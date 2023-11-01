@@ -106,7 +106,7 @@ public class ZIMFile extends File {
                 break;
             }
             String mimeType = mimeBuffer.toString();
-            System.out.println(mimeType);
+            //System.out.println(mimeType);
             mList.add(mimeType);
         }
         this.mimeTypeList = mList.toArray(new String[mList.size()]);

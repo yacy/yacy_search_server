@@ -20,6 +20,7 @@ package org.openzim;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.tukaani.xz.SingleXZInputStream;
 import com.github.luben.zstd.ZstdInputStream;
@@ -39,6 +40,11 @@ import com.github.luben.zstd.ZstdInputStream;
  */
 public class ZIMReader {
 
+    public final static String[] METADATA_KEYS = new String[] {
+            "Name", "Title", "Creator", "Publisher", "Date", "Description", "LongDescription",
+            "Language", "License", "Tags", "Relation", "Flavour", "Source", "Counter", "Scraper"
+    };
+
     private final ZIMFile mFile;
 
     public static abstract class DirectoryEntry {
@@ -48,13 +54,13 @@ public class ZIMReader {
         public final int cluster_number;
         public final String url;
         public final String title;
-        public final long urlListindex;
+        public final int urlListindex;
 
         public DirectoryEntry(
                 final int mimeType, final char namespace,
                 final int cluster_number,
                 final String url, final String title,
-                final long index) {
+                final int index) {
             this.mimetype = mimeType;
             this.namespace = namespace;
             this.cluster_number = cluster_number;
@@ -74,7 +80,7 @@ public class ZIMReader {
                 final int mimeType, final char namespace,
                 final int cluster_number, final int blob_number,
                 final String url, final String title,
-                final long urlListindex) {
+                final int urlListindex) {
             super(mimeType, namespace, cluster_number, url, title, urlListindex);
             this.cluster_number = cluster_number;
             this.blob_number = blob_number;
@@ -84,11 +90,11 @@ public class ZIMReader {
 
     public static class RedirectEntry extends DirectoryEntry {
 
-        public final long redirect_index;
+        public final int redirect_index;
 
         public RedirectEntry(final int mimeType, final char namespace,
-                final long redirect_index, final String url, final String title,
-                final long urlListindex) {
+                final int redirect_index, final String url, final String title,
+                final int urlListindex) {
             super(mimeType, namespace, 0, url, title, urlListindex);
             this.redirect_index = redirect_index;
         }
@@ -101,6 +107,25 @@ public class ZIMReader {
 
     public ZIMFile getZIMFile() {
         return this.mFile;
+    }
+
+    public final String getMetadata(String key) throws IOException {
+        DirectoryEntry de = getDirectoryInfo('M', key);
+        if (de == null) return null; // metadata not found; that would be normal
+        byte[] val = getArticleData(de);
+        if (val == null) return null; // article data not found: that is not normal
+        if (val.length == 0) return null; // that empty string is a proper value, however, not usable for a client
+        return new String(val, StandardCharsets.UTF_8);
+    }
+
+    public DirectoryEntry getMainDirectoryEntry() throws IOException {
+        DirectoryEntry de = getDirectoryInfo(this.mFile.header_mainPage);
+        if (de.namespace == 'W' && de.url.equals("mainPage") && de instanceof RedirectEntry) {
+            // resolve redirect to get the actual main page
+            int redirect = ((RedirectEntry) de).redirect_index;
+            de = getDirectoryInfo(redirect);
+        }
+        return de;
     }
 
     public String getURLByURLOrder(final int entryNumber) throws IOException {
@@ -283,6 +308,7 @@ public class ZIMReader {
         is.read(buffer);
         long offset2 = extended? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
         long blob_size = offset2 - offset1;
+        if (blob_size == 0) return new byte[0]; // skip the skipping to get to a zero-length object (they exist!)
         byte[] entry = new byte[(int) blob_size]; // TODO: we should be able to read blobs larger than MAXINT
         // we must do two skip steps: first to the end of the offset list and second to the start of the blob
         // - the whole number of offset list entries is numberOfBlobs1, which includes the extra entry for the end offset
