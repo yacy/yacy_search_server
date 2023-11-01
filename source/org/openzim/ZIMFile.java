@@ -46,10 +46,10 @@ public class ZIMFile extends File {
     public final int  header_majorVersion;
     public final int  header_minorVersion;
     public final int  header_entryCount;
-    private final int  header_clusterCount;
+    public final int  header_clusterCount;
     public final long header_urlPtrPos;
     public final long header_titlePtrPos;
-    private final long header_clusterPtrPos;
+    public final long header_clusterPtrPos;
     public final long header_mimeListPos;
     public final int  header_mainPage;
     public final int  header_layoutPage;

@@ -20,6 +20,11 @@ package org.openzim;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.tukaani.xz.SingleXZInputStream;
 import com.github.luben.zstd.ZstdInputStream;
@@ -36,61 +41,78 @@ import com.github.luben.zstd.ZstdInputStream;
  *         bugfix to long parsing (prevented reading of large files),
  *         added extended cluster size parsing
  *         added ZStandard compression parsing (cluster type 5)
+ *         added cluster index
  */
 public class ZIMReader {
 
     private final ZIMFile mFile;
 
-    public static abstract class DirectoryEntry {
+    public class DirectoryEntry {
 
-        public final int mimetype;
+        private final int mimetype;
         public final char namespace;
-        public final int cluster_number;
         public final String url;
         public final String title;
         public final long urlListindex;
 
         public DirectoryEntry(
-                final int mimeType, final char namespace,
-                final int cluster_number,
-                final String url, final String title,
-                final long index) {
+                final long urlListindex,
+                final char namespace, final String url, final String title, final int mimeType) {
+            assert url != null;
+            assert title != null;
             this.mimetype = mimeType;
             this.namespace = namespace;
-            this.cluster_number = cluster_number;
             this.url = url;
             this.title = title;
-            this.urlListindex = index;
+            this.urlListindex = urlListindex;
+        }
+
+        public String getMimeType() {
+            return mFile.getMimeType(this.mimetype);
         }
 
     }
 
-    public static class ArticleEntry extends DirectoryEntry {
+    public class ArticleEntry extends DirectoryEntry {
 
         public final int cluster_number;
         public final int blob_number;
 
         public ArticleEntry(
-                final int mimeType, final char namespace,
-                final int cluster_number, final int blob_number,
-                final String url, final String title,
-                final long urlListindex) {
-            super(mimeType, namespace, cluster_number, url, title, urlListindex);
+                final long urlListindex,
+                final char namespace, final String url, final String title, final int mimeType,
+                final int cluster_number, final int blob_number) {
+            super(urlListindex, namespace, url, title, mimeType);
             this.cluster_number = cluster_number;
             this.blob_number = blob_number;
         }
 
     }
 
-    public static class RedirectEntry extends DirectoryEntry {
+    public class RedirectEntry extends DirectoryEntry {
 
         public final long redirect_index;
 
-        public RedirectEntry(final int mimeType, final char namespace,
-                final long redirect_index, final String url, final String title,
-                final long urlListindex) {
-            super(mimeType, namespace, 0, url, title, urlListindex);
+        public RedirectEntry(
+                final long urlListindex,
+                final char namespace, final String url, final String title, final int mimeType,
+                final long redirect_index) {
+            super(urlListindex, namespace, url, title, mimeType);
             this.redirect_index = redirect_index;
+        }
+
+    }
+
+    public class ArticleBlobEntry {
+
+        public final ArticleEntry article;
+        public final byte[] blob;
+
+        public ArticleBlobEntry(final ArticleEntry article, final byte[] blob) {
+            assert article != null;
+            assert blob != null;
+            this.article = article;
+            this.blob = blob;
         }
 
     }
@@ -103,12 +125,84 @@ public class ZIMReader {
         return this.mFile;
     }
 
+    public List<ArticleEntry> getAllArticles() throws IOException {
+        List<ArticleEntry> list = new ArrayList<>();
+        for (int i = 0; i < this.mFile.header_entryCount; i++) {
+            DirectoryEntry de = getDirectoryInfo(i);
+            if (de instanceof ArticleEntry) list.add((ArticleEntry) de);
+        }
+        return list;
+    }
+
+    public Map<Integer, Map<Integer, ArticleEntry>> getIndexedArticles(List<ArticleEntry> list) {
+        Map<Integer, Map<Integer, ArticleEntry>> index = new HashMap<>();
+        for (ArticleEntry entry: list) {
+            Map<Integer, ArticleEntry> cluster = index.get(entry.cluster_number);
+            if (cluster == null) {
+                cluster = new HashMap<Integer, ArticleEntry>();
+                index.put(entry.cluster_number, cluster);
+            }
+            cluster.put(entry.blob_number, entry);
+        }
+        return index;
+    }
+
+    public class ClusterIterator implements Iterator<ArticleBlobEntry> {
+
+        private Map<Integer, Map<Integer, ArticleEntry>> index;
+        private Cluster cluster;
+        private int clusterCounter;
+        private int blobCounter;
+
+        public ClusterIterator() throws IOException {
+            List<ArticleEntry> list = getAllArticles();
+            this.index = getIndexedArticles(list);
+            this.clusterCounter = 0;
+            this.blobCounter = 0;
+            this.cluster = null; // not loaded
+        }
+
+        private final void loadCluster() {
+            if (this.cluster == null) {
+                // load cluster
+                try {
+                    this.cluster = new Cluster(this.clusterCounter);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (this.clusterCounter >= mFile.header_clusterCount) return false;
+            loadCluster(); // ensure cluster is loaded
+            return this.blobCounter < this.cluster.blobs.size();
+        }
+
+        @Override
+        public ArticleBlobEntry next() {
+            Map<Integer, ArticleEntry> clusterMap = this.index.get(this.clusterCounter);
+            ArticleEntry ae = clusterMap.get(this.blobCounter);
+            loadCluster(); // ensure cluster is loaded
+            ArticleBlobEntry abe = new ArticleBlobEntry(ae, this.cluster.blobs.get(this.blobCounter));
+
+            // increase the counter(s)
+            this.blobCounter++;
+            if (this.blobCounter >= this.cluster.blobs.size()) {
+                this.clusterCounter++;
+                this.cluster = null; // unload cluster
+                this.blobCounter = 0;
+            }
+
+            return abe;
+        }
+    }
+
     public String getURLByURLOrder(final int entryNumber) throws IOException {
 
         // The position of URL i
         long pos = this.mFile.getURLPtr(entryNumber);
-
-        // Move to the position of URL i
         this.mFile.mReader.seek(pos);
 
         // Article or Redirect entry?
@@ -127,19 +221,7 @@ public class ZIMReader {
 
         // The articleNumber of the position of URL i
         int articleNumber = this.mFile.getTitlePtr(entryNumber);
-        long pos = this.mFile.getURLPtr(articleNumber);
-        this.mFile.mReader.seek(pos);
-
-        // Article or Redirect entry?
-        int mimeType = this.mFile.mReader.readTwoLittleEndianBytesInt();
-
-        if (mimeType == 65535) {
-            this.mFile.mReader.seek(pos + 12);
-            return this.mFile.mReader.readZeroTerminatedString();
-        } else {
-            this.mFile.mReader.seek(pos + 16);
-            return this.mFile.mReader.readZeroTerminatedString();
-        }
+        return getURLByURLOrder(articleNumber);
     }
 
     public DirectoryEntry getDirectoryInfo(final int entryNumber) throws IOException {
@@ -165,14 +247,14 @@ public class ZIMReader {
             final String url = this.mFile.mReader.readZeroTerminatedString();
             String title = this.mFile.mReader.readZeroTerminatedString();
             title = title.equals("") ? url : title;
-            return new RedirectEntry(type, namespace, redirectIndex, url, title, entryNumber);
+            return new RedirectEntry(entryNumber, namespace, url, title, type, redirectIndex);
         } else {
             final int cluster_number = this.mFile.mReader.readFourLittleEndianBytesInt(); // 4
             final int blob_number = this.mFile.mReader.readFourLittleEndianBytesInt();    // 4
             final String url = this.mFile.mReader.readZeroTerminatedString();             // zero terminated
             String title = this.mFile.mReader.readZeroTerminatedString();                 // zero terminated
             title = title.equals("") ? url : title;
-            return new ArticleEntry(type, namespace, cluster_number, blob_number, url, title, entryNumber);
+            return new ArticleEntry(entryNumber, namespace, url, title, type, cluster_number, blob_number);
         }
     }
 
@@ -204,6 +286,66 @@ public class ZIMReader {
         }
 
         return null;
+    }
+
+    /**
+     * Cluster class is required to read a whole cluster with all documents inside at once.
+     * This is a good thing because reading single documents from a cluster requires that the
+     * cluster is decompressed every time again and again. Doing whole clusters with all documents
+     * at once means that the decompression is much more efficient because it is done only once.
+     * This can of course only be done, if:
+     * - we want to iterate through all documents of a ZIM file
+     * - we have reverse indexed all directory entries to be able to assign metadata to cluster documents
+     */
+    private class Cluster {
+
+        private List<byte[]> blobs;
+        private boolean extended;
+
+        public Cluster(int cluster_number) throws IOException {
+
+            // open the cluster and make a Input Stream with the proper decompression type
+            final long clusterPos = mFile.geClusterPtr(cluster_number);
+            mFile.mReader.seek(clusterPos);
+            final int compressionType = mFile.mReader.read();
+            InputStream is = null;
+            if (compressionType <= 1 || compressionType == 8 || compressionType == 9) {
+                extended = compressionType > 1;
+                is = mFile.mReader;
+            }
+            if (compressionType == 4 || compressionType == 12) {
+                extended = compressionType == 12;
+                is = new SingleXZInputStream(mFile.mReader, 41943040);
+            }
+
+            if (compressionType == 5 || compressionType == 13) {
+                extended = compressionType == 13;
+                is = new ZstdInputStream(mFile.mReader);
+            }
+            if (is == null) throw new IOException("compression type unknown: " + compressionType);
+
+            // read the offset list
+            List<Long> offsets = new ArrayList<>();
+            byte[] buffer = new byte[extended ? 8 : 4];
+            is.read(buffer);
+            long end_offset = extended ? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+            offsets.add(end_offset);
+            int offset_count = (int) ((end_offset - 1) / (extended ? 8 : 4));
+            for (int i = 0; i < offset_count - 1; i++) {
+                long l = extended ? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+                offsets.add(l);
+            }
+
+            // now all document sizes are known because they are defined by the offset deltas
+            // the seek position should be now at the beginning of the first document
+            this.blobs = new ArrayList<>();
+            for (int i = 0; i < offsets.size() - 1; i++) { // loop until the size - 1 because the last offset is the end of the last document
+                int length = (int) (offsets.get(i + 1) + offsets.get(i)); // yes the maximum document length is 2GB, for now
+                byte[] b = new byte[length];
+                RandomAccessFileZIMInputStream.readFully(is, b);
+                this.blobs.add(b);
+            }
+        }
     }
 
     public byte[] getArticleData(final DirectoryEntry directoryInfo) throws IOException {
