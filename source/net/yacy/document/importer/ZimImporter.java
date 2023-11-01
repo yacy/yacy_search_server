@@ -46,6 +46,7 @@ import org.openzim.ZIMReader.DirectoryEntry;
 /**
  * ZIM importer
  * can import ZIM file i.e. from https://download.kiwix.org/zim/ or mirrors like https://ftp.fau.de/kiwix/zim/
+ * A huge list is at https://wiki.kiwix.org/wiki/Content_in_all_languages
  * These files contains identifiers named "URL" which are not actually full URLs but just paths inside a well-known domains.
  * These domains are sometimes given by a "Source" metadata field, but that is rare - we have to guess them.
  * For that we have a guessing function, but we must check if the guessing was correct by testing some of the given
@@ -220,6 +221,10 @@ public class ZimImporter extends Thread implements Importer {
                 return "vikidia.org";
             case "westeros":
                 return "westeros.org";
+            case "wikibooks":
+                return parts[1] + ".wikibooks.org/wiki";
+            case "wikinews":
+                return parts[1] + ".wikinews.org/wiki";
             case "wikipedia":
                 return parts[1] + ".wikipedia.org/wiki";
             case "www.ready.gov":
@@ -264,6 +269,9 @@ public class ZimImporter extends Thread implements Importer {
     public static String guessURL(String guessedSource, DirectoryEntry de) {
         String url = de.url;
         if (url.equals("Main_Page")) url = "";
+        if (guessedSource != null) return guessedSource + url;
+        if (url.startsWith("A/")) return "https://" + url.substring(2);
+        if (url.startsWith("H/")) return "https://" + url.substring(2);
         return guessedSource + url;
     }
 

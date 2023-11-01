@@ -46,7 +46,7 @@ import com.github.luben.zstd.ZstdInputStream;
  */
 public class ZIMReader {
 
-    private final static int MAX_CLUSTER_CACHE_SIZE = 10;
+    private final static int MAX_CLUSTER_CACHE_SIZE = 100;
     public final static String[] METADATA_KEYS = new String[] {
             "Name", "Title", "Creator", "Publisher", "Date", "Description", "LongDescription",
             "Language", "License", "Tags", "Relation", "Flavour", "Source", "Counter", "Scraper"
@@ -371,6 +371,8 @@ public class ZIMReader {
      * This can of course only be done, if:
      * - we want to iterate through all documents of a ZIM file
      * - we have reverse indexed all directory entries to be able to assign metadata to cluster documents
+     * 
+     * Reference implementation: https://github.com/openzim/libzim/blob/main/src/cluster.cpp
      */
     private class Cluster {
 
