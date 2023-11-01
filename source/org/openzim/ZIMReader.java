@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 import org.tukaani.xz.SingleXZInputStream;
 import com.github.luben.zstd.ZstdInputStream;
@@ -45,6 +46,11 @@ import com.github.luben.zstd.ZstdInputStream;
  */
 public class ZIMReader {
 
+    public final static String[] METADATA_KEYS = new String[] {
+            "Name", "Title", "Creator", "Publisher", "Date", "Description", "LongDescription",
+            "Language", "License", "Tags", "Relation", "Flavour", "Source", "Counter", "Scraper"
+    };
+
     private final ZIMFile mFile;
 
     public class DirectoryEntry {
@@ -53,10 +59,10 @@ public class ZIMReader {
         public final char namespace;
         public final String url;
         public final String title;
-        public final long urlListindex;
+        public final int urlListindex;
 
         public DirectoryEntry(
-                final long urlListindex,
+                final int urlListindex,
                 final char namespace, final String url, final String title, final int mimeType) {
             assert url != null;
             assert title != null;
@@ -79,7 +85,7 @@ public class ZIMReader {
         public final int blob_number;
 
         public ArticleEntry(
-                final long urlListindex,
+                final int urlListindex,
                 final char namespace, final String url, final String title, final int mimeType,
                 final int cluster_number, final int blob_number) {
             super(urlListindex, namespace, url, title, mimeType);
@@ -91,12 +97,12 @@ public class ZIMReader {
 
     public class RedirectEntry extends DirectoryEntry {
 
-        public final long redirect_index;
+        public final int redirect_index;
 
         public RedirectEntry(
-                final long urlListindex,
+                final int urlListindex,
                 final char namespace, final String url, final String title, final int mimeType,
-                final long redirect_index) {
+                final int redirect_index) {
             super(urlListindex, namespace, url, title, mimeType);
             this.redirect_index = redirect_index;
         }
@@ -197,6 +203,25 @@ public class ZIMReader {
 
             return abe;
         }
+    }
+
+    public final String getMetadata(String key) throws IOException {
+        DirectoryEntry de = getDirectoryInfo('M', key);
+        if (de == null) return null; // metadata not found; that would be normal
+        byte[] val = getArticleData(de);
+        if (val == null) return null; // article data not found: that is not normal
+        if (val.length == 0) return null; // that empty string is a proper value, however, not usable for a client
+        return new String(val, StandardCharsets.UTF_8);
+    }
+
+    public DirectoryEntry getMainDirectoryEntry() throws IOException {
+        DirectoryEntry de = getDirectoryInfo(this.mFile.header_mainPage);
+        if (de.namespace == 'W' && de.url.equals("mainPage") && de instanceof RedirectEntry) {
+            // resolve redirect to get the actual main page
+            int redirect = ((RedirectEntry) de).redirect_index;
+            de = getDirectoryInfo(redirect);
+        }
+        return de;
     }
 
     public String getURLByURLOrder(final int entryNumber) throws IOException {
@@ -422,6 +447,7 @@ public class ZIMReader {
         is.read(buffer);
         long offset2 = extended? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
         long blob_size = offset2 - offset1;
+        if (blob_size == 0) return new byte[0]; // skip the skipping to get to a zero-length object (they exist!)
         byte[] entry = new byte[(int) blob_size]; // TODO: we should be able to read blobs larger than MAXINT
         // we must do two skip steps: first to the end of the offset list and second to the start of the blob
         // - the whole number of offset list entries is numberOfBlobs1, which includes the extra entry for the end offset
