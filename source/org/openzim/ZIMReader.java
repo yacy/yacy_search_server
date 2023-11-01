@@ -349,11 +349,11 @@ public class ZIMReader {
         // check cache size
         if (clusterCache.size() >= MAX_CLUSTER_CACHE_SIZE) {
             // remove one entry
-            double minEntry = Double.MAX_VALUE;
+            double maxEntry = Double.MIN_VALUE;
             int pos = -1;
             for (int i = 0; i < clusterCache.size(); i++) {
                 double r = this.clusterCache.get(i).getUsageRatio();
-                if (r < minEntry) {minEntry = r; pos = i;}
+                if (r > maxEntry) {maxEntry = r; pos = i;}
             }
             if (pos >= 0) this.clusterCache.remove(pos);
         }
@@ -406,10 +406,21 @@ public class ZIMReader {
             // read the offset list
             List<Long> offsets = new ArrayList<>();
             byte[] buffer = new byte[extended ? 8 : 4];
+
+            // the first offset is a pointer to the first blob, it therefore also points to the
+            // end of the offset list. Consequently, we name it end_offset because it points there:
             is.read(buffer);
             long end_offset = extended ? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+
+            // even if it is the end of the offsets, it is the first offset pointer in the list of offsets
             offsets.add(end_offset);
-            int offset_count = (int) ((end_offset - 1) / (extended ? 8 : 4));
+
+            // when divided by the pointer size, the offset to the first blob is the number of offsets pointers
+            int offset_count = (int) (end_offset / (extended ? 8 : 4));
+
+            // there are now (offset_count - 1) remaining pointers left to read.
+            // however, the last offset does not point to a final blob, it points to the end
+            // of the last blob. The number of blobs is therefore offset_count - 1
             for (int i = 0; i < offset_count - 1; i++) {
                 is.read(buffer);
                 long l = extended ? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
@@ -448,7 +459,6 @@ public class ZIMReader {
         }
     }
 
-    /*
     public byte[] getArticleData(final DirectoryEntry directoryInfo) throws IOException {
 
         // fail fast
@@ -466,8 +476,8 @@ public class ZIMReader {
 
         return blob;
     }
-    */
-    
+
+    /*
     public byte[] getArticleData(final DirectoryEntry directoryInfo) throws IOException {
 
         // fail fast
@@ -556,4 +566,5 @@ public class ZIMReader {
 
         return entry;
     }
+    */
 }
