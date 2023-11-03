@@ -337,10 +337,7 @@ public class ZIMReader {
     public Cluster getCluster(int clusterNumber) throws IOException {
         for (int i = 0; i < this.clusterCache.size(); i++) {
             Cluster c = clusterCache.get(i);
-            if (c.cluster_number == clusterNumber) {
-                c.incUsage(); // cache hit
-                return c;
-            }
+            if (c.cluster_number == clusterNumber) return c;
         }
 
         // cache miss
@@ -348,17 +345,10 @@ public class ZIMReader {
 
         // check cache size
         if (clusterCache.size() >= MAX_CLUSTER_CACHE_SIZE) {
-            // remove one entry
-            double maxEntry = Double.MIN_VALUE;
-            int pos = -1;
-            for (int i = 0; i < clusterCache.size(); i++) {
-                double r = this.clusterCache.get(i).getUsageRatio();
-                if (r > maxEntry) {maxEntry = r; pos = i;}
-            }
-            if (pos >= 0) this.clusterCache.remove(pos);
+            // remove one entry: the first entry is the oldest entry
+            this.clusterCache.remove(0);
         }
 
-        c.incUsage();
         this.clusterCache.add(c);
         return c;
     }
@@ -378,12 +368,10 @@ public class ZIMReader {
 
         private int cluster_number; // used to identify the correct cache entry
         private List<byte[]> blobs;
-        private int usageCounter; // used for efficient caching and cache stale detection
         private boolean extended;
 
         public Cluster(int cluster_number) throws IOException {
             this.cluster_number = cluster_number;
-            this.usageCounter = 0;
 
             // open the cluster and make a Input Stream with the proper decompression type
             final long clusterPos = mFile.geClusterPtr(cluster_number);
@@ -444,20 +432,8 @@ public class ZIMReader {
             return this.blobs.get(i);
         }
 
-        public void incUsage() {
-            this.usageCounter++;
-        }
-
-        public int getUsage() {
-            return this.usageCounter;
-        }
-
         public int getSize() {
             return this.blobs.size();
-        }
-
-        public double getUsageRatio() {
-            return ((double) this.usageCounter) / ((double) this.blobs.size());
         }
     }
 
