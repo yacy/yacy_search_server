@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -84,6 +85,12 @@ public class ZimImporter extends Thread implements Importer {
             this.reader = new ZIMReader(this.file);
             this.guessedSource = getSource(this.reader);
 
+            // verify the source
+            DirectoryEntry mainEntry = this.reader.getMainDirectoryEntry();
+            DigestURL url = new DigestURL(mainEntry.url);
+            if (!url.exists(ClientIdentification.browserAgent)) return; 
+
+            // read all documents
             for (int i = 0; i < this.file.header_entryCount; i++) {
                 if (this.abort) break;
                 DirectoryEntry de = this.reader.getDirectoryInfo(i);
@@ -304,7 +311,9 @@ public class ZimImporter extends Thread implements Importer {
                 System.out.println("guessed domain: " + guessDomainName(f.getName()));
                 String source = getSource(r);
                 System.out.println("guessed Source: " + source);
-                System.out.println("guessed main article: " + guessURL(source, de));
+                String mainURL = guessURL(source, de);
+                System.out.println("guessed main article: " + mainURL);
+                System.out.println("main article exists: " + new DigestURL(mainURL).exists(ClientIdentification.browserAgent));
                 System.out.println();
             } catch (IOException e) {
                 e.printStackTrace();

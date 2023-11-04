@@ -37,6 +37,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
@@ -2576,6 +2577,32 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
 
         return null;
+    }
+
+    public boolean exists(final ClientIdentification.Agent agent) {
+        try {
+            if (isFile()) {
+                return getFSFile().exists();
+            }
+            if (isSMB()) {
+                return getSmbFile().exists();
+            }
+            if (isFTP()) {
+                final FTPClient client = new FTPClient();
+                client.open(this.host, this.port < 0 ? 21 : this.port);
+                return client.fileSize(path) > 0;
+            }
+            if (isHTTP() || isHTTPS()) {
+                    try (final HTTPClient client = new HTTPClient(agent)) {
+                        client.setHost(getHost());
+                        org.apache.http.HttpResponse response = client.HEADResponse(this, true);
+                        return response != null && (response.getStatusLine().getStatusCode() == 200 || response.getStatusLine().getStatusCode() == 301);
+                    }
+            }
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
