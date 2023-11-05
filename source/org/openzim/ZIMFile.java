@@ -113,20 +113,24 @@ public class ZIMFile extends File {
         }
         this.mimeTypeList = mList.toArray(new String[mList.size()]);
 
-        // Initialize the Url Pointer List
-        this.urlPtrListBlob = new byte[this.header_entryCount * 8];
-        mReader.seek(this.header_urlPtrPos);
-        RandomAccessFileZIMInputStream.readFully(mReader, this.urlPtrListBlob);
+        try {
+            // Initialize the Url Pointer List
+            this.urlPtrListBlob = new byte[this.header_entryCount * 8];
+            mReader.seek(this.header_urlPtrPos);
+            RandomAccessFileZIMInputStream.readFully(mReader, this.urlPtrListBlob);
 
-        // Initialize the Title Pointer List
-        this.titlePtrListBlob = new byte[this.header_entryCount * 4];
-        mReader.seek(this.header_titlePtrPos);
-        RandomAccessFileZIMInputStream.readFully(mReader, this.titlePtrListBlob);
+            // Initialize the Title Pointer List
+            this.titlePtrListBlob = new byte[this.header_entryCount * 4];
+            mReader.seek(this.header_titlePtrPos);
+            RandomAccessFileZIMInputStream.readFully(mReader, this.titlePtrListBlob);
 
-        // Initialize the Cluster Pointer List
-        this.clusterPtrListBlob = new byte[this.header_clusterCount * 8];
-        mReader.seek(this.header_clusterPtrPos);
-        RandomAccessFileZIMInputStream.readFully(mReader, this.clusterPtrListBlob);
+            // Initialize the Cluster Pointer List
+            this.clusterPtrListBlob = new byte[this.header_clusterCount * 8];
+            mReader.seek(this.header_clusterPtrPos);
+            RandomAccessFileZIMInputStream.readFully(mReader, this.clusterPtrListBlob);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     public final String getMimeType(int idx) {

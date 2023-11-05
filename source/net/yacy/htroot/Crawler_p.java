@@ -774,7 +774,7 @@ public class Crawler_p {
         }
 
         /*
-         *  <input id="customPPM" name="customPPM" type="number" min="10" max="30000" style="width:46px" value="#[customPPMdefault]#" />PPM
+         *  <input id="customPPM" name="customPPM" type="number" min="10" max="60000" style="width:46px" value="#[customPPMdefault]#" />PPM
             <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:32px" value="#[latencyFactorDefault]#" />LF
             <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:32px" value="#[MaxSameHostInQueueDefault]#" />MH
             <input type="submit" name="crawlingPerformance" value="set" />
@@ -784,19 +784,19 @@ public class Crawler_p {
         if (post != null && post.containsKey("crawlingPerformance")) {
             final String crawlingPerformance = post.get("crawlingPerformance", "custom");
             final long LCbusySleep1 = sb.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
-            int wantedPPM = (LCbusySleep1 == 0) ? 30000 : (int) (60000L / LCbusySleep1);
+            int wantedPPM = (LCbusySleep1 == 0) ? 60000 : (int) (60000L / LCbusySleep1);
             try {
                 wantedPPM = post.getInt("customPPM", wantedPPM);
             } catch (final NumberFormatException e) {}
             if ("minimum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 10;
-            if ("maximum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 30000;
+            if ("maximum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 60000;
 
             int wPPM = wantedPPM;
             if ( wPPM <= 0 ) {
                 wPPM = 1;
             }
-            if ( wPPM >= 30000 ) {
-                wPPM = 30000;
+            if ( wPPM >= 60000 ) {
+                wPPM = 60000;
             }
             final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 

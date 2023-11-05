@@ -2593,14 +2593,18 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 return client.fileSize(path) > 0;
             }
             if (isHTTP() || isHTTPS()) {
-                    try (final HTTPClient client = new HTTPClient(agent)) {
-                        client.setHost(getHost());
-                        org.apache.http.HttpResponse response = client.HEADResponse(this, true);
-                        return response != null && (response.getStatusLine().getStatusCode() == 200 || response.getStatusLine().getStatusCode() == 301);
-                    }
+                final HTTPClient client = new HTTPClient(agent);
+                client.setHost(getHost());
+                org.apache.http.HttpResponse response = client.HEADResponse(this, true);
+                client.close();
+                if (response == null) return false;
+                int status = response.getStatusLine().getStatusCode();
+                return status == 200 || status == 301 || status == 302;
             }
             return false;
         } catch (IOException e) {
+            if (e.getMessage().contains("Circular redirect to")) return true; // exception; this is a 302 which the client actually accepts
+            //e.printStackTrace();
             return false;
         }
     }

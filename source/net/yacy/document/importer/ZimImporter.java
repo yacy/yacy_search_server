@@ -25,12 +25,20 @@ package net.yacy.document.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -81,14 +89,18 @@ public class ZimImporter extends Thread implements Importer {
     public void run() {
         job = this;
         this.startTime = System.currentTimeMillis();
+        Switchboard sb = Switchboard.getSwitchboard();
         try {
             this.reader = new ZIMReader(this.file);
             this.guessedSource = getSource(this.reader);
 
             // verify the source
             DirectoryEntry mainEntry = this.reader.getMainDirectoryEntry();
-            DigestURL url = new DigestURL(mainEntry.url);
-            if (!url.exists(ClientIdentification.browserAgent)) return; 
+            DigestURL mainURL = guessURL(this.guessedSource, mainEntry);
+            if (!mainURL.exists(ClientIdentification.browserAgent)) {
+                sb.log.info("zim importer: file " + this.file.getName() + " failed main url existence test: " + mainURL);
+                return; 
+            }
 
             // read all documents
             for (int i = 0; i < this.file.header_entryCount; i++) {
@@ -98,8 +110,14 @@ public class ZimImporter extends Thread implements Importer {
                 ArticleEntry ae = (ArticleEntry) de;
 
                 // check url
-                String guessedUrl = guessURL(this.guessedSource, de);
-                assert guessedUrl.startsWith("http");
+                DigestURL guessedUrl = guessURL(this.guessedSource, de);
+                if (recordCnt < 10) {
+                    // critical test for the first 10 urls
+                    if (!guessedUrl.exists(ClientIdentification.browserAgent)) {
+                        sb.log.info("zim importer: file " + this.file.getName() + " failed url " + recordCnt + " existence test: " + guessedUrl);
+                        return; 
+                    }
+                }
 
                 // check availability of text parser
                 String mimeType = ae.getMimeType();
@@ -111,7 +129,17 @@ public class ZimImporter extends Thread implements Importer {
                 // create artificial request and response headers for the indexer
                 RequestHeader requestHeader = new RequestHeader();
                 ResponseHeader responseHeader = new ResponseHeader(200);
-                final Request request = new Request(new DigestURL(guessedUrl), null);
+                responseHeader.put(HeaderFramework.CONTENT_TYPE, de.getMimeType()); // very important to tell parser which kind of content
+                final Request request = new Request(
+                        ASCII.getBytes(sb.peers.mySeed().hash),
+                        guessedUrl,
+                        null, // referrerhash the hash of the referrer URL
+                        de.title, // name the name of the document to crawl
+                        null, // appdate the time when the url was first time appeared
+                        sb.crawler.defaultSurrogateProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
+                        0,    // depth the crawling depth of the entry
+                        sb.crawler.defaultSurrogateProfile.timezoneOffset() // timezone offset
+                );
                 final Response response = new Response(
                         request,
                         requestHeader,
@@ -122,7 +150,7 @@ public class ZimImporter extends Thread implements Importer {
                 );
 
                 // throw this to the indexer
-                String error = Switchboard.getSwitchboard().toIndexer(response);
+                String error = sb.toIndexer(response);
                 if (error != null) ConcurrentLog.info("ZimImporter", "error parsing: " + error);
                 this.recordCnt++;
             }
@@ -203,7 +231,7 @@ public class ZimImporter extends Thread implements Importer {
             case "fonts":
                 return "fonts.google.com";
             case "gutenberg":
-                return "gutenberg.org";
+                return "https://dev.library.kiwix.org/viewer#gutenberg_de_all_2023-03";
             case "ifixit":
                 return "ifixit.com";
             case "lesfondamentaux":
@@ -223,11 +251,23 @@ public class ZimImporter extends Thread implements Importer {
             case "rapsberry_pi_docs":
                 return "raspberrypi.org";
             case "ted":
-                return "ted.com";
+                return "www.ted.com/search?q=";
             case "vikidia":
-                return "vikidia.org";
+                return parts[1] + ".vikidia.org/wiki";
             case "westeros":
                 return "westeros.org";
+            case "wikihow":
+                return parts[1].equals("en") ? "wikihow.com" : parts[1] + ".wikihow.com";
+            case "wikisource":
+                return parts[1] + ".wikisource.org/wiki";
+            case "wikiversity":
+                return parts[1] + ".wikiversity.org/wiki";
+            case "wikivoyage":
+                return parts[1] + ".wikivoyage.org/wiki";
+            case "wiktionary":
+                return parts[1] + ".wiktionary.org/wiki";
+            case "wikiquote":
+                return parts[1] + ".wikiquote.org/wiki";
             case "wikibooks":
                 return parts[1] + ".wikibooks.org/wiki";
             case "wikinews":
@@ -273,16 +313,148 @@ public class ZimImporter extends Thread implements Importer {
         return source;
     }
 
-    public static String guessURL(String guessedSource, DirectoryEntry de) {
+    public static DigestURL guessURL(String guessedSource, DirectoryEntry de) throws MalformedURLException {
         String url = de.url;
         if (url.equals("Main_Page")) url = "";
-        if (guessedSource != null) return guessedSource + url;
-        if (url.startsWith("A/")) return "https://" + url.substring(2);
-        if (url.startsWith("H/")) return "https://" + url.substring(2);
-        return guessedSource + url;
+        if (guessedSource != null) return new DigestURL(guessedSource + url);
+        if (url.startsWith("A/")) return new DigestURL("https://" + url.substring(2));
+        if (url.startsWith("H/")) return new DigestURL("https://" + url.substring(2));
+        return new DigestURL(guessedSource + url);
     }
 
+    private final static String[] skip_files = {
+         "iota.stackexchange.com_en_all_2023-05.zim",
+         "stellar.stackexchange.com_en_all_2023-10.zim",
+         "vegetarianism.stackexchange.com_en_all_2023-05.zim",
+         "esperanto.stackexchange.com_eo_all_2023-10.zim",
+         "tezos.stackexchange.com_en_all_2023-10.zim",
+         "eosio.stackexchange.com_en_all_2023-10.zim",
+         "ebooks.stackexchange.com_en_all_2023-10.zim",
+         "poker.stackexchange.com_en_all_2023-05.zim",
+         "cseducators.stackexchange.com_en_all_2023-10.zim",
+         "iot.stackexchange.com_en_all_2023-05.zim",
+         "portuguese.stackexchange.com_pt_all_2023-04.zim",
+         "portuguese.stackexchange.com_pt_all_2023-10.zim",
+         "italian.stackexchange.com_it_all_2023-05.zim",
+         "monero.stackexchange.com_en_all_2022-11.zim",
+         "sustainability.stackexchange.com_en_all_2023-05.zim",
+         "westeros_en_all_nopic_2021-03.zim",
+         "opensource.stackexchange.com_en_all_2023-10.zim",
+         "tor.stackexchange.com_en_all_2023-05.zim",
+         "devops.stackexchange.com_en_all_2023-10.zim",
+         "patents.stackexchange.com_en_all_2023-10.zim",
+         "stackapps.com_en_all_2023-05.zim",
+         "hardwarerecs.stackexchange.com_en_all_2023-05.zim",
+         "hsm.stackexchange.com_en_all_2023-05.zim",
+         "expatriates.stackexchange.com_en_all_2023-11.zim",
+         "opendata.stackexchange.com_en_all_2023-10.zim",
+         "sports.stackexchange.com_en_all_2023-05.zim",
+         "wikinews_de_all_nopic_2023-10.zim",
+         "computergraphics.stackexchange.com_en_all_2023-10.zim",
+         "tridion.stackexchange.com_en_all_2023-10.zim",
+         "bioinformatics.stackexchange.com_en_all_2023-10.zim",
+         "expressionengine.stackexchange.com_en_all_2023-11.zim",
+         "elementaryos.stackexchange.com_en_all_2023-10.zim",
+         "cstheory.stackexchange.com_en_all_2023-10.zim",
+         "chess.stackexchange.com_en_all_2023-05.zim",
+         "vi.stackexchange.com_en_all_2023-05.zim",
+         "fitness.stackexchange.com_en_all_2023-10.zim",
+         "pets.stackexchange.com_en_all_2023-05.zim",
+         "french.stackexchange.com_fr_all_2023-10.zim",
+         "sqa.stackexchange.com_en_all_2023-05.zim",
+         "islam.stackexchange.com_en_all_2023-05.zim",
+         "scicomp.stackexchange.com_en_all_2023-05.zim",
+         "wikinews_en_all_nopic_2023-09.zim",
+         "ai.stackexchange.com_en_all_2023-10.zim",
+         "boardgames.stackexchange.com_en_all_2023-05.zim",
+         "economics.stackexchange.com_en_all_2023-05.zim",
+         "3dprinting.stackexchange.com_en_all_2023-07.zim",
+         "earthscience.stackexchange.com_en_all_2023-05.zim",
+         "emacs.stackexchange.com_en_all_2023-10.zim",
+         "bitcoin.stackexchange.com_en_all_2023-05.zim",
+         "philosophy.stackexchange.com_en_all_2023-05.zim",
+         "law.stackexchange.com_en_all_2023-05.zim",
+         "astronomy.stackexchange.com_en_all_2023-05.zim",
+         "artofproblemsolving_en_all_nopic_2021-03.zim",
+         "engineering.stackexchange.com_en_all_2023-05.zim",
+         "ja.stackoverflow.com_ja_all_2023-06.zim",
+         "webmasters.stackexchange.com_en_all_2023-05.zim",
+         "anime.stackexchange.com_en_all_2023-10.zim",
+         "cooking.stackexchange.com_en_all_2023-05.zim",
+         "arduino.stackexchange.com_en_all_2023-05.zim",
+         "money.stackexchange.com_en_all_2023-05.zim",
+         "judaism.stackexchange.com_en_all_2023-05.zim",
+         "ethereum.stackexchange.com_en_all_2023-05.zim",
+         "datascience.stackexchange.com_en_all_2023-10.zim",
+         "academia.stackexchange.com_en_all_2023-10.zim",
+         "music.stackexchange.com_en_all_2023-05.zim",
+         "cs.stackexchange.com_en_all_2023-03.zim",
+         "dsp.stackexchange.com_en_all_2023-05.zim",
+         "biology.stackexchange.com_en_all_2023-05.zim",
+         "android.stackexchange.com_en_all_2023-10.zim",
+         "bicycles.stackexchange.com_en_all_2023-05.zim",
+         "puzzling.stackexchange.com_en_all_2023-05.zim",
+         "photo.stackexchange.com_en_all_2023-05.zim",
+         "aviation.stackexchange.com_en_all_2023-05.zim",
+         "drupal.stackexchange.com_en_all_2023-05.zim",
+         "ux.stackexchange.com_en_all_2023-05.zim",
+         "ell.stackexchange.com_en_all_2023-10.zim",
+         "openstreetmap-wiki_en_all_nopic_2023-05.zim",
+         "softwareengineering.stackexchange.com_en_all_2023-05.zim",
+         "gaming.stackexchange.com_en_all_2023-10.zim",
+         "mathematica.stackexchange.com_en_all_2023-10.zim",
+         "pt.stackoverflow.com_pt_all_2023-06.zim",
+         "apple.stackexchange.com_en_all_2023-05.zim",
+         "diy.stackexchange.com_en_all_2023-08.zim",
+         "es.stackoverflow.com_es_all_2023-06.zim",
+         "gis.stackexchange.com_en_all_2023-05.zim",
+         "stats.stackexchange.com_en_all_2023-05.zim",
+         "physics.stackexchange.com_en_all_2023-05.zim",
+         "serverfault.com_en_all_2023-05.zim",
+         "electronics.stackexchange.com_en_all_2023-05.zim",
+         "tex.stackexchange.com_en_all_2023-05.zim",
+         "wikibooks_de_all_nopic_2021-03.zim",
+         "askubuntu.com_en_all_2023-05.zim",
+         "superuser.com_en_all_2023-05.zim",
+         "lesfondamentaux.reseau-canope.fr_fr_all_2022-11.zim",
+         "wikibooks_en_all_nopic_2021-03.zim",
+         "courses.lumenlearning.com_en_all_2021-03.zim",
+         "wikipedia_de_all_nopic_2023-10.zim",
+         "wikipedia_en_all_nopic_2023-10.zim",
+         "stackoverflow.com_en_all_nopic_2022-07.zim",
+         "stackoverflow.com_en_all_2023-05.zim",
+         "armypubs_en_all_2023-08.zim",
+         "vikidia_en_all_nopic_2023-09.zim",
+         "wikiquote_de_all_nopic_2023-10.zim",
+         "wikiquote_en_all_nopic_2023-09.zim",
+         "wiktionary_de_all_nopic_2023-10.zim",
+         "wiktionary_en_all_nopic_2023-10.zim",
+         "wikihow_de_maxi_2023-10.zim",
+         "wikivoyage_de_all_nopic_2023-09.zim",
+         "wikiversity_de_all_nopic_2021-03.zim",
+         "wikiversity_en_all_nopic_2021-03.zim",
+         "wikisource_de_all_nopic_2023-09.zim",
+         "wikisource_en_all_nopic_2023-08.zim",
+         "ted_countdown_global_2023-09.zim",
+         "ted_en_design_2023-09.zim",
+         "ted_en_business_2023-09.zim",
+         "ted_en_global_issues_2023-09.zim",
+
+         // 302
+         "moderators.stackexchange.com_en_all_2023-05.zim",
+         "beer.stackexchange.com_en_all_2023-05.zim",
+         "health.stackexchange.com_en_all_2023-05.zim",
+         "avp.stackexchange.com_en_all_2023-05.zim",
+         "lowtechmagazine.com_en_all_2023-08.zim",
+         "ifixit_de_all_2023-07.zim",
+         "ifixit_en_all_2023-10.zim",
+         "der-postillon.com_de_all_2020-12.zim",
+         "wikihow_en_maxi_2023-03.zim",
+    };
+
     public static void main(String[] args) {
+        Set<String> skip = new HashSet<>();
+        for (String s: skip_files) skip.add(s);
         // zim file import test
         // will test mostly if domain names are included in zim file urls
         String zimFilesPath = args[0];
@@ -298,7 +470,10 @@ public class ZimImporter extends Thread implements Importer {
         }
 
         Collection<File> orderedFiles = orderedFileMap.values();
+        Set<String> files_ok = new LinkedHashSet<>();
+        Set<String> files_nok = new LinkedHashSet<>();
         for (File f: orderedFiles) {
+            if (skip.contains(f.getName())) continue;
             try {
                 ZIMFile z = new ZIMFile(f.getAbsolutePath());
                 ZIMReader r = new ZIMReader(z);
@@ -308,16 +483,20 @@ public class ZimImporter extends Thread implements Importer {
                 System.out.println("Namespace: " + de.namespace);
                 System.out.println("Title:     " + de.title);
                 System.out.println("URL:       " + de.url);
-                System.out.println("guessed domain: " + guessDomainName(f.getName()));
+                System.out.println("guessed domain: " + guessDomainName(f.getName())); // uses a table and rules that deduces a source from the file name
                 String source = getSource(r);
-                System.out.println("guessed Source: " + source);
-                String mainURL = guessURL(source, de);
+                System.out.println("guessed Source: " + source); // this uses metadata stored in the zim file
+                DigestURL mainURL = guessURL(source, de);
                 System.out.println("guessed main article: " + mainURL);
-                System.out.println("main article exists: " + new DigestURL(mainURL).exists(ClientIdentification.browserAgent));
+                boolean ok = mainURL.exists(ClientIdentification.browserAgent);
+                System.out.println("main article exists: " + ok);
+                if (ok) files_ok.add(f.getName()); else files_nok.add(f.getName());
                 System.out.println();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        System.out.println("ok files: " + files_ok.toString());
+        System.out.println("not-ok files: " + files_nok.toString());
     }
 }
