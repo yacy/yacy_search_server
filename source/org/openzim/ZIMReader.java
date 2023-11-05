@@ -237,10 +237,24 @@ public class ZIMReader {
 
     public DirectoryEntry getMainDirectoryEntry() throws IOException {
         DirectoryEntry de = getDirectoryInfo(this.mFile.header_mainPage);
-        if (de.namespace == 'W' && de.url.equals("mainPage") && de instanceof RedirectEntry) {
+        if (de instanceof RedirectEntry) {
             // resolve redirect to get the actual main page
             int redirect = ((RedirectEntry) de).redirect_index;
             de = getDirectoryInfo(redirect);
+        }
+        // For the main entry we demand a "text/html" mime type.
+        // Many zim files do not provide this as the main file, which is strange (maybe lazy/irresponsibe)
+        // Because the main entry is important for a validation, we seek for one entry which may
+        // be proper for indexing.
+        int entryNumner = 0;
+        while (!de.getMimeType().equals("text/html") && entryNumner < this.mFile.header_entryCount) {
+            de = getDirectoryInfo(entryNumner);
+            entryNumner++;
+            if (de.namespace != 'C' && de.namespace != 'A') continue;
+            if (!(de instanceof ArticleEntry)) continue;
+            if (!de.getMimeType().equals("text/html")) continue;
+            if (de.url.contains("404") || de.title.contains("404") || de.title.contains("301")) continue; // is a pain
+            return de;
         }
         return de;
     }

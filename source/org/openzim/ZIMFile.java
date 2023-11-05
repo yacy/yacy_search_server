@@ -134,6 +134,7 @@ public class ZIMFile extends File {
     }
 
     public final String getMimeType(int idx) {
+        if (idx >= this.mimeTypeList.length) return "";
         return this.mimeTypeList[idx];
     }
 

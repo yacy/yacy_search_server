@@ -26,11 +26,13 @@ package net.yacy.document.importer;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -93,6 +95,8 @@ public class ZimImporter extends Thread implements Importer {
         try {
             this.reader = new ZIMReader(this.file);
             this.guessedSource = getSource(this.reader);
+            Date guessedDate = getDate(this.reader);
+            String dates = HeaderFramework.newRfc1123Format().format(guessedDate);
 
             // verify the source
             DirectoryEntry mainEntry = this.reader.getMainDirectoryEntry();
@@ -108,6 +112,7 @@ public class ZimImporter extends Thread implements Importer {
                 DirectoryEntry de = this.reader.getDirectoryInfo(i);
                 if (!(de instanceof ZIMReader.ArticleEntry)) continue;
                 ArticleEntry ae = (ArticleEntry) de;
+                if (ae.namespace != 'C' && ae.namespace != 'A') continue;
 
                 // check url
                 DigestURL guessedUrl = guessURL(this.guessedSource, de);
@@ -121,6 +126,7 @@ public class ZimImporter extends Thread implements Importer {
 
                 // check availability of text parser
                 String mimeType = ae.getMimeType();
+                if (!mimeType.startsWith("text/") && !mimeType.equals("application/epub+zip")) continue; // in this import we want only text, not everything that is possible
                 if (TextParser.supportsMime(mimeType) != null) continue;
 
                 // read the content
@@ -130,6 +136,7 @@ public class ZimImporter extends Thread implements Importer {
                 RequestHeader requestHeader = new RequestHeader();
                 ResponseHeader responseHeader = new ResponseHeader(200);
                 responseHeader.put(HeaderFramework.CONTENT_TYPE, de.getMimeType()); // very important to tell parser which kind of content
+                responseHeader.put(HeaderFramework.LAST_MODIFIED, dates); // put in the guessd date to have something that is not the current date
                 final Request request = new Request(
                         ASCII.getBytes(sb.peers.mySeed().hash),
                         guessedUrl,
@@ -230,8 +237,6 @@ public class ZimImporter extends Thread implements Importer {
                 return "fas.org";
             case "fonts":
                 return "fonts.google.com";
-            case "gutenberg":
-                return "https://dev.library.kiwix.org/viewer#gutenberg_de_all_2023-03";
             case "ifixit":
                 return "ifixit.com";
             case "lesfondamentaux":
@@ -313,12 +318,22 @@ public class ZimImporter extends Thread implements Importer {
         return source;
     }
 
+    public static Date getDate(ZIMReader r) throws IOException {
+        String date = r.getMetadata("Date");
+        if (date != null) try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            return format.parse(date);
+        } catch (ParseException e) {}
+        // failover situation: use file date
+        return new Date(r.getZIMFile().lastModified());
+    }
+
     public static DigestURL guessURL(String guessedSource, DirectoryEntry de) throws MalformedURLException {
         String url = de.url;
         if (url.equals("Main_Page")) url = "";
-        if (guessedSource != null) return new DigestURL(guessedSource + url);
         if (url.startsWith("A/")) return new DigestURL("https://" + url.substring(2));
         if (url.startsWith("H/")) return new DigestURL("https://" + url.substring(2));
+        if (guessedSource != null) return new DigestURL(guessedSource + url);
         return new DigestURL(guessedSource + url);
     }
 
@@ -439,6 +454,22 @@ public class ZimImporter extends Thread implements Importer {
          "ted_en_design_2023-09.zim",
          "ted_en_business_2023-09.zim",
          "ted_en_global_issues_2023-09.zim",
+         "opentextbooks_en_all_2023-08.zim",
+         "bestedlessons.org_en_all_2023-08.zim",
+         "wikivoyage_en_all_nopic_2023-10.zim",
+         "based.cooking_en_all_2023-10.zim",
+         "wordnet_en_all_2023-04.zim",
+         "internet-encyclopedia-philosophy_en_all_2023-08.zim",
+         "100r-off-the-grid_en_2023-09.zim",
+         "coopmaths_2023-04.zim",
+         "birds-of-ladakh_en_all_2023-02.zim",
+         "storyweaver.org_en_2023-09.zim",
+         "developer.mozilla.org_en_all_2023-02.zim",
+         "www.ready.gov_es_2023-06.zim",
+         "teoria.com_en_2023-08.zim",
+         "theworldfactbook_en_all_2023-06.zim",
+         "mutopiaproject.org_en_2023-08.zim",
+         "dp.la_en_all_2023-08.zim",
 
          // 302
          "moderators.stackexchange.com_en_all_2023-05.zim",
@@ -483,6 +514,7 @@ public class ZimImporter extends Thread implements Importer {
                 System.out.println("Namespace: " + de.namespace);
                 System.out.println("Title:     " + de.title);
                 System.out.println("URL:       " + de.url);
+                System.out.println("Mime Type  " + de.getMimeType());
                 System.out.println("guessed domain: " + guessDomainName(f.getName())); // uses a table and rules that deduces a source from the file name
                 String source = getSource(r);
                 System.out.println("guessed Source: " + source); // this uses metadata stored in the zim file
