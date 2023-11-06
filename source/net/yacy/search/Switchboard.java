@@ -2166,7 +2166,10 @@ public final class Switchboard extends serverSwitch {
                 this.log.warn("IO Error processing zim file " + infile);
             }
             return moved;
-        } else if (s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") || s.endsWith(".flatjson")) {
+        } else if (
+                s.endsWith(".jsonl") || s.endsWith(".jsonl.gz") ||
+                s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") ||
+                s.endsWith(".flatjson") || s.endsWith(".flatjson.gz")) {
             return this.processSurrogateJson(infile, outfile);
         }
         InputStream is = null;
