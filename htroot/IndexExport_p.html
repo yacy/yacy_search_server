@@ -21,13 +21,16 @@
         <dd><input type="text" name="exportfilepath" value="#[exportfilepath]#" size="120" maxlength="250" />
         </dd>
         <dt class="TableCellDark">URL Filter</dt>
-        <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />
+        <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />&nbsp;.*.* (default) is a catch-all; format: java regex
         </dd>
         <dt class="TableCellDark">query</dt>
-        <dd><input type="text" name="exportquery" value="*:*" size="20" maxlength="250" />
+        <dd><input type="text" name="exportquery" value="*:*" size="20" maxlength="250" />&nbsp;*:* (default) is a catch-all; format: <field-name>:<solr-pattern>
         </dd>
-        <dt class="TableCellDark">maximum age (seconds, -1 = unlimited)</dt>
-        <dd><input type="text" name="exportmaxseconds" value="-1" size="20" maxlength="250" />
+        <dt class="TableCellDark">maximum age (seconds)</dt>
+        <dd><input type="text" name="exportmaxseconds" value="-1" size="20" maxlength="250" />&nbsp;-1 = unlimited -> no document is too old
+        </dd>
+        <dt class="TableCellDark">maximum number of records per chunk</dt>
+        <dd><input type="text" name="maxchunksize" value="-1" size="20" maxlength="250" />&nbsp;if exceeded: several chunks are stored; -1 = unlimited (makes only one chunk)
         </dd>
         <dt class="TableCellDark">Export Format</dt>
         <dd>
