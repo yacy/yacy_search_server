@@ -9,11 +9,10 @@
   <body id="IndexControl">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexImport.template%#
-    
-    
+
     <h2>Index Export</h2>
     <p>The local index currently contains #[ucount]# documents, only #[ucount200]# exportable with status code 200 - the remaining are error documents.</p>
-    
+
     #(lurlexport)#::
     <form action="IndexExport_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Loaded URL Export</legend>
@@ -34,19 +33,45 @@
         <dd>
         <dl>
         <dt>Full Data Records:</dt>
-        <dd><input type="radio" name="format" value="full-solr" /> XML (Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)<br />
-            <input type="radio" name="format" value="full-elasticsearch" checked="checked" /> JSON (Rich and full-text Elasticsearch data, one document per line in one flat JSON file, can be bulk-imported to elasticsearch with the command "curl -XPOST localhost:9200/collection1/yacy/_bulk --data-binary @yacy_dump_XXX.flatjson")<br />
-            <input type="radio" name="format" value="full-rss" /> XML (RSS)</dd>
+        <dd><input type="radio" name="format" value="full-elasticsearch" checked="checked" />
+            JSON (Rich and full-text Elasticsearch data, one document per line in one flat JSON file,
+            can be bulk-imported to elasticsearch. Here is an example for opensearch, using docker:<br />
+Start docker container of opensearch:<br />
+<code>docker run --name opensearch -p 9200:9200 -d -e OPENSEARCH_JAVA_OPTS="-Xms2G -Xmx2G" -e discovery.type=single-node -e DISABLE_SECURITY_PLUGIN=true -v $(pwd)/opensearch_data:/usr/share/opensearch/data opensearchproject/opensearch:latest</code><br />
+Unblock index creation:<br />
+<code>curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+{
+  "persistent": {
+    "cluster.blocks.create_index": null
+  }
+}'</code><br />
+Create the search index:<br />
+<code>curl -X PUT "http://localhost:9200/collection1/yacy"</code><br />
+Bulk-upload the index file:<br />
+<code>curl -XPOST "http://localhost:9200/collection1/yacy/_bulk?filter_path=took,errors" -H "Content-Type: application/x-ndjson" --data-binary @yacy_dump_XXX.flatjson</code><br />
+Make a search, get 10 results, search in fields text_t, title, description with boosts:<br />
+<code>curl -X POST "http://localhost:9200/collection1/yacy/_search" -H 'Content-Type: application/json' -d'
+{"size": 10, "query": {"multi_match": {
+    "query": "one two three",
+    "fields": ["text_t", "title^10", "description^3"], "fuzziness": "AUTO"
+}}}'</code><br />
+            <input type="radio" name="format" value="full-solr" />
+            XML (Rich and full-text Solr data, one document per line in one large xml file,
+            can be processed with shell tools, can be imported with DATA/SURROGATE/in/)
+            <br />
+            <input type="radio" name="format" value="full-rss" />
+            XML (RSS)
+        </dd>
         <dt>Full URL List:</dt>
         <dd><input type="radio" name="format" value="url-text" /> Plain Text List (URLs only)<br />
             <input type="radio" name="format" value="url-html" /> HTML (URLs with title)</dd>
         <dt>Only Domain:</dt>
         <dd><input type="radio" name="format" value="dom-text" /> Plain Text List (domains only)<br />
             <input type="radio" name="format" value="dom-html" /> HTML (domains as URLs, no title)</dd>
-		<dt>Only Text:</dt>
+        <dt>Only Text:</dt>
         <dd><input type="radio" name="format" value="text-text" /> Fulltext of Search Index Text</dd>
-		</dl>
-		</dd>
+        </dl>
+        </dd>
         <dt>&nbsp;</dt>
         <dd><input type="submit" name="lurlexport" value="Export" class="btn btn-primary" style="width:240px;"/>
         </dd>
@@ -55,16 +80,16 @@
     </form>::
     <div class="alert alert-info" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far</div>::
     #(/lurlexport)#
-    
-	#(lurlexportfinished)#::
+
+    #(lurlexportfinished)#::
     <div class="alert alert-success">Finished export of #[urlcount]# Documents to file <a href="file://#[exportfile]#" target="_">#[exportfile]#</a><br/>
     <em>Import this file by moving it to DATA/SURROGATES/in</em></div>::
     #(/lurlexportfinished)#
-    
+
     #(lurlexporterror)#::
     <div class="alert alert-warning">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
     #(/lurlexporterror)#
-    
+
     #(dumprestore)#::
     <form action="IndexExport_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Dump and Restore of Solr Index</legend>
