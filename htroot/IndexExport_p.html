@@ -32,6 +32,11 @@
         <dt class="TableCellDark">maximum number of records per chunk</dt>
         <dd><input type="text" name="maxchunksize" value="-1" size="20" maxlength="250" />&nbsp;if exceeded: several chunks are stored; -1 = unlimited (makes only one chunk)
         </dd>
+        <dt class="TableCellDark">Export Size</dt>
+        <dd>
+          full size, all fields:<input type="radio" name="minified" value="no" checked="checked">&nbsp;
+          minified; only fields sku, date, title, description, text_t<input type="radio" name="minified" value="yes" >
+        </dd>
         <dt class="TableCellDark">Export Format</dt>
         <dd>
         <dl>

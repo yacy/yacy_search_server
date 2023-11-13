@@ -126,13 +126,14 @@ public class IndexExport_p {
             long maxChunkSize = post.getLong("maxchunksize", Long.MAX_VALUE);
             if (maxChunkSize <= 0) maxChunkSize = Long.MAX_VALUE;
             final String path = post.get("exportfilepath", "");
+            final boolean minified = post.get("minified", "no").equals("yes");
 
             // store this call as api call: we do this even if there is a chance that it fails because recurring calls may do not fail
             if (maxseconds != -1) sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_DUMP, format + "-dump, q=" + query + ", maxseconds=" + maxseconds);
 
             // start the export
             try {
-                export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text, maxChunkSize);
+                export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text, maxChunkSize, minified);
             } catch (final IOException e) {
                 prop.put("lurlexporterror", 1);
                 prop.put("lurlexporterror_exportfile", "-no export-");

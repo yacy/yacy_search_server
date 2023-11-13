@@ -34,8 +34,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -118,7 +120,7 @@ public final class Fulltext {
         this.writeWebgraph = false;
     }
 
-    public void setUseWebgraph(boolean check) {
+    public void setUseWebgraph(final boolean check) {
         this.writeWebgraph = check;
     }
 
@@ -142,8 +144,8 @@ public final class Fulltext {
         final File solrLocation = new File(this.segmentPath, SOLR_PATH);
 
         // migrate old solr to new
-        for (String oldVersion: SOLR_OLD_PATH) {
-            File oldLocation = new File(this.segmentPath, oldVersion);
+        for (final String oldVersion: SOLR_OLD_PATH) {
+            final File oldLocation = new File(this.segmentPath, oldVersion);
             if (oldLocation.exists()) {
                 if (!oldLocation.renameTo(solrLocation)) {
                     ConcurrentLog.severe("Fulltext", "Failed renaming old Solr location ("
@@ -183,11 +185,11 @@ public final class Fulltext {
         return this.solrInstances.getDefaultEmbeddedConnector();
     }
 
-    public EmbeddedSolrConnector getEmbeddedConnector(String corename) {
+    public EmbeddedSolrConnector getEmbeddedConnector(final String corename) {
         return this.solrInstances.getEmbeddedConnector(corename);
     }
 
-    public SolrConnector getConnectorForRead(String corename) {
+    public SolrConnector getConnectorForRead(final String corename) {
         if (this.solrInstances.isConnectedRemote()) return this.solrInstances.getRemoteConnector(corename);
         if (this.solrInstances.isConnectedEmbedded()) return this.solrInstances.getEmbeddedConnector(corename);
         return null;
@@ -315,7 +317,7 @@ public final class Fulltext {
     }
 
     private long lastCommit = 0;
-    public void commit(boolean softCommit) {
+    public void commit(final boolean softCommit) {
         final long t = System.currentTimeMillis();
         if (this.lastCommit + 10000 > t) return;
         this.lastCommit = t;
@@ -423,7 +425,7 @@ public final class Fulltext {
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @throws IOException
      */
-    public void deleteStaleDomainHashes(final Set<String> hosthashes, Date freshdate) {
+    public void deleteStaleDomainHashes(final Set<String> hosthashes, final Date freshdate) {
         // delete in solr
         final Date now = new Date();
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes,
@@ -434,7 +436,7 @@ public final class Fulltext {
                     (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
     }
 
-    public void deleteStaleDomainNames(final Set<String> hostnames, Date freshdate) {
+    public void deleteStaleDomainNames(final Set<String> hostnames, final Date freshdate) {
 
         final Date now = new Date();
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_s.getSolrFieldName(), hostnames,
@@ -453,7 +455,7 @@ public final class Fulltext {
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes, CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
     }
 
-    private static void deleteDomainWithConstraint(SolrConnector connector, String fieldname, final Set<String> hosthashes, String constraintQuery) {
+    private static void deleteDomainWithConstraint(final SolrConnector connector, final String fieldname, final Set<String> hosthashes, final String constraintQuery) {
         if (hosthashes == null || hosthashes.size() == 0) return;
         final int subsetscount = 1 + (hosthashes.size() / 255); // if the list is too large, we get a "too many boolean clauses" exception
         int c = 0;
@@ -492,7 +494,7 @@ public final class Fulltext {
      * @param basepath the left path of the url; at least until the end of the host
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      */
-    public int remove(final String basepath, Date freshdate) {
+    public int remove(final String basepath, final Date freshdate) {
         DigestURL uri;
         try {uri = new DigestURL(basepath);} catch (final MalformedURLException e) {return 0;}
         final String host = uri.getHost();
@@ -690,15 +692,15 @@ public final class Fulltext {
     public static enum ExportFormat {
         text("txt"), html("html"), rss("rss"), solr("xml"), elasticsearch("flatjson");
         private final String ext;
-        private ExportFormat(String ext) {this.ext = ext;}
+        private ExportFormat(final String ext) {this.ext = ext;}
         public String getExt() {return this.ext;}
     }
 
     public final static String yacy_dump_prefix = "yacy_dump_";
     public Export export(
-            Fulltext.ExportFormat format, String filter, String query,
-            final int maxseconds, File path, boolean dom, boolean text,
-            long maxChunkSize) throws IOException {
+            final Fulltext.ExportFormat format, final String filter, String query,
+            final int maxseconds, final File path, final boolean dom, final boolean text,
+            final long maxChunkSize, final boolean minified) throws IOException {
 
         // modify query according to maxseconds
         final long now = System.currentTimeMillis();
@@ -763,13 +765,13 @@ public final class Fulltext {
             }
         }
 
-        String filename = yacy_dump_prefix +
+        final String filename = yacy_dump_prefix +
                 "f" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate) + "_" +
                 "l" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(lastdate) + "_" +
                 "n" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(new Date(now)) + "_" +
                 "c" + String.format("%1$012d", doccount)+ "_tc"; // the name ends with the transaction token ('c' = 'created')
 
-        return export(path, filename, format.getExt(), filter, query, format, dom, text, maxChunkSize);
+        return export(path, filename, format.getExt(), filter, query, format, dom, text, maxChunkSize, minified);
     }
 
     // export methods
@@ -777,23 +779,35 @@ public final class Fulltext {
             final File path, final String filename,
             final String fileext, final String filter, final String query,
             final ExportFormat format, final boolean dom, final boolean text,
-            long maxChunkSize) {
+            final long maxChunkSize, final boolean minified) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
             ConcurrentLog.warn("LURL-EXPORT", "cannot start another export thread, already one running");
             return this.exportthread;
         }
-        this.exportthread = new Export(path, filename, fileext, filter, query, format, dom, text, maxChunkSize);
+        this.exportthread = new Export(path, filename, fileext, filter, query, format, dom, text, maxChunkSize, minified);
         this.exportthread.start();
         return this.exportthread;
     }
 
-    public static void main(String args[]) {
+    public static void main(final String args[]) {
         final Date firstdate = null;
         System.out.println(GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate));
     }
 
     public Export export() {
         return this.exportthread;
+    }
+
+    private final static Set<String> minified_keys = new HashSet<>();
+    static {
+        //minified_keys.add(CollectionSchema.id.getSolrFieldName());
+        minified_keys.add(CollectionSchema.sku.getSolrFieldName());
+        minified_keys.add(CollectionSchema.title.getSolrFieldName());
+        //minified_keys.add(CollectionSchema.author.getSolrFieldName());
+        minified_keys.add(CollectionSchema.description_txt.getSolrFieldName());
+        //minified_keys.add(CollectionSchema.size_i.getSolrFieldName());
+        minified_keys.add(CollectionSchema.last_modified.getSolrFieldName());
+        minified_keys.add(CollectionSchema.text_t.getSolrFieldName());
     }
 
     public class Export extends Thread {
@@ -806,12 +820,13 @@ public final class Fulltext {
         private final boolean dom, text;
         private int docCount, chunkSize, chunkCount;
         private final long maxChunkSize;
+        private final boolean minified;
 
         private Export(
                 final File path, final String filename,
                 final String fileext, final String filter, final String query,
                 final ExportFormat format, final boolean dom, final boolean text,
-                long maxChunkSize) {
+                final long maxChunkSize, final boolean minified) {
             super("Fulltext.Export");
             // format: 0=text, 1=html, 2=rss/xml
             this.path = path;
@@ -827,10 +842,11 @@ public final class Fulltext {
             this.chunkSize = 0; // number of documents in the current chunk
             this.chunkCount = 0; // number of chunks opened so far
             this.maxChunkSize = maxChunkSize; // number of maximum document count per chunk
+            this.minified = minified;
             //if ((dom) && (format == 2)) dom = false;
         }
 
-        private void printHead(PrintWriter pw) {
+        private void printHead(final PrintWriter pw) {
             if (this.format == ExportFormat.html) {
                 pw.println("<html><head></head><body>");
             }
@@ -855,8 +871,8 @@ public final class Fulltext {
                 pw.println("<result>");
             }
         }
- 
-        private void printTail(PrintWriter pw) {
+
+        private void printTail(final PrintWriter pw) {
             if (this.format == ExportFormat.html) {
                 pw.println("</body></html>");
             }
@@ -869,7 +885,7 @@ public final class Fulltext {
                 pw.println("</response>");
             }
         }
- 
+
         @Override
         public void run() {
             try {
@@ -881,9 +897,9 @@ public final class Fulltext {
             }
 
             try {
-                docCount = 0;
-                chunkSize = 0;
-                chunkCount = 0;
+                this.docCount = 0;
+                this.chunkSize = 0;
+                this.chunkCount = 0;
                 PrintWriter pw = getWriter();
                 printHead(pw);
                 if (this.dom) {
@@ -902,6 +918,12 @@ public final class Fulltext {
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                             final String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
+                            if (this.minified) {
+                                final Iterator<Entry<String, Object>> i = doc.iterator();
+                                while (i.hasNext()) {
+                                    if (!minified_keys.contains(i.next().getKey())) i.remove();
+                                }
+                            }
                             final CRIgnoreWriter sw = new CRIgnoreWriter();
                             if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
                             if (this.format == ExportFormat.solr) EnhancedXMLResponseWriter.writeDoc(sw, doc);
@@ -914,7 +936,8 @@ public final class Fulltext {
                             if (this.chunkSize >= this.maxChunkSize) {
                                 printTail(pw);
                                 pw.close();
-                                pw = getWriter(); // increases chunkCount as side-effect
+                                this.chunkCount++;
+                                pw = getWriter();
                                 printHead(pw);
                                 this.chunkSize = 0;
                             }
@@ -957,7 +980,8 @@ public final class Fulltext {
                             if (this.chunkSize >= this.maxChunkSize) {
                                 printTail(pw);
                                 pw.close();
-                                pw = getWriter(); // increases chunkCount as side-effect
+                                this.chunkCount++;
+                                pw = getWriter();
                                 printHead(pw);
                                 this.chunkSize = 0;
                             }
@@ -980,14 +1004,13 @@ public final class Fulltext {
         }
 
         private PrintWriter getWriter() throws IOException {
-            File f = file();
+            final File f = file();
             final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(f.getAbsolutePath() + ".gz") : f);
             final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os));
-            this.chunkCount++;
             return pw;
         }
 
-        private String chunkcount(int count) {
+        private String chunkcount(final int count) {
             if (count < 10) return "000" + count;
             if (count < 100) return "00" + count;
             if (count < 1000) return "0" + count;
