@@ -108,58 +108,63 @@ public class ZimImporter extends Thread implements Importer {
 
             // read all documents
             for (int i = 0; i < this.file.header_entryCount; i++) {
-                if (this.abort) break;
-                DirectoryEntry de = this.reader.getDirectoryInfo(i);
-                if (!(de instanceof ZIMReader.ArticleEntry)) continue;
-                ArticleEntry ae = (ArticleEntry) de;
-                if (ae.namespace != 'C' && ae.namespace != 'A') continue;
-
-                // check url
-                DigestURL guessedUrl = guessURL(this.guessedSource, de);
-                if (recordCnt < 10) {
-                    // critical test for the first 10 urls
-                    if (!guessedUrl.exists(ClientIdentification.browserAgent)) {
-                        sb.log.info("zim importer: file " + this.file.getName() + " failed url " + recordCnt + " existence test: " + guessedUrl);
-                        return; 
-                    }
-                }
-
-                // check availability of text parser
-                String mimeType = ae.getMimeType();
-                if (!mimeType.startsWith("text/") && !mimeType.equals("application/epub+zip")) continue; // in this import we want only text, not everything that is possible
-                if (TextParser.supportsMime(mimeType) != null) continue;
-
-                // read the content
-                byte[] b = this.reader.getArticleData(ae);
-
-                // create artificial request and response headers for the indexer
-                RequestHeader requestHeader = new RequestHeader();
-                ResponseHeader responseHeader = new ResponseHeader(200);
-                responseHeader.put(HeaderFramework.CONTENT_TYPE, de.getMimeType()); // very important to tell parser which kind of content
-                responseHeader.put(HeaderFramework.LAST_MODIFIED, dates); // put in the guessd date to have something that is not the current date
-                final Request request = new Request(
-                        ASCII.getBytes(sb.peers.mySeed().hash),
-                        guessedUrl,
-                        null, // referrerhash the hash of the referrer URL
-                        de.title, // name the name of the document to crawl
-                        null, // appdate the time when the url was first time appeared
-                        sb.crawler.defaultSurrogateProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
-                        0,    // depth the crawling depth of the entry
-                        sb.crawler.defaultSurrogateProfile.timezoneOffset() // timezone offset
-                );
-                final Response response = new Response(
-                        request,
-                        requestHeader,
-                        responseHeader,
-                        Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
-                        false,
-                        b
-                );
-
-                // throw this to the indexer
-                String error = sb.toIndexer(response);
-                if (error != null) ConcurrentLog.info("ZimImporter", "error parsing: " + error);
-                this.recordCnt++;
+            	try {
+	                if (this.abort) break;
+	                DirectoryEntry de = this.reader.getDirectoryInfo(i);
+	                if (!(de instanceof ZIMReader.ArticleEntry)) continue;
+	                ArticleEntry ae = (ArticleEntry) de;
+	                if (ae.namespace != 'C' && ae.namespace != 'A') continue;
+	
+	                // check url
+	                DigestURL guessedUrl = guessURL(this.guessedSource, de);
+	                if (recordCnt < 10) {
+	                    // critical test for the first 10 urls
+	                    if (!guessedUrl.exists(ClientIdentification.browserAgent)) {
+	                        sb.log.info("zim importer: file " + this.file.getName() + " failed url " + recordCnt + " existence test: " + guessedUrl);
+	                        return; 
+	                    }
+	                }
+	
+	                // check availability of text parser
+	                String mimeType = ae.getMimeType();
+	                if (!mimeType.startsWith("text/") && !mimeType.equals("application/epub+zip")) continue; // in this import we want only text, not everything that is possible
+	                if (TextParser.supportsMime(mimeType) != null) continue;
+	
+	                // read the content
+	                byte[] b = this.reader.getArticleData(ae);
+	
+	                // create artificial request and response headers for the indexer
+	                RequestHeader requestHeader = new RequestHeader();
+	                ResponseHeader responseHeader = new ResponseHeader(200);
+	                responseHeader.put(HeaderFramework.CONTENT_TYPE, de.getMimeType()); // very important to tell parser which kind of content
+	                responseHeader.put(HeaderFramework.LAST_MODIFIED, dates); // put in the guessd date to have something that is not the current date
+	                final Request request = new Request(
+	                        ASCII.getBytes(sb.peers.mySeed().hash),
+	                        guessedUrl,
+	                        null, // referrerhash the hash of the referrer URL
+	                        de.title, // name the name of the document to crawl
+	                        null, // appdate the time when the url was first time appeared
+	                        sb.crawler.defaultSurrogateProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
+	                        0,    // depth the crawling depth of the entry
+	                        sb.crawler.defaultSurrogateProfile.timezoneOffset() // timezone offset
+	                );
+	                final Response response = new Response(
+	                        request,
+	                        requestHeader,
+	                        responseHeader,
+	                        Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
+	                        false,
+	                        b
+	                );
+	
+	                // throw this to the indexer
+	                String error = sb.toIndexer(response);
+	                if (error != null) ConcurrentLog.info("ZimImporter", "error parsing: " + error);
+	                this.recordCnt++;
+            	} catch (Exception e) {
+            		// catch any error that could stop the importer
+	                ConcurrentLog.info("ZimImporter", "error loading: " + e.getMessage());
+            	}
             }
         } catch (IOException e) {
             ConcurrentLog.info("ZimImporter", "error reading: " + e.getMessage());
