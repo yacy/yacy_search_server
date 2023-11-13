@@ -2578,6 +2578,36 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
+    public boolean exists(final ClientIdentification.Agent agent) {
+        try {
+            if (isFile()) {
+                return getFSFile().exists();
+            }
+            if (isSMB()) {
+                return getSmbFile().exists();
+            }
+            if (isFTP()) {
+                final FTPClient client = new FTPClient();
+                client.open(this.host, this.port < 0 ? 21 : this.port);
+                return client.fileSize(path) > 0;
+            }
+            if (isHTTP() || isHTTPS()) {
+                final HTTPClient client = new HTTPClient(agent);
+                client.setHost(getHost());
+                org.apache.http.HttpResponse response = client.HEADResponse(this, true);
+                client.close();
+                if (response == null) return false;
+                int status = response.getStatusLine().getStatusCode();
+                return status == 200 || status == 301 || status == 302;
+            }
+            return false;
+        } catch (IOException e) {
+            if (e.getMessage().contains("Circular redirect to")) return true; // exception; this is a 302 which the client actually accepts
+            //e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * Read fully the source, close it and return its content as a bytes array.
      * @param source the source to read

@@ -176,6 +176,7 @@ import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.JsonListImporter;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.WarcImporter;
+import net.yacy.document.importer.ZimImporter;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
@@ -906,8 +907,6 @@ public final class Switchboard extends serverSwitch {
 
                 TextParser.setDenyMime(this.getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
                 TextParser.setDenyExtension(this.getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
-                pdfParser.individualPages = this.getConfigBool(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES, false);
-                pdfParser.individualPagePropertyname = this.getConfig(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES_KEY, "page");
 
                 // start a loader
                 this.log.config("Starting Crawl Loader");
@@ -2153,7 +2152,24 @@ public final class Switchboard extends serverSwitch {
                 this.log.warn("IO Error processing warc file " + infile);
             }
             return moved;
-        } else if (s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") || s.endsWith(".flatjson")) {
+        } else if (s.endsWith(".zim")) {
+            try {
+                final ZimImporter wri = new ZimImporter(infile.getAbsolutePath());
+                wri.start();
+                try {
+                    wri.join();
+                } catch (final InterruptedException ex) {
+                    return moved;
+                }
+                moved = infile.renameTo(outfile);
+            } catch (final IOException ex) {
+                this.log.warn("IO Error processing zim file " + infile);
+            }
+            return moved;
+        } else if (
+                s.endsWith(".jsonl") || s.endsWith(".jsonl.gz") ||
+                s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") ||
+                s.endsWith(".flatjson") || s.endsWith(".flatjson.gz")) {
             return this.processSurrogateJson(infile, outfile);
         }
         InputStream is = null;
@@ -2349,6 +2365,7 @@ public final class Switchboard extends serverSwitch {
                     if ( surrogate.endsWith(".xml")
                             || surrogate.endsWith(".xml.gz")
                             || surrogate.endsWith(".xml.zip")
+                            || surrogate.endsWith(".zim")
                             || surrogate.endsWith(".warc")
                             || surrogate.endsWith(".warc.gz")
                             || surrogate.endsWith(".jsonlist")

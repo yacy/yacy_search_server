@@ -20,6 +20,7 @@ package org.openzim;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 import org.openzim.ZIMReader.DirectoryEntry;
 
@@ -54,6 +55,17 @@ public class ZIMTest {
             byte[] articleBytes = zReader.getArticleData(directory_entry);
             String article = articleBytes == null ? "NULL" : new String(articleBytes, StandardCharsets.UTF_8);
             System.out.println(article);
+
+            // iterate over all entries
+            Iterator<ZIMReader.ArticleBlobEntry> i = zReader.new ClusterIterator();
+            int count = 0;
+            while (i.hasNext()) {
+                ZIMReader.ArticleBlobEntry entry = i.next();
+                System.out.println(entry.article.url);
+                count++;
+            }
+            System.out.println("Number of articles extracted: " + count);
+            System.out.println("Number of articles expected:  " + file.header_entryCount);
         } catch (final IOException e) {
             e.printStackTrace();
         }

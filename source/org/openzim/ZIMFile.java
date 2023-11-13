@@ -33,8 +33,9 @@ import java.util.List;
  *         Proof-Reading, unclustering, refactoring,
  *         naming adoption to https://wiki.openzim.org/wiki/ZIM_file_format,
  *         change of Exception handling, 
- *         extension to more attributes as defined in spec (bugfix for mime type loading)
- *         int/long bugfix (did reading of long values with int variables, causing negative offsets)
+ *         extension to more attributes as defined in spec (bugfix for mime type loading),
+ *         int/long bugfix (did reading of long values with int variables, causing negative offsets),
+ *         added url pointer, title pointer and cluster pointer caches
  */
 public class ZIMFile extends File {
 
@@ -46,9 +47,9 @@ public class ZIMFile extends File {
     public final int  header_minorVersion;
     public final int  header_entryCount;
     public final int  header_clusterCount;
-    public final long header_urlPtrPos;
-    public final long header_titlePtrPos;
-    public final long header_clusterPtrPos;
+    private final long header_urlPtrPos;
+    private final long header_titlePtrPos;
+    private final long header_clusterPtrPos;
     public final long header_mimeListPos;
     public final int  header_mainPage;
     public final int  header_layoutPage;
@@ -61,6 +62,7 @@ public class ZIMFile extends File {
     private final String[] mimeTypeList;
     private final byte[]   urlPtrListBlob;
     private final byte[]   titlePtrListBlob;
+    private final byte[]   clusterPtrListBlob;
 
     public ZIMFile(final String path) throws IOException {
         super(path);
@@ -106,23 +108,33 @@ public class ZIMFile extends File {
                 break;
             }
             String mimeType = mimeBuffer.toString();
-            System.out.println(mimeType);
+            //System.out.println(mimeType);
             mList.add(mimeType);
         }
         this.mimeTypeList = mList.toArray(new String[mList.size()]);
 
-        // Initialize the Url Pointer List
-        this.urlPtrListBlob = new byte[this.header_entryCount * 8];
-        mReader.seek(this.header_urlPtrPos);
-        RandomAccessFileZIMInputStream.readFully(mReader, this.urlPtrListBlob);
+        try {
+            // Initialize the Url Pointer List
+            this.urlPtrListBlob = new byte[this.header_entryCount * 8];
+            mReader.seek(this.header_urlPtrPos);
+            RandomAccessFileZIMInputStream.readFully(mReader, this.urlPtrListBlob);
 
-        // Initialize the Title Pointer List
-        this.titlePtrListBlob = new byte[this.header_entryCount * 4];
-        mReader.seek(this.header_titlePtrPos);
-        RandomAccessFileZIMInputStream.readFully(mReader, this.titlePtrListBlob);
+            // Initialize the Title Pointer List
+            this.titlePtrListBlob = new byte[this.header_entryCount * 4];
+            mReader.seek(this.header_titlePtrPos);
+            RandomAccessFileZIMInputStream.readFully(mReader, this.titlePtrListBlob);
+
+            // Initialize the Cluster Pointer List
+            this.clusterPtrListBlob = new byte[this.header_clusterCount * 8];
+            mReader.seek(this.header_clusterPtrPos);
+            RandomAccessFileZIMInputStream.readFully(mReader, this.clusterPtrListBlob);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     public final String getMimeType(int idx) {
+        if (idx >= this.mimeTypeList.length) return "";
         return this.mimeTypeList[idx];
     }
 
@@ -132,5 +144,9 @@ public class ZIMFile extends File {
 
     public final int getTitlePtr(final int idx) {
         return RandomAccessFileZIMInputStream.toFourLittleEndianInteger(this.titlePtrListBlob, idx * 4);
+    }
+
+    public final long geClusterPtr(final int idx) {
+        return RandomAccessFileZIMInputStream.toEightLittleEndianLong(this.clusterPtrListBlob, idx * 8);
     }
 }
