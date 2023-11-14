@@ -237,10 +237,24 @@ public class ZIMReader {
 
     public DirectoryEntry getMainDirectoryEntry() throws IOException {
         DirectoryEntry de = getDirectoryInfo(this.mFile.header_mainPage);
-        if (de.namespace == 'W' && de.url.equals("mainPage") && de instanceof RedirectEntry) {
+        if (de instanceof RedirectEntry) {
             // resolve redirect to get the actual main page
             int redirect = ((RedirectEntry) de).redirect_index;
             de = getDirectoryInfo(redirect);
+        }
+        // For the main entry we demand a "text/html" mime type.
+        // Many zim files do not provide this as the main file, which is strange (maybe lazy/irresponsibe)
+        // Because the main entry is important for a validation, we seek for one entry which may
+        // be proper for indexing.
+        int entryNumner = 0;
+        while (!de.getMimeType().equals("text/html") && entryNumner < this.mFile.header_entryCount) {
+            de = getDirectoryInfo(entryNumner);
+            entryNumner++;
+            if (de.namespace != 'C' && de.namespace != 'A') continue;
+            if (!(de instanceof ArticleEntry)) continue;
+            if (!de.getMimeType().equals("text/html")) continue;
+            if (de.url.contains("404") || de.title.contains("404") || de.title.contains("301")) continue; // is a pain
+            return de;
         }
         return de;
     }
@@ -337,10 +351,7 @@ public class ZIMReader {
     public Cluster getCluster(int clusterNumber) throws IOException {
         for (int i = 0; i < this.clusterCache.size(); i++) {
             Cluster c = clusterCache.get(i);
-            if (c.cluster_number == clusterNumber) {
-                c.incUsage(); // cache hit
-                return c;
-            }
+            if (c.cluster_number == clusterNumber) return c;
         }
 
         // cache miss
@@ -348,17 +359,10 @@ public class ZIMReader {
 
         // check cache size
         if (clusterCache.size() >= MAX_CLUSTER_CACHE_SIZE) {
-            // remove one entry
-            double maxEntry = Double.MIN_VALUE;
-            int pos = -1;
-            for (int i = 0; i < clusterCache.size(); i++) {
-                double r = this.clusterCache.get(i).getUsageRatio();
-                if (r > maxEntry) {maxEntry = r; pos = i;}
-            }
-            if (pos >= 0) this.clusterCache.remove(pos);
+            // remove one entry: the first entry is the oldest entry
+            this.clusterCache.remove(0);
         }
 
-        c.incUsage();
         this.clusterCache.add(c);
         return c;
     }
@@ -378,12 +382,10 @@ public class ZIMReader {
 
         private int cluster_number; // used to identify the correct cache entry
         private List<byte[]> blobs;
-        private int usageCounter; // used for efficient caching and cache stale detection
         private boolean extended;
 
         public Cluster(int cluster_number) throws IOException {
             this.cluster_number = cluster_number;
-            this.usageCounter = 0;
 
             // open the cluster and make a Input Stream with the proper decompression type
             final long clusterPos = mFile.geClusterPtr(cluster_number);
@@ -444,20 +446,8 @@ public class ZIMReader {
             return this.blobs.get(i);
         }
 
-        public void incUsage() {
-            this.usageCounter++;
-        }
-
-        public int getUsage() {
-            return this.usageCounter;
-        }
-
         public int getSize() {
             return this.blobs.size();
-        }
-
-        public double getUsageRatio() {
-            return ((double) this.usageCounter) / ((double) this.blobs.size());
         }
     }
 

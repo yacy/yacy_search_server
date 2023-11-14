@@ -981,17 +981,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     public String urlstring() {
         if (this.alternative_urlstring != null) return this.alternative_urlstring;
 
-        if (!pdfParser.individualPages) return this.url().toNormalform(true);
-        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.url().getFileName()).toLowerCase(Locale.ROOT))) return this.url().toNormalform(true);
-        // for pdf links we rewrite the url
-        // this is a special treatment of pdf files which can be splitted into subpages
-        String pageprop = pdfParser.individualPagePropertyname;
-        String resultUrlstring = this.url().toNormalform(true);
-        int p = resultUrlstring.lastIndexOf(pageprop + "=");
-        if (p > 0) {
-          return resultUrlstring.substring(0, p - 1) + "#page=" + resultUrlstring.substring(p + pageprop.length() + 1);
-        }
-        return resultUrlstring;
+        return this.url().toNormalform(true);
     }
     /**
      * used for search result entry

@@ -51,27 +51,6 @@
   </tr>
 </table>
 </fieldset>
-<fieldset><legend id="parser">PDF Parser Attributes</legend>
-<p>
-  This is an experimental setting which makes it possible to split PDF documents into individual index entries.
-  Every page will become a single index hit and the url is artifically extended with a post/get attribute value containing
-  the page number as value. When such an url is displayed within a search result, then the post/get attribute is transformed into an anchor hash link.
-  This makes it possible to view the individual page directly in the pdf.js viewer built-in into firefox,
-  for reference see https://github.com/mozilla/pdf.js/wiki/Viewer-options
-</p>
-<table border="0">
-  <tr class="TableCellLight">
-    <td class="small" align="right" width="90">Split PDF</td>
-    <td class="small" align="left" width="300"><input type="checkbox" name="individualPages" #(individualPages)#::checked="checked" #(/individualPages)#/></td>
-  </tr>
-  <tr class="TableCellLight">
-    <td class="small" align="right">Property Name</td>
-    <td class="small" align="left"><input type="text" name="individualPagePropertyname" value="#[individualPagePropertyname]#"/></td>
-  </tr>
-  <tr class="TableCellDark">
-    <td colspan="3" class="small" ><input type="submit" name="pdfSettings" value="Submit" class="btn btn-primary"/></td>
-  </tr>
-</table>
 </form>
     #%env/templates/footer.template%#
   </body>

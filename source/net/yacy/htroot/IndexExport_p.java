@@ -64,8 +64,8 @@ public class IndexExport_p {
         prop.put("lurlexport", 0);
         prop.put("reload", 0);
         prop.put("dumprestore", 1);
-		prop.put("dumprestore_dumpRestoreEnabled", sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
-				SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT));
+        prop.put("dumprestore_dumpRestoreEnabled", sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+                SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT));
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
@@ -80,7 +80,7 @@ public class IndexExport_p {
             prop.put("lurlexportfinished", 0);
             prop.put("lurlexporterror", 0);
             prop.put("lurlexport_exportfile", export.file().toString());
-            prop.put("lurlexport_urlcount", export.count());
+            prop.put("lurlexport_urlcount", export.docCount());
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
@@ -93,7 +93,7 @@ public class IndexExport_p {
                 // an export was running but has finished
                 prop.put("lurlexportfinished", 1);
                 prop.put("lurlexportfinished_exportfile", export.file().toString());
-                prop.put("lurlexportfinished_urlcount", export.count());
+                prop.put("lurlexportfinished_urlcount", export.docCount());
                 if (export.failed() == null) {
                     prop.put("lurlexporterror", 0);
                 } else {
@@ -123,14 +123,17 @@ public class IndexExport_p {
             final String filter = post.get("exportfilter", ".*");
             final String query = post.get("exportquery", "*:*");
             final int maxseconds = post.getInt("exportmaxseconds", -1);
+            long maxChunkSize = post.getLong("maxchunksize", Long.MAX_VALUE);
+            if (maxChunkSize <= 0) maxChunkSize = Long.MAX_VALUE;
             final String path = post.get("exportfilepath", "");
+            final boolean minified = post.get("minified", "no").equals("yes");
 
             // store this call as api call: we do this even if there is a chance that it fails because recurring calls may do not fail
             if (maxseconds != -1) sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_DUMP, format + "-dump, q=" + query + ", maxseconds=" + maxseconds);
 
             // start the export
             try {
-                export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text);
+                export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text, maxChunkSize, minified);
             } catch (final IOException e) {
                 prop.put("lurlexporterror", 1);
                 prop.put("lurlexporterror_exportfile", "-no export-");
@@ -140,7 +143,7 @@ public class IndexExport_p {
 
             // show result
             prop.put("lurlexport_exportfile", export.file().toString());
-            prop.put("lurlexport_urlcount", export.count());
+            prop.put("lurlexport_urlcount", export.docCount());
             if ((export != null) && (export.failed() == null)) {
                 prop.put("lurlexport", 2);
             }
@@ -148,34 +151,34 @@ public class IndexExport_p {
         }
 
         if (post.containsKey("indexdump")) {
-        	try {
-        		final File dump = segment.fulltext().dumpEmbeddedSolr();
-        		prop.put("indexdump", 1);
-        		prop.put("indexdump_dumpfile", dump.getAbsolutePath());
-        		dumpFiles =  segment.fulltext().dumpFiles();
-        		prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
-        		// sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
-        	} catch(final SolrException e) {
-        		if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
-        			prop.put("indexdump", 2);
-        		} else {
-        			prop.put("indexdump", 3);
-        		}
-        	}
+            try {
+                final File dump = segment.fulltext().dumpEmbeddedSolr();
+                prop.put("indexdump", 1);
+                prop.put("indexdump_dumpfile", dump.getAbsolutePath());
+                dumpFiles =  segment.fulltext().dumpFiles();
+                prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
+                // sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
+            } catch(final SolrException e) {
+                if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
+                    prop.put("indexdump", 2);
+                } else {
+                    prop.put("indexdump", 3);
+                }
+            }
         }
 
         if (post.containsKey("indexrestore")) {
-        	try {
-        		final File dump = new File(post.get("dumpfile", ""));
-        		segment.fulltext().restoreEmbeddedSolr(dump);
-        		prop.put("indexRestore", 1);
-        	} catch(final SolrException e) {
-        		if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
-        			prop.put("indexRestore", 2);
-        		} else {
-        			prop.put("indexRestore", 3);
-        		}
-        	}
+            try {
+                final File dump = new File(post.get("dumpfile", ""));
+                segment.fulltext().restoreEmbeddedSolr(dump);
+                prop.put("indexRestore", 1);
+            } catch(final SolrException e) {
+                if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
+                    prop.put("indexRestore", 2);
+                } else {
+                    prop.put("indexRestore", 3);
+                }
+            }
         }
 
         // insert constants

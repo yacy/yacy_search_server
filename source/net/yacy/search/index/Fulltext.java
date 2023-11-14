@@ -34,8 +34,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -118,7 +120,7 @@ public final class Fulltext {
         this.writeWebgraph = false;
     }
 
-    public void setUseWebgraph(boolean check) {
+    public void setUseWebgraph(final boolean check) {
         this.writeWebgraph = check;
     }
 
@@ -142,8 +144,8 @@ public final class Fulltext {
         final File solrLocation = new File(this.segmentPath, SOLR_PATH);
 
         // migrate old solr to new
-        for (String oldVersion: SOLR_OLD_PATH) {
-            File oldLocation = new File(this.segmentPath, oldVersion);
+        for (final String oldVersion: SOLR_OLD_PATH) {
+            final File oldLocation = new File(this.segmentPath, oldVersion);
             if (oldLocation.exists()) {
                 if (!oldLocation.renameTo(solrLocation)) {
                     ConcurrentLog.severe("Fulltext", "Failed renaming old Solr location ("
@@ -183,11 +185,11 @@ public final class Fulltext {
         return this.solrInstances.getDefaultEmbeddedConnector();
     }
 
-    public EmbeddedSolrConnector getEmbeddedConnector(String corename) {
+    public EmbeddedSolrConnector getEmbeddedConnector(final String corename) {
         return this.solrInstances.getEmbeddedConnector(corename);
     }
 
-    public SolrConnector getConnectorForRead(String corename) {
+    public SolrConnector getConnectorForRead(final String corename) {
         if (this.solrInstances.isConnectedRemote()) return this.solrInstances.getRemoteConnector(corename);
         if (this.solrInstances.isConnectedEmbedded()) return this.solrInstances.getEmbeddedConnector(corename);
         return null;
@@ -315,7 +317,7 @@ public final class Fulltext {
     }
 
     private long lastCommit = 0;
-    public void commit(boolean softCommit) {
+    public void commit(final boolean softCommit) {
         final long t = System.currentTimeMillis();
         if (this.lastCommit + 10000 > t) return;
         this.lastCommit = t;
@@ -423,7 +425,7 @@ public final class Fulltext {
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @throws IOException
      */
-    public void deleteStaleDomainHashes(final Set<String> hosthashes, Date freshdate) {
+    public void deleteStaleDomainHashes(final Set<String> hosthashes, final Date freshdate) {
         // delete in solr
         final Date now = new Date();
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes,
@@ -434,7 +436,7 @@ public final class Fulltext {
                     (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
     }
 
-    public void deleteStaleDomainNames(final Set<String> hostnames, Date freshdate) {
+    public void deleteStaleDomainNames(final Set<String> hostnames, final Date freshdate) {
 
         final Date now = new Date();
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_s.getSolrFieldName(), hostnames,
@@ -453,7 +455,7 @@ public final class Fulltext {
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes, CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
     }
 
-    private static void deleteDomainWithConstraint(SolrConnector connector, String fieldname, final Set<String> hosthashes, String constraintQuery) {
+    private static void deleteDomainWithConstraint(final SolrConnector connector, final String fieldname, final Set<String> hosthashes, final String constraintQuery) {
         if (hosthashes == null || hosthashes.size() == 0) return;
         final int subsetscount = 1 + (hosthashes.size() / 255); // if the list is too large, we get a "too many boolean clauses" exception
         int c = 0;
@@ -492,7 +494,7 @@ public final class Fulltext {
      * @param basepath the left path of the url; at least until the end of the host
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      */
-    public int remove(final String basepath, Date freshdate) {
+    public int remove(final String basepath, final Date freshdate) {
         DigestURL uri;
         try {uri = new DigestURL(basepath);} catch (final MalformedURLException e) {return 0;}
         final String host = uri.getHost();
@@ -690,12 +692,15 @@ public final class Fulltext {
     public static enum ExportFormat {
         text("txt"), html("html"), rss("rss"), solr("xml"), elasticsearch("flatjson");
         private final String ext;
-        private ExportFormat(String ext) {this.ext = ext;}
+        private ExportFormat(final String ext) {this.ext = ext;}
         public String getExt() {return this.ext;}
     }
 
     public final static String yacy_dump_prefix = "yacy_dump_";
-    public Export export(Fulltext.ExportFormat format, String filter, String query, final int maxseconds, File path, boolean dom, boolean text) throws IOException {
+    public Export export(
+            final Fulltext.ExportFormat format, final String filter, String query,
+            final int maxseconds, final File path, final boolean dom, final boolean text,
+            final long maxChunkSize, final boolean minified) throws IOException {
 
         // modify query according to maxseconds
         final long now = System.currentTimeMillis();
@@ -760,32 +765,31 @@ public final class Fulltext {
             }
         }
 
-        String s = new File(path, yacy_dump_prefix +
+        final String filename = yacy_dump_prefix +
                 "f" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate) + "_" +
                 "l" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(lastdate) + "_" +
                 "n" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(new Date(now)) + "_" +
-                "c" + String.format("%1$012d", doccount)).getAbsolutePath() + "_tc"; // the name ends with the transaction token ('c' = 'created')
+                "c" + String.format("%1$012d", doccount)+ "_tc"; // the name ends with the transaction token ('c' = 'created')
 
-        // create export file name
-        if (s.indexOf('.',0) < 0) s += "." + format.getExt();
-        final File f = new File(s);
-        f.getParentFile().mkdirs();
-
-        return export(f, filter, query, format, dom, text);
+        return export(path, filename, format.getExt(), filter, query, format, dom, text, maxChunkSize, minified);
     }
 
     // export methods
-    public Export export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
+    public Export export(
+            final File path, final String filename,
+            final String fileext, final String filter, final String query,
+            final ExportFormat format, final boolean dom, final boolean text,
+            final long maxChunkSize, final boolean minified) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
             ConcurrentLog.warn("LURL-EXPORT", "cannot start another export thread, already one running");
             return this.exportthread;
         }
-        this.exportthread = new Export(f, filter, query, format, dom, text);
+        this.exportthread = new Export(path, filename, fileext, filter, query, format, dom, text, maxChunkSize, minified);
         this.exportthread.start();
         return this.exportthread;
     }
 
-    public static void main(String args[]) {
+    public static void main(final String args[]) {
         final Date firstdate = null;
         System.out.println(GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate));
     }
@@ -794,70 +798,110 @@ public final class Fulltext {
         return this.exportthread;
     }
 
+    private final static Set<String> minified_keys = new HashSet<>();
+    static {
+        //minified_keys.add(CollectionSchema.id.getSolrFieldName());
+        minified_keys.add(CollectionSchema.sku.getSolrFieldName());
+        minified_keys.add(CollectionSchema.title.getSolrFieldName());
+        //minified_keys.add(CollectionSchema.author.getSolrFieldName());
+        minified_keys.add(CollectionSchema.description_txt.getSolrFieldName());
+        //minified_keys.add(CollectionSchema.size_i.getSolrFieldName());
+        minified_keys.add(CollectionSchema.last_modified.getSolrFieldName());
+        minified_keys.add(CollectionSchema.text_t.getSolrFieldName());
+    }
+
     public class Export extends Thread {
-        private final File f;
+        private final File path;
+        private final String filename, fileext;
         private final Pattern pattern;
-        private int count;
         private String failure;
         private final String query;
         private final ExportFormat format;
         private final boolean dom, text;
+        private int docCount, chunkSize, chunkCount;
+        private final long maxChunkSize;
+        private final boolean minified;
 
-        private Export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
+        private Export(
+                final File path, final String filename,
+                final String fileext, final String filter, final String query,
+                final ExportFormat format, final boolean dom, final boolean text,
+                final long maxChunkSize, final boolean minified) {
             super("Fulltext.Export");
             // format: 0=text, 1=html, 2=rss/xml
-            this.f = f;
+            this.path = path;
+            this.filename = filename;
+            this.fileext = fileext;
             this.pattern = filter == null ? null : Pattern.compile(filter);
             this.query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
-            this.count = 0;
             this.failure = null;
             this.format = format;
             this.dom = dom;
             this.text = text;
+            this.docCount = 0; // number of all documents exported so far
+            this.chunkSize = 0; // number of documents in the current chunk
+            this.chunkCount = 0; // number of chunks opened so far
+            this.maxChunkSize = maxChunkSize; // number of maximum document count per chunk
+            this.minified = minified;
             //if ((dom) && (format == 2)) dom = false;
+        }
+
+        private void printHead(final PrintWriter pw) {
+            if (this.format == ExportFormat.html) {
+                pw.println("<html><head></head><body>");
+            }
+            if (this.format == ExportFormat.rss) {
+                pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
+                pw.println("<rss version=\"2.0\" xmlns:yacy=\"http://www.yacy.net/\" xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\">");
+                pw.println("<channel>");
+                pw.println("<title>YaCy Peer-to-Peer - Web-Search URL Export</title>");
+                pw.println("<description></description>");
+                pw.println("<link>http://yacy.net</link>");
+            }
+            if (this.format == ExportFormat.solr) {
+                pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                pw.println("<response>");
+                pw.println("<lst name=\"responseHeader\">");
+                pw.println(" <str format=\"yacy.index.export.solr.xml\"/>");
+                pw.println(" <lst name=\"params\">");
+                pw.println("  <str name=\"q\">" + this.query + "</str>");
+                pw.println(" </lst>");
+                pw.println("</lst>");
+                pw.println("<result>");
+            }
+        }
+
+        private void printTail(final PrintWriter pw) {
+            if (this.format == ExportFormat.html) {
+                pw.println("</body></html>");
+            }
+            if (this.format == ExportFormat.rss) {
+                pw.println("</channel>");
+                pw.println("</rss>");
+            }
+            if (this.format == ExportFormat.solr) {
+                pw.println("</result>");
+                pw.println("</response>");
+            }
         }
 
         @Override
         public void run() {
             try {
-                final File parentf = this.f.getParentFile();
-                if (parentf != null) {
-                    parentf.mkdirs();
-                }
+                if (this.path != null) this.path.mkdirs();
             } catch(final Exception e) {
                 ConcurrentLog.logException(e);
                 this.failure = e.getMessage();
                 return;
             }
 
-            try (/* Resources automatically closed by this try-with-resources statement */
-                    final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
-                    final OutputStream wrappedStream = ((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os;
-                    final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(wrappedStream));
-                    ) {
-                if (this.format == ExportFormat.html) {
-                    pw.println("<html><head></head><body>");
-                }
-                if (this.format == ExportFormat.rss) {
-                    pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-                    pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
-                    pw.println("<rss version=\"2.0\" xmlns:yacy=\"http://www.yacy.net/\" xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\">");
-                    pw.println("<channel>");
-                    pw.println("<title>YaCy Peer-to-Peer - Web-Search URL Export</title>");
-                    pw.println("<description></description>");
-                    pw.println("<link>http://yacy.net</link>");
-                }
-                if (this.format == ExportFormat.solr) {
-                    pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-                    pw.println("<response>");
-                    pw.println("<lst name=\"responseHeader\">");
-                    pw.println(" <str format=\"yacy.index.export.solr.xml\"/>");
-                    pw.println(" <lst name=\"params\">");
-                    pw.println("  <str name=\"q\">" + this.query + "</str>");
-                    pw.println(" </lst>");
-                    pw.println("</lst>");
-                    pw.println("<result>");
-                }
+            try {
+                this.docCount = 0;
+                this.chunkSize = 0;
+                this.chunkCount = 0;
+                PrintWriter pw = getWriter();
+                printHead(pw);
                 if (this.dom) {
                     final Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
                     final ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
@@ -865,7 +909,7 @@ public final class Fulltext {
                         if (this.pattern != null && !this.pattern.matcher(host).matches()) continue;
                         if (this.format == ExportFormat.text) pw.println(host);
                         if (this.format == ExportFormat.html) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
-                        this.count++;
+                        this.docCount++; this.chunkSize++;
                     }
                 } else {
                     if (this.format == ExportFormat.solr || this.format == ExportFormat.elasticsearch || (this.text && this.format == ExportFormat.text)) {
@@ -874,6 +918,12 @@ public final class Fulltext {
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                             final String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
+                            if (this.minified) {
+                                final Iterator<Entry<String, Object>> i = doc.iterator();
+                                while (i.hasNext()) {
+                                    if (!minified_keys.contains(i.next().getKey())) i.remove();
+                                }
+                            }
                             final CRIgnoreWriter sw = new CRIgnoreWriter();
                             if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
                             if (this.format == ExportFormat.solr) EnhancedXMLResponseWriter.writeDoc(sw, doc);
@@ -882,7 +932,15 @@ public final class Fulltext {
                             if (this.format == ExportFormat.elasticsearch) pw.println("{\"index\":{}}");
                             final String d = sw.toString();
                             pw.println(d);
-                            this.count++;
+                            this.docCount++; this.chunkSize++;
+                            if (this.chunkSize >= this.maxChunkSize) {
+                                printTail(pw);
+                                pw.close();
+                                this.chunkCount++;
+                                pw = getWriter();
+                                printHead(pw);
+                                this.chunkSize = 0;
+                            }
                         }
                     } else {
                         final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true,
@@ -918,21 +976,20 @@ public final class Fulltext {
                                 pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");
                                 pw.println("</item>");
                             }
-                            this.count++;
+                            this.docCount++; this.chunkSize++;
+                            if (this.chunkSize >= this.maxChunkSize) {
+                                printTail(pw);
+                                pw.close();
+                                this.chunkCount++;
+                                pw = getWriter();
+                                printHead(pw);
+                                this.chunkSize = 0;
+                            }
                         }
                     }
                 }
-                if (this.format == ExportFormat.html) {
-                    pw.println("</body></html>");
-                }
-                if (this.format == ExportFormat.rss) {
-                    pw.println("</channel>");
-                    pw.println("</rss>");
-                }
-                if (this.format == ExportFormat.solr) {
-                    pw.println("</result>");
-                    pw.println("</response>");
-                }
+                printTail(pw);
+                pw.close();
             } catch (final Exception e) {
                 /* Catch but log any IO exception that can occur on copy, automatic closing or streams creation */
                 ConcurrentLog.logException(e);
@@ -942,15 +999,46 @@ public final class Fulltext {
         }
 
         public File file() {
-            return this.f;
+            final File f = new File(this.path, this.filename + "_" + chunkcount(this.chunkCount) + "." + this.fileext);
+            return f;
+        }
+
+        private PrintWriter getWriter() throws IOException {
+            final File f = file();
+            final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(f.getAbsolutePath() + ".gz") : f);
+            final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os));
+            return pw;
+        }
+
+        private String chunkcount(final int count) {
+            if (count < 10) return "000" + count;
+            if (count < 100) return "00" + count;
+            if (count < 1000) return "0" + count;
+            return "" + count;
+        }
+
+        public File path() {
+            return this.path;
+        }
+
+        public String filename() {
+            return this.filename;
+        }
+
+        public String fileext() {
+            return this.fileext;
         }
 
         public String failed() {
             return this.failure;
         }
 
-        public int count() {
-            return this.count;
+        public int docCount() {
+            return this.docCount;
+        }
+
+        public int chunkCount() {
+            return this.chunkCount;
         }
 
         @SuppressWarnings("unchecked")

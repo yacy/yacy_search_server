@@ -61,13 +61,6 @@ public class ConfigParser_p {
                 env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, TextParser.getDenyMime());
                 env.setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, TextParser.getDenyExtension());
             }
-
-            if (post.containsKey("pdfSettings")) {
-                env.setConfig(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES, post.getBoolean("individualPages"));
-                env.setConfig(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES_KEY, post.get("individualPagePropertyname", "page"));
-                pdfParser.individualPages = sb.getConfigBool(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES, false);
-                pdfParser.individualPagePropertyname = sb.getConfig(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES_KEY, "page");
-            }
         }
 
         int i = 0;
@@ -93,9 +86,6 @@ public class ConfigParser_p {
         }
 
         prop.put("parser", i);
-
-        prop.put("individualPages", sb.getConfigBool(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES, false));
-        prop.put("individualPagePropertyname", sb.getConfig(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES_KEY, "page"));
 
         // return rewrite properties
         return prop;

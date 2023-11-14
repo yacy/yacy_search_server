@@ -14,7 +14,8 @@
       <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.18.0"  />
       <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.13.5"/>
       <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.1.8"/>
-      <dependency org="com.google.guava" name="guava" rev="28.0-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="guava" rev="32.1.3-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="failureaccess" rev="1.0.2" />
       <dependency org="com.ibm.icu" name="icu4j" rev="73.2"/>
       <dependency org="com.jcraft" name="jsch" rev="0.1.55" />
       <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.9.4"/>
@@ -28,6 +29,7 @@
       <dependency org="io.opentracing" name="opentracing-noop" rev="0.33.0"/>
       <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
       <dependency org="javax.servlet" name="javax.servlet-api" rev="3.1.0"/>
+      <dependency org="javainetlocator" name="inetaddresslocator" rev="2.18" />
       <dependency org="jcifs" name="jcifs" rev="1.3.17"  conf="compile->master" />
       <dependency org="net.arnx" name="jsonic" rev="1.3.10"/>
       <dependency org="net.jthink" name="jaudiotagger" rev="2.2.5"/>
