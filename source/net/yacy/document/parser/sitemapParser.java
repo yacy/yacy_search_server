@@ -25,6 +25,7 @@
 
 package net.yacy.document.parser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -50,6 +51,7 @@ import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -131,7 +133,9 @@ public class sitemapParser extends AbstractParser implements Parser {
             if ((contentMimeType != null && (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) || url.endsWith(".gz")) {
                 contentStream = new GZIPInputStream(contentStream);
             }
-            return new SitemapReader(contentStream, agent);
+            byte[] bytes = IOUtils.toByteArray(contentStream);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            return new SitemapReader(bais, agent);
         } catch (final IOException e) {
             throw e;
         }
