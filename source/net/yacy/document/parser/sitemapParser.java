@@ -49,7 +49,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
-import net.yacy.kelondro.io.ByteCountInputStream;
 
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;
@@ -116,7 +115,8 @@ public class sitemapParser extends AbstractParser implements Parser {
         ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         // client.setHeader(requestHeader.entrySet());
         try (final HTTPClient client = new HTTPClient(agent)) {
-            client.GET(sitemapURL.toNormalform(false), false);
+        	String url = sitemapURL.toNormalform(false);
+            client.GET(url, false);
             if (client.getStatusCode() != 200) {
                 throw new IOException("Unable to download the sitemap file " + sitemapURL +
                         "\nServer returned status: " + client.getHttpResponse().getStatusLine());
@@ -128,11 +128,10 @@ public class sitemapParser extends AbstractParser implements Parser {
             final String contentMimeType = header.mime();
 
             InputStream contentStream = client.getContentstream();
-            if (contentMimeType != null && (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) {
+            if ((contentMimeType != null && (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) || url.endsWith(".gz")) {
                 contentStream = new GZIPInputStream(contentStream);
             }
-            final ByteCountInputStream counterStream = new ByteCountInputStream(contentStream, null);
-            return new SitemapReader(counterStream, agent);
+            return new SitemapReader(contentStream, agent);
         } catch (final IOException e) {
             throw e;
         }
