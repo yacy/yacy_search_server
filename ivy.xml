@@ -34,12 +34,12 @@
       <dependency org="net.jthink" name="jaudiotagger" rev="2.2.5"/>
       <dependency org="net.sourceforge.jchardet" name="jchardet" rev="1.0"/>
       <dependency org="org.apache.commons" name="commons-collections4" rev="4.4" />
-      <dependency org="org.apache.commons" name="commons-compress" rev="1.21" />
+      <dependency org="org.apache.commons" name="commons-compress" rev="1.24.0" />
       <dependency org="org.apache.calcite.avatica" name="avatica-core" rev="1.13.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-core" rev="1.18.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.18.0" conf="compile->master"/>
-      <dependency org="org.apache.commons" name="commons-math3" rev="3.4.1" />
-      <dependency org="org.apache.commons" name="commons-lang3" rev="3.12.0" />
+      <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" />
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.13.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.12"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.12"/>
       <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
