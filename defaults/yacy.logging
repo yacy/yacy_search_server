@@ -22,10 +22,20 @@ CRAWLER.level = INFO
 STACKCRAWL.level = INFO
 MEMORY.level = INFO
 HTTPC.level = INFO
+
+# RWI related
 INDEX-TRANSFER-DISPATCHER.level = INFO
+SWITCHBOARD.level = INFO
+DHT.level = INFO
+INDEX-TRANSFER-DISPATCHER.level = INFO
+HeapReader.level = INFO
+Heap.level = INFO
+
+
 # UPnP related
 UPNP.level = INFO
 sun.net.www.protocol.http.HttpURLConnection.level = INFO
+
 # Tray
 sun.awt.level = OFF
 java.awt.level = OFF
