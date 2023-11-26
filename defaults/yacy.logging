@@ -10,10 +10,13 @@
 # INFO    regular action information (i.e. any httpd request URL)
 # CONFIG  regular system status information (i.e. start-up messages)
 # FINE  in-function status debug output
+# FINER  more details in debug output
+# FINEST  even more details in debug output
 BASE64.level = OFF
 PARSER.level = INFO
 PROXY.level = INFO
 YACY.level = INFO
+NETWORK.level = INFO
 HTCACHE.level = INFO
 PLASMA.level = INFO
 SERVER.level = INFO
