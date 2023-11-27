@@ -281,7 +281,7 @@ public class Dispatcher implements WorkflowTask<Transmission.Chunk> {
             for (Seed target: targets[vertical]) {
                 Transmission.Chunk entry = this.transmissionBuffer.get(target.hash); // if this is not null, the entry is extended here
                 if (entry == null) entry =  transmission.newChunk(target); else {
-                    log.info("extending chunk for peer " + entry.dhtTarget().hash + " containing " + entry.containersSize() + " references with " + verticalContainer.size() + " more entries");
+                    log.fine("extending chunk for peer " + entry.dhtTarget().hash + " containing " + entry.containersSize() + " references with " + verticalContainer.size() + " more entries");
                 }
                 try {
                     entry.add(verticalContainer);
