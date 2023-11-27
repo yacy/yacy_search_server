@@ -207,7 +207,7 @@ public final class hello {
                 remoteSeed.put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR);
             }
             // connect the seed
-            Network.log.info("hello/server: responded remote " + reportedPeerType + " peer '" + remoteSeed.getName() + "' from " + reportedips + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
+            Network.log.fine("hello/server: responded remote " + reportedPeerType + " peer '" + remoteSeed.getName() + "' from " + reportedips + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         } else {
             //ConcurrentLog.info("**hello-DEBUG**", "fail for IP(s) " + remoteSeed.getIPs() + ", port " + remoteSeed.getPort());
@@ -215,7 +215,7 @@ public final class hello {
             remoteSeed.setIP(ias.getHostAddress());
             prop.put(Seed.YOURTYPE, Seed.PEERTYPE_JUNIOR);
             remoteSeed.put(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
-            Network.log.info("hello/server: responded remote " + reportedPeerType + " peer '" + remoteSeed.getName() + "' from " + reportedips + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
+            Network.log.fine("hello/server: responded remote " + reportedPeerType + " peer '" + remoteSeed.getName() + "' from " + reportedips + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
                 sb.peers.peerActions.peerPing(remoteSeed);
@@ -227,7 +227,7 @@ public final class hello {
         // update event tracker
         EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(remoteSeed.getName(), sb.peers.myName(), false, connectedAfter - connectedBefore), false);
         if (!(prop.get(Seed.YOURTYPE)).equals(reportedPeerType)) {
-            Network.log.info("hello/server: changing remote peer '" + remoteSeed.getName() + "' " + reportedips + " peerType from '" + reportedPeerType + "' to '" + prop.get(Seed.YOURTYPE) + "'.");
+            Network.log.fine("hello/server: changing remote peer '" + remoteSeed.getName() + "' " + reportedips + " peerType from '" + reportedPeerType + "' to '" + prop.get(Seed.YOURTYPE) + "'.");
         }
 
         final StringBuilder seeds = new StringBuilder(768);
@@ -268,7 +268,7 @@ public final class hello {
         prop.put("seedlist", seeds.toString());
         // return rewrite properties
         prop.put("message", "ok " + seed.length());
-        Network.log.info("hello/server: responded remote peer '" + remoteSeed.getName() + "' " + reportedips + " in " + (System.currentTimeMillis() - start) + " milliseconds");
+        Network.log.fine("hello/server: responded remote peer '" + remoteSeed.getName() + "' " + reportedips + " in " + (System.currentTimeMillis() - start) + " milliseconds");
         return prop;
     }
 
