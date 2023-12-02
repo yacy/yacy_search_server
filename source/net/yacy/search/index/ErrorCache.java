@@ -44,7 +44,7 @@ import net.yacy.search.schema.CollectionSchema;
 
 public class ErrorCache {
 
-    private static final ConcurrentLog log = new ConcurrentLog("REJECTED");
+    private static final ConcurrentLog log = new ConcurrentLog("CRAWLER");
     private static final int maxStackSize = 1000;
 
     // the class object
@@ -103,7 +103,7 @@ public class ErrorCache {
         assert failCategory.store || httpcode == -1 : "failCategory=" + failCategory.name();
         if (anycause == null) anycause = "unknown";
         final String reason = anycause + ((httpcode >= 0) ? " (http return code = " + httpcode + ")" : "");
-        if (!reason.startsWith("double")) log.info(url.toNormalform(true) + " - " + reason);
+        if (!reason.startsWith("double")) log.fine("REJECTED " + url.toNormalform(true) + " - " + reason);
 
         if (!this.cache.containsKey(ASCII.String(url.hash()))) { // no further action if in error-cache
             CollectionConfiguration.FailDoc failDoc = new CollectionConfiguration.FailDoc(
