@@ -102,7 +102,8 @@ public final class transferRWI {
             return prop;
         }
         // load tests
-        if (Memory.getSystemLoadAverage() > 2.0 || MemoryControl.shortStatus()) {
+        final float maxReceiveLoad = sb.getConfigFloat(SwitchboardConstants.INDEX_RECEIVE_LOADPREREQ, 2.0f);
+        if (Memory.getSystemLoadAverage() > maxReceiveLoad || MemoryControl.shortStatus()) {
             // check also Protocol.metadataRetrievalRunning.get() > 0 ?
             result = "too high load"; // don't tell too much details
             prop.put("result", result);
