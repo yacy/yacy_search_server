@@ -4110,7 +4110,7 @@ public final class Switchboard extends serverSwitch {
         final long kbytesUp = ConnectionInfo.getActiveUpbytes() / 1024;
         // accumulate RWIs to transmission buffer
         if ( this.dhtDispatcher.bufferSize() > this.peers.scheme.verticalPartitions() ) {
-            this.log.info("dhtTransferJob: no selection, too many entries in transmission buffer: "
+            this.log.fine("dhtTransferJob: no selection, too many entries in transmission buffer: "
                     + this.dhtDispatcher.bufferSize());
         } else if ( MemoryControl.available() < 1024 * 1024 * 25 ) {
             this.log.info("dhtTransferJob: no selection, too less memory available : "
@@ -4148,7 +4148,7 @@ public final class Switchboard extends serverSwitch {
                             this.dhtMaxReferenceCount,
                             5000);
             hasDoneSomething = hasDoneSomething | enqueued;
-            this.log.info("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
+            this.log.fine("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
         }
 
         // check if we can deliver entries to other peers
@@ -4166,7 +4166,7 @@ public final class Switchboard extends serverSwitch {
         } else {
             final boolean dequeued = this.dhtDispatcher.dequeueContainer();
             hasDoneSomething = hasDoneSomething | dequeued;
-            this.log.info("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
+            this.log.fine("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
         }
         return hasDoneSomething;
     }

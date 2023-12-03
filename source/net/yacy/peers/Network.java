@@ -71,7 +71,7 @@ public class Network
     // statics
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static final HashMap<String, String> seedUploadMethods = new HashMap<>();
-    public static final ConcurrentLog log = new ConcurrentLog("YACY");
+    public static final ConcurrentLog log = new ConcurrentLog("NETWORK");
     /** pseudo-random key derived from a time-interval while YaCy startup */
     public static long speedKey = 0;
     public static long magic = System.currentTimeMillis();

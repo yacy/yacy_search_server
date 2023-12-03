@@ -215,7 +215,7 @@ public class DHTSelection {
             	/* Even if the peer is not a robinson and has the required minimum age, it may have an empty or disabled RWI */
             	continue;
             }
-            if (RemoteSearch.log.isInfo()) RemoteSearch.log.info("selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
+            if (RemoteSearch.log.isFine()) RemoteSearch.log.fine("selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
             seeds.add(seed);
             c--;
         }
