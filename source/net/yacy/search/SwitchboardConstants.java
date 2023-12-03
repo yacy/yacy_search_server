@@ -82,6 +82,7 @@ public final class SwitchboardConstants {
     public static final String INDEX_DIST_LOADPREREQ        = "20_dhtdistribution_loadprereq";
     public static final String INDEX_DIST_IDLESLEEP         = "20_dhtdistribution_idlesleep";
     public static final String INDEX_DIST_BUSYSLEEP         = "20_dhtdistribution_busysleep";
+    public static final String INDEX_RECEIVE_LOADPREREQ     = "20_dhtreceive_loadprereq";
     // 30_peerping
     /**
      * <p><code>public static final String <strong>PEER_PING</strong> = "30_peerping"</code></p>

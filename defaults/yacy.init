@@ -691,6 +691,7 @@ collection=user
 20_dhtdistribution_busysleep=15000
 20_dhtdistribution_memprereq=12582912
 20_dhtdistribution_loadprereq=2.0
+20_dhtreceive_loadprereq=2.0
 30_peerping_idlesleep=30000
 30_peerping_busysleep=30000
 30_peerping_memprereq=2097152
