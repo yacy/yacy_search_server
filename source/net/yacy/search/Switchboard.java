@@ -4121,8 +4121,9 @@ public final class Switchboard extends serverSwitch {
                     + ConnectionInfo.getCount());
             // close unused connections
             //            Client.cleanup();
-        } else if ( kbytesUp > 128 ) {
-            this.log.info("dhtTransferJob: too much upload(1), currently uploading: " + kbytesUp + " Kb");
+// changed by okybaca to experimentaly speed-up the upload
+//        } else if ( kbytesUp > 1024 ) {
+//           this.log.info("dhtTransferJob: too much upload(1), currently uploading: " + kbytesUp + " Kb");
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
@@ -4161,8 +4162,9 @@ public final class Switchboard extends serverSwitch {
                     + ConnectionInfo.getCount());
             // close unused connections
             //            Client.cleanup();
-        } else if ( kbytesUp > 256 ) {
-            this.log.info("dhtTransferJob: too much upload(2), currently uploading: " + kbytesUp + " Kb");
+// removed by okybaca to experimentaly speed-up the RWI transfers
+//        } else if ( kbytesUp > 256 ) {
+//            this.log.info("dhtTransferJob: too much upload(2), currently uploading: " + kbytesUp + " Kb");
         } else {
             final boolean dequeued = this.dhtDispatcher.dequeueContainer();
             hasDoneSomething = hasDoneSomething | dequeued;
