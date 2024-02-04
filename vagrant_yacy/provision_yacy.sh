@@ -16,3 +16,4 @@ mv yacy_search_server yacy
 cd yacy
 ant clean all
 chown -R vagrant:vagrant ./
+sudo -u vagrant ./startYACY.sh
