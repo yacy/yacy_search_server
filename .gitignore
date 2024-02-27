@@ -30,3 +30,4 @@ yacy.log
 /.project
 /ivy
 /lib
+vagrant_yacy/.vagrant/
