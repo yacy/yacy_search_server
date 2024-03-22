@@ -1,0 +1,21 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # two machines with archlinux
+  config.vm.define "yacy" do |yacy|
+    yacy.vm.box = "archlinux/archlinux"
+    yacy.vm.hostname = "Yacy"
+    yacy.vm.network "private_network", type: "dhcp"
+    # forward the port 8090 to the host
+    yacy.vm.network "forwarded_port", guest: 8090, host: 8090, auto_correct: true, protocol: "tcp"
+    yacy.vm.network "forwarded_port", guest: 8443, host: 8443, auto_correct: true, protocol: "tcp"
+    yacy.vm.provision "shell", path: "provision_yacy.sh"
+    #set the memory to 4GB
+    yacy.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = 4
+    end
+  end
+
+end
