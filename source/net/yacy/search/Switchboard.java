@@ -2325,7 +2325,10 @@ public final class Switchboard extends serverSwitch {
                     || s.endsWith(".xml.zip")
                     || s.endsWith(".warc")
                     || s.endsWith(".warc.gz")
+                    || s.endsWith(".jsonl")
+                    || s.endsWith(".jsonl.gz")
                     || s.endsWith(".jsonlist")
+                    || s.endsWith(".jsonlist.gz")
                     || s.endsWith(".flatjson") ) {
                 count++;
             }
@@ -3167,9 +3170,9 @@ public final class Switchboard extends serverSwitch {
         }
 
         // check mustmatch pattern
-        Pattern mustmatchurl = profile.indexUrlMustMatchPattern();
+        final Pattern mustmatchurl = profile.indexUrlMustMatchPattern();
         if (mustmatchurl != CrawlProfile.MATCH_ALL_PATTERN && !mustmatchurl.matcher(urls).matches()) {
-            String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + mustmatchurl.pattern();
+            final String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + mustmatchurl.pattern();
             if (this.log.isInfo()) this.log.info(info);
             // create a new errorURL DB entry
             this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
@@ -3177,9 +3180,9 @@ public final class Switchboard extends serverSwitch {
         }
 
         // check mustnotmatch
-        Pattern mustnotmatchurl = profile.indexUrlMustNotMatchPattern();
+        final Pattern mustnotmatchurl = profile.indexUrlMustNotMatchPattern();
         if (mustnotmatchurl != CrawlProfile.MATCH_NEVER_PATTERN && mustnotmatchurl.matcher(urls).matches()) {
-            String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustNotMatchPattern = " + mustnotmatchurl;
+            final String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustNotMatchPattern = " + mustnotmatchurl;
             if (this.log.isInfo()) this.log.info(info);
             // create a new errorURL DB entry
             this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
@@ -3192,13 +3195,13 @@ public final class Switchboard extends serverSwitch {
 
             // check canonical
             if (profile.noindexWhenCanonicalUnequalURL()) {
-                AnchorURL canonical = document.getCanonical();
-                DigestURL source = document.dc_source();
+                final AnchorURL canonical = document.getCanonical();
+                final DigestURL source = document.dc_source();
                 if (canonical != null && source != null) {
-                    String canonical_norm = canonical.toNormalform(true);
-                    String source_norm = source.toNormalform(true);
+                    final String canonical_norm = canonical.toNormalform(true);
+                    final String source_norm = source.toNormalform(true);
                     if (!canonical_norm.equals(source_norm)) {
-                        String info = "Not Condensed Resource '" + urls + "': denied, canonical != source; canonical = " +canonical_norm + "; source = " + source_norm;
+                        final String info = "Not Condensed Resource '" + urls + "': denied, canonical != source; canonical = " +canonical_norm + "; source = " + source_norm;
                         if (this.log.isInfo()) this.log.info(info);
                         // create a new errorURL DB entry
                         this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
@@ -3216,9 +3219,9 @@ public final class Switchboard extends serverSwitch {
             }
 
             // check content pattern must-match
-            Pattern mustmatchcontent = profile.indexContentMustMatchPattern();
+            final Pattern mustmatchcontent = profile.indexContentMustMatchPattern();
             if (mustmatchcontent != CrawlProfile.MATCH_ALL_PATTERN && !mustmatchcontent.matcher(document.getTextString()).matches()) {
-                String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + mustmatchcontent.pattern() ;
+                final String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + mustmatchcontent.pattern() ;
                 if (this.log.isInfo()) this.log.info(info);
                 // create a new errorURL DB entry
                 this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
@@ -3226,9 +3229,9 @@ public final class Switchboard extends serverSwitch {
             }
 
             // check content pattern must-not-match
-            Pattern mustnotmatchcontent = profile.indexContentMustNotMatchPattern();
+            final Pattern mustnotmatchcontent = profile.indexContentMustNotMatchPattern();
             if (mustnotmatchcontent != CrawlProfile.MATCH_NEVER_PATTERN && mustnotmatchcontent.matcher(document.getTextString()).matches()) {
-                String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustNotMatchPattern = " + mustnotmatchcontent.pattern();
+                final String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustNotMatchPattern = " + mustnotmatchcontent.pattern();
                 if (this.log.isInfo()) this.log.info(info);
                 // create a new errorURL DB entry
                 this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
