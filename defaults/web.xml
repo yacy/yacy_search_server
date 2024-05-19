@@ -50,6 +50,11 @@
         <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
     </servlet>
     
+    <servlet>
+        <servlet-name>RAGProxyServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.RAGProxyServlet</servlet-class>
+    </servlet>
+    
     <!-- servlet to provide searchresults via proxy -->
     <servlet>
         <servlet-name>URLProxyServlet</servlet-name>
@@ -81,7 +86,12 @@
         <url-pattern>/solr/webgraph/admin/luke</url-pattern>
         <!-- uncomment this to use YaCy as remote solr -->
         <!-- <url-pattern>/solr/collection1/update</url-pattern> --> <!-- only with server.response.compress.gzip=false  -->
-    </servlet-mapping>       
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RAGProxyServlet</servlet-name>
+        <url-pattern>/v1/chat/completions</url-pattern>
+    </servlet-mapping>
     <!-- eof hardcoded mappings --> 
             
     <!-- additional (optional) mappings --> 
