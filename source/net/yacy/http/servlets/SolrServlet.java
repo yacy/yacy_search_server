@@ -141,6 +141,7 @@ public class SolrServlet extends HttpServlet {
 			if (solrRsp.getException() != null) {
 				@SuppressWarnings("rawtypes")
 				NamedList info = new SimpleOrderedMap();
+				@SuppressWarnings("unchecked")
 				int code = ResponseUtils.getErrorInfo(solrRsp.getException(), info, null);
 				solrRsp.add("error", info);
 				response.setStatus(code);

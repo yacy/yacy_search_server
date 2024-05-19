@@ -79,7 +79,7 @@ import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.RawResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.response.XSLTResponseWriter;
+import org.apache.solr.scripting.xslt.XSLTResponseWriter;
 import org.apache.solr.search.DocList;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
