@@ -148,6 +148,11 @@ public class JsonListImporter extends Thread implements Importer {
             }
             if ((json.opt("index") != null && json.length() == 1) || json.length() == 0) continue;
             final SolrInputDocument surrogate = new SolrInputDocument();
+
+            // set default values which act as constraints for a proper search
+            CollectionSchema.httpstatus_i.add(surrogate, 200);
+
+            // get fields for json object
             jsonreader: for (final String key: json.keySet()) {
                 final Object o = json.opt(key);
                 if (o == null) continue;
@@ -212,10 +217,19 @@ public class JsonListImporter extends Thread implements Importer {
                         final String id = ASCII.String(durl.hash());
                         surrogate.setField(CollectionSchema.sku.getSolrFieldName(), durl.toNormalform(true));
                         surrogate.setField(CollectionSchema.id.getSolrFieldName(), id);
+                        surrogate.setField(CollectionSchema.host_s.getSolrFieldName(), durl.getHost());
                         surrogate.setField(CollectionSchema.host_id_s.getSolrFieldName(), id.substring(6));
                         continue jsonreader;
                     }
+                    if (key.equals("description")) {
+                        // in YaCy descriptions are full-text indexed and also multi-value fields
+                        final List<Object> descriptions = new ArrayList<>();
+                        descriptions.add(o.toString());
+                        CollectionSchema.description_txt.add(surrogate, descriptions);
+                        continue jsonreader;
+                    }
                     if (key.equals("referrer_url_s")) {
+                        // same patch as for urls which require re-calculation of id's; in this case we store the id only!
                         final DigestURL durl = new DigestURL(o.toString());
                         final String id = ASCII.String(durl.hash());
                         surrogate.setField(CollectionSchema.referrer_id_s.getSolrFieldName(), id);
@@ -234,6 +248,12 @@ public class JsonListImporter extends Thread implements Importer {
                         final Date dd = d == null || d.length() == 0 ? null : AbstractFormatter.parseAny(d);
                         if (dd != null) surrogate.setField(ctype.getSolrFieldName(), ISO8601Formatter.FORMATTER.format(dd)); // solr dateTime is ISO8601 format
                         continue jsonreader;
+                    }
+
+                    // check if required fields are still missing and compute them
+                    if (!surrogate.containsKey(CollectionSchema.host_s.getSolrFieldName())) {
+                        final DigestURL durl = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                        surrogate.setField(CollectionSchema.host_s.getSolrFieldName(), durl.getHost());
                     }
 
                     // regular situation, just read content of field
