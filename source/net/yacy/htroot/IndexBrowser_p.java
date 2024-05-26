@@ -156,7 +156,7 @@ public class IndexBrowser_p {
             !path.startsWith("https://") &&
             !path.startsWith("ftp://") &&
             !path.startsWith("smb://") &&
-            !path.startsWith("file://"))) { path = "http://" + path; }
+            !path.startsWith("file://"))) { path = "https://" + path; }
         prop.putHTML("path", path);
         prop.put("delete", path.length() > 0 ? 1 : 0);
 
