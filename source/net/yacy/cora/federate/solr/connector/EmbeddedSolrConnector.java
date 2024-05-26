@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,8 +49,10 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.core.PluginInfo;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.component.SearchComponent;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
@@ -80,7 +84,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     private final EmbeddedInstance instance;
     private final SolrCore core;
 
-    public EmbeddedSolrConnector(EmbeddedInstance instance) {
+    public EmbeddedSolrConnector(final EmbeddedInstance instance) {
         super();
         this.instance = instance;
         this.core = this.instance.getDefaultCore();
@@ -90,10 +94,12 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         //this.suggestHandler = new SuggestComponent();
         //this.suggestHandler.init(new NamedList<Object>());
         //this.suggestHandler.inform(this.core);
+        config();
         super.init(this.instance.getDefaultServer());
+
     }
 
-    public EmbeddedSolrConnector(EmbeddedInstance instance, String coreName) {
+    public EmbeddedSolrConnector(final EmbeddedInstance instance, final String coreName) {
         super();
         this.instance = instance;
         this.core = this.instance.getCore(coreName);
@@ -103,7 +109,43 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         //this.suggestHandler = new SuggestComponent();
         //this.suggestHandler.init(new NamedList<Object>());
         //this.suggestHandler.inform(this.core);
+        config();
         super.init(this.instance.getServer(coreName));
+    }
+
+    private void config() {
+        // Define cache configuration parameters
+        final Map<String, Object> cacheConfig = Map.of(
+            "name", "documentCache",
+            "class", "solr.LRUCache",
+            "size", "10240",
+            "initialSize", "512",
+            "autowarmCount", "0"
+        );
+
+        // Retrieve the Solr configuration
+        final SolrConfig solrConfig = this.core.getSolrConfig();
+        // Get the list of plugin infos for SearchComponent
+        final List<PluginInfo> pluginInfos = solrConfig.getPluginInfos(SearchComponent.class.getName());
+
+        boolean changed = false;
+        // Iterate over pluginInfos to find and update documentCache
+        for (final PluginInfo pluginInfo : pluginInfos) {
+            if (pluginInfo.name.equals("documentCache")) {
+                pluginInfo.initArgs.addAll(cacheConfig);
+                changed = true;
+            }
+        }
+
+        // If documentCache is not found, create and add it
+        if (!changed) {
+            final Map<String, String> attrs = new HashMap<>();
+            final PluginInfo pi = new PluginInfo("documentCache", attrs, new NamedList<>(cacheConfig), null);
+            pluginInfos.add(pi);
+        }
+
+        // Ensure the changes are applied to Solr configuration if needed
+        // This part may vary based on how SolrConfig applies updates
     }
 
     @Override
@@ -112,7 +154,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         return o instanceof EmbeddedSolrConnector && this.instance.equals(((EmbeddedSolrConnector) o).instance);
     }
 
@@ -186,7 +228,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return req;
     }
 
-    public SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
+    public SolrQueryResponse query(final SolrQueryRequest req) throws SolrException {
         final long startTime = System.currentTimeMillis();
 
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
@@ -266,7 +308,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return sf;
     }
 
-    public SolrDocument doc2SolrDoc(Document doc) {
+    public SolrDocument doc2SolrDoc(final Document doc) {
         final SolrDocument solrDoc = new SolrDocument();
         for (final IndexableField field : doc) {
             final String fieldName = field.name();
@@ -312,7 +354,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * Reason: Solr makes a very complex folding/unfolding including data compression for SolrQueryResponses.
      */
     @Override
-    public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
+    public QueryResponse getResponseByParams(final ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         final String threadname = Thread.currentThread().getName();
@@ -345,7 +387,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @throws SolrException
      */
     @Override
-    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
+    public SolrDocumentList getDocumentListByParams(final ModifiableSolrParams params) throws IOException, SolrException {
         final SolrQueryRequest req = this.request(params);
         SolrQueryResponse response = null;
         final String q = params.get(CommonParams.Q);
@@ -368,7 +410,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         private SolrQueryRequest request;
         private DocList response;
 
-        public DocListSearcher(final String querystring, String sort, final int offset, final int count, final String ... fields) {
+        public DocListSearcher(final String querystring, final String sort, final int offset, final int count, final String ... fields) {
             // construct query
             final SolrQuery params = AbstractSolrConnector.getSolrQuery(querystring, sort, offset, count, fields);
 
@@ -390,7 +432,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    public long getCountByQuery(String querystring) {
+    public long getCountByQuery(final String querystring) {
     	long numFound = 0;
     	DocListSearcher docListSearcher = null;
         try {
@@ -425,7 +467,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public String getURL(String id) throws IOException {
+    public String getURL(final String id) throws IOException {
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
