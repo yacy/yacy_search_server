@@ -35,7 +35,7 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
   -->
-  <luceneMatchVersion>8.11.2</luceneMatchVersion>
+  <luceneMatchVersion>9.0</luceneMatchVersion>
 
   <!-- <lib/> directives can be used to instruct Solr to load any Jars
        identified and use them to resolve any "plugins" specified in
@@ -429,7 +429,7 @@
     <filterCache class="solr.CaffeineCache"
                  size="512"
                  initialSize="512"
-                 autowarmCount="128"/>
+                 autowarmCount="0"/>
 
     <!-- Query Result Cache
          
