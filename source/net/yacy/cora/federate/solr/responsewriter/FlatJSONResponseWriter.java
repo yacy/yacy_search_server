@@ -22,6 +22,7 @@ package net.yacy.cora.federate.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -152,10 +153,11 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
             json.put(name, Double.parseDouble(value));
         }
     }
-    
+
     public static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
         JSONObject json = new JSONObject();
         final Map<String, Object> fields = doc.getFieldValueMap();
+        SimpleDateFormat sdf=new SimpleDateFormat("YYYY-MM-DD'T'hh:mm:ssZ");
         for (String key: fields.keySet()) {
             if (key == null)  continue;
             Object value = doc.get(key);
@@ -165,15 +167,16 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                     JSONArray a = new JSONArray();
                     json.put(key, a);
                     for (Object o: ((Collection<?>) value)) {
-                        a.put(o);
+                        a.put(o instanceof Date?sdf.format((Date)o):o);
                     }
                 } else {
-                    json.put(key, value);
+                    json.put(key, value instanceof Date?sdf.format((Date)value):value);
                 }
-            } catch (JSONException e) {
+            } catch (JSONException | IllegalArgumentException | NullPointerException  e) {
                 throw new IOException(e.getMessage());
             }
         }
+        
         writer.write(json.toString());
         writer.write(lb);
     }
