@@ -617,6 +617,10 @@ public class CrawlQueues {
                     deep = true;
                 }
                 DigestURL url;
+		if (doc.getFieldValue("url_protocol_s") == null || doc.getFieldValue("host_s") == null) {
+			//Skip this document if either of these values is null.
+			continue; 
+		}
                 final String u = doc.getFieldValue("url_protocol_s").toString() + "://" + doc.getFieldValue("host_s").toString();
                 try {
                     url = new DigestURL(u);
