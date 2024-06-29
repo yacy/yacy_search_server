@@ -608,6 +608,9 @@ public class CrawlQueues {
             int i = 0;
             int deepRatio = Integer.parseInt(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_RATIO, "50"));
             for (SolrDocument doc: resp.getResults()) {
+		if (doc == null) {
+		    continue;
+		}
                 boolean deep = false;
                 i++;
                 if( i % deepRatio == 0 ){
