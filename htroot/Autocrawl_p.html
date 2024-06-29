@@ -20,7 +20,7 @@
     			#(changed)#::<dt></dt><dd><span class="error">You need to restart for some settings to be applied</span></dd>#(/changed)#
     			<dt>Enable Autocrawler:</dt>
     			<dd><input id="autocrawlEnable" name="autocrawlEnable" type="checkbox" #(autocrawlEnable)#::checked="checked"#(/autocrawlEnable)# /></dd>
-    			<dt>Deep crawl every:</dt>
+    			<dt>Deep crawl every Nth document:</dt>
     			<dd>
     				<input id="autocrawlRatio" name="autocrawlRatio" type="number" min="1" max="500" step="1" size="2" maxlength="2" value="#[autocrawlRatio]#" />
     				Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.

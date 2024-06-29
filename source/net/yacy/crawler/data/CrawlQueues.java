@@ -608,12 +608,19 @@ public class CrawlQueues {
             int i = 0;
             int deepRatio = Integer.parseInt(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_RATIO, "50"));
             for (SolrDocument doc: resp.getResults()) {
+		if (doc == null) {
+		    continue;
+		}
                 boolean deep = false;
                 i++;
                 if( i % deepRatio == 0 ){
                     deep = true;
                 }
                 DigestURL url;
+		if (doc.getFieldValue("url_protocol_s") == null || doc.getFieldValue("host_s") == null) {
+			//Skip this document if either of these values is null.
+			continue; 
+		}
                 final String u = doc.getFieldValue("url_protocol_s").toString() + "://" + doc.getFieldValue("host_s").toString();
                 try {
                     url = new DigestURL(u);
