@@ -211,7 +211,7 @@
        <source>Enable Autocrawler:</source>
     </trans-unit>
     <trans-unit id="66a1bd2c" xml:space="preserve" approved="no" translate="yes">
-       <source>Deep crawl every:</source>
+       <source>Deep crawl every Nth document:</source>
     </trans-unit>
     <trans-unit id="2291c65d" xml:space="preserve" approved="no" translate="yes">
        <source>Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.</source>
