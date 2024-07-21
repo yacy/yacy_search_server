@@ -247,7 +247,7 @@ if [ $PRINTONLY -eq 1 ];then
 else
     echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
     echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
-    echo "****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****"
+    echo "****   USE AT YOUR OWN RISK! Project home and releases: https://yacy.net/  ****"
     echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
     echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
     echo "**  GET HELP for YaCy: join our community at https://community.searchlab.eu  **"

@@ -6,7 +6,7 @@ this is a xml file with embedded dublin core properties
 you can validate it with http://www.stg.brown.edu/service/xmlvalid/
 -->
 
-<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:yacy="http://yacy.net/" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:yacy="https://yacy.net/" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
   <record>
   <dc:title LANG="#[dc_language]#">#[dc_title]#</dc:title>
   <dc:creator>#[dc_creator]#</dc:creator>

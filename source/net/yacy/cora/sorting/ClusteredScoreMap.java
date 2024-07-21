@@ -1,7 +1,7 @@
 /**
  *  ScoreCluster
  *  Copyright 2004, 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 28.09.2004 at http://yacy.net
+ *  First released 28.09.2004 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

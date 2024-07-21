@@ -1,7 +1,7 @@
 /**
  *  SolrChardingSelection
  *  Copyright 2011 by Michael Peter Christen
- *  First released 25.05.2011 at http://yacy.net
+ *  First released 25.05.2011 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

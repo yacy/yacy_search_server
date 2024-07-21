@@ -2,7 +2,7 @@
  *  ComparableARC
  *  an Adaptive Replacement Cache for comparable objects
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 24.08.2010 at http://yacy.net
+ *  First released 24.08.2010 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

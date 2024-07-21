@@ -1,7 +1,7 @@
 /**
  *  AutoSearch.java
  *  Copyright 2015 by Burkhard Buelte
- *  First released 09.01.2015 at http://yacy.net
+ *  First released 09.01.2015 at https://yacy.net
  *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *

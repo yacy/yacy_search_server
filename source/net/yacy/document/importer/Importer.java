@@ -1,7 +1,7 @@
 /**
  *  Importer
  *  Copyright 2009 by Michael Peter Christen
- *  First released 29.04.2010 at http://yacy.net
+ *  First released 29.04.2010 at https://yacy.net
  *  
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *

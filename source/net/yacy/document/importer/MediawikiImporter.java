@@ -1,7 +1,7 @@
 /**
  *  MediawikiImporter
  *  Copyright 2008 by Michael Peter Christen
- *  First released 20.11.2008 at http://yacy.net
+ *  First released 20.11.2008 at https://yacy.net
  *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *

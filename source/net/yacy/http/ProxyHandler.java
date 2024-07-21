@@ -2,7 +2,7 @@
 //  ProxyHandler
 //  Copyright 2004 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 //  Copyright 2011 by Florian Richter
-//  First released 2011 at http://yacy.net
+//  First released 2011 at https://yacy.net
 //  
 //  $LastChangedDate$
 //  $LastChangedRevision$

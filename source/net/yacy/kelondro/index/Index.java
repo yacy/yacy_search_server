@@ -1,7 +1,7 @@
 /**
  *  Index
  *  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 26.10.2005 at http://yacy.net
+ *  First released 26.10.2005 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

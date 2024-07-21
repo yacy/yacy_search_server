@@ -1,7 +1,7 @@
 /**
  *  Sortable
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 16.07.2011 at http://yacy.net
+ *  First released 16.07.2011 at https://yacy.net
  *
  *  $LastChangedDate: 2011-05-30 10:53:58 +0200 (Mo, 30 Mai 2011) $
  *  $LastChangedRevision: 7759 $

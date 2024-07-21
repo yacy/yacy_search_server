@@ -1,7 +1,7 @@
 /**
  *  ChartPlotter
  *  Copyright 2005 by Michael Christen
- *  First released 26.10.2005 at http://yacy.net
+ *  First released 26.10.2005 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

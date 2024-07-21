@@ -1,7 +1,7 @@
 /**
  *  OAIPMHLoader
  *  Copyright 2009 by Michael Peter Christen
- *  First released 30.09.2009 at http://yacy.net
+ *  First released 30.09.2009 at https://yacy.net
  *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *

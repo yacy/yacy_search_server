@@ -1,7 +1,7 @@
 /**
  *  htmlParser.java
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 09.07.2009 at http://yacy.net
+ *  First released 09.07.2009 at https://yacy.net
  *
  * $LastChangedDate$
  * $LastChangedRevision$

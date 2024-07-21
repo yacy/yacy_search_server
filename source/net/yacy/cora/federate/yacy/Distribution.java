@@ -1,7 +1,7 @@
 /**
  *  VerticalPartition
  *  Copyright 2009 by Michael Peter Christen
- *  First released 28.01.2009 at http://yacy.net
+ *  First released 28.01.2009 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

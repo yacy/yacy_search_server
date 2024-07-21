@@ -1,7 +1,7 @@
 /**
  *  RowSet
  *  Copyright 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 20.06.2006 at http://yacy.net
+ *  First released 20.06.2006 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

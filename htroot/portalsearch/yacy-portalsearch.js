@@ -50,7 +50,7 @@ $(document).ready(function() {
 		theme    : 'start',
 		title    : 'YaCy Search Widget',
 		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
-		link     : 'http://yacy.net',
+		link     : 'https://yacy.net',
 		width    : 640,
 		height   : 640,
 		position : [150,50],

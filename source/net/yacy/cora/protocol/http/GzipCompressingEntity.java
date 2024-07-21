@@ -1,7 +1,7 @@
 /**
  *  GzipCompressingEntity
  *  Copyright 2010 by Sebastian Gaebel
- *  First released 01.07.2010 at http://yacy.net
+ *  First released 01.07.2010 at https://yacy.net
  *  
  *  $LastChangedDate$
  *  $LastChangedRevision$

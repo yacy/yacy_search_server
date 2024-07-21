@@ -1,7 +1,7 @@
 /**
  *  Phonetic
  *  Copyright 201 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 13.12.2011 at http://yacy.net
+ *  First released 13.12.2011 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

@@ -1,7 +1,7 @@
 /**
  *  OpenSearchConnector
  *  Copyright 2012 by Michael Peter Christen
- *  First released 03.11.2012 at http://yacy.net
+ *  First released 03.11.2012 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -60,13 +60,13 @@ import net.yacy.search.schema.CollectionSchema;
  * configured systems until number of needed results are available.
  */
 public class OpenSearchConnector extends AbstractFederateSearchConnector implements FederateSearchConnector {
-	
-	/** 
+
+	/**
 	 * HTML mapping properties used to retrieve result from HTML when the results
 	 * are not provided as a standard RSS/Atom feed but as simple HTML.
 	 */
-	private Properties htmlMapping;
-	
+	private final Properties htmlMapping;
+
 	/**
 	 * @param instanceName open search instance name
 	 * @return the html mapping configuration file name derived from the instance name
@@ -74,16 +74,16 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 	public static String htmlMappingFileName(final String instanceName) {
 		return instanceName + ".html.map.properties";
 	}
-	
+
 	/**
-	 * @param urlTemplate OpenSearch URL template 
+	 * @param urlTemplate OpenSearch URL template
 	 */
 	public OpenSearchConnector(final String urlTemplate) {
 		super();
 		this.baseurl = urlTemplate;
 		this.htmlMapping = new Properties();
 	}
-	
+
     @Override
     public boolean init(final String name, final String cfgFileName) {
         this.instancename = name;
@@ -94,13 +94,13 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 			try {
 				cfgFileStream = new BufferedInputStream(new FileInputStream(cfgFileName));
 				this.htmlMapping.load(cfgFileStream);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.config("OpenSearchConnector." + this.instancename, "Error reading html mapping file : " + cfgFileName, e);
 			} finally {
 				if (cfgFileStream != null) {
 					try {
 						cfgFileStream.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						ConcurrentLog.config("OpenSearchConnector." + this.instancename, "Error closing html mapping file : " + cfgFileName, e);
 					}
 				}
@@ -108,11 +108,11 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 		}
         return true;
     }
-    
+
     /**
      * replace Opensearchdescription search template parameter with actual values
      */
-    private String parseSearchTemplate(String searchurltemplate, String query, int start, int rows) {
+    private String parseSearchTemplate(final String searchurltemplate, final String query, final int start, final int rows) {
         String tmps = searchurltemplate.replaceAll("\\?}", "}"); // some optional parameters may include question mark '{param?}='
         tmps = tmps.replace("{startIndex}", Integer.toString(start));
         tmps = tmps.replace("{startPage}", "");
@@ -127,42 +127,42 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
      * @param linkElement html link result node. Must not be null.
      * @return and {@link URIMetadataNode} instance from the html link element or null when minimum required information is missing or malformed
      */
-	protected URIMetadataNode htmlLinkToMetadataNode(Element linkElement) {
+	protected URIMetadataNode htmlLinkToMetadataNode(final Element linkElement) {
 		URIMetadataNode doc = null;
-		String absoluteURL = linkElement.absUrl("href");
+		final String absoluteURL = linkElement.absUrl("href");
 		try {
 			if (!absoluteURL.isEmpty()) {
-				DigestURL uri = new DigestURL(absoluteURL);
+				final DigestURL uri = new DigestURL(absoluteURL);
 
 				doc = new URIMetadataNode(uri);
-				
+
 				if(linkElement.hasText() && !this.htmlMapping.containsKey("title")) {
 					/* Let's use the link text as default title when no mapping is defined.*/
 					doc.setField(CollectionSchema.title.getSolrFieldName(), linkElement.text());
 				}
-				
-				String targetLang = linkElement.attr("hreflang");
+
+				final String targetLang = linkElement.attr("hreflang");
 				if(targetLang != null && !targetLang.isEmpty()) {
 					doc.setField(CollectionSchema.language_s.getSolrFieldName(), targetLang);
 				}
-				
+
 				final String mime = TextParser.mimeOf(uri);
 				if (mime != null) {
 					doc.setField(CollectionSchema.content_type.getSolrFieldName(), mime);
 				}
-				
+
 				/*
 				 * add collection "dht" which is used to differentiate metadata
 				 * from full crawl data in the index
 				 */
 				doc.setField(CollectionSchema.collection_sxt.getSolrFieldName(), "dht");
 			}
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			ConcurrentLog.fine("OpenSearchConnector." + this.instancename, "Malformed url : " + absoluteURL);
 		}
 		return doc;
 	}
-    
+
 	/**
 	 * Extract results from the HTML result stream, using the html mapping properties.
 	 * Important : it is the responsibility of the caller to close the stream.
@@ -171,33 +171,33 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 	 * @return a list of URI nodes, eventually empty.
 	 * @throws IOException when a read/write exception occurred
 	 */
-	protected List<URIMetadataNode> parseHTMLResult(InputStream resultStream, String charsetName) throws IOException {
-		List<URIMetadataNode> docs = new ArrayList<>();
-		String resultSelector = this.htmlMapping.getProperty("_result");
-		String skuSelector = this.htmlMapping.getProperty("_sku");
+	protected List<URIMetadataNode> parseHTMLResult(final InputStream resultStream, final String charsetName) throws IOException {
+		final List<URIMetadataNode> docs = new ArrayList<>();
+		final String resultSelector = this.htmlMapping.getProperty("_result");
+		final String skuSelector = this.htmlMapping.getProperty("_sku");
 		if (resultSelector == null || skuSelector == null) {
 			ConcurrentLog.warn("OpenSearchConnector." + this.instancename, "HTML mapping is incomplete!");
 			return docs;
 		}
 
-		Document jsoupDoc = Jsoup.parse(resultStream, charsetName, this.baseurl);
-		Elements results = jsoupDoc.select(resultSelector);
+		final Document jsoupDoc = Jsoup.parse(resultStream, charsetName, this.baseurl);
+		final Elements results = jsoupDoc.select(resultSelector);
 
-		for (Element result : results) {
-			Elements skuNodes = result.select(skuSelector);
+		for (final Element result : results) {
+			final Elements skuNodes = result.select(skuSelector);
 			if (!skuNodes.isEmpty()) {
 				Element skuNode = skuNodes.first();
 				if (!"a".equals(skuNode.tagName())) {
 					/*
 					 * The selector may refer to a node with link(s) inside
 					 */
-					Elements links = skuNode.select("a[href]");
+					final Elements links = skuNode.select("a[href]");
 					if (!links.isEmpty()) {
 						skuNode = links.first();
 					}
 				}
 				if (skuNode.hasAttr("href")) {
-					URIMetadataNode newDoc = htmlLinkToMetadataNode(skuNode);
+					final URIMetadataNode newDoc = htmlLinkToMetadataNode(skuNode);
 					if (newDoc != null) {
 						/* Let's handle other field mappings */
 						htmlResultToFields(result, newDoc);
@@ -214,32 +214,32 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 	 * @param resultNode html single result node
 	 * @param newdoc result document to fill
 	 */
-	private void htmlResultToFields(Element resultNode, URIMetadataNode newdoc) {
-		for (Entry<Object, Object> entry : this.htmlMapping.entrySet()) {
+	private void htmlResultToFields(final Element resultNode, final URIMetadataNode newdoc) {
+		for (final Entry<Object, Object> entry : this.htmlMapping.entrySet()) {
 			if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
-				String yacyFieldName = (String) entry.getKey();
-				String selector = (String) entry.getValue();
-				
+				final String yacyFieldName = (String) entry.getKey();
+				final String selector = (String) entry.getValue();
+
 				if (!yacyFieldName.startsWith("_")) {
 					/* If Switchboard environment is set, check the index configuration has this field enabled */
 					if (Switchboard.getSwitchboard() == null || Switchboard.getSwitchboard().index == null
 							|| Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration()
 									.contains(yacyFieldName)) {
 
-						Elements nodes = resultNode.select(selector);
+						final Elements nodes = resultNode.select(selector);
 
 						SchemaDeclaration est;
 						try {
 							est = CollectionSchema.valueOf(yacyFieldName);
-						} catch(IllegalArgumentException e) {
+						} catch(final IllegalArgumentException e) {
 							ConcurrentLog.config("OpenSearchConnector." + this.instancename,
 									"Ignored " + yacyFieldName + " field mapping : not a field of this schema.");
 							continue;
 						}
 						if (est.isMultiValued()) {
 							if (!nodes.isEmpty()) {
-								for (Element node : nodes) {
-									String value = node.text();
+								for (final Element node : nodes) {
+									final String value = node.text();
 									if (!value.isEmpty()) {
 										newdoc.addField(yacyFieldName, value);
 									}
@@ -247,8 +247,8 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 							}
 						} else {
 							if (!nodes.isEmpty()) {
-								Element node = nodes.first();
-								String value = node.text();
+								final Element node = nodes.first();
+								final String value = node.text();
 								if (!value.isEmpty()) {
 									/* Perform eventual type conversion */
 									try {
@@ -257,7 +257,7 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 										} else {
 											newdoc.setField(yacyFieldName, value);
 										}
-									} catch (NumberFormatException ex) {
+									} catch (final NumberFormatException ex) {
 										continue;
 									}
 								}
@@ -278,11 +278,11 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
      * @return query results (metadata) with fields according to YaCy schema
      */
     @Override
-    public List<URIMetadataNode> query(QueryParams query) {
+    public List<URIMetadataNode> query(final QueryParams query) {
 
         return query(query.getQueryGoal().getQueryString(false), 0, query.itemsPerPage);
     }
-    
+
     /**
      * Query the remote system at baseurl with the specified search terms
      * @param searchTerms search terms
@@ -291,17 +291,17 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
      * @return a result list eventually empty when no results where found or when an error occured
      */
     public List<URIMetadataNode> query(final String searchTerms, final int startIndex, final int count) {
-    	List<URIMetadataNode> docs = new ArrayList<URIMetadataNode>();
-    	
+    	List<URIMetadataNode> docs = new ArrayList<>();
+
         // see http://www.loc.gov/standards/sru/
-        String searchurl = this.parseSearchTemplate(baseurl, searchTerms, startIndex, count);
+        final String searchurl = this.parseSearchTemplate(this.baseurl, searchTerms, startIndex, count);
         try {
-        	DigestURL aurl = new DigestURL(searchurl);
+        	final DigestURL aurl = new DigestURL(searchurl);
         	try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
                 this.lastaccesstime = System.currentTimeMillis();
-                
-                byte[] result = httpClient.GETbytes(aurl, null, null, false);
-                
+
+                final byte[] result = httpClient.GETbytes(aurl, null, null, false);
+
     			if(result == null) {
     				String details;
     				if(httpClient.getHttpResponse() != null && httpClient.getHttpResponse().getStatusLine() != null) {
@@ -324,15 +324,15 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 					}
                 } else {
                 	/* Other mime types or unknown : let's try to parse the result as RSS or Atom Feed */
-                    RSSReader rssReader =  RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
+                    final RSSReader rssReader =  RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
                     if (rssReader != null) {
                         final RSSFeed feed = rssReader.getFeed();
                         if (feed != null) {
                             for (final RSSMessage item : feed) {
                                 try {
-                                    DigestURL uri = new DigestURL(item.getLink());
+                                    final DigestURL uri = new DigestURL(item.getLink());
 
-                                    URIMetadataNode doc = new URIMetadataNode(uri);
+                                    final URIMetadataNode doc = new URIMetadataNode(uri);
                                     doc.setField(CollectionSchema.charset_s.getSolrFieldName(), StandardCharsets.UTF_8.name());
                                     doc.setField(CollectionSchema.author.getSolrFieldName(), item.getAuthor());
                                     doc.setField(CollectionSchema.title.getSolrFieldName(), item.getTitle());
@@ -369,16 +369,16 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
                 		}
                 	}
                 }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ConcurrentLog.logException(ex);
                 ConcurrentLog.info("OpenSearchConnector." + this.instancename, "no connection to " + searchurl);
             }
-        } catch (MalformedURLException ee) {
+        } catch (final MalformedURLException ee) {
             ConcurrentLog.warn("OpenSearchConnector." + this.instancename, "malformed url " + searchurl);
         }
         return docs;
     }
-    
+
     /**
      * Main procedure : can be used to test results retrieval from an open search system
      * @param args main arguments list:
@@ -388,14 +388,14 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
      * 	<li>Html mapping file path (optional)</li>
      * </ol>
      */
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		try {
 			if (args.length < 2) {
 				System.out.println("Usage : java " + OpenSearchConnector.class.getCanonicalName()
 						+ " <templateURL> <\"searchTerms\"> [htmlMappingFile]");
 				return;
 			}
-			OpenSearchConnector connector = new OpenSearchConnector(args[0]);
+			final OpenSearchConnector connector = new OpenSearchConnector(args[0]);
 			String htmlMappingFile;
 			if (args.length > 2) {
 				htmlMappingFile = args[2];
@@ -407,12 +407,12 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
 			if(searchTerms.length() > 2 && searchTerms.startsWith("\"") && searchTerms.endsWith("\"")) {
 				searchTerms = searchTerms.substring(1, searchTerms.length() - 1);
 			}
-			List<URIMetadataNode> docs = connector.query(searchTerms, 0, 20);
+			final List<URIMetadataNode> docs = connector.query(searchTerms, 0, 20);
 			if (docs.isEmpty()) {
 				System.out.println("No results");
 			} else {
 
-				for (URIMetadataNode doc : docs) {
+				for (final URIMetadataNode doc : docs) {
 					System.out.println("title : " + doc.getFieldValue(CollectionSchema.title.getSolrFieldName()));
 					System.out.println("sku : " + doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
 					System.out.println(

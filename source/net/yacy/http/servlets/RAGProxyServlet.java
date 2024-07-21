@@ -1,7 +1,7 @@
 /**
  *  RAGProxyServlet
  *  Copyright 2024 by Michael Peter Christen
- *  First released 17.05.2024 at http://yacy.net
+ *  First released 17.05.2024 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

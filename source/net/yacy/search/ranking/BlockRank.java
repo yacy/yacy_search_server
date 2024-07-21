@@ -1,7 +1,7 @@
 /**
  *  BlockRankCollector
  *  Copyright 2011 by Michael Christen
- *  First released 18.05.2011 at http://yacy.net
+ *  First released 18.05.2011 at https://yacy.net
  *
  *  $LastChangedDate: 2011-04-26 19:39:16 +0200 (Di, 26 Apr 2011) $
  *  $LastChangedRevision: 7676 $

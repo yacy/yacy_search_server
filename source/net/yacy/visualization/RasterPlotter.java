@@ -1,7 +1,7 @@
 /**
  *  RasterPlotter
  *  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 16.09.2005 at http://yacy.net
+ *  First released 16.09.2005 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

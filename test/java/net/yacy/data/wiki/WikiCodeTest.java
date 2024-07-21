@@ -169,14 +169,14 @@ public class WikiCodeTest {
         WikiCode wc = new WikiCode();
         
         /* Unamed link */
-        String result = wc.transform("http://wiki:8080", "[http://yacy.net]");
+        String result = wc.transform("http://wiki:8080", "[https://yacy.net]");
         assertTrue(result.contains("<a"));
-        assertTrue(result.contains("href=\"http://yacy.net\""));
+        assertTrue(result.contains("href=\"https://yacy.net\""));
         
         /* Named link */
-        result = wc.transform("http://wiki:8080", "[http://yacy.net YaCy]");
+        result = wc.transform("http://wiki:8080", "[https://yacy.net YaCy]");
         assertTrue(result.contains("<a"));
-        assertTrue(result.contains("href=\"http://yacy.net\""));
+        assertTrue(result.contains("href=\"https://yacy.net\""));
         assertTrue(result.contains(">YaCy<"));
         
         /* Lua Script array parameter : should not crash the transform process */

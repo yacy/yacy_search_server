@@ -1,7 +1,7 @@
 /**
  *  Cache.java
  *  Copyright 2006 by Michael Peter Christen
- *  First released 26.10.2006 at http://yacy.net
+ *  First released 26.10.2006 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

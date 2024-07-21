@@ -1,7 +1,7 @@
 /**
  *  sidAudioParser
  *  Copyright 2010 by Marc Nause, marc.nause@gmx.de, Braunschweig, Germany
- *  First released 28.12.2010 at http://yacy.net
+ *  First released 28.12.2010 at https://yacy.net
  *
  * $LastChangedDate$
  * $LastChangedRevision$

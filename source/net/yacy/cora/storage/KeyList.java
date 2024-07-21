@@ -1,7 +1,7 @@
 /**
  *  KeyList
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 18.4.2011 at http://yacy.net
+ *  First released 18.4.2011 at https://yacy.net
  *
  *  $LastChangedDate: 2011-03-22 10:34:10 +0100 (Di, 22 Mrz 2011) $
  *  $LastChangedRevision: 7619 $

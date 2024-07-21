@@ -1,7 +1,7 @@
 /**
  *  genericParser
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 30.11.2010 at http://yacy.net
+ *  First released 30.11.2010 at https://yacy.net
  *
  * $LastChangedDate$
  * $LastChangedRevision$

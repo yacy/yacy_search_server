@@ -1,7 +1,7 @@
 /**
  *  AnimationGIF
  *  Copyright 2010 by Michael Christen
- *  First released 20.11.2010 at http://yacy.net
+ *  First released 20.11.2010 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

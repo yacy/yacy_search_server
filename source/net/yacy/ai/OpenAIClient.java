@@ -1,7 +1,7 @@
 /**
  *  OpenAIClient
  *  Copyright 2024 by Michael Peter Christen
- *  First released 17.05.2024 at http://yacy.net
+ *  First released 17.05.2024 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -38,31 +38,31 @@ public class OpenAIClient {
 
     private static String[] STOPTOKENS = new String[]{"[/INST]", "<|im_end|>", "<|end_of_turn|>", "<|eot_id|>", "<|end_header_id|>", "<EOS_TOKEN>", "</s>", "<|end|>"};
 
-    private String hoststub;
-    
-    public OpenAIClient(String hoststub) {
+    private final String hoststub;
+
+    public OpenAIClient(final String hoststub) {
         this.hoststub = hoststub;
     }
 
 
     // API Helper Methods
-    
-    public static String sendPostRequest(String endpoint, JSONObject data) throws IOException, URISyntaxException {
-        URL url = new URI(endpoint).toURL();
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+    public static String sendPostRequest(final String endpoint, final JSONObject data) throws IOException, URISyntaxException {
+        final URL url = new URI(endpoint).toURL();
+        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = data.toString().getBytes("utf-8");
+            final byte[] input = data.toString().getBytes("utf-8");
             os.write(input, 0, input.length);
         }
 
-        int responseCode = conn.getResponseCode();
+        final int responseCode = conn.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
+                final StringBuilder response = new StringBuilder();
                 String responseLine;
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
@@ -74,15 +74,15 @@ public class OpenAIClient {
         }
     }
 
-    public static String sendGetRequest(String endpoint) throws IOException, URISyntaxException {
-        URL url = new URI(endpoint).toURL();
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    public static String sendGetRequest(final String endpoint) throws IOException, URISyntaxException {
+        final URL url = new URI(endpoint).toURL();
+        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
-        int responseCode = conn.getResponseCode();
+        final int responseCode = conn.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
+                final StringBuilder response = new StringBuilder();
                 String responseLine;
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
@@ -93,14 +93,14 @@ public class OpenAIClient {
             throw new IOException("Request failed with response code " + responseCode);
         }
     }
-    
-    // OpenAI chat client, works with llama.cpp and Ollama 
-    
-    public String chat(String model, String prompt, int max_tokens) throws IOException {
-        JSONObject data = new JSONObject();
-        JSONArray messages = new JSONArray();
-        JSONObject systemPrompt = new JSONObject(true);
-        JSONObject userPrompt = new JSONObject(true);
+
+    // OpenAI chat client, works with llama.cpp and Ollama
+
+    public String chat(final String model, final String prompt, final int max_tokens) throws IOException {
+        final JSONObject data = new JSONObject();
+        final JSONArray messages = new JSONArray();
+        final JSONObject systemPrompt = new JSONObject(true);
+        final JSONObject userPrompt = new JSONObject(true);
         messages.put(systemPrompt);
         messages.put(userPrompt);
         try {
@@ -114,52 +114,52 @@ public class OpenAIClient {
             data.put("messages", messages);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", false);
-            String response = sendPostRequest(this.hoststub + "/v1/chat/completions", data);
-            JSONObject responseObject = new JSONObject(response);
-            JSONArray choices = responseObject.getJSONArray("choices");
-            JSONObject choice = choices.getJSONObject(0);
-            JSONObject message = choice.getJSONObject("message");
-            String content = message.optString("content", "");
+            final String response = sendPostRequest(this.hoststub + "/v1/chat/completions", data);
+            final JSONObject responseObject = new JSONObject(response);
+            final JSONArray choices = responseObject.getJSONArray("choices");
+            final JSONObject choice = choices.getJSONObject(0);
+            final JSONObject message = choice.getJSONObject("message");
+            final String content = message.optString("content", "");
             return content;
         } catch (JSONException | URISyntaxException e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public static String[] stringsFromChat(String answer) {
-        int p = answer.indexOf('[');
-        int q = answer.indexOf(']');
+    public static String[] stringsFromChat(final String answer) {
+        final int p = answer.indexOf('[');
+        final int q = answer.indexOf(']');
         if (p < 0 || q < 0 || q < p) return new String[0];
         try {
-            JSONArray a = new JSONArray(answer.substring(p, q + 1));
-            String[] arr = new String[a.length()];
+            final JSONArray a = new JSONArray(answer.substring(p, q + 1));
+            final String[] arr = new String[a.length()];
             for (int i = 0; i < a.length(); i++) arr[i] = a.getString(i);
             return arr;
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             return new String[0];
         }
     }
-    
-    public static void main(String[] args) {
-        String model = "phi3:3.8b";
-        OpenAIClient oaic = new OpenAIClient(OllamaClient.OLLAMA_API_HOST);
+
+    public static void main(final String[] args) {
+        final String model = "phi3:3.8b";
+        final OpenAIClient oaic = new OpenAIClient(OllamaClient.OLLAMA_API_HOST);
         // make chat completion with model
         String question = "Who invented the wheel?";
         try {
-            String answer = oaic.chat(model, question, 80);
+            final String answer = oaic.chat(model, question, 80);
             System.out.println(answer);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
 
         // try the json parser from chat results
         question = "Make a list of four names from Star Wars movies. Use a JSON Array.";
         try {
-            String[] a = stringsFromChat(oaic.chat(model, question, 80));
-            for (String s: a) System.out.println(s);
-        } catch (IOException e) {
+            final String[] a = stringsFromChat(oaic.chat(model, question, 80));
+            for (final String s: a) System.out.println(s);
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
-    
+
 }

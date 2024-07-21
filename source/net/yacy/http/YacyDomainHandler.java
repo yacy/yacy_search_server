@@ -2,7 +2,7 @@
 //  YacyDomainHandler
 //  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 //  Copyright 2011 by Florian Richter
-//  First released 13.04.2011 at http://yacy.net
+//  First released 13.04.2011 at https://yacy.net
 //  
 //  $LastChangedDate$
 //  $LastChangedRevision$

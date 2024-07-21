@@ -1,7 +1,7 @@
 /**
  *  Domains
  *  Copyright 2007 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 23.7.2007 at http://yacy.net
+ *  First released 23.7.2007 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

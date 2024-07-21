@@ -1,7 +1,7 @@
 /**
  *  UTF8
  *  Copyright 2011 by Michael Peter Christen
- *  First released 25.2.2011 at http://yacy.net
+ *  First released 25.2.2011 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
@@ -50,12 +50,12 @@ public class UTF8 implements Comparator<String> {
 
     public boolean insensitive;
 
-    public UTF8(boolean insensitive) {
+    public UTF8(final boolean insensitive) {
         this.insensitive = insensitive;
     }
 
     @Override
-    public int compare(String o0, String o1) {
+    public int compare(final String o0, final String o1) {
         final int l0 = o0.length();
         final int l1 = o1.length();
         final int ml = Math.min(l0, l1);
@@ -96,7 +96,7 @@ public class UTF8 implements Comparator<String> {
         }
         return true;
     }
-    
+
     public final static StringBody StringBody(final byte[] b) {
         return StringBody(UTF8.String(b));
     }
@@ -270,12 +270,12 @@ public class UTF8 implements Comparator<String> {
 
         return (needToChange? sb.toString() : s);
     }
-    
+
 	/**
 	 * Utility wrapper around the standard JDK {@link URLEncoder#encode(String)}
 	 * function, using the UTF-8 character set and catching
 	 * {@link UnsupportedEncodingException} exception.
-	 * 
+	 *
 	 * @param str a string to encode. Must not be null.
 	 * @return str encoded in application/x-www-form-urlencoded format
 	 */

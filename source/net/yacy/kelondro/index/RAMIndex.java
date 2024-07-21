@@ -1,7 +1,7 @@
 /**
  *  RAMIndex
  *  Copyright 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 07.01.2008 at http://yacy.net
+ *  First released 07.01.2008 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
