@@ -60,8 +60,8 @@
       <dependency org="org.apache.lucene" name="lucene-suggest" rev="9.0.0"/>
       
       <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.2" />
-      <dependency org="org.apache.poi" name="poi" rev="3.17" />
-      <dependency org="org.apache.poi" name="poi-scratchpad" rev="3.17" />
+      <dependency org="org.apache.poi" name="poi" rev="5.3.0" />
+      <dependency org="org.apache.poi" name="poi-scratchpad" rev="5.3.0" />
       
       <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="compile->master"/>
