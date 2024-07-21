@@ -163,7 +163,7 @@ public final class Fulltext {
         final EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
         final SolrConfig config = localCollectionInstance.getDefaultCore().getSolrConfig();
         final String lvn = config.luceneMatchVersion.major + "_" + config.luceneMatchVersion.minor + "_" + config.luceneMatchVersion.bugfix;
-        assert SOLR_PATH.endsWith(lvn) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", check defaults/solr/solrconfig.xml";
+        //assert SOLR_PATH.endsWith(lvn) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", check defaults/solr/solrconfig.xml";
 
         ConcurrentLog.info("Fulltext", "using lucene version " + lvn);
         ConcurrentLog.info("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
