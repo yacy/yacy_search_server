@@ -1848,135 +1848,21 @@ YaCy: Default Page for Individual Peer Content==YaCy: 個別のピアのコン�
 >Date==>日時
 #-----------------------------
 
-#File: yacy/ui/js/jquery-flexigrid.js
+#File: js/jquery-flexigrid.js
 #---------------------------
 'Displaying {from} to {to} of {total} items'=='{total} の内の {from} から {to} までの項目を表示しています'
 'Processing, please wait ...'=='処理しています, どうぞお待ち下さい...'
 'No items'=='項目がありません'
 #-----------------------------
 
-#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#File: js/jquery-ui-1.7.2.min.js
 #---------------------------
 Loading&#8230;==読み込み&#8230;
 #-----------------------------
 
-#File: yacy/ui/js/jquery.ui.all.min.js
+#File: js/jquery.ui.all.min.js
 #---------------------------
 Loading&#8230;==読み込み&#8230;
-#-----------------------------
-
-#File: yacy/ui/index.html
-#---------------------------
-About YaCy-UI==YaCy-UIについて
-Admin Console==管理コンソール
-"Bookmarks"=="ブックマーク"
->Bookmarks==>ブックマーク
-#Server Log==サーヴァー ログ
-#-----------------------------
-
-#File: yacy/ui/yacyui-admin.html
-#---------------------------
-Peer Control==ピアの制御
-"Login"=="ログイン"
-#Login==ログイン
-Themes==テーマ
-Messages==メッセージ
-Re-Start==再起動
-Shutdown==シャットダウン
-Web Indexing==ウェブの索引付け
-Crawl Start==クロールの開始
-Monitoring==モニタリング
-YaCy Network==YaCy ネットワーク
->Settings==>設定
-"Basic Settings"=="基本的な設定"
-	Basic==	基本的な
-Accounts==アカウント
-"Network"=="ネットワーク"
-	Network==	ネットワーク
-"Advanced Settings"=="高度な設定"
-	Advanced==	高度な
-"Update Settings"=="更新の設定"
-	Update==	更新
->YaCy Project==>YaCy プロジェクト
-"YaCy Project Home"=="YaCy プロジェクトのホーム"
-	Project==	プロジェクト
-"YaCy Statistics"=="YaCyの統計情報"
-	Statistics==	統計情報
-"YaCy Forum"=="YaCy フォーラム"
-#Forum==フォーラム
-"Help"=="ヘルプ"
-#"YaCy Wiki"=="YaCy ウィキ"
-#Wiki==ウィキ
-#-----------------------------
-
-#File: yacy/ui/yacyui-bookmarks.html
-#---------------------------
-'Add'=='追加する'
-'Crawl'=='クロールする'
-'Edit'=='編集する'
-'Delete'=='削除する'
-'Rename'=='名前を変更する'
-'Help'=='ヘルプ'
-
-#"public bookmark"=="パブリック ブックマーク"
-#"private bookmark"=="プライヴェート ブックマーク"
-
-#"delete bookmark"=="ブックマークを削除する"
-"YaCy Bookmarks"=="YaCy ブックマーク"
-#>Title==>題名
-#>Tags==>タグ
-#>Date==>日時
-#'Hash'=='ハッシュ'
-'Public'=='パブリック'
-'Title'=='題名'
-#'Tags'=='タグ'
-'Folders'=='フォルダー'
-'Date'=='日時'
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_1.html
-#---------------------------
-YaCy P2P Websearch==YaCy P2P ウェブ検索
-"Search"=="検索"
->Text==>テキスト
->Images==>画像
->Audio==>音声
->Video==>動画
->Applications==>アプリケーション
-Search term:==検索用語:
-"help"=="ヘルプ"
-Resource/Network:==リソース/ネットワーク:
-freeworld==フリーワールド
-local peer==ローカル ピア
->bookmarks==>ブックマーク
-sciencenet==sciencenet
->Language:==>言語:
-any language==全ての言語
-Bookmark Folders==ブックマーク フォルダー
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_2.html
-#---------------------------
-Bookmark Tags<==ブックマーク タグ<
-Search Options==検索オプション
-Constraint:==制約:
-all pages==全てのページ
-index pages==索引のページ
-URL mask:==URL マスク:
-Prefer mask:==プリファー マスク:
-Bookmark TagCloud==ブックマーク タグ クラウド
-Topwords<==トップワード<
-alt="help"==alt="ヘルプ"
-title="help"==title="ヘルプ"
-#-----------------------------
-
-#File: yacy/ui/yacyui-welcome.html
-#---------------------------
->Overview==>概要
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UIは既存のXMLとJSON APIに基づくYaCyの為のJavaScriptを基にしたクライアントになるでしょう.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==まだ検索結果の取得に於ける問題がある事により、YaCy-UIは最高でもアルファ状態です.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==私は現在バックエンドをアプリケーションによりフレンドリーな形式に変更しつつあり、それで良い結果を得つつあります(私は安定版リリース 0.7の後のいつかに確認します).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==今のところはブックマークを見て下さい, JSONとFlexigridの使用によってパフォーマンスが顕著に増加しました!
 #-----------------------------
 
 # EOF

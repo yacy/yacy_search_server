@@ -3780,187 +3780,23 @@ and set upload/download accounts to author and access content on this peer==та
 loading from local index==Завантаження з місцевого індексу
 #-----------------------------
 
-#File: yacy/ui/js/jquery-flexigrid.js
+#File: js/jquery-flexigrid.js
 #---------------------------
 'Displaying {from} to {to} of {total} items'=='Показано {from} до {to} з {total} записів'
 'Processing, please wait ...'=='В обробці. Будь-ласка, зачекайте ...'
 'No items'=='Результати відсутні'
 #-----------------------------
 
-#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#File: js/jquery-ui-1.7.2.min.js
 #---------------------------
 Loading&#8230;==Завантаження&#8230;
 #-----------------------------
 
-#File: yacy/ui/js/jquery.ui.all.min.js
+#File: js/jquery.ui.all.min.js
 #---------------------------
 Loading&#8230;==Завантаження&#8230;
 #-----------------------------
 
-#File: yacy/ui/index.html
-#---------------------------
-About YaCy-UI==Про YaCy-UI
-Admin Console==Адмін. консоль
-"Bookmarks"=="Закладки"
->Bookmarks==>Закладки
-Server Log==Журнал сервера
-This dialog lets you rename (edit) tag names.==Дозволяє редагувати імена ключів.
-You can also add a new tag to all bookmarks tagged with old tag.==Можна також додати новий ключ до всіх закладок позначених старим.
-Old Tag:==Старий ключ:
-New Tag:==Новий ключ:
-YaCy Bookmark Edit Tags==Зміна ключів закладок YaCy
-This dialog lets you add tags or folders to the selected bookmarks.==Це вікно дозволяє додавати ключі чи папки до вибраних закладок.
-Tag Name:==Ім’я ключа:
-YaCy Bookmark Add Tags==Додавання ключів закладок YaCy
-Add or edit bookmark==Додати чи змінити закладку
-Title:==Заголовок:
-Description:==Опис:
-Folder (/folder/subfolder):==Папка (/папка/підпапка):
-Tags (comma separated):==Ключі (через кому):
-Public:==Загальна:
->yes<==>так<
->no<==>ні<
-YaCy Bookmarks==Закладки YaCy
-
-This dialog lets you select an alternate theme/skin for YaCy-UI==Це вікно дозволяє вибрати
-Base Theme==Основна тема
-Custom Theme==Змінена тема
->You can==Ви можете
-download</a> ready made themes or==завантажити</a> готові теми або
-create</a>==створити</a>
-your own custom theme. Themes are installed into==свою власну тему. Теми встановлені в
-YaCy - Peer-to-Peer Search Network==YaCy - однорангова пошукова мережа
-Select YaCy-UI Theme==Вибір теми YaCy-UI
-
-#>Cancel<==>Відхилити<
-#>Edit<==>Змінити<
-#>Add<==>Додати<
-#-----------------------------
-
-#File: yacy/ui/yacyui-admin.html
-#---------------------------
-Peer Control==Вузол
-"Login"=="Ввійти"
-	Login==Ввійти
-Themes==Вигляд
-Messages==Повідомлення
-Re-Start==Перезапуск
-Shutdown==Зупинка
-Web Indexing==Індексування веб
-Crawl Start==Запуск сканування
-Monitoring==Спостереження
-YaCy Network==Мережа YaCy
->Settings==>Налаштування
-"Basic Settings"=="Прості налаштування"
-	Basic==Основні
-Accounts==Облікові записи
-"Network"=="Мережа"
-	Network==Мережа
-"Advanced Settings"=="Розширені налаштування"
-	Advanced==Розширені
-"Update Settings"=="Оновлення системи"
-	Update==Оновлення
->YaCy Project==>Проект YaCy
-"YaCy Project Home"=="Домашня сторінка YaCy"
-	Project==Проект
-"YaCy Statistics"=="Статистика YaCy"
-	Statistics==Статистика
-"YaCy Forum"=="Форум YaCy"
-	Forum==Форум
-"Help"=="Допомога"
-#"YaCy Wiki"=="YaCy Wiki"
-#Wiki==Wiki
-#-----------------------------
-
-#File: yacy/ui/yacyui-bookmarks.html
-#---------------------------
-'Add'=='Додати'
-'Crawl'=='Сканувати'
-'Edit'=='Редагувати'
-'Delete'=='Видалити'
-'Rename'=='Перейменувати'
-'Help'=='Допомога'
-
-#"public bookmark"=="загальна закладка"
-#"private bookmark"=="власна закладка"
-
-#"delete bookmark"=="видалити закладку"
-YaCy Bookmarks==Закладки YaCy
-#>Title==>Заголовок
-#>Tags==>Ключі
-#>Date==>Дата
-'Hash'=='Контр.сума'
-'Public'=='Загальна'
-'Title'=='Заголовок'
-'Tags'=='Ключі'
-'Folders'=='Папки'
-'Date'=='Дата'
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_1.html
-#---------------------------
-YaCy P2P Websearch==YaCy P2P Веб-Пошук
-"Search"=="Пошук"
->Text==>Текст
->Images==>Картинки
->Audio==>Звук
->Video==>Відео
->Applications==>Додатки
-#вираз
-#умова
-#Критерій пошуку
-Search term:==Пошуковий вираз:
-"help"=="Допомога"
-#Засіб
-#Ресурс
-Resource/Network:==Джерело/Мережа:
-freeworld==ВільнийСвіт
-local peer==Місцевий вузол
->bookmarks==>Закладки
-sciencenet==ScienceNet
->Language:==>Мова:
-any language==всі мови
-Bookmark Folders==Папки закладок
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_2.html
-#---------------------------
-Bookmark Tags<==Ключі закладок<
-Search Options==Настроки пошуку
-Constraint:==Обмеження:
-all pages==всі сторінки
-index pages==індексні сторінки
-URL mask:==Фільтр URL:
-Prefer mask:==Бажана маска:
-Bookmark TagCloud==Хмара ключів закладок
-Topwords<==Верхні слова<
-alt="help"==alt="Допомога"
-title="help"==title="Допомога"
-#-----------------------------
-
-#File: yacy/ui/yacyui-view-log.html
-#---------------------------
-'Debug'=='Відладка'
-'Info'=='Інфо'
-'System'=='Система'
-'Warning'=='Попередження'
-'Error'=='Помилка'
-'Help'=='Допомога'
-='Info'==='Інфо'
-#-----------------------------
-
-#File: yacy/ui/yacyui-welcome.html
-#---------------------------
->Overview==>Огляд
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI - написаний на JavaScript клієнт для YaCy, який грунтується на існуючих XML і JSON API.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI, в кращому випадку, в стадії альфа, оскільки ще є проблеми при отриманні результатів пошуку.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Я зараз змінюю керування на зручніший формат і отримую гарні результати (я перевірю зміни ще деякий час після виходу стабільного випуску 0.7).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==В даний час ви можете переглянути закладки - продуктивність значно покращилась за рахунок використання JSON і Flexigrid!
->Change Log<==>Журнал змін<
->Bug Tracker<==>Помилки<
-Please report bugs in the official==Будь-ласка, повідомляйте про помилки на офіційному
-YaCy-Forum</a> - thanks==форумі YaCy</a> - дякую
-#-----------------------------
 
 #File: AccessGrid_p.html
 #---------------------------
