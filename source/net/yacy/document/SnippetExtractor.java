@@ -28,6 +28,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.language.synonyms.SynonymLibrary;
+
 public class SnippetExtractor {
 
     private String snippetString;
@@ -37,32 +39,42 @@ public class SnippetExtractor {
     public SnippetExtractor(final Iterable<StringBuilder> sentences, final Set<String> queryTerms, int maxLength) throws UnsupportedOperationException {
         if (sentences == null) throw new UnsupportedOperationException("sentences == null");
         if (queryTerms == null || queryTerms.isEmpty()) throw new UnsupportedOperationException("queryTerms == null");
-        SortedMap<String, Integer> hs;
-        final TreeMap<Long, StringBuilder> order = new TreeMap<Long, StringBuilder>();
+        final TreeMap<Long, StringBuilder> sentences_candidates = new TreeMap<Long, StringBuilder>();
         long uniqCounter = 999L;
         Integer pos;
-        TreeSet<Integer> positions;
         int linenumber = 0;
         int fullmatchcounter = 0;
         lookup: for(final StringBuilder sentence : sentences) {
-            hs = WordTokenizer.tokenizeSentence(sentence.toString(), 100);
-            positions = new TreeSet<Integer>();
+            SortedMap<String, Integer> positions_in_sentence = WordTokenizer.tokenizeSentence(sentence.toString(), 100);
+            TreeSet<Integer> found_positions = new TreeSet<Integer>(); // the positions of the query terms in the sentence
             for (final String word: queryTerms) {
-                pos = hs.get(word);
+                pos = positions_in_sentence.get(word);
                 if (pos != null) {
-                    positions.add(pos);
+                    found_positions.add(pos);
+                } else {
+                    // try to find synonyms
+                    Set<String> syms = SynonymLibrary.getSynonyms(word);
+                    if (syms != null && syms.size() > 0) {
+                        symsearch: for (String sym: syms) {
+                            pos = positions_in_sentence.get(sym);
+                            if (pos != null) {
+                                found_positions.add(pos);
+                                break symsearch;
+                            }
+                        }
+                    }
                 }
             }
-            int worddistance = positions.size() > 1 ? positions.last() - positions.first() : 0;
+            int worddistance = found_positions.size() > 1 ? found_positions.last() - found_positions.first() : 0;
             // sort by
             // - 1st order: number of matching words
             // - 2nd order: word distance
             // - 3th order: line length (not too short and not too long)
             // - 4rd order: line number
-            if (!positions.isEmpty()) {
-                order.put(Long.valueOf(-100000000L * (linenumber == 0 ? 1 : 0) + 10000000L * positions.size() + 1000000L * worddistance + 100000L * linelengthKey(sentence.length(), maxLength) - 10000L * linenumber + uniqCounter--), sentence);
-                if (order.size() > 5) order.remove(order.firstEntry().getKey());
-                if (positions.size() == queryTerms.size()) fullmatchcounter++;
+            if (!found_positions.isEmpty()) {
+                sentences_candidates.put(Long.valueOf(-100000000L * (linenumber == 0 ? 1 : 0) + 10000000L * found_positions.size() + 1000000L * worddistance + 100000L * linelengthKey(sentence.length(), maxLength) - 10000L * linenumber + uniqCounter--), sentence);
+                if (sentences_candidates.size() > 5) sentences_candidates.remove(sentences_candidates.firstEntry().getKey());
+                if (found_positions.size() == queryTerms.size()) fullmatchcounter++;
                 if (fullmatchcounter >= 3) break lookup;
             }
             linenumber++;
@@ -70,8 +82,8 @@ public class SnippetExtractor {
 
         StringBuilder sentence;
         SnippetExtractor tsr;
-        while (!order.isEmpty()) {
-            sentence = order.remove(order.lastKey()); // sentence with the biggest score
+        while (!sentences_candidates.isEmpty()) {
+            sentence = sentences_candidates.remove(sentences_candidates.lastKey()); // sentence with the biggest score
             try {
                 tsr = new SnippetExtractor(sentence.toString(), queryTerms, maxLength);
             } catch (final UnsupportedOperationException e) {
@@ -90,7 +102,7 @@ public class SnippetExtractor {
                     maxLength = maxLength - this.snippetString.length();
                     if (maxLength < 20) maxLength = 20;
                     try {
-                        tsr = new SnippetExtractor(order.values(), this.remainingTerms, maxLength);
+                        tsr = new SnippetExtractor(sentences_candidates.values(), this.remainingTerms, maxLength);
                     } catch (final UnsupportedOperationException e) {
                         throw e;
                     }
@@ -106,6 +118,7 @@ public class SnippetExtractor {
                 }
             }
         }
+        
         throw new UnsupportedOperationException("no snippet computed");
     }
 
@@ -134,7 +147,22 @@ public class SnippetExtractor {
                 term = j.next();
                 pos = hs.get(term);
                 if (pos == null) {
-                   remainingTerms.add(term);
+                    // try to find synonyms
+                    Set<String> syms = SynonymLibrary.getSynonyms(term);
+                    boolean found = false;
+                    if (syms != null && syms.size() > 0) {
+                        symsearch: for (String sym : syms) {
+                            pos = hs.get(sym);
+                            if (pos != null) {
+                                p = pos.intValue();
+                                if (p > maxpos) maxpos = p;
+                                if (p < minpos) minpos = p;
+                                found = true;
+                                break symsearch;
+                            }
+                        }
+                    }
+                    if (!found) remainingTerms.add(term);
                 } else {
                     p = pos.intValue();
                     if (p > maxpos) maxpos = p;
