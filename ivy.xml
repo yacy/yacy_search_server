@@ -23,7 +23,7 @@
       <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.9.4" />
       <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.9.4"/>
       <dependency org="commons-codec" name="commons-codec" rev="1.15" />
-      <dependency org="commons-io" name="commons-io" rev="2.8.0" />
+      <dependency org="commons-io" name="commons-io" rev="2.17.0" />
       <dependency org="commons-logging" name="commons-logging" rev="1.2" />
       <dependency org="io.dropwizard.metrics" name="metrics-core" rev="3.2.2"/>
       <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.1.5" conf="compile->master"/>
