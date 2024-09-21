@@ -516,6 +516,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     public WordReferenceVars word() {
         return this.word;
     }
+    
+    public ArrayList<String> getSynonyms() {
+        return getStringList(CollectionSchema.synonyms_sxt);
+    }
 
     public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
         Collection<Object> urlstub = doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_urlstub_sxt :  CollectionSchema.outboundlinks_urlstub_sxt).getSolrFieldName());
