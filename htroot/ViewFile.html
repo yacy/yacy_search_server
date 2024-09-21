@@ -84,16 +84,16 @@ function updatepage(str) {
           <dd>
             <input type="text" size="60" name="url" id="url" value="#[url]#" />
             <input type="submit" name="show" class="btn btn-primary" value="Show Metadata" />
-            #(moar)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='IndexBrowser_p.html?path=' + document.getElementById('url').value" />#(/moar)#
+            #(searchindocument)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='IndexBrowser_p.html?path=' + document.getElementById('url').value" />#(/searchindocument)#
             <div id="searchresults"></div>
           </dd>
-          #(moar)#::
+          #(searchindocument)#::
           <dt>Search in Document:</dt>
           <dd>
-            <input type="text" size="60" name="search" id="search" value="#[search]#" />
+            <input type="text" size="60" name="search" id="query" value="#[query]#" />
             <input type="submit" name="show" class="btn btn-primary" value="Show Snippet" />
           </dd>
-          #(/moar)#
+          #(/searchindocument)#
         </dl>
       </fieldset>
     </form>
@@ -123,6 +123,7 @@ function updatepage(str) {
               <option value="sentences"#(vMode-sentences)#:: selected="selected"#(/vMode-sentences)#>Parsed Sentences</option>
               <option value="words"#(vMode-words)#:: selected="selected"#(/vMode-words)#>Parsed Tokens/Words</option>
               <option value="links"#(vMode-links)#:: selected="selected"#(/vMode-links)#>Link List</option>
+              <option value="schema"#(vMode-schema)#:: selected="selected"#(/vMode-schema)#>Schema Fields</option>
               <option value="iframeCitations"#(vMode-iframeCitations)#:: selected="selected"#(/vMode-iframeCitations)#>Citation Report</option>
             </select>
             <noscript><input type="submit" name="show" class="btn btn-primary" value="Show" /></noscript>
@@ -166,9 +167,9 @@ function updatepage(str) {
 	  </p>
 	</fieldset>
 :: <!-- 2 -->
-<form action="">
-          <fieldset><legend>Parsed Content</legend>
-          <dl>
+    <form action="">
+      <fieldset><legend>Parsed Content</legend>
+      <dl>
 	  <dt>dc:title</dt><dd>#[title]#</dd>
 	  <dt>dc:creator</dt><dd>#[creator]#</dd>
 	  <dt>dc:subject</dt><dd>#[subject]#</dd>
@@ -180,7 +181,7 @@ function updatepage(str) {
 	  <dt>geo:lat &amp; geo:long</dt><dd><a href="osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" onclick="return hs.expand(this)">lat=#[lat]#, lon=#[lon]#</a></dd>
 	  </dl>
 	  <p class="tt">#[parsedText]#</p>
-          </fieldset>
+      </fieldset>
     </form>
 :: <!-- 3 -->
 	<fieldset><legend>Parsed Sentences</legend>
@@ -228,6 +229,14 @@ function updatepage(str) {
 	  </ol>
 	</fieldset>
 :: <!-- 8 -->
+    <form action="">
+      <fieldset><legend>Schema Fields</legend>
+      <dl>#{fields}#
+        <dt>#[key]#</dt><dd>#[value]#</dd>#{/fields}#
+      </dl>
+      </fieldset>
+    </form>
+:: <!-- 9 -->
 	<fieldset><legend>CitationReport</legend>
 	  <iframe src="api/citation.html?url=#[url]#" width="800" height="400" />
 	</fieldset>
