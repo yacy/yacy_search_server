@@ -72,22 +72,22 @@
       <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
         <exclude module="stax-api" />
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.54.v20240208" />
-      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.54.v20240208" conf="compile->master" />
-      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.54.v20240208" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.54.v20240208"/>
-      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.54.v20240208"/>
-      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.54.v20240208"/>
-      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.54.v20240208"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.54.v20240208"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.54.v20240208">
+      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.56.v20240826" />
+      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.56.v20240826" conf="compile->master" />
+      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.56.v20240826">
         <exclude module="jetty-util-ajax" />
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.54.v20240208"  />
-      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.54.v20240208"  />
-      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.54.v20240208" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.54.v20240208" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.54.v20240208" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.56.v20240826"  />
+      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.56.v20240826"  />
+      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.56.v20240826" conf="compile->master"/>
       <dependency org="org.jsoup" name="jsoup" rev="1.15.3"  />
       <dependency org="org.jwat" name="jwat-warc" rev="1.1.3"  />
       <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.8"/>
