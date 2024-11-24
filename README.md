@@ -105,7 +105,7 @@ For building Docker image from latest sources, see [docker/Readme.md](docker/Rea
 
 - clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
 - or download source from this site (download button "Code" -> download as Zip -> and unpack)
-- Open Help -> Eclipse Marketplace -> Search for "ivy" -> Install "Apache IvyDE"
+- Open Help -> Install New Software -> add.. -> add archived IvyDE Updatesite "https://archive.apache.org/dist/ant/ivyde/updatesite/" -> Install "Apache IvyDE"
 - right-click on the YaCy project in the package explorer -> Ivy -> resolve
 
 This will build YaCy in Eclipse. To run YaCy:
