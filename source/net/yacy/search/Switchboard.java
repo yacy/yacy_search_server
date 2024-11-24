@@ -546,6 +546,13 @@ public final class Switchboard extends serverSwitch {
             solrWebgraphConfigurationWork.commit();
         } catch (final IOException e) {ConcurrentLog.logException(e);}
 
+        // define load limitation according to current number of cpu cores
+        if (this.firstInit) {
+            float numberOfCores2 = 2.0f * (float) Runtime.getRuntime().availableProcessors();
+            sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_LOADPREREQ, numberOfCores2);
+            sb.setConfig(SwitchboardConstants.SURROGATES_LOADPREREQ, numberOfCores2);
+        }
+        
         // define boosts
         Ranking.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
         Ranking.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
