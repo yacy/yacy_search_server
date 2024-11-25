@@ -1,7 +1,7 @@
 /**
  *  RegexTest
  *  Copyright 2012 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 14.09.2011 at http://yacy.net
+ *  First released 14.09.2011 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

@@ -1,7 +1,7 @@
 /**
  *  LinkExtractor
  *  Copyright 2011 by Michael Peter Christen
- *  First released 2.01.2011 at http://yacy.net
+ *  First released 2.01.2011 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

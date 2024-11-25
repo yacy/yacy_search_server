@@ -2,7 +2,7 @@
  *  YaCySearchClient
  *  an interface for Adaptive Replacement Caches
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 20.09.2010 at http://yacy.net
+ *  First released 20.09.2010 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

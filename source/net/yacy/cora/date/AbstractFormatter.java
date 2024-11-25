@@ -1,7 +1,7 @@
 /**
  *  AbstractFormatter
  *  Copyright 2011 by Michael Peter Christen
- *  First released 2.1.2011 at http://yacy.net
+ *  First released 2.1.2011 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -62,7 +62,7 @@ public abstract class AbstractFormatter implements DateFormatter {
     @Override
     public abstract String format();
 
-    private static final HashMap<Pattern, SimpleDateFormat> DATE_FORMAT_REGEXPS = new HashMap<Pattern, SimpleDateFormat>() {
+    private static final HashMap<Pattern, SimpleDateFormat> DATE_FORMAT_REGEXPS = new HashMap<>() {
         private static final long serialVersionUID = 1321140786174228717L;
     {
         put(Pattern.compile("^\\d{8}$"), new SimpleDateFormat("yyyyMMdd", Locale.US));
@@ -92,16 +92,16 @@ public abstract class AbstractFormatter implements DateFormatter {
     }};
 
     @Override
-    public Date parse(String s) {
+    public Date parse(final String s) {
         return parseAny(s);
     }
 
-    public static Date parseAny(String s) {
-        for (Map.Entry<Pattern, SimpleDateFormat> ps: DATE_FORMAT_REGEXPS.entrySet()) {
+    public static Date parseAny(final String s) {
+        for (final Map.Entry<Pattern, SimpleDateFormat> ps: DATE_FORMAT_REGEXPS.entrySet()) {
             if (ps.getKey().matcher(s.toLowerCase()).matches()) {
                 try {
                     return ps.getValue().parse(s);
-                } catch (ParseException e) {
+                } catch (final ParseException e) {
                 }
             }
         }

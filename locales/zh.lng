@@ -4492,123 +4492,21 @@ could not be found.==未找到.
 Did you mean:==是不是:
 #-----------------------------
 
-### Subdirectory yacy ###
-#File: yacy/ui/index.html
-#---------------------------
-About YaCy-UI==关于YaCy-UI
-Admin Console==管理控制台
-"Bookmarks"=="书签"
->Bookmarks==>书签
-Server Log==服务器日志
-#-----------------------------
-
-#File: yacy/ui/js/jquery-flexigrid.js
+#File: js/jquery-flexigrid.js
 #---------------------------
 'Displaying {from} to {to} of {total} items'=='显示 {from} 到 {to}, 总共 {total} 个词条'
 'Processing, please wait ...'=='正在处理, 请稍候...'
 'No items'=='无词条'
 #-----------------------------
 
-#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#File: js/jquery-ui-1.7.2.min.js
 #---------------------------
 Loading&#8230;==正在加载&#8230;
 #-----------------------------
 
-#File: yacy/ui/js/jquery.ui.all.min.js
+#File: js/jquery.ui.all.min.js
 #---------------------------
 Loading&#8230;==正在加载&#8230;
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_1.html
-#---------------------------
-YaCy P2P Websearch==YaCy P2P搜索
-"Search"=="搜索"
->Text==>文本
->Images==>图片
->Audio==>音频
->Video==>视频
->Applications==>应用
-Search term:==搜索词条:
-# do not translate class="help" which only has technical html semantics
-alt="help"==alt="帮助"
-title="help"==title="帮助"
-Resource/Network:==资源/网络:
-freeworld==自由世界
-local peer==本地节点
->bookmarks==>书签
-sciencenet==ScienceNet
->Language:==>语言:
-any language==任意语言
-Bookmark Folders==书签目录
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_2.html
-#---------------------------
-Bookmark Tags<==标签<
-Search Options==搜索设置
-Constraint:==约束:
-all pages==所有页面
-index pages==索引页面
-URL mask:==URL过滤:
-Prefer mask:==首选过滤:
-Bookmark TagCloud==标签云
-Topwords<==顶部<
-alt="help"==alt="帮助"
-title="help"==title="帮助"
-#-----------------------------
-
-#File: yacy/ui/yacyui-admin.html
-#---------------------------
-Peer Control==节点控制
-"Login"=="登录"
-Themes==主题
-Messages==消息
-Re-Start==重启
-Shutdown==关闭
-Web Indexing==网页索引
-Crawl Start==开始爬取
-Monitoring==监控
-YaCy Network==YaCy网络
->Settings==>设置
-"Basic Settings"=="基本设置"
-	Basic==	基本
-Accounts==账户
-"Network"=="网络"
-	Network==	网络
-"Advanced Settings"=="高级设置"
-	Advanced==	高级
-"Update Settings"=="升级设置"
-	Update==	升级
->YaCy Project==>YaCy项目
-"YaCy Project Home"=="YaCy项目主页"
-	Project==	项目
-"YaCy Forum"=="YaCy论坛"
-"Help"=="帮助"
-#-----------------------------
-
-#File: yacy/ui/yacyui-bookmarks.html
-#---------------------------
-'Add'=='添加'
-'Crawl'=='爬取'
-'Edit'=='编辑'
-'Delete'=='删除'
-'Rename'=='重命名'
-'Help'=='帮助'
-"YaCy Bookmarks"=="YaCy书签"
-'Public'=='公有'
-'Title'=='题目'
-'Tags'=='标签'
-'Folders'=='目录'
-'Date'=='日期'
-#-----------------------------
-
-#File: yacy/ui/yacyui-welcome.html
-#---------------------------
->Overview==>概况
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI 是基于JavaScript的YaCy客户端, 它使用当前的XML和JSON API.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI 尚在测试阶段, 所以在搜索时会有部分问题出现.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==目前我正在修改程序后台, 以让其更加友善和搜索到更合适的结果(我会在稳定版0.7后改善此类问题).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==就目前来说, 由于使用JSON和Flexigrid, 性能已获得显著提升!
 #-----------------------------
 
 # EOF

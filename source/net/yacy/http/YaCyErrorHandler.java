@@ -2,7 +2,7 @@
 //  YaCyErrorHandler
 //  ----------------
 //  Copyright 2014 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-//  First released 2014 at http://yacy.net
+//  First released 2014 at https://yacy.net
 //
 //  $LastChangedDate$
 //  $LastChangedRevision$

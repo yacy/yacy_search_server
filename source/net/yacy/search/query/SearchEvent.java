@@ -2056,6 +2056,21 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 if (this.deleteIfSnippetFail) {
                     this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes());
                 }
+                // to make an exception in case matches are only in the synonym field, we load the synonym field to check if the word is there
+                final ArrayList<String> synonyms = page.getSynonyms();
+                if (synonyms != null) {
+                    Iterator<String> words = this.query.getQueryGoal().getIncludeWords();
+                    while (words.hasNext()) {
+                        String word = words.next().toLowerCase();
+                        for (final String synonym : synonyms) {
+                            if (synonym.toLowerCase().equals(word)) {
+                                SearchEvent.log.info("accepted url " + page.url().toNormalform(true) + " without snippet: hit in synonyms field");
+                                TextSnippet synonym_snippet = new TextSnippet(page.url(), "[Synonym Match]", true, ResultClass.SOURCE_METADATA, "");
+                                return page.makeResultEntry(this.query.getSegment(), this.peers, synonym_snippet);
+                            }
+                        }
+                    }
+                }
                 SearchEvent.log.info("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;
             }

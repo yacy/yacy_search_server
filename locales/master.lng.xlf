@@ -211,7 +211,7 @@
        <source>Enable Autocrawler:</source>
     </trans-unit>
     <trans-unit id="66a1bd2c" xml:space="preserve" approved="no" translate="yes">
-       <source>Deep crawl every:</source>
+       <source>Deep crawl every Nth document:</source>
     </trans-unit>
     <trans-unit id="2291c65d" xml:space="preserve" approved="no" translate="yes">
        <source>Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.</source>
@@ -10923,27 +10923,7 @@
   </body>
 </file>
 
-<file original="yacy/ui/index.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="eea09b50" xml:space="preserve" approved="no" translate="yes">
-       <source>About YaCy-UI</source>
-    </trans-unit>
-    <trans-unit id="75a58d46" xml:space="preserve" approved="no" translate="yes">
-       <source>Admin Console</source>
-    </trans-unit>
-    <trans-unit id="f164d787" xml:space="preserve" approved="no" translate="yes">
-       <source>"Bookmarks"</source>
-    </trans-unit>
-    <trans-unit id="1aa8875f" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Bookmarks</source>
-    </trans-unit>
-    <trans-unit id="9e468e7" xml:space="preserve" approved="no" translate="yes">
-       <source>Server Log</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="yacy/ui/js/jquery-flexigrid.js"  source-language="en"  datatype="html">
+<file original="js/jquery-flexigrid.js"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="aae695d9" xml:space="preserve" approved="no" translate="yes">
        <source>'Displaying {from} to {to} of {total} items'</source>
@@ -10957,7 +10937,7 @@
   </body>
 </file>
 
-<file original="yacy/ui/js/jquery-ui-1.7.2.min.js"  source-language="en"  datatype="html">
+<file original="js/jquery-ui-1.7.2.min.js"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="58805d0b" xml:space="preserve" approved="no" translate="yes">
        <source>Loading&amp;#8230;</source>
@@ -10965,7 +10945,7 @@
   </body>
 </file>
 
-<file original="yacy/ui/js/jquery.ui.all.min.js"  source-language="en"  datatype="html">
+<file original="js/jquery.ui.all.min.js"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="58805d0b" xml:space="preserve" approved="no" translate="yes">
        <source>Loading&amp;#8230;</source>
@@ -10973,240 +10953,6 @@
   </body>
 </file>
 
-<file original="yacy/ui/sidebar/sidebar_1.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="28301008" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy P2P Websearch</source>
-    </trans-unit>
-    <trans-unit id="a472dcf8" xml:space="preserve" approved="no" translate="yes">
-       <source>"Search"</source>
-    </trans-unit>
-    <trans-unit id="3916a8b" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Text</source>
-    </trans-unit>
-    <trans-unit id="5281c856" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Images</source>
-    </trans-unit>
-    <trans-unit id="6d972238" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Audio</source>
-    </trans-unit>
-    <trans-unit id="6eb99add" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Video</source>
-    </trans-unit>
-    <trans-unit id="5638c81" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Applications</source>
-    </trans-unit>
-    <trans-unit id="b9ea38f6" xml:space="preserve" approved="no" translate="yes">
-       <source>Search term:</source>
-    </trans-unit>
-    <trans-unit id="3fedde1f" xml:space="preserve" approved="no" translate="yes">
-       <source>"help"</source>
-    </trans-unit>
-    <trans-unit id="10cddcad" xml:space="preserve" approved="no" translate="yes">
-       <source>Resource/Network:</source>
-    </trans-unit>
-    <trans-unit id="e77a28a6" xml:space="preserve" approved="no" translate="yes">
-       <source>freeworld</source>
-    </trans-unit>
-    <trans-unit id="4a3b6cf7" xml:space="preserve" approved="no" translate="yes">
-       <source>local peer</source>
-    </trans-unit>
-    <trans-unit id="a336677f" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;bookmarks</source>
-    </trans-unit>
-    <trans-unit id="4efd44b9" xml:space="preserve" approved="no" translate="yes">
-       <source>sciencenet</source>
-    </trans-unit>
-    <trans-unit id="fbbb5d44" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Language:</source>
-    </trans-unit>
-    <trans-unit id="83ab630c" xml:space="preserve" approved="no" translate="yes">
-       <source>any language</source>
-    </trans-unit>
-    <trans-unit id="66eaf8db" xml:space="preserve" approved="no" translate="yes">
-       <source>Bookmark Folders</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="yacy/ui/sidebar/sidebar_2.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="2b7a3d9" xml:space="preserve" approved="no" translate="yes">
-       <source>Bookmark Tags&lt;</source>
-    </trans-unit>
-    <trans-unit id="55d9c426" xml:space="preserve" approved="no" translate="yes">
-       <source>Search Options</source>
-    </trans-unit>
-    <trans-unit id="3a54ddd" xml:space="preserve" approved="no" translate="yes">
-       <source>Constraint:</source>
-    </trans-unit>
-    <trans-unit id="8f010085" xml:space="preserve" approved="no" translate="yes">
-       <source>all pages</source>
-    </trans-unit>
-    <trans-unit id="f8ccc6f6" xml:space="preserve" approved="no" translate="yes">
-       <source>index pages</source>
-    </trans-unit>
-    <trans-unit id="71fbbcbd" xml:space="preserve" approved="no" translate="yes">
-       <source>URL mask:</source>
-    </trans-unit>
-    <trans-unit id="f0bf24de" xml:space="preserve" approved="no" translate="yes">
-       <source>Prefer mask:</source>
-    </trans-unit>
-    <trans-unit id="35d73a65" xml:space="preserve" approved="no" translate="yes">
-       <source>Bookmark TagCloud</source>
-    </trans-unit>
-    <trans-unit id="a7330828" xml:space="preserve" approved="no" translate="yes">
-       <source>Topwords&lt;</source>
-    </trans-unit>
-    <trans-unit id="98502d3" xml:space="preserve" approved="no" translate="yes">
-       <source>alt="help"</source>
-    </trans-unit>
-    <trans-unit id="a3130744" xml:space="preserve" approved="no" translate="yes">
-       <source>title="help"</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="yacy/ui/yacyui-admin.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="2546dc9f" xml:space="preserve" approved="no" translate="yes">
-       <source>Peer Control</source>
-    </trans-unit>
-    <trans-unit id="8e90c89b" xml:space="preserve" approved="no" translate="yes">
-       <source>"Login"</source>
-    </trans-unit>
-    <trans-unit id="95402fea" xml:space="preserve" approved="no" translate="yes">
-       <source>Themes</source>
-    </trans-unit>
-    <trans-unit id="e84f656c" xml:space="preserve" approved="no" translate="yes">
-       <source>Messages</source>
-    </trans-unit>
-    <trans-unit id="7687a848" xml:space="preserve" approved="no" translate="yes">
-       <source>Re-Start</source>
-    </trans-unit>
-    <trans-unit id="f9c26a76" xml:space="preserve" approved="no" translate="yes">
-       <source>Shutdown</source>
-    </trans-unit>
-    <trans-unit id="72d4315c" xml:space="preserve" approved="no" translate="yes">
-       <source>Web Indexing</source>
-    </trans-unit>
-    <trans-unit id="c4acfae9" xml:space="preserve" approved="no" translate="yes">
-       <source>Crawl Start</source>
-    </trans-unit>
-    <trans-unit id="e5368068" xml:space="preserve" approved="no" translate="yes">
-       <source>Monitoring</source>
-    </trans-unit>
-    <trans-unit id="e83ad9ac" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy Network</source>
-    </trans-unit>
-    <trans-unit id="41f00281" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Settings</source>
-    </trans-unit>
-    <trans-unit id="f1992e4b" xml:space="preserve" approved="no" translate="yes">
-       <source>"Basic Settings"</source>
-    </trans-unit>
-    <trans-unit id="132b81a5" xml:space="preserve" approved="no" translate="yes">
-       <source>	Basic</source>
-    </trans-unit>
-    <trans-unit id="84782006" xml:space="preserve" approved="no" translate="yes">
-       <source>Accounts</source>
-    </trans-unit>
-    <trans-unit id="33b0df6" xml:space="preserve" approved="no" translate="yes">
-       <source>"Network"</source>
-    </trans-unit>
-    <trans-unit id="780485e5" xml:space="preserve" approved="no" translate="yes">
-       <source>	Network</source>
-    </trans-unit>
-    <trans-unit id="993ee983" xml:space="preserve" approved="no" translate="yes">
-       <source>"Advanced Settings"</source>
-    </trans-unit>
-    <trans-unit id="f69b34b" xml:space="preserve" approved="no" translate="yes">
-       <source>	Advanced</source>
-    </trans-unit>
-    <trans-unit id="1c735dea" xml:space="preserve" approved="no" translate="yes">
-       <source>"Update Settings"</source>
-    </trans-unit>
-    <trans-unit id="737d3a32" xml:space="preserve" approved="no" translate="yes">
-       <source>	Update</source>
-    </trans-unit>
-    <trans-unit id="2ba55dd5" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;YaCy Project</source>
-    </trans-unit>
-    <trans-unit id="7f1e03dc" xml:space="preserve" approved="no" translate="yes">
-       <source>"YaCy Project Home"</source>
-    </trans-unit>
-    <trans-unit id="f7b376d0" xml:space="preserve" approved="no" translate="yes">
-       <source>	Project</source>
-    </trans-unit>
-    <trans-unit id="5ad1a681" xml:space="preserve" approved="no" translate="yes">
-       <source>"YaCy Forum"</source>
-    </trans-unit>
-    <trans-unit id="3e2aedff" xml:space="preserve" approved="no" translate="yes">
-       <source>"Help"</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="yacy/ui/yacyui-bookmarks.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="244a46d" xml:space="preserve" approved="no" translate="yes">
-       <source>'Add'</source>
-    </trans-unit>
-    <trans-unit id="87dc13e7" xml:space="preserve" approved="no" translate="yes">
-       <source>'Crawl'</source>
-    </trans-unit>
-    <trans-unit id="46886376" xml:space="preserve" approved="no" translate="yes">
-       <source>'Edit'</source>
-    </trans-unit>
-    <trans-unit id="92f09db5" xml:space="preserve" approved="no" translate="yes">
-       <source>'Delete'</source>
-    </trans-unit>
-    <trans-unit id="77a21e82" xml:space="preserve" approved="no" translate="yes">
-       <source>'Rename'</source>
-    </trans-unit>
-    <trans-unit id="46b3291f" xml:space="preserve" approved="no" translate="yes">
-       <source>'Help'</source>
-    </trans-unit>
-    <trans-unit id="9e8e1d25" xml:space="preserve" approved="no" translate="yes">
-       <source>"YaCy Bookmarks"</source>
-    </trans-unit>
-    <trans-unit id="287f08b7" xml:space="preserve" approved="no" translate="yes">
-       <source>'Public'</source>
-    </trans-unit>
-    <trans-unit id="a4681bd6" xml:space="preserve" approved="no" translate="yes">
-       <source>'Title'</source>
-    </trans-unit>
-    <trans-unit id="475a5f47" xml:space="preserve" approved="no" translate="yes">
-       <source>'Tags'</source>
-    </trans-unit>
-    <trans-unit id="abcf1449" xml:space="preserve" approved="no" translate="yes">
-       <source>'Folders'</source>
-    </trans-unit>
-    <trans-unit id="46791652" xml:space="preserve" approved="no" translate="yes">
-       <source>'Date'</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="yacy/ui/yacyui-welcome.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="c0633d7" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Overview</source>
-    </trans-unit>
-    <trans-unit id="7114de08" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.</source>
-    </trans-unit>
-    <trans-unit id="7b434082" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy-UI is at most alpha status, as there is still problems with retriving the search results.</source>
-    </trans-unit>
-    <trans-unit id="98436844" xml:space="preserve" approved="no" translate="yes">
-       <source>I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).</source>
-    </trans-unit>
-    <trans-unit id="af668bc4" xml:space="preserve" approved="no" translate="yes">
-       <source>For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!</source>
-    </trans-unit>
-  </body>
-</file>
 
 <file original="yacyinteractive.html"  source-language="en"  datatype="html">
   <body>

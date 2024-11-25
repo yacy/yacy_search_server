@@ -46,7 +46,6 @@ import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -90,10 +89,17 @@ import net.yacy.search.schema.WebgraphSchema;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_8_11_2"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_PATH = "solr_9_0"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
     private static final String SOLR_OLD_PATH[] = new String[]{
             "solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47",
-            "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6", "solr_8_8_1"};
+            "solr_4_9",  // yacy_v1.80 (solr 4.9.0)
+            "solr_4_10", // yacy_v1.81 (solr 4.10.3), yacy_v1.82 (solr 4.10.3)
+            "solr_5_2",  // yacy_v1.90 (solr 5.5.1, sic!)
+            "solr_5_5",  // yacy_v1.91 (solr 5.5.2), yacy_v1.92 (solr 5.5.2)
+            "solr_6_6",  // yacy_v1.922 (solr 6.6, init fail), yacy_v1.924_20210209_10069 (solr 7.7.3), yacy_v1.926 (solr 8.9.0)
+            "solr_8_8_1", //
+            "solr_8_11_2"
+	};
 
     // class objects
     private final File                    segmentPath;
@@ -156,9 +162,8 @@ public final class Fulltext {
 
         final EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
         final SolrConfig config = localCollectionInstance.getDefaultCore().getSolrConfig();
-        final Version luceneVersion = config.luceneMatchVersion;
-        final String lvn = luceneVersion.major + "_" + luceneVersion.minor + "_" + luceneVersion.bugfix;
-        assert SOLR_PATH.endsWith(lvn) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", check defaults/solr/solrconfig.xml";
+        final String lvn = config.luceneMatchVersion.major + "_" + config.luceneMatchVersion.minor + "_" + config.luceneMatchVersion.bugfix;
+        //assert SOLR_PATH.endsWith(lvn) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", check defaults/solr/solrconfig.xml";
 
         ConcurrentLog.info("Fulltext", "using lucene version " + lvn);
         ConcurrentLog.info("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);

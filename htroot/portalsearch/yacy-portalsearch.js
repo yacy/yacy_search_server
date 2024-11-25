@@ -49,8 +49,8 @@ $(document).ready(function() {
 		'global' : false,		
 		theme    : 'start',
 		title    : 'YaCy Search Widget',
-		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
-		link     : 'http://yacy.net',
+		logo     : yconf.url + '/env/grafics/yacy-logo.png',
+		link     : 'https://yacy.net',
 		width    : 640,
 		height   : 640,
 		position : [150,50],
@@ -242,7 +242,7 @@ function yacysearch(clear) {
 	if(clear) {
 		$('#ypopup').empty();
 		var loading = "<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/>";
-		var loadimg = "<img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>";
+		var loadimg = "<img src='"+yconf.url+"/env/grafics/loading2.gif' align='absmiddle'/></h3></div>";
 		$('#ypopup').append(loading+loadimg);
 
 		if (!$("#ypopup").dialog('isOpen'))			
@@ -292,7 +292,7 @@ function yacysearch(clear) {
 					err = 'Request Time out.';
 			};
 			if (clear) $('#ypopup').empty();
-			var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
+			var favicon = "<img src='"+yconf.url+"/env/grafics/stop.png' class='favicon'/>";
 			var title = "<h3 class='linktitle'>"+favicon+" "+err+"</h3>";						
 			var url = "<p class='url'><a href=''>Current search terms: "+portalsearch.ycurr+"</a></p>"
 			$(title+url).appendTo("#ypopup");
@@ -340,7 +340,7 @@ function yacysearch(clear) {
 			
 			if(count == 0) {
     			if (clear) $('#ypopup').empty();
-				var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
+				var favicon = "<img src='"+yconf.url+"/env/grafics/stop.png' class='favicon'/>";
 				var title = "<h3 class='linktitle'>"+favicon+"No search results!</h3>";						
 				var url = "<p class='url'><a href=''>Current search terms: "+searchTerms+"</a></p>"
 				var desc = "<p class='desc'>You could restate your search, release some navigators or switch to global search...</p>";

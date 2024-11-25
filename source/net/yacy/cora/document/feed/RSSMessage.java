@@ -1,7 +1,7 @@
 /**
  *  RSSMessage
  *  Copyright 2007 by Michael Peter Christen
- *  First released 16.7.2007 at http://yacy.net
+ *  First released 16.7.2007 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
@@ -58,53 +58,53 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     	/** Human-readable title for an entry or a feed. */
         title(new String[]{"title","atom:title","rss:title",DublinCore.Title.getURIref()}),
-        
+
         /** Reference from an entry or feed to a Web resource URL */
         link(new String[]{"link","atom:link","rss:link"}),
-        
+
         /** Human-readable description or subtitle for an entry or a feed. */
         description(new String[]{"description","subtitle","atom:subtitle","rss:description", DublinCore.Description.getURIref()}),
-        
+
         /** The publication date for content in a feed or for an antry. */
         pubDate(new String[]{"pubDate","lastBuildDate","updated","rss:lastBuildDate","rss:updated"}),
-        
+
         /** Copyright notice for content in the channel. */
         copyright(new String[]{"copyright","publisher",DublinCore.Publisher.getURIref()}),
-        
+
         /** The author of an item (Email address) */
         author(new String[]{"author","creator",DublinCore.Creator.getURIref()}),
-        
+
         subject(new String[]{"subject",DublinCore.Subject.getURIref()}),
-        
+
         /** One or more categories a channel or item belongs to */
         category(new String[]{"category"}),
-        
+
         referrer(new String[]{"referrer","referer"}),
-        
+
         /** The language the channel is written in. */
         language(new String[]{"language",DublinCore.Language.getURIref()}),
-        
+
         /** A string that uniquely identifies an item (RSS 2.0) */
         guid(new String[]{"guid"}),
-        
+
         /** URL describing a media object that is attached to a feed item */
         enclosure(new String[]{"enclosure"}),
-        
+
         /**  Time To Live : number of minutes that indicates how long a channel (RSS 2.0) can be cached before refreshing from the source. */
         ttl(new String[]{"ttl"}),
-        
+
         /** URL to the documentation for the format used in the RSS file (for example http://www.rssboard.org/rss-specification) */
         docs(new String[]{"docs"}),
-        
+
         size(new String[]{"size", "length", YaCyMetadata.size.getURIref()}),
         lon(new String[]{Geo.Long.getURIref(), "geo:lon"}), // include possible misspelling geo:lon (instead of geo:long)
         lat(new String[]{Geo.Lat.getURIref()});
         //point("gml:pos,georss:point,coordinates");
-        
+
         private Set<String> keys;
 
         private Token(final String[] keylist) {
-            this.keys = new HashSet<String>();
+            this.keys = new HashSet<>();
             this.keys.addAll(Arrays.asList(keylist));
             this.keys.add(this.name());
         }
@@ -127,23 +127,23 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
             return this.keys.size() == 0 ? "" : this.keys.iterator().next();
         }
     }
-    
-    private static Map<String, Token> tokenNick2Token = new HashMap<String, Token>();
+
+    private static Map<String, Token> tokenNick2Token = new HashMap<>();
     static {
-        for (Token t: Token.values()) {
-            for (String nick: t.keys) tokenNick2Token.put(nick, t);
+        for (final Token t: Token.values()) {
+            for (final String nick: t.keys) tokenNick2Token.put(nick, t);
         }
     }
 
-    public static Token valueOfNick(String nick) {
+    public static Token valueOfNick(final String nick) {
         return tokenNick2Token.get(nick);
     }
-    
+
     private static String artificialGuidPrefix = "c0_";
     private static String calculatedGuidPrefix = "c1_";
     public static final RSSMessage POISON = new RSSMessage("", "", "");
 
-    public static final HashSet<String> tags = new HashSet<String>();
+    public static final HashSet<String> tags = new HashSet<>();
     static {
         for (final Token token: Token.values()) {
             tags.addAll(token.keys());
@@ -153,7 +153,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     private final Map<String, String> map;
 
     public RSSMessage(final String title, final String description, final String link) {
-        this.map = new HashMap<String, String>();
+        this.map = new HashMap<>();
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         if (link.length() > 0) this.map.put(Token.link.name(), link);
@@ -162,7 +162,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     }
 
     public RSSMessage(final String title, final String description, final MultiProtocolURL link, final String guid) {
-        this.map = new HashMap<String, String>();
+        this.map = new HashMap<>();
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         this.map.put(Token.link.name(), link.toNormalform(true));
@@ -173,9 +173,9 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     }
 
     public RSSMessage() {
-        this.map = new HashMap<String, String>();
+        this.map = new HashMap<>();
     }
-    
+
     public void setValue(final Token token, final String value) {
         if (value.length() > 0) {
         	this.map.put(token.name(), value);
@@ -214,8 +214,8 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public List<String> getDescriptions() {
-        List<String> ds = new ArrayList<String>();
-        String d = Token.description.valueFrom(this.map, "");
+        final List<String> ds = new ArrayList<>();
+        final String d = Token.description.valueFrom(this.map, "");
         if (d.length() > 0) ds.add(d);
         return ds;
     }
@@ -285,12 +285,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         }
         return guid;
     }
-    
+
     @Override
     public String getEnclosure() {
     	return Token.enclosure.valueFrom(this.map, "");
     }
-    
+
     public String getTTL() {
         return Token.ttl.valueFrom(this.map, "");
     }
@@ -330,9 +330,9 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     public String toString() {
         return this.toString(true);
     }
-    
-    public String toString(boolean withItemTag) {
-        StringBuilder sb = new StringBuilder();
+
+    public String toString(final boolean withItemTag) {
+        final StringBuilder sb = new StringBuilder();
         if (withItemTag) sb.append("<item>\n");
         if (this.map.containsKey(Token.title.name())) sb.append("<title>").append(this.map.get(Token.title.name())).append("</title>\n");
         if (this.map.containsKey(Token.link.name())) sb.append("<link>").append(this.map.get(Token.link.name())).append("</link>\n");
@@ -384,12 +384,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     public void setGuid(final String guid) {
         setValue(Token.guid, guid);
     }
-    
+
     @Override
     public void setEnclosure(final String enclosure) {
     	setValue(Token.enclosure, enclosure);
     }
-    
+
     @Override
     public void setLanguage(final String language) {
         setValue(Token.language, language);

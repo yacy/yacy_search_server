@@ -1,7 +1,7 @@
 /**
  *  OSMTile
  *  Copyright 2008 by Michael Peter Christen
- *  First released 12.02.2008 at http://yacy.net
+ *  First released 12.02.2008 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

@@ -283,13 +283,13 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
     
     /** Default maximum system load allowing remote RWI searches */
-    public static final float REMOTESEARCH_MAXLOAD_RWI_DEFAULT  = 8.0f;
+    public static final float REMOTESEARCH_MAXLOAD_RWI_DEFAULT  = 2.0f * (float) Runtime.getRuntime().availableProcessors();
     
     /** Setting key to configure the maximum system load allowing remote Solr searches */
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
     
     /** Default maximum system load allowing remote Solr searches */
-    public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = 4.0f;
+    public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = (float) Runtime.getRuntime().availableProcessors();
     
     /** Key of the setting controlling whether https should be preferred for remote searches, when available on the target peer */
     public static final String REMOTESEARCH_HTTPS_PREFERRED = "remotesearch.https.preferred";

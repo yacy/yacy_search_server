@@ -35,8 +35,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
@@ -58,7 +56,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
-import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -196,7 +193,7 @@ public final class yacy {
             f = new File(dataHome, "DATA/yacy.running");
             if (!f.createNewFile()) ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be created!");
             try {
-            	FileOutputStream fos = new FileOutputStream(f);
+            	final FileOutputStream fos = new FileOutputStream(f);
             	fos.write(Integer.toString(OS.getPID()).getBytes());
             	fos.close();
             } catch (final Exception e) { } // write PID
@@ -204,7 +201,7 @@ public final class yacy {
             FileChannel channel = null;
             FileLock lock = null;
             try {
-            	RandomAccessFile raf = new RandomAccessFile(f,"rw");
+            	final RandomAccessFile raf = new RandomAccessFile(f,"rw");
                 channel = raf.getChannel();
                 lock = channel.tryLock(); // lock yacy.running
                 raf.close();
@@ -435,7 +432,7 @@ public final class yacy {
      * @see File#mkdir()
      * @param path
      */
-    private static void mkdirIfNeseccary(final File path) {
+    public static void mkdirIfNeseccary(final File path) {
         if (!(path.exists()))
             if(!path.mkdir())
                 ConcurrentLog.warn("STARTUP", "could not create directory "+ path.toString());
@@ -722,26 +719,6 @@ public final class yacy {
 
             // case for the application path if started normally with a jre command
             File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
-
-            // try to find the application root path within a Mac application
-            // call com.apple.eio.FileManager.getPathToApplicationBundle();
-            if (!OS.isWindows) { // prevent that YaCy always starts with an exception message on none Apple systems
-                try {
-                    // these methods will cause a warning: remove them with --illegal-access=permit
-                    final Class<?> comAppleEioFileManagerClass = Class.forName("com.apple.eio.FileManager");
-                    final Method getPathToApplicationBundleMethod = ClassProvider.getStaticMethod(comAppleEioFileManagerClass, "getPathToApplicationBundle", null);
-                    final String apppath = (String) getPathToApplicationBundleMethod.invoke(null);
-                    System.out.println("PathToApplicationBundle = " + apppath); // PathToApplicationBundle = /Users/admin/git/rc1/build/YaCy.app
-                    if (apppath != null && apppath.endsWith(".app")) {
-                        // modify the applicationRoot path to within the app file
-                        applicationRoot = new File(apppath + "/Contents");
-                        System.setProperty("user.dir", applicationRoot.getAbsolutePath()); // required since nasty code elswhere is using it
-                        System.setProperty("user.home", applicationRoot.getAbsolutePath()); // well
-                    }
-                } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-            }
             File dataRoot = applicationRoot;
             //System.out.println("args.length=" + args.length);
             //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");

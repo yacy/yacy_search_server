@@ -1,7 +1,7 @@
 /**
  *  RAMIndexCluster
  *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 12.03.2009 at http://yacy.net
+ *  First released 12.03.2009 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

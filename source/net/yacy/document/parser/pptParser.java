@@ -32,7 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import org.apache.poi.hpsf.DocumentSummaryInformation;
+import org.apache.poi.hpsf.SummaryInformation;
+import org.apache.poi.hslf.usermodel.HSLFSlideShow;
+import org.apache.poi.sl.extractor.SlideShowExtractor;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
@@ -41,8 +47,6 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
-
-import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
 public class pptParser extends AbstractParser implements Parser {
 
@@ -69,40 +73,47 @@ public class pptParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            final VocabularyScraper scraper, 
+            final VocabularyScraper scraper,
             final int timezoneOffset,
-            final InputStream source) throws Parser.Failure,
-            InterruptedException {
+            final InputStream source) throws Parser.Failure, InterruptedException {
         try {
-            /*
-             * create new PowerPointExtractor and extract text and notes
-             * of the document
-             */
-            final PowerPointExtractor pptExtractor = new PowerPointExtractor(new BufferedInputStream(source));
-            final String contents = pptExtractor.getText(true, true).trim();
-            String title = contents.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
-            if (title.length() > 80) title = title.substring(0, 80);
-            int l = title.length();
-            while (true) {
-                title = title.replaceAll("  ", " ");
-                if (title.length() == l) break;
-                l = title.length();
+            final BufferedInputStream bis = new BufferedInputStream(source);
+            final HSLFSlideShow slideShow = new HSLFSlideShow(bis);
+            final SummaryInformation summaryInfo = slideShow.getSummaryInformation();
+            final DocumentSummaryInformation docSummaryInfo = slideShow.getDocumentSummaryInformation();
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            final SlideShowExtractor<?,?> pptExtractor = new SlideShowExtractor(slideShow);
+            final String contents = pptExtractor.getText().trim();
+
+            String title = summaryInfo == null ? "" : summaryInfo.getTitle();
+            if (title.length() == 0) {
+                title = contents.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
+                if (title.length() > 80) title = title.substring(0, 80);
+                int l = title.length();
+                while (true) {
+                    title = title.replaceAll("  ", " ");
+                    if (title.length() == l) break;
+                    l = title.length();
+                }
             }
-            // get keywords (for yacy as array)
-            final String keywords = pptExtractor.getSummaryInformation().getKeywords();
+
+            final String author = summaryInfo == null ? "" : summaryInfo.getAuthor();
+            final String keywords = summaryInfo == null ? "" : summaryInfo.getKeywords();
+            final String subject = summaryInfo == null ? "" : summaryInfo.getSubject();
+            //final String comments = summaryInfo == null ? "" : summaryInfo.getComments();
+            final Date lastSaveDate = summaryInfo == null ? null : summaryInfo.getLastSaveDateTime();
+            //final String category = docSummaryInfo == null ? "" : docSummaryInfo.getCategory();
+            final String company = docSummaryInfo == null ? "" : docSummaryInfo.getCompany();
+            //final String manager = docSummaryInfo == null ? "" : docSummaryInfo.getManager();
+
             final String[] keywlist;
             if (keywords != null && !keywords.isEmpty()) {
                keywlist = CommonPattern.COMMA.split(keywords);
             } else keywlist = null;
 
-            final String subject = pptExtractor.getSummaryInformation().getSubject();
-            List<String> descriptions = new ArrayList<String>();
+            final List<String> descriptions = new ArrayList<>();
             if (subject != null && !subject.isEmpty()) descriptions.add(subject);
 
-            /*
-             * create the plasmaParserDocument for the database
-             * and set shortText and bodyText properly
-             */
             final Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
@@ -111,8 +122,8 @@ public class pptParser extends AbstractParser implements Parser {
                 null,
                 keywlist,
                 singleList(title),
-                pptExtractor.getSummaryInformation().getAuthor(), // may be null
-                pptExtractor.getDocSummaryInformation().getCompany(),
+                author, // may be null
+                company,
                 null,
                 descriptions,
                 0.0d, 0.0d,
@@ -121,9 +132,9 @@ public class pptParser extends AbstractParser implements Parser {
                 null,
                 null,
                 false,
-                pptExtractor.getSummaryInformation().getLastSaveDateTime() // may be null
+                lastSaveDate // may be null
                 )};
-            try {pptExtractor.close();} catch (IOException e1) {}
+            try {pptExtractor.close();} catch (final IOException e1) {}
             return docs;
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;

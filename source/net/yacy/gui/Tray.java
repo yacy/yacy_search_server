@@ -151,22 +151,6 @@ public final class Tray {
     private static Object applicationInstance;
     private static Method setDockIconImage;
 
-    static {
-        Class<?> applicationClass = null;
-        try {
-            applicationClass = Class.forName("com.apple.eawt.Application");
-            final Method applicationGetApplication = applicationClass.getMethod("getApplication");
-            applicationInstance = applicationGetApplication.invoke(null);
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            ConcurrentLog.logException(e);
-        }
-        if (applicationClass != null) try {
-            setDockIconImage = applicationClass.getMethod("setDockIconImage", Class.forName("java.awt.Image"));
-        } catch (ClassNotFoundException | SecurityException | IllegalArgumentException | NoSuchMethodException e) {
-            ConcurrentLog.logException(e);
-        }
-    }
-
     private static void setDockIcon(final Image icon) {
         if (!OS.isMacArchitecture || setDockIconImage == null || applicationInstance == null) return;
         try {

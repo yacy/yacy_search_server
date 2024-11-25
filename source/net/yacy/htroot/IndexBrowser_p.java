@@ -1,7 +1,7 @@
 /**
  *  IndexBrowser
  *  Copyright 2012 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 27.09.2012 at http://yacy.net
+ *  First released 27.09.2012 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -156,7 +156,7 @@ public class IndexBrowser_p {
             !path.startsWith("https://") &&
             !path.startsWith("ftp://") &&
             !path.startsWith("smb://") &&
-            !path.startsWith("file://"))) { path = "http://" + path; }
+            !path.startsWith("file://"))) { path = "https://" + path; }
         prop.putHTML("path", path);
         prop.put("delete", path.length() > 0 ? 1 : 0);
 

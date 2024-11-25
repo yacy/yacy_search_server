@@ -1,7 +1,7 @@
 /**
  *  Classification.java
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 09.07.2009 at http://yacy.net
+ *  First released 09.07.2009 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -34,13 +34,13 @@ import net.yacy.cora.util.CommonPattern;
 
 public class Classification {
 
-    private static final Set<String> textExtSet = new HashSet<String>();
-    private static final Set<String> mediaExtSet = new HashSet<String>();
-    private static final Set<String> imageExtSet = new HashSet<String>();
-    private static final Set<String> audioExtSet = new HashSet<String>();
-    private static final Set<String> videoExtSet = new HashSet<String>();
-    private static final Set<String> appsExtSet = new HashSet<String>();
-    private static final Set<String> ctrlExtSet = new HashSet<String>();
+    private static final Set<String> textExtSet = new HashSet<>();
+    private static final Set<String> mediaExtSet = new HashSet<>();
+    private static final Set<String> imageExtSet = new HashSet<>();
+    private static final Set<String> audioExtSet = new HashSet<>();
+    private static final Set<String> videoExtSet = new HashSet<>();
+    private static final Set<String> appsExtSet = new HashSet<>();
+    private static final Set<String> ctrlExtSet = new HashSet<>();
 
     public enum ContentDomain {
 
@@ -54,7 +54,7 @@ public class Classification {
 
         private final int code;
 
-        ContentDomain(int code) {
+        ContentDomain(final int code) {
             this.code = code;
         }
 
@@ -104,17 +104,17 @@ public class Classification {
         addSet(mediaExtSet, apps + "," + audio + "," + video + "," + image); // all media formats
     }
 
-    private static void addSet(Set<String> set, final String extString) {
+    private static void addSet(final Set<String> set, final String extString) {
         if ((extString == null) || (extString.isEmpty())) return;
-        for (String s: CommonPattern.COMMA.split(extString, 0)) set.add(s.toLowerCase(Locale.ROOT).trim());
+        for (final String s: CommonPattern.COMMA.split(extString, 0)) set.add(s.toLowerCase(Locale.ROOT).trim());
     }
 
-    public static boolean isTextExtension(String textExt) {
+    public static boolean isTextExtension(final String textExt) {
         if (textExt == null) return false;
         return textExtSet.contains(textExt.trim().toLowerCase(Locale.ROOT));
     }
 
-    public static boolean isMediaExtension(String mediaExt) {
+    public static boolean isMediaExtension(final String mediaExt) {
         if (mediaExt == null) return false;
         return mediaExtSet.contains(mediaExt.trim().toLowerCase(Locale.ROOT));
     }
@@ -200,9 +200,9 @@ public class Classification {
                 if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}
             }
         }
-        for (Entry<Object, Object> entry: mimeTable.entrySet()) {
-            String ext = (String) entry.getKey();
-            String mime = (String) entry.getValue();
+        for (final Entry<Object, Object> entry: mimeTable.entrySet()) {
+            final String ext = (String) entry.getKey();
+            final String mime = (String) entry.getValue();
             if (mime.startsWith("text/")) textExtSet.add(ext.toLowerCase(Locale.ROOT));
             if (mime.startsWith("audio/")) audioExtSet.add(ext.toLowerCase(Locale.ROOT));
             if (mime.startsWith("video/")) videoExtSet.add(ext.toLowerCase(Locale.ROOT));

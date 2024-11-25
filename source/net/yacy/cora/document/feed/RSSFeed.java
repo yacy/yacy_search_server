@@ -1,7 +1,7 @@
 /**
  *  RSSFeed
  *  Copyright 2007 by Michael Peter Christen
- *  First released 16.7.2007 at http://yacy.net
+ *  First released 16.7.2007 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -36,22 +36,22 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public static final int DEFAULT_MAXSIZE = 10000;
 
     // class variables
-    
+
     /** Single required element  see http://www.rssboard.org/rss-profile#element-channel */
     private RSSMessage channel = null;
-    
+
     /** A guid:Item map */
     private final Map<String, RSSMessage> messages;
     private final int maxsize;
-    
+
     /** Set to true when maxsize messages limit has been exceeded and exceeding messages have been discarded */
     private boolean maxSizeExceeded;
 
-    
+
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sb.append("<rss version=\"2.0\"\n");
         sb.append("  xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\"\n");
@@ -62,14 +62,14 @@ public class RSSFeed implements Iterable<RSSMessage> {
         sb.append("<opensearch:startIndex>0</opensearch:startIndex>\n");
         sb.append("<opensearch:itemsPerPage>" + this.size() + "</opensearch:itemsPerPage>\n");
         sb.append("<opensearch:totalResults>" + this.size() + "</opensearch:totalResults>\n");
-        for (RSSMessage item: messages.values()) {
+        for (final RSSMessage item: this.messages.values()) {
             sb.append(item.toString());
         }
         sb.append("</channel>\n");
         sb.append("</rss>\n");
         return sb.toString();
     }
-    
+
     public RSSFeed(final int maxsize) {
         this.messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
         this.channel = null;
@@ -83,11 +83,11 @@ public class RSSFeed implements Iterable<RSSMessage> {
      * @param links
      * @param source
      */
-    public RSSFeed(Set<MultiProtocolURL> links, String source) {
+    public RSSFeed(final Set<MultiProtocolURL> links, final String source) {
         this(Integer.MAX_VALUE);
         String u;
         RSSMessage message;
-        for (MultiProtocolURL uri: links) {
+        for (final MultiProtocolURL uri: links) {
             u = uri.toNormalform(true);
             message = new RSSMessage(u, "", u);
             message.setAuthor(source);
@@ -112,8 +112,8 @@ public class RSSFeed implements Iterable<RSSMessage> {
     }
 
     public Set<MultiProtocolURL> getLinks() {
-        Set<MultiProtocolURL> links = new HashSet<MultiProtocolURL>();
-        for (RSSMessage message: this.messages.values()) {
+        final Set<MultiProtocolURL> links = new HashSet<>();
+        for (final RSSMessage message: this.messages.values()) {
             try {links.add(new MultiProtocolURL(message.getLink()));} catch (final MalformedURLException e) {}
         }
         return links;
@@ -141,7 +141,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public int size() {
         return this.messages.size();
     }
-    
+
     /**
      * @return true when maxsize messages limit has been exceeded and exceeding messages have been discarded
      */

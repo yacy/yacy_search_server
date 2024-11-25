@@ -1,7 +1,7 @@
 /**
  *  tarParser
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 29.6.2010 at http://yacy.net
+ *  First released 29.6.2010 at https://yacy.net
  *
  * $LastChangedDate$
  * $LastChangedRevision$

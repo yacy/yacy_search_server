@@ -1,7 +1,7 @@
 /**
  *  SolrServlet
  *  Copyright 2014 by Michael Peter Christen
- *  First released 23.01.2014 at http://yacy.net
+ *  First released 23.01.2014 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -141,6 +141,7 @@ public class SolrServlet extends HttpServlet {
 			if (solrRsp.getException() != null) {
 				@SuppressWarnings("rawtypes")
 				NamedList info = new SimpleOrderedMap();
+				@SuppressWarnings("unchecked")
 				int code = ResponseUtils.getErrorInfo(solrRsp.getException(), info, null);
 				solrRsp.add("error", info);
 				response.setStatus(code);

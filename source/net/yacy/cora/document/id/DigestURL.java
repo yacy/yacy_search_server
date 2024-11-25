@@ -1,18 +1,18 @@
 /**
  *  DigestURL
  *  Copyright 2006 by Michael Peter Christen
- *  first published 13.07.2006 on http://yacy.net
+ *  first published 13.07.2006 on https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -46,7 +46,7 @@ import net.yacy.cora.util.CommonPattern;
 public class DigestURL extends MultiProtocolURL implements Serializable {
 
     public static final DigestURL POISON = new DigestURL(); // poison pill for concurrent link generators
-    
+
     private static final long serialVersionUID = -1173233022912141885L;
 
     // class variables
@@ -67,7 +67,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
             else if (port > 999) h = "http://" + h + ":" + port;
             else h = "http://" + h;
         }
-        DigestURL url = new DigestURL(h);
+        final DigestURL url = new DigestURL(h);
         return (url == null) ? null : url.hosthash();
     }
 
@@ -76,11 +76,11 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
      * the list is separated by comma
      * @param hostlist
      * @return list of host hashes without separation
-     * @throws MalformedURLException 
+     * @throws MalformedURLException
      */
     public static String hosthashes(final String hostlist) throws MalformedURLException {
-        String[] hs = CommonPattern.COMMA.split(hostlist);
-        StringBuilder sb = new StringBuilder(hostlist.length());
+        final String[] hs = CommonPattern.COMMA.split(hostlist);
+        final StringBuilder sb = new StringBuilder(hostlist.length());
         for (String h: hs) {
             if (h == null) continue;
             h = h.trim();
@@ -92,9 +92,9 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return sb.toString();
     }
 
-    public static Set<String> hosthashess(String hosthashes) {
+    public static Set<String> hosthashess(final String hosthashes) {
         if (hosthashes == null || hosthashes.isEmpty()) return null;
-        HashSet<String> h = new HashSet<String>();
+        final HashSet<String> h = new HashSet<>();
         assert hosthashes.length() % 6 == 0;
         for (int i = 0; i < hosthashes.length(); i = i + 6) {
             h.add(hosthashes.substring(i, i + 6));
@@ -135,7 +135,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         super(url);
         this.hash = hash;
     }
-    
+
     /**
      * DigestURI from general URI, hash already calculated
      * @param baseURL
@@ -172,9 +172,9 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         }
         return new DigestURL(baseURL, relPath);
     }
-    
+
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
-    
+
     @Override
     public int hashCode() {
         if (this.hashCache == Integer.MIN_VALUE) {
@@ -211,13 +211,13 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
 
     /**
      * <p>Extract a fragment of the url hash that can be used as a hash for the host name part of this url.</p>
-     * <p><strong>WARNING : two URLs with the same host name but different protocols or ports will produce two different host hashes with this method!</strong></p> 
+     * <p><strong>WARNING : two URLs with the same host name but different protocols or ports will produce two different host hashes with this method!</strong></p>
      * @return a 6-byte hash fragment
      */
     public String hosthash() {
     	return ASCII.String(this.hash(), 6, 6);
     }
-    
+
     /**
      * calculated YaCy-Hash of this URI
      *
@@ -306,7 +306,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         if (host == null) {
             return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol)).substring(0, 5);
         }
-        boolean isIPv6HostIP = host.indexOf(':') >= 0;
+        final boolean isIPv6HostIP = host.indexOf(':') >= 0;
         final StringBuilder sb = new StringBuilder(host.length() + 15);
         sb.append(protocol).append(':');
         if (isIPv6HostIP) {sb.append('[').append(host).append(']');} else sb.append(host);
@@ -346,7 +346,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     public static final String hosthash6(final String host) {
         return hosthash6("http", host, 80);
     }
-    
+
     //private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
     public static final int domLengthEstimation(final byte[] urlHashBytes) {

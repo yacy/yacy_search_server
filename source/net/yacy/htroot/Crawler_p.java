@@ -803,7 +803,8 @@ public class Crawler_p {
             // we must increase the load limit because a conservative load limit will prevent a high crawling speed
             // however this must not cause that the load limit is reduced again because that may go against the users requirements
             // in case they set the limit themself, see https://github.com/yacy/yacy_search_server/issues/363
-            float loadprereq = wantedPPM <= 10 ? 1.0f : wantedPPM <= 100 ? 2.0f : wantedPPM >= 1000 ? 8.0f : 3.0f;
+            float numberOfCores2 = 2.0f * (float) Runtime.getRuntime().availableProcessors();
+            float loadprereq = wantedPPM <= 10 ? 1.0f : wantedPPM <= 100 ? 2.0f : wantedPPM >= 1000 ? numberOfCores2 : 3.0f;
             loadprereq = Math.max(loadprereq, sb.getConfigFloat(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_LOADPREREQ, loadprereq));
 
             BusyThread thread;

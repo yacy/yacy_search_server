@@ -1,7 +1,7 @@
 /**
  *  IndexDeletion_p
  *  Copyright 2013 by Michael Peter Christen
- *  First released 29.04.2013 at http://yacy.net
+ *  First released 29.04.2013 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

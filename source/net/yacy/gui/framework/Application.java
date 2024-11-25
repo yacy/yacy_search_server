@@ -1,7 +1,7 @@
 /**
  *  Application
  *  Copyright 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 05.08.2010 at http://yacy.net
+ *  First released 05.08.2010 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

@@ -5,7 +5,7 @@ FROM arm64v8/openjdk:17-buster
 
 # Install needed packages not in base image 
 # (curl for sh scripts in /bin, and wkhtmltopdf,imagemagick,xvfb and ghostscript to enable PDF and image snapshot generation)
-RUN apt-get update && apt-get install -yq curl wkhtmltopdf imagemagick xvfb ghostscript && \
+RUN apt-get update && apt-get install -yq curl wkhtmltopdf imagemagick xvfb ghostscript ca-certificates-java && \
   rm -rf /var/lib/apt/lists/*
 
 # trace java version

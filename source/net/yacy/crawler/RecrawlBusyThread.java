@@ -2,7 +2,7 @@
  * RecrawlBusyThread.java
  * SPDX-FileCopyrightText: 2015 by Burkhard Buelte
  * SPDX-License-Identifier: GPL-2.0-or-later
- * First released 15.05.2015 at http://yacy.net
+ * First released 15.05.2015 at https://yacy.net
  *
  * This is a part of YaCy, a peer-to-peer based web search engine
  *

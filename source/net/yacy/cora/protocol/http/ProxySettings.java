@@ -1,7 +1,7 @@
 /**
  *  ProxySettings
  *  Copyright 2010 by Michael Peter Christen
- *  First released 25.05.2010 at http://yacy.net
+ *  First released 25.05.2010 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

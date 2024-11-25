@@ -1,7 +1,7 @@
 /**
  *  mp3Parser
  *  Copyright 2012 by Stefan Foerster, Norderstedt, Germany
- *  First released 01.10.2012 at http://yacy.net
+ *  First released 01.10.2012 at https://yacy.net
  *
  * $LastChangedDate$
  * $LastChangedRevision$

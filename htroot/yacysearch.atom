@@ -4,7 +4,7 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:yacy="http://www.yacy.net/"
 >
-	<!-- YaCy Search Engine; http://yacy.net -->
+	<!-- YaCy Search Engine; https://yacy.net -->
 	
 		<title>#[promoteSearchPageGreeting]#: #[rss_query]#</title>
 		<subtitle>Search for #[rss_query]#</subtitle>

@@ -1,7 +1,7 @@
 /**
  *  GenericFormatter
  *  Copyright 2011 by Michael Peter Christen
- *  First released 2.1.2011 at http://yacy.net
+ *  First released 2.1.2011 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
@@ -50,7 +50,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
     public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
     public static final String PATTERN_SIMPLE  = "yyyy/MM/dd HH:mm:ss";
-    
+
 	/**
 	 * A regular expression matching the PATTERN_SIMPLE pattern (does not control
 	 * last day of month (30/31 or 28/29 for february). Can be used as a HTML5 input
@@ -74,7 +74,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
 	public static final DateTimeFormatter FORMAT_SHORT_MINUTE = DateTimeFormatter
 			.ofPattern(PATTERN_SHORT_MINUTE.replace("yyyy", "uuuu"), Locale.US).withZone(ZoneId.systemDefault());
 
-	
+
 	/**
 	 * A thread-safe date formatter using the
 	 * {@link GenericFormatter#PATTERN_SHORT_SECOND} pattern with the US locale on
@@ -257,17 +257,17 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     @Override
     public Calendar parse(final String timeString, final int timezoneOffset) throws ParseException {
         synchronized (this.dateFormat) {
-            Calendar cal = Calendar.getInstance(UTCtimeZone);
+            final Calendar cal = Calendar.getInstance(UTCtimeZone);
             cal.setTime(this.dateFormat.parse(timeString));
             cal.add(Calendar.MINUTE, timezoneOffset); // add a correction; i.e. for UTC+1 -60 minutes is added to patch a time given in UTC+1 to the actual time at UTC
             return cal;
         }
     }
-    
+
     /**
      * Like {@link #parseShortSecond(String)} using additional timezone information provided in an
      * offset String, like "+0100" for CET.
-     * @throws ParseException 
+     * @throws ParseException
      */
     public Calendar parse(final String timeString, final String UTCOffset) throws ParseException {
         if (timeString == null || timeString.isEmpty()) { return Calendar.getInstance(UTCtimeZone); }
@@ -292,7 +292,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         final int om = NumberTools.parseIntDecSubstring(diffString, 3);
         return ((ahead) ? 1 : -1) * (oh * 60 + om);
     }
-    
+
     /**
      * get the difference of this servers time zone to UTC/GMT in milliseconds
      * @return
@@ -307,7 +307,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
             return zoneOffsetHours + DSTOffsetHours;
         }
     }
-    
+
     public static String UTCDiffString() {
         // we express the UTC Difference in 5 digits:
         // SHHMM
@@ -330,12 +330,12 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     }
 
     private final static DecimalFormat D2 = new DecimalFormat("00");
-    
+
 	/**
 	 * Safely format the given time value using the given formatter. Fallback to
 	 * ISO-8601 representation or to raw time value without exception when the
 	 * format can not be applied.
-	 * 
+	 *
 	 * @param time
 	 *            a time value as millisecnods from Epoch (1970-01-01T00:00:00Z)
 	 * @param formatter
@@ -355,11 +355,11 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
 		}
 		return res;
 	}
-	
+
 	/**
 	 * Safely format the given instant using the given formatter. Fallback to
 	 * ISO-8601 representation without exception when the format can not be applied.
-	 * 
+	 *
 	 * @param instant
 	 *            the instant to format
 	 * @param formatter
@@ -384,7 +384,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
 		return res;
 	}
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         System.out.println(UTCDiffString());
     }
 }

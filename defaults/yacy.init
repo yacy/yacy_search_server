@@ -597,7 +597,7 @@ proxyIndexingLocalMedia=true
 # proxy usage only for .yacy-Domains for autoconfig
 proxyYacyOnly=false
 
-# enable proxy via url (/proxy.html?url=http://yacy.net)
+# enable proxy via url (/proxy.html?url=https://yacy.net)
 proxyURL=false
 proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
 # which urls to rewrite to /proxy.html?url=x (values: all, domainlist)
@@ -1288,8 +1288,8 @@ content.phpbb3.dumpfile =
 
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
-about.headline=
-about.body=
+about.headline=Please Help Us
+about.body=<iframe src="/env/donate.html" style="border:none;"></iframe>
 
 donation.iframesource=https://yacy.net/include/donate.html
 donation.iframetarget=env/donate.html
@@ -1405,7 +1405,7 @@ postprocessing.partialUpdate = true
 # To use this user agent option, you must define completely different names and strings
 # and remove the given example here, which will be ignored by default.
 crawler.userAgent.name = yacybot
-crawler.userAgent.string = yacybot ($$SYSTEM$$) http://yacy.net/bot.html
+crawler.userAgent.string = yacybot ($$SYSTEM$$) https://yacy.net/bot.html
 crawler.userAgent.minimumdelta = 500
 crawler.userAgent.clienttimeout = 10000
 

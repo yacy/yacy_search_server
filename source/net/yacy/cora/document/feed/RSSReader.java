@@ -1,7 +1,7 @@
 /**
  *  RSSReader
  *  Copyright 2007 by Michael Peter Christen
- *  First released 16.7.2007 at http://yacy.net
+ *  First released 16.7.2007 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -50,7 +50,7 @@ public class RSSReader extends DefaultHandler {
     private boolean parsingChannel, parsingItem;
     private final RSSFeed theChannel;
     private Type type;
-    
+
     /** When a parsing limit on instance construction has been exceeded */
     private boolean maxBytesExceeded;
 
@@ -66,7 +66,7 @@ public class RSSReader extends DefaultHandler {
         this.maxBytesExceeded = false;
     }
 
-    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<>();
     private static SAXParser getParser() throws SAXException {
         SAXParser parser = tlSax.get();
         if (parser == null) {
@@ -98,16 +98,16 @@ public class RSSReader extends DefaultHandler {
             throw new IOException (e.getMessage());
         }
     }
-    
+
     public RSSReader(final int maxsize, final long maxBytes, InputStream stream) throws IOException {
         this(maxsize);
-        
+
         if (!(stream instanceof ByteArrayInputStream) && !(stream instanceof BufferedInputStream)) {
         	stream = new BufferedInputStream(stream);
         }
-        
-		StrictLimitInputStream limitedSource = new StrictLimitInputStream(stream, maxBytes);
-        
+
+		final StrictLimitInputStream limitedSource = new StrictLimitInputStream(stream, maxBytes);
+
         try {
             final SAXParser saxParser = getParser();
             // do not look at external dtd - see: http://www.ibm.com/developerworks/xml/library/x-tipcfsx/index.html
@@ -121,7 +121,7 @@ public class RSSReader extends DefaultHandler {
             saxParser.parse(limitedSource, this);
         } catch (final SAXException e) {
 	        throw new IOException (e.getMessage());
-        } catch(StreamLimitException e) {
+        } catch(final StreamLimitException e) {
         	this.maxBytesExceeded = true;
         }
     }
@@ -194,7 +194,7 @@ public class RSSReader extends DefaultHandler {
 					if(StringUtils.isNotBlank(url)) {
 						this.item.setEnclosure(url);
 					}
-    			}	
+    			}
         	}
         } else if ("rss".equals(tag)) {
             this.type = Type.rss;
@@ -236,7 +236,7 @@ public class RSSReader extends DefaultHandler {
     public RSSFeed getFeed() {
         return this.theChannel;
     }
-    
+
     /**
      * @return true when a parsing limit on instance construction has been exceeded
      */

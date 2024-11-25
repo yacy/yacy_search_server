@@ -41,7 +41,7 @@ public class URLLicenseConcurrentTest {
 	 */
 	private static class ClientThread extends Thread {
 
-		private String testURL = "http://yacy.net";
+		private String testURL = "https://yacy.net";
 
 		private int steps = 100000;
 

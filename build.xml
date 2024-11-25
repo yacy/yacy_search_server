@@ -12,7 +12,7 @@
 # ==========================================
 # This Software is Copyrighted
 # (C) by Michael Peter Christen; mc@yacy.net
-# first published on http://yacy.net
+# first published on https://yacy.net
 # Frankfurt, Germany, 2005-2009
 #
 # This program is free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@
   <!-- defining all needed directory names for packing search widget-->
   <property name="jquery" location="htroot/jquery/"/>
   <property name="portalsearch" location="htroot/portalsearch/"/>
-  <property name="img-2" location="htroot/yacy/ui/img-2"/>
+  <property name="img-2" location="htroot/env/grafics"/>
 
   <target name="install-ivy" description="--> install ivy">
     <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
@@ -388,7 +388,7 @@
       <tarfileset dir="${jquery}" prefix="yacy/jquery/">
           <include name="**/*"/>
       </tarfileset>
-      <tarfileset dir="${img-2}" prefix="yacy/ui/img-2/">
+      <tarfileset dir="${img-2}" prefix="env/grafics">
           <include name="magnify.png"/>
           <include name="cancel_round.png"/>
           <include name="stop.png"/>  
@@ -399,8 +399,8 @@
   <!-- make clean -->
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
-    <delete file="${lib}/yacycore.jar" failonerror="false"/>
     <delete failonerror="false">
+      <fileset dir="${lib}" includes="**/*.jar" excludes="org.restlet.jar" /> <!-- we cannot find the org.restlet.jar in maven -->
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />

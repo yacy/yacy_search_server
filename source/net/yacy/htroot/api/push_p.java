@@ -1,7 +1,7 @@
 /**
  *  push_p
  *  Copyright 2014 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 12.06.2014 at http://yacy.net
+ *  First released 12.06.2014 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

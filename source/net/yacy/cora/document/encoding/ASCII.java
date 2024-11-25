@@ -1,7 +1,7 @@
 /**
  *  ASCIIComparator
  *  Copyright 2010 by Michael Peter Christen
- *  First released 25.2.2011 at http://yacy.net
+ *  First released 25.2.2011 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
@@ -42,7 +42,7 @@ public class ASCII implements Comparator<String> {
 
     public boolean insensitive;
 
-    public ASCII(boolean insensitive) {
+    public ASCII(final boolean insensitive) {
         this.insensitive = insensitive;
     }
 
@@ -52,13 +52,13 @@ public class ASCII implements Comparator<String> {
     }
 
     @Override
-    public int compare(String s0, String s1) {
+    public int compare(final String s0, final String s1) {
         if (s0 == null && s1 == null) return 0;
         if (s0 == null) return -1;
         if (s1 == null) return 1;
         int i = 0;
-        int l0 = s0.length(), l1 = s1.length();
-        int lm = Math.min(l0, l1);
+        final int l0 = s0.length(), l1 = s1.length();
+        final int lm = Math.min(l0, l1);
         char c0, c1;
         while (i < lm) {
             c0 = s0.charAt(i);
@@ -74,13 +74,13 @@ public class ASCII implements Comparator<String> {
         return 0;
     }
 
-    public boolean equals(String s0, String s1) {
+    public boolean equals(final String s0, final String s1) {
         if (s0 == null && s1 == null) return true;
         if (s0 == null) return false;
         if (s1 == null) return false;
         int i = 0;
-        int l0 = s0.length(), l1 = s1.length();
-        int lm = Math.min(l0, l1);
+        final int l0 = s0.length(), l1 = s1.length();
+        final int lm = Math.min(l0, l1);
         char c0, c1;
         while (i < lm) {
             c0 = s0.charAt(i);
@@ -95,7 +95,7 @@ public class ASCII implements Comparator<String> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return (obj == this);
     }
 
@@ -112,7 +112,7 @@ public class ASCII implements Comparator<String> {
     }
 
     public final static String String(final byte[] bytes, final int offset, final int length) {
-        int l = Math.min(length, bytes.length - offset);
+        final int l = Math.min(length, bytes.length - offset);
         final char[] c = new char[l];
         for (int i = 0; i < l; ++ i) {
             if (bytes[i + offset] < 0) throw new IllegalArgumentException();
@@ -124,7 +124,7 @@ public class ASCII implements Comparator<String> {
     public final static byte[] getBytes(final String s) {
         assert s != null;
         //assert s.length() < 3 || s.charAt(2) != '@';
-        int count = s.length();
+        final int count = s.length();
         final byte[] b = new byte[count];
         for (int i = 0; i < count; i++) {
             b[i] = (byte) s.charAt(i);
@@ -135,7 +135,7 @@ public class ASCII implements Comparator<String> {
     public final static byte[] getBytes(final String s, final int beginIndex, final int endIndex) {
         assert s != null;
         //assert s.length() < 3 || s.charAt(2) != '@';
-        int count = endIndex - beginIndex;
+        final int count = endIndex - beginIndex;
         final byte[] b = new byte[count];
         for (int i = 0; i < count; i++) {
             b[i] = (byte) s.charAt(i + beginIndex);

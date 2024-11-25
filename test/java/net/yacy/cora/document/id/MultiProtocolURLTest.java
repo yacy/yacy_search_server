@@ -230,11 +230,11 @@ public class MultiProtocolURLTest {
         // some test url/uri with problems in the past
         String[][] testStrings = new String[][]{
             // teststring , expectedresultkey, expectedresultvalue
-            new String[]{"http://yacy.net?&test", "test", ""},
+            new String[]{"https://yacy.net?&test", "test", ""},
             /* Encoded UTF-8 2 bytes characters parameter value */
             new String[]{"https://zh.wikipedia.org/w/index.php?search=encodedlatinchars%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9", "search", "encodedlatincharsàäâéèïîôöù"},
             /* Non encoded UTF-8 2 bytes characters parameter value */
-            new String[]{"http://yacy.net?query=unencodedlatincharsàäâéèïîôöù", "query", "unencodedlatincharsàäâéèïîôöù"},
+            new String[]{"https://yacy.net?query=unencodedlatincharsàäâéèïîôöù", "query", "unencodedlatincharsàäâéèïîôöù"},
             /* Encoded UTF-8 3 bytes characters parameter value */
             new String[]{"https://zh.wikipedia.org/w/index.php?query=%E6%96%B9%E9%87%9D%E8%88%87%E6%8C%87%E5%BC%95", "query", "方針與指引"},
             /* Non encoded UTF-8 3 bytes characters parameter value */
@@ -312,12 +312,12 @@ public class MultiProtocolURLTest {
 	public void testToTokens() throws MalformedURLException {
         String[][] testStrings = new String[][]{
             // test string , "expected tokens"
-            new String[]{"http://yacy.net?&test", "yacy net test"},
+            new String[]{"https://yacy.net?&test", "yacy net test"},
             new String[]{"http://example.net/camelCased/subpath1/PATH_EXAMPLE", "example net camelCased subpath1 PATH EXAMPLE camel Cased subpath 1"},
             /* Encoded UTF-8 2 bytes characters parameter value */
             new String[]{"https://zh.wikipedia.org/w/index.php?search=encodedlatinchars%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9", "zh wikipedia org w index php search encodedlatincharsàäâéèïîôöù"},
             /* Non encoded UTF-8 2 bytes characters parameter value */
-            new String[]{"http://yacy.net?query=unencodedlatincharsàäâéèïîôöù", "yacy net query unencodedlatincharsàäâéèïîôöù"},
+            new String[]{"https://yacy.net?query=unencodedlatincharsàäâéèïîôöù", "yacy net query unencodedlatincharsàäâéèïîôöù"},
             /* Encoded UTF-8 3 bytes characters parameter value */
             new String[]{"https://zh.wikipedia.org/w/index.php?query=%E6%96%B9%E9%87%9D%E8%88%87%E6%8C%87%E5%BC%95", "zh wikipedia org w index php query 方針與指引"},
             /* Non encoded UTF-8 3 bytes characters parameter value */

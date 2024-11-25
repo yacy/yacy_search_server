@@ -1,7 +1,7 @@
 /**
  *  URIMetadataNode
  *  Copyright 2012 by Michael Peter Christen
- *  First released 10.8.2012 at http://yacy.net
+ *  First released 10.8.2012 at https://yacy.net
  *
  *  This file is part of YaCy Content Integration
  *
@@ -516,6 +516,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     public WordReferenceVars word() {
         return this.word;
     }
+    
+    public ArrayList<String> getSynonyms() {
+        return getStringList(CollectionSchema.synonyms_sxt);
+    }
 
     public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
         Collection<Object> urlstub = doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_urlstub_sxt :  CollectionSchema.outboundlinks_urlstub_sxt).getSolrFieldName());
@@ -874,10 +878,17 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     private Date[] getDates(CollectionSchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.date;
-        @SuppressWarnings("unchecked")
-        List<Date> x = (List<Date>) this.getFieldValue(field.getSolrFieldName());
-        if (x == null) return new Date[0];
-        return x.toArray(new Date[x.size()]);
+        Object content = this.getFieldValue(field.getSolrFieldName());
+        if (content == null) return new Date[0];
+        if (content instanceof Date) {
+        	return new Date[] {(Date) content};
+        }
+        if (content instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Date> x = (List<Date>) content;
+            return x.toArray(new Date[x.size()]);
+        }
+        return new Date[0];
     }
 
     private String getString(CollectionSchema field) {

@@ -1682,110 +1682,18 @@ Did you mean:==Forse intendevi cercare:
 >Date==>Data
 #-----------------------------
 
-#File: yacy/ui/js/jquery-flexigrid.js
+#File: js/jquery-flexigrid.js
 #---------------------------
 #-----------------------------
 
-#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#File: js/jquery-ui-1.7.2.min.js
 #---------------------------
 Loading&#8230;==Caricamento in corso&#8230;
 #-----------------------------
 
-#File: yacy/ui/js/jquery.ui.all.min.js
+#File: js/jquery.ui.all.min.js
 #---------------------------
 Loading&#8230;==Caricamento in corso&#8230;
-#-----------------------------
-
-#File: yacy/ui/index.html
-#---------------------------
-About YaCy-UI==Informazioni su YaCy-UI
-Admin Console==Console amministrazione
-Server Log==Log del server
-#-----------------------------
-
-#File: yacy/ui/yacyui-admin.html
-#---------------------------
-"Login"=="Login"
-Login==Login
-Themes==Temi grafici
-Messages==Messaggi
-Re-Start==Riavvio
-Shutdown==Arresto
-Web Indexing==Indicizzazione web
-Monitoring==Monitoraggio
-YaCy Network==Rete YaCy
->Settings==>Impostazioni
-"Basic Settings"=="Impostazioni di base"
-	Basic==	di base
-Accounts==Account
-"Network"=="Rete"
-	Network==	Rete
-"Advanced Settings"=="Impostazioni avanzate"
-	Advanced==	Avanzate
-"Update Settings"=="Aggiornamento del sistema"
-	Update==	Aggiornamento
->YaCy Project==>Progetto YaCy
-"YaCy Project Home"=="Sito del Progetto YaCy"
-	Project==	Progetto
-"YaCy Statistics"=="Statistiche su YaCy"
-	Statistics==	Statistiche
-"YaCy Forum"=="Forum di YaCy"
-Forum==Forum
-"Help"=="Aiuto"
-"YaCy Wiki"=="Wiki di YaCy"
-Wiki==Wiki
-#-----------------------------
-
-#File: yacy/ui/yacyui-bookmarks.html
-#---------------------------
-'Add'=='Aggiungi'
-'Crawl'=='Crawl'
-'Edit'=='Modifica'
-'Delete'=='Elimina'
-'Rename'=='Rinomina'
-'Help'=='Aiuto'
-"YaCy Bookmarks"=="YaCy Bookmarks"
->Title==>Titolo
->Tags==>Tag
->Date==>Data
-'Hash'=='Hash'
-'Title'=='Titolo'
-'Tags'=='Tag'
-'Folders'=='Directory'
-'Date'=='Data'
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_1.html
-#---------------------------
-YaCy P2P Websearch==YaCy ricerca web P2P
-"Search"=="Cerca"
->Text==>Testo
->Images==>Immagini
->Audio==>Audio
->Video==>Filmati
->Applications==>Programmi
-"help"=="Aiuto"
-Resource/Network:==Risorsa/rete:
-freeworld==freeworld
-sciencenet==ScienceNet
->Language:==>Lingua:
-any language==qualsiasi lingua
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_2.html
-#---------------------------
-Search Options==Opzioni di ricerca
-all pages==tutte le pagine
-index pages==indice pagine
-URL mask:==Filtro URL:
-alt="help"==alt="Aiuto"
-title="help"==title="Aiuto"
-#-----------------------------
-
-#File: yacy/ui/yacyui-welcome.html
-#---------------------------
->Overview==>Panoramica
-#YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI è un client YaCy scritto in JavaScript basato sulle API XML già esistenti e su chiamate JSON.
 #-----------------------------
 
 # EOF

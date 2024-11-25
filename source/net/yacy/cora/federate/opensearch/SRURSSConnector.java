@@ -1,7 +1,7 @@
 /**
  *  AccumulateSRURSS
  *  Copyright 2010 by Michael Peter Christen
- *  First released 06.01.2011 at http://yacy.net
+ *  First released 06.01.2011 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,8 @@ import java.net.MalformedURLException;
 import java.util.LinkedHashMap;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.http.entity.mime.content.ContentBody;
+
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
@@ -33,8 +35,6 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
-
-import org.apache.http.entity.mime.content.ContentBody;
 
 public class SRURSSConnector {
 
@@ -114,7 +114,7 @@ public class SRURSSConnector {
         // send request
         byte[] result = new byte[0];
         try {
-            final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
+            final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<>();
             parts.put("query", UTF8.StringBody(query));
             parts.put("startRecord", UTF8.StringBody(Integer.toString(startRecord)));
             parts.put("maximumRecords", UTF8.StringBody(Long.toString(maximumRecords)));

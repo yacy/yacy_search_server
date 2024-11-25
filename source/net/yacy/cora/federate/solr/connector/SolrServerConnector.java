@@ -1,7 +1,7 @@
 /**
  *  SolrServerConnector
  *  Copyright 2012 by Michael Peter Christen
- *  First released 21.06.2012 at http://yacy.net
+ *  First released 21.06.2012 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+//import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.request.LukeRequest;
@@ -43,6 +43,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 
+import net.yacy.cora.federate.solr.embedded.EmbeddedSolrServer;
 import net.yacy.cora.federate.solr.instance.ServerShard;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;

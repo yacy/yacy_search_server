@@ -1,18 +1,18 @@
 /**
  *  Anchor
  *  Copyright 2013 by Michael Peter Christen
- *  first published 15.09.2013 on http://yacy.net
+ *  first published 15.09.2013 on https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -40,7 +40,7 @@ public class AnchorURL extends DigestURL {
         this.imageURL = null;
         this.imageAlt = null;
     }
-    
+
     public AnchorURL(final AnchorURL url) {
         super(url, url.hash());
         this.textBody = url.textBody;
@@ -76,7 +76,7 @@ public class AnchorURL extends DigestURL {
         this.imageURL = null;
         this.imageAlt = null;
     }
-    
+
     public AnchorURL(final String protocol, final String host, final int port, final String path, final DigestURL imageURL, final String imageAlt) throws MalformedURLException {
         super(protocol, host, port, path);
         this.textBody = "";
@@ -104,42 +104,42 @@ public class AnchorURL extends DigestURL {
     }
 
     public String getNameProperty() {
-        return nameProperty;
+        return this.nameProperty;
     }
 
-    public void setNameProperty(String name) {
+    public void setNameProperty(final String name) {
         this.nameProperty = name;
     }
 
     public String getTextProperty() {
-        return textBody;
+        return this.textBody;
     }
 
-    public void setTextProperty(String text) {
+    public void setTextProperty(final String text) {
         this.textBody = text;
     }
 
     public String getRelProperty() {
-        return relProperty;
+        return this.relProperty;
     }
 
-    public void setRelProperty(String rel) {
+    public void setRelProperty(final String rel) {
         this.relProperty = rel;
     }
 
     public DigestURL getImageURL() {
-        return imageURL;
+        return this.imageURL;
     }
 
-    public void setImageURL(DigestURL imageURL) {
+    public void setImageURL(final DigestURL imageURL) {
         this.imageURL = imageURL;
     }
 
     public String getImageAlt() {
-        return imageAlt;
+        return this.imageAlt;
     }
 
-    public void setImageAlt(String imageAlt) {
+    public void setImageAlt(final String imageAlt) {
         this.imageAlt = imageAlt;
     }
 
@@ -156,16 +156,16 @@ public class AnchorURL extends DigestURL {
         tagopts.setProperty("rel", this.relProperty);
         return tagopts;
     }
-    
+
     public boolean attachedNofollow() {
         return this.relProperty.indexOf("nofollow") >= 0;
     }
-    
+
     public String toHTML() {
         return "<a href=\"" + this.toNormalform(false) + "\"" +
                 (this.nameProperty.length() > 0 ? (" name=\"" + this.nameProperty + "\"") : "") +
                 (this.relProperty.length() > 0 ? (" rel=\"" + this.relProperty + "\"") : "") +
                 ">" + this.textBody + "</a>";
     }
-    
+
 }

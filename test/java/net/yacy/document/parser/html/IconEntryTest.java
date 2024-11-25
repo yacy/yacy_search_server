@@ -81,7 +81,7 @@ public class IconEntryTest {
 		sizes.add(new Dimension(16,16));
 		
 		Dimension preferredSize = new Dimension(16, 16);
-		IconEntry icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		IconEntry icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		Dimension result = icon.getClosestSize(preferredSize);
 		Assert.assertEquals(preferredSize, result);
 		
@@ -103,14 +103,14 @@ public class IconEntryTest {
 		/* Sizes set contains only one item */
 		sizes = new HashSet<>();
 		sizes.add(new Dimension(128,128));
-		icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		preferredSize = new Dimension(1992, 1024);
 		result = icon.getClosestSize(preferredSize);
 		Assert.assertEquals(new Dimension(128, 128), result);
 		
 		/* Empty sizes set */
 		sizes = new HashSet<>();
-		icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		preferredSize = new Dimension(16, 16);
 		result = icon.getClosestSize(preferredSize);
 		Assert.assertNull(result);
@@ -120,7 +120,7 @@ public class IconEntryTest {
 		sizes.add(new Dimension(128,128));
 		sizes.add(new Dimension(256,512));
 		sizes.add(new Dimension(16,16));
-		icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		preferredSize = null;
 		result = icon.getClosestSize(preferredSize);
 		Assert.assertNull(result);
@@ -137,7 +137,7 @@ public class IconEntryTest {
 		sizes.add(new Dimension(256,512));
 		sizes.add(new Dimension(16,16));
 		
-		IconEntry icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		IconEntry icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		String sizesStr = icon.sizesToString();
 		/* The set is not ordered, only check result contains what we expect */
 		Assert.assertTrue(sizesStr.contains("128x128"));
@@ -149,14 +149,14 @@ public class IconEntryTest {
 		sizes = new HashSet<>();
 		sizes.add(new Dimension(128,128));
 		
-		icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		sizesStr = icon.sizesToString();
 		Assert.assertEquals("128x128", sizesStr);
 		
 		/* Empty sizes set */
 		sizes = new HashSet<>();
 		
-		icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		sizesStr = icon.sizesToString();
 		Assert.assertTrue(sizesStr.isEmpty());
 	}
@@ -172,7 +172,7 @@ public class IconEntryTest {
 		Set<Dimension> sizes = new HashSet<>();
 		sizes.add(new Dimension(128,128));
 		
-		IconEntry icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		IconEntry icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		String relStr = icon.relToString();
 		/* The set is not ordered, only check result contains what we expect */
 		Assert.assertTrue(relStr.contains(IconLinkRelations.ICON.getRelValue()));
@@ -184,7 +184,7 @@ public class IconEntryTest {
 		rels = new HashSet<>();
 		rels.add(IconLinkRelations.ICON.getRelValue());
 		
-		icon = new IconEntry(new DigestURL("http://yacy.net"), rels, sizes);
+		icon = new IconEntry(new DigestURL("https://yacy.net"), rels, sizes);
 		relStr = icon.relToString();
 		Assert.assertEquals(IconLinkRelations.ICON.getRelValue(), relStr);
 	}

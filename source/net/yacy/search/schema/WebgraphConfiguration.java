@@ -1,7 +1,7 @@
 /**
  *  WebgraphConfiguration
  *  Copyright 2011 by Michael Peter Christen
- *  First released 14.04.2011 at http://yacy.net
+ *  First released 14.04.2011 at https://yacy.net
  *
  *  $LastChangedDate: 2011-04-14 22:05:04 +0200 (Do, 14 Apr 2011) $
  *  $LastChangedRevision: 7654 $

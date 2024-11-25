@@ -26,7 +26,7 @@ Echo Priority:%priority%
 
 Echo ****************** YaCy Web Crawler/Indexer ^& Search Engine ******************
 Echo **** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****
-Echo ****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****
+Echo ****   USE AT YOUR OWN RISK! Project home and releases: https://yacy.net/  ****
 Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)              **
 Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **
 Echo **  GET HELP for YaCy: join our community at https://community.searchlab.eu  **

@@ -1,7 +1,7 @@
 //
 //  YaCyHttpServer
 //  Copyright 2011 by Florian Richter
-//  First released 13.04.2011 at http://yacy.net
+//  First released 13.04.2011 at https://yacy.net
 //
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public

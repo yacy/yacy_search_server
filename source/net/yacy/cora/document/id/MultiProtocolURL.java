@@ -1,7 +1,7 @@
 /**
  *  MultiProtocolURI
  *  Copyright 2010 by Michael Peter Christen
- *  First released 25.5.2010 at http://yacy.net
+ *  First released 25.5.2010 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$
@@ -84,20 +84,20 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /** Register unreserved chars (never escaped in url) */
     private final static BitSet UNRESERVED_RFC1738 = new BitSet(128);
-    
+
     /** Register unreserved chars for path part (not escaped in path) */
     private final static BitSet UNRESERVED_PATH    = new BitSet(128);
-    
+
 	/**
 	 * Register regular expressions metacharacters used by the {@link Pattern}
 	 * class.
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://docs.oracle.com/javase/tutorial/essential/regex/literals.html">Regular
 	 *      expressions string literals documentation</a>
 	 */
 	private static final BitSet PATTERN_METACHARACTERS = new BitSet(128);
-    
+
     static {
         // unreserved characters (chars not to escape in url)
         for (int i = 'A'; i <= 'Z'; i++) { // hialpha RFC1738 Section 5
@@ -134,7 +134,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         UNRESERVED_PATH.set('@');
         UNRESERVED_PATH.set('&');
         UNRESERVED_PATH.set('=');
-        
+
         /* Pattern metacharacters : <([{\^-=$!|]})?*+.> */
         PATTERN_METACHARACTERS.set('<');
         PATTERN_METACHARACTERS.set('(');
@@ -159,7 +159,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     // session id handling
     private static final Object PRESENT = new Object();
-    private static final ConcurrentHashMap<String, Object> sessionIDnames = new ConcurrentHashMap<String, Object>();
+    private static final ConcurrentHashMap<String, Object> sessionIDnames = new ConcurrentHashMap<>();
 
     public static final void initSessionIDNames(final Set<String> idNames) {
         for (String s: idNames) {
@@ -224,7 +224,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         // identify protocol
         url = url.trim();
-        
+
         if (url.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             url = "http:" + url;
@@ -266,7 +266,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             }
             if (q < 0) { // check for www.test.com#fragment
                 q = url.indexOf("#", p + 3);
-            } 
+            }
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -331,14 +331,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                         // wrong windows path, after the doublepoint there should be a backslash. Let's add a slash, as it will be slash in the normal form
                         h = h.substring(0, 4) + '/' + h.substring(4);
                     }
-                    int q = h.indexOf('/', 2);
+                    final int q = h.indexOf('/', 2);
                     if (q < 0 || h.length() > 3 && h.charAt(3) == ':') {
                     	// Missing root slash such as "path" or "c:/path" accepted, but the path attribute must by after all start with it
-                        this.path = "/" + h.substring(2); 
+                        this.path = "/" + h.substring(2);
                     } else {
                         this.host = h.substring(2, q ); // TODO: handle "c:"  ?
                         if (this.host.equalsIgnoreCase(Domains.LOCALHOST)) this.host = null;
-                        this.path = h.substring(q ); // "/path" 
+                        this.path = h.substring(q ); // "/path"
                     }
                 } else if (h.startsWith("/")) { // "/host/path" or "/host/c:/path"
                     this.path = h;
@@ -442,7 +442,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         return new MultiProtocolURL(baseURL, relPath);
     }
-    
+
     public MultiProtocolURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
@@ -470,12 +470,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else if (relPath.length() > 0 && relPath.charAt(0) == '/') {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
-        	/* According to RFC 3986 example in Appendix B. (https://tools.ietf.org/html/rfc3986) 
+        	/* According to RFC 3986 example in Appendix B. (https://tools.ietf.org/html/rfc3986)
         	   such an URL is valid : http://www.ics.uci.edu/pub/ietf/uri/#Related
-        	   
-        	   We also find similar usages in the 2016 URL living standard (https://url.spec.whatwg.org/),  
-        	   for example : https://url.spec.whatwg.org/#syntax-url-absolute-with-fragment 
-        	   
+
+        	   We also find similar usages in the 2016 URL living standard (https://url.spec.whatwg.org/),
+        	   for example : https://url.spec.whatwg.org/#syntax-url-absolute-with-fragment
+
         	   java.lang.URL constructor also accepts this form.*/
             if (relPath.startsWith("/")) this.path = baseURL.path + relPath.substring(1); else this.path = baseURL.path + relPath;
         } else {
@@ -518,7 +518,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         identSearchpart();
         escape();
     }
-    
+
     /**
      * @param host the new host to apply to the copy
      * @return an exact copy of this URL instance but with a new host. The original instance remains unchanged.
@@ -528,22 +528,22 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     	if(host == null || host.trim().isEmpty()) {
     		throw new IllegalArgumentException("Host parameter must not be null");
     	}
-    	MultiProtocolURL copy = new MultiProtocolURL(this);
-    	
+    	final MultiProtocolURL copy = new MultiProtocolURL(this);
+
     	if (host.indexOf(':') >= 0 && host.charAt(0) != '[') {
     		copy.host = '[' + host + ']'; // IPv6 host must be enclosed in square brackets
     	} else {
-        	copy.host = host;	
+        	copy.host = host;
     	}
-    	
+
         if (!Punycode.isBasic(this.host)) try {
             this.host = toPunycode(this.host);
         } catch (final PunycodeException e) {
         	ConcurrentLog.logException(e);
         }
-    	
+
     	return copy;
-    	
+
     }
 
     /**
@@ -568,7 +568,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             p = matcher.replaceAll("");
             matcher.reset(p);
         }
-        /* Let's remove any eventual remaining but inappropriate '..' segments at the beginning. 
+        /* Let's remove any eventual remaining but inappropriate '..' segments at the beginning.
          * See https://tools.ietf.org/html/rfc3986#section-5.2.4 -> parts 2.C and 2.D */
         while(p.startsWith("/../")) {
         	p = p.substring(3);
@@ -600,7 +600,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 	 * (see RFC3986, and formerly RFC1738 & RFC2396). Uses UTF-8 character codes for
 	 * non-ASCII.</p>
 	 * <p>Important : already percent-encoded characters are not re-encoded</p>
-	 * 
+	 *
 	 * @param pathToEscape the path part to escape.
 	 * @return an escaped path with only ASCII characters, or null when pathToEscape
 	 *         is null.
@@ -612,13 +612,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public static String escapePath(final String pathToEscape) {
     	return escapePath(pathToEscape, false);
     }
-    
+
 	/**
 	 * <p>Percent-encode/escape an URL path regular expression according to the allowed
 	 * characters in an URL path (see RFC3986) and in the {@link Pattern} regular
 	 * expressions. Uses UTF-8 character codes for non-ASCII.</p>
 	 * <p>Important : already percent-encoded characters are not re-encoded</p>
-	 * 
+	 *
 	 * @param pathPattern the URL path regular expression to escape.
 	 * @return an escaped path regular expression with only allowed ASCII
 	 *         characters, or null when pathPattern is null.
@@ -630,7 +630,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 	public static String escapePathPattern(final String pathPattern) {
 		return escapePath(pathPattern, true);
 	}
-    
+
 	/**
 	 * <p>
 	 * Percent-encode/escape an URL path part according to the allowed characters
@@ -642,7 +642,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 	 * therefore meta-characters used by the {@link Pattern} class are not
 	 * percent-encoded.
 	 * </p>
-	 * 
+	 *
 	 * @param pathToEscape the path part to escape.
 	 * @param isPattern    when true, regular meta-characters are not escaped
 	 * @return an escaped path regular expression with only allowed ASCII
@@ -661,7 +661,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 		final int len = pathToEscape.length();
 		int i = 0;
 		while (i < len) {
-			int ch = pathToEscape.charAt(i);
+			final int ch = pathToEscape.charAt(i);
 			if (ch == '%' && (i + 2) < len) {
 				final char digit1 = pathToEscape.charAt(i + 1);
 				final char digit2 = pathToEscape.charAt(i + 2);
@@ -707,7 +707,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 		}
 		return pathToEscape;
 	}
-	
+
 	/**
 	 * Decode UTF-8 percent-encoded characters eventually found in the given path.
 	 * <ul>
@@ -715,7 +715,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 	 * <li>the '+' character is not decoded to space character</li>
 	 * <li>no exception is thrown when invalid hexadecimal digits are found after a '%' character</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param path an URL path eventually escaped
 	 * @return return the unescaped path or null when path is null.
 	 */
@@ -738,7 +738,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 						utf8Bytes = ByteBuffer.allocate((len - i) / 3);
 					}
 					/* Percent-encoded character UTF-8 byte */
-					int hexaValue = Integer.parseInt(escaped.substring(i + 1, i + 3), 16);
+					final int hexaValue = Integer.parseInt(escaped.substring(i + 1, i + 3), 16);
 					utf8Bytes.put((byte) hexaValue);
 					modified = true;
 					i += 2;
@@ -761,7 +761,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
 		return modified ? unescaped.toString() : escaped;
 	}
-    
+
 	/**
 	 * @param character a character to test
 	 * @return true when the character is a valid hexadecimal digit
@@ -770,7 +770,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 		return (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f')
 				|| (character >= 'A' && character <= 'F');
 	}
-	
+
     private void escapeSearchpart() {
         final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
         for (final Map.Entry<String, String> element: getAttributes().entrySet()) {
@@ -827,7 +827,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      *
      * <li>The unreserved characters & : - _ . ! ~ * ' ( ) ; , = remain the same.
      *     see RFC 1738 2.2  and  RFC 3986 2.2
-     * 
+     *
      * <li>All other ASCII characters are converted into the
      *     3-character string "%xy", where xy is
      *     the two-digit hexadecimal representation of the character
@@ -849,24 +849,24 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             final int ch = s.charAt(i);
             if (ch == ' ') {                 // space
                 sbuf.append("%20");
-            } else if (ch == '%') {  
+            } else if (ch == '%') {
                 if (i < len - 2 && s.charAt(i + 1) >= '0' && s.charAt(i + 1) <= '9' && s.charAt(i + 2) >= '0' && s.charAt(i + 2) <= '9') {
                     // TODO: actually 0..9 A..F a..f is allowed (or any of hex[] sequence)
                     sbuf.append((char)ch);   // lets consider this is used for encoding, leave it that way
                 } else {
                     sbuf.append("%25");      // '%' RFC 1738 2.2 unsafe char shall be encoded
                 }
-            } else if (ch == '&') { 
+            } else if (ch == '&') {
                 if (i < len - 6 && "amp;".equals(s.substring(i + 1, i + 5).toLowerCase(Locale.ROOT))) {
                     sbuf.append((char)ch);   // leave it that way, it is used the right way
                 } else {
                     sbuf.append("%26");    // this must be urlencoded
                 }
-            } else if (ch == '#') {          // RFC 1738 2.2 unsafe char is _not_ encoded because it may already be used for encoding 
+            } else if (ch == '#') {          // RFC 1738 2.2 unsafe char is _not_ encoded because it may already be used for encoding
                 sbuf.append((char)ch);
             } else if (ch == '!' || ch == ':'   // unreserved
                     || ch == '-' || ch == '_'
-                    || ch == '.' || ch == '~' 
+                    || ch == '.' || ch == '~'
                     || ch == '*' || ch == '\''
                     || ch == '(' || ch == ')'
                     || ch == '{' || ch == '}'
@@ -903,16 +903,16 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public static String unescape(final String s) {
     	try {
 			return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			/* This should not happen */
 			ConcurrentLog.logException(e);
 			return s;
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			/*
 			 * URLDecode may throw an IllegalArgumentException (or any other
 			 * Exception in future implementations) when the string doesn't
 			 * match the application/x-www-form-urlencoded format: in that case
-			 * return the original string. 
+			 * return the original string.
 			 * Example case : when the valid '%' character is used in a URL but without percent encoding purpose.
 			 */
 			return s;
@@ -1088,10 +1088,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public String[] getPaths() {
         String s = (this.path == null || this.path.length() < 1) ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
-        int p = s.lastIndexOf('/');
+        final int p = s.lastIndexOf('/');
         if (p < 0) return new String[0];
         s = s.substring(0, p); // the paths do not contain the last part, which is considered as the getFileName() part.
-        String[] paths = CommonPattern.SLASH.split(s);
+        final String[] paths = CommonPattern.SLASH.split(s);
         return paths;
     }
 
@@ -1106,7 +1106,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         char c = this.path.charAt(1);
         if (c == ':') return new File(this.path);
         if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2));
-        
+
         if (this.path.length() > 1) { // prevent StringIndexOutOfBoundsException
             c = this.path.charAt(2);
             if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3));
@@ -1124,12 +1124,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public String getHost() {
         return this.host;
     }
-    
+
     public String getOrganization() {
-        String dnc = Domains.getDNC(host);
-        String subdomOrga = host.length() - dnc.length() <= 0 ? "" : host.substring(0, host.length() - dnc.length() - 1);
-        int p = subdomOrga.lastIndexOf('.');
-        String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
+        final String dnc = Domains.getDNC(this.host);
+        final String subdomOrga = this.host.length() - dnc.length() <= 0 ? "" : this.host.substring(0, this.host.length() - dnc.length() - 1);
+        final int p = subdomOrga.lastIndexOf('.');
+        final String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
         return orga;
     }
 
@@ -1138,7 +1138,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public String getTLD() {
         if (this.host == null) return "";
-        int p = this.host.lastIndexOf('.');
+        final int p = this.host.lastIndexOf('.');
         if (p < 0) return "";
         return this.host.substring(p + 1);
     }
@@ -1161,7 +1161,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * @return this URL fragment or null if has no fragment
      * @see <a href="https://url.spec.whatwg.org/#concept-url-fragment">URL fragment concept at WHATWG</a>
-     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.5">URL fragment section in RFC 3986</a> 
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.5">URL fragment section in RFC 3986</a>
      */
     public String getRef() {
         return this.anchor;
@@ -1194,10 +1194,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public Map<String, String> getSearchpartMap() {
         if (this.searchpart == null) return null;
         this.searchpart = this.searchpart.replaceAll("&amp;", "&");
-        String[] parts = CommonPattern.AMP.split(this.searchpart);
-        Map<String, String> map = new LinkedHashMap<String, String>();
-        for (String part: parts) {
-            int p = part.indexOf('=');
+        final String[] parts = CommonPattern.AMP.split(this.searchpart);
+        final Map<String, String> map = new LinkedHashMap<>();
+        for (final String part: parts) {
+            final int p = part.indexOf('=');
             if (p > 0) map.put(part.substring(0, p), part.substring(p + 1)); else map.put(part, "");
         }
         return map;
@@ -1210,7 +1210,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /**
      * Tokenizes url as string (without the protocol).
-     * For example "http://host.com/path/file.txt" returns "host com path file ext" 
+     * For example "http://host.com/path/file.txt" returns "host com path file ext"
      * @return url tokens as one string
      */
     public String toTokens() {
@@ -1233,7 +1233,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         // split the string into tokens and add all camel-case splitting
         final String[] u = CommonPattern.SPACES.split(sb);
-        final Set<String> token = new LinkedHashSet<String>();
+        final Set<String> token = new LinkedHashSet<>();
         for (final String r: u) token.add(r);
         for (final String r: u) token.addAll(parseCamelCase(r));
 
@@ -1246,7 +1246,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public static enum CharType { low, high, number; }
 
     private static Set<String> parseCamelCase(String s) {
-        final Set<String> token = new LinkedHashSet<String>();
+        final Set<String> token = new LinkedHashSet<>();
         if (s.isEmpty()) return token;
         int p = 0;
         CharType type = charType(s.charAt(0)), nct = type;
@@ -1272,18 +1272,18 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * Evaluates url search part and returns attribute '=' value pairs
      * the returned values are in clear text (without urlencoding).
-     * 
+     *
      * To get the parameter map as (url-encoded key and values)
      * @see getSearchpartMap()
      *
      * @return map key=attribue name, value=string after '='
      */
     public Map<String, String> getAttributes() {
-        Map<String, String > map = new LinkedHashMap<>();
+        final Map<String, String > map = new LinkedHashMap<>();
         if (this.searchpart == null) return map;
         final String[] questp = CommonPattern.AMP.split(this.searchpart, -1);
         for (final String element : questp) {
-            int p = element.indexOf('=');
+            final int p = element.indexOf('=');
             if (p != -1) {
                 map.put(unescape(element.substring(0, p)), unescape(element.substring(p + 1)));
             } else {
@@ -1292,13 +1292,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         return map;
     }
-    
+
     private static CharType charType(final char c) {
         if (Character.isLowerCase(c)) return CharType.low;
         if (Character.isDigit(c)) return CharType.number;
         return CharType.high;
     }
-    
+
     public String toNormalform(final boolean excludeAnchor) {
         return toNormalform(excludeAnchor, false);
     }
@@ -1326,7 +1326,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             defaultPort = true;
         }
         String urlPath = this.getFile(excludeAnchor, removeSessionID);
-        String h = getHost();
+        final String h = getHost();
         final StringBuilder u = new StringBuilder(20 + (urlPath == null ? 0 : urlPath.length()) + ((h == null) ? 0 : h.length()));
         u.append(this.protocol);
         u.append("://");
@@ -1345,8 +1345,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             urlPath = urlPath.replace('\\', '/');
         }
         u.append(urlPath);
-        String result = u.toString();
-        
+        final String result = u.toString();
+
         return result;
     }
 
@@ -1375,8 +1375,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else if (isFile()) {
             defaultPort = true;
         }
-        String urlPath = this.getFile(excludeAnchor, removeSessionID);
-        String h = getHost();
+        final String urlPath = this.getFile(excludeAnchor, removeSessionID);
+        final String h = getHost();
         final StringBuilder u = new StringBuilder(20 + urlPath.length() + ((h == null) ? 0 : h.length()));
         if (h != null) {
             if (this.userInfo != null && !(this.isFTP() && this.userInfo.startsWith(FTPClient.ANONYMOUS))) {
@@ -1390,8 +1390,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             u.append(this.port);
         }
         u.append(urlPath);
-        String result = u.toString();
-        
+        final String result = u.toString();
+
         return result;
     }
 
@@ -1491,12 +1491,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         String language = "en";
         if (this.host == null) return language;
         final int pos = this.host.lastIndexOf('.');
-        String host_tld = this.host.substring(pos + 1).toLowerCase(Locale.ROOT);
+        final String host_tld = this.host.substring(pos + 1).toLowerCase(Locale.ROOT);
         if (pos == 0) return language;
-        int length = this.host.length() - pos - 1;
+        final int length = this.host.length() - pos - 1;
         switch (length) {
 	        case 2:
-	        	char firstletter = host_tld.charAt(0);
+	        	final char firstletter = host_tld.charAt(0);
 	        	switch (firstletter) {//speed-up
 	        	case 'a':
 	        		if (host_tld.equals("au")) {//Australia /91,000,000
@@ -2500,7 +2500,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * Get directory listing of file or smb url
      * respects the hidden attribute of a directory (return null if hidden)
-     * 
+     *
      * @return names of files and directories or null
      * @throws IOException
      */
@@ -2554,11 +2554,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public byte[] get(final ClientIdentification.Agent agent, final String username, final String pass) throws IOException {
         if (isFile()) {
-        	byte[] b = read(new FileInputStream(getFSFile()));
+        	final byte[] b = read(new FileInputStream(getFSFile()));
         	return b;
         }
         if (isSMB()) {
-        	byte[] b = read(new SmbFileInputStream(getSmbFile()));
+        	final byte[] b = read(new SmbFileInputStream(getSmbFile()));
         	return b;
         }
         if (isFTP()) {
@@ -2589,19 +2589,19 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (isFTP()) {
                 final FTPClient client = new FTPClient();
                 client.open(this.host, this.port < 0 ? 21 : this.port);
-                return client.fileSize(path) > 0;
+                return client.fileSize(this.path) > 0;
             }
             if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
-                org.apache.http.HttpResponse response = client.HEADResponse(this, true);
+                final org.apache.http.HttpResponse response = client.HEADResponse(this, true);
                 client.close();
                 if (response == null) return false;
-                int status = response.getStatusLine().getStatusCode();
+                final int status = response.getStatusLine().getStatusCode();
                 return status == 200 || status == 301 || status == 302;
             }
             return false;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if (e.getMessage().contains("Circular redirect to")) return true; // exception; this is a 302 which the client actually accepts
             //e.printStackTrace();
             return false;
@@ -2626,7 +2626,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     	} finally {
     		try {
     			source.close();
-    		} catch(IOException ignored) {
+    		} catch(final IOException ignored) {
     		}
     	}
     }
@@ -2654,7 +2654,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         // TODO lowering case in a locale sensitive manner makes sense here, but the used language locale should not dependant on the default system locale
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
-    
+
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "file://y:/"},
@@ -2717,7 +2717,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         String environment, url;
         MultiProtocolURL aURL, aURL1;
         java.net.URL jURL;
-        for (String[] element : test) {
+        for (final String[] element : test) {
             environment = element[0];
             url = element[1];
             try {aURL = MultiProtocolURL.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}

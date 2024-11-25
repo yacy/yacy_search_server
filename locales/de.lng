@@ -4060,135 +4060,21 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 >Date==>Datum
 #-----------------------------
 
-#File: yacy/ui/js/jquery-flexigrid.js
+#File: js/jquery-flexigrid.js
 #---------------------------
 'Displaying {from} to {to} of {total} items'=='Zeige {from} bis {to} von {total} Elementen'
 'Processing, please wait ...'=='In Bearbeitung. Bitte warten ...'
 'No items'=='Keine Elemente'
 #-----------------------------
 
-#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#File: js/jquery-ui-1.7.2.min.js
 #---------------------------
 Loading&#8230;==Lade&#8230;
 #-----------------------------
 
-#File: yacy/ui/js/jquery.ui.all.min.js
+#File: js/jquery.ui.all.min.js
 #---------------------------
 Loading&#8230;==Lade&#8230;
-#-----------------------------
-
-#File: yacy/ui/index.html
-#---------------------------
-About YaCy-UI==Über YaCy-UI
-Admin Console==Admin Konsole
-"Bookmarks"=="Lesezeichen"
->Bookmarks==>Lesezeichen
-#Server Log==Server Log
-#-----------------------------
-
-#File: yacy/ui/yacyui-admin.html
-#---------------------------
-Peer Control==Peer
-"Login"=="Login"
-#Login==Anmelden
-Themes==Aussehen
-Messages==Nachrichten
-Re-Start==Neustart
-Shutdown==Beenden
-Web Indexing==Web Indexierung
-Crawl Start==Crawl starten
-Monitoring==Überwachung
-YaCy Network==YaCy Netzwerk
->Settings==>Einstellungen
-"Basic Settings"=="Grundkonfiguration"
-	Basic==	Basis
-Accounts==Konten
-"Network"=="Netzwerk"
-	Network==	Netzwerk
-"Advanced Settings"=="Erweiterte Einstellungen"
-	Advanced==	Erweitert
-"Update Settings"=="System Aktualisierung"
-	Update==	Aktualisierung
->YaCy Project==>YaCy Projekt
-"YaCy Project Home"=="YaCy Projekt Homepage"
-	Project==	Projekt
-"YaCy Statistics"=="YaCy Statistiken"
-	Statistics==	Statistiken
-"YaCy Forum"=="YaCy Forum"
-#Forum==Forum
-"Help"=="Hilfe"
-#"YaCy Wiki"=="YaCy Wiki"
-#Wiki==Wiki
-#-----------------------------
-
-#File: yacy/ui/yacyui-bookmarks.html
-#---------------------------
-'Add'=='Hinzufügen'
-'Crawl'=='Crawlen'
-'Edit'=='Bearbeiten'
-'Delete'=='Löschen'
-'Rename'=='Umbenennen'
-'Help'=='Hilfe'
-
-#"public bookmark"=="öffentliches Lesezeichen"
-#"private bookmark"=="privates Lesezeichen"
-
-#"delete bookmark"=="Lesezeichen löschen"
-"YaCy Bookmarks"=="YaCy Lesezeichen"
-#>Title==>Titel
-#>Tags==>Tags
-#>Date==>Datum
-#'Hash'=='Hash'
-'Public'=='Öffentlich'
-'Title'=='Titel'
-#'Tags'=='Tags'
-'Folders'=='Ordner'
-'Date'=='Datum'
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_1.html
-#---------------------------
-YaCy P2P Websearch==YaCy P2P Websuche
-"Search"=="Suchen"
->Text==>Text
->Images==>Bilder
->Audio==>Audio
->Video==>Videos
->Applications==>Anwendungen
-Search term:==Suchbegriff:
-"help"=="Hilfe"
-Resource/Network:==Ressource/Netzwerk:
-freeworld==freeworld
-local peer==lokaler Peer
->bookmarks==>Lesezeichen
-sciencenet==ScienceNet
->Language:==>Sprache:
-any language==jede Sprache
-Bookmark Folders==Lesezeichen Ordner
-#-----------------------------
-
-#File: yacy/ui/sidebar/sidebar_2.html
-#---------------------------
-Bookmark Tags<==Lesezeichen Tags<
-Search Options==Suchoptionen
-Constraint:==Einschränkungen:
-all pages==alle Seiten
-index pages==Index Seiten
-URL mask:==URL Filter:
-Prefer mask:==Vorzugsmaske:
-Bookmark TagCloud==Lesezeichen TagWolke
-Topwords<==Top Wörter<
-alt="help"==alt="Hilfe"
-title="help"==title="Hilfe"
-#-----------------------------
-
-#File: yacy/ui/yacyui-welcome.html
-#---------------------------
->Overview==>Übersicht
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
 #-----------------------------
 
 # EOF

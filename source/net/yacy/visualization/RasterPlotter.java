@@ -1,7 +1,7 @@
 /**
  *  RasterPlotter
  *  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  First released 16.09.2005 at http://yacy.net
+ *  First released 16.09.2005 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -929,9 +929,9 @@ public class RasterPlotter {
     
     public ByteBuffer exportPng() {
         try {
-            final ByteBuffer baos = new ByteBuffer();
-            byte[] pngbytes = pngEncode(1);
+            byte[] pngbytes = pngEncode(9);
             if (pngbytes == null) return null;
+            final ByteBuffer baos = new ByteBuffer(pngbytes.length);
             baos.write(pngbytes);
             baos.flush();
             baos.close();
@@ -1000,7 +1000,7 @@ public class RasterPlotter {
         final int height = image.getHeight(null);
 
         final Deflater scrunch = new Deflater(compressionLevel);
-        ByteBuffer outBytes = new ByteBuffer(1024);
+        ByteBuffer outBytes = new ByteBuffer(1024 * 400); // avoid frequent resizing of the ByteBuffer
         final OutputStream compBytes = new BufferedOutputStream(new DeflaterOutputStream(outBytes, scrunch, 2048, false), 16384);
         int i = 0;
         for (int row = 0; row < height; row++) {

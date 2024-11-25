@@ -1,7 +1,7 @@
 /**
  *  TimeoutRequest
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 08.10.2007 at http://yacy.net
+ *  First released 08.10.2007 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

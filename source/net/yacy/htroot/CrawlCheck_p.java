@@ -1,7 +1,7 @@
 /**
  *  CrawlCheck_p
  *  Copyright 2012 by Michael Peter Christen
- *  First released 10.10.2011 at http://yacy.net
+ *  First released 10.10.2011 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General private

@@ -1,6 +1,6 @@
 /*    
 * Copyright (C) 2005 - 2014 Alexander Schier, Michael Peter Christen, 
-* and other YaCy developers (see http://yacy.net/en/Join.html)
+* and other YaCy developers (see https://yacy.net/en/Join.html)
 *         
 * This file is part of YaCy.
 * 
@@ -15,7 +15,7 @@
 * GNU General Public License for more details.
 * 
 * You should have received a copy of the GNU General Public License
-* along with YaCy.  If not, see <http://www.gnu.org/licenses/>.
+* along with YaCy.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 DELETE_STRING="delete";

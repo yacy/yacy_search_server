@@ -4,7 +4,7 @@
     xmlns:yacy="http://www.yacy.net/"
     xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" 
 >
-    <!-- YaCy Search Engine; http://yacy.net -->
+    <!-- YaCy Search Engine; https://yacy.net -->
     <channel>
         <title>#[promoteSearchPageGreeting]#</title>
         <description>Search for #[rss_query]#</description>

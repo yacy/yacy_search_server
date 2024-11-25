@@ -1,7 +1,7 @@
 /**
  *  ResponseHeader
  *  Copyright 2008 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
- *  First released 22.08.2008 at http://yacy.net
+ *  First released 22.08.2008 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

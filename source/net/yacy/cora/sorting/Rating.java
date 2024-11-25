@@ -1,7 +1,7 @@
 /**
  *  Rating
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 25.08.2011 at http://yacy.net
+ *  First released 25.08.2011 at https://yacy.net
  *
  *  $LastChangedDate: 2011-03-08 02:51:51 +0100 (Di, 08 Mrz 2011) $
  *  $LastChangedRevision: 7567 $

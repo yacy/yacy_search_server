@@ -4073,134 +4073,21 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==LÜTFEN BU 
 >Date==>Tarih
 #-----------------------------
 
-#Dosya: yacy/ui/js/jquery-flexigrid.js
+#Dosya: js/jquery-flexigrid.js
 #---------------------------
 'Displaying {from} to {to} of {total} items'=='{total} öğeden {from} ile {to} arasını göster'
 'Processing, please wait ...'=='İşleniyor, lütfen bekleyin ...'
 'No items'=='Öğe bulunamadı'
 #-----------------------------
 
-#Dosya: yacy/ui/js/jquery-ui-1.7.2.min.js
+#Dosya: js/jquery-ui-1.7.2.min.js
 #---------------------------
 Loading&#8230;==Yükleniyor&#8230;
 #-----------------------------
 
-#Dosya: yacy/ui/js/jquery.ui.all.min.js
+#Dosya: js/jquery.ui.all.min.js
 #---------------------------
 Loading&#8230;==Yükleniyor&#8230;
-#-----------------------------
-
-#Dosya: yacy/ui/index.html
-#---------------------------
-About YaCy-UI==YaCy-UI Hakkında
-Admin Console==Yönetici Konsolu
-"Bookmarks"=="Yer İmleri"
->Bookmarks==>Yer İmleri
-#Server Log==Sunucu Günlüğü
-#-----------------------------
-
-#Dosya: yacy/ui/yacyui-admin.html
-#---------------------------
-Peer Control==Peer Kontrolü
-"Login"=="Giriş"
-#Login==Giriş
-Themes==Temalar
-Messages==Mesajlar
-Re-Start==Yeniden Başlat
-Shutdown==Kapat
-Web Indexing==Web İndeksleme
-Crawl Start==Crawl Başlat
-Monitoring==İzleme
-YaCy Network==YaCy Ağı
->Settings==>Ayarlar
-"Basic Settings"=="Temel Ayarlar"
-	Basic==Temel
-Accounts==Hesaplar
-"Network"=="Ağ"
-	Network==Ağ
-"Advanced Settings"=="Gelişmiş Ayarlar"
-	Advanced==Gelişmiş
-"Update Settings"=="Sistem Güncelleme"
-	Update==Güncelleme
->YaCy Project==>YaCy Projesi
-"YaCy Project Home"=="YaCy Proje Ana Sayfa"
-	Project==Proje
-"YaCy Statistics"=="YaCy İstatistikleri"
-	Statistics==İstatistikler
-"YaCy Forum"=="YaCy Forum"
-#Forum==Forum
-"Help"=="Yardım"
-#"YaCy Wiki"=="YaCy Wiki"
-#Wiki==Wiki
-#-----------------------------
-
-#Dosya: yacy/ui/yacyui-bookmarks.html
-#---------------------------
-'Add'=='Ekle'
-'Crawl'=='Crawl'
-'Edit'=='Düzenle'
-'Delete'=='Sil'
-'Rename'=='Yeniden Adlandır'
-'Help'=='Yardım'
-
-#"public bookmark"=="genel yer imi"
-#"private bookmark"=="özel yer imi"
-
-#"delete bookmark"=="yer imini sil"
-"YaCy Bookmarks"=="YaCy Yer İmleri"
-#>Title==>Başlık
-#>Tags==>Etiketler
-#>Date==>Tarih
-#'Hash'=='Hash'
-'Public'=='Genel'
-'Title'=='Başlık'
-#'Tags'=='Etiketler'
-'Folders'=='Klasörler'
-'Date'=='Tarih'
-#-----------------------------
-
-#Dosya: yacy/ui/sidebar/sidebar_1.html
-#---------------------------
-YaCy P2P Websearch==YaCy P2P Web Arama
-"Search"=="Ara"
->Text==>Metin
->Images==>Resimler
->Audio==>Ses
->Video==>Videolar
->Applications==>Uygulamalar
-Search term:==Arama terimi:
-"help"=="Yardım"
-Resource/Network:==Kaynak/Ağ:
-freeworld==freeworld
-local peer==yerel peer
->bookmarks==>Yer İmleri
-sciencenet==ScienceNet
->Language:==>Dil:
-any language==herhangi bir dil
-Bookmark Folders==Yer İmi Klasörleri
-#-----------------------------
-
-#Dosya: yacy/ui/sidebar/sidebar_2.html
-#---------------------------
-Bookmark Tags<==Yer İmi Etiketleri<
-Search Options==Arama Seçenekleri
-Constraint:==Kısıtlama:
-all pages==tüm sayfalar
-index pages==index sayfalar
-URL mask:==URL maskesi:
-Prefer mask:==Tercih maskesi:
-Bookmark TagCloud==Yer İmi Etiket Bulutu
-Topwords<==En Çok Kullanılan Kelimeler<
-alt="help"==alt="Yardım"
-title="help"==title="Yardım"
-
-#File: yacy/ui/yacyui-welcome.html
-#---------------------------
->Overview==>Übersicht
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
 #-----------------------------
 
 # EOF

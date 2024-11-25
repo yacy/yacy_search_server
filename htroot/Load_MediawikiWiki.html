@@ -85,7 +85,7 @@
         <li>Insert the following code:
          <pre>
 &lt;p&gt;Search with YaCy in this Wiki:&lt;/p&gt;
-&lt;script src="#[address]#/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="#[address]#/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script&gt;
    $(document).ready(function() {
       yconf = {
@@ -96,7 +96,7 @@
          width : 500,
          height : 600
       };
-      $.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
+      $.getScript(yconf.url+'/js/yacyui-portalsearch.js', function(){});
    });
 &lt;/script&gt;
 &lt;div id="yacylivesearch"&gt;

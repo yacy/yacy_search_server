@@ -811,7 +811,7 @@ public class HeapReader {
                         // the allocation of memory for the payload may fail
                         // this is bad because we must interrupt the iteration here but the
                         // process that uses the iteration may think that the iteraton has just been completed
-                        log.severe("out of memory in LookAheadIterator.next0", ee);
+                        log.severe("out of memory in LookAheadIterator.next0 for file " + this.blobFile.toString(), ee);
                         try {this.is.close();} catch (final IOException e) {}
                         return null;
                     }

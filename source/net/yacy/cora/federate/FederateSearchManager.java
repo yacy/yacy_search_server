@@ -1,7 +1,7 @@
 /**
  * FederateSearchManager.java
  * Copyright 2015 by Burkhard Buelte
- * First released 19.01.2015 at http://yacy.net
+ * First released 19.01.2015 at https://yacy.net
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free

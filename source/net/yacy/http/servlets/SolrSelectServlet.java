@@ -1,7 +1,7 @@
 /**
  *  SolrSelectServlet
  *  Copyright 2012 by Michael Peter Christen
- *  First released 23.08.2012 at http://yacy.net
+ *  First released 23.08.2012 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -79,7 +79,7 @@ import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.RawResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.response.XSLTResponseWriter;
+import org.apache.solr.scripting.xslt.XSLTResponseWriter;
 import org.apache.solr.search.DocList;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;

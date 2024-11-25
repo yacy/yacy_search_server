@@ -1,7 +1,7 @@
 /**
  *  AnimationPlotter
  *  Copyright 2013 by Michael Christen
- *  First released 9.9.2010 at http://yacy.net
+ *  First released 9.9.2010 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

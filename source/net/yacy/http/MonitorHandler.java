@@ -1,7 +1,7 @@
 /**
  *  MonitorHandler
  *  Copyright 2014 by Sebastian Gaebel
- *  First released 15.05.2014 at http://yacy.net
+ *  First released 15.05.2014 at https://yacy.net
  *
  *  $LastChangedDate$
  *  $LastChangedRevision$

@@ -1,7 +1,7 @@
 //
 //  YaCyLegacyCredentials
 //  Copyright 2011 by Florian Richter
-//  First released 16.04.2011 at http://yacy.net
+//  First released 16.04.2011 at https://yacy.net
 //  
 //  $LastChangedDate$
 //  $LastChangedRevision$

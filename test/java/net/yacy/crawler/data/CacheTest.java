@@ -99,7 +99,7 @@ public class CacheTest {
 	@Test
 	public void testGetContent() throws MalformedURLException, IOException {
 		final ResponseHeader okResponse = new ResponseHeader(HttpStatus.SC_OK);
-		DigestURL url = new DigestURL("http://yacy.net");
+		DigestURL url = new DigestURL("https://yacy.net");
 		byte[] urlHash = url.hash();
 		byte[] fileContent = TEXT_CONTENT.getBytes(StandardCharsets.UTF_8);
 
@@ -129,10 +129,10 @@ public class CacheTest {
 		 * Store an entry larger than backend buffer sizes, likely to be flushed
 		 * to the file system
 		 */
-		url = new DigestURL("http://json.org");
+		url = new DigestURL("https://json.org");
 		urlHash = url.hash();
 		fileContent = generateFlushableContent();
-		Cache.store(new DigestURL("http://json.org"), okResponse, fileContent);
+		Cache.store(new DigestURL("https://json.org"), okResponse, fileContent);
 		Cache.commit();
 		/* content is in cache */
 		assertArrayEquals(fileContent, Cache.getContent(urlHash));
@@ -141,7 +141,7 @@ public class CacheTest {
 	@Test
 	public void testDelete() throws MalformedURLException, IOException {
 		final ResponseHeader okResponse = new ResponseHeader(HttpStatus.SC_OK);
-		final DigestURL url = new DigestURL("http://yacy.net");
+		final DigestURL url = new DigestURL("https://yacy.net");
 		final byte[] urlHash = url.hash();
 		final byte[] fileContent = TEXT_CONTENT.getBytes(StandardCharsets.UTF_8);
 
@@ -189,7 +189,7 @@ public class CacheTest {
 	@Test
 	public void testClear() throws MalformedURLException, IOException {
 		final ResponseHeader okResponse = new ResponseHeader(HttpStatus.SC_OK);
-		final DigestURL url = new DigestURL("http://yacy.net");
+		final DigestURL url = new DigestURL("https://yacy.net");
 		final byte[] urlHash = url.hash();
 		byte[] fileContent = TEXT_CONTENT.getBytes(StandardCharsets.UTF_8);
 
@@ -494,7 +494,7 @@ public class CacheTest {
 			for (int count = 0; count < threads; count++) {
 				List<DigestURL> urls = new ArrayList<>();
 				for (int i = 0; i < urlsPerThread; i++) {
-					urls.add(new DigestURL("http://yacy.net/" + i + "/" + count));
+					urls.add(new DigestURL("https://yacy.net/" + i + "/" + count));
 				}
 				CacheAccessTask thread = new CacheAccessTask(urls, steps, contentSize, sleepTime);
 				thread.start();

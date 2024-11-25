@@ -1,7 +1,7 @@
 /**
  *  EmbeddedInstance
  *  Copyright 2013 by Michael Peter Christen
- *  First released 13.02.2013 at http://yacy.net
+ *  First released 13.02.2013 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -23,18 +23,23 @@ package net.yacy.cora.federate.solr.instance;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+//import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.NodeConfig;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.core.SolrXmlConfig;
 
 import com.google.common.io.Files;
 
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.federate.solr.embedded.EmbeddedSolrServer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -80,7 +85,19 @@ public class EmbeddedInstance implements SolrInstance {
 
         // initialize the coreContainer
         final File configFile = new File(solr_config, "solr.xml"); //  the configuration file for all cores
-        this.coreContainer = CoreContainer.createAndLoad(containerPath.toPath(), configFile.toPath()); // this may take indefinitely long if solr files are broken
+        Path solrHome = containerPath.toPath();
+        Path configFilePath = configFile.toPath();
+        //this.coreContainer = CoreContainer.createAndLoad(containerPath.toPath(), configFile.toPath());
+        // this may take indefinitely long if solr files are broken
+        NodeConfig nc = SolrXmlConfig.fromFile(solrHome, configFilePath, new Properties());
+        this.coreContainer = new CoreContainer(nc);
+        try {
+        	this.coreContainer.load();
+        } catch (Exception e) {
+        	this.coreContainer.shutdown();
+            throw e;
+        }
+        
         if (this.coreContainer == null) throw new IOException("cannot create core container dir = " + containerPath + ", configFile = " + configFile);
 
         // get the default core from the coreContainer

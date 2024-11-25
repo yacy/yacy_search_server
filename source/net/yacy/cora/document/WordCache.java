@@ -1,7 +1,7 @@
 /**
  *  WordCache
  *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
- *  first published 01.10.2009 on http://yacy.net
+ *  first published 01.10.2009 on https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -50,11 +50,11 @@ import net.yacy.cora.util.StringBuilderComparator;
 public class WordCache {
 
     private final static ConcurrentLog log = new ConcurrentLog(WordCache.class.getName());
-    
+
     // common word cache
     private static final int commonWordsMaxSize = 20000;  // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
-    private static OrderedScoreMap<StringBuilder> commonWords = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+    private static OrderedScoreMap<StringBuilder> commonWords = new OrderedScoreMap<>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
     // dictionaries
     private final File dictionaryPath;
@@ -67,8 +67,8 @@ public class WordCache {
 
         public Dictionary(final File file) throws IOException {
 
-            this.dict = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-            this.tcid = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+            this.dict = new TreeSet<>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+            this.tcid = new TreeSet<>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
             InputStream is = new FileInputStream(file);
             if (file.getName().endsWith(".gz")) {
@@ -103,7 +103,7 @@ public class WordCache {
          * @return set that contains all words that start or end with the input value
          */
         public Set<StringBuilder> recommend(StringBuilder string) {
-            final Set<StringBuilder> ret = new HashSet<StringBuilder>();
+            final Set<StringBuilder> ret = new HashSet<>();
             SortedSet<StringBuilder> t = this.dict.tailSet(string);
             for (final StringBuilder r: t) {
                 if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) {
@@ -201,7 +201,7 @@ public class WordCache {
      */
     public WordCache(final File dictionaryPath) {
         this.dictionaryPath = dictionaryPath;
-        this.dictionaries = new ConcurrentHashMap<String, Dictionary>();
+        this.dictionaries = new ConcurrentHashMap<>();
         reload();
     }
 
@@ -222,8 +222,8 @@ public class WordCache {
         }
     }
 
-    public static void learn(Collection<String> wordset) {
-        for (String s: wordset) {
+    public static void learn(final Collection<String> wordset) {
+        for (final String s: wordset) {
             learn(new StringBuilder(s));
         }
     }
@@ -239,7 +239,7 @@ public class WordCache {
         for (final String f: files) {
             if (f.endsWith(".words")) {
                 try {
-                    Dictionary dict = new Dictionary(new File(this.dictionaryPath, f));
+                    final Dictionary dict = new Dictionary(new File(this.dictionaryPath, f));
                     this.dictionaries.put(f.substring(0, f.length() - 6), dict);
                 } catch (final IOException e) {
                     log.warn(e);
@@ -262,9 +262,9 @@ public class WordCache {
      * @param string input value that is used to match recommendations
      * @return set that contains all words that start or end with the input value
      */
-    public Set<StringBuilder> recommend(StringBuilder string) {
-        Set<StringBuilder> ret = new HashSet<StringBuilder>();
-        for (Dictionary dict: this.dictionaries.values()) {
+    public Set<StringBuilder> recommend(final StringBuilder string) {
+        final Set<StringBuilder> ret = new HashSet<>();
+        for (final Dictionary dict: this.dictionaries.values()) {
             ret.addAll(dict.recommend(string));
         }
         final SortedMap<StringBuilder, AtomicInteger> u = commonWords.tailMap(string);
@@ -290,7 +290,7 @@ public class WordCache {
      * @return true if the library contains the word
      */
     public boolean contains(final StringBuilder s) {
-        for (Dictionary dict: this.dictionaries.values()) {
+        for (final Dictionary dict: this.dictionaries.values()) {
             if (dict.contains(s)) {
                 return true;
             }
@@ -305,8 +305,8 @@ public class WordCache {
      * @param string the given word
      * @return true if the library supports the word
      */
-    public boolean supports(StringBuilder string) {
-        for (Dictionary dict: this.dictionaries.values()) {
+    public boolean supports(final StringBuilder string) {
+        for (final Dictionary dict: this.dictionaries.values()) {
             if (dict.supports(string)) {
                 return true;
             }
@@ -320,7 +320,7 @@ public class WordCache {
      */
     public int size() {
         int size = 0;
-        for (Dictionary dict: this.dictionaries.values()) {
+        for (final Dictionary dict: this.dictionaries.values()) {
             size += dict.size();
         }
         return size;
@@ -329,7 +329,7 @@ public class WordCache {
     public static int sizeCommonWords() {
         return commonWords.size();
     }
-    
+
     public static void clearCommonWords() {
         commonWords.clear();
     }
@@ -343,7 +343,7 @@ public class WordCache {
      * @return
      */
     public boolean isRelevant(final int minimumWords) {
-        for (Dictionary dict: this.dictionaries.values()) {
+        for (final Dictionary dict: this.dictionaries.values()) {
             if (dict.isRelevant(minimumWords)) {
                 return true;
             }

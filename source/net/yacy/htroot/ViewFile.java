@@ -40,6 +40,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.solr.common.SolrDocument;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -79,7 +81,8 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_IFRAME_FROM_CACHE = 5;
     public static final int VIEW_MODE_AS_LINKLIST = 6;
     public static final int VIEW_MODE_AS_PARSED_WORDS = 7;
-    public static final int VIEW_MODE_AS_IFRAME_FROM_CITATION_REPORT = 8;
+    public static final int VIEW_MODE_AS_SCHEMA = 8;
+    public static final int VIEW_MODE_AS_IFRAME_FROM_CITATION_REPORT = 9;
 
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
@@ -89,7 +92,7 @@ public class ViewFile {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
-        prop.put("moar", 0);
+        prop.put("searchindocument", 0);
         prop.put("viewMode", VIEW_MODE_NO_TEXT);
         prop.put("viewModeValue", "sentences");
         prop.putHTML("error_words", "");
@@ -118,6 +121,7 @@ public class ViewFile {
         prop.put("error_vMode-words", "0");
         prop.put("error_vMode-links", "0");
         prop.put("error_vMode-iframeCitations", "0");
+        prop.put("error_vMode-schema", "0");
         final boolean showSnippet = post.get("show", "").equals("Show Snippet");
         final String viewMode = showSnippet ? "sentences" : post.get("viewMode", "sentences");
         prop.put("error_vMode-" + viewMode, "1");
@@ -132,6 +136,7 @@ public class ViewFile {
         // get the url hash from which the content should be loaded
         String urlHash = post.get("urlHash", post.get("urlhash", ""));
 
+        // if the user has made an input of the url string, this overwrites a possibly given url hash
         final String urlString = post.get("url", "");
         if (urlString.length() > 0) try {
             // this call forces the peer to download  web pages
@@ -148,11 +153,12 @@ public class ViewFile {
             pre = post.getBoolean("pre");
         } catch (final MalformedURLException e) {}
 
-        URIMetadataNode urlEntry = null;
         // get the urlEntry that belongs to the url hash
+        URIMetadataNode urlEntry = null; // to be overwritten if we succeed in finding the url in the current document index
         //boolean ue = urlHash.length() > 0 && indexSegment.exists(ASCII.getBytes(urlHash));
         //if (ue) Log.logInfo("ViewFile", "exists(" + urlHash + ")");
         if (urlHash.length() > 0 && (urlEntry = indexSegment.fulltext().getMetadata(ASCII.getBytes(urlHash))) == null) {
+            // could not find the url, we try a commit to get the latest data and the try again
             indexSegment.fulltext().commit(true);
         }
         if (urlHash.length() > 0 && (urlEntry = indexSegment.fulltext().getMetadata(ASCII.getBytes(urlHash))) != null) {
@@ -167,8 +173,8 @@ public class ViewFile {
             //urlEntry.wordCount();
             size = urlEntry.filesize();
             pre = urlEntry.flags().get(Tokenizer.flag_cat_indexof);
-            prop.put("moar", 1);
-            prop.putHTML("moar_search", post.get("search",""));
+            prop.put("searchindocument", 1);
+            prop.putHTML("searchindocument_query", post.get("query",""));
         }
 
         prop.put("error_inurldb", urlEntry == null ? 0 : 1);
@@ -184,6 +190,7 @@ public class ViewFile {
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);
 
+        // load the resource content, if user is not authorized, use cache only
         Response response = null;
         try {
             final ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
@@ -196,6 +203,7 @@ public class ViewFile {
             return prop;
         }
 
+        // no resource available, return an error
         if (response == null) {
             prop.put("error", "4");
             prop.put("error_errorText", "No resource available");
@@ -204,37 +212,7 @@ public class ViewFile {
         }
 
         final String[] wordArray = wordArray(post.get("words", null));
-        if (viewMode.equals("plain")) {
-
-            // TODO: how to handle very large files here ?
-            String content;
-            try {
-            	String charsetName = response.getCharacterEncoding();
-            	try {
-            		if(charsetName == null) {
-            			/* Encoding is unknown from response headers : default decode using UTF-8 */
-            			charsetName = StandardCharsets.UTF_8.name();
-            		} else if(!Charset.isSupported(charsetName)) {
-            			/* Encoding is known but not supported on this system : default decode using UTF-8 */
-            			charsetName = StandardCharsets.UTF_8.name();
-            		}
-            	} catch(final IllegalCharsetNameException e) {
-        			/* Encoding is known but charset name is not valid : default decode using UTF-8 */
-        			charsetName = StandardCharsets.UTF_8.name();
-            	}
-            	content = new String(response.getContent(), charsetName);
-            } catch (final Exception e) {
-                prop.put("error", "4");
-                prop.putHTML("error_errorText", e.getMessage());
-                prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                return prop;
-            }
-
-            prop.put("error", "0");
-            prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
-            prop.put("viewMode_plainText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
-
-        } else if (viewMode.equals("iframeWeb")) {
+        if (viewMode.equals("iframeWeb")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_WEB);
             prop.put("viewMode_url", url.toNormalform(true));
 
@@ -249,9 +227,36 @@ public class ViewFile {
                 prop.put("viewMode_html", 1);
                 prop.put("viewMode_html_url", url.toNormalform(true));
             }
-        } else if (viewMode.equals("iframeCitations")) {
-            prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CITATION_REPORT);
-            prop.put("viewMode_url", url.toNormalform(true));
+        } else if (viewMode.equals("plain")) {
+
+            // TODO: how to handle very large files here ?
+            String content;
+            try {
+                String charsetName = response.getCharacterEncoding();
+                try {
+                    if(charsetName == null) {
+                        /* Encoding is unknown from response headers : default decode using UTF-8 */
+                        charsetName = StandardCharsets.UTF_8.name();
+                    } else if(!Charset.isSupported(charsetName)) {
+                        /* Encoding is known but not supported on this system : default decode using UTF-8 */
+                        charsetName = StandardCharsets.UTF_8.name();
+                    }
+                } catch(final IllegalCharsetNameException e) {
+                    /* Encoding is known but charset name is not valid : default decode using UTF-8 */
+                    charsetName = StandardCharsets.UTF_8.name();
+                }
+                content = new String(response.getContent(), charsetName);
+            } catch (final Exception e) {
+                prop.put("error", "4");
+                prop.putHTML("error_errorText", e.getMessage());
+                prop.put("viewMode", VIEW_MODE_NO_TEXT);
+                return prop;
+            }
+
+            prop.put("error", "0");
+            prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
+            prop.put("viewMode_plainText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
+
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {
             // parsing the resource content
             Document document = null;
@@ -344,29 +349,35 @@ public class ViewFile {
 
             } else if (viewMode.equals("links")) {
                 putLinks(prop, wordArray, document, post.get("agentName"));
-
             }
+
             // optional: generate snippet
             if (showSnippet) {
                 final QueryGoal goal = new QueryGoal(post.get("search", ""));
-                final TextSnippet snippet = new TextSnippet(
-                        sb.loader,
-                        urlEntry,
-                        goal.getIncludeWordsSet(),
-                        goal.getIncludeHashes(),
-                        CacheStrategy.CACHEONLY,
-                        false,
-                        SearchEvent.SNIPPET_MAX_LENGTH,
-                        false);
-                String titlestr = urlEntry.dc_title();
-                // if title is empty use filename as title
-                if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
-                    titlestr = urlEntry.url() != null ? urlEntry.url().getFileName() : "";
+                try {
+                    final TextSnippet snippet = new TextSnippet(
+                            sb.loader,
+                            urlEntry,
+                            goal.getIncludeWordsSet(),
+                            goal.getIncludeHashes(),
+                            CacheStrategy.CACHEONLY,
+                            false,
+                            SearchEvent.SNIPPET_MAX_LENGTH,
+                            false);
+                    String titlestr = urlEntry.dc_title();
+                    // if title is empty use filename as title
+                    if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
+                        titlestr = urlEntry.url() != null ? urlEntry.url().getFileName() : "";
+                    }
+                    final String desc = (snippet == null) ? "" : snippet.descriptionline(goal);
+                    prop.put("showSnippet_headline", titlestr);
+                    prop.put("showSnippet_teasertext", desc);
+                    prop.put("showSnippet", 1);
+                } catch (UnsupportedOperationException e) {
+                    prop.put("showSnippet_headline", "<no snippet found>");
+                    prop.put("showSnippet_teasertext", "<no snippet found>");
+                    prop.put("showSnippet", 1);
                 }
-                final String desc = (snippet == null) ? "" : snippet.descriptionline(goal);
-                prop.put("showSnippet_headline", titlestr);
-                prop.put("showSnippet_teasertext", desc);
-                prop.put("showSnippet", 1);
             }
             // update index with parsed resource if index entry is older or missing
 			final long responseSize = response.size();
@@ -378,6 +389,31 @@ public class ViewFile {
 				}
 			}
             if (document != null) document.close();
+        } else if (viewMode.equals("schema")) {
+            prop.put("viewMode", VIEW_MODE_AS_SCHEMA);
+            prop.put("viewMode_url", url.toNormalform(true));
+            // list all fields in the document which have text or string content
+            // first we must load the solr document from the index
+            try {
+                final SolrDocument solrDocument = indexSegment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(url.hash()));
+                if (solrDocument != null) {
+                    int c = 0;
+                    for (final String fieldName : solrDocument.getFieldNames()) {
+                        final Object value = solrDocument.getFieldValue(fieldName);
+                        if (value instanceof String || value instanceof Collection) {
+                            prop.put("viewMode_fields_" + c + "_key", fieldName);
+                            prop.put("viewMode_fields_" + c + "_value", value.toString());
+                            c++;
+                        }
+                    }
+                    prop.put("viewMode_fields", c);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (viewMode.equals("iframeCitations")) {
+            prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CITATION_REPORT);
+            prop.put("viewMode_url", url.toNormalform(true));
         }
         prop.put("error", "0");
         prop.put("error_url", url.toNormalform(true));

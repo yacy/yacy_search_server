@@ -2,7 +2,7 @@
  *  HostQueue
  *  SPDX-FileCopyrightText: 2013 Michael Peter Christen <mc@yacy.net)>
  *  SPDX-License-Identifier: GPL-2.0-or-later
- *  First released 24.09.2013 at http://yacy.net
+ *  First released 24.09.2013 at https://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

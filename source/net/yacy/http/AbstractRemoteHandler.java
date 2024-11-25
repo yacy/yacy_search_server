@@ -1,7 +1,7 @@
 //
 //  AbstractRemoteHandler
 //  Copyright 2011 by Florian Richter
-//  First released 2011 at http://yacy.net
+//  First released 2011 at https://yacy.net
 //  
 //  $LastChangedDate$
 //  $LastChangedRevision$
