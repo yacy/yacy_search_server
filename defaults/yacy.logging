@@ -27,10 +27,9 @@ MEMORY.level = INFO
 HTTPC.level = INFO
 
 # RWI related
-INDEX-TRANSFER-DISPATCHER.level = INFO
+DHT-OUT.level = INFO
 SWITCHBOARD.level = INFO
 DHT.level = INFO
-INDEX-TRANSFER-DISPATCHER.level = INFO
 HeapReader.level = INFO
 Heap.level = INFO
 
