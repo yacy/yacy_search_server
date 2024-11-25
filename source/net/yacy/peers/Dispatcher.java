@@ -117,7 +117,7 @@ public class Dispatcher implements WorkflowTask<Transmission.Chunk> {
         this.transmissionBuffer = new ConcurrentHashMap<String, Transmission.Chunk>();
         this.segment = env.index;
         this.seeds = env.peers;
-        this.log = new ConcurrentLog("INDEX-TRANSFER-DISPATCHER");
+        this.log = new ConcurrentLog("DHT-OUT");
 		this.transmission = new Transmission(env, this.log, gzipBody, timeout);
 
         final int concurrentSender = Math.min(8, WorkflowProcessor.availableCPU);
