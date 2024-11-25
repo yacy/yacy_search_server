@@ -3,6 +3,7 @@ package net.yacy.htroot.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class ynetSearch {
                     s = s + "&" + k.getKey() + "=" + k.getValue();
                 }
                 // final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");
-                final URL url = new URL(s);
+                final URL url = new URI(s).toURL();
                 is = url.openStream();
                 Scanner scanner = new Scanner(is);
                 final String httpout = scanner.useDelimiter( "\\Z" ).next();

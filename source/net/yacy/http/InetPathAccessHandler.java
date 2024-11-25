@@ -102,7 +102,7 @@ public class InetPathAccessHandler extends InetAccessHandler {
 			final String path = (idx > 0 && (pattern.length() > idx + 1)) ? pattern.substring(idx + 1) : "/*";
 
 			if (!addr.isEmpty()) {
-				final PathSpec pathSpec = PathMappings.asPathSpec(path);
+				final PathSpec pathSpec = PathSpec.from(path);
 				InetAddressSet addresses = pathMappings.get(pathSpec);
 				if (addresses == null) {
 					addresses = new InetAddressSet();

@@ -27,6 +27,8 @@ package net.yacy.cora.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -46,11 +48,11 @@ public class ClassProvider {
             if (!path.startsWith("/")) path = "/" + path;
             URL[] urls;
             try {
-                urls = new URL[]{new URL("file", "", path)};
+                urls = new URL[]{new URI("file", "", path).toURL()};
                 final URLClassLoader cl = new URLClassLoader(urls);
                 c = cl.loadClass(classname);
                 cl.close();
-            } catch (ClassNotFoundException | IOException e) {
+            } catch (ClassNotFoundException | IOException | URISyntaxException e) {
 				e.printStackTrace();
 			}
         }

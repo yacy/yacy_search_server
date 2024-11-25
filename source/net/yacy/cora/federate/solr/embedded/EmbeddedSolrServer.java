@@ -66,7 +66,6 @@ import org.apache.solr.servlet.SolrRequestParsers;
  *
  * @since solr 1.3
  */
-@SuppressWarnings("deprecation")
 public class EmbeddedSolrServer extends SolrClient {
 
   private static final long serialVersionUID = -6657217211811383651L;

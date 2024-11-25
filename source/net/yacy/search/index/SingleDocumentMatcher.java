@@ -63,7 +63,8 @@ public abstract class SingleDocumentMatcher {
 		final SolrQueryRequestBase solrRequest = new SolrQueryRequestBase(targetCore, solrQuery) {
 		};
 
-		final LuceneQParserPlugin luceneParserPlugin = new LuceneQParserPlugin();
+		@SuppressWarnings("resource")
+        final LuceneQParserPlugin luceneParserPlugin = new LuceneQParserPlugin();
 		final QParser solrParser = luceneParserPlugin.createParser(query, null, solrRequest.getParams(), solrRequest);
 		return solrParser.parse();
 	}

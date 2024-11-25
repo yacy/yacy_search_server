@@ -60,7 +60,7 @@ public class XZParser extends AbstractCompressorParser {
 
 	@Override
 	protected String getUncompressedFilename(final String filename) {
-		return XZUtils.getUncompressedFilename(filename);
+		return XZUtils.getUncompressedFileName(filename);
 	}
 
 }

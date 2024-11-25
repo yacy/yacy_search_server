@@ -97,7 +97,7 @@ public class tarParser extends AbstractParser implements Parser {
         while (true) {
             try {
                 File tmp = null;
-                entry = tis.getNextTarEntry();
+                entry = tis.getNextEntry();
                 if (entry == null) break;
                 if (entry.isDirectory() || entry.getSize() <= 0) continue;
                 final String name = entry.getName();
@@ -154,7 +154,7 @@ TarArchiveEntry entry;
 int totalProcessedLinks = 0;
 while (true) {
 try {
-entry = tis.getNextTarEntry();
+entry = tis.getNextEntry();
 if (entry == null) {
 break;
 }

@@ -126,7 +126,7 @@ public class tarTools {
 		if (new File(untarDir).exists()) {
 			final TarArchiveInputStream tin = new TarArchiveInputStream(in);
 			try {
-				TarArchiveEntry tarEntry = tin.getNextTarEntry();
+				TarArchiveEntry tarEntry = tin.getNextEntry();
 				if (tarEntry == null) {
 					throw new IOException("tar archive is empty or corrupted");
 				}
@@ -143,7 +143,7 @@ public class tarTools {
 					} else {
 						destPath.mkdir();
 					}
-					tarEntry = tin.getNextTarEntry();
+					tarEntry = tin.getNextEntry();
 				}
 			} finally {
 				try {

@@ -109,6 +109,7 @@ public class odtParser extends AbstractParser implements Parser {
     	return parser;
     }
 
+    @SuppressWarnings("resource")
     private Document[] parse(final DigestURL location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest)
             throws Parser.Failure, InterruptedException {
 

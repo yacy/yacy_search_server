@@ -122,7 +122,7 @@ public final class OS {
         FileUtils.copy(UTF8.getBytes(theScript), scriptFile);
         if(!isWindows){ // set executable
             try {
-                Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
+                Runtime.getRuntime().exec(new String[]{"chmod", "755", scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")}).waitFor();
             } catch (final InterruptedException e) {
                 ConcurrentLog.severe("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
                 throw new IOException(e.getMessage());
@@ -155,7 +155,7 @@ public final class OS {
         final File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + starterFileExtension);
         deployScript(starterFile, script);
         try {
-            Runtime.getRuntime().exec(starterFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
+            Runtime.getRuntime().exec(new String[] {starterFile.getAbsolutePath().replaceAll(" ", "\\ ")}).waitFor();
         } catch (final InterruptedException e) {
             throw new IOException(e.getMessage());
         }

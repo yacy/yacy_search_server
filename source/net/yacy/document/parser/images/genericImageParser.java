@@ -57,7 +57,6 @@ import com.drew.metadata.exif.GpsDirectory;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.solr.connector.SolrServerConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;

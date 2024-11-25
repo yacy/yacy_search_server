@@ -9,6 +9,8 @@ classes/
 RELEASE/
 /yacy.pid
 .DS_Store
+/yacy/source/.DS_Store
+/htroot/.DS_Store
 /DATA.bkp
 /DATA.1
 /gen

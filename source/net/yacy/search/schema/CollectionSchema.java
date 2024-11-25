@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.poi.ss.formula.atp.DateParser;
+import org.apache.poi.ss.util.DateParser;
 import org.apache.poi.ss.formula.eval.EvaluationException;
 import org.apache.solr.common.SolrInputDocument;
 

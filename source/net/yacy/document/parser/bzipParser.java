@@ -125,7 +125,7 @@ public class bzipParser extends AbstractParser implements Parser {
              // create maindoc for this bzip container, register with supplied url & mime
             maindoc = createMainDocument(location, mimeType, charset, this);
             // creating a new parser class to parse the unzipped content
-            final String contentfilename = BZip2Utils.getUncompressedFilename(location.getFileName());
+            final String contentfilename = BZip2Utils.getUncompressedFileName(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
             final Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tempFile);
             if (docs != null) maindoc.addSubDocuments(docs);
@@ -197,7 +197,7 @@ public class bzipParser extends AbstractParser implements Parser {
             final InputStream compressedInStream, final int maxLinks, final long maxBytes) throws Failure {
         // creating a new parser class to parse the unzipped content
         final String compressedFileName = location.getFileName();
-        final String contentfilename = BZip2Utils.getUncompressedFilename(compressedFileName);
+        final String contentfilename = BZip2Utils.getUncompressedFileName(compressedFileName);
         final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
         try {
             /* Use the uncompressed file name for sub parsers to not unnecessarily use again the gzipparser */
@@ -212,6 +212,7 @@ public class bzipParser extends AbstractParser implements Parser {
         }
     }
 
+    @SuppressWarnings("resource")
     @Override
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
             final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
@@ -221,7 +222,6 @@ public class bzipParser extends AbstractParser implements Parser {
         try {
             // BZip2CompressorInputStream checks filecontent (magic start-bytes "BZh") and throws ioexception if no match
             zippedContent = new BZip2CompressorInputStream(source);
-
         } catch(Exception e) {
             throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
         } 

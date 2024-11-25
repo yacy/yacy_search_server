@@ -221,6 +221,7 @@ public class pdfParser extends AbstractParser implements Parser {
     /**
      * Clean up cache resources allocated by PDFBox that would otherwise not be released.
      */
+    @SuppressWarnings("deprecation")
     public static void clearPdfBoxCaches() {
 		/*
 		 * Prior to pdfbox 2.0.0 font cache occupied > 80MB RAM for a single pdf and

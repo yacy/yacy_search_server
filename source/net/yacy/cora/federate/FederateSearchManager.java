@@ -22,6 +22,8 @@ package net.yacy.cora.federate;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -366,8 +368,8 @@ public class FederateSearchManager {
                                 final String hrefurltxt = sdoc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName()) + "://" + sdoc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
                                 URL url;
                                 try {
-                                    url = new URL(hrefurltxt);
-                                } catch (final MalformedURLException ex) {
+                                    url = new URI(hrefurltxt).toURL();
+                                } catch (final MalformedURLException | URISyntaxException ex) {
                                     LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
                                     continue;
                                 }

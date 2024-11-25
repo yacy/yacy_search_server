@@ -128,7 +128,7 @@ public class gzipParser extends AbstractParser implements Parser {
         try {
             maindoc = createMainDocument(location, mimeType, charset, this);
             // creating a new parser class to parse the unzipped content
-            final String contentfilename = GzipUtils.getUncompressedFilename(location.getFileName());
+            final String contentfilename = GzipUtils.getUncompressedFileName(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
             Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, DEFAULT_DEPTH, tempFile);
             if (docs != null) maindoc.addSubDocuments(docs);
@@ -195,7 +195,7 @@ public class gzipParser extends AbstractParser implements Parser {
             final InputStream compressedInStream, final int maxLinks, final long maxBytes) throws Failure {
         // creating a new parser class to parse the unzipped content
         final String compressedFileName = location.getFileName();
-        final String contentfilename = GzipUtils.getUncompressedFilename(compressedFileName);
+        final String contentfilename = GzipUtils.getUncompressedFileName(compressedFileName);
         final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
         try {
             /* Use the uncompressed file name for sub parsers to not unnecessarily use again the gzipparser */

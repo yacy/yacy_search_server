@@ -146,6 +146,7 @@ public class docParser extends AbstractParser implements Parser {
      * @return an array containing one Document
      * @throws net.yacy.document.Parser.Failure
      */
+    @SuppressWarnings("resource")
     public Document[] parseOldWordDoc(
             final DigestURL location,
             final String mimeType,

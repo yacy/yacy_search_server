@@ -86,6 +86,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
      * @throws IOException
      * @throws SpaceExceededException
      */
+    @SuppressWarnings("resource")
     public RowHandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file) throws IOException, SpaceExceededException {
         this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), file.getAbsolutePath());
         // read the index dump and fill the index
@@ -95,10 +96,11 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         	fis = new FileInputStream(file);
             is = new BufferedInputStream(fis, 1024 * 1024);
         } catch (final OutOfMemoryError e) {
-        	if(fis != null) {
+        	if (fis != null) {
         		/* Reuse if possible the already created FileInputStream */
         		is = fis;
         	} else {
+        	    // fis is null, no resource to close
         		is = new FileInputStream(file);
         	}
         }

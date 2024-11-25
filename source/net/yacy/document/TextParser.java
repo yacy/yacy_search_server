@@ -330,7 +330,7 @@ public final class TextParser {
                 for(final Parser parser : idioms) {
                     /* Wrap in a CloseShieldInputStream to prevent SAX parsers closing the sourceStream
                      * and so let us eventually reuse the same opened stream with other parsers on parser failure */
-                    CloseShieldInputStream nonCloseInputStream = new CloseShieldInputStream(markableStream);
+                    CloseShieldInputStream nonCloseInputStream = CloseShieldInputStream.wrap(markableStream);
 
                     try {
                         return parseSource(location, mimeType, parser, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset,
@@ -351,7 +351,7 @@ public final class TextParser {
                              * (see RFC 7231 section 3.1.2.2 for "Content-Encoding" header specification https://tools.ietf.org/html/rfc7231#section-3.1.2.2)*/
                             final gzipParser gzParser = (gzipParser)parser;
 
-                            nonCloseInputStream = new CloseShieldInputStream(markableStream);
+                            nonCloseInputStream = CloseShieldInputStream.wrap(markableStream);
 
                             final Document maindoc = gzipParser.createMainDocument(location, mimeType, charset, gzParser);
 

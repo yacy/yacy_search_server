@@ -446,6 +446,7 @@ public class ZIMReader {
             return this.blobs.get(i);
         }
 
+        @SuppressWarnings("unused")
         public int getSize() {
             return this.blobs.size();
         }
