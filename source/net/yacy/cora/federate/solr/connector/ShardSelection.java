@@ -21,6 +21,8 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -82,8 +84,8 @@ public class ShardSelection implements Iterable<SolrClient> {
             if (sif != null) {
                 final String url = (String) sif.getValue();
                 if (url != null && url.length() > 0) try {
-                    return server4write(new URL(url));
-                } catch (final IOException e) {
+                    return server4write(new URI(url).toURL());
+                } catch (final IOException | URISyntaxException e) {
                     ConcurrentLog.logException(e);
                     return this.server.get(0);
                 }
@@ -97,7 +99,11 @@ public class ShardSelection implements Iterable<SolrClient> {
 
     public SolrClient server4write(final String host) throws IOException {
         if (host == null) throw new IOException("sharding - host url, host empty: " + host);
-        if (host.indexOf("://") >= 0) return server4write(new URL(host)); // security catch for accidantly using the wrong method
+        if (host.indexOf("://") >= 0) try {
+            return server4write(new URI(host).toURL()); // security catch for accidently using the wrong method
+        } catch (URISyntaxException e) {
+            throw new IOException("sharding - host url, host invalid: " + host);
+        }   
         if (this.method == Method.MODULO_HOST_MD5) {
             try {
                 final MessageDigest digest = MessageDigest.getInstance("MD5");

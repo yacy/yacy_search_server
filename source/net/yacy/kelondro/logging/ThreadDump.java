@@ -236,6 +236,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                     while (tracename.length() < 20) tracename = tracename + "_";
                     tracename = "[" + tracename + "] ";
                 }
+                @SuppressWarnings("deprecation")
                 final String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
                 String className;
                 boolean cutcore = true;

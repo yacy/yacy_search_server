@@ -56,7 +56,6 @@ public class XMLBlacklistImporter extends DefaultHandler {
     @SuppressWarnings("deprecation")
     public synchronized ListAccumulator parse(InputSource input) throws IOException, SAXException {
 
-        @SuppressWarnings("deprecation")
         final XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
         reader.setContentHandler(this);
         reader.parse(input);

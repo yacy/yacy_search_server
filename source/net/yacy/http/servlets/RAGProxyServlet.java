@@ -24,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import net.yacy.ai.OllamaClient;
 import net.yacy.ai.OpenAIClient;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.search.Switchboard;
@@ -51,12 +50,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class implements a Retrieval Augmented Generation ("RAG") proxy which uses a YaCy search index
@@ -66,11 +61,11 @@ public class RAGProxyServlet extends HttpServlet {
 	
     private static final long serialVersionUID = 3411544789759603107L;
 
-	private static Boolean LLM_ENABLED = false;
-    private static Boolean LLM_CONTROL_OLLAMA = true;
-    private static Boolean LLM_ATTACH_QUERY = false; // instructs the proxy to attach the prompt generated to do the RAG search
-    private static Boolean LLM_ATTACH_REFERENCES = false; // instructs the proxy to attach a list of sources that had been used in RAG
-    private static String  LLM_LANGUAGE  = "en"; // used to select proper language in RAG augmentation
+	//private static Boolean LLM_ENABLED = false;
+    //private static Boolean LLM_CONTROL_OLLAMA = true;
+    //private static Boolean LLM_ATTACH_QUERY = false; // instructs the proxy to attach the prompt generated to do the RAG search
+    //private static Boolean LLM_ATTACH_REFERENCES = false; // instructs the proxy to attach a list of sources that had been used in RAG
+    //private static String  LLM_LANGUAGE  = "en"; // used to select proper language in RAG augmentation
     private static String  LLM_SYSTEM_PREFIX  = "\n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.";
     private static String  LLM_USER_PREFIX  = "\n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n";
 	private static String  LLM_API_HOST  = "http://localhost:11434"; // Ollama port; install ollama from https://ollama.com/

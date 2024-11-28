@@ -30,8 +30,6 @@ package net.yacy.htroot;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.parser.pdfParser;
-import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -42,8 +40,6 @@ public class ConfigParser_p {
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        final Switchboard sb = (Switchboard) env;
-
 
         if (post != null) {
 

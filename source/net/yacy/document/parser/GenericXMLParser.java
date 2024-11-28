@@ -112,7 +112,8 @@ public class GenericXMLParser extends AbstractParser implements Parser {
 
         	/* Use commons-io XmlStreamReader advanced rules to help with charset detection when source contains no BOM or XML declaration
         	 * (detection algorithm notably also include ContentType transmitted by HTTP headers, here eventually present as mimeType and charset parameters),  */
-        	final XmlStreamReader reader = new XmlStreamReader(source, mimeType, true, charset);
+            final XmlStreamReader reader = XmlStreamReader.builder().setInputStream(source).setHttpContentType(mimeType).setLenient(true).setCharset(charset).get();
+        	//final XmlStreamReader reader = new XmlStreamReader(source, mimeType, true, charset);
 			final InputSource saxSource = new InputSource(reader);
 			final String detectedCharset = reader.getEncoding();
 
@@ -176,7 +177,8 @@ public class GenericXMLParser extends AbstractParser implements Parser {
         	
         	/* Use commons-io XmlStreamReader advanced rules to help with charset detection when source contains no BOM or XML declaration
         	 * (detection algorithm notably also include ContentType transmitted by HTTP headers, here eventually present as mimeType and charset parameters),  */
-        	final XmlStreamReader reader = new XmlStreamReader(limitedSource, mimeType, true, charsetName);
+            final XmlStreamReader reader = XmlStreamReader.builder().setInputStream(limitedSource).setHttpContentType(mimeType).setLenient(true).setCharset(charsetName).get();
+        	//final XmlStreamReader reader = new XmlStreamReader(limitedSource, mimeType, true, charsetName);
 			final InputSource saxSource = new InputSource(reader);
 			final String detectedCharset = reader.getEncoding();
 

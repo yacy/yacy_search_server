@@ -119,7 +119,7 @@ public class FTPClient {
     private final Map<String, entryInfo> infoCache = new HashMap<String, entryInfo>();
 
     // date-format in LIST (english month names)
-    private static final SimpleDateFormat lsDateFormat = new SimpleDateFormat("MMM d y H:m", new Locale("en"));
+    private static final SimpleDateFormat lsDateFormat = new SimpleDateFormat("MMM d y H:m", Locale.forLanguageTag("en"));
 
     // TODO: implement RFC 2640 Internationalization
 

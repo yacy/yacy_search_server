@@ -728,7 +728,7 @@ public final class Switchboard extends serverSwitch {
         // Set jvm default locale to match UI language (
         String lng = this.getConfig("locale.language", "en");
         if (!"browser".equals(lng) && !"default".equals(lng)) {
-            Locale.setDefault(new Locale(lng));
+            Locale.setDefault(Locale.forLanguageTag(lng));
         } else {
             lng = "en"; // default = English
         }

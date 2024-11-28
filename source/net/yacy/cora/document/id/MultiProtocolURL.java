@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -2368,7 +2369,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public java.net.URL getURL() throws MalformedURLException {
         if (!(isHTTP() || isHTTPS() || isFTP())) throw new MalformedURLException();
-        return new java.net.URL(this.toNormalform(false));
+        try {
+            return new java.net.URI(this.toNormalform(false)).toURL();
+        } catch (URISyntaxException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
     }
 
     /**
@@ -2655,6 +2660,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
 
+    @SuppressWarnings("deprecation")
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "file://y:/"},
@@ -2722,7 +2728,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = element[1];
             try {aURL = MultiProtocolURL.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (environment == null) {
-                try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
+                try {jURL = new java.net.URI(url).toURL();} catch (final MalformedURLException | URISyntaxException e) {jURL = null;}
             } else {
                 try {jURL = new java.net.URL(new java.net.URL(environment), url);} catch (final MalformedURLException e) {jURL = null;}
             }

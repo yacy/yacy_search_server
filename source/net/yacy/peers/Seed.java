@@ -47,6 +47,8 @@ import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.time.DateTimeException;
@@ -1358,7 +1360,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 return "wrong protocol for seedURL";
             }
             try {
-                final URL url = new URL(seedURL);
+                final URL url = new URI(seedURL).toURL();
                 final String host = url.getHost();
                 if (Domains.isIntranet(host)) {
                     // network.unit.domain = any returns isIntranet() always true (because noLocalCheck is set true)
@@ -1371,7 +1373,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                         return "seedURL in local network rejected ("+host+")";
                     }
                 }
-            } catch (final MalformedURLException e ) {
+            } catch (final MalformedURLException | URISyntaxException e ) {
                 return "seedURL malformed";
             }
         }

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -169,8 +171,8 @@ public class RDFaParser extends AbstractParser implements Parser {
 					}
 				} else {
 					try {
-						aURL = new URL(args[0]);
-					} catch (final MalformedURLException e) {
+						aURL = new URI(args[0]).toURL();
+					} catch (final MalformedURLException | URISyntaxException e) {
 						System.err.println("URL is malformed.");
 					}
 

@@ -22,6 +22,8 @@ package net.yacy.htroot;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 
@@ -83,7 +85,7 @@ public class IndexImportJsonList_p {
  */
                         if (urlstr != null && urlstr.length() > 0) {
                             try {
-                                final URL url = new URL(urlstr);
+                                final URL url = new URI(urlstr).toURL();
                                 final String tempfilename = "jsonlistimporter";
                                 final boolean gz = urlstr.endsWith(".gz");
                                 final File tempfile = File.createTempFile(tempfilename, "");
@@ -93,7 +95,7 @@ public class IndexImportJsonList_p {
                                 final JsonListImporter wi = new JsonListImporter(tempfile, gz, true);
                                 wi.start();
                                 prop.put("import_thread", "started");
-                            } catch (final IOException ex) {
+                            } catch (final IOException | URISyntaxException ex) {
                                 prop.put("import_thread", ex.getMessage());
                             }
                             prop.put("import", 1);
