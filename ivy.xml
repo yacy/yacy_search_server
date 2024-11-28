@@ -13,15 +13,15 @@
       </dependency>
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
       <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.19.0"  />
-      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.17.0"/>
+      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.18.2"/>
       <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.1.8"/>
-      <dependency org="com.google.guava" name="guava" rev="33.2.0-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="guava" rev="33.3.1-jre" conf="compile->master"/>
       <dependency org="com.google.guava" name="failureaccess" rev="1.0.2" />
-      <dependency org="com.ibm.icu" name="icu4j" rev="75.1"/>
-      <dependency org="com.jcraft" name="jsch" rev="0.1.55" />
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.9.4"/>
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.9.4" />
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.9.4"/>
+      <dependency org="com.ibm.icu" name="icu4j" rev="76.1"/>
+      <dependency org="com.github.mwiede" name="jsch" rev="0.2.21" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.12.0"/>
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.12.0" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.12.0"/>
       <dependency org="commons-codec" name="commons-codec" rev="1.15" />
       <dependency org="commons-io" name="commons-io" rev="2.17.0" />
       <dependency org="commons-logging" name="commons-logging" rev="1.2" />
@@ -36,7 +36,7 @@
       <dependency org="net.jthink" name="jaudiotagger" rev="2.2.5"/>
       <dependency org="net.sourceforge.jchardet" name="jchardet" rev="1.0"/>
       <dependency org="org.apache.commons" name="commons-collections4" rev="4.4" />
-      <dependency org="org.apache.commons" name="commons-compress" rev="1.26.0" />
+      <dependency org="org.apache.commons" name="commons-compress" rev="1.27.1" />
       <dependency org="org.apache.calcite.avatica" name="avatica-core" rev="1.13.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-core" rev="1.18.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.18.0" conf="compile->master"/>
@@ -59,7 +59,7 @@
       <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-suggest" rev="9.0.0"/>
       
-      <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.2" />
+      <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.3" />
       <dependency org="org.apache.poi" name="poi" rev="5.3.0" />
       <dependency org="org.apache.poi" name="poi-scratchpad" rev="5.3.0" />
       
@@ -68,7 +68,7 @@
       <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
       <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.6.2" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
-      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.78.1" />
+      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.79" />
       <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
         <exclude module="stax-api" />
       </dependency>
