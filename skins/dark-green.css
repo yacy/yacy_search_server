@@ -94,11 +94,13 @@ table {
 
 .TableCellSummary {
   background-color: #FFCCCC;
+  color: #3c3c3c;
   border:1px solid #888888;
 }
 
 .TableCellActive {       
   background-color: #FFCCCC;     
+  color: #3c3c3c;
 }
 
 /* Blog and Wiki*/
