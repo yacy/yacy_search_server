@@ -20,15 +20,23 @@ else
     ID="id"
 fi
 
+# if java executable not found using 'which', let's try 'command'
+if [ ! -x "$JAVA" ]
+then
+	JAVA="`command -v java`"
+fi
+
 if [ ! -x "$JAVA" ]
 then
     echo "The java command is not executable."
-    echo "Either you have not installed java or it is not in your PATH"
+    echo "Either you have not installed java or it is not in your PATH."
+    echo "You can also set a path to java manually, in \$JAVA option of $0 script."
     #Cron supports setting the path in 
     #echo "Has this script been invoked by CRON?"
     #echo "if so, please set PATH in the crontab, or set the correct path in the variable in this script."
     exit 1
 fi
+
 
 usage() {
     cat - <<USAGE
