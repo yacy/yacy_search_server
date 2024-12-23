@@ -60,7 +60,7 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
-    private static final ConcurrentLog log = new ConcurrentLog("ReferenceContainerCache");
+    private static final ConcurrentLog log = new ConcurrentLog("KELONDRO");
 
     private final int termSize;
     private final ByteOrder termOrder;

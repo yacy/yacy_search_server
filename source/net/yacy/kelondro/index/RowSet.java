@@ -100,7 +100,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         }
         //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
         if (b.length - exportOverheadSize != alloc) {
-            ConcurrentLog.severe("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
+            ConcurrentLog.severe("KELONDRO", "RowSet: exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
             return new RowSet(rowdef, 0);
         }
         System.arraycopy(b, (int) exportOverheadSize, chunkcache, 0, chunkcache.length);
@@ -509,13 +509,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         try {
         	c0.sort();
         } catch (final Throwable e) {
-        	ConcurrentLog.severe("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
+        	ConcurrentLog.severe("KELONDRO", "RowSet: collection corrupted. cleaned. " + e.getMessage(), e);
         	c0.clear();
         }
         try {
         	c1.sort();
         } catch (final Throwable e) {
-        	ConcurrentLog.severe("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
+        	ConcurrentLog.severe("KELONDRO", "RowSet: collection corrupted. cleaned. " + e.getMessage(), e);
         	c1.clear();
         }
         int c0i = 0, c1i = 0;

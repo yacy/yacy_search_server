@@ -146,7 +146,7 @@ public class BEncodedHeapShard extends AbstractMapStore implements MapStore {
         // open all tables of this shard
         for (final String element : tablefile) {
             if (this.shardMethod.isShardPart(element)) {
-                ConcurrentLog.info("BEncodedHeapShard", "opening partial shard " + element);
+                ConcurrentLog.info("KELONDRO", "BEncodedHeapShard: opening partial shard " + element);
                 MapStore bag = openBag(element);
                 this.shard.put(this.shardMethod.getShardName(element), bag);
             }

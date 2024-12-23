@@ -106,7 +106,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.rowdef = rowdef;
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
-            ConcurrentLog.warn("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
+            ConcurrentLog.warn("KELONDRO", "RowCollection: corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
         }
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
@@ -122,7 +122,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             throw new kelondroException("old collection order does not match with new order; objectOrder.signature = " + rowdef.objectOrder.signature() + ", oldOrder.signature = " + oldOrder.signature());
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
         if (this.sortBound > this.chunkcount) {
-            ConcurrentLog.warn("RowCollection", "corrected wrong sortBound; sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount);
+            ConcurrentLog.warn("KELONDRO", "RowCollection: corrected wrong sortBound; sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount);
             this.sortBound = this.chunkcount;
         }
         this.chunkcache = exportedCollection.getColBytes(exp_collection, false);
@@ -860,7 +860,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
                 i--;
             }
         } catch (final RuntimeException e) {
-            ConcurrentLog.warn("kelondroRowCollection", e.getMessage(), e);
+            ConcurrentLog.warn("KELONDRO", "kelondroRowCollection: " + e.getMessage(), e);
         } finally {
             if (!u) sort();
         }
