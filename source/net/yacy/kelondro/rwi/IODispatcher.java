@@ -48,7 +48,7 @@ import net.yacy.kelondro.util.MemoryControl;
  */
 public class IODispatcher extends Thread {
 
-    private static final ConcurrentLog log = new ConcurrentLog("IODispatcher");
+    private static final ConcurrentLog log = new ConcurrentLog("KELONDRO IODispatcher");
 
     private   Semaphore                    controlQueue; // controls that only one io job is running
     private   final Semaphore              termination; // released if thread is safe to terminate

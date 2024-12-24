@@ -486,7 +486,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 try {
                     map = get(nextKey, false);
                 } catch (final IOException e) {
-                    ConcurrentLog.warn("MapDataMining", e.getMessage());
+                    ConcurrentLog.warn("KELONDRO", "MapDataMining: " + e.getMessage());
                     continue;
                 } catch (final SpaceExceededException e) {
                     ConcurrentLog.logException(e);

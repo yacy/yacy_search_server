@@ -97,7 +97,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
                 try {
                     d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime();
                 } catch (final ParseException e) {
-                    ConcurrentLog.severe("BEncodedHeapBag", "", e);
+                    ConcurrentLog.severe("KELONDRO", "BEncodedHeapBag", e);
                     continue;
                 }
                 time = d.getTime();
@@ -134,11 +134,11 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
             t.remove(maxf);
             f = new File(this.baseDir, maxf);
             try {
-                ConcurrentLog.info("BEncodedHeapBag", "opening partial heap " + f);
+                ConcurrentLog.info("KELONDRO", "BEncodedHeapBag: opening partial heap " + f);
                 BEncodedHeap heap = new BEncodedHeap(f, this.keylength, this.entryOrder, this.buffermax);
                 this.bag.put(maxf, heap);
             } catch (final IOException e) {
-                ConcurrentLog.severe("BEncodedHeapBag", "error opening partial heap " + f);
+                ConcurrentLog.severe("KELONDRO", "BEncodedHeapBag: error opening partial heap " + f);
             }
         }
     }
@@ -187,7 +187,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
         try {
             heap = new BEncodedHeap(f, this.keylength, this.entryOrder, this.buffermax);
         } catch (final IOException e) {
-            ConcurrentLog.severe("BEncodedHeapBag", "unable to open new heap file: " + e.getMessage(), e);
+            ConcurrentLog.severe("KELONDRO", "BEncodedHeapBag: unable to open new heap file: " + e.getMessage(), e);
             return null;
         }
         this.bag.put(this.current, heap);
@@ -205,7 +205,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
         try {
             d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime().getTime();
         } catch (final ParseException e) {
-            ConcurrentLog.severe("BEncodedHeapBag", "", e);
+            ConcurrentLog.severe("KELONDRO", "BEncodedHeapBag", e);
             d = 0;
         }
         if (d + this.fileAgeLimit < t || new File(this.baseDir, name).length() >= this.fileSizeLimit) {

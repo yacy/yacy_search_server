@@ -124,7 +124,7 @@ public class MapDataMining extends MapHeap {
                 try {
                     map = super.get(mapnameb);
                 } catch (final SpaceExceededException e) {
-                    ConcurrentLog.warn("MapDataMining", e.getMessage());
+                    ConcurrentLog.warn("KELONDRO", "MapDataMining: " + e.getMessage());
                     break;
                 }
                 if (map == null) break;

@@ -54,7 +54,7 @@ public abstract class AbstractReference implements Reference {
         try {
             return d == 0 ? 0 : d / positions().size();
         } catch (ArithmeticException ex) {
-            ConcurrentLog.fine("AbstractReference", "word distance calculation:" + ex.getMessage());
+            ConcurrentLog.fine("KELONDRO", "AbstractReference: word distance calculation:" + ex.getMessage());
             return 0;
         }
     }

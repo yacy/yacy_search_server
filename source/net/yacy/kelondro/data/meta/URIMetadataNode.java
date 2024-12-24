@@ -184,7 +184,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             final String myhash = ASCII.String(this.url.hash());
             if (!hashstr.equals(myhash)) {
                 this.setField(CollectionSchema.id.getSolrFieldName(), myhash);
-                ConcurrentLog.fine("URIMetadataNode", "updated document.ID of " + urlRaw + " from " + hashstr + " to " + myhash);
+                ConcurrentLog.fine("KELONDRO", "URIMetadataNode: updated document.ID of " + urlRaw + " from " + hashstr + " to " + myhash);
                 // ususally the hosthash matches but just to be on the safe site
                 final String hostidstr = getString(CollectionSchema.host_id_s); // id or empty string
                 if (!hostidstr.isEmpty() && !hostidstr.equals(this.url.hosthash())) {
@@ -704,14 +704,14 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 
     public static URIMetadataNode importEntry(final String propStr, String collection) {
         if (propStr == null || propStr.isEmpty() || propStr.charAt(0) != '{' || !propStr.endsWith("}")) {
-            ConcurrentLog.severe("URIMetadataNode", "importEntry: propStr is not proper: " + propStr);
+            ConcurrentLog.severe("KELONDRO", "URIMetadataNode: importEntry: propStr is not proper: " + propStr);
             return null;
         }
         try {
             return new URIMetadataNode(MapTools.s2p(propStr.substring(1, propStr.length() - 1)), collection);
         } catch (final kelondroException | MalformedURLException e) {
             // wrong format
-            ConcurrentLog.severe("URIMetadataNode", e.getMessage());
+            ConcurrentLog.severe("KELONDRO", "URIMetadataNode: " + e.getMessage());
             return null;
         }
     }

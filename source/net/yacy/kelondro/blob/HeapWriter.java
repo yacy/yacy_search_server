@@ -41,7 +41,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 public final class HeapWriter {
 
-    private final static ConcurrentLog log = new ConcurrentLog("HeapWriter");
+    private final static ConcurrentLog log = new ConcurrentLog("KELONDRO");
     public final static byte[] ZERO = new byte[]{0};
 
     private final int          keylength;     // the length of the primary key
@@ -95,7 +95,7 @@ public final class HeapWriter {
         	try {
         		fileStream.close();
         	} catch(IOException ignored) {
-        		log.warn("Could not close output stream on file " + temporaryHeapFile);
+        		log.warn("HeapWriter: Could not close output stream on file " + temporaryHeapFile);
         	}
         	throw e;
         }
@@ -147,9 +147,9 @@ public final class HeapWriter {
         // rename the file into final name
         if (this.heapFileREADY.exists()) FileUtils.deletedelete(this.heapFileREADY);
         boolean renameok = this.heapFileTMP.renameTo(this.heapFileREADY);
-        if (!renameok) throw new IOException("cannot rename " + this.heapFileTMP + " to " + this.heapFileREADY);
-        if (!this.heapFileREADY.exists()) throw new IOException("renaming of " + this.heapFileREADY.toString() + " failed: files still exists");
-        if (this.heapFileTMP.exists()) throw new IOException("renaming to " + this.heapFileTMP.toString() + " failed: file does not exist");
+        if (!renameok) throw new IOException("HeapWriter: cannot rename " + this.heapFileTMP + " to " + this.heapFileREADY);
+        if (!this.heapFileREADY.exists()) throw new IOException("HeapWriter: renaming of " + this.heapFileREADY.toString() + " failed: files still exists");
+        if (this.heapFileTMP.exists()) throw new IOException("HeapWriter: renaming to " + this.heapFileTMP.toString() + " failed: file does not exist");
 
         // generate index and gap files
         if (writeIDX && this.index.size() > 3) {
@@ -158,11 +158,11 @@ public final class HeapWriter {
             long start = System.currentTimeMillis();
             String fingerprint = HeapReader.fingerprintFileHash(this.heapFileREADY);
             if (fingerprint == null) {
-                log.severe("cannot write a dump for " + this.heapFileREADY.getName()+ ": fingerprint is null");
+                log.severe("HeapWriter: cannot write a dump for " + this.heapFileREADY.getName()+ ": fingerprint is null");
             } else {
                 new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
                 this.index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
-                log.info("wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                log.info("HeapWriter: wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
             }
             this.index.close();
             this.index = null;
