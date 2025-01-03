@@ -115,8 +115,8 @@ public class HeapModifier extends HeapReader implements BLOB {
             //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
             long filelength = this.file.length(); // put in separate variable for debugging
             if (seek + size + 4 > filelength) {
-                ConcurrentLog.severe("BLOBHeap", this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
-                throw new IOException(this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
+                ConcurrentLog.severe("KELONDRO", "BLOBHeap: " + this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
+                throw new IOException("BLOBHeap: " + this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
             }
             super.deleteFingerprint();
 

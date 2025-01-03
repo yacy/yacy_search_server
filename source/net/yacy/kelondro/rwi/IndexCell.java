@@ -487,7 +487,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashes));
         } catch (final SpaceExceededException e) {
             reduced = 0;
-            ConcurrentLog.warn("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
+            ConcurrentLog.warn("KELONDRO", "IndexCell: not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
         //assert this.array.mem() <= am : "am = " + am + ", array.mem() = " + this.array.mem();
         return removed + (reduced / this.array.rowdef().objectsize);
@@ -503,7 +503,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashBytes));
         } catch (final SpaceExceededException e) {
             reduced = 0;
-            ConcurrentLog.warn("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
+            ConcurrentLog.warn("KELONDRO", "IndexCell: not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
         //assert this.array.mem() <= am : "am = " + am + ", array.mem() = " + this.array.mem();
         return removed || (reduced > 0);

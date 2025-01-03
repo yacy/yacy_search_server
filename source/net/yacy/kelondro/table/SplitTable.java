@@ -181,7 +181,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                 try {
                     d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime();
                 } catch (final ParseException e) {
-                    ConcurrentLog.severe("SplitTable", "", e);
+                    ConcurrentLog.severe("KELONDRO", "SplitTable: ", e);
                     continue;
                 }
                 time = d.getTime();
@@ -218,7 +218,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             // open next biggest table
             t.remove(maxf);
             f = new File(this.path, maxf);
-            ConcurrentLog.info("kelondroSplitTable", "opening partial eco table " + f);
+            ConcurrentLog.info("KELONDRO", "SplitTable: opening partial eco table " + f);
             Table table;
             try {
                 table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, false);
@@ -226,7 +226,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                 try {
                     table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, false);
                 } catch (final SpaceExceededException ee) {
-                    ConcurrentLog.severe("SplitTable", "Table " + f.toString() + " cannot be initialized: " + ee.getMessage(), ee);
+                    ConcurrentLog.severe("KELONDRO", "SplitTable: Table " + f.toString() + " cannot be initialized: " + ee.getMessage(), ee);
                     continue maxfind;
                 }
             }
@@ -373,7 +373,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         try {
             d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime().getTime();
         } catch (final ParseException e) {
-            ConcurrentLog.severe("SplitTable", "", e);
+            ConcurrentLog.severe("KELONDRO", "SplitTable", e);
             d = 0;
         }
         if (d + this.fileAgeLimit < t || new File(this.path, name).length() >= this.fileSizeLimit) {

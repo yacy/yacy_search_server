@@ -311,7 +311,7 @@ public final class Row implements Serializable {
                             try {
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, NumberTools.parseLongDecSubstring(token, p + 1));
                             } catch (final NumberFormatException e) {
-                                ConcurrentLog.severe("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
+                                ConcurrentLog.severe("KELONDRO", "kelondroRow: NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0);
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
@@ -319,7 +319,7 @@ public final class Row implements Serializable {
                             try {
                                 setCol(clstrt, col.cellwidth, new byte[]{(byte) NumberTools.parseIntDecSubstring(token, p + 1)});
                             } catch (final NumberFormatException e) {
-                                ConcurrentLog.severe("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
+                                ConcurrentLog.severe("KELONDRO", "kelondroRow: NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(clstrt, col.cellwidth, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_bitfield)) {

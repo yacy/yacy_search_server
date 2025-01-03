@@ -593,7 +593,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     			p--;
 				worker[p % cores0].add(this.container.get(p, false));
 				if (p % 100 == 0 && System.currentTimeMillis() > timeout) {
-				    ConcurrentLog.warn("TransformDistributor", "distribution of WordReference entries to worker queues ended with timeout = " + this.maxtime);
+				    ConcurrentLog.warn("KELONDRO", "TransformDistributor: distribution of WordReference entries to worker queues ended with timeout = " + this.maxtime);
 				    break;
 				}
             }
@@ -645,7 +645,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 				while ((entry = this.in.take()) != WordReferenceRow.poisonRowEntry) {
 				    this.out.put(new WordReferenceVars(new WordReferenceRow(entry), local));
 				    if (System.currentTimeMillis() > timeout) {
-	                    ConcurrentLog.warn("TransformWorker", "normalization of row entries from row to vars ended with timeout = " + this.maxtime);
+	                    ConcurrentLog.warn("KELONDRO", "TransformWorker: normalization of row entries from row to vars ended with timeout = " + this.maxtime);
 				        break;
 				    }
 				}

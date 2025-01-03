@@ -67,15 +67,15 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
             try {
                 row = RowSet.importRowSet(entry.getValue(), this.factory.getRow());
                 if (row == null) {
-                    ConcurrentLog.severe("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because importRowSet returned null");
+                    ConcurrentLog.severe("KELONDRO", "ReferenceIterator: lost entry '" + UTF8.String(entry.getKey()) + "' because importRowSet returned null");
                     continue; // thats a fail but not as REALLY bad if the whole method would crash here
                 }
                 return new ReferenceContainer<ReferenceType>(this.factory, entry.getKey(), row);
             } catch (final SpaceExceededException e) {
-                ConcurrentLog.severe("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of too low memory: " + e.toString());
+                ConcurrentLog.severe("KELONDRO", "ReferenceIterator: lost entry '" + UTF8.String(entry.getKey()) + "' because of too low memory: " + e.toString());
                 continue;
             } catch (final Throwable e) {
-                ConcurrentLog.severe("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of error: " + e.toString());
+                ConcurrentLog.severe("KELONDRO", "ReferenceIterator: lost entry '" + UTF8.String(entry.getKey()) + "' because of error: " + e.toString());
                 continue;
             }
         }

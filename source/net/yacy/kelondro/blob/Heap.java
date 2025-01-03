@@ -89,7 +89,7 @@ public final class Heap extends HeapModifier implements BLOB {
         this.buffermax = buffermax;
         this.buffer = new TreeMap<byte[], byte[]>(ordering);
         this.buffersize = 0;
-        ConcurrentLog.info("Heap", "initializing heap " + this.name());
+        ConcurrentLog.info("KELONDRO", "Heap: initializing heap " + this.name());
         /*
         // DEBUG
         Iterator<byte[]> i = index.keys(true, null);
@@ -279,7 +279,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized void clear() throws IOException {
-        ConcurrentLog.info("Heap", "clearing heap " + this.name());
+        ConcurrentLog.info("KELONDRO", "Heap: clearing heap " + this.name());
         assert this.buffer != null;
         if (this.buffer == null) this.buffer = new TreeMap<byte[], byte[]>(this.ordering);
         this.buffer.clear();
@@ -292,7 +292,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized void close(final boolean writeIDX) {
-        ConcurrentLog.info("Heap", "closing heap " + this.name());
+        ConcurrentLog.info("KELONDRO", "Heap: closing heap " + this.name());
         if (this.file != null && this.buffer != null) {
             try {
                 flushBuffer();

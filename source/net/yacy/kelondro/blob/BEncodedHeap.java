@@ -99,7 +99,7 @@ public class BEncodedHeap implements MapStore {
         try {
             return this.table.keys(true, false);
         } catch (final IOException e) {
-            ConcurrentLog.severe("BEncodedHeap", "returning empty iterator for failed key iteration: " + e.getMessage(), e);
+            ConcurrentLog.severe("KELONDRO", "BEncodedHeap: returning empty iterator for failed key iteration: " + e.getMessage(), e);
             return new CloneableIterator<byte[]>(){
 
                 @Override
@@ -620,7 +620,7 @@ public class BEncodedHeap implements MapStore {
                 this.table = new Heap(location, keylen, order, buffermax);
                 return iter;
             } catch (final IOException e ) {
-                ConcurrentLog.severe("PropertiesTable", e.getMessage(), e);
+                ConcurrentLog.severe("KELONDRO", "PropertiesTable " + e.getMessage(), e);
                 return null;
             }
         }
