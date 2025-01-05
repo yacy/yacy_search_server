@@ -30,9 +30,7 @@ HTTPC.level = INFO
 DHT-OUT.level = INFO
 SWITCHBOARD.level = INFO
 DHT.level = INFO
-HeapReader.level = INFO
-Heap.level = INFO
-
+KELONDRO.level = INFO
 
 # UPnP related
 UPNP.level = INFO

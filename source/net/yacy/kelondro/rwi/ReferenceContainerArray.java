@@ -310,14 +310,14 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	int k = 1;
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, this.factory.getRow()));
     	if (System.currentTimeMillis() > timeout) {
-    	    ConcurrentLog.warn("ReferenceContainerArray", "timout in get() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+    	    ConcurrentLog.warn("KELONDRO", "ReferenceContainerArray: timout in get() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     	    return c;
     	}
     	while (entries.hasNext()) {
     		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), this.factory.getRow())));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
-    		    ConcurrentLog.warn("ReferenceContainerArray", "timout in get() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+    		    ConcurrentLog.warn("KELONDRO", "ReferenceContainerArray: timout in get() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     		    return c;
             }
     	}
@@ -333,7 +333,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         int c = RowSet.importRowCount(a, this.factory.getRow());
         assert c >= 0;
         if (System.currentTimeMillis() > timeout) {
-            ConcurrentLog.warn("ReferenceContainerArray", "timout in count() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+            ConcurrentLog.warn("KELONDRO", "ReferenceContainerArray: timeout in count() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
             return c;
         }
         while (entries.hasNext()) {
@@ -341,7 +341,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             assert c >= 0;
             k++;
             if (System.currentTimeMillis() > timeout) {
-                ConcurrentLog.warn("ReferenceContainerArray", "timout in count() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+                ConcurrentLog.warn("KELONDRO", "ReferenceContainerArray: timeout in count() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
                 return c;
             }
         }
@@ -402,7 +402,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkBestSmallFiles(final IODispatcher merger, final long targetFileSize) {
         final File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
         if (ff == null) return false;
-        ConcurrentLog.info("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
+        ConcurrentLog.info("KELONDRO", "RICELL-shrink1: unmountBestMatch(2.0, " + targetFileSize + ")");
         merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
         return true;
     }
@@ -410,7 +410,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkAnySmallFiles(final IODispatcher merger, final long targetFileSize) {
         final File[] ff = this.array.unmountSmallest(targetFileSize);
         if (ff == null) return false;
-        ConcurrentLog.info("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
+        ConcurrentLog.info("KELONDRO", "RICELL-shrink2: unmountSmallest(" + targetFileSize + ")");
         merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
         return true;
     }
@@ -418,7 +418,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkUpToMaxSizeFiles(final IODispatcher merger, final long maxFileSize) {
         final File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
         if (ff == null) return false;
-        ConcurrentLog.info("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
+        ConcurrentLog.info("KELONDRO", "RICELL-shrink3: unmountBestMatch(2.0, " + maxFileSize + ")");
         merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
         return true;
     }
@@ -426,7 +426,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkOldFiles(final IODispatcher merger) {
         final File ff = this.array.unmountOldest();
         if (ff == null) return false;
-        ConcurrentLog.info("RICELL-shrink4/rewrite", "unmountOldest()");
+        ConcurrentLog.info("KELONDRO", "RICELL-shrink4/rewrite: unmountOldest()");
         merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
         return true;
     }

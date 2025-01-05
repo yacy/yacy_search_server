@@ -158,7 +158,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
             baos.close();
             return baos.toByteArray();
         } catch (final IOException e) {
-            ConcurrentLog.severe("Compressor", "", e);
+            ConcurrentLog.severe("KELONDRO", "Compressor", e);
             return null;
         }
     }
@@ -219,7 +219,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
 			locked = this.lock.tryLock(this.lockTimeout, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException ignored) {
 			/* When interrupted, simply return null */
-			ConcurrentLog.fine("Compressor", "Interrupted while acquiring a synchronzation lock on get()");
+			ConcurrentLog.fine("KELONDRO", "Compressor: Interrupted while acquiring a synchronzation lock on get()");
 		}
         if(locked) {
         	try {
@@ -241,7 +241,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
             }
             return decompress(b);
         }
-       	ConcurrentLog.fine("Compressor", "Could not acquire a synchronization lock for retrieval within " + this.lockTimeout + " milliseconds");
+       	ConcurrentLog.fine("KELONDRO", "Compressor: Could not acquire a synchronization lock for retrieval within " + this.lockTimeout + " milliseconds");
         return b;
     }
 
@@ -318,7 +318,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
 			locked = this.lock.tryLock(this.lockTimeout, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException ignored) {
 			/* When interrupted, simply nothing is inserted */
-			ConcurrentLog.fine("Compressor", "Interrupted while acquiring a synchronzation lock on insert()");
+			ConcurrentLog.fine("KELONDRO", "Compressor: Interrupted while acquiring a synchronzation lock on insert()");
 		}
     	if(locked) {
     		try {
@@ -349,7 +349,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     			flushAll();
     		}
     	} else {
-    		ConcurrentLog.fine("Compressor", "Could not acquire a synchronization lock for insertion within " + this.lockTimeout + " milliseconds");
+    		ConcurrentLog.fine("KELONDRO", "Compressor: Could not acquire a synchronization lock for insertion within " + this.lockTimeout + " milliseconds");
     	}
     }
 

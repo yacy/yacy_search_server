@@ -212,7 +212,7 @@ public class ArrayStack implements BLOB {
                        sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                    } catch (final IOException e) {
                        if (deleteonfail) {
-                           ConcurrentLog.warn("ArrayStack", "cannot read file " + f.getName() + ", deleting it (smart fail; alternative would be: crash; required user action would be same as deletion)");
+                           ConcurrentLog.warn("KELONDRO", "ArrayStack: cannot read file " + f.getName() + ", deleting it (smart fail; alternative would be: crash; required user action would be same as deletion)");
                            f.delete();
                        } else {
                            throw new IOException(e.getMessage(), e);
@@ -279,7 +279,7 @@ public class ArrayStack implements BLOB {
                 return;
             }
         }
-        ConcurrentLog.severe("BLOBArray", "file " + location + " cannot be unmounted. The file " + ((location.exists()) ? "exists." : "does not exist."));
+        ConcurrentLog.severe("KELONDRO", "BLOBArray: file " + location + " cannot be unmounted. The file " + ((location.exists()) ? "exists." : "does not exist."));
     }
 
     private File unmount(final int idx) {
@@ -624,7 +624,7 @@ public class ArrayStack implements BLOB {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            ConcurrentLog.severe("ArrayStack", "", e);
+            ConcurrentLog.severe("KELONDRO", "ArrayStack", e);
             throw new RuntimeException(e.getCause());
         }
         //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
@@ -701,10 +701,10 @@ public class ArrayStack implements BLOB {
                     final byte[] n = b.get(this.key);
                     if (n != null) return n;
                 } catch (final IOException e) {
-                    ConcurrentLog.severe("ArrayStack", "BlobValues - IOException: " + e.getMessage(), e);
+                    ConcurrentLog.severe("KELONDRO", "ArrayStack: BlobValues - IOException: " + e.getMessage(), e);
                     return null;
                 } catch (final SpaceExceededException e) {
-                    ConcurrentLog.severe("ArrayStack", "BlobValues - RowSpaceExceededException: " + e.getMessage(), e);
+                    ConcurrentLog.severe("KELONDRO", "ArrayStack: BlobValues - RowSpaceExceededException: " + e.getMessage(), e);
                     break;
                 }
             }
@@ -758,7 +758,7 @@ public class ArrayStack implements BLOB {
                     final long l = b.length(this.key);
                     if (l >= 0) return Long.valueOf(l);
                 } catch (final IOException e) {
-                    ConcurrentLog.severe("ArrayStack", "", e);
+                    ConcurrentLog.severe("KELONDRO", "ArrayStack", e);
                     return null;
                 }
             }
@@ -891,10 +891,10 @@ public class ArrayStack implements BLOB {
 		try {
 			final boolean terminated = DELETE_EXECUTOR.awaitTermination(timeout, TimeUnit.SECONDS);
 			if(!terminated) {
-				ConcurrentLog.warn("ArrayStack", "Delete executor service could not terminated within " + timeout + " second");
+				ConcurrentLog.warn("KELONDRO", "ArrayStack: Delete executor service could not terminated within " + timeout + " second");
 			}
 		} catch (InterruptedException e) {
-			ConcurrentLog.warn("ArrayStack", "Interrupted before termination of the delete executor service");
+			ConcurrentLog.warn("KELONDRO", "ArrayStack: Interrupted before termination of the delete executor service");
 		}
 	}
 
@@ -925,34 +925,34 @@ public class ArrayStack implements BLOB {
             final File newFile, final int writeBuffer) {
         if (f2 == null) {
             // this is a rewrite
-            ConcurrentLog.info("BLOBArray", "rewrite of " + f1.getName());
+            ConcurrentLog.info("KELONDRO", "BLOBArray: rewrite of " + f1.getName());
             final File resultFile = rewriteWorker(factory, this.keylength, this.ordering, f1, newFile, writeBuffer);
             if (resultFile == null) {
-                ConcurrentLog.warn("BLOBArray", "rewrite of file " + f1 + " returned null. newFile = " + newFile);
+                ConcurrentLog.warn("KELONDRO", "BLOBArray: rewrite of file " + f1 + " returned null. newFile = " + newFile);
                 return null;
             }
             try {
                 mountBLOB(resultFile, false);
             } catch (final IOException e) {
-                ConcurrentLog.warn("BLOBArray", "rewrite of file " + f1 + " successfull, but read failed. resultFile = " + resultFile);
+                ConcurrentLog.warn("KELONDRO", "BLOBArray: rewrite of file " + f1 + " successfull, but read failed. resultFile = " + resultFile);
                 return null;
             }
-            ConcurrentLog.info("BLOBArray", "rewrite of " + f1.getName() + " into " + resultFile);
+            ConcurrentLog.info("KELONDRO", "BLOBArray: rewrite of " + f1.getName() + " into " + resultFile);
             return resultFile;
         }
-        ConcurrentLog.info("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
+        ConcurrentLog.info("KELONDRO", "BLOBArray: merging " + f1.getName() + " with " + f2.getName());
         final File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, newFile, writeBuffer);
         if (resultFile == null) {
-            ConcurrentLog.warn("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
+            ConcurrentLog.warn("KELONDRO", "BLOBArray: merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
             return null;
         }
         try {
             mountBLOB(resultFile, false);
         } catch (final IOException e) {
-            ConcurrentLog.warn("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
+            ConcurrentLog.warn("KELONDRO", "BLOBArray: merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
             return null;
         }
-        ConcurrentLog.info("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
+        ConcurrentLog.info("KELONDRO", "BLOBArray: merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
         return resultFile;
     }
 
@@ -988,12 +988,12 @@ public class ArrayStack implements BLOB {
                     merge(i1, i2, order, writer);
                     writer.close(true);
                 } catch (final IOException e) {
-                    ConcurrentLog.severe("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+                    ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
                     HeapWriter.delete(tmpFile);
                     HeapWriter.delete(newFile);
                     return null;
                 } catch (final SpaceExceededException e) {
-                    ConcurrentLog.severe("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
+                    ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot merge because of memory failure: " + e.getMessage(), e);
                     HeapWriter.delete(tmpFile);
                     HeapWriter.delete(newFile);
                     return null;
@@ -1003,13 +1003,13 @@ public class ArrayStack implements BLOB {
                 HeapWriter.delete(f2);
                 return newFile;
             } catch (final IOException e) {
-                ConcurrentLog.severe("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
+                ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
                 return null;
             } finally {
                 if (i2 != null) i2.close();
             }
         } catch (final IOException e) {
-            ConcurrentLog.severe("ArrayStack", "cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
+            ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
             return null;
         } finally {
             if (i1 != null) i1.close();
@@ -1025,7 +1025,7 @@ public class ArrayStack implements BLOB {
         try {
             i = new ReferenceIterator<ReferenceType>(f, factory);
         } catch (final IOException e) {
-            ConcurrentLog.severe("ArrayStack", "cannot rewrite because input file cannot be read, f = " + f.toString() + ": " + e.getMessage(), e);
+            ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot rewrite because input file cannot be read, f = " + f.toString() + ": " + e.getMessage(), e);
             return null;
         }
         if (!i.hasNext()) {
@@ -1040,12 +1040,12 @@ public class ArrayStack implements BLOB {
             writer.close(true);
             i.close();
         } catch (final IOException e) {
-            ConcurrentLog.severe("ArrayStack", "cannot writing or close writing rewrite, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+            ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot writing or close writing rewrite, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             return null;
         } catch (final SpaceExceededException e) {
-            ConcurrentLog.severe("ArrayStack", "cannot rewrite because of memory failure: " + e.getMessage(), e);
+            ConcurrentLog.severe("KELONDRO", "ArrayStack: cannot rewrite because of memory failure: " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             return null;
@@ -1072,7 +1072,7 @@ public class ArrayStack implements BLOB {
             e = ordering.compare(c1.getTermHash(), c2.getTermHash());
             if (e < 0) {
             	s = c1.shrinkReferences();
-            	if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
+            	if (s > 0) ConcurrentLog.info("KELONDRO", "ArrayStack: shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
                 writer.add(c1.getTermHash(), c1.exportCollection());
                 if (i1.hasNext()) {
                     c1lh = c1.getTermHash();
@@ -1085,7 +1085,7 @@ public class ArrayStack implements BLOB {
             }
             if (e > 0) {
                 s = c2.shrinkReferences();
-                if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
+                if (s > 0) ConcurrentLog.info("KELONDRO", "ArrayStack: shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
                 writer.add(c2.getTermHash(), c2.exportCollection());
                 if (i2.hasNext()) {
                     c2lh = c2.getTermHash();
@@ -1100,7 +1100,7 @@ public class ArrayStack implements BLOB {
             // merge the entries
             c1 = c1.merge(c2);
             s = c1.shrinkReferences();
-            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
+            if (s > 0) ConcurrentLog.info("KELONDRO", "ArrayStack: shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
             writer.add(c1.getTermHash(), c1.exportCollection());
             c1lh = c1.getTermHash();
             c2lh = c2.getTermHash();
@@ -1130,7 +1130,7 @@ public class ArrayStack implements BLOB {
         while (c1 != null) {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
             s = c1.shrinkReferences();
-            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
+            if (s > 0) ConcurrentLog.info("KELONDRO", "ArrayStack: shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
             writer.add(c1.getTermHash(), c1.exportCollection());
             if (i1.hasNext()) {
                 c1lh = c1.getTermHash();
@@ -1143,7 +1143,7 @@ public class ArrayStack implements BLOB {
         while (c2 != null) {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
             s = c2.shrinkReferences();
-            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
+            if (s > 0) ConcurrentLog.info("KELONDRO", "ArrayStack: shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
             writer.add(c2.getTermHash(), c2.exportCollection());
             if (i2.hasNext()) {
                 c2lh = c2.getTermHash();
@@ -1167,7 +1167,7 @@ public class ArrayStack implements BLOB {
         while (true) {
             assert c != null;
             s = c.shrinkReferences();
-            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c.getTermHash()) + " by " + s + " to " + c.size() + " entries");
+            if (s > 0) ConcurrentLog.info("KELONDRO", "ArrayStack: shrinking index for " + ASCII.String(c.getTermHash()) + " by " + s + " to " + c.size() + " entries");
             writer.add(c.getTermHash(), c.exportCollection());
             if (i.hasNext()) {
                 clh = c.getTermHash();
