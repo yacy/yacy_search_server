@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<crawlProfiles>
+#{crawlProfiles}# 
+    <crawlProfile>
+        <handle>#[handle]#</handle>
+        <name>#[name]#</name>
+        <collections>#[collections]#</collections>
+        <agentName>#[agentName]#</agentName>
+        <userAgent>#[userAgent]#</userAgent>
+        <depth>#[depth]#</depth>
+        <directDocByURL>#(directDocByURL)#false::true#(/directDocByURL)#</directDocByURL>
+        <recrawlIfOlder>#[recrawlIfOlder]#</recrawlIfOlder>
+        <domMaxPages>#[domMaxPages]#</domMaxPages>
+        <crawlingQ>#(crawlingQ)#false::true#(/crawlingQ)#</crawlingQ>
+        <followFrames>#(followFrames)#false::true#(/followFrames)#</followFrames>
+        <obeyHtmlRobotsNoindex>#(obeyHtmlRobotsNoindex)#false::true#(/obeyHtmlRobotsNoindex)#</obeyHtmlRobotsNoindex>
+        <obeyHtmlRobotsNofollow>#(obeyHtmlRobotsNofollow)#false::true#(/obeyHtmlRobotsNofollow)#</obeyHtmlRobotsNofollow>
+        <indexText>#(indexText)#false::true#(/indexText)#</indexText>
+        <indexMedia>#(indexMedia)#false::true#(/indexMedia)#</indexMedia>
+        <storeHTCache>#(storeHTCache)#false::true#(/storeHTCache)#</storeHTCache>
+        <remoteIndexing>#(remoteIndexing)#false::true#(/remoteIndexing)#</remoteIndexing>
+        <cacheStrategy>#[cacheStrategy]#</cacheStrategy>
+        <crawlerAlwaysCheckMediaType>#(crawlerAlwaysCheckMediaType)#false::true#(/crawlerAlwaysCheckMediaType)#</crawlerAlwaysCheckMediaType>
+        <crawlerURLMustMatch>#[crawlerURLMustMatch]#</crawlerURLMustMatch>
+        <crawlerURLMustNotMatch>#[crawlerURLMustNotMatch]#</crawlerURLMustNotMatch>
+        <crawlerOriginURLMustMatch>#[crawlerOriginURLMustMatch]#</crawlerOriginURLMustMatch>
+        <crawlerOriginURLMustNotMatch>#[crawlerOriginURLMustNotMatch]#</crawlerOriginURLMustNotMatch>
+        <crawlerIPMustMatch>#[crawlerIPMustMatch]#</crawlerIPMustMatch>
+        <crawlerIPMustNotMatch>#[crawlerIPMustNotMatch]#</crawlerIPMustNotMatch>
+        <crawlerCountryMustMatch>#[crawlerCountryMustMatch]#</crawlerCountryMustMatch>
+        <crawlerNoLimitURLMustMatch>#[crawlerNoLimitURLMustMatch]#</crawlerNoLimitURLMustMatch>
+        <indexURLMustMatch>#[indexURLMustMatch]#</indexURLMustMatch>
+        <indexURLMustNotMatch>#[indexURLMustNotMatch]#</indexURLMustNotMatch>
+        <indexContentMustMatch>#[indexContentMustMatch]#</indexContentMustMatch>
+        <indexContentMustNotMatch>#[indexContentMustNotMatch]#</indexContentMustNotMatch>
+        <indexMediaTypeMustMatch>#[indexMediaTypeMustMatch]#</indexMediaTypeMustMatch>
+        <indexMediaTypeMustNotMatch>#[indexMediaTypeMustNotMatch]#</indexMediaTypeMustNotMatch>
+        <indexSolrQueryMustMatch>#[indexSolrQueryMustMatch]#</indexSolrQueryMustMatch>
+        <indexSolrQueryMustNotMatch>#[indexSolrQueryMustNotMatch]#</indexSolrQueryMustNotMatch>
+        <noindexWhenCanonicalUnequalURL>#(noindexWhenCanonicalUnequalURL)#false::true#(/noindexWhenCanonicalUnequalURL)#</noindexWhenCanonicalUnequalURL>
+        <status>#(status)#terminated::active::system#(/status)#</status>
+        <crawlingDomFilterContent>
+        #{crawlingDomFilterContent}#
+            <item>#[item]#</item>
+        #{/crawlingDomFilterContent}#
+        </crawlingDomFilterContent>
+    </crawlProfile>
+#{/crawlProfiles}# 
+</crawlProfiles>

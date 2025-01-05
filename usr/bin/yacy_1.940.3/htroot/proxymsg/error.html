@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy: Error Message</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="error">
+    <div class="head">
+      <h3 class="head">YaCy</h3>
+    </div>
+    <div class="content">
+      <p>request: <span class="settingsValue">#[requestMethod]# #[requestURL]#</span></p>
+      <p class="tt">#[httpStatus]#</p>
+      #(errorMessageType)#
+      <!-- 0 --><p><strong>unspecified error</strong></p>
+      ::<!-- 1 --><p><strong>not-yet-assigned error</strong></p>
+      ::<!-- 2 --><p><strong>You don't have an active internet connection. Please go online.</strong></p>
+      ::<!-- 3 --><p><strong>Could not load resource. The file is not available.</strong></p>
+      ::<!-- 4 --><p><strong>#[detailedErrorMsg]#</strong></p>
+      ::<!-- 5 -->
+      #%[file]%#
+      #(/errorMessageType)#
+
+      #(printStackTrace)#::
+      <hr />
+      <p class="tt error"><em>Exception occurred</em>: <strong>#[exception]#</strong></p>
+      <pre class="tt error"><em>TRACE</em>:
+      #[stacktrace]#</pre>
+      #(/printStackTrace)#
+
+      <hr />
+      <p>Generated #[date]# by #[peerName]#.yacy</p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Remote Peer Profile</title>
+    <link rel="alternate" type="text/x-vcard" title="vCard" href="ViewProfile.vcf?hash=#[hash]#" />
+    <link rel="meta" type="application/rdf+xml" title="rdf:foaf" href="ViewProfile.rdf?hash=#[hash]#" />
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ViewProfile">
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    <script type="text/javascript">
+      document.getElementById("header_profile").className += " active";
+    </script>
+    ::
+    #%env/templates/header.template%#
+    #(/display)#
+    #(localremotepeer)#
+    <h2>Local Peer Profile:</h2>
+    ::
+    <h2>Remote Peer Profile:</h2>
+    #(/localremotepeer)#
+    #(success)#
+    <p class="error">Wrong access of this page</p>
+    ::
+    <p class="error">The requested peer is unknown or a potential peer.<br />
+    The profile can't be fetched.</p>
+    ::
+    <p class="error">The peer #[peername]# is not online.</p>
+    ::
+    <h3>This is the Profile of #[peername]#:</h3>
+    <fieldset>
+    <dl class="pairs">
+      <dt>Name</dt>
+      <dd>#(name)#&nbsp;::#[value]##(/name)#</dd>
+      <dt>Nick Name</dt>
+      <dd>#(nickname)#&nbsp;::#[value]##(/nickname)#</dd>
+      <dt>Homepage</dt>
+      <dd>#(homepage)#&nbsp;::<a href="#[value]#">#[value]#</a>#(/homepage)#</dd>
+      <dt>eMail</dt>
+      <dd>#(email)#&nbsp;::<a href="mailto:#[value]#">#[value]#</a>#(/email)#</dd>
+    </dl>
+  
+    <dl class="pairs">
+      #(icq)#::
+      <dt>ICQ</dt>
+      <dd>&nbsp;<a href="http://www.icq.com/people/#[value]#/" target="_blank">#[value]#</a> <img src="http://status.icq.com/online.gif?icq=#[value]#&amp;img=5" alt="Onlinestatus" /></dd>
+      #(/icq)#
+      #(jabber)#::
+      <dt>Jabber</dt>
+      <dd>&nbsp;#[value]#</dd>
+      #(/jabber)#
+      #(yahoo)#::
+      <dt>Yahoo!</dt>
+      <dd>&nbsp;#[value]# <img src="http://opi.yahoo.com/online?u=#[value]#&amp;m=g&amp;t=0&amp;zzz=.png" alt="Onlinestatus" /></dd>
+      #(/yahoo)#
+      #(msn)#::
+      <dt>MSN</dt>
+      <dd>&nbsp;#[value]#</dd>
+      #(/msn)#
+      #(skype)#::
+      <dt>Skype</dt>
+      <dd>&nbsp;#[value]#</dd>
+      #(/skype)#
+    </dl>
+
+    <dl class="pairs">
+      <dt>Comment</dt>
+      <dd>#(comment)#&nbsp;::#[value]##(/comment)#</dd>
+      #{other}#
+      <dt>#[key]#</dt>
+      <dd>#[value]#&nbsp;</dd>
+      #{/other}#
+    </dl>
+    </fieldset>
+    #(/success)#
+    <p>View this profile as <a rel="meta" type="application/rdf+xml" title="rdf:foaf" href="ViewProfile.rdf?hash=#[hash]#">rdf:foaf</a> or 
+    <a rel="alternate" type="text/x-vcard" title="vCard" href="ViewProfile.vcf?hash=#[hash]#">vCard</a></p>
+    #(edit)#::
+    <p>You can edit your profile <a href="ConfigProfile_p.html">here</a></p>
+    #(/edit)#
+    #(display)#
+    #%env/templates/simplefooter.template%#
+    ::
+    #%env/templates/footer.template%#
+    #(/display)#
+  </body>
+</html>

@@ -1,0 +1,1868 @@
+# ja.lng
+# English-->Japanese
+# -----------------------
+# This is a part of YaCy, a peer-to-peer based web search engine
+#
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+#
+
+#File: ConfigLanguage_p.html
+#---------------------------
+# Thank you for your help!
+<!-- lang -->default(english)==Japanese
+
+#-----------------------------
+
+#File: AccessGrid_p.html
+#---------------------------
+YaCy Network Access==YaCy ネットワーク アクセス
+Server Access Grid==サーヴァー アクセス グリッド
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==この画像はあなたのYaCy ピアへの着信接続とあなたのピアから他のピアやウェブ サーヴァーへの発信接続を示します
+#-----------------------------
+
+#File: AccessTracker_p.html
+#---------------------------
+Access Tracker==アクセス トラッカー
+Server Access Overview==サーヴァー アクセス概要
+This is a list of #[num]# requests to the local http server within the last hour.==これは #[num]# ローカル http サーヴァーへの直近の1時間のリクエストの一覧です.
+This is a list of requests (max. 1000) to the local http server within the last hour.==これはローカル http サーヴァーへの直近の1時間のリクエスト (max. 1000) の一覧です.
+Showing #[num]# requests.== #[num]# のリクエストを表示しています.
+#>Host<==>ホスト<
+>Path<==>パス<
+Date<==日時<
+Access Count During==アクセス計測の期間
+last Second==最後の1秒
+last Minute==最後の1分
+last 10 Minutes==最後の10分
+last Hour==最後の1時間
+The following hosts are registered as source for brute-force requests to protected pages==次のホストは保護されたページヘのブルート-フォース リクエストのソースとして登録されています
+#>Host==>ホスト
+Access Times==アクセス回数
+Server Access Details==サーヴァー アクセスの詳細
+Local Search Log==ローカル検索ログ
+Local Search Host Tracker==ローカル検索ホスト トラッカー
+Remote Search Log==リモート検索ログ
+#Total:==合計:
+Success:==成功:
+Remote Search Host Tracker==リモート検索ホスト トラッカー
+This is a list of searches that had been requested from this' peer search interface==これはこのピアの検索インターフェースからリクエストされた検索の一覧です.
+Showing #[num]# entries from a total of #[total]# requests.==合計 #[total]# のリクエストから #[num]# エントリーを表示しています.
+Requesting Host==リクエストしているホスト
+Offset==オフセット
+Expected Results==期待される結果
+Returned Results==戻って来た結果
+Known Results==既知の結果
+Used Time (ms)==使用された時間 (ミリ秒)
+URL fetch (ms)==URL フェッチ (ミリ秒)
+Snippet comp (ms)==スニペット作成 (ミリ秒)
+Query==クエリー
+#>User Agent<==>ユーザー エージェント<
+Search Word Hashes==検索語のハッシュ
+Count</td>==カウント</td>
+Queries Per Last Hour==最後の1時間毎のクエリー
+Access Dates==アクセスの日時
+This is a list of searches that had been requested from remote peer search interface==これはリモート ピアの検索インターフェースからリクエストされた検索の一覧です. 
+#-----------------------------
+
+#File: Settings_UrlProxyAccess.inc
+#---------------------------
+Augmented Browsing<==増強されたブラウジング<
+URL Proxy Settings<==URL プロキシ設定<
+With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==この設定であなたは増強の為に使用される方法であるURL プロキシを有効化または無効化できます.
+Service call: ==サーヴィス コール: 
+, where parameter is the url of an external web page.==, ここでパラメーターは外部のウェブ ページのURLです.
+#URL proxy:==URL プロキシ:
+>Enabled<==>有効<
+Globally enables or disables URL proxy via ==次を経由するURL プロキシをグローバルに有効化または無効化する: 
+Show search results via URL proxy:==次のURL プロキシを経由する検索結果を表示する:
+Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==全ての検索結果のURL プロキシを有効化または無効化する. もし有効の場合、全ての検索結果はURL プロキシをトンネルされます.
+Restrict URL proxy use:==次を使用してURL プロキシを制限します:
+Define client filter. Default: ==クライアント フィルターを定義します. 既定: 
+URL substitution:==URLの置換:
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==プロキシ環境でのナヴィゲーティングを可能にするURL置換の規則を定義します. 可能な値: all, domainlist. 既定: domainlist.
+"Submit"=="確定する"
+Augmented Browsing Settings==増強されたブラウジングの設定
+With this settings you can activate or deactivate augmented browsing which happens usually via the URL proxy.==この設定であたなはURL プロキシを経由して通常起きる増強されたブラウジングを有効化または無効化できます.
+Augmented Browsing:==増強されたブラウジング:
+#>Enabled<==>有効<
+Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==増強されたブラウジングの有効化または無効化. もし有効の場合、全てのウェブサイトは読み込みの間に変更されます.
+#"Submit"=="確定する"
+#-----------------------------
+
+#File: AugmentedBrowsingFilters_p.html
+#---------------------------
+Augmented Browsing - Filters and Modules==増強されたブラウジング - フィルターとモジュール
+Augmented Browsing Filters<==増強されたブラウジングのフィルター<
+Select the desired functionality.==所望の機能を選択する.
+External REFLECT:<==外部REFLECT:<
+>Enabled<==>有効<
+Send webpages to REFLECT (==ウェブページをREFLECTへ送信する (
+Select the desired inbuilt functionality==所望の備え付けの機能を選択する
+Add DOCTYPE:==DOCTYPEを追加する:
+Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==DOCTYPE情報が与えられていないならば追加する. これはIEが絶対正確に位置をレンダーする為に要求されます.
+Reparse webpage:==ウェブページを再解析する:
+Put webpage back into schema (htmlparser document) to allow node by node manipulation.==ノード操作によりノードを許可する為にスキーマ(htmlparser ドキュメント)をウェブページに戻す.
+Show overlay interaction buttons:==オーヴァーレイ インタラクション ボタンを表示する:
+Show overlay interaction buttons.==オーヴァーレイ インタラクション ボタンを表示する.
+"Submit"=="確定する"
+#-----------------------------
+
+#File: AugmentedParsing_p.html
+#---------------------------
+Augmented Parsing<==増強された構文解析<
+Global Status==グローバル ステータス
+With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources (tags etc.).==この設定であなたは外部ソースからの情報(タグ等)とドキュメントを組み合わせた増強された構文解析を有効化または無効化できます.
+Augmented Parser:==増強された構文解析器:
+>Enabled<==>有効<
+Globally enables or disables the augmented parser. This setting requires a restart.==増強された構文解析をグローバルに有効化または無効化する. この設定は再起動を要求します.
+Augmented Parser - RDFa:==増強された構文解析 - RDFa:
+Globally enables or disables the RDFa parser. This setting requires a restart.==RDFa構文解析器をグローバルに有効化または無効化する.
+"Submit"=="確定する"
+#-----------------------------
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Administration==ブラックリスト管理
+#Used Blacklist engine:==使用されたブラックリスト エンジン:
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==この機能はプロキシにURL フィルターを提供します; ブラックリストに載ったいかなるURLもブロックします.
+from being loaded. You can define several blacklists and activate them separately.==あなたは幾つかのブラックリストを定義してそれらを個別に有効化する事ができます.
+You may also provide your blacklist to other peers by sharing them; in return you may==あなたはあなたのブラックリストを共有する事により他のピアに提供する事もできます.
+collect blacklist entries from other peers.==他のピアからブラックリストのエントリーを収集する.
+Active list:==アクティヴなリスト:
+No blacklist selected==どのブラックリストも選択されていません
+Select list to edit:==編集するリストを選択する:
+not shared::shared==共有されていません::共有されています
+"select"=="選択する"
+Create new list:==新規のリストを作成する:
+"create"=="作成する"
+Settings for this list==このリストの設定
+"Save"=="保存する"
+Share/don't share this list==このリストを共有する/共有しない
+Delete this list==このリストを削除する
+Edit list==リストを編集する
+These are the domain name/path patterns in==これらは次の中のドメイン名/パスのパターンです
+Blacklist Pattern==ブラックリストのパターン
+Edit selected pattern(s)==選択されたパターンを編集する
+Delete selected pattern(s)==選択されたパターンを削除する
+Move selected pattern(s) to==選択されたパターンを次の所へ移動する
+#You can select them here for deletion==あなたはここで削除する為にそれらを選択できます
+Add new pattern:==新規のパターンを追加する:
+"Add URL pattern"=="URLのパターンを追加する"
+The right '*', after the '/', can be replaced by a=='/' の後の '*' は次のもので置き換える事ができます
+>regular expression<==>正規表現<
+domain.net/fullpath<==domain.net/フルパス<
+#>domain.net/*<==>domain.net/*<
+#*.domain.net/*<==*.domain.net/*<
+#*.sub.domain.net/*<==*.sub.domain.net/*<
+#sub.domain.*/*<==sub.domain.*/*<
+#domain.*/*<==domain.*/*<
+(slow)==(遅い)
+#was removed from blacklist==はブラックリストから削除されました
+#was added to the blacklist==はブラックリストに追加されました
+Activate this list for==次の為にこのリストを有効化する
+Show entries:==エントリーを表示する:
+Entries per page:==ページ毎のエントリー:
+"set"=="設定する"
+Edit existing pattern(s):==既存のパターンを編集する:
+"Save URL pattern(s)"=="URL パターンを保存する"
+#-----------------------------
+
+#File: BlacklistCleaner_p.html
+#---------------------------
+Blacklist Cleaner==ブラックリスト クリーナー
+Here you can remove or edit illegal or double blacklist-entries.==ここであなたは不正または重複したブラックリスト-エントリーを削除または編集できます.
+Check list==リストをチェックする
+"Check"=="チェックする"
+Allow regular expressions in host part of blacklist entries.==ブラックリスト エントリーのホスト部分での正規表現を許可する.
+The blacklist-cleaner only works for the following blacklist-engines up to now:==ブラックリスト-クリーナーは次の今までのブラックリスト-エンジンの為に働くだけです:
+Illegal Entries in #[blList]# for==次の為の #[blList]# の中の不正なエントリー
+Deleted #[delCount]# entries==#[delCount]# のエントリーを削除しました
+Altered #[alterCount]# entries!==#[alterCount]# の変更されたエントリー
+Two wildcards in host-part==ホスト部分での2つのワイルドカード
+Either subdomain <u>or</u> wildcard==<u>または</u> ワイルドカードのどちらかのサブドメイン
+Path is invalid Regex==パスが無効な正規表現です
+Wildcard not on begin or end==始めまたは終わりではないワイルドカード
+Host contains illegal chars==ホストが不正な文字を含んでいます
+Double==重複
+"Change Selected"=="選択されたものを変更する"
+"Delete Selected"=="選択されたものを削除する"
+No Blacklist selected==ブラックリストが選択されていません
+#-----------------------------
+
+#File: BlacklistImpExp_p.html
+#---------------------------
+#Blacklist Import==ブラックリストの取り込み
+Used Blacklist engine:==使用されるブラックリスト エンジン:
+Import blacklist items from...==次の場所からブラックリスト項目を取り込む
+other YaCy peers:==他のYaCy ピア:
+"Load new blacklist items"=="新しいブラックリスト項目を読み込む"
+#URL:==URL:
+plain text file:<==プレーン テキスト ファイル:<
+XML file:==XML ファイル:
+Upload a regular text file which contains one blacklist entry per line.==行毎に1つのブラックリストのエントリーを含む通常のテキスト ファイルをアップロードします.
+Upload an XML file which contains one or more blacklists.==1つ以上のブラックリストを含むXML ファイルをアップロードします.
+Export blacklist items to...==次の場所へブラックリスト項目を書き出す
+Here you can export a blacklist as an XML file. This file will contain additional==ここであなたはブラックリストをXML ファイルとして書き出す事ができます.
+information about which cases a blacklist is activated for.==このファイルはブラックリストがどの事例の為に有効化されるのかという追加の情報を含むでしょう.
+"Export list as XML"=="XMLとしてリストを書き出す"
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==ここであなたは1行につき1つのブラックリスト エントリーの通常のテキスト ファイルとしてブラックリストを書き出す事ができます.
+This file will not contain any additional information==このファイルはいかなる追加の情報も含まないでしょう
+"Export list as text"=="リストをテキストとして書き出す"
+#-----------------------------
+
+#File: BlacklistTest_p.html
+#---------------------------
+Blacklist Test==ブラックリスト テスト
+Used Blacklist engine:==使用されるブラックリスト エンジン:
+Test list:==リストを試す:
+"Test"=="試す"
+The tested URL was==試したURLは次のものです
+It is blocked for the following cases:==それは次の事例の為にブロックされます:
+#Crawling==クローリング
+#DHT==DHT
+#News==ニューズ
+#Proxy==プロキシ
+Search==検索
+Surftips==サーフティップス
+#-----------------------------
+
+#File: Blog.html
+#---------------------------
+#by==by
+Comments</a>==コメント</a>
+>edit==>編集
+>delete==>削除
+Edit<==編集<
+previous entries==前のエントリー
+next entries==次のエントリー
+new entry==新しいエントリー
+import XML-File==XML-ファイルの取り込み
+export as XML==XMLとして書き出す
+Comments</a>==コメント</a>
+Blog-Home==ブログ-ホーム
+Author:==著者:
+Subject:==題名:
+#Text:==テキスト:
+You can use==あなたはここで
+Yacy-Wiki Code==YaCy-Wiki コード
+here.==を使用できます.
+Comments:==コメント:
+deactivated==無効化されたもの
+>activated==>有効化されたもの
+moderated==変更されたもの
+"Submit"=="確定する"
+"Preview"=="プレヴュー"
+"Discard"=="廃棄する"
+>Preview==>プレヴュー
+No changes have been submitted so far!==まだ変更が確定されていません!
+Access denied==アクセスが拒否されました
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==ブログ-エントリーを編集または作成する為にあなたはブログの権利を持つ管理者またはユーザーとしてログインする必要があります.
+Are you sure==あなたは次のものを削除したいという事で
+that you want to delete==宜しいですか
+Confirm deletion==削除を確認する
+Yes, delete it.==はい、それを削除します.
+No, leave it.==いいえ、それをそのままにして下さい.
+Import was successful!==取り込みは成功しました!
+Import failed, maybe the supplied file was no valid blog-backup?==取り込みは失敗しました。おそらく供給されたファイルは有効なブログ-バックアップではなかったのではないでしょうか?
+Please select the XML-file you want to import:==あなたが取り込みたいXML-ファイルを選択して下さい:
+#-----------------------------
+
+#File: BlogComments.html
+#---------------------------
+#by==by
+Comments</a>==コメント</a>
+Login==ログイン
+Blog-Home==ブログ-ホーム
+delete</a>==削除</a>
+allow</a>==許可</a>
+Author:==著者:
+Subject:==題名:
+#Text:==テキスト:
+You can use==あなたはここで
+Yacy-Wiki Code==YaCy-Wiki コード
+here.==を使用できます.
+"Submit"=="確定する"
+"Preview"=="プレヴュー"
+"Discard"=="廃棄する"
+#-----------------------------
+
+#File: Bookmarks.html
+#---------------------------
+YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': ブックマーク
+
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==ブックマークのリストはRSS フィードとして取得する事もできます. あなたが特定のタグを選択する時にこれを行う事もできます.
+Click the API icon to load the RSS from the current selection.==現在選択されているものからRSSを読み込むにはAPIのアイコンをクリックして下さい.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==全てのAPIの一覧を見る為には、<a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki ページ</a>を訪問して下さい.
+<h3>Bookmarks==<h3>ブックマーク
+Bookmarks (==ブックマーク (
+#Login==ログイン
+List Bookmarks==ブックマークをリストにする
+Add Bookmark==ブックマークを追加する
+Import Bookmarks==ブックマークを取り込む
+Import XML Bookmarks==XML ブックマークを取り込む
+Import HTML Bookmarks==HTML ブックマークを取り込む
+"import"=="取り込む"
+Default Tags:==既定のタグ
+imported==読み込まれたもの
+#Edit Bookmark==ブックマークを編集する
+#URL:==URL:
+Title:==題名:
+Description:==説明:
+Folder (/folder/subfolder):==フォルダー (/フォルダー/サブフォルダー):
+Tags (comma separated):==タグ (コンマで区切られたもの):
+>Public:==>パブリック:
+yes==はい
+no==いいえ
+Bookmark is a newsfeed==ブックマークはニューズフィードです
+"create"=="作成"
+"edit"=="編集"
+File:==ファイル:
+import as Public==パブリックとして取り込む
+"private bookmark"=="プライヴェート ブックマーク"
+"public bookmark"=="パブリック ブックマーク"
+Tagged with==次のものでタグ付けされたもの:
+'Confirm deletion'=='削除を確認する'
+Edit==編集
+Delete==削除
+Folders==フォルダー
+Bookmark Folder==ブックマーク フォルダー
+#Tags==Tags
+Bookmark List==ブックマークのリスト
+previous page==前のページ
+next page==次のページ
+All==全部
+Show==表示する
+Bookmarks per page.==ページ毎のブックマーク.
+#unsorted==ソートされていないもの
+start autosearch of new bookmarks==新しいブックマークの自動検索を開始する
+This starts a search of new or modified bookmarks since startup==これは "search" フォルダー内で "query=&lt;original_search_term&gt;" で
+in folder "search" with "query=&lt;original_search_term&gt;"==起動してからの新しいまたは編集されたブックマークの検索を開始します
+Every peer online will be ask for results.==全てのオンラインのピアは結果を要求されるでしょう.
+#-----------------------------
+
+#File: Collage.html
+#---------------------------
+Image Collage==画像のコラージュ
+Private Queue==プライヴェート キュー
+Public Queue==パブリック キュー
+#-----------------------------
+
+
+#File: compare_yacy.html
+#---------------------------
+Websearch Comparison==ウェブ検索の比較
+Left Search Engine==左の検索エンジン
+Right Search Engine==右の検索エンジン
+"Compare"=="比較"
+Search Result==検索結果
+#-----------------------------
+
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==ユーザーのアカウント
+User Administration==ユーザーの管理
+User created:==作成されたユーザー:
+User changed:==変更されたユーザー:
+Generic error.==一般的なエラー.
+Passwords do not match.==パスワードが一致しません.
+Username too short. Username must be &gt;= 4 Characters.==ユーザー名が短過ぎます. ユーザー名 &gt;= 4文字 でなければなりません.
+No password is set for the administration account.==管理アカウントの為に設定されたパスワードがありません.
+Please define a password for the admin account.==管理アカウントの為のパスワードを定めて下さい.
+Admin Account==Admin Konto
+Access from localhost without account==アカウント無しでのローカルホストからのアクセス
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==あなたの自分のコンピュータ（ローカルホストアクセス）からピアへのアクセスは管理者権限を付与されています. 管理アカウントを構成する必要はありません.
+Access only with qualified account==資格のあるアカウントでのみのアクセス
+Peer User:==ピア ユーザー:
+New Peer Password:==新規のピアのパスワード:
+Repeat Peer Password:==ピアのパスワードを繰り返して下さい:
+"Define Administrator"=="管理者を定義する"
+Select user==ユーザーを選択する
+New user==新規のユーザー
+Edit User==ユーザーを編集する
+Delete User==ユーザーを削除する
+Edit current user:==現在のユーザーを編集する:
+Username</label>==ユーザー名</label>
+Password</label>==パスワード</label>
+Repeat password==パスワードを繰り返して下さい
+First name==名
+Last name==姓
+Address==住所
+Rights==権利
+Timelimit==期限
+Time used==使われた時間
+Save User==ユーザーを保存する
+#-----------------------------
+
+#File: ConfigAppearance_p.html
+#---------------------------
+Appearance and Integration==外観と統合
+You can change the appearance of the YaCy interface with skins.==あなたはスキンによってYaCyのインターフェースの外観を変更する事ができます.
+#You can change the appearance of YaCy with skins==あなたはスキンによってYaCyのインターフェースの外観を変更する事ができます
+The selected skin and language also affects the appearance of the search page.==選択されたスキンと言語は検索ページの外観にも影響を与えます.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==もしあなたが<a href="ConfigPortal_p.html">YaCyで検索ポータルを作成</a>するならば
+change the appearance of the search page here.==ここで検索ページの外観を変更できます.
+#and the default icons and links on the search page can be replaced with you own.==そして検索ページの既定のアイコンとリンクを自分のもので置き換える事ができます.
+Skin Selection==スキンの選択
+Select one of the default skins, download new skins, or create your own skin.==既定のスキンの1つを選択する, 新しいスキンをダウンロードする, または自分のスキンを作成する.
+Current skin==現在のスキン
+Available Skins==利用可能なスキン
+"Use"=="使用する"
+"Delete"=="削除する"
+>Skin Color Definition<==>スキンの色の定義<
+The generic skin 'generic_pd' can be configured here with custom colors:==一般のスキン 'generic_pd' はここでカスタム カラーによる構成ができます:
+>Background<==>背景<
+#>Text<==>テキスト<
+>Legend<==>凡例<
+>Table&nbsp;Header<==>テーブル&nbsp;ヘッダー<
+>Table&nbsp;Item<==>テーブル&nbsp;項目<
+>Table&nbsp;Item&nbsp;2<==>テーブル&nbsp;項目&nbsp;2<
+>Table&nbsp;Bottom<==>テーブル&nbsp;ボトム<
+>Border&nbsp;Line<==>境界&nbsp;線<
+>Sign&nbsp;'bad'<==>サイン&nbsp;'悪い'<
+>Sign&nbsp;'good'<==>サイン&nbsp;'良い'<
+>Sign&nbsp;'other'<==>サイン&nbsp;'その他'<
+>Search&nbsp;Headline<==>検索&nbsp;ヘッドライン<
+>Search&nbsp;URL==>検索&nbsp;URL
+"Set Colors"=="色を設定する"
+#>Skin Download<==>スキンのダウンロード<
+Skins can be installed from download locations==スキンはダウンロードする場所からインストールする事ができます
+Install new skin from URL==URLから新しいスキンをインストールする
+Use this skin==このスキンを使用する
+"Install"=="インストール"
+Make sure that you only download data from trustworthy sources. The new Skin file==あなたは信頼できる提供元からのみデータをダウンロードするようにして下さい.
+might overwrite existing data if a file of the same name exists already.==新しいスキン ファイルは既に同名のファイルが存在する場合には既存のデータを上書きするかもしれません.
+>Unable to get URL:==>URLを取得できません:
+Error saving the skin.==スキンの保存でのエラー.
+#-----------------------------
+
+#File: ConfigBasic.html
+#---------------------------
+Access Configuration==アクセスの構成
+Basic Configuration==基本的な構成
+Your YaCy Peer needs some basic information to operate properly==あなたのYaCy ピアは正常に動作する為に幾つかの基本的な情報を必要とします
+Select a language for the interface==インターフェースの為の言語を選択して下さい
+Use Case: what do you want to do with YaCy:==使用例: あなたはYaCyで何をする事を望みますか:
+Community-based web search==コミュニティに基づくウェブ検索
+Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==グローバル ネットワーク 'フリーワールド' に加わり支援する, ユーザーが所有する検閲を受けていない検索ネットワークでウェブを検索する
+Search portal for your own web pages==あなた自身のウェブ ページの為の検索ポータル
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==あなたのYaCyのインストレーションは他のピアから独立的に振る舞い、あなたは自分のウェブ クロールを開始する事により自身のウェブの索引を定義します. これはあなた自身のウェブ ページの検索またはトピック指向の検索ポータルの定義の為に使用できます.
+Files may also be shared with the YaCy server, assign a path here:==ファイルはYaCy サーヴァーと共有する事もできます, ここでパスを割り当てて下さい:
+This path can be accessed at ==このパスは次の所でアクセスできます 
+Use that path as crawl start point.==そのパスをクロールの開始点として使用する.
+Intranet Indexing==イントラネットの索引付け
+Create a search portal for your intranet or web pages or your (shared) file system.==あなたのイントラネットまたはウェブ ページまたはあなたの(共有された)ファイル システムの為の検索ポータルを作成する.
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLは http/https/ftp そしてローカル ドメイン名またはIP, または次の形式のURLと共に使用できます
+or smb:==またはsmb:
+Your peer name has not been customized; please set your own peer name==あなたのピア名はカスタマイズされていません; どうぞ自身のピア名を設定して下さい
+You may change your peer name==あなたは自分のピア名を変更する事ができます
+Peer Name:==ピア名:
+Your peer cannot be reached from outside==あなたのピアは外部から届く事ができません
+which is not fatal, but would be good for the YaCy network==これは致命的ではなく, YaCy ネットワークにとっては問題無いでしょう
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==どうぞこのポートの為にあなたのファイアーウォールを開いて、そして/または、このポートの接続を許可する為にあなたのルーターの仮想サーヴァーのオプションを設定して下さい
+Your peer can be reached by other peers==あなたのピアは他のピアから届く事ができます
+Peer Port:==ピアのポート:
+with SSL==SSLを用いる
+https enabled==httpsが利用可能
+ on port == on ポート 
+Configure your router for YaCy using UPnP:==UPnPを使用してYaCyの為にあなたのルーターを構成する:
+Configuration was not successful. This may take a moment.==構成は成功しませんでした. これには少々時間が掛かるかもしれません.
+Set Configuration==構成を設定する
+What you should do next:==あなたが次にするべき事:
+Your basic configuration is complete! You can now (for example)==あなたの基本的な構成は完了しました! あなたは今次の事ができます (例)
+start an uncensored search==検閲を受けていない検索を開始する
+start your own crawl</a> and contribute to the global index, or create your own private web index==自分のクロールを開始して</a>グローバルな索引に貢献する, または自分のプライヴェートなウェブの索引を作成する
+set a personal peer profile</a> (optional settings)==個人的なピアのプロファイルを設定する</a> (オプショナルな設定)
+just <a href="Network.html">monitor at the network page</a> what the other peers are doing==ただ単に他のピアがしている事を<a href="Network.html">ネットワークのページでモニターする</a>
+Your Peer name is a default name; please set an individual peer name.==あなたのピア名は既定の名前です; どうぞ個人的なピア名を設定して下さい.
+You did not set a user name and/or a password.==あなたはユーザー名及び/またはパスワードを設定していません.
+Some pages are protected by passwords.==幾つかのページはパスワードによって保護されています.
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==あなたはあなたのYaCy ピアの安全の為に<a href="ConfigAccounts_p.html">アカウント メニュー</a>でパスワードを設定するべきです.</p>::
+You did not open a port in your firewall or your router does not forward the server port to your peer.==あなたはあなたのファイアーウォールのポートを開いていないか、またはあなたのルーターがあなたのピアへサーヴァーのポートを転送しません.
+This is needed if you want to fully participate in the YaCy network.==あなたがYaCyのネットワークに完全に参加したい場合はこれが必要とされます.
+You can also use your peer without opening it, but this is not recomended.==あなたはあなたのピアをポートの開放をせずに使用する事もできます, ですがこれは推奨されません.
+#-----------------------------
+
+#File: ConfigHeuristics_p.html
+#---------------------------
+Heuristics Configuration==ヒューリスティクスの構成
+#-----------------------------
+
+#File: ConfigHTCache_p.html
+#---------------------------
+Hypertext Cache Configuration==ハイパーテキストのキャッシュの構成
+"Set"=="設定"
+Cleanup==クリーンアップ
+Cache Deletion==キャッシュの削除
+Delete HTTP &amp; FTP Cache==HTTP &amp; FTPのキャッシュを削除する
+Delete robots.txt Cache==robots.txtのキャッシュを削除する
+Delete cached snippet-fetching failures during search==検索の間にキャッシュされたスニペット取得の失敗を削除する
+"Delete"=="削除"
+#-----------------------------
+
+#File: ConfigLanguage_p.html
+#---------------------------
+Language selection==言語の選択
+You can change the language of the YaCy-webinterface with translation files.==あなたは翻訳ファイルによってYaCy-ウェブインターフェースの言語を変更する事ができます.
+Current language</label>==現在の言語</label>
+#default(english)==既定(english)
+Author(s) (chronological)</label>==著者 (時間順)</label>
+Send additions to maintainer</em>==保守担当者に追加情報を送る</em>
+Available Languages</label>==利用可能な言語</label>
+Install new language from URL==URLから新しい言語をインストールする
+Use this language==この言語を使用する
+"Use"=="使用する"
+"Delete"=="削除する"
+"Install"=="インストールする"
+Unable to get URL:==次のURLを取得できません:
+Error saving the language file.==言語ファイルの保存時のエラー.
+Make sure that you only download data from trustworthy sources. The new language file==あなたは信頼できる提供元からのみデータをダウンロードするようにして下さい.
+might overwrite existing data if a file of the same name exists already.== 新しい言語ファイルは既に同名のファイルが存在する場合には既存のデータを上書きするかもしれません.
+#-----------------------------
+
+#File: ConfigLiveSearch.html
+#---------------------------
+Integration of a Search Field for Live Search==ライヴ検索の為の検索フィールドの統合
+Integration of Live Search with YaCy Search Widget==YaCyの検索ウィジェットによるライヴ検索の統合
+Advantages:==利点:
+#Advantages:==利点:
+#-----------------------------
+
+#File: ConfigNetwork_p.html
+#---------------------------
+<html lang="en">==<html lang="ja">
+Network Configuration==ネットワークの構成
+No changes were made!==変更されていません!
+Accepted Changes==承認された変更
+Long Description==長い説明
+Indexing Domain==索引付けのドメイン
+#DHT==DHT
+"Change Network"=="ネットワークを変更する"
+"Save"=="保存する"
+#-----------------------------
+
+#File: ConfigParser_p.html
+#---------------------------
+Parser Configuration==構文解析器の構成
+Content Parser Settings==コンテントの構文解析器の構成
+>File Viewer<==>ファイル ヴューワー<
+> enable/disable<==> 有効 / 無効<
+>Extension<==>拡張子<
+>Mime-Type<==>MIME-タイプ<
+"Submit"=="確定"
+#-----------------------------
+
+#File: ConfigPortal_p.html
+#---------------------------
+Integration of a Search Portal==検索ポータルの統合
+#-----------------------------
+
+#File: ConfigProfile_p.html
+#---------------------------
+Your Personal Profile==あなたの個人的なプロファイル
+You can create a personal profile here, which can be seen by other YaCy-members　or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==ここであなたは他のYaCyメンバーまたは<a href="ViewProfile.rdf?hash=localhash">FOAF RDF ファイル</a>によって<a href="ViewProfile.html?hash=localhash">公衆が</a>見る事ができる個人的なプロファイルを作成できます.
+#Name==名前
+#Nick Name==ニック ネーム
+Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==あなたのウェブ ページ (あなたのピアがオンラインである間は全ての<a href="Supporter.html">サポーターのページ</a>に表れます).
+#eMail==eメール
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
+#Skype==Skype
+Comment==コメント
+"Save"=="保存する"
+You can use <==ここであなたは<
+> here.==>を使う事ができます.
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==高度な構成
+"Save"=="保存する"
+"Clear"=="消去する"
+#-----------------------------
+
+#File: ConfigRobotsTxt_p.html
+#---------------------------
+Exclude Web-Spiders==ウェブ-スパイダーを除外する
+Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==ここであなたはあなたのYaCy ピアのウェブインターフェースへのアクセスを試みる全てのウェブクローラーの為の robots.txt を設定する事ができます.
+is a volunteer agreement most search-engines (including YaCy) follow.==はほとんどの検索エンジン(YaCyを含む)が従うヴォランティアの合意です.
+It disallows crawlers to access webpages or even entire domains.==それはウェブページ或いはドメイン全体へアクセスするクローラーを認めません.
+Deny access to==次へのアクセスを拒否する
+Entire Peer==ピア全体
+Status page==状態のページ
+Network pages==ネットワーク ページ
+Surftips==サーフティップス
+News pages==ニューズ ページ
+Blog==ブログ
+Wiki=ウィキ
+Public bookmarks==公開ブックマーク
+Home Page==ホーム ページ
+File Share==ファイル共有
+"Save restrictions"=="制限を保存する"
+#-----------------------------
+
+#File: ConfigSearchBox.html
+#---------------------------
+Integration of a Search Box==検索ボックスの統合
+  MySearch==  私の検索
+"Search"=="検索"
+This would look like:==これは次の様に見えます:
+#-----------------------------
+
+#File: ConfigSearchPage_p.html
+#---------------------------
+<html lang="en">==<html lang="ja">
+Search Page<==検索ページ<
+>Search Result Page Layout Configuration<==>検索結果のページのレイアウトの構成<
+>Appearance<==>外観<
+ menu for different skins.== 別のスキンの為のメニュー.
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==他のポータルの設定は<a href="ConfigPortal_p.html">一般的な検索ポータル</a> メニューで調整できます
+>Page Template<==>ページのテンプレート<
+#>Administration<==>管理<
+>Web Search<==>ウェブ検索<
+>File Search<==>ファイル検索<
+>IndexBrowser<==>索引ブラウザー<
+>About Us<==>私達について<
+>Help / YaCy Wiki<==>ヘルプ / YaCy ウィキ<
+"Search"=="検索"
+#>Text<==>テキスト<
+>Images<==>画像<
+#>Audio<==>音声<
+#>Video<==>動画<
+>Applications<==>アプリケーション<
+>more options<==>更なるオプション<
+#>Tag<==>タグ<
+>Topics<==>トピックス<
+#>Cloud<==>クラウド<
+>Protocol<==>プロトコル<
+>Filetype<==>ファイル タイプ<
+>Provider<==>プロヴァイダー<
+>Wiki Name Space<==>Wiki名前空間<
+>Language<==>言語<
+>Author<==>著者<
+>Vocabulary<==>語彙<
+>Title of Result<==>結果の題名<
+Description and text snippet of the search result==検索結果の説明とテキストのスニペット
+#http://url-of-the-search-result.net==http://url-of-the-search-result.net
+42 kbyte<==42 kB<
+>Metadata<==>メタデータ<
+#>Parser<==>構文解析器<
+#>Citation<==>引用<
+>Pictures<==>画像<
+#>Cache<==>キャッシュ<
+>Augmented Browsing<==>増強されたブラウジング<
+"Save Settings"=="設定を保存する"
+"Set Default Values"=="既定値を設定する"
+#-----------------------------
+
+
+#File: ConfigUpdate_p.html
+#---------------------------
+Manual System Update==手動でのシステムの更新
+Current installed Release==現在のインストールされているリリース
+Available Releases==利用可能なリリース
+>changelog<==>変更ログ<
+#> and <==> and <
+> RSS feed<==> RSS フィード<
+(unsigned)==(署名無し)
+(signed)==(署名有り)
+"Download Release"=="リリースをダウンロードする"
+"Check for new Release"=="新しいリリースを確認する"
+Downloaded Releases==ダウンロードされたリリース
+No downloaded releases available for deployment.==展開する為に利用可能なダウンロードされたリリースがありません.
+no&nbsp;automated installation on development environments==開発環境では自動化されたインストレーションはありません
+"Install Release"=="リリースをインストールする"
+"Delete Release"=="リリースを削除する"
+Automatic Update==自動更新
+check for new releases, download if available and restart with downloaded release==新しいリリースを確認し、もし利用可能ならばダウンロードしてからダウンロードされたリリースで再起動します
+"Check + Download + Install Release Now"=="確認 + ダウンロード + 直ぐにリリースをインストールする"
+Download of release #[downloadedRelease]# finished. Restart Initiated.==リリース #[downloadedRelease]# のダウンロードが終わりました. 再起動が開始されました.
+No more recent release found.==これ以上新しいリリースは見つかりませんでした.
+Release will be installed. Please wait.==リリースがインストールされます. どうぞお待ち下さい
+You installed YaCy with a package manager.==あなたはパッケージ マネージャーでYaCyをインストールしました.
+To update YaCy, use the package manager:==YaCyを更新するには、パッケージ マネージャーを使用して下さい.
+Omitting update because this is a development environment.==これは開発環境ですので更新は省略します.
+Omitting update because download of release #[downloadedRelease]# failed.==リリース #[downloadedRelease]# のダウンロードに失敗したので更新は省略します.
+Automated System Update==自動化されたシステムの更新
+manual update==手動での更新
+no automatic look-up, updates can be made manually using this interface (see options above)==自動的な検索がありません, 更新はこのインターフェース(上のオプションをご覧下さい)を使用する事で可能です.
+automatic update==自動更新
+updates are made within fixed cycles:==更新は一定の周期内で行われます:
+Time between lookup==検索までの時間
+hours==時間
+Release blacklist==リリースのブラックリスト
+regex on release number strings==リリース番号の文字列の正規表現
+Release type==リリース タイプ
+only main releases==メイン リリースのみ
+any release including developer releases==開発者向けのリリースを含む全てのリリース
+Signed autoupdate:==署名有りの自動更新:
+only accept signed files==署名があるファイルだけを認める
+"Submit"=="確定する"
+Accepted Changes.==承認された変更.
+System Update Statistics==システムの更新の統計情報
+Last System Lookup==最後のシステムの検索
+never==ありません
+Last Release Download==最後のリリースのダウンロード
+Last Deploy==最後の展開
+#-----------------------------
+
+#File: Connections_p.html
+#---------------------------
+Connection Tracking==接続の追跡
+#-----------------------------
+
+#File: CookieMonitorIncoming_p.html
+#---------------------------
+Incoming Cookies Monitor==着信したCookieのモニター
+#-----------------------------
+
+#File: CookieMonitorOutgoing_p.html
+#---------------------------
+Outgoing Cookies Monitor==送信したCookieのモニター
+#-----------------------------
+
+#File: CrawlCheck_p.html
+#---------------------------
+Crawl Check==クロールの確認
+#-----------------------------
+
+#File: Crawler_p.html
+#---------------------------
+#Crawler==クローラー
+Load<==読み込み<
+#-----------------------------
+
+#File: CrawlProfileEditor_p.html
+#---------------------------
+>Crawl Profile Editor<==>クロール プロファイル エディター<
+#-----------------------------
+
+#File: CrawlResults.html
+#---------------------------
+Crawl Results<==クロールの結果<
+"delete"=="削除する"
+#-----------------------------
+
+#File: CrawlStartExpert.html
+#---------------------------
+<html lang="en">==<html lang="ja">
+Expert Crawl Start==エキスパート クロールの開始
+Start Crawling Job:==クローリングのジョブを開始する:
+>Crawl Job<==>クロール ジョブ<
+>Start Point<==>開始点<
+One Start URL or a list of URLs:==1つの開始URLまたはURLのリスト
+(must start with http:// https:// ftp:// smb:// file://)==(http:// https:// ftp:// smb:// file:// で始まらなくてはなりません)
+>From Link-List of URL<==>URLのリンク-リストから<
+>From Sitemap<==>サイトマップから<
+>From File (enter a path<br/>within your local file system)<==>ファイルから (あなたのローカル ファイル システム内のパスを入力して下さい)<
+>Crawler Filter<==>クローラーのフィルター<
+>Crawling Depth<==>クローリングの深さ<
+also all linked non-parsable documents==全てのリンクされた構文解析不能なドキュメントも
+Unlimited crawl depth for URLs matching with==次のものと一致するURLにはクロールの深さを制限しない
+Maximum Pages per Domain==ドメイン毎の最大のページ数
+>misc. Constraints<==>その他の制限<
+>Load Filter on URLs<==>URLのフィルターを読み込む<
+>Load Filter on IPs<==>IPのフィルターを読み込む<
+>Must-Match List for Country Codes<==>国コードのリストに一致しなくてはならない<
+>Document Filter<==>ドキュメントのフィルター<
+>Filter on URLs<==>URLのフィルター<
+>Filter on Content of Document<==>ドキュメントの内容のフィルター<
+(all visible text, including camel-case-tokenized url and title)==(全ての見る事ができるテキスト, キャメル-ケースでトークン化されたURLと題名を含む)
+>Clean-Up before Crawl Start<==>クロールの開始前のクリーン-アップ<
+>No Deletion<==>削除しない<
+>Delete sub-path<==>サブ-パスを削除する<
+>Delete only old<==>古いものだけ削除する<
+>Double-Check Rules<==>重複検査の規則<
+>No&nbsp;Doubles<==>重複させない<
+>Re-load<==>再読み込み<
+>Document Cache<==>ドキュメントのキャッシュ<
+>Snapshot Creation<==>スナップショットの作成<
+>Index Attributes<==>索引の属性<
+"Start New Crawl Job"=="新たなクロールのジョブを開始する"
+#-----------------------------
+
+#File: CrawlStartIntranet_p.html
+#---------------------------
+#Intranet Crawl Start==イントラネット クロールの開始
+#-----------------------------
+
+#File: CrawlStartScanner_p.html
+#---------------------------
+Network Scanner==ネットワーク スキャナー
+#-----------------------------
+
+#File: CrawlStartSite.html
+#---------------------------
+>Site Crawling<==>サイトのクローリング<
+Site Crawler:==サイトのクローラー:
+Download all web pages from a given domain or base URL.==与えられたドメインまたは基点のURLから全てのウェブ ページをダウンロードします.
+>Site Crawl Start<==>サイトのクロールの開始<
+>Site<==>サイト<
+>Start URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)<==>開始URL&nbsp;(http:// https:// ftp:// smb:// file:// で始まらなくてはなりません)<
+>Link-List of URL<==>URLのリンク-リスト<
+>Sitemap URL<==>サイトマップのURL<
+>Path<==>パス<
+load all files in domain==ドメインの全てのファイルを読み込む
+load only files in a sub-path of given url==与えられたURLのサブ-パスのファイルだけを読み込む
+>Limitation<==>制限<
+> not more than <==> 次の数を超えない <
+>documents<==>ドキュメント<
+>Collection<==>収集<
+>Start<==>開始<
+>Hints<==>ヒント<
+#-----------------------------
+
+#File: Help.html
+#---------------------------
+#YaCy: Help==YaCy: ヘルプ
+YaCy: Tutorial==YaCy: チュートリアル
+>Tutorial==>チュートリアル
+#-----------------------------
+
+#File: IndexBrowser_p.html
+#---------------------------
+Index Browser==索引ブラウザー
+#Administration Options==管理オプション
+Administration Options==管理オプション
+Delete all==全部を削除する
+>Load Errors<==>読み込みエラー<
+from index==索引から
+"Delete Load Errors"=="読み込みエラーを削除する"
+#-----------------------------
+
+#File: index.html
+#---------------------------
+<html lang="en">==<html lang="ja">
+YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 検索ページ
+#kiosk mode==Kiosk モード
+"Search"=="検索"
+Text==テキスト
+Images==画像
+#Audio==音声
+Video==動画
+Applications==アプリケーション
+more options...==更なるオプション...
+#advanced parameters==高度なパラメーター
+#Max. number of results==結果の最大の数
+Results per page==ページ毎の結果
+Resource==リソース
+global==グローバル
+#>local==>ローカル
+#-----------------------------
+
+#File: IndexCleaner_p.html
+#---------------------------
+Index Cleaner==索引クリーナー
+#-----------------------------
+
+#File: IndexControlRWIs_p.html
+#---------------------------
+Reverse Word Index Administration==逆引き単語索引の管理
+#-----------------------------
+
+#File: IndexControlURLs_p.html
+#---------------------------
+#URL References Administration==URL参照の管理
+#-----------------------------
+
+#File: IndexCreateLoaderQueue_p.html
+#---------------------------
+Loader Queue==ローダーのキュー
+The loader set is empty==ローダーのセットは空です.
+There are #[num]# entries in the loader set:==ローダーのセットには #[num]# のエントリーがあります:
+Initiator==イニシエーター
+Depth==深度
+#URL==URL
+#-----------------------------
+
+#File: IndexCreateParserErrors_p.html
+#---------------------------
+Parser Errors==構文解析器のエラー
+Rejected URL List:==拒否されたURLの一覧:
+There are #[num]# entries in the rejected-urls list.==拒否されたURLの一覧には #[num]# のエントリーがあります.
+Showing latest #[num]# entries.==最新の #[num]# のエントリーを表示しています.
+"show more"=="もっと表示する"
+"clear list"=="一覧を消去する"
+There are #[num]# entries in the rejected-queue:==拒否されたキューには #[num]# のエントリーがあります:
+#Initiator==イニシエーター
+#Executor==エグゼキューター
+#URL==URL
+Fail-Reason==失敗理由
+#-----------------------------
+
+#File: ContentIntegrationPHPBB3_p.html
+#---------------------------
+Content Integration: Retrieval from phpBB3 Databases==コンテントの統合: phpBB3 データベースからの取得
+#-----------------------------
+
+#File: DictionaryLoader_p.html
+#---------------------------
+Knowledge Loader==ナレッジ ローダー
+#-----------------------------
+
+#File: IndexCreateWWWGlobalQueue_p.html
+#---------------------------
+Global Crawl Queue==グローバル クロールのキュー
+#-----------------------------
+
+#File: IndexCreateWWWLocalQueue_p.html
+#---------------------------
+Local Crawl Queue==ローカル クロールのキュー
+#-----------------------------
+
+#File: IndexCreateWWWRemoteQueue_p.html
+#---------------------------
+Remote Crawl Queue==リモート クロールのキュー
+#-----------------------------
+
+#File: IndexDeletion_p.html
+#---------------------------
+Index Deletion<==索引の削除<
+#-----------------------------
+
+#File: IndexImport_p.html
+#---------------------------
+YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': 索引の取り込み
+#Crawling Queue Import==クローリング キューの取り込み
+Index DB Import==索引データベースの取り込み
+#-----------------------------
+
+#File: IndexImportMediawiki_p.html
+#---------------------------
+#MediaWiki Dump Import==MediaWiki ダンプの取り込み
+#-----------------------------
+
+#File: IndexImportOAIPMH_p.html
+#---------------------------
+#OAI-PMH Import==OAI-PMHの取り込み
+#-----------------------------
+
+#File: IndexImportOAIPMHList_p.html
+#---------------------------
+List of #[num]# OAI-PMH Servers==#[num]# のOAI-PMH サーヴァーの一覧
+#-----------------------------
+
+#File: IndexReIndexMonitor_p.html
+#---------------------------
+Field Re-Indexing<==フィールド再索引付け<
+#-----------------------------
+
+#File: Load_MediawikiWiki.html
+#---------------------------
+YaCy '#[clientname]#': Configuration of a Wiki Search==YaCy '#[clientname]#': ウィキの検索の構成
+#Integration in MediaWiki==MediaWiki内の統合
+#-----------------------------
+
+#File: Load_PHPBB3.html
+#---------------------------
+Configuration of a phpBB3 Search==phpBB3検索の構成
+#-----------------------------
+
+#File: Load_RSS_p.html
+#---------------------------
+Configuration of a RSS Search==RSS検索の構成
+#-----------------------------
+
+#File: Messages_p.html
+#---------------------------
+>Messages==>メッセージ
+Date</td>==日時</td>
+#From</td>==From</td>
+#To</td>==To</td>
+>Subject==>件名
+Action==動作
+#From:==From:
+#To:==To:
+Date:==日時:
+#Subject:==件名:
+>view==>見る
+reply==返信する
+>delete==>削除する
+Compose Message==メッセージを作成する
+Send message to peer==ピアへメッセージを送る
+"Compose"=="作成"
+Message:==メッセージ:
+inbox==受信箱
+#-----------------------------
+
+#File: MessageSend_p.html
+#---------------------------
+Send message==メッセージを送る
+You cannot send a message to==あなたは次へメッセージを送る事ができません
+#-----------------------------
+
+#File: Network.html
+#---------------------------
+YaCy Search Network==YaCy検索ネットワーク
+YaCy Network<==YaCy ネットワーク<
+#-----------------------------
+
+#File: News.html
+#---------------------------
+Overview==概要
+#-----------------------------
+
+#File: Performance_p.html
+#---------------------------
+Performance Settings==パフォーマンスの設定
+#-----------------------------
+
+#File: PerformanceMemory_p.html
+#---------------------------
+Performance Settings for Memory==メモリーの為のパフォーマンスの設定
+refresh graph==グラフを更新する
+#-----------------------------
+
+#File: PerformanceQueues_p.html
+#---------------------------
+Performance Settings of Queues and Processes==キューとプロセスのパフォーマンスの設定
+#-----------------------------
+
+#File: PerformanceConcurrency_p.html
+#---------------------------
+Performance of Concurrent Processes==同時並行のプロセスのパフォーマンス
+#-----------------------------
+
+#File: PerformanceSearch_p.html
+#---------------------------
+Performance Settings of Search Sequence==検索シークエンスのパフォーマンス設定
+Search Sequence Timing==検索シークエンスのタイミング
+#-----------------------------
+
+#File: ProxyIndexingMonitor_p.html
+#---------------------------
+Indexing with Proxy==プロキシでの索引付け
+#-----------------------------
+
+#File: QuickCrawlLink_p.html
+#---------------------------
+Quick Crawl Link==簡便なクロールのリンク
+#-----------------------------
+
+#File: Ranking_p.html
+#---------------------------
+Ranking Configuration==順位付けの構成
+#-----------------------------
+
+#File: RankingRWI_p.html
+#---------------------------
+RWI Ranking Configuration<==RWIの順位付けの構成<
+#-----------------------------
+
+#File: RankingSolr_p.html
+#---------------------------
+Solr Ranking Configuration<==Solrの順位付けの構成<
+#-----------------------------
+
+#File: RegexTest.html
+#---------------------------
+Regex Test==正規表現のテスト
+Test String==試す文字列
+Regular Expression==正規表現
+This is a ==これは 
+Java Pattern==Java パターン
+Result<==結果<
+no match<==一致しません<
+> match<==> 一致します<
+error in expression:==表現の中のエラー:
+#-----------------------------
+
+#File: RemoteCrawl_p.html
+#---------------------------
+Remote Crawl Configuration==リモート クロールの構成
+#-----------------------------
+
+#File: Settings_p.html
+#---------------------------
+Advanced Settings==高度な設定
+#-----------------------------
+
+#File: Settings_Crawler.inc
+#---------------------------
+Generic Crawler Settings==一般的なクローラーの設定
+#-----------------------------
+
+#File: Settings_Http.inc
+#---------------------------
+HTTP Networking==HTTPのネットワーキング
+#-----------------------------
+
+#File: Settings_Proxy.inc
+#---------------------------
+YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCyはインターネットへの接続の為に別のプロキシを使用できます. ここであなたはリモート プロキシの為のアドレスを入力できます.
+#-----------------------------
+
+#File: Settings_ProxyAccess.inc
+#---------------------------
+Proxy Access Settings==プロキシのアクセスの設定
+"Submit"=="確定する"
+#-----------------------------
+
+#File: Settings_Seed.inc
+#---------------------------
+Seed Upload Settings==シードのアップロードの設定
+#-----------------------------
+
+#File: Settings_Seed_UploadFile.inc
+#---------------------------
+Store into filesystem:==ファイルシステムの中に保存する:
+"Submit"=="確定する"
+#-----------------------------
+
+#File: Settings_Seed_UploadFtp.inc
+#---------------------------
+Uploading via FTP:==FTP経由でのアップロード:
+"Submit"=="確定する"
+#-----------------------------
+
+#File: Settings_Seed_UploadScp.inc
+#---------------------------
+
+Uploading via SCP:==SCP経由でのアップロード:
+"Submit"=="確定する"
+#-----------------------------
+
+#File: Settings_ServerAccess.inc
+#---------------------------
+Server Access Settings==サーヴァーのアクセスの設定
+value="Submit"==value="確定する"
+#-----------------------------
+
+#File: SettingsAck_p.html
+#---------------------------
+YaCy '#[clientname]#': Settings Acknowledge==YaCy '#[clientname]#': 設定の確認
+#-----------------------------
+
+#File: Settings_MessageForwarding.inc
+#---------------------------
+Message Forwarding==メッセージの転送
+"Submit"=="確定する"
+Changes will take effect immediately.==変更は即座に有効になります.
+#-----------------------------
+
+#File: sharedBlacklist_p.html
+#---------------------------
+Shared Blacklist==共有されたブラックリスト
+#-----------------------------
+
+#File: Status.html
+#---------------------------
+Console Status==コンソールの状態
+>forum<==>フォーラム<
+Log-in as administrator to see full status==全ての状態を見る為には管理者としてログ-インして下さい
+Welcome to YaCy!==YaCyへようこそ!
+#-----------------------------
+
+#File: Status_p.inc
+#---------------------------
+>System Status==>システムの状態
+Unknown==不明
+System==システム
+YaCy version==YaCyのヴァージョン
+Uptime:==稼働時間:
+Java version:==Javaのヴァージョン:
+Processors:==プロセッサー:
+Load:==負荷:
+Threads:==スレッド:
+peak:==ピーク:
+total:==総計:
+Protection==保護
+Password is missing==パスワードが見つかりません
+password-protected==パスワードで保護されています
+Unrestricted access from localhost==ローカルホストからの無制限のアクセス
+Configure==構成
+Address</dt>==アドレス</dt>
+peer address not assigned==ピアのアドレスは割り当てられていません
+Public Address:==パブリック アドレス:
+YaCy Address:==YaCyのアドレス:
+>Proxy==>プロキシ
+>Transparent==>透過
+#Peer Host==ピアのホスト
+#Port Forwarding Host==ポート フォワーディングのホスト
+Remote:==リモート:
+not used==使用されていません
+broken==壊れています
+connected==接続されています
+#Remote Proxy==リモート プロキシ
+not used==使用されていません
+Used for YaCy -> YaCy communication:==YaCyの為に使用されています -> YaCy コミュニケーション:
+WARNING:==警告:
+You do this on your own risk.==あなたはこれを自己責任で行います.
+If you do this without YaCy running on a desktop-pc, this will possibly break startup.==もしもあなたがこれをデスクトップ-PCで動作しているYaCy無しでするならば, これは起動を止めるかもしれません.
+In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==この場合, あなたは DATA/SETTINGS/yacy.conf で手動で構成を編集する必要があるでしょう
+Auto-popup on start-up==起動時の自動ポップアップ
+Enabled==有効
+[Enable==[有効化
+Disabled==無効
+[Disable==[無効化
+Tray-Icon==トレイ-アイコン
+Experimental==実験的
+Memory Usage==メモリーの使用方法
+RAM used:==使われているRAM:
+RAM max:==RAMの最大:
+DISK used:==使われているディスク:
+(approx.)==(凡そ)
+DISK free:==フリーなディスク:
+Traffic==トラフィック
+>Reset==>リセット
+Proxy:==プロキシ:
+Crawler:==クローラー:
+Incoming Connections==着信接続
+Active:==有効:
+Max:==最大:
+>Queues==>キュー
+>Loader Queue==>ローダー キュー
+Local Crawl==ローカル キュー
+Remote triggered Crawl==リモート トリガード クロール
+Pre-Queueing==プリ-キューイング
+Seed server==シード サーヴァー
+#-----------------------------
+
+#File: Steering.html
+#---------------------------
+Steering</title>==ステアリング</title>
+Checking peer status...==ピアの状態を調べています...
+#-----------------------------
+
+#File: Supporter.html
+#---------------------------
+Supporter<==サポーター<
+"Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="どうぞあなたのリンクの推薦にコメントを入力して下さい. (あなたの投票はコメント無しでも考慮されます.)"
+Supporter are switched off for users without authorization==サポーターは認可の無いユーザーにはスウィッチがオフにされます
+"bookmark"=="ブックマーク"
+"Add to bookmarks"=="ブックマークに追加する"
+"positive vote"=="ポジティヴな票"
+"Give positive vote"=="ポジティヴな投票"
+"negative vote"=="ネガティヴな票"
+"Give negative vote"=="ネガティヴな投票"
+provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==プロファイルにURLがあるYaCy ピアによる提供です. これは現在オンラインであるピアからのURLのみを示します.
+#-----------------------------
+
+#File: Surftips.html
+#---------------------------
+Surftips</title>==サーフティップス</title>
+Surftips</h2>==サーフティップス</h2>
+Surftips are switched off==サーフティップスはスウィッチがオフになっています
+title="bookmark"==title="ブックマーク"
+alt="Add to bookmarks"==alt="ブックマークに追加する"
+title="positive vote"==title="ポジティヴな票"
+alt="Give positive vote"==alt="ポジティヴな投票"
+title="negative vote"==title="ネガティヴな票"
+alt="Give negative vote"==alt="ネガティヴな投票"
+YaCy Supporters<==YaCy サポーター<
+>a list of home pages of yacy users<==>YaCy ユーザーのホーム ページの一覧<
+Show surftips to everyone==サーフティップスを全員に見せる
+#-----------------------------
+
+#File: Table_API_p.html
+#---------------------------
+: Peer Steering==: ピアのステアリング
+The information that is presented on this page can also be retrieved as XML.==このページに表示されている情報はXMLとして取得する事もできます.
+#-----------------------------
+
+#File: Table_RobotsTxt_p.html
+#---------------------------
+Table Viewer==テーブル ヴューワー
+#-----------------------------
+
+### This Tables section is removed in current SVN Versions
+#File: Tables_p.html
+#---------------------------
+Table Administration==テーブルの管理
+Table Selection==テーブルの選択
+Select Table:==テーブルを選択する:
+#"Show Table"=="テーブルを表示する"
+show max.==最大を表示する
+>all<==>全て<
+entries,==エントリー,
+"Commit"=="コミット"
+#-----------------------------
+
+
+#File: terminal_p.html
+#---------------------------
+#YaCy System Terminal Monitor==YaCy システム ターミナル モニター
+Search Form==検索フォーム
+Crawl Start==クロールの開始
+Status Page==状態のページ
+Confirm Shutdown==シャットダウンの確認
+>&lt;Shutdown==>&lt;シャットダウン
+Event Terminal==イヴェント ターミナル
+Image Terminal==画像ターミナル
+#Domain Monitor==ドメイン モニター
+"Loading Processing software..."=="プロセッシング ソフトウェアを読み込んでいます..."
+This browser does not have a Java Plug-in.==このブラウザーはJavaのプラグ-インがありません.
+Get the latest Java Plug-in here.==ここで最新のJavaのプラグ-インを入手して下さい.
+Resource Monitor==リソース モニター
+Network Monitor==ネットワーク モニター
+#-----------------------------
+
+#File: Threaddump_p.html
+#---------------------------
+YaCy Debugging: Thread Dump==YaCy デバッギング: スレッドのダンプ
+Threaddump<==スレッド ダンプ<
+"Single Threaddump"=="シングル スレッド ダンプ"
+"Multiple Dump Statistic"=="マルティプル スレッド ダンプ"
+#"create Threaddump"=="スレッド ダンプを作成する"
+#-----------------------------
+
+#File: User.html
+#---------------------------
+User Page==ユーザー ページ
+You are not logged in.<br />==あなたはログ インしていません.<br /> 
+Username:==ユーザー名:
+Password: <input==パスワード: <input
+"login"=="ログイン"
+You are currently logged in as #[username]#.==あなたは現在 #[username]# としてログ インしています.
+#-----------------------------
+
+#File: ViewFile.html
+#---------------------------
+YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': URL コンテントを見る
+#-----------------------------
+
+#File: ViewLog_p.html
+#---------------------------
+Lines==行
+reversed order==逆順
+"refresh"=="更新"
+#-----------------------------
+
+#File: ViewProfile.html
+#---------------------------
+Local Peer Profile:==ローカル ピアのプロファイル:
+Remote Peer Profile==リモート ピアのプロファイル
+Wrong access of this page==このページの誤ったアクセス
+The requested peer is unknown or a potential peer.==リクエストしたピアは不明または潜在的なピアです.
+The profile can't be fetched.==プロファイルをフェッチできませんでした.
+The peer==ピア
+is not online.==はオンラインではありません.
+This is the Profile of==これは次のもののプロファイルです
+#Name==名前
+#Nick Name==ニック ネーム
+#Homepage==ウェブサイト
+#eMail==e-メール
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
+#Skype==Skype
+Comment==コメント
+View this profile as==このプロファイルを次のものとして表示する 
+> or==> または
+#vCard==vCard
+You can edit your profile <a href="ConfigProfile_p.html">here</a>==あなたは <a href="ConfigProfile_p.html">ここで</a> あなたのプロファイルを編集できます.
+#-----------------------------
+
+#File: Vocabulary_p.html
+#---------------------------
+#Vocabulary Name==語彙の名前
+#Objectspace==オブジェクト空間
+Discover Terms:==語を探し出す:
+#-----------------------------
+
+#File: WatchWebStructure_p.html
+#---------------------------
+Web Structure<==ウェブ構造<
+>Host List<==>ホストの一覧<
+>#[count]# outlinks==>#[count]# アウトリンク
+host<==ホスト<
+depth<==深さ<
+nodes<==ノード<
+time<==時間<
+size<==大きさ<
+>Background<==>背景<
+#>Text<==>テキスト<
+>Line<==>線<
+>Pivot Dot<==>ピヴォットの点<
+>Other Dot<==>他の点<
+>Dot-end<==>点の終わり<
+>Color <==>色 <
+"change"=="変更"
+"WebStructurePicture"=="ウェブ構造図"
+#-----------------------------
+
+#File: Wiki.html
+#---------------------------
+YaCyWiki page:==YaCyWiki ページ:
+last edited by==次のものによる最後の編集
+change date==変更の日時
+Edit<==編集<
+#-----------------------------
+
+#File: WikiHelp.html
+#---------------------------
+Wiki Help==Wiki ヘルプ
+Wiki-Code==Wiki-コード
+#YaCy Wiki==YaCy ウィキ
+Description==説明
+=headline===ヘッドライン
+#text==テキスト
+point==ポイント
+something<==何らかのもの<
+another thing==別のもの
+and yet another==そしてもう一つ
+something else==別の何らかのもの
+#-----------------------------
+
+#File: yacyinteractive.html
+#---------------------------
+YaCy Interactive Search==YaCy インタラクティヴ検索
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==この検索結果は RSS/<a href="http://www.opensearch.org">opensearch</a> 出力として取得する事もできます.
+The query format is similar to==クエリーの形式は次のものに似ています
+SRU==SRU
+Click the API icon to see an example call to the search rss API.==検索rss APIの呼び出しの例を見るにはAPIのアイコンをクリックして下さい.
+To see a list of all APIs, please visit the==全てのAPIの一覧を見るには, どうぞ次の場所を訪問して下さい
+API wiki page==API ウィキ ページ
+loading from local index...==ローカル索引から読み込んでいます...
+e="Search"==e="検索"
+#-----------------------------
+
+#File: yacysearch.html
+#---------------------------
+Search Page==検索ページ
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==この検索結果はRSS/<a href="http://www.opensearch.org">opensearch</a>の出力として取得する事もできます.
+The query format is similar to==クエリーの形式は次に似ています
+#SRU==SRU
+Click the API icon to see an example call to the search rss API.==rss APIを検索する為のエグザンプル コールを見る為にはAPI アイコンをクリックして下さい.
+To see a list of all APIs, please visit the==全てのAPIの一覧を見る為には, どうぞ次を訪問して下さい
+API wiki page==API ウィキページ
+"Search"=="検索する"
+'Search'=='検索する'
+"search again"=="再検索する" 
+#Text==テキスト
+Images==画像
+#Audio==音声
+Video==動画
+Applications==アプリケーション
+more options==更なるオプション
+Illegal URL mask:==不正なURL マスク:
+(not a valid regular expression), mask ignored.==(無効な正規表現です), マスクは無視されます.
+Illegal prefer mask:==不正なプリファー マスク:
+Did you mean:==もしかして:
+The following words are stop-words and had been excluded from the search:==次の単語はストップ-ワードであり検索から除外されました:
+No Results.==結果がありません.
+length of search words must be at least 1 character==検索語の長さは最短でも1文字無くてはなりません
+Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function<==無認可のユーザーがこのピアでウェブを検索する事は無効となっています. どうぞ検索機能を使用する為に管理者として <a href="Status.html?login=">ログ イン</a> して下さい
+Location -- click on map to enlarge==場所 -- 拡大するには地図をクリックして下さい
+Map (c) by <==地図 &copy; by<
+#>OpenStreetMap<==>OpenStreetMap<
+and contributors, CC-BY-SA==そしてコントリビューター, CC-BY-SA
+>Media<==>メディア<
+#>URL<==>URL<
+> of==> of 
+> local,==> ローカル,
+remote from==リモート from
+YaCy peers).==のYaCy　ピア).
+#-----------------------------
+
+#File: yacysearchitem.html
+#---------------------------
+"bookmark"=="ブックマークする"
+"recommend"=="推薦する"
+"delete"=="削除する"
+Pictures==画像
+#-----------------------------
+
+#File: yacysearchtrailer.html
+#---------------------------
+show search results for "#[query]#" on map==地図上に "#[query]#" の検索結果を表示する
+#-----------------------------
+
+### Subdirectory api ###
+#File: api/table_p.html
+#---------------------------
+Table Viewer==テーブル ヴューワー
+#>PK<==>プライマリー キー<
+"Edit Table"=="テーブルを編集する"
+#-----------------------------
+
+#File: api/yacydoc.html
+#---------------------------
+>Author<==>著者<
+>Description<==>説明<
+>Subject<==>件名<
+#>Publisher<==>パブリッシャー<
+#>Contributor<==>コントリビューター<
+>Date<==>日時<
+>Type<==>タイプ<
+>Identifier<==>識別子<
+>Language<==>言語<
+>Load Date<==>読み込みの日時<
+>Referrer Identifier<==>リファラーの識別子<
+#>Referrer URL<==>リファラーのURL<
+>Document size<==>ドキュメントの大きさ<
+>Number of Words<==>単語の数<
+#-----------------------------
+
+#File: env/templates/metas.template
+#---------------------------
+English, Englisch==Japanese, 日本語
+
+#-----------------------------
+
+### Subdirectory env/templates ###
+#File: env/templates/header.template
+#---------------------------
+#YaCy - Distributed Search Engine==YaCy - 分散型検索エンジン
+### FIRST STEPS ###
+First Steps==初めの一歩
+Use Case &amp; Account==使用例 &amp; アカウント
+Load Web Pages, Crawler==ウェブ ページを読み込む
+RAM/Disk Usage &amp; Updates==RAM/ストレージの使用方法 &amp; 更新
+You just started a YaCy peer!==あなたはちょうどYaCy ピアを開始しました!
+As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==初回のユーザーであるあなたは基本的な機能だけが見えています. 更なるオプションを見るには使用例またはあなたのピアの名前を設定して下さい. 全てのモニタリング オプションを見るには最初のウェブのクロールを開始して下さい.
+You did not yet start a web crawl!==あなたはまだウェブのクロールを開始していません!
+You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!==あなたはここでは全てのモニタリング オプションを見る事はありません, 何故ならば幾つかはクロール結果のモニタリングに属しているからです. それを見るにはウェブのクロールを開始して下さい!
+### MONITORING ###
+Monitoring==モニタリング
+System Status==システムの状態
+Peer-to-Peer Network==ピア-to-ピア ネットワーク
+Index Browser==索引ブラウザー
+Network Access==ネットワーク アクセス
+Web Visualization==ウェブの視覚化
+Crawler Monitor==クローラー モニター
+### PRODUCTION ###
+Production==プロダクション
+Advanced Crawler==高度なクローラー
+Index Export/Import==索引の書き出し/取り込み
+Target Analysis==対象の解析
+Process Scheduler==プロセス スケジューラー
+### ADMINISTRATION ###
+<h3>Administration==<h3>管理
+System Administration==システムの管理
+Index Administration==索引の管理
+Filter &amp; Blacklists==フィルター &amp; ブラックリスト
+Content Semantic==コンテント セマンティック
+### SEARCH PORTAL INTEGRATION ###
+Search Portal Integration==検索ポータルの統合
+Portal Configuration==ポータルの構成
+Portal Design==ポータルのデザイン
+Ranking and Heuristics==順位付けとヒューリスティクス
+#-----------------------------
+
+#File: env/templates/simpleheader.template
+#---------------------------
+#Administration<==管理<
+>Web Search<==>ウェブ検索<
+>File Search<==>ファイル検索<
+>Compare Search<==>検索を比較する<
+>Index Browser<==>索引ブラウザー<
+About This Page==私達について
+Help / YaCy Wiki==ヘルプ / YaCy ウィキ
+#-----------------------------
+
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Access Tracker==アクセス トラッカー
+Server Access==サーヴァー アクセス
+Access Grid==アクセス グリッド
+Incoming Requests Overview==着信したリクエストの概要
+Incoming Requests Details==着信したリクエストの詳細
+All Connections<==全ての接続<
+Local Search<==ローカル検索<
+#Log==ログ
+Host Tracker==ホスト トラッカー
+Remote Search<==リモート検索<
+Cookie Menu==Cookie メニュー
+#-----------------------------
+
+#File: env/templates/submenuBlacklist.template
+#---------------------------
+Filter &amp; Blacklists==フィルター &amp; ブラックリスト
+Blacklist Administration==ブラックリストの管理
+Blacklist Cleaner==ブラックリスト クリーナー
+Blacklist Test==ブラックリストのテスト
+Import/Export==読み込み/書き出し
+Content Control==コンテントの制御
+#-----------------------------
+
+#File: env/templates/submenuComputation.template
+#---------------------------
+>Application Status<==>アプリケーションの状態<
+>Computation Monitor<==>計算モニター<
+## System Submenu
+>System<==>システム<
+>Status<==>状態<
+## Processes Submenu
+>Processes<==>プロセス<
+>Server Log<==>サーヴァー ログ<
+>Thread Dump<==>スレッドのダンプ<
+>Concurrent Indexing<==>同時並行の索引付け<
+>Memory Usage<==>メモリーの使用方法<
+>Search Sequence<==>検索シークエンス<
+## Messages Submenu
+>Messages<==>メッセージ<
+>Overview<==>概要<
+>Incoming&nbsp;News<==>着信ニューズ<
+>Processed&nbsp;News<==>処理されたニューズ<
+>Outgoing&nbsp;News<==>発信ニューズ<
+>Published&nbsp;News<==>公開されたニューズ<
+## Community Data Submenu
+>Community Data<==>コミュニティ データ<
+>Surftips<==>サーフティップス<
+>Local Peer Wiki<==>ローカル ピア ウィキ<
+#-----------------------------
+
+#File: env/templates/submenuConfig.template
+#---------------------------
+System Administration==システムの管理
+#UNUSED HERE
+#Peer Administration Console==ピア管理コンソール
+#Status==状態
+Network Configuration==ネットワークの構成
+Download System Update==システムの更新をダウンロードする
+>Performance==>パフォーマンス
+Advanced Settings==高度な設定
+Local robots.txt==ローカル robots.txt
+#Web Cache==ウェブのキャッシュ
+Advanced Properties==高度な属性
+#>Thread Dump<==>スレッドのダンプ<
+#-----------------------------
+
+#File: env/templates/submenuContentIntegration.template
+#---------------------------
+External Content Integration==外部コンテントの統合
+#-----------------------------
+
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages==ウェブページを読み込む
+Site Crawling==サイトのクローリング
+Parser Configuration==構文解析器の構成
+#-----------------------------
+
+#File: env/templates/submenuCrawlMonitor.template
+#---------------------------
+Overview</a>==概要</a>
+Receipts</a>==受理</a>
+Queries</a>==クエリー</a>
+DHT Transfer==DHTの転送
+#-----------------------------
+
+#File: env/templates/submenuDesign.template
+#-----------------------------
+>Appearance==>外観
+>Language==>言語
+>Search Page Layout==>検索ページのレイアウト
+#-----------------------------
+
+#File: env/templates/submenuIndexControl.template
+#---------------------------
+Index Administration==索引の管理
+URL Database Administration==URL データベースの管理
+Index Deletion==索引の削除
+Index Sources &amp; Targets==索引のソース &amp; 対象
+#Solr Schema Editor==Solr スキーマ エディター
+Field Re-Indexing==フィールドの再索引付け
+Reverse Word Index==逆引き単語索引
+Index Cleaner==索引クリーナー
+Content Analysis==コンテントの解析
+Web Cache==ウェブ キャッシュ
+Parser Configuration==パーサーの構成
+#-----------------------------
+
+#File: env/templates/submenuIndexCreate.template
+#---------------------------
+#Web Crawler Control==ウェブ クローラーの制御
+#Start a Web Crawl==ウェブのクロールを開始する
+#Crawl Start==クロールを開始する
+#Crawl Profile Editor==クロール プロファイル エディター
+#Crawler Queues==クローラー キュー
+#Indexing<==索引付け<
+#Loader<==ローダー<
+#URLs to be processed==処理されるURL
+#Processing Queues==処理しているキュー
+#Local<==ローカル<
+#Global<==グローバル<
+#Remote<==リモート<
+#Overhang<==オーヴァーハング<
+#Media Crawl Queues==メディア クロール キュー
+#>Images==>画像
+#>Movies==>動画
+#>Music==>音楽
+#--- New menu items ---
+Index Creation==索引の作成
+#Crawler/Spider<==クローラー/スパイダー<
+Full Site Crawl==全てのサイトのクロール
+Sitemap Loader==サイトマップ ローダー
+Crawl Start<br/>(Expert)==クロールの開始<br/>(エキスパート)
+Network<br/>Scanner==ネットワーク<br/>スキャナー
+#>Intranet<br/>Scanner<==>イントラネット<br/>スキャナー<
+Crawl Start (Expert)==クロールの開始 (エキスパート)
+Crawling of MediaWikis==メディアウィキのクローリング
+Crawling of phpBB3 Forums==phpBB3 フォーラムのクローリング
+Index Export/Import<==索引の書き出し/読み込み<
+Network Harvesting<==ネットワーク ハーヴェスティング<
+Network Scanner==ネットワーク スキャナー
+Remote Crawling==リモート クローリング
+Scraping Proxy==スクラッピング プロキシ
+Database Reader<==データベース リーダー<
+for phpBB3 Forums==for phpBB3 フォーラム
+Dump Reader for==次のもののダンプ リーダー
+#MediaWiki dumps==メディアウィキ ダンプ
+#-----------------------------
+
+#File: env/templates/submenuPerformance.template
+#---------------------------
+Performance Menu==パフォーマンスのメニュー
+#-----------------------------
+
+#File: env/templates/submenuPortalIntegration.template
+#---------------------------
+Search Portal Integration==検索ポータルの統合
+#-----------------------------
+
+#File: env/templates/submenuPublication.template
+#---------------------------
+Publication==公開
+#Wiki==ウィキ
+#Blog==ブログ
+File Hosting==ファイルのホスティング
+#-----------------------------
+
+#File: env/templates/submenuSearchConfiguration.template
+#---------------------------
+Integrated Search Configuration==統合された検索の構成
+Generic Search Portal==ジェネリック検索ポータル
+Search Page Layout==検索ページのレイアウト
+>Appearance<==>外観<
+>Language<==>言語<
+User Profile==ユーザーのプロファイル
+>Heuristics<==>ヒューリスティクス<
+Solr Ranking Config==Solrの順位付けの構成
+RWI Ranking Config==RWIの順位付けの構成
+#-----------------------------
+
+#File: env/templates/submenuSearchIntegration.template
+#---------------------------
+Search Integration into External Sites==外部のサイトへの検索の統合
+Live Search Anywhere==どこでもライヴ検索
+Search Box Anywhere==どこでも検索ボックス
+#-----------------------------
+
+#File: env/templates/submenuSemantic.template
+#---------------------------
+Content Semantic==コンテント セマンティック
+# Subemenu: Automated Annotation
+>Automated Annotation<==>自動化されたアノテーション<
+Auto-Annotation Vocabulary Editor==自動アノテーションの語彙エディター
+Knowledge Loader==ナレッジ ローダー
+# Submenu Augmented Content
+>Augmented Content<==>増強されたコンテント<
+Augmented Browsing==増強されたブラウジング
+Filters and Modules==フィルターとモジュール
+Augmented Parsing==増強されたパーシング
+#-----------------------------
+
+#File: env/templates/submenuTargetAnalysis.template
+#---------------------------
+Target Analysis==対象の解析
+Robots.txt Database==Robots.txt データベース
+Mass Crawl Check==大量のCrawlの確認
+Regex Test==正規表現のテスト
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==使用例 &amp; アカウント
+Basic Configuration==基本的な構成
+>Accounts<==>アカウント<
+Network Configuration==ネットワークの構成
+#-----------------------------
+
+#File: env/templates/submenuViewLog.template
+#---------------------------
+Server Log Menu==サーヴァーのログのメニュー
+#Server Log==サーヴァーのログ
+#-----------------------------
+
+#File: env/templates/submenuWebStructure.template
+#---------------------------
+Web Visualization==ウェブの視覚化
+Web Structure==ウェブの構造
+Image Collage==画像のコラージュ
+#-----------------------------
+
+#File: htdocsdefault/dir.html
+#---------------------------
+YaCy: Public Files==YaCy: パブリック ファイル
+Public File Directory==パブリック ファイルのディレクトリー
+value="#[peername]#'s Console"==value="#[peername]#のコンソール"
+Welcome! You are identified and authorized as==ようこそ! あなたは次のものとして識別と認定をされました
+#-----------------------------
+
+#File: proxymsg/authfail.inc
+#---------------------------
+Your Username/Password is wrong.==あなたの ユーザー名/パスワード は間違っています.
+Username</label>==ユーザー名</label>
+Password</label>==パスワード</label>
+"login"=="ログイン"
+#-----------------------------
+
+#File: proxymsg/error.html
+#---------------------------
+YaCy: Error Message==YaCy: エラー メッセージ
+request:==リクエスト:
+unspecified error==不特定のエラー
+not-yet-assigned error==未割り当てのエラー
+You don't have an active internet connection. Please go online.==あなたは有効なインターネット接続がありません. どうぞオンラインにして下さい.
+Could not load resource. The file is not available.==リソースを読み込めませんでした. ファイルが利用できません.
+Exception occurred==例外が発生しました 
+Generated #[date]# by==生成された #[date]# by
+#-----------------------------
+
+#File: proxymsg/proxylimits.inc
+#---------------------------
+Your Account is disabled for surfing.==あなたのアカウントはサーフィンでは無効です.
+Your Timelimit (#[timelimit]# Minutes per Day) is reached.==あなたはタイムリミット (1日当たり #[timelimit]# 分) に達しています. 
+#-----------------------------
+
+#File: proxymsg/unknownHost.inc
+#---------------------------
+The server==サーヴァー
+could not be found.==見つかりませんでした.
+Did you mean:==もしかして:
+#-----------------------------
+
+#File: www/welcome.html
+#---------------------------
+YaCy: Default Page for Individual Peer Content==YaCy: 個別のピアのコンテントの為の既定のページ
+#-----------------------------
+
+#File: js/Crawler.js
+#---------------------------
+"Continue this queue"=="このキューを続ける"
+"Pause this queue"=="このキューを一時停止する"
+#-----------------------------
+
+#File: js/yacyinteractive.js
+#---------------------------
+>total results==>総合的な結果
+&nbsp;topwords:==&nbsp;トップワード:
+>Name==>名前
+>Size==>大きさ
+>Date==>日時
+#-----------------------------
+
+#File: js/jquery-flexigrid.js
+#---------------------------
+'Displaying {from} to {to} of {total} items'=='{total} の内の {from} から {to} までの項目を表示しています'
+'Processing, please wait ...'=='処理しています, どうぞお待ち下さい...'
+'No items'=='項目がありません'
+#-----------------------------
+
+#File: js/jquery-ui-1.7.2.min.js
+#---------------------------
+Loading&#8230;==読み込み&#8230;
+#-----------------------------
+
+#File: js/jquery.ui.all.min.js
+#---------------------------
+Loading&#8230;==読み込み&#8230;
+#-----------------------------
+
+# EOF

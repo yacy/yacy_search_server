@@ -1,0 +1,17 @@
+{
+    "item": {
+		"title": "#[title]#",
+		"desc": "#[desc]#",
+		"lang" : "#[lang]#",
+		"robots": "#(robots-allowed)#0::1::#(/robots-allowed)#",
+  		"robotsInfo": "#[robotsInfo]#",
+
+  		"icons": [#{icons}#
+  			"#[icon]#"#(eol)#::,#(/eol)#
+  			#{/icons}#],
+
+  		"filter": "#[filter]#",
+  		"tags": "#{tags}##[tag]#,#{/tags}#",
+  		"oai": "#[oai]#"
+    }
+}

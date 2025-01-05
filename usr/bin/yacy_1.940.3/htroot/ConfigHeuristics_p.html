@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Heuristics Configuration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigNetwork">
+    #%env/templates/header.template%#
+    #%env/templates/submenuRanking.template%#
+    <h2>Heuristics Configuration</h2>
+    <p>
+    A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia). The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.
+    When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content. This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.
+    </p>
+    
+    <form action=""><fieldset>
+    The success of heuristics are marked with an image (<img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>/<img width="16" height="9" src="env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>) below the favicon left from the search result entry:
+    <dl>
+        <dt>
+          <img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>
+        </dt>
+        <dd>
+          The search result was discovered by a heuristic, but the link was already known by YaCy
+        </dd>
+        <dt>
+          <img width="16" height="9" src="env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>
+        </dt>
+        <dd>
+          The search result was discovered by a heuristic, not previously known by YaCy
+        </dd>
+    </dl></fieldset></form>
+    
+    <form id="HeuristicFormSite" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset>
+      <legend>
+        <input type="checkbox" name="site_check" id="site" onclick="window.location.href='ConfigHeuristics_p.html?#(site.checked)#site_on=::site_off=#(/site.checked)#'" value="site"#(site.checked)#:: checked="checked"#(/site.checked)# />
+        'site'-operator: instant shallow crawl
+      </legend>
+      <p>
+      When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.
+      That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.
+      Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).
+      </p>
+    </fieldset>
+    </form>
+    
+    <form id="HeuristicFormSearchResult" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+        <fieldset>
+            <table>
+                <tr>
+                    <td>
+                        <legend>
+                            <input type="checkbox" name="searchresult_check" id="searchresult" onclick="window.location.href='ConfigHeuristics_p.html?#(searchresult.checked)#searchresult_on=::searchresult_off=#(/searchresult.checked)#'" value="searchresult"#(searchresult.checked)#:: checked="checked"#(/searchresult.checked)# />
+                            search-result: shallow crawl on all displayed search results
+                        </legend>
+                    </td>
+                    <td>
+                        <legend>
+                            <input type="checkbox" name="searchresultglobal_check" id="searchresultglobal" onclick="window.location.href='ConfigHeuristics_p.html?#(searchresultglobal.checked)#searchresultglobal_on=::searchresultglobal_off=#(/searchresultglobal.checked)#'" value="siteresultglobal"#(searchresultglobal.checked)#:: checked="checked"#(/searchresultglobal.checked)# />
+                            add as global crawl job
+                        </legend>
+                    </td>
+                </tr>
+            </table>
+      <p>
+      When a search is made then all displayed result links are crawled with a depth-1 crawl.
+      This means: right after the search request every page is loaded and every page that is linked on this page.
+      If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).
+      Default is to add the links to the local crawl queue (your peer crawls the linked pages).
+      </p>
+    </fieldset>
+    </form>
+       
+    <fieldset>
+      <form id="HeuristicFormOpenSearch" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+        <legend>
+          <input type="checkbox" name="opensearch_check" id="opensearch" onclick="window.location.href='ConfigHeuristics_p.html?#(opensearch.checked)#opensearch_on=::opensearch_off=#(/opensearch.checked)#'" value="opensearch"#(opensearch.checked)#:: checked="checked"#(/opensearch.checked)# />
+          opensearch load external search result list from active systems below
+        </legend>
+        <p>
+        When using this heuristic, then every new search request line is used for a call to listed opensearch systems.
+        20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.
+        To find out more about OpenSearch see <a href="http://www.opensearch.org" target="_blank">OpenSearch.org</a>
+        </p>
+      </form>
+
+    <form action="ConfigHeuristics_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <div>
+      <b>Available/Active Opensearch System</b>
+      <table class="sortable" border="0">
+      <tr class="TableHeader" valign="bottom">
+        <td>Active</td>
+        <td>Title</td>
+        <td>Comment</td>
+        <td>Url <small>(format opensearch <a href="http://www.opensearch.org/Specifications/OpenSearch/1.1#OpenSearch_URL_template_syntax" target="_blank">Url template syntax</a>)</small></td>
+        <td>delete</td>
+      </tr>
+      #{osdcfg}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td align="center"><input type="checkbox" name="ossys_#[title]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
+        <td align="left"><b><a href="#[urlhostlink]#" target="_blank">#[title]#</b></a> </td>
+        <td align="left">#[comment]#</td>
+        <td align="left"><input type="text" name="ossys_url_#[title]#" value="#[url]#" size="70" required="required"/></td>
+        <td align="center"><input type="checkbox" name="ossys_del_#[title]#" value="checked" #(delchecked)#::checked="checked"#(/delchecked)#/></td>
+      </tr>
+      #{/osdcfg}#
+      <tr>
+        <td><small>new</small></td>
+        <td><input type="text" name="ossys_newtitle"/></td>
+        <td><input type="text" name="ossys_newcomment"/></td>
+        <td><input type="text" name="ossys_newurl" size="70"/></td>
+        <td><input type="submit" name="addnewosd" value="add"/></td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding-top:10px "><input type="submit" name="setopensearch" value="Save" class="btn btn-primary"/></td>
+        <td colspan="2" align="center" style="padding-top:10px "><input type="submit" name="resettodefaultosdlist" value="reset to default list" class="btn btn-primary"/></td>
+      </tr>
+      </table>
+      </div>
+      <div>
+        <span style="color:red">#[osderrmsg]#</span>
+      </div>
+      <br>
+      <div>
+        <div style="float:right">
+        <input type="submit" name="discoverosd" id="discoverosd" value="discover from index" class="btn btn-primary" onclick="return confirm('start background task, depending on index size this may run a long time')"/>
+        </div>
+        With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.
+        The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).
+        Alternatively you may <a href="?copydefaultosdconfig=">copy &amp; paste a example config file</a> located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.
+        For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.
+        #{osdsolrfieldswitch}#<input type="submit" name="switchsolrfieldson" value="switch Solr fields on" class="btn btn-primary btn-xs" onclick="return confirm('modify Solr Schema')"/>#{/osdsolrfieldswitch}#
+      </div>
+    </form>
+    </fieldset>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

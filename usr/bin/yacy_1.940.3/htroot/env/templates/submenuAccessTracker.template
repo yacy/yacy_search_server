@@ -1,0 +1,39 @@
+<div class="SubMenu">
+    <h3>Access Tracker</h3>
+    <div class="SubMenugroup">
+      <h3>Server Access</h3>
+      <ul class="SubMenu">
+        <li><a href="AccessGrid_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Access Grid</a></li>
+        <li><a href="AccessTracker_p.html?page=0" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Incoming Requests Overview</a></li>
+        <li><a href="AccessTracker_p.html?page=1" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Incoming Requests Details</a></li>
+        <li><a href="Connections_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">All Connections</a></li>
+      </ul>
+    </div>
+
+    <div class="SubMenugroup">
+      <h3>Local Search</h3>
+      <ul class="SubMenu">
+        <li><a href="AccessTracker_p.html?page=2" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Log</a></li>
+        <li><a href="AccessTracker_p.html?page=3" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Host Tracker</a></li>
+        <li><a href="SearchAccessRate_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Access Rate Limitations</a></li>
+      </ul>
+    </div>
+    
+    #(navigation-p2p)#::
+    <div class="SubMenugroup">
+      <h3>Remote Search</h3>
+      <ul class="SubMenu">
+        <li><a href="AccessTracker_p.html?page=4" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Log</a></li>
+        <li><a href="AccessTracker_p.html?page=5" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Host Tracker</a></li>
+      </ul>
+    </div>
+    #(/navigation-p2p)#
+    
+    <div class="SubMenugroup">
+      <h3>Cookie Menu</h3>
+      <ul class="SubMenu">
+        <li><a href="CookieMonitorIncoming_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Incoming&nbsp;Cookies</a></li>
+        <li><a href="CookieMonitorOutgoing_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Outgoing&nbsp;Cookies</a></li>
+      </ul>
+    </div>
+</div>

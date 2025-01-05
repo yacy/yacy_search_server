@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Access Tracker</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="AccessTracker">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAccessTracker.template%#
+    <script type="text/javascript" src="js/sorttable.js"></script>
+    #(page)#
+    <h2>Server Access Overview</h2>
+    <p>This is a list of #[num]# requests to the local http server within the last hour.</p>
+    <table border="0">
+      <tr class="TableHeader">
+        <td rowspan="2">Host</td>
+        <td colspan="4">Access Count During</td>
+      </tr>
+      <tr class="TableHeader">
+        <td>last Second</td>
+        <td>last Minute</td>
+        <td>last 10 Minutes</td>
+        <td>last Hour</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td><a href="AccessTracker_p.html?page=1&amp;host=#[host]#">#[host]#</a></td>
+        <td>#[countSecond]#</td>
+        <td>#[countMinute]#</td>
+        <td>#[count10Minutes]#</td>
+        <td>#[countHour]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    <p>The following hosts are registered as source for brute-force requests to protected pages</p>
+    <table class="sortable" border="0">
+      <tr class="TableHeader">
+        <td>Host</td>
+        <td>Access Times</td>
+      </tr>
+      #{bflist}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[countSecond]#</td>
+      </tr>
+      #{/bflist}#
+    </table>
+    ::
+    <h2>Server Access Details</h2>
+    <p>This is a list of requests (max. 1000) to the local http server within the last hour.</p>
+    <p>Showing #[num]# requests.</p>
+    <table class="sortable" border="0">
+      <tr class="TableHeader">
+        <td>Host</td>
+        <td>Date</td>
+        <td>Path</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td><a href="AccessTracker_p.html?page=1&amp;host=#[host]#">#[host]#</a></td>
+        <td>#[date]#</td>
+        <td><a href="#[relativePath]#">#[path]#</a></td>
+      </tr>
+      #{/list}#
+    </table>
+    ::
+    <h2>Local Search Log</h2>
+    <p>This is a list of searches that had been requested from this' peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
+    <table class="sortable" border="0">
+    <thead>
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Date</td>
+        <td>Offset</td>
+        <td>Expected Results</td>
+        <td>Returned Results</td>
+        <td>Known Results</td>
+        <td>Used Time (ms)</td>
+        <td>URL fetch (ms)</td>
+        <td>Snippet comp (ms)</td>
+        <td>Query</td>
+        <td>User Agent</td>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="TableHeader">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>&#216; #[querycount_avg]#</td>
+        <td>&#216; #[transmitcount_avg]#</td>
+        <td>&#216; #[resultcount_avg]#</td>
+        <td>&#216; #[resulttime_avg]#</td>
+        <td>&#216; #[urltime_avg]#</td>
+        <td>&#216; #[snippettime_avg]#</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+    <tbody>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[offset]#</td>
+        <td>#[querycount]#</td>
+        <td>#[transmitcount]#</td>
+        <td>#[resultcount]#</td>
+        <td>#[resulttime]#</td>
+        <td>#[urltime]#</td>
+        <td>#[snippettime]#</td>
+        <td><a href="yacysearch.html?query=#[querystring]#&amp;resource=local">#[querystring]#</a></td>
+        <td>#[userAgent]#</td>
+      </tr>
+      #{/list}#
+    </tbody>
+    </table>
+    #(nav-topics)#<p>&nbsp;</p>::<p>&nbsp;</p>
+    <fieldset><legend>Top Search Words (last 7 Days)</legend>
+    <div id="tagcloud" style="text-align:justify">#{element}#
+    <a href="yacysearch.html?query=#[name]#&amp;resource=local" style="text-decoration:none;font-size:#[size]#px;">#[name]#</a> (#[count]#)
+    #{/element}#</div>
+    </fieldset>
+    #(/nav-topics)#
+    ::
+    <h2>Local Search Host Tracker</h2>
+    <p>This is a list of searches that had been requested from this' peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
+    <table class="sortable" border="0">
+    <thead>
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Count</td>
+        <td>Queries Per Last Hour</td>
+        <td>Access Dates</td>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="TableHeader">
+        <td></td>
+        <td>&#931; #[total]#</td>
+        <td>&#931; #[qph_sum]#</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    <tbody>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[count]#</td>
+        <td>#[qph]#</td>
+        <td>#{dates}##[date]# #{/dates}#</td>
+      </tr>
+      #{/list}#
+    </tbody>
+    </table>
+    ::
+    <h2>Remote Search Log</h2>
+    <p>This is a list of searches that had been requested from remote peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
+    <table class="sortable" border="0">
+    <thead>
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Peer Name</td>
+        <td>Date</td>
+        <td>Expected Results</td>
+        <td>Returned Results</td>
+        <td>Used Time (ms)</td>
+        <td>URL fetch (ms)</td>
+        <td>Snippet comp (ms)</td>
+        <td>Search Word Hashes</td>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="TableHeader">
+        <td>Total: #[num]#
+        <br/>Success: #[resultcount]#</td>
+        <td></td>
+        <td></td>
+        <td>&#216; #[querycount_avg]#
+        <br/></td>
+        <td><!--&#216; #[resultcount_avg]#-->
+        <br/>&#216; #[transmitcount_avg]#</td>
+        <td>&#216; #[resulttime_avg]#
+        <br/>&#216; #[resulttime_avg1]#</td>
+        <td>&#216; #[urltime_avg]#
+        <br/>&#216; #[urltime_avg1]#</td>
+        <td>&#216; #[snippettime_avg]#
+        <br/>&#216; #[snippettime_avg1]#</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    <tbody>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[peername]#</td>
+        <td>#[date]#</td>
+        <td>#[querycount]#</td>
+        <td>#[transmitcount]#</td>
+        <td>#[resulttime]#</td>
+        <td>#[urltime]#</td>
+        <td>#[snippettime]#</td>
+        <td>#[queryhashes]#</td>
+      </tr>
+      #{/list}#
+    </tbody>
+    </table>
+    ::
+    <h2>Remote Search Host Tracker</h2>
+    <p>This is a list of searches that had been requested from remote peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
+    <table class="sortable" border="0">
+    <thead>
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Peer Name</td>
+        <td>Count</td>
+        <td>Queries Per Last Hour</td>
+        <td>Access Dates</td>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="TableHeader">
+        <td></td>
+        <td></td>
+        <td>&#931; #[total]#</td>
+        <td>&#931; #[qph_sum]#</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    <tbody>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[peername]#</td>
+        <td>#[count]#</td>
+        <td>#[qph]#</td>
+        <td>#{dates}##[date]# #{/dates}#</td>
+      </tr>
+      #{/list}#
+    </tbody>
+    </table>
+    #(/page)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

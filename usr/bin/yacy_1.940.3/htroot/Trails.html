@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>CyTag Trails</title>
+    #%env/templates/metas.template%#
+<script type="text/javascript">
+function search() {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "api/trail_p.json", true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var rsp = eval("("+str+")");
+  var trails = rsp.trails;
+  
+  var html = "";
+  
+  var item;
+  html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\">";
+  html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+  html += "<td>time</td>";
+  html += "<td>trail</td>";
+  html += "<td>nick</td>";
+  html += "<td>tag</td>";
+  html += "<td>icon</td>";
+  html += "<td>ip</td>";
+  html += "<td>agent</td></tr>";
+  for (var i = 0; i < trails.length; i++) {
+      item = trails[i];
+      if (item.time == null) break;
+      html += "<tr class=\"TableCellLight\"><td>"+ item.time + "</td>";
+      html += "<td>" + item.trail + "</td>";
+      html += "<td>" + item.nick + "</td>";
+      html += "<td>" + item.tag + "</td>";
+      html += "<td>" + item.icon + "</td>";
+      html += "<td>" + item.ip + "</td>";
+      html += "<td>" + item.agent + "</td></tr>";
+  }
+  html += "</table>";
+  document.getElementById("trails").innerHTML = html;
+}
+</script>
+</head>
+<body>
+#%env/templates/header.template%#
+<script type="text/javascript">
+search();
+</script>
+<div id="trails"></div>
+
+#%env/templates/footer.template%#
+</body>
+</html>

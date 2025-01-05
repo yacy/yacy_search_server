@@ -1,0 +1,7 @@
+<div class="SubMenu">
+  <h3>Publication</h3>
+    <ul class="SubMenu">
+      <li><a href="Wiki.html?display=1" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Wiki</a></li>
+      <li><a href="Blog.html?display=1" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Blog</a></li>
+    </ul>
+</div>

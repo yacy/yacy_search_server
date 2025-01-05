@@ -1,0 +1,256 @@
+/* Skin phosphor */
+
+body {
+  background-color:#000000;
+  color:#00ff00;
+}
+
+a:link {
+  color:#336633;
+}
+
+a:visited {
+  color:#339933;
+}
+
+a:hover {
+  color:#009900;
+  text-decoration:underline;
+}
+
+
+/* Menu */
+
+.menugroup h3, .SubMenugroup h3, .SubMenu h3 {
+  background-color: #00ff00;
+  color:#000000;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color: #000000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+}
+
+a:hover.MenuItemLink {
+  color:#006600;
+}
+
+/* Head */
+
+div.head h1 {
+  background-color:#00ff00;
+  color:#000000;
+}
+
+/* Tables */
+
+.TableHeader {
+  background-color: #00ff00;
+  color:#000000;
+}
+
+.TableCellDark {
+  background-color: #003300;
+}
+
+.TableCellLight {
+  background-color: #000000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+}
+
+.TableCellSummary {
+  background-color: #ffbbaa;
+}
+
+.TableCellActive {  	 
+  background-color: #d0d0d0; 	 
+}
+
+/* Blog and Wiki*/
+
+.Post {
+  background-color:#000000;
+  color: #00ff00;
+}
+
+.PostSubject {
+  background-color:#00ff00;
+  color:#000000;
+}
+
+.PostSubject a {
+  color:black;
+}
+
+.PostInfo {
+  background-color:#000000;
+  color: #00ff00;
+  border:1px solid #00ff00;
+
+}
+
+/* Wiki */
+
+.WikiTOCBox {
+  border: 1px solid #aaa;
+  background-color: #F8F8FF;
+}
+
+a.unknown {
+  color:#990000;
+}
+
+a.known {
+  color:#009900;
+}
+
+a.extern {
+  color:#000099;
+}
+
+/* in Bookmarks */
+
+.bookmark {
+  border-bottom:1px #000 dashed;
+}
+
+a.bookmarkTitle {
+  color: #4070a0;
+}
+
+a:hover.bookmarkTitle {
+  color: #4070a0;
+}
+
+a.bookmarkTags {
+  color: #007050;
+}
+
+a:hover.bookmarkTags {
+  color: #4070a0;
+}
+
+a.bookmarkAction {
+  color: #999999;
+}
+
+.Tags {
+  border-left: 2px solid black;
+}
+
+.diff 				{ background-color: #171717; }
+.diff .unchanged 	{ color: #666; }
+.diff .added 		{ color: #0A0; background-color: #053005; }
+.diff .deleted 		{ color: #B00; background-color: #390505; }
+
+/* in Status.html */
+
+.ProgressBar {
+  border: #CAD5E3 solid 1px;
+}
+
+div.ProgressBarFill {
+  background-color:#71D500;
+}
+
+/* Copyright info */
+
+.info {
+  border-top:1px solid gray;
+}
+
+/* Searchresults */
+
+.searchresults {
+  border-top:1px #000 dashed;
+}
+
+.searchresults .url a {
+  color:#008000;
+}
+
+.snippetLoading {
+  color:#999999;
+}
+
+.snippetLoaded b {
+  color: #00ff00;
+}
+
+.snippetError {
+  color:red;
+}
+
+.searchHighlight1	{ font-weight: bold; color: #FFFF64; }
+.searchHighlight2	{ font-weight: bold; color: #FF9B9B; }
+.searchHighlight3	{ font-weight: bold; color: #0F0; }
+.searchHighlight4	{ font-weight: bold; color: #0FF; }
+.searchHighlight5	{ font-weight: bold; color: #C90; }
+
+
+/* other */
+
+.settingsValue {
+  color:#556699;
+}
+
+.Headline {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+.Heading {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+.error, .warning {
+  color:red;
+}
+
+.success {
+  color:green;
+}
+
+.Message {
+  background-color: #eeeeee;
+}
+
+.example {
+  background-color:#D3D3D3;
+}
+
+.hides:hover .hoverShow { background-color: #010; }
+
+.navbar-default{background-color:#000;border-color:#000}
+
+/* Log */
+
+body#ViewLog pre {
+  background-color:white;
+}
+
+/* Forms */
+
+fieldset {
+  background-color:#000000;
+  border:1px solid #00ff00;
+}
+
+legend {
+  background-color:#5f5f5f;
+  color: white;
+}
+
+form dt, dl.pairs dt {
+  background-color:#00ff00;
+  color:#000000;
+}
+
+form dd, dl.pairs dd {
+  background-color: #000000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+}

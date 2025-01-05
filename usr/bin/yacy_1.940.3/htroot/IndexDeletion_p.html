@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Index Deletion</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexDeletion">
+  
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Index Deletion</h2>
+    <p>The search index contains #[doccount]# documents. You can delete them here.
+    Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.</p>
+    <p>Index deletion will not immediately reduce the storage size on disk because entries are only marked as deleted in a first step.
+    The storage size will later on shrink by itself if new documents are indexed or you can force a shrinking by <a href="/IndexControlURLs_p.html">performing an "Optimize Solr" procedure.</a></p>
+    <form id="IndexDeletionPath" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset>
+      <legend>Delete by URL Matching</legend>
+      <p>Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.</p>
+      <dl>
+        <dt>One URL stub, a list of URL stubs<br/>or a regular expression</dt>
+        <dd>
+          <textarea name="urldelete" id="crawlingURL" cols="64" rows="3" size="41" onClick="d=document.getElementById('engage-urldelete');d.disabled=true;d.className='btn btn-default';">#[urldelete]#</textarea>
+        </dd>
+        <dt>Matching Method</dt>
+        <dd>
+          <input type="radio" name="urldelete-mm" value="subpath" #(urldelete-mm-subpath-checked)#::checked="checked"#(/urldelete-mm-subpath-checked)# />sub-path of given URLs&nbsp;&nbsp;&nbsp;
+          <input type="radio" name="urldelete-mm" value="regexp" #(urldelete-mm-regexp-checked)#::checked="checked"#(/urldelete-mm-regexp-checked)# />matching with regular expression
+        <dt><input type="submit" name="simulate-urldelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-urldelete" id="engage-urldelete" value="Engage Deletion" #(urldelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/urldelete-active)#/>
+          #(urldelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/urldelete-active)#
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    <form id="IndexDeletionAge" action="IndexDeletion_p.html" method="post" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset>
+      <legend>Delete by Age</legend>
+      <p>Delete all documents which are older than a given time period.</p>
+      <dl>
+        <dt>Time Period</dt>
+        <dd>All documents older than
+          <select name="timedelete-number" id="timedelete-number" onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';">
+            <option value="1" #(timedelete-n-1)#::selected="selected"#(/timedelete-n-1)#>1</option>
+            <option value="2" #(timedelete-n-2)#::selected="selected"#(/timedelete-n-2)#>2</option>
+            <option value="3" #(timedelete-n-3)#::selected="selected"#(/timedelete-n-3)#>3</option>
+            <option value="4" #(timedelete-n-4)#::selected="selected"#(/timedelete-n-4)#>4</option>
+            <option value="5" #(timedelete-n-5)#::selected="selected"#(/timedelete-n-5)#>5</option>
+            <option value="6" #(timedelete-n-6)#::selected="selected"#(/timedelete-n-6)#>6</option>
+            <option value="7" #(timedelete-n-7)#::selected="selected"#(/timedelete-n-7)#>7</option>
+            <option value="8" #(timedelete-n-8)#::selected="selected"#(/timedelete-n-8)#>8</option>
+            <option value="9" #(timedelete-n-9)#::selected="selected"#(/timedelete-n-9)#>9</option>
+            <option value="10" #(timedelete-n-10)#::selected="selected"#(/timedelete-n-10)#>10</option>
+            <option value="12" #(timedelete-n-12)#::selected="selected"#(/timedelete-n-12)#>12</option>
+            <option value="14" #(timedelete-n-14)#::selected="selected"#(/timedelete-n-14)#>14</option>
+            <option value="21" #(timedelete-n-21)#::selected="selected"#(/timedelete-n-21)#>21</option>
+            <option value="24" #(timedelete-n-24)#::selected="selected"#(/timedelete-n-24)#>24</option>
+            <option value="28" #(timedelete-n-28)#::selected="selected"#(/timedelete-n-28)#>28</option>
+            <option value="30" #(timedelete-n-30)#::selected="selected"#(/timedelete-n-30)#>30</option>
+            <option value="60" #(timedelete-n-60)#::selected="selected"#(/timedelete-n-60)#>60</option>
+            <option value="90" #(timedelete-n-90)#::selected="selected"#(/timedelete-n-90)#>90</option>
+          </select>
+          <select name="timedelete-unit" id="timedelete-unit" onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';">
+            <option value="year" #(timedelete-u-year)#::selected="selected"#(/timedelete-u-year)#>years</option>
+            <option value="month" #(timedelete-u-month)#::selected="selected"#(/timedelete-u-month)#>months</option>
+            <option value="day" #(timedelete-u-day)#::selected="selected"#(/timedelete-u-day)#>days</option>
+            <option value="hour" #(timedelete-u-hour)#::selected="selected"#(/timedelete-u-hour)#>hours</option>
+          </select>
+        </dd>
+        <dt>Age Identification</dt>
+        <dd>
+          <input type="radio" name="timedelete-source" value="loaddate" #(timedelete-source-loaddate-checked)#::checked="checked"#(/timedelete-source-loaddate-checked)# onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';"/>load date&nbsp;&nbsp;&nbsp;
+          <input type="radio" name="timedelete-source" value="lastmodified" #(timedelete-source-lastmodified-checked)#::checked="checked"#(/timedelete-source-lastmodified-checked)# onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';"/>last-modified
+        </dd>
+        <dt><input type="submit" name="simulate-timedelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-timedelete" id="engage-timedelete" value="Engage Deletion" #(timedelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/timedelete-active)#/>
+          #(timedelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/timedelete-active)#
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    <form id="IndexDeletionCollection" action="IndexDeletion_p.html" method="post" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset>
+      <legend>Delete Collections</legend>
+      <p>Delete all documents which are inside specific collections.</p>
+      <dl>
+        <dt>Not Assigned</dt>
+        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-unassigned" value="unassigned" #(collectiondelete-mode-unassigned-checked)#::checked="checked"#(/collectiondelete-mode-unassigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';"/>Delete all documents which are not assigned to any collection
+        </dd>
+        
+        <dt>Assigned</dt>
+        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-assigned" value="assigned" #(collectiondelete-mode-assigned-checked)#::checked="checked"#(/collectiondelete-mode-assigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';"/>Delete all documents which are assigned to the following collection(s)
+        #(collectiondelete-select)#, separated by ',' (comma) or '|' (vertical bar); or <a href="IndexDeletion_p.html?collectionlist=">generate the collection list...</a><br/><input type="text" name="collectiondelete" id="collections" value="#[collectiondelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';document.getElementById('collectiondelete-mode-assigned').checked=true;"/>::
+        <br/><select id="collectiondelete" name="collectiondelete">
+          #{list}#<option value="#[collection-value]#" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';document.getElementById('collectiondelete-mode-assigned').checked=true;">#[collection-name]#</option>#{/list}#
+        </select>
+        #(/collectiondelete-select)#
+        </dd>
+        <dt><input type="submit" name="simulate-collectiondelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-collectiondelete" id="engage-collectiondelete" value="Engage Deletion" #(collectiondelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/collectiondelete-active)#/>
+          #(collectiondelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/collectiondelete-active)#
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    <form id="IndexDeletionQuery" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset>
+      <legend>Delete by Solr Query</legend>
+      <p>This is the most generic option: select a set of documents using a solr query.</p>
+      <dl>
+        <dt>Core</dt>
+        <dd>
+        <select id="core" name="core" onchange='submit()'>
+          #{cores}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          #{/cores}#
+        </select>
+        </dd>
+        <dt>q=</dt>
+        <dd>
+          <textarea name="querydelete" id="querydelete" cols="64" rows="3" size="41" onClick="d=document.getElementById('engage-querydelete');d.disabled=true;d.className='btn btn-default';">#[querydelete]#</textarea>
+        </dd>
+        <dt><input type="submit" name="simulate-querydelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-querydelete" id="engage-querydelete" value="Engage Deletion" #(querydelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/querydelete-active)#/>
+          #(querydelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/querydelete-active)#
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

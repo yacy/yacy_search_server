@@ -1,0 +1,145 @@
+# Set the logging level for the root of the namespace.
+# This becomes the default logging level for all Loggers.
+.level=INFO
+
+# setting logging levels vor individual classes
+# possible values are:
+# OFF     no output at all
+# SEVERE  system-level error, internal cause, critical and not fixable (i.e. inconsistency)
+# WARNING uncritical service failure, may require user activity (i.e. input required, wrong authorization)
+# INFO    regular action information (i.e. any httpd request URL)
+# CONFIG  regular system status information (i.e. start-up messages)
+# FINE  in-function status debug output
+# FINER  more details in debug output
+# FINEST  even more details in debug output
+BASE64.level = OFF
+PARSER.level = INFO
+PROXY.level = INFO
+YACY.level = INFO
+NETWORK.level = INFO
+HTCACHE.level = INFO
+PLASMA.level = INFO
+SERVER.level = INFO
+FILEHANDLER.level = INFO
+CRAWLER.level = INFO
+STACKCRAWL.level = INFO
+MEMORY.level = INFO
+HTTPC.level = INFO
+
+# RWI related
+DHT-OUT.level = INFO
+SWITCHBOARD.level = INFO
+DHT.level = INFO
+KELONDRO.level = INFO
+
+# UPnP related
+UPNP.level = INFO
+sun.net.www.protocol.http.HttpURLConnection.level = INFO
+
+# Tray
+sun.awt.level = OFF
+java.awt.level = OFF
+TABLE.level = INFO
+
+# List of global handlers
+handlers = java.util.logging.FileHandler,\
+           net.yacy.kelondro.logging.GuiHandler,\
+           net.yacy.kelondro.logging.ConsoleOutErrHandler,\
+           net.yacy.kelondro.logging.LogalizerHandler
+
+# Properties for the FileHandler
+java.util.logging.FileHandler.limit = 1048576
+java.util.logging.FileHandler.count = 20
+java.util.logging.FileHandler.pattern = DATA/LOG/yacy%u%g.log
+java.util.logging.FileHandler.level = ALL
+java.util.logging.FileHandler.formatter=net.yacy.kelondro.logging.SimpleLogFormatter
+java.util.logging.FileHandler.encoding=UTF-8
+
+# Properties for crawler
+net.yacy.crawler.robots.RobotsTxt.level = SEVERE
+
+# Properties for the GuiHandler
+net.yacy.kelondro.logging.GuiHandler.level = ALL
+net.yacy.kelondro.logging.GuiHandler.formatter=net.yacy.kelondro.logging.SimpleLogFormatter
+net.yacy.kelondro.logging.GuiHandler.size = 10000
+
+# Properties for the ConsoleOutErrHandler
+net.yacy.kelondro.logging.ConsoleOutErrHandler.level = ALL
+net.yacy.kelondro.logging.ConsoleOutErrHandler.levelStdOut = ALL
+net.yacy.kelondro.logging.ConsoleOutErrHandler.levelSplit = WARNING
+net.yacy.kelondro.logging.ConsoleOutErrHandler.levelStdErr = ALL
+net.yacy.kelondro.logging.ConsoleOutErrHandler.formatter=net.yacy.kelondro.logging.SimpleLogFormatter
+#net.yacy.kelondro.logging.ConsoleOutErrHandler.ignoreCtrlChr=true
+
+# Properties for the proxy access logger
+net.yacy.server.http.HTTPDProxyHandler.logging.enabled = TRUE
+net.yacy.server.http.HTTPDProxyHandler.logging.FileHandler.limit = 1048576
+net.yacy.server.http.HTTPDProxyHandler.logging.FileHandler.count = 20
+net.yacy.server.http.HTTPDProxyHandler.logging.FileHandler.pattern = DATA/LOG/proxyAccess%u%g.log
+
+# Properties for the LogalizerHandler
+net.yacy.kelondro.logging.LogalizerHandler.enabled = false
+net.yacy.kelondro.logging.LogalizerHandler.debug = false
+net.yacy.kelondro.logging.LogalizerHandler.parserPackage = net.yacy.kelondro.logging
+
+# Poperties for the HttpServer (Jetty)
+org.eclipse.jetty.level = INFO
+
+org.apache.http.level = OFF
+org.apache.commons.httpclient.level = OFF
+httpclient.wire.level = OFF
+# above log setting can be replaced by separate levels for header and content
+# e.g. to log content for attached Solr server
+# httpclient.wire.header.level = OFF
+# httpclient.wire.content.level = OFF
+
+org.apache.pdfbox.level = INFO
+
+# Properties for solr
+org.apache.solr.client.solrj.impl.HttpClientUtil.level = SEVERE
+org.apache.solr.core.Config.level = SEVERE
+org.apache.solr.core.CoreContainer.level = SEVERE
+org.apache.solr.core.JmxMonitoredMap.level = SEVERE
+org.apache.solr.core.RequestHandlers.level = SEVERE
+org.apache.solr.core.SolrConfig.level = SEVERE
+org.apache.solr.core.SolrCore.level = SEVERE
+org.apache.solr.core.SolrResourceLoader.level = SEVERE
+org.apache.solr.core.CachingDirectoryFactory.level = OFF
+org.apache.solr.rest.ManagedResource.level = SEVERE
+org.apache.solr.util.plugin.AbstractPluginLoader.level = INFO
+org.apache.solr.schema.IndexSchema.level = INFO
+org.apache.solr.schema.FieldTypePluginLoader.level = INFO
+org.apache.solr.handler.admin.LukeRequestHandler.level = SEVERE
+org.apache.solr.handler.component.HttpShardHandlerFactory.level = SEVERE
+org.apache.solr.handler.component.QueryElevationComponent.level = SEVERE
+org.apache.solr.handler.component.SearchHandler.level = SEVERE
+org.apache.solr.handler.component.SpellCheckComponent.level = SEVERE
+org.apache.solr.handler.loader.XMLLoader.level = SEVERE
+org.apache.solr.handler.ReplicationHandler.level = SEVERE
+org.apache.solr.handler.UpdateRequestHandler.level = INFO
+org.apache.solr.response.XSLTResponseWriter.level = SEVERE
+org.apache.solr.schema.FileExchangeRateProvider.level = SEVERE
+org.apache.solr.schema.IndexSchema.level = SEVERE
+org.apache.solr.search.SolrIndexSearcher.level = SEVERE
+org.apache.solr.spelling.DirectSolrSpellChecker.level = SEVERE
+org.apache.solr.update.processor.LogUpdateProcessor.level = OFF
+org.apache.solr.update.DefaultSolrCoreState.level = SEVERE
+org.apache.solr.update.SolrCoreState.level = SEVERE
+org.apache.solr.update.SolrIndexWriter.level = INFO
+org.apache.solr.update.UpdateHandler.level = SEVERE
+org.apache.solr.update.UpdateLog.level = INFO
+org.apache.solr.update.LoggingInfoStream.level = OFF
+
+# Properties for the YaCy solr interface
+net.yacy.cora.federate.solr.connector.SolrServerConnector.level = INFO
+net.yacy.cora.federate.solr.instance.RemoteInstance$1.level = INFO
+
+# Some more cora loggers
+net.yacy.cora.protocol.Domains.level = SEVERE
+
+# java properties
+javax.management.misc.level = INFO
+javax.management.mbeanserver.level = INFO
+
+# Properties for Collection
+CollectionConfiguration.CRHost.level = SEVERE

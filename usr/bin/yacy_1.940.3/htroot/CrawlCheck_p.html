@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Crawl Check</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="js/ajax.js"></script>
+    <script type="text/javascript" src="js/IndexCreate.js"></script>
+    <script type="text/javascript">
+        function check(key){
+            document.getElementById(key).checked = 'checked';
+        }
+    </script>
+    <style type="text/css">
+    	.nobr {
+    		white-space: nowrap;
+    	}
+    </style>
+  </head>
+  <body id="IndexCreate">
+  
+    #%env/templates/header.template%#
+    #%env/templates/submenuTargetAnalysis.template%#
+    <h2>Crawl Check</h2>
+    
+    <p>This pages gives you an analysis about the possible success for a web crawl on given addresses.</p>
+    
+    <fieldset>
+      <legend>
+        <label>Crawl Check</label>
+      </legend>
+      <form id="CrawlCheck" method="post" action="CrawlCheck_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <dl>
+        <dt><label>List of possible crawl start URLs</label></dt>
+        <dd>
+           <textarea name="crawlingURLs" id="crawlingURLs" cols="80" rows="15" size="80">#[starturls]#</textarea>
+        </dd>      
+        <dt></dt>
+        <dd><input type="submit" name="crawlcheck" value="Check given urls" class="btn btn-primary"/>
+        </dd>
+      </dl>
+      
+    </form>
+    </fieldset>
+    
+    
+    #(table)#::
+     <fieldset><legend>Analysis</legend>
+      <table border="0" style="float:left">
+      <tr>
+        <th align="left" width="600" class="listing">URL</th>
+        <th align="right" width="80" class="listing">Access</th>
+        <th align="right" width="80" class="listing">Robots</th>
+        <th align="right" width="80" class="listing">Crawl-Delay</th>
+        <th align="right" width="200" class="listing">Sitemap</th>
+      </tr>
+      #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left" nowrap class="listing"><a href="#[url]#" class="listing">#[url]#</a></td>
+          <td align="right" nowrap class="listing">#[access]#</td>
+          <td align="right" nowrap class="listing">#[robots]#</td>
+          <td align="right" nowrap class="listing">#[crawldelay]#</td>
+          <td align="right" nowrap class="listing">#[sitemap]#</td>
+        </tr>
+      #{/list}#
+      </table>
+    </fieldset>
+    #(/table)#
+    
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

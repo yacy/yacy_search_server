@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
+<posts>
+#{posts}#<post href="#[url]#" description="#[title]#" extended="#[description]#" hash="#[md5]#" tag="#[tags]#" time="#[time]#" #(isExtended)#::private="#[private]#"#(/isExtended)#/>
+#{/posts}#
+</posts>

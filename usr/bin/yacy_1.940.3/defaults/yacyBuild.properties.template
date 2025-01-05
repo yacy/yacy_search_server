@@ -1,0 +1,7 @@
+Version = @REPL_VERSION@
+RepositoryVersionDate = @REPL_REPVERDATE@
+RepositoryVersionTime = @REPL_REPVERTIME@
+RepositoryVersionHash = @REPL_REPVERHASH@
+ReleaseStub = @REPL_RELEASESTUB@
+dstamp = @REPL_DSTAMP@
+tstamp = @REPL_TSTAMP@

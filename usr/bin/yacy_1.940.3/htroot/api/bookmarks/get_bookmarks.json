@@ -1,0 +1,27 @@
+#(display)#
+{
+page: #[page]#,
+total: #[total]#,
+posts: [
+#{bookmarks}#
+{bookmark:["#[hash]#",#(public)#"public"::"private"#(/public)#,"#[title]#","#[link]#","#[tags]#","#[folders]#","#[date]#"]}#[comma]#
+#{/bookmarks}#
+]
+}
+::
+{
+page: #[page]#,
+total: #[total]#,
+rows: [
+#{bookmarks}#
+{id:"#[id]#",cell:[
+"#[hash]#",
+#(public)#"<img src='img-2/world2.png' alt='public' title='public bookmark'/>"::"<img src='img-2/lock.png' alt='private' title='private bookmark'/>"#(/public)#,
+"<h3 class='linktitle'>#[title-html]#</h3><p class='desc'>#[desc-html]#</p><p class='url'><a href='#[link]#'>#[link]#</a>",
+"<p class='tags'>#[tags-html]#</p>",
+"<p class='folders'>#[folders-html]#</p>",
+"<p class='date'>#[rfc822date]#</p>"]}#[comma]#
+#{/bookmarks}#
+]
+}
+#(/display)#

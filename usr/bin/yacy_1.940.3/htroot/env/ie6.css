@@ -1,0 +1,6 @@
+/* Fixes for IE 6 and lower */
+
+/* API icon - IE6 does not support position:fixed
+div#api {
+    position:absolute;
+} */

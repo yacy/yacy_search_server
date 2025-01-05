@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>rss terminal</title>
+<style type="text/css">
+
+div#feedbox {
+  padding: 0;
+  margin: 0;
+  background: #fff;
+  text-align:left;
+  font:9px 'Droid Sans', 'Lucida Console', 'Courier New', monospace;
+}
+
+div#feedbox p {
+  margin:0px 0;
+}
+</style>
+
+<script type="text/javascript" src="js/ajax.js"></script>
+<script type="text/javascript" src="js/rss2.js"></script>
+<script type="text/javascript" src="js/query.js"></script>
+<script type="text/javascript">
+
+var lines = new Array();
+var maxlines = 20;
+var maxwidth = 90;
+var maxtime = 10000; // time that should be wasted until everything is scrolled
+var minwait = 50; // if this is too short, the CPU will eat all performance
+var maxwait = 500;
+var scroller = null;
+var idleping = null;
+var loader = null;
+var lastwait = 1000;
+var tab = "&nbsp;&nbsp;";
+var lastShow = new Date();
+var set = "";
+var requestCount = 0;
+var fntcolor = "000000";
+var setcolors = new Array("PEERNEWS:606060","REMOTESEARCH:ffab00","LOCALSEARCH:dd0000","REMOTEINDEXING:ccbb00","LOCALINDEXING:562b29","DHTRECEIVE:006600","DHTSEND:002a97","PROXY:8d85f3");
+
+function fillLines() {
+alert(maxlines);
+  for (var i = 0; i < maxlines + 1; i++) {
+  alert(maxlines);http://localhost:8090/Steering.html?shutdown=
+    addLine(i + "-123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789-");
+    //addLine("");
+  }
+}
+
+function addLine(line) {
+  //if (typeof query.cf!=='undefined') {
+    for (var i=0;i<setcolors.length;i++) {
+      if (line.match(setcolors[i].split(":")[0])) {
+          fntcolor = setcolors[i].split(":")[1];
+      }
+    }
+  //}
+  while (line.length > maxwidth) {
+    lines.push("<font style=\"color:#" + fntcolor + ";\">" + line.substring(0, maxwidth) + "</font>");
+    line = tab + line.substring(maxwidth);
+  }
+  lines.push("<font style=\"color:#" + fntcolor + ";\">" + line + "</font>");
+  if (lines.length > maxlines) {
+    if (scroller != null) {
+      window.clearInterval(scroller);
+      scroller = null;
+    }
+    scroller=window.setInterval("scroll()", newwait());
+  }
+  show();
+}
+
+function show() {
+  now = new Date();
+  if (now.getTime() - lastShow.getTime() < 50) return;
+  var doc = document.getElementById("content");
+  doc.innerHTML = "";
+  for (var i = 0; i < maxlines; i++) {
+    if (lines[i]) doc.innerHTML += lines[i] + "<br />";
+  }
+  lastShow = new Date();
+}
+
+function newwait() {
+  if (lines.length > maxlines) {
+    var time = maxtime / (lines.length - maxlines);
+    if (time < minwait) time = minwait;
+    if (time > maxwait) time = maxwait;
+  } else {
+    time = maxwait;
+  }
+  if (time < lastwait) time = (time +  maxlines * lastwait) / (maxlines + 1);
+  lastwait = time;
+  return time;
+}
+
+function scroll() {
+  if (scroller != null) {
+    window.clearInterval(scroller);
+    scroller = null;
+  }
+  if (lines.length > maxlines) {
+    var factor = (lines.length - maxlines) / maxlines / 10;
+    if (factor < 0) factor = 1;
+    if (factor > 3) factor = 3;
+    for (var i = 0; i < factor; i++) {
+      lines.shift();
+    }
+    show();
+    scroller=window.setInterval("scroll()", newwait());
+  }
+}
+
+function showRSS(RSS) {
+  //populate the items
+  for (var i=0; i<RSS.items.length; i++) {
+    if (RSS.items[i].title != null) {
+        if (RSS.items[i].link != null) addLine(RSS.items[i].title + ":" + RSS.items[i].link);
+        else addLine(RSS.items[i].title); }
+    if (RSS.items[i].description != null) addLine(tab + RSS.items[i].description);
+  }
+  return true;
+}
+
+function idlepingExec() {
+  if (lines.length <= maxlines) {
+    // feed in some empty lines to make the list appear alive
+    addLine("");
+  }
+}
+
+function load() {
+  /* Check for Internet Explorer to use feed.xml instead of feed.rss fixing a problem with reading from the RSS Feed file which results in a null reference */
+  /* Problem is described in the forums and should be fixed by changing the MIME-Type for .rss files in the YaCy HTTPd */
+  if (navigator.appName=="Microsoft Internet Explorer")
+  {
+	getRSS("api/feed.xml?count=80&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
+  } else {
+    getRSS("api/feed.rss?count=80&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
+  }
+  requestCount++;
+}
+
+function init() {
+  if (query.maxlines) maxlines = query.maxlines;
+  if (query.maxwidth) maxwidth = query.maxwidth;
+  if (query.maxtime) maxtime = query.maxtime;
+  if (query.minwait) minwait = query.minwait;
+  if (query.maxwait) maxwait = query.maxwait;
+  if (query.width) {
+    document.getElementById("feedbox").style.width = query.width;
+  }
+  if (query.height) {
+    document.getElementById("feedbox").style.height = query.height;
+  }
+  if (query.set) set = query.set;
+  if (query.background) {
+	document.getElementById("feedbox").style.background = "#" + query.background;
+  }
+  if (query.color) {
+	document.getElementById("feedbox").style.color = "#" + query.color;
+  }
+  idleping = window.setInterval("idlepingExec()", 17000);
+  loader=window.setInterval("load()", 10000);
+  load();
+}
+
+</script>
+</head>
+
+<body onload="self.getURLparameters();init();">
+  <div id="feedbox">
+      <p id="content" role="marquee"></p>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,4 @@
+#!/bin/bash
+HERE=$(dirname "$(readlink -f "$0")")
+exec "$HERE/./startyacyappimage" "$@" "-no-sandbox" "%U"
+

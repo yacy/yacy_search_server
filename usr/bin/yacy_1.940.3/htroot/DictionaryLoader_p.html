@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <title>YaCy '#[clientname]#': Knowledge Loader</title>
+  #%env/templates/metas.template%#
+  </head>
+  <body id="DictionaryLoader">
+    #%env/templates/header.template%#
+    #%env/templates/submenuSemantic.template%#
+    <h2>Knowledge Loader</h2>
+
+	<p>
+	YaCy can use external libraries to enable or enhance some functions. These libraries are not
+	included in the main release of YaCy because they would increase the application file too much.
+	You can download additional files here.
+	</p>
+
+    <form action="DictionaryLoader_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Geolocalization</legend>
+        Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.
+        
+        <h4>GeoNames</h4>
+	    <p>With this file it is possible to find cities all over the world.</p>
+        
+        <dl>
+          <dt>Content</dt>
+          <dd>cities with a population &gt; 1000 all over the world</dd>
+          <dt><label>Download from</label></dt>
+          <dd>#[geon0URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geon0Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geon0Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geon0Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geon0Status)#
+          <input type="submit" name="geon0Load" class="btn btn-sm btn-primary" value="Load" />::
+          <input type="submit" name="geon0Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geon0Remove" class="btn btn-sm btn-danger" value="Remove" />::
+          <input type="submit" name="geon0Activate" class="btn btn-sm btn-primary" value="Activate" />
+          <input type="submit" name="geon0Remove" class="btn btn-sm btn-danger" value="Remove" />
+          #(/geon0Status)#</dd>
+          #(geon0ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/geon0ActionLoaded)#
+          #(geon0ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geon0ActionRemoved)#
+          #(geon0ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/geon0ActionDeactivated)#
+          #(geon0ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geon0ActionActivated)#        
+        </dl>
+        <dl>
+          <dt>Content</dt>
+          <dd>cities with a population &gt; 5000 all over the world</dd>
+          <dt><label>Download from</label></dt>
+          <dd>#[geon1URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geon1Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geon1Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geon1Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geon1Status)#
+          <input type="submit" name="geon1Load" class="btn btn-sm btn-primary" value="Load" />::
+          <input type="submit" name="geon1Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geon1Remove" class="btn btn-sm btn-danger" value="Remove" />::
+          <input type="submit" name="geon1Activate" class="btn btn-sm btn-primary" value="Activate" />
+          <input type="submit" name="geon1Remove" class="btn btn-sm btn-danger" value="Remove" />
+          #(/geon1Status)#</dd>
+          #(geon1ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/geon1ActionLoaded)#
+          #(geon1ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geon1ActionRemoved)#
+          #(geon1ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/geon1ActionDeactivated)#
+          #(geon1ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geon1ActionActivated)#        
+        </dl>
+        <dl>
+          <dt>Content</dt>
+          <dd>cities with a population &gt; 100000 all over the world (the set is is reduced to cities &gt; 100000)</dd>
+          <dt><label>Download from</label></dt>
+          <dd>#[geon2URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geon2Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geon2Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geon2Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geon2Status)#
+          <input type="submit" name="geon2Load" class="btn btn-sm btn-primary" value="Load" />::
+          <input type="submit" name="geon2Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geon2Remove" class="btn btn-sm btn-danger" value="Remove" />::
+          <input type="submit" name="geon2Activate" class="btn btn-sm btn-primary" value="Activate" />
+          <input type="submit" name="geon2Remove" class="btn btn-sm btn-danger" value="Remove" />
+          #(/geon2Status)#</dd>
+          #(geon2ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/geon2ActionLoaded)#
+          #(geon2ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geon2ActionRemoved)#
+          #(geon2ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/geon2ActionDeactivated)#
+          #(geon2ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geon2ActionActivated)#        
+        </dl>
+        
+        <h4>OpenGeoDB</h4>
+	    <p>With this file it is possible to find locations in Germany using the location (city) name, a zip code, a car sign or a telephone pre-dial number.</p>
+        
+        <dl>
+          #(geo0Status)#::
+          <dt><label>Downloaded from</label></dt>
+          <dd>#[URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd><div class="commit">loaded - can be upgraded using the Load button for the new URL</div></dd>
+          <dt>Action</dt>
+          <dd>
+          <input type="submit" name="geo0Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geo0Remove" class="btn btn-sm btn-danger" value="Remove" />
+          </dd>::
+          #(/geo0Status)#
+          #(geo0ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geo0ActionRemoved)#
+          #(geo0ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
+          #(/geo0ActionDeactivated)#
+          
+          #(geo1Status)#::
+          <dt><label>Downloaded from</label></dt>
+          <dd>#[URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd><div class="commit">loaded - can be upgraded using the Load button for the new URL</div></dd>
+          <dt>Action</dt>
+          <dd>
+          <input type="submit" name="geo1Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geo1Remove" class="btn btn-sm btn-danger" value="Remove" />
+          </dd>::
+          #(/geo1Status)#
+          #(geo1ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geo1ActionRemoved)#
+          #(geo1ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
+          #(/geo1ActionDeactivated)#
+          
+          <dt><label>Download from</label></dt>
+          <dd>#[geo2URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geo2Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geo2Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geo2Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geo2Status)#
+          <input type="submit" name="geo2Load" class="btn btn-sm btn-primary" value="Load" />::
+          <input type="submit" name="geo2Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geo2Remove" class="btn btn-sm btn-danger" value="Remove" />::
+          <input type="submit" name="geo2Activate" class="btn btn-sm btn-primary" value="Activate" />
+          <input type="submit" name="geo2Remove" class="btn btn-sm btn-danger" value="Remove" />
+          #(/geo2Status)#</dd>
+          #(geo2ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>::
+          <dt>Result</dt><dd><div class="commit">loaded and upgraded dictionary file</div></dd>
+          #(/geo2ActionLoaded)#
+          #(geo2ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geo2ActionRemoved)#
+          #(geo2ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
+          #(/geo2ActionDeactivated)#
+          #(geo2ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geo2ActionActivated)#
+        </dl>
+      </fieldset>
+    </form>
+    
+    <form action="DictionaryLoader_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Suggestions</legend>
+        Suggestion dictionaries will help YaCy to provide better suggestions during the input of search words
+        
+        <h4><a href="http://www1.ids-mannheim.de/kl/projekte/methoden/derewo.html" target="_blank">DeReWo - Korpusbasierte Grund-/Wortformenlisten (German) of 'Institut f&uuml;r Deutsche Sprache'</a></h4>
+	    <p>This file provides 100000 most common german words for suggestions</p>
+        
+        <dl>
+          <dt><label>Download from</label></dt>
+          <dd>#[drw0URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[drw0Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(drw0Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/drw0Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(drw0Status)#
+          <input type="submit" name="drw0Load" class="btn btn-sm btn-primary" value="Load" />::
+          <input type="submit" name="drw0Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="drw0Remove" class="btn btn-sm btn-danger" value="Remove" />::
+          <input type="submit" name="drw0Activate" class="btn btn-sm btn-primary" value="Activate" />
+          <input type="submit" name="drw0Remove" class="btn btn-sm btn-danger" value="Remove" />
+          #(/drw0Status)#</dd>
+          #(drw0ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/drw0ActionLoaded)#
+          #(drw0ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/drw0ActionRemoved)#
+          #(drw0ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/drw0ActionDeactivated)#
+          #(drw0ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/drw0ActionActivated)#        
+        </dl>
+      </fieldset>
+    </form>
+    
+    <form action="DictionaryLoader_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Synonyms</legend>
+        Synonyms are used to find not only the searched word but also their synonyms. This is done by adding all synonyms of words in documents to the document and searching the synonyms as well.
+        
+        <h4><a href="http://www.openthesaurus.de" target="_blank">OpenThesaurus - German Thesaurus from http://www.openthesaurus.de</a></h4>
+	    <p>The data from this source was converted to the YaCy synonym file format and part of the YaCy distribution.</p>
+        
+        <dl>
+          <dt><label>Status</label></dt>
+          <dd>#(syn0Status)#<div class="info">Deactivated</div>::<div class="commit">Activated</div>#(/syn0Status)#</dd> 
+          <dt>Action</dt>
+          <dd>#(syn0Status)#<input type="submit" name="syn0Activate" class="btn btn-sm btn-primary" value="Activate" />::<input type="submit" name="syn0Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />#(/syn0Status)#</dd> 
+        </dl>
+        
+        <h4><a href="https://www.gutenberg.org/ebooks/3202" target="_blank">Moby Lexicon - English Thesaurus from https://www.gutenberg.org/ebooks/3202</a></h4>
+        <p>The data from this source was converted to the YaCy synonym file format and part of the YaCy distribution.</p>
+        
+        <dl>
+          <dt><label>Status</label></dt>
+          <dd>#(syn1Status)#<div class="info">Deactivated</div>::<div class="commit">Activated</div>#(/syn1Status)#</dd> 
+          <dt>Action</dt>
+          <dd>#(syn1Status)#<input type="submit" name="syn1Activate" class="btn btn-sm btn-primary" value="Activate" />::<input type="submit" name="syn1Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />#(/syn1Status)#</dd> 
+        </dl>
+        
+        <h4>Russian Thesaurus</h4>
+        <p>The data was converted to the YaCy synonym file format and part of the YaCy distribution.</p>
+        
+        <dl>
+          <dt><label>Status</label></dt>
+          <dd>#(syn2Status)#<div class="info">Deactivated</div>::<div class="commit">Activated</div>#(/syn2Status)#</dd> 
+          <dt>Action</dt>
+          <dd>#(syn2Status)#<input type="submit" name="syn2Activate" class="btn btn-sm btn-primary" value="Activate" />::<input type="submit" name="syn2Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />#(/syn2Status)#</dd> 
+        </dl>
+      </fieldset>
+    </form>
+  #%env/templates/footer.template%#
+  </body>
+</html>

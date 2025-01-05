@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.url.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    };
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var raw = document.getElementById("raw");
+  if (raw != null) raw.innerHTML = str;
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"ViewFile.html?viewMode=#[viewModeValue]#&url=" + item.link + "\">" + item.link + "<\/a><\/td>";
+    }
+    html += "<\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
+    <title>YaCy '#[clientname]#': View URL Content</title>
+  <script type="text/javascript" src="js/highslide/highslide.js"></script>
+  </head>
+  <body>
+  
+    #(topmenu)#
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleheader.template%#
+    #(/topmenu)#
+<script type="text/javascript">
+  document.getElementById("header_urlviewer").className += " active";
+</script>
+
+<div id="api" style="top:58px;">
+<a href="api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
+<img src="env/grafics/api.png" width="60" height="40" alt="API"/>
+</a>
+<span>See the page info about the url.</span>
+</div>
+
+    <h2>View URL Content</h2>
+
+    <form method="get" action="ViewFile.html" id="searchform" accept-charset="ascii" onkeyup="xmlhttpPost(); return false;">
+      <input type="hidden" name="viewMode" value="#[viewModeValue]#" />
+      <fieldset><legend>Get URL Viewer</legend>
+        <dl>
+          <dt>URL:</dt>
+          <dd>
+            <input type="text" size="60" name="url" id="url" value="#[url]#" />
+            <input type="submit" name="show" class="btn btn-primary" value="Show Metadata" />
+            #(searchindocument)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='IndexBrowser_p.html?path=' + document.getElementById('url').value" />#(/searchindocument)#
+            <div id="searchresults"></div>
+          </dd>
+          #(searchindocument)#::
+          <dt>Search in Document:</dt>
+          <dd>
+            <input type="text" size="60" name="search" id="query" value="#[query]#" />
+            <input type="submit" name="show" class="btn btn-primary" value="Show Snippet" />
+          </dd>
+          #(/searchindocument)#
+        </dl>
+      </fieldset>
+    </form>
+<table border="0">
+<tr><td valign="top">
+    #(error)#
+    <form method="get" action="ViewFile.html" accept-charset="ascii">
+      <fieldset><legend>URL Metadata</legend>
+        <dl>
+          <dt>URL:</dt><dd><a href="#[url]#">#[url]#</a></dd>
+          <dt>Hash:</dt><dd>#(inurldb)##[hash]#::<a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&omitHeader=true&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)#(/inurldb)#</dd>
+          <dt>In Metadata:</dt><dd>#(inurldb)#no::yes#(/inurldb)#</dd>
+          <dt>In Cache:</dt><dd>#(incache)#no::yes#(/incache)#</dd>
+          <dt>First Seen:</dt><dd>#[firstSeen]#</dd>
+          <dt>Word Count:</dt><dd>#[wordCount]#</dd>
+          <dt>Description:</dt><dd>#[desc]#</dd>
+          <dt>Size:</dt><dd>#[size]# Bytes</dd>#(mimeTypeAvailable)#::
+          <dt>MimeType:</dt><dd>#[mimeType]#</dd>#(/mimeTypeAvailable)#
+          <dt>Collections:</dt><dd>#[collections]#</dd>
+          <dt><label for="viewMode">View as</label>:</dt>
+          <dd>
+            <select id="viewMode" name="viewMode" onchange='this.form.submit()'>
+              <option value="iframeWeb"#(vMode-iframeWeb)#:: selected="selected"#(/vMode-iframeWeb)#>Original from Web</option>
+              <option value="iframeCache"#(vMode-iframeCache)#:: selected="selected"#(/vMode-iframeCache)#>Original from Cache</option>
+              <option value="plain"#(vMode-plain)#:: selected="selected"#(/vMode-plain)#>Plain Text</option>
+              <option value="parsed"#(vMode-parsed)#:: selected="selected"#(/vMode-parsed)#>Parsed Text</option>
+              <option value="sentences"#(vMode-sentences)#:: selected="selected"#(/vMode-sentences)#>Parsed Sentences</option>
+              <option value="words"#(vMode-words)#:: selected="selected"#(/vMode-words)#>Parsed Tokens/Words</option>
+              <option value="links"#(vMode-links)#:: selected="selected"#(/vMode-links)#>Link List</option>
+              <option value="schema"#(vMode-schema)#:: selected="selected"#(/vMode-schema)#>Schema Fields</option>
+              <option value="iframeCitations"#(vMode-iframeCitations)#:: selected="selected"#(/vMode-iframeCitations)#>Citation Report</option>
+            </select>
+            <noscript><input type="submit" name="show" class="btn btn-primary" value="Show" /></noscript>
+          </dd>
+        </dl>
+        <input type="hidden" name="words" value="#[words]#" />
+        <input type="hidden" name="urlHash" value="#[hash]#" />
+        <input type="hidden" name="url" value="#[url]#" />
+      </fieldset>
+    </form>
+:: <!-- 1 -->
+:: <!-- 2 -->
+<span class="error">Unable to find URL Entry in DB</span>
+:: <!-- 3 -->
+<span class="error">Invalid URL</span>
+:: <!-- 4 -->
+<p class="error">Unable to download resource content.</p>
+<tt>#[errorText]#</tt>
+:: <!-- 5 -->
+<p class="error">Unable to parse resource content.</p>
+<tt>#[errorText]#</tt>
+:: <!-- 6 -->
+<span class="error">Unsupported protocol.</span>
+#(/error)#
+</td><td valign="top">
+#(showSnippet)#::
+<form action="">
+<fieldset><legend>Snippet</legend>
+  <dl>
+    <dt>Headline</dt><dd>#[headline]#</dd>
+    <dt>Teaser Text</dt><dd>#[teasertext]#</dd>
+  </dl>
+</fieldset>
+</form>
+#(/showSnippet)#
+#(viewMode)#
+:: <!-- 1 -->
+	<fieldset><legend>Original Content from Web</legend>
+	  <p class="tt">
+	    #[plainText]#
+	  </p>
+	</fieldset>
+:: <!-- 2 -->
+    <form action="">
+      <fieldset><legend>Parsed Content</legend>
+      <dl>
+	  <dt>dc:title</dt><dd>#[title]#</dd>
+	  <dt>dc:creator</dt><dd>#[creator]#</dd>
+	  <dt>dc:subject</dt><dd>#[subject]#</dd>
+	  <dt>dc:description</dt><dd>#[description]#</dd>
+	  <dt>dc:publisher</dt><dd>#[publisher]#</dd>
+	  <dt>dc:format</dt><dd>#[format]#</dd>
+	  <dt>dc:identifier</dt><dd>#[identifier]#</dd>
+	  <dt>dc:source</dt><dd>#[source]#</dd>
+	  <dt>geo:lat &amp; geo:long</dt><dd><a href="osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" onclick="return hs.expand(this)">lat=#[lat]#, lon=#[lon]#</a></dd>
+	  </dl>
+	  <p class="tt">#[parsedText]#</p>
+      </fieldset>
+    </form>
+:: <!-- 3 -->
+	<fieldset><legend>Parsed Sentences</legend>
+	  <ol>#{sentences}#
+		<li class="tt">#[text]#</li>#{/sentences}#
+	  </ol>
+	</fieldset>
+:: <!-- 4 -->
+	<fieldset><legend>Original from Web</legend>
+	  <iframe src="#[url]#" width="800" height="400" />
+	</fieldset>
+:: <!-- 5 -->
+	<fieldset><legend>Original from Cache</legend>
+	  #(html)#::<iframe src="CacheResource_p.html?url=#[url]#" width="800" height="400" />#(/html)#
+	  #(png)#::<iframe src="CacheResource_p.png?url=#[url]#" width="800" height="400" />#(/png)#
+	</fieldset>
+:: <!-- 6 -->
+	<fieldset><legend>Link List</legend>
+	<table border="0">
+		<tr class="head">
+			<td>nr</td>
+			<td class="tt"><span class="glyphicon glyphicon-list" title="action"></span></td>
+			<td class="tt">type</td>
+			<td class="tt">name</td>
+			<td class="tt">link</td>
+			<td class="tt">text</td>
+			<td class="tt">rel</td>
+		</tr>
+		#{links}#
+		<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+			<td>#[nr]#</td>
+			<td class="tt"><a href="ViewFile.html?viewMode=links#(agent)#::&agentName=#[name]##(/agent)#&url=#[encodedUrl]#" title="Show Metadata"><img src="env/grafics/doc.gif" alt=""></a></td>
+			<td class="tt"><tt>#[type]#</tt></td>
+			<td class="tt"><tt>#[name]#</tt></td>
+			<td class="tt"><tt><a href="#[url]#">#[link]#</a></tt></td>
+			<td class="tt"><tt>#[text]#</tt></td>
+			<td class="tt"><tt>#[rel]#</tt></td>
+		</tr>#{/links}#
+	</table>
+        </fieldset>
+:: <!-- 7 -->
+	<fieldset><legend>Parsed Tokens</legend>
+	  <ol>#{words}#
+		<li class="tt"><tt>#[word]#</tt></li>#{/words}#
+	  </ol>
+	</fieldset>
+:: <!-- 8 -->
+    <form action="">
+      <fieldset><legend>Schema Fields</legend>
+      <dl>#{fields}#
+        <dt>#[key]#</dt><dd>#[value]#</dd>#{/fields}#
+      </dl>
+      </fieldset>
+    </form>
+:: <!-- 9 -->
+	<fieldset><legend>CitationReport</legend>
+	  <iframe src="api/citation.html?url=#[url]#" width="800" height="400" />
+	</fieldset>
+#(/viewMode)#
+</td></tr></table>
+
+#%env/templates/footer.template%#
+</body>
+</html>

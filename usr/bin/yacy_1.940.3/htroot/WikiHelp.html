@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+ <head>
+  <title>YaCy '#[clientname]#': Wiki Help</title>
+#%env/templates/metas.template%#
+ </head>
+ <body>
+ <div style="padding: 5px">
+  <h2>Wiki-Code</h2>
+  <table width="100%" border="1" cellspacing="0" cellpadding="4">
+   <caption>
+     This table contains a short description of the tags that can be used in the Wiki and several other servlets
+     of YaCy. For a more detailed description visit the
+     <a href="https://wiki.yacy.net/index.php/Hauptseite" target="_blank">YaCy Wiki</a>.
+   </caption>
+   <tr valign="top">
+    <th>
+     Code
+    </th>
+    <th>
+     Description
+    </th>
+   </tr>
+   <tr valign="top">
+    <td class="tt">
+     =headline1=<br />
+     ==headline2==<br />
+     ===headline3===<br />
+     ====headline4====<br />
+     =====headline5=====<br />
+     ======headline6======<br />
+    </td>
+    <td>
+     These tags create headlines. If a page has three or more headlines, a table of content will be created automatically. Headlines of level 1 will be ignored in the table of content.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     ''text''<br />'''text'''<br />'''''text'''''
+    </td>
+    <td>
+     These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),
+     the second one emphazises it more strongly (i.e. bold) and the last tags create a combination of both.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+        &lt;s&gt;text&lt;/s&gt;
+    </td>
+    <td>
+     Text will be displayed <span class="strike">stricken through</span>.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+        &lt;u&gt;text&lt;/u&gt;
+    </td>
+    <td>
+     Text will be displayed <span class="underline">underlined</span>.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     :text<br />::text
+    </td>
+    <td>
+     Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     #point1<br />##point1.1<br />##point1.2<br />#point2
+    </td>
+    <td>
+     These tags create a numbered list.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     *something<br />**another thing<br />***and yet another<br />*something else
+    </td>
+    <td>
+     These tags create an unnumbered list.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     <span class="tt" style="white-space: nowrap;">;word 1:definition 1</span><br />
+     <span class="tt" style="white-space: nowrap;">;word 2:definition 2</span><br />
+     <span class="tt" style="white-space: nowrap;">;;word 3:definition 3</span><br />
+     <span class="tt" style="white-space: nowrap;">;word 4:definition 4</span>
+    </td>
+    <td>
+     These tags create a definition list.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     ----
+    </td>
+    <td>
+     This tag creates a horizontal line.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     <span class="tt" style="white-space: nowrap;">[[pagename]]</span><br />
+     <span class="tt" style="white-space: nowrap;">[[pagename|description]]</span>
+    </td>
+    <td>
+     This tag creates links to other pages of the wiki.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     [url]<br />
+	 [url description]
+    </td>
+    <td>
+     This tag creates links to external websites.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     <span class="tt" style="white-space: nowrap;">[[Image:url]]</span><br />
+     <span class="tt" style="white-space: nowrap;">[[Image:url|alt text]]</span><br />
+     <span class="tt" style="white-space: nowrap;">[[Image:url|align|alt text]]</span>
+    </td>
+    <td>
+     This tag displays an image, it can be aligned left, right or center.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     <span class="tt" style="white-space: nowrap;">[[Youtube:id]]</span><br />
+	 <span class="tt" style="white-space: nowrap;">[[Vimeo:id]]</span><br />
+    </td>
+    <td>
+     This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.<br />
+	 i.e. use [[Youtube:QZsWG4-7Qfk]] to embed this video: https://www.youtube.com/watch?v=QZsWG4-7Qfk<br />
+	 i.e. use [[Vimeo:32200946]] to embed this video: http://vimeo.com/32200946<br />
+    </td>
+   </tr>
+   
+   <tr valign="top">
+    <td class="tt">
+     {|<br />
+     |-<br />
+     <span class="tt" style="white-space: nowrap;">||row 1, col 1||row 1, col 2</span><br />
+     |-<br />
+     <span class="tt" style="white-space: nowrap;">||row 2, col 1||row 2, col 2</span><br />
+     |}
+    </td>
+    <td>
+     These tags create a table, whereas the first marks the beginning of the table, the second starts
+     a new line, the third and fourth each create a new cell in the line. The last displayed tag 
+     closes the table.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     &lt;pre&gt; text &lt;/pre&gt;
+    </td>
+    <td>
+     A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     text<br />&nbsp;text<br />text
+    </td>
+    <td>
+     If a line starts with a space, it will be displayed in a non-proportional font.
+    </td>
+   </tr>
+  </table>
+ </div>
+ </body>
+</html>

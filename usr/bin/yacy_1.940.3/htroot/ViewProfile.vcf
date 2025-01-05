@@ -1,0 +1,16 @@
+#(success)#::::::BEGIN:vcard
+VERSION:3.0
+CATEGORIES:YACY PEER
+UID:#[peerhash]#
+FN: #(name)#::#[value]##(/name)#
+NICKNAME: #(nickname)#::#[value]# #(/nickname)#
+URL: #(homepage)#::#[value]# #(/homepage)#
+EMAIL: #(email)#::#[value]# #(/email)#
+NOTE;CHARSET=UTF-8;ENCODING=BASE64: #(comment)#::#[b64value]# #(/comment)#
+X-ICQ: #(icq)#::#[value]# #(/icq)#
+X-JABBER: #(jabber)#::#[value]# #(/jabber)#
+X-YAHOO: #(yahoo)#::#[value]# #(/yahoo)#
+X-MSN: #(msn)#::#[value]# #(/msn)#
+X-SKYPE: #(skype)#::#[value]# #(/skype)#
+#{other}#X-#[key]#:#[value]##{/other}#
+END:vcard#(/success)#

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+	<title><![CDATA[YaCy '#[clientname]#': Messages]]></title>
+	<link>#[context]#/Messages_p.html</link>
+	<image>
+		<url>#[context]#/env/grafics/YaCyLogo_60ppi.png</url>
+		<title>YaCy</title>
+		<link>#[context]#/</link>
+	</image>
+#(mode)#
+#{messages}#
+	<item>
+		<author><![CDATA[#[from]#]]></author>
+		<title><![CDATA[#[subject]#]]></title>
+		<category>#[category]#</category>
+		<link>#[context]#/Messages_p.html?action=view&amp;object=#[key]#</link>
+		<pubDate>#[rfc822Date]#</pubDate>
+		<guid>#[key]#</guid>
+		<description><![CDATA[#[body]#]]></description>
+	</item>
+#{/messages}#
+::#(/mode)#
+</channel>
+</rss>

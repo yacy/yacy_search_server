@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': RWI Ranking Configuration</title>
+    #%env/templates/metas.template%#
+	
+   	<script>
+   	/**
+   	* Apply the new selected value to the bound slider.
+   	*/
+   	function handleSelectChange(event) {
+   		var selectElem = event.target || event.srcElement;
+   		if(selectElem != null && selectElem.id != null && selectElem.id.length > 7) {
+   			var rangeElem = document.getElementById("slider_" + selectElem.id.substring(7));
+   			if(rangeElem != null) {
+   				rangeElem.value = selectElem.value;
+   			}
+   		}
+   	}
+   	
+   	/**
+   	* Apply the new slider value to the bound select.
+   	*/
+   	function handleSliderChange(event) {
+   		var rangeElem = event.target || event.srcElement;
+   		if(rangeElem != null && rangeElem.id != null && rangeElem.id.length > 7) {
+   			var selectElem = document.getElementById("select_" + rangeElem.id.substring(7));
+   			if(selectElem != null) {
+   				selectElem.value = rangeElem.value;
+   			}
+   		}
+   	}
+   	
+	</script>
+  </head>
+  <body id="RankingRWI_p">
+    #%env/templates/header.template%#
+    #%env/templates/submenuRanking.template%#
+    <h2>RWI Ranking Configuration</h2>
+    <p>The document ranking influences the order of the search result entities.
+    A ranking is computed using a number of attributes from the documents that match with the search word.
+    The attributes are first normalized over all search results and then the normalized attribute is multiplied with the ranking coefficient computed from this list.
+    The ranking coefficient grows exponentially with the ranking levels given in the following table. If you increase a single value by one, then the strength of the parameter doubles.
+    </p>
+    <form class="dsearch" action="RankingRWI_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Pre-Ranking</legend>
+        <dl>#{attrPre}# 
+          <dt style="width:260px"><label id="label_#[nameorg]#" for="select_#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span id="info_#[nameorg]#">#[info]#</span></span></dt>
+          <dd style="width:360px; float:left; display:inline;" id="#[nameorg]#">
+            <select id="select_#[nameorg]#" aria-describedby="info_#[nameorg]#" style="float:left; display:inline;" name="#[nameorg]#" onchange="handleSelectChange(event)">#{select}# 
+				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
+			</select>
+			<div style="width:280px; margin-left: 10px; float:left; display: inline;">
+				<input id="slider_#[nameorg]#" aria-labelledby="label_#[nameorg]#" aria-describedby="info_#[nameorg]#" type="range" min="0" max="15" value="#[value]#" onchange="handleSliderChange(event)"/>
+			</div>
+          </dd>#{/attrPre}# 
+        </dl>
+      </fieldset>
+      <p>There are two ranking stages: first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.
+      The two stages are separated because they need statistical information from the result of the pre-ranking.
+      </p>
+      <fieldset>
+        <legend>Post-Ranking</legend>
+        <dl>#{attrPost}# 
+          <dt style="width:260px"><label id="label_#[nameorg]#" for="select_#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span id="info_#[nameorg]#">#[info]#</span></span></dt>
+          <dd style="width:360px" id="#[nameorg]#">            
+          	<select id="select_#[nameorg]#" aria-describedby="info_#[nameorg]#" style="float:left; display:inline;" name="#[nameorg]#" onchange="handleSelectChange(event)">#{select}# 
+				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
+			</select>
+			<div style="width:280px; margin-left: 10px; float:left; display: inline;">
+				<input id="slider_#[nameorg]#" aria-labelledby="label_#[nameorg]#" aria-describedby="info_#[nameorg]#" type="range" min="0" max="15" value="#[value]#" onchange="handleSliderChange(event)"/>
+			</div>
+          </dd>#{/attrPost}# 
+        </dl>
+      </fieldset>
+      <fieldset>
+        <input type="submit" name="EnterRanking" class="btn btn-primary" value="Set as Default Ranking" />
+        <input type="submit" name="ResetRanking" class="btn btn-primary" value="Re-Set to Built-In Ranking" />
+      </fieldset>
+    </form>
+
+  #%env/templates/footer.template%#
+  </body>
+</html>

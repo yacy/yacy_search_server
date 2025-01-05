@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>YaCy '#[clientname]#': Crawler</title>
+#%env/templates/metas.template%# 
+<script type="text/javascript" src="js/ajax.js"></script>
+<script type="text/javascript" src="js/xml.js"></script>
+<script type="text/javascript" src="js/html.js"></script>
+<script type="text/javascript" src="js/rss2.js"></script>
+<script type="text/javascript" src="js/query.js"></script>
+<script type="text/javascript" src="js/Crawler.js"></script>
+
+<!-- style for hypertree -->
+<link href="env/hypertree.css" rel="stylesheet">
+</head>
+<body id="Crawler" onload="initCrawler();">
+
+#%env/templates/header.template%#
+#%env/templates/submenuCrawlMonitor.template%#
+
+<div id="api">
+<a href="api/status_p.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>Click on this API button to see an XML with information about the crawler status</span>
+</div>
+
+<h2>Crawler</h2>
+<noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
+<fieldset id="queues" style="width:210px;float:left;">
+<legend>Queues</legend>
+      <table border="0" class="watchCrawler">
+          <thead>
+          <tr class="TableHeader"> 
+            <th width="120">Queue<br/>&nbsp;</th>
+            <th width="60">Size<br/>&nbsp;</th>
+            <th width="30"><span class="glyphicon glyphicon-wrench"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="TableCellLight"> 
+            <td align="left"><a href="IndexCreateQueues_p.html?stack=LOCAL">Local Crawler</a></td>
+            <td align="right"><span id="localcrawlerqueuesize">#[localCrawlSize]#</span></td>
+            <td>
+              <a href="" id="localcrawlerstateA">
+                <img src="" alt="" style="width:12px; height:12px;" id="localcrawlerstateIMG" />
+              </a>
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">Limit Crawler</td>
+            <td align="right"><span id="limitcrawlerqueuesize">#[limitCrawlSize]#</span></td>
+            <td>
+              <a href="" title="" id="limitcrawlerstateA">
+                <img src="" alt="" style="width:12px; height:12px;" id="limitcrawlerstateIMG" />
+              </a>
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left"><a href="IndexCreateQueues_p.html?stack=REMOTE">Remote Crawler</a></td>
+            <td align="right"><span id="remotecrawlerqueuesize">#[remoteCrawlSize]#</span></td>
+            <td>
+              <a href="" title="" id="remotecrawlerstateA">
+                <img src="" alt="" style="width:12px; height:12px;" id="remotecrawlerstateIMG" />
+              </a>
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left"><a href="IndexCreateQueues_p.html?stack=NOLOAD">No-Load Crawler</a></td>
+            <td align="right"><span id="noloadcrawlerqueuesize">#[noloadCrawlSize]#</span></td>
+            <td>
+              <a href="" title="" id="noloadcrawlerstateA">
+                <img src="" alt="" style="width:12px; height:12px;" id="noloadcrawlerstateIMG" />
+              </a>
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left"><a href="IndexCreateLoaderQueue_p.html">Loader</a> (<a href="PerformanceQueues_p.html#ThreadPoolSettings"><span id="loaderqueuemax">#[loaderMax]#</span></a>)</td>
+            <td align="right"><span id="loaderqueuesize">#[loaderSize]#</span></td>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+      #(terminate-button)#::
+      <form action="Crawler_p.html" method="get">
+            <input type="hidden" name="queues_terminate_all" value="" />
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Confirm Termination of All Crawls')"><span class="glyphicon glyphicon-remove-circle"></span> Terminate All</button>
+      </form>
+      #(/terminate-button)#
+</fieldset>
+<fieldset id="indexsize" style="width:240px;float:left;">
+<legend>Index Size</legend>
+      <table border="0" class="watchCrawler">
+          <thead>
+          <tr class="TableHeader"> 
+            <th width="130">Database<br/>&nbsp;</th>
+            <th width="50">Entries<br/>&nbsp;</th>
+            <th width="40">Seg-<br/>ments</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="TableCellLight"> 
+            <td align="left">Documents<br/><a href="#[urlpublictextSolrURL]#">solr search api</a></td>
+            <td align="right"><span id="urlpublictextSize">#[urlpublictextSize]#</span></td>
+            <td align="right"><span id="urlpublictextSegmentCount">#[urlpublictextSegmentCount]#</span></td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">Webgraph Edges<br/><a href="#[webgraphSolrURL]#">solr search api</a></td>
+            <td align="right"><span id="webgraphSize">#[webgraphSize]#</span></td>
+            <td align="right"><span id="webgraphSegmentCount">#[webgraphSegmentCount]#</span></td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">Citations<br/>(reverse link index)</td>
+            <td align="right"><span id="citationSize">#[citationSize]#</span></td>
+            <td align="right"><span id="citationSegmentCount">#[citationSegmentCount]#</span></td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">RWIs<br/>(P2P Chunks)</td>
+            <td align="right"><span id="rwipublictextSize">#[rwipublictextSize]#</span></td>
+            <td align="right"><span id="rwipublictextSegmentCount">#[rwipublictextSegmentCount]#</span></td>
+          </tr>
+        </tbody>
+      </table>
+</fieldset>
+<fieldset id="progress" style="width:530px;float:left;">
+<legend>Progress</legend>
+      <form action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+      <table border="0" class="watchCrawler">
+          <thead>
+          <tr class="TableHeader"> 
+            <th width="160">Indicator<br/>&nbsp;</th>
+            <th width="300" colspan="4">Level<br/>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="TableCellLight"> 
+            <td align="left">Speed / PPM<br/>(Pages Per Minute)</td>
+            <td align="left" colspan="4">
+            <input id="customPPM" name="customPPM" type="number" min="10" max="60000" style="width:5em" value="#[customPPMdefault]#" /><label for="customPPM"><abbr title="Pages Per Minute">PPM</abbr></label>
+            <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:3.5em" value="#[latencyFactorDefault]#" />
+            <label for="latencyFactor"><abbr title="Latency Factor">LF</abbr></label>
+            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:3em" value="#[MaxSameHostInQueueDefault]#" />
+            <label for="MaxSameHostInQueue"><abbr title="Max same Host in queue">MH</abbr></label>
+            <input type="submit" name="crawlingPerformance" value="set" />
+            (<a href="Crawler_p.html?crawlingPerformance=minimum" title="Set PPM to the default minimum value">min</a>/<a href="Crawler_p.html?crawlingPerformance=maximum" title="Set PPM to the default maximum value">max</a>)
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">Crawler PPM</td>
+            <td align="left" width="60"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="260px" colspan="3">
+                <progress id="ppmbar" max="60000" value="0" style="width:94%;"/>
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left" valign="top" rowspan="2">Postprocessing Progress <span id="postprocessing_speed">&nbsp;</span><br/><span id="postprocessing_status">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="40"><span id="postprocessing_remainingTimeMinutes">0</span>:<span id="postprocessing_remainingTimeSeconds">0</span></td>
+            <td align="left" width="260px" colspan="3">
+                <span id="postprocessing_bar"><progress id="postprocessingBar" max="100" value="0" style="width:94%;"/></span>
+            </td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left">pending:</td>
+            <td align="left">collection=<span id="postprocessing_collection">&nbsp;</span></td>
+            <td align="left">webgraph=<span id="postprocessing_webgraph">&nbsp;</span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left">Traffic (Crawler)</td>
+            <td align="left" colspan="2"><span id="trafficCrawler">&nbsp;&nbsp;&nbsp;</span> MB</td>
+            <td colspan="2">&nbsp;</td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left">Load</td>
+            <td align="left" colspan="2"><span id="load">&nbsp;&nbsp;&nbsp;</span></td>
+            <td colspan="2">&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+      </form>
+</fieldset>
+
+<script>
+function setTableSize() {
+    var maxh = Math.max(document.getElementById("progress").children[1].clientHeight, document.getElementById("indexsize").children[1].clientHeight, document.getElementById("queues").children[1].clientHeight) + 42;
+    if(lastMaxh !== maxh) {
+        var lastMaxh = maxh;
+        document.getElementById("indexsize").style.height = maxh + "px";
+        document.getElementById("progress").style.height = maxh + "px";
+        document.getElementById("queues").style.height = maxh + "px";
+    }
+}
+window.setInterval("setTableSize()", 1000);
+</script>
+<p class="watchCrawler" style="clear:both;">
+#(info)#
+        <!-- 0 -->
+        ::
+        <!-- 1 -->
+        Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db 
+        and restart. ::
+        <!-- 2 -->
+        Error: #[errmsg]# ::
+        <!-- 3 -->
+        Application not yet initialized. Sorry. Please wait some seconds and repeat 
+        the request. ::
+        <!-- 4 -->
+        <strong>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with 
+        crawl root "#[crawlingStart]#".</strong> Please try again with different 
+        filter. ::
+        <!-- 5 -->
+        Crawling of "#[crawlingURL]#" failed. Reason: #[reasonString]#<br>
+        ::
+        <!-- 6 -->
+        Error with URL input "#[crawlingStart]#": #[error]# ::
+        <!-- 7 -->
+        Error with file input "#[crawlingStart]#": #[error]# ::
+        <!-- 8 -->
+        Crawling of "#[crawlingURL]#" started. <strong>Please wait some seconds, 
+        it may take some seconds until the first result appears there.</strong> 
+        If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />::
+        <!-- 9 -->
+        No embedded local Solr index is connected. This is required to use a Solr query filter.
+        You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.::
+        <!-- 10 -->
+        The Solr filter query syntax is not valid : <code>#[solrQuery]#</code>::
+        <!-- 11 -->
+        Could not parse the Solr filter query : <code>#[solrQuery]#</code>
+#(/info)#
+</p>
+
+#(wontReceiptRemoteResults)#::
+<div class="alert alert-warning">
+     <p>You asked for remote indexing, but remote crawl results won't be added to the local index as the remote crawler is currently disabled on this peer.</p>
+    <p>You can activate it in the <a href="RemoteCrawl_p.html">Remote Crawl Configuration</a> page.</p>
+</div>
+#(/wontReceiptRemoteResults)#
+
+<!-- #(noEmbeddedSolr)#::<div class="alert alert-error">No embedded local Solr index is connected. This is required to use the Solr filter query. 
+    You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.</div>
+#(/noEmbeddedSolr)#
+
+#(solrQuerySyntaxtError)#::<div class="alert alert-error">The Solr filter query syntax is not valid : #[solrQuery]#</div>
+#(/solrQuerySyntaxtError)#-->
+<!-- crawl queues -->
+
+#(info-queue)#::<div class="alert alert-warning">#[message]#</div>#(/info-queue)#
+
+<!-- crawl profile list -->
+#(crawlProfilesShow)#::
+<fieldset>
+    <legend id="runningCrawlsLegend">Running Crawls (#[count]#)</legend> 
+<table width="96%">
+<tr><td>
+  <table border="0" summary="A list of crawl profiles and their current settings." id="crawlProfiles">
+    <colgroup>
+        <col width="16" />
+        <col width="140"/>
+    </colgroup>
+    <thead>
+        <tr class="TableHeader">
+              <th><strong>Name</strong></th>
+              #(debug)#::<th id="headerDebug"><strong>Count</strong></th>#(/debug)#
+              <th><strong>Status</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+    #{list}# 
+        <tr class="TableCell#(dark)#Light::Dark#(/dark)#" id="#[handle]#">
+              <td>#[name]#</td>
+              #(debug)#::<td>#[count]#</td>#(/debug)#
+              <td id="#[handle]#_status_cell">#(terminateButton)#::
+                <div id="#[handle]#_status" style="text-decoration:blink;float:left;">Running</div>
+                <form id="#[handle]#_terminate" style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+                    <div>
+                        <input type="hidden" name="handle" value="#[handle]#" />
+                        <input type="submit" name="terminate" value="Terminate" class="btn btn-danger btn-xs"/>
+                    </div>
+                </form>
+            #(/terminateButton)#
+              </td>
+        </tr>
+    #{/list}#
+    </tbody> 
+  </table>
+</td>
+#(linkstructure)#
+<td>
+  <form style="float:right;" action="Crawler_p.html"><input type="submit" name="showwebstructuregraph" class="btn btn-default btn-xs" value="show link structure"/><form>
+</td></tr></table>
+::
+<td>
+  <form style="float:right;" action="Crawler_p.html"><input type="submit" name="hidewebstructuregraph" class="btn btn-default btn-xs" value="hide graphic"/><form>
+</td></tr></table>
+<script src="js/d3.v5.min.js"></script>
+<script src="js/hypertree.js"></script>
+<div id="linkstructure"></div>
+<script>$(document).ready(linkstructure("#[hosts]#", "#linkstructure", 1600, 900, 3000, 700));</script>::
+<td>
+  <form style="float:right;" action="Crawler_p.html"><input type="submit" name="hidewebstructuregraph" class="btn btn-default btn-xs" value="hide graphic"/><form>
+</td></tr></table>
+<script type="text/javascript">
+    imagestub = "WebStructurePicture_p.png?host=#[hosts]#&depth=4&width=1024&height=512&nodes=600&time=1000&colortext=888888&colorback=FFFFFF&colordot0=1111BB&colordota=11BB11&colorline=222222&colorlineend=333333";
+    idx = 0;
+    setTimeout("doanimation(500)", 500);
+    function doanimation(nexttimeout) {
+      var accessPicture = document.getElementById("WebPicture");
+      if (accessPicture != null) {
+        idx++;
+        accessPicture.src = imagestub + "&idx=" + idx;
+        setTimeout("doanimation(" + (nexttimeout > 3000 ? 3000 : nexttimeout * 1.2) + ")", nexttimeout);
+      }
+    }
+  </script>
+  <div style="clear:both; text-align:left;">
+  <img id="WebPicture" src="env/grafics/invisible.png"/>
+  </div>
+#(/linkstructure)#
+<h3>Crawled Pages</h3>
+<p id="crawllist"></p>
+</fieldset>
+#(/crawlProfilesShow)#
+
+
+
+#%env/templates/footer.template%# 
+</body>
+</html>

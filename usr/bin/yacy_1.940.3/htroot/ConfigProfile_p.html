@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Your Personal Profile</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigProfile">
+    #%env/templates/header.template%#
+    #%env/templates/submenuPortalConfiguration.template%#
+    <h2>Your Personal Profile</h2>
+    <p>
+      You can create a personal profile here, which can be seen by other YaCy-members
+      or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.
+    </p>
+    <form action="ConfigProfile_p.html" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="name">Name</label></dt>
+          <dd>
+            <input type="text" name="name" id="name" size="40" maxlength="1000" value="#[name]#" />
+          </dd>
+          <dt><label for="nickname">Nick Name</label></dt>
+          <dd>
+            <input type="text" name="nickname" id="nickname" size="40" maxlength="1000" value="#[nickname]#" />
+          </dd>
+          <dt><label for="homepage">Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)</label></dt>
+          <dd>
+            <input type="text" name="homepage" id="homepage" size="40" maxlength="1000" value="#[homepage]#" />
+          </dd>
+          <dt><label for="email">eMail</label></dt>
+          <dd>
+            <input type="text" name="email" id="email" size="40" maxlength="1000" value="#[email]#" />
+          </dd>
+        </dl>
+        <dl>
+          <dt><label for="icq">ICQ</label></dt>
+          <dd>
+            <input type="text" name="icq" id="icq" size="20" maxlength="9" value="#[icq]#" />
+          </dd>
+          <dt><label for="jabber">Jabber</label></dt>
+          <dd>
+            <input type="text" name="jabber" id="jabber" size="40" maxlength="1000" value="#[jabber]#" />
+          </dd>
+          <dt><label for="yahoo">Yahoo!</label></dt>
+          <dd>
+            <input type="text" name="yahoo" id="yahoo" size="40" maxlength="1000" value="#[yahoo]#" />
+          </dd>
+          <dt><label for="msn">MSN</label></dt>
+          <dd>
+            <input type="text" name="msn" id="msn" size="40" maxlength="1000" value="#[msn]#" />
+          </dd>
+          <dt><label for="skype">Skype</label></dt>
+          <dd>
+            <input type="text" name="skype" id="skype" size="40" maxlength="1000" value="#[skype]#" />
+          </dd>
+        </dl>
+        <dl>
+          <dt><label for="comment">Comment</label></dt>
+          <dd>
+            <textarea name="comment" id="comment" cols="40" rows="10">#[comment]#</textarea>
+            <p class="help">You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.</p>
+          </dd>
+        </dl>
+        <dl>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="set" value="Save" class="btn btn-primary"/>
+          </dd>
+        </dl>
+        
+      </fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script type="text/javascript" src="js/ajax.js"></script>
+    <title>YaCy '#[clientname]#': Steering</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body style="margin:40px;text-align:center;">
+
+      <script type="text/javascript">
+        <!--
+        var ro;
+
+        function pingPeer() {
+            ro = createRequestObject();
+            var url = "yacy/hello.html" + '?' + Math.random();
+            ro.open("Get",url,true);
+            ro.onreadystatechange = callback;
+            ro.send(null);
+            document.getElementById("status").innerHTML = 'Checking peer status...';
+        }
+
+        function callback() {
+            if (ro.readyState == 4) {
+                if(ro.status == 200) {
+                    document.getElementById("status").innerHTML = 'Peer is online again, forwarding to status page...';
+                    window.location.replace('Status.html');
+                } else {
+                    isDown = true;
+                    document.getElementById("status").innerHTML = 'Peer is not online yet, will check again in a few seconds...';
+                }
+            }
+        }
+
+        function setPingInterval() {
+            window.setInterval('pingPeer()', 5000);
+            pingPeer();
+        }
+        
+        //-->
+      </script>
+
+      <p><img src="data:image/png;base64,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" width="128" height="64" alt="Kaskelix"/></p>
+      #(info)#
+      <p><b>No action submitted</b><br />
+      Go back to the <a href="Settings_p.html">Settings</a> page.</p>
+      <!-- Restart and Shutdown buttons available here as classical HTML submit buttons for those who eventually disabled JavaScript -->
+      <form action="Steering.html" method="post">
+		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+        <input type="hidden" name="restart" value="" />
+        <button type="submit" class="btn label-warning" onclick="return confirm('Confirm Re-Start')" title="Restart">
+        	<span class="glyphicon glyphicon-fire"/>
+            <span>Re-Start</span>
+        </button>
+      </form>
+      <form action="Steering.html" method="post">
+		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+        <input type="hidden" name="shutdown" value="" />
+        <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')" title="Shutdown">
+        	<span class="glyphicon glyphicon-off"/>
+            <span>Shutdown</span>
+        </button>
+      </form>
+::
+      <p><b>Your system is not protected by a password</b><br />
+      Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.</p>
+::
+      <p><b>You don't have the correct access right to perform this task.</b><br />
+      Please log in.<br />
+      You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.</p>
+::
+      <h2>See you soon!</h2>
+      <p>Application will terminate after working off all scheduled tasks.</p>
+      <h2>Please send us feed-back!</h2>
+      <p>We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.<br/>
+      Therefore we like to ask you: do you like YaCy? Will you use it again... if not, why? Is it possible that we change a bit to suit your needs?</p>
+      <p>Please send us feed-back about your experience with an<br/>
+      posting to our <a href="https://community.searchlab.eu" target="_blank">web forums</a><br/>
+      or a<br/>
+      <a href="https://github.com/yacy/yacy_search_server/issues" target="_blank">bug report</a>!</p>
+      <h2>Professional Support</h2>
+      <p>If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see <a href="http://pro.yacy.net" target="_blank">http://pro.yacy.net</a>.
+::
+      <h2>Just a moment, please!</h2>
+      <p>Application will terminate after working off all scheduled tasks.<br />
+      Then YaCy will restart.<br />
+      If you can't reach YaCy's interface after 5 minutes restart failed.</p>
+      <script type="text/javascript">window.setTimeout('setPingInterval()', 10000);</script>
+      <div id="status"></div>
+::
+      <h2>Just a moment, please!</h2>
+      <p><b>Installing release #[release]#</b><br />
+      YaCy will be restarted after installation.</p>
+      <script type="text/javascript">window.setTimeout('setPingInterval()', 10000);</script>
+      <div id="status"></div>
+::
+      <p><b>The file you are trying to install is not located in the release directory.<br />
+      Go back to the <a href="ConfigUpdate_p.html">System Update</a> page.</p>
+::
+      <p><b>An error occurred when trying to install release #[release]#</b><br/>
+      Please check your <a href="ViewLog_p.html">log</a> or go back to the <a href="ConfigUpdate_p.html">System Update</a> page.</p>
+::
+      <p><b>You are in a development environment or the file you are trying to install is empty.</b><br/>
+      Go back to the <a href="ConfigUpdate_p.html">System Update</a> page.</p>
+#(/info)#
+  </body>
+</html>

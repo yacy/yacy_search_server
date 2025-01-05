@@ -1,0 +1,7 @@
+{
+"edges" : "#[edges]#",
+"maxdepth" : "#[maxdepth]#",
+"graph" : [#{edges|,}#
+{"source":"#[source]#", "target":"#[target]#", "type":"#[type]#", "depthSource":"#[depthSource]#", "depthTarget":"#[depthTarget]#"}
+#{/edges}#]
+}

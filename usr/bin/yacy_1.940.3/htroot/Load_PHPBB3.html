@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Configuration of a phpBB3 Search</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Integration in phpBB3</h2>
+    <p>
+      It is possible to insert forum pages into the YaCy index using a database import of forum postings.
+      This guide helps you to insert a search window in your phpBB3 pages.
+    </p>
+    
+    <h3>Retrieval of phpBB3 Forum Pages using a database export</h3>
+    <p>
+      Forum posting contain rich information about the topic, the time, the subject and the author.
+      This information is in an bad annotated form in web pages delivered by the forum software.
+      It is much better to retrieve the forum postings directly from the database. This will cause that YaCy is able to offer nice navigation features after searches.
+      YaCy has a phpBB3 extraction feature, please go to the <a href="ContentIntegrationPHPBB3_p.html">phpBB3 content integration</a> servlet for direct database imports.
+    </p>
+
+    <h3>Retrieval of phpBB3 Forum Pages using a web crawl</h3>
+    <p>
+      The following form is a simplified crawl start that uses the proper values for a phpbb3 forum crawl.
+      Just insert the front page URL of your forum. After you started the crawl you may want to get back
+      to this page to read the integration hints below.
+    </p>
+    
+   <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
+       <fieldset>
+        <dl>
+          <dt><b>URL of the phpBB3 forum main page</b><br />This is a crawl start point</dt>
+          <dd><input type="text" name="crawlingURL" value="#[starturl]#" size="60" maxlength="256" onkeypress="changed()" onfocus="check('url')" /></dd>
+
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="crawlingstart" class="btn btn-primary" value="Get content of phpBB3: crawl forum pages" /></dd>
+          
+        </dl>
+           
+        <input type="hidden" name="crawlingMode" id="url" value="url" checked="checked" />
+        <input type="hidden" name="createBookmark" value="off" />
+        <input type="hidden" name="crawlingDepth" value="8" />
+        <input type="hidden" name="mustmatch" value=".*" />
+        <input type="hidden" name="mustnotmatch" value=".*memberlist.*|.*previous.*|.*next.*|.*start=.*|.*p=.*" />
+        <input type="hidden" name="range" value="subpath" />
+        <input type="hidden" name="cleanSearchCache" id="cleanSearchCache" value=#(cleanSearchCacheChecked)#"off"::"on"#(/cleanSearchCacheChecked)# />
+        <input type="hidden" name="crawlingIfOlderCheck" value="on"/>
+        <input type="hidden" name="crawlingIfOlderNumber" value="1" />
+        <input type="hidden" name="crawlingIfOlderUnit" value="day" />
+        <input type="hidden" name="crawlingDomFilterCheck" value="off" />
+        <input type="hidden" name="crawlingDomFilterDepth" value="0" />
+        <input type="hidden" name="crawlingDomMaxCheck" value="off" />
+        <input type="hidden" name="crawlingDomMaxPages" value="" />
+        <input type="hidden" name="crawlingQ" value="on" />
+        <input type="hidden" name="storeHTCache" value="off" />
+        <input type="hidden" name="indexText" value="on" />
+        <input type="hidden" name="indexMedia" value="on" />
+        <input type="hidden" name="crawlOrder" value="off" />
+        <input type="hidden" name="intention" value="" />
+        <input type="hidden" name="xsstopw" value="off" />
+        <input type="hidden" name="xdstopw" value="off" />
+        <input type="hidden" name="xpstopw" value="off" />
+        
+      </fieldset>
+    </form>
+    
+    <h3>Inserting a Search Window to phpBB3</h3>
+    <p>
+      To integrate a search window into phpBB3, you must insert some code into a forum template.
+      There are several templates that can be used for phpBB3, but in this guide we consider that
+      you are using the default template, 'prosilver':
+    </p>
+    <ul>
+      <li>open styles/prosilver/template/overall_header.html</li>
+      <li>find the line where the default search window is displayed, thats right behind the <pre>&lt;div id="search-box"&gt;</pre> statement</li>
+      <li>Insert the following code right behind the div tag:
+        <pre>
+&lt;script src="#[address]#/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script&gt;
+   $(document).ready(function() {
+      yconf = {
+         url : '#[address]#/',
+         title : 'YaCy Forum Search',
+         width : 500,
+         height : 600,
+         position : ['top',30]
+      };
+      $.getScript(yconf.url+'/js/yacyui-portalsearch.js', function(){return false;});
+   });
+&lt;/script&gt;
+&lt;div id="yacylivesearch"&gt;
+   &lt;form id="ysearch" method="get" accept-charset="UTF-8" action="#[address]#/yacysearch.html"&gt;
+      &lt;input name="search" id="yquery" type="text" size="16" maxlength="128" title="{L_SEARCH_KEYWORDS}" class="inputbox search" value=""/&gt;
+      &lt;input type="hidden" name="verify" value="cacheonly" /&gt;
+      &lt;input type="hidden" name="maximumRecords" value="10" /&gt;
+      &lt;input type="hidden" name="resource" value="local" /&gt;
+      &lt;input type="hidden" name="urlmaskfilter" value=".*" /&gt;
+      &lt;input type="hidden" name="prefermaskfilter" value="" /&gt;
+      &lt;input type="hidden" name="display" value="2" /&gt;
+      &lt;input type="hidden" name="nav" value="all" /&gt;
+      &lt;input type="submit" name="Enter" value="Search" /&gt;
+  &lt;/form&gt;YaCy Search
+&lt;/div&gt;
+        </pre>
+      </li>
+      <li>Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name</li>
+      <li>You may want to change the default text elements in the code snippet</li>
+      <li>To see all options for the search widget, look at the more generic description of search widgets at
+          the <a href="ConfigLiveSearch.html">configuration for live search</a>.</li>
+   </ul>
+       
+    #%env/templates/footer.template%#
+  </body>
+</html>

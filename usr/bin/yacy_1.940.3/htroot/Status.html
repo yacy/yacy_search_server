@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    #(forwardToConfigBasic)#::<meta http-equiv="REFRESH" content="0; url=ConfigBasic.html" />#(/forwardToConfigBasic)#
+    <title>YaCy '#[clientname]#': Console Status</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+      <!--
+      function loadBanner() {
+        for (var i = 0; i < document.images.length; i++) {
+          if (document.images[i].src.indexOf("Banner.png") > 0) {
+            document.images[i].src = "Banner.png?textcolor=000000&bgcolor=e7effc&bordercolor=5090d0&time=" + (new Date()).getTime();
+            break;
+          }
+        }
+      }
+      function reloadGraph() {
+	    document.images["graph"].src="PerformanceGraph.png?nomem=&time="+(new Date()).getTime();
+	    window.status="";
+	  }
+      function init() {
+        loaderBanner = window.setInterval("loadBanner()", 20000);
+        window.setInterval("reloadGraph()", 8000);
+      }
+      -->
+    </script>
+  </head>
+  <body onload="init();">
+	#%env/templates/header.template%#
+    #%env/templates/submenuComputation.template%#
+    <a class="forceNoExternalIcon" href="https://github.com/yacy/yacy_search_server.git"><img style="position:absolute; top:20; right:0; border:0;" src="env/grafics/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+    
+    #(showPrivateTable)#
+    <div class="SubMenu">
+      <ul class="SubMenu">
+      <li><a href="Status.html?login=" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Log-in as administrator to see full status</a></li>
+      </ul>
+    </div>
+    ::
+    #(/showPrivateTable)#
+    
+    <!--[if IE]>
+    <div style="clear:left;" class="gainlayout">
+    <![endif]-->
+    
+    <div class="welcome">
+    <div style="margin:auto;text-align:center;">
+     <div class="media">
+       <div class="pull-left"><img class="media-object" src="env/grafics/kaskelix.png" width="128" height="64" alt="YaCy Websearch"></div>
+       <div class="media-body" style="text-align:left;padding-left:100px;"><h1>Welcome to YaCy!</h1></div>
+     </div>
+     <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,DHTRECEIVE,DHTSEND,PROXY&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120"
+              style="width:600px;height:180px;margin:0px;border:1px solid black;" scrolling="no" name="newsframe"></iframe><br />
+      <img src="PerformanceGraph.png?nomem=" id="graph" alt="PerformanceGraph" width="660" height="240"/><br />
+      <img src="NetworkHistory.png?columns=cI&scale=1&maxtime=24&width=660" width="660" height="240"/><br />
+      <img src="Banner.png?textcolor=000000&amp;bgcolor=e7effc&amp;bordercolor=5090d0" alt="banner" width="468" height="60"/>
+    </div>
+
+    <dl>
+    
+    <!-- urgent -->
+
+    #(urgentSetPassword)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad" /></dt>
+    <dd class="hint"><strong>Your settings are _not_ protected!</strong>
+    Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>
+    and set an administration password.
+    </dd>
+    #(/urgentSetPassword)#
+
+    #(urgentStatusVirgin)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">You have not published your peer seed yet. This happens automatically, just wait.
+    </dd>
+    #(/urgentStatusVirgin)#
+    
+    #(hintStatusPrivate)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="idea"/></dt>
+    <dd class="hint">Your network configuration is in private mode. Your peer seed will not be published.
+    </dd>
+    #(/hintStatusPrivate)#
+   
+    <!-- warnings -->
+    
+    #(warningUnrestrictedLocalAccess)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">Access is unrestricted from localhost (this includes administration features). 
+    	Please check the <a href="ConfigAccounts_p.html">accounts configuration</a> page to ensure that the settings match the security level you need.</dd>
+    #(/warningUnrestrictedLocalAccess)#
+    
+    #(warningGoOnline)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">The peer must go online to get a peer address.
+    </dd>
+    #(/warningGoOnline)#
+    
+    #(warningStatusJunior)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">You cannot be reached from outside.
+    A possible reason is that you are behind a firewall, NAT or Router.
+    But you can <a href="index.html">search the internet</a> using the other peers'
+    global index on your own search page.
+    We encourage you to open your firewall for the port you configured (usually: 8090),
+    or to set up a 'virtual server' in your router settings (often called DMZ).
+    Please be fair, contribute your own index to the global index.
+    </dd>
+    #(/warningStatusJunior)#
+    
+    #(warningDiskSpaceLow)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix
+    it as soon as possible and restart YaCy.
+    </dd>
+    #(/warningDiskSpaceLow)#
+    
+    #(warningMemoryLow)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix
+    it as soon as possible and restart YaCy.
+    </dd>
+    #(/warningMemoryLow)#
+    
+    #(warningCrawlPaused)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">Crawling is paused! If the crawling was paused automatically, please check your disk space.
+    </dd>
+    #(/warningCrawlPaused)#
+    
+     <!-- hints -->
+    
+    #(hintVersionAvailable)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+    <dd class="hint">Latest public version is v#[latestVersion]#.
+      You can download a more recent version of YaCy. Click here to install this update and restart YaCy: 
+      <form action="Status.html" method="get" class="PeerControl" accept-charset="UTF-8">
+        <button type="submit" name="aquirerelease" class="btn btn-primary" value="Update YaCy">
+          <img src="env/grafics/lockclose.png" alt="lock icon"/>
+          Install YaCy v#[latestVersion]#
+        </button>
+      </form>
+    </dd>
+    #(/hintVersionAvailable)#
+    
+    <!--
+    #(hintVersionDownload)#::
+    <dt class="hintIcon"><img src="env/grafics/start.gif" alt="Start"/></dt>
+    <dd class="hint">You can download the latest releases here:
+      #[versionResMain]# or #[versionResDev]#
+    </dd>
+    #(/hintVersionDownload)#
+    -->
+    
+    #(hintStatusSenior)#::
+    <dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32" alt="good"/></dt>
+    <dd class="hint">You are running a server in senior mode and you support the global internet index,
+    which you can also <a href="index.html">search yourself</a>.
+    </dd>
+    #(/hintStatusSenior)#
+    
+    #(hintStatusPrincipal)#::
+    <dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32" alt="good"/></dt>
+    <dd class="hint">You have a principal peer because you publish your seed-list to a public accessible server
+    where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.
+    </dd>
+    #(/hintStatusPrincipal)#
+    
+    #(hintCrawlStart)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+    <dd class="hint">Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>.
+    </dd>
+    #(/hintCrawlStart)#
+    
+    #(hintCrawlMonitor)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+	<dd class="hint">Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.
+    </dd>
+    #(/hintCrawlMonitor)#
+    
+    #(hintSupport)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+	<dd class="hint">If you need professional support, please write to <tt>support@yacy.net</tt><br>For community support, please visit our <a href="https://community.searchlab.eu" target="_blank">forum</a>.
+    </dd>
+    #(/hintSupport)#
+    
+    <!-- Social Networking -->
+    <!--
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+    <dd class="hint"><a href="http://twitter.com/yacy_search"><img src="env/grafics/twitter_followme.png" alt="Follow YaCy on Twitter"/></a>
+    </dd>
+    -->
+    
+    <!-- templates
+    #(hint)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+    <dd class="hint">
+    </dd>
+    #(/hint)#
+    
+    
+    #(hint)#::
+    <dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32" alt="good"/></dt>
+    <dd class="hint">
+    </dd>
+    #(/hint)#
+    
+    #(hint)#::
+    <dt class="hintIcon"><img src="env/grafics/start.png" width="32" height="32" alt="start" /></dt>
+    <dd class="hint">
+    </dd>
+    #(/hint)#
+    
+    #(hint)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad" /></dt>
+    <dd class="hint">
+    </dd>
+    #(/hint)#
+       -->
+    </dl>
+    
+    </div>
+    
+    #%[privateStatusTable]%#
+    
+    <!--[if IE]> 
+    </div>
+    <![endif]-->
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

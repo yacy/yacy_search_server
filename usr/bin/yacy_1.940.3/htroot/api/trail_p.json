@@ -1,0 +1,8 @@
+{
+    "trails": [
+#{trails}#
+#[trail]#,
+#{/trails}#
+{}
+    ]
+}

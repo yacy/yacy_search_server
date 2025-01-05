@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YaCy '#[clientname]#': Access Configuration</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+      <!--
+      function element_clicked(element){
+        document.getElementById("key").value=element.id;
+        document.getElementById("value").value=element.value;
+      }
+      -->
+    </script>
+    <!-- redirecting browser if port was changed -->
+    #(reconnect)#::<meta http-equiv="refresh" content="5; url=http://#[host]#:#[port]#/ConfigBasic.html" />#(/reconnect)#
+    <!-- redirecting browser if language was changed -->
+    #(changedLanguage)#::<meta http-equiv="refresh" content="0; url=ConfigBasic.html" />#(/changedLanguage)#
+  </head>
+  <body id="ConfigBasic">
+  #%env/templates/header.template%#
+    #%env/templates/submenuUseCaseAccount.template%#
+    <h2>Basic Configuration</h2>
+    #(reconnect)#::
+    <p><strong>Your port has changed. Please wait 10 seconds.</strong></p>
+    #(/reconnect)#
+    #(changedfltpw)#::
+    <div class="alert alert-danger" role="alert">
+        <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy". 
+        Open the <a href="ConfigAccounts_p.html" class="alert-link">User Administration</a> and change the password as soon as possible!
+    </div>
+    #(/changedfltpw)#
+    <p>
+      Your YaCy Peer needs some basic information to operate properly
+    </p>
+
+    <form action="ConfigBasic.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+      <ol>
+        <li>
+          <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
+          <fieldset>
+            <input type="radio" name="language" value="browser" id="lang_browser" onchange="this.form.submit()" #(lang_browser)#::checked="checked"#(/lang_browser)# /><label for="lang_browser" title="Use the browser preferred language if available">Browser</label>&nbsp;
+            <input type="radio" name="language" value="default" id="lang_en" onchange="this.form.submit()" #(lang_en)#::checked="checked"#(/lang_en)# /><label for="lang_en" #(active_en)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_en)#>English</label>&nbsp;    
+            <input type="radio" name="language" value="de" id="lang_de" onchange="this.form.submit()" #(lang_de)#::checked="checked"#(/lang_de)# /><label for="lang_de" #(active_de)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_de)#>Deutsch</label>&nbsp;
+            <input type="radio" name="language" value="fr" id="lang_fr" onchange="this.form.submit()" #(lang_fr)#::checked="checked"#(/lang_fr)# /><label for="lang_fr" #(active_fr)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_fr)#>Fran&ccedil;ais</label>&nbsp;
+            <input type="radio" name="language" value="zh" id="lang_zh" onchange="this.form.submit()" #(lang_zh)#::checked="checked"#(/lang_zh)# /><label for="lang_zh" #(active_zh)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_zh)#>&#20013;&#25991</label>
+            <input type="radio" name="language" value="ru" id="lang_ru" onchange="this.form.submit()" #(lang_ru)#::checked="checked"#(/lang_ru)# /><label for="lang_ru" #(active_ru)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_ru)#>&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</label>
+            <input type="radio" name="language" value="uk" id="lang_uk" onchange="this.form.submit()" #(lang_uk)#::checked="checked"#(/lang_uk)# /><label for="lang_uk" #(active_uk)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_uk)#>&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</label>
+            <input type="radio" name="language" value="hi" id="lang_hi" onchange="this.form.submit()" #(lang_hi)#::checked="checked"#(/lang_hi)# /><label for="lang_hi" #(active_hi)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_hi)#>&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</label>
+            <input type="radio" name="language" value="ja" id="lang_ja" onchange="this.form.submit()" #(lang_ja)#::checked="checked"#(/lang_ja)# /><label for="lang_ja" #(active_ja)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_ja)#>&#26085;&#26412;&#35486;</label>
+            <input type="radio" name="language" value="el" id="lang_el" onchange="this.form.submit()" #(lang_el)#::checked="checked"#(/lang_el)# /><label for="lang_el" #(active_el)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_el)#>Greek</label>
+            <input type="radio" name="language" value="it" id="lang_it" onchange="this.form.submit()" #(lang_it)#::checked="checked"#(/lang_it)# /><label for="lang_it" #(active_el)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_el)#>Italiano</label>            
+              <input type="radio" name="language" value="es" id="lang_es" onchange="this.form.submit()" #(lang_es)#::checked="checked"#(/lang_es)# /><label for="lang_es" #(active_es)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_es)#>Español</label>
+          </fieldset>
+        </li>
+        <!-- take care that no other items are changed, but also change the former if no js is enabled -->
+        <script type="text/javascript"> document.write('</form><form action="ConfigBasic.html" method="post" accept-charset="UTF-8"><input type="hidden" name="transactionToken" value="#[transactionToken]#"/>');</script>
+
+    #(setUseCase)#::
+
+    <li>
+          <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Use Case: what do you want to do with YaCy:<br />
+          <fieldset>
+          #(switchError)#::<div class="alert alert-danger" role="alert"><p>Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.</p> 
+          <p>Please first delete all index entries (see the <a href="IndexControlURLs_p.html">URL Database Administration</a> page) or disconnect the remote Solr instance(s) from YaCy (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          #(/switchError)#
+          #(switchWarning)#::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.</p> 
+          <p>You may want to delete all indexed documents (see the <a href="IndexControlURLs_p.html">URL Database Administration</a> page), disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          ::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached.</p> 
+          <p>Please be sure you want to expose the indexed documents in this new mode. You may want to disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          #(/switchWarning)#
+          <table border="0">
+          <tr>
+            <td style="width: 256px;"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
+              <td style="width: 256px;"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
+              <td><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
+          </tr>
+          <tr>
+            <td><label for="usecaseFreeworld"><img src="env/grafics/usecase_freeworld.png" alt="Usecase Freeworld" /></label></td>
+            <td><label for="usecasePortal"><img src="env/grafics/usecase_webportal.png" alt="Usecase Portal" /></label></td>
+            <td><label for="usecaseIntranet"><img src="env/grafics/usecase_intranet.png" alt="Usecase Intranet" /></label></td>
+          </tr>
+          <tr>
+            <td valign="top"><label for="usecaseFreeworld">Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
+            <td valign="top"><label for="usecasePortal">Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label></td>
+            <td valign="top"><label for="usecaseIntranet">Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;<br/>            
+            </td>
+          </tr>
+          </table>
+          </fieldset>
+        </li>
+        #(/setUseCase)#
+
+        <li>
+          #(statusName)#<img src="env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You may change your peer name#(/statusName)#<br />
+          <fieldset>
+            <dl>
+              <dt><label for="peername">Peer Name: </label></dt>
+              <dd>
+                <input type="text" name="peername" id="peername" value="#[defaultName]#" size="32" maxlength="32" />
+              </dd>
+            </dl>
+          </fieldset>
+        </li>
+
+        <li>
+          #(statusPort)#<img src="env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port. Opening a router port is <i>not</i> a YaCy-specific task; you can see instruction videos everywhere in the internet, just search for <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> and add your router type as search term. However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.::<img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
+          <fieldset>
+            <dl>
+              <dt><label for="port">Peer Port: </label></dt>
+              <dd>
+                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" /> &nbsp;&nbsp;&nbsp;
+                <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled#(withsslenabled)#:: on port <a href="Settings_p.html?page=ProxyAccess">#[sslport]#</a>#(/withsslenabled)#)
+              </dd>
+              #(upnp)#::<dt>
+                <label for="enableUpnp">Configure your router for YaCy using UPnP:&nbsp;</label>
+              </dt>
+              <dd>
+                <input type="checkbox" name="enableUpnp" id="enableUpnp" #(enabled)#::checked="checked"#(/enabled)# />
+                #(success)#::<img src="env/grafics/bad.png" height="16" width="16" alt="warning" /> Configuration was not successful. This may take a moment.::<img src="env/grafics/ok.png" height="16" width="16" alt="ok" />#(/success)#
+              </dd>#(/upnp)#
+             </dl>
+           </fieldset>
+         </li>
+    <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" class="btn btn-primary"/></fieldset>
+
+    #(reconnect)#::<div class="alert alert-danger" role="alert">Your Browser will reload the YaCy UI with the new port in 5 seconds...</div>#(/reconnect)#
+
+      </ol>
+    </form>
+    <p><strong>What you should do next:</strong></p>
+    #(nextStep)#<!-- [0] -->
+    <p>Your basic configuration is complete! You can now (for example):</p>
+    <ul>
+      <li><a href="index.html">start an uncensored search</a>;</li>
+      <li><a href="CrawlStartSite.html">start your own crawl</a> and contribute to the global index, or create your own private web index;</li>
+      <li><a href="ConfigProfile_p.html">set a personal peer profile</a> (optional settings);</li>
+      <li>just <a href="Network.html">monitor at the network page</a> what the other peers are doing</li>
+    </ul>::
+    <!-- [1]: password not proper -->
+    <p>You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::
+    <!-- [2]: peername not proper -->
+    <p>Your Peer name is a default name; please set an individual peer name.</p>::
+    <!-- [3]: port not proper -->
+    <p>You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.</p>::
+    <!-- [4]: reconnect to different port -->
+    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.</p>
+    #(/nextStep)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

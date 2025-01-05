@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': User Page</title>
+    #%env/templates/metas.template%#
+  </head>
+<body>
+    #%env/templates/header.template%#
+    <h2>User Page</h2>
+    #(logged-in)#
+    <p>
+      You are not logged in.<br />
+      <form action="User.html" method="post" accept-charset="UTF-8">
+        <input type="hidden" name="returnto" value="#[returnto]#" />
+        Username: <input type="text" name="username" value="#[username]#" /><br />
+        Password: <input type="password" name="password" /><br />
+        <input type="submit" class="btn btn-primary" value="login" />
+      </form>
+    </p>
+    ::
+    <p>
+      You are currently logged in as #[username]#.<br />
+      (Identified by #(identified-by)#IP::Username/Password::Cookie#(/identified-by)#)<br />
+      <form action="User.html" accept-charset="UTF-8">
+        <input type="submit" name="logout" class="btn btn-danger" value="logout">
+      </form>
+      #(limit)#::
+      #{percent}#<img src="env/grafics/red-block.png" alt="red bar" />#{/percent}##{percent2}#<img src="env/grafics/green-block.png" alt="green bar" />#{/percent2}#
+      <br />
+      You have used <strong>#[timeused]#</strong> minutes of your onlinetime limit of <strong>#[timelimit]#</strong> minutes per day.<br />
+      #(/limit)#
+    </p>
+    <form action="User.html" method="post" accept-charset="UTF-8">
+      <table border="1">
+        <tr>
+          <td><label for="oldpass">old Password</label></td>
+          <td><input type="password" name="oldpass" id="oldpass" /></td>
+        </tr>
+        <tr>
+          <td><label for="newpass">new Password</label></td>
+          <td><input type="password" name="newpass" id="newpass" /></td>
+        </tr>
+        <tr>
+          <td><label for="newpass2">new Password(repetition)</label></td>
+          <td><input type="password" name="newpass2" id="newpass2" /></td>
+        </tr>
+        <tr>
+          <td colspan="2"><input type="submit" name="changepass" class="btn btn-primary" value="Change" /></td>
+        </tr>
+      </table>
+    </form>
+    ::
+    You are currently logged in as admin.<br />
+    <form action="User.html" accept-charset="UTF-8">
+      <input type="submit" name="logout" class="btn btn-danger" value="logout">
+    </form>
+    <br />
+    <p>(after logout you will be prompted for your password again. simply click "cancel")</p>
+    #(/logged-in)#
+    <b>
+      #(status)#
+      ::
+      #(password)#
+      Password was changed.::
+      Old Password is wrong.::
+      New Password and its repetition do not match.::
+      New Password is empty.
+      #(/password)#
+      #(/status)#
+    </b>
+    #%env/templates/footer.template%#
+  </body>
+</html>

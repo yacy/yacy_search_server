@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Index Browser</title>
+    #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.path.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\" OR url_paths_sxt:\"" + query + "\" OR url_file_name_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" style=\"border-width:0; width:99%; border-spacing:1px;\">";
+    html += "<thead><tr class=\"TableHeader\" style=\"vertical-align:bottom;\">";
+    html += "<th style=\"padding: 2px;\">URL from index (total results = " + totalResults + ")<\/th></tr></thead>";
+    html += "<tbody>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td style=\"padding: 2px;text-align:left;\"><a href=\"IndexBrowser_p.html?pathsearch=&amp;path=" + item.link + "\">" + item.link + "<\/a><\/td>";
+    }
+    html += "</tbody><\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
+<script type="text/javascript" src="js/sorttable.js"></script>
+<!-- style for hypertree -->
+<link href="env/hypertree.css" rel="stylesheet">
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuWebStructure.template%#
+    <h1>Index Browser</h1>
+    <p>Browse the index of #[ucount]# documents. Enter a host or an URL for a file list or view a list of <a href="IndexBrowser_p.html?hosts=">all hosts</a>#(authorized)#::, <a href="IndexBrowser_p.html?hosts=crawling">only hosts with urls pending in the crawler</a> or <a href="IndexBrowser_p.html?hosts=error">only with load errors</a>#(/authorized)#.</p>
+    <form action="IndexBrowser_p.html" id="searchform" method="get" role="search">
+    <fieldset class="yacys">
+      <div class="input-group" style="width:600px;float:left;">
+        <label for="search" class="input-group-addon">Host/URL</label>
+        <input id="search" type="search" name="path" value="#[path]#" maxlength="250" class="form-control" onkeyup="xmlhttpPost(); return false;"/>
+        <div class="input-group-btn">
+          <button id="list" name="list" class="btn btn-primary">Browse Host</button>
+        </div>
+      </div>
+      #(delete)#::
+      &nbsp;<input type="submit" name="delete" value="Delete Subpath" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>
+      <input type="submit" name="reload404" value="Re-load load-failure docs (404s etc)" class="btn btn-warning" />
+      #(/delete)#
+      <div id="searchresults" style="clear:both;"></div>
+    </fieldset>
+    </form>
+    #[result]#
+
+    #(hosts)#::
+     <fieldset><legend>Host List</legend>
+      <ol style="list-style-type : none; padding-left: 0px">
+       #{list}#
+       <li style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:180px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div><img src="env/grafics/#(type)#invisible.png::burn-e.gif::construction.gif#(/type)#" alt="#(type)#::Host has load error(s)::Pending in Crawler#(/type)#" title="#(type)#::Host has load error(s)::Pending in Crawler#(/type)#" style="float:left" width="12" height="8">&nbsp;<a href="IndexBrowser_p.html?path=#[host]#&facetcount=#[count]#">#[host]#</a></div></div>
+        <div style="width:120px; text-align:right; float: left; white-space:nowrap; overflow:hidden;"><span class="commit" aria-label="#[count]# valid">#[count]#</span>#(crawler)#::/<span class="pending" aria-label="#[pending]# pending">#[pending]#</span>#(/crawler)##(errors)#::/<span class="info" aria-label="#[exclcount]# excluded">#[exclcount]#</span>/<span class="error" aria-label="#[failcount]# failed">#[failcount]#</span>#(/errors)# URLs</div>
+       </li>
+       #{/list}#
+      </ol>
+      <div style="clear:both; float:left; padding:10px 5px 1px 5px;">
+        <span>Count Colors:</span>
+        <span class="commit">&nbsp;&nbsp;&nbsp;Documents without Errors</span>
+        #(authorized)#::
+        <span class="pending">&nbsp;&nbsp;&nbsp;Pending in Crawler</span>
+        <span class="info">&nbsp;&nbsp;&nbsp;Crawler Excludes</span>
+        <span class="error">&nbsp;&nbsp;&nbsp;Load Errors</span>
+        #(/authorized)#
+        </div>
+    </fieldset>
+
+<link rel="stylesheet" href="env/morris.css">
+<script src="js/raphael.min.js"></script>
+<script src="js/morris.js"></script>
+<script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
+<div id="graph" style="height:200px"></div>
+<script>
+var solr= $.getJSON("solr/collection1/select?q=*:*&start=0&rows=0&wt=json&facet=true&facet.sort=index&facet.range=dates_in_content_dts&f.dates_in_content_dts.facet.range.start=NOW/DAY-99DAYS&f.dates_in_content_dts.facet.range.end=NOW/DAY%2B1DAY&f.dates_in_content_dts.facet.range.gap=%2B1DAY", function(data) {
+    dates_in_content_dts = data.facet_counts.facet_ranges.dates_in_content_dts.counts;
+    var parsed = [];
+    for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
+        var date = dates_in_content_dts[i];
+        var count = dates_in_content_dts[i + 1];
+        if (date && count) {parsed[parsed.length] = {x: date,y: count};};
+    };
+    if (parsed.length > 0) {
+        var histogram = Morris.Bar({
+              element: 'graph',
+              data: parsed,
+              xkey: 'x',
+              ykeys: ['y'],
+              labels: ['number of documents about this date'],
+              yLabelFormat: function (y) { return y.toString() + ' docs'; },
+              barColors: function (row, series, type) {
+                  var d = new Date(row.label);
+                  if (d.getDay() === 6) return '#4aaf46'; //saturday
+                  if (d.getDay() === 0) return '#4aaf46'; //sunday
+                  return '#3574c0';
+              },
+              hideHover: 'false'
+        }).on('click', function(i, row) {
+            console.log(i, row);
+        });
+
+        /* Add keyboard navigation support and accessible attributes */
+        makeAccessibleMorrisBar(histogram, 
+                "Number of documents per date histogram", 
+                function(data) {return data.x + " : " + data.y + " docs"}); 
+    }
+
+});
+</script>
+    #(/hosts)#
+
+    #(hostanalysis)#::
+    <fieldset><legend>Host Analysis</legend>
+      #{facets}#
+      <table class="sortable" style="float:left; border-width: 0">
+      <tr class="TableCellDark">
+        <td style="text-align:left;white-space:nowrap" colspan="5" class="pending">#[facetname]#</td>
+         <td style="text-align:right;white-space:nowrap" colspan="5" class="listingok">#</td>
+      </tr>
+      #{facet}#
+      <tr class="TableCellLight">
+        <td style="text-align:left;white-space:nowrap" colspan="5" class="pending">#[key]#</td>
+         <td style="text-align:right;white-space:nowrap" colspan="5" class="listingok"><a href="#[a]#" target="_blank" class="forceNoExternalIcon">#[count]#</a></td>
+      </tr>
+      #{/facet}#
+      </table>&nbsp;&nbsp;
+      #{/facets}#
+    </fieldset>
+    #(/hostanalysis)#
+
+    #(files)#::
+    <fieldset>
+      <legend style="display: inline">Browser for <a href="#[path]#" target="_blank">#[path]#</a>
+        <span style="padding-left: 25px">
+          <form style="display: inline" action="IndexBrowser_p.html?path=#[path]#" id="searchform" method="get" role="search">     
+            <button type="submit" name="addtoblacklist" class="btn btn-xs btn-default">Add to blacklist #(blkadded)#::<span class="text-success glyphicon glyphicon-ok"></span>::<span class="text-danger glyphicon glyphicon-remove">#(/blkadded)#</button>
+            <input type="text" name="path" value="#[path]#" hidden="true"/>
+          </form>    
+        </span>
+      </legend>
+      <p>documents stored for host: #[hostsize]#; documents stored for subpath: #[subpathloadsize]#; unloaded documents detected in subpath: #[subpathdetectedsize]# <!-- #(complete)#;<a href="IndexBrowser_p.html?complete=true&path=#[path]#">get complete list</a>::<a href="IndexBrowser_p.html?path=#[path]#">directory view</a>#(/complete)#-->
+      </p>
+      <table class="sortable" style="float:left; border-width: 0">
+      <thead>
+          <tr>
+            <th style="text-align:center; width:32px"></th>
+            <th style="text-align:left; width: 600px" class="listing">Path</th>
+            <th style="text-align:right; padding:2px;" class="listingem">stored</th>
+            <th style="text-align:right; padding:2px;" class="listingem">linked</th>
+            <th style="text-align:right; padding:2px;" class="listingem">pending</th>
+            <th style="text-align:right; padding:2px;" class="listingem">excluded</th>
+            <th style="text-align:right; padding:2px;" class="listingem">failed</th>
+          </tr>
+      </thead>
+      <tbody>
+      #(root)#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td style="text-align:center"></td>
+        <td style="text-align:left;white-space:nowrap"><a href="IndexBrowser_p.html?path=#[path]#" class="listing">..</a></td>
+        <td style="text-align:right;white-space:nowrap" colspan="5"></td>
+      </tr>::
+      #(/root)#
+      #{list}#
+        #(type)#<!--file-->
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td style="text-align:center"><div><a href="ViewFile.html?url=#[url]#"><img src="env/grafics/doc.gif" alt=""/><span>Metadata</span></a></div></td>
+          <td style="text-align:left;white-space:nowrap" class=#(stored)#"listingem"::"listing"#(/stored)#><a href="#[url]#" target="_blank">#[url]#</a></td>
+          #(stored)#
+          #(load)#<td style="text-align:left;white-space:nowrap" colspan="5" class="listingem">link, detected from context</td>::<td style="text-align:left;white-space:nowrap" colspan="5" class="listingnok"><a href="IndexBrowser_p.html?load=#[url]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
+          <td style="text-align:left;white-space:nowrap" colspan="1" class="listingok">indexed</td><td style="text-align:left;white-space:nowrap" colspan="4" class="listingem">#[comment]#</td>::
+           <td style="text-align:left;white-space:nowrap" colspan="5" class="pending">loading</td>::
+           <td style="text-align:left;white-space:nowrap" colspan="5" class="listingnok">#[error]#</td>
+          #(/stored)#
+        </tr>::<!--folder-->
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td style="text-align:center"><img src="env/grafics/dir.gif" alt="Directory"/></td>
+          <td style="text-align:left;white-space:nowrap" class="listing"><a href="IndexBrowser_p.html?path=#[url]#" class="listing">#[url]#</a></td>
+          <td style="text-align:right" class="commit">#[stored]#</td>
+          <td style="text-align:right" class="listing">#[linked]#</td>
+          <td style="text-align:right" #(pendingVisible)#class="listingem"::class="pending"#(/pendingVisible)#>#[pending]#</td>
+          <td style="text-align:right" #(excludedVisible)#class="listingem"::class="error"#(/excludedVisible)#>#[excluded]#</td>
+          <td style="text-align:right" #(failedVisible)#class="listingem"::class="error"#(/failedVisible)#>#[failed]#</td>
+        </tr>
+        #(/type)#
+      #{/list}#
+      </tbody>
+      </table>
+    </fieldset>
+    
+    #(linkgraph)#<div style="text-align:center"><form><input name="showlinkstructure" onClick="location.href = location.toString() + '&showlinkstructure=';" class="btn btn-default btn-xs" value="show link graph"/></form></div>::
+    <script src="js/d3.v5.min.js"></script>
+    <script src="js/hypertree.js"></script>
+    <div id="linkstructure"></div>
+    <script>$(document).ready(linkstructure("#[host]#", "#linkstructure", 1280, 720, 3000, 700));</script>
+    #(/linkgraph)#
+    
+    #(/files)#
+    
+     
+    #(outbound)#::
+     <fieldset><legend>Outbound Links, outgoing from #[host]# - Host List</legend>
+      <ol style="list-style-type : none; padding-left: 0px">
+       #{list}#
+       <li style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div><a href="IndexBrowser_p.html?path=#[link]#">#[host]#</a></div></div>
+        <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
+       </li>
+       #{/list}#
+      </ol>
+      <p style="clear:both"><br/>
+      <img src="WebStructurePicture_p.png?host=#[host]#&depth=3&width=1024&height=576&nodes=200&time=1000&colortext=888888&colorback=FFFFFF&colordot0=1111BB&colordota=11BB11&colorline=222222&colorlineend=333333">
+      </p>
+    </fieldset>
+    #(/outbound)#
+
+    #(inbound)#::
+     <fieldset><legend>Inbound Links, incoming to #[host]# - Host List</legend>
+      <ol style="list-style-type : none; padding-left: 0px">
+          #{list}#
+          <li style="float:left; padding:1px 5px 1px 5px;">
+            <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div><a href="IndexBrowser_p.html?path=#[host]#">#[host]#</a></div></div>
+            <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
+          </li>
+      #{/list}#
+      </ol>
+    </fieldset>
+    #(/inbound)#
+
+    #(hosts)#::
+     <form action="IndexBrowser_p.html" method="get">  
+     <fieldset><legend>Administration Options</legend>
+         <div>Delete all <span class="error">Load Errors</span> from index <input style="width:240px " type="submit" name="deleteLoadErrors" value="Delete Load Errors" class="btn btn-primary"/></div>
+     </fieldset>
+     </form>  
+    #(/hosts)#
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

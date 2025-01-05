@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Hypertext Cache Configuration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigHTCache">
+    #%env/templates/header.template%#
+    #%env/templates/submenuMaintenance.template%#
+    <h2>Hypertext Cache Configuration</h2>
+    <p>
+      The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.
+      The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.
+    </p>
+    
+    <form action="ConfigHTCache_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>HTCache Configuration</legend>
+        <dl>
+          <dt title="A cache hit occurs when the requested data can be found in a cache.">Cache hits</dt>
+          <dd>#[hitRate]# ( #[hits]# hits for a total of #[requests]# requests )</dd>
+          <dt><label for="HTCachePath">The path where the cache is stored</label></dt>
+          <dd><input name="HTCachePath" id="HTCachePath" type="text" size="20" maxlength="300" value="#[HTCachePath]#" /></dd>
+          <dt><label>The current size of the cache</label></dt>
+          <dd><span id="actualCacheSize">#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average </span></dd>
+          <dt><label for="maxCacheSize">The maximum size of the cache</label></dt>
+          <dd><input name="maxCacheSize" id="maxCacheSize" type="text" size="8" maxlength="24" value="#[maxCacheSize]#" /> MB</dd>
+          <dt><label for="compressionLevel">Compression level</label></dt>
+          <dd><select id="compressionLevel" name="compressionLevel">
+            #{compressionLevels}#
+          	<option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          	#{/compressionLevels}#
+          </select></dd>
+          <dt><label for="lockTimeout" aria-describedby="timeoutInfo">Concurrent access timeout</label>
+          	<span class="info">
+        		<img src="env/grafics/i16.gif" width="16" height="16" alt="Concurrent access timeout info"/>
+        		<span class="infobox" id="timeoutInfo">The maximum time to wait for acquiring a synchronization lock on concurrent get/store cache operations. 
+        		Beyond this limit, the crawler or proxy falls back to regular remote resource loading.</span>
+        	</span>
+          </dt>
+          <dd><input name="lockTimeout" id="lockTimeout" type="number" min="10" max="600000" value="#[lockTimeout]#"/> milliseconds</dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="set" value="Set" class="btn btn-primary"/></dd>
+        </dl>
+      </fieldset>
+    </form>
+
+    <form action="ConfigHTCache_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Cleanup</legend>
+      <dl>
+        <dt class="TableCellDark">Cache Deletion</dt>
+        <dd><input type="checkbox" name="deleteCache" id="deleteCache"
+             onclick="x=document.getElementById('deleteCache').checked;document.getElementById('deleteRobots').checked=x;c='disabled';if(x){c='';}document.getElementById('deleteRobots').disabled=c;"
+            />Delete HTTP &amp; FTP Cache<br/>
+            <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" />Delete robots.txt Cache<br/>
+            <br/><br/>
+            <input type="submit" name="deletecomplete" value="Delete" class="btn btn-danger"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

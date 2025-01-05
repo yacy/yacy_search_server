@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Translation Editor</title>
+    #%env/templates/metas.template%#
+
+  </head>
+  <body id="Translator">
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Translation Editor</h2>
+
+    <p>Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.</p>
+    <form id="Translation" method="post" action="Translator_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+      <fieldset>
+        <legend>
+          <label>UI Translation</label>
+        </legend>
+        <p>Target Language: <b>#[targetlang]#</b></p> #(errmsg)#::<p class="error">activate a different language <a href='ConfigBasic.html'>here</a></p>#(/errmsg)#
+        <label for="sourcefile">Source File</label>
+        <select name="sourcefile" onchange="submit();">
+          #{filelist}#
+          <option value="#[filename]#" #(selected)#::selected="selected"#(/selected)#>#[filename]#</option>              
+          #{/filelist}#
+        </select> <a href="#[sourcefile]#" target="sourcefilewindow" >view it</a>
+        <label for="filteruntranslated">filter untranslated</label>
+        <input type="checkbox" name="filteruntranslated" id="filteruntranslated" value="true" onclick="submit();" #(filter.checked)#::checked="checked"#(/filter.checked)#  />
+          <table>
+            <tr><th style="border-bottom: solid gray;  border-bottom-width: 1px;">Source Text</th>
+              <th style="border-bottom: solid gray;  border-bottom-width: 1px;">Translated Text ( #[targetlang]# )</th></tr>
+            #{textlist}#
+            <tr>
+              <td style="border-bottom: solid gray;  border-bottom-width: 1px;" valign="top">
+                <!--<input type="text" name="sourcetxt" id="sourcetxt#[tokenid]#" size="80" disabled="true" value="#[sourcetxt]#"/>-->
+                <label for="targettxt#[tokenid]#"  >#[sourcetxt]#</label>
+              </td>
+              <td style="border-bottom: solid gray;  border-bottom-width: 1px;" valign="top" nowrap>
+                <input type="text" name="targettxt#[tokenid]#" id="targettxt#[tokenid]#" size="80" value="#[targettxt]#" title="#[targettxt]#" #(filteruntranslated)#disabled::#(/filteruntranslated)#/>#(filteruntranslated)#<button name="editapproved" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-pencil"/></button>::<button name="approve" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-ok-sign" style="color: green"/></button>#(/filteruntranslated)#
+              </td>
+            </tr>
+            #{/textlist}#
+          </table>
+        
+          <input type="submit" name="savetranslationlist" value="Save translation" class="btn btn-primary"/>
+     
+      </fieldset>
+    </form>
+    <p>Check for remote translation proposals and/or share your own added translations <a href="TransNews_p.html">Translation News</a></p>
+    #%env/templates/footer.template%#
+  </body>
+</html>

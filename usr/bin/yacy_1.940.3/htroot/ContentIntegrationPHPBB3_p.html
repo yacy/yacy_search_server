@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Content Integration: Retrieval from phpBB3 Databases</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ContentIntegrationPHPBB3">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+    <h2>Content Integration: Retrieval from phpBB3 Databases</h2>
+    <p>
+      It is possible to extract texts directly from mySQL and postgreSQL databases.
+      Each extraction is specific to the data that is hosted in the database.
+      This interface gives you access to the phpBB3 forums software content.
+    </p>
+    <p>
+      If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:
+	</p>
+    <ul>
+		<li>before importing large database dumps, set the following Line in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB):<br />
+		<pre>$cfg['UploadDir'] = '/tmp';</pre></li>
+		<li>deselect the partial import flag</li>
+    </ul>
+    <p>
+      When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.
+      All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.
+    </p>
+        
+    <form action="ContentIntegrationPHPBB3_p.html" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><b>The URL stub</b>,<br />like http://forum.yacy-websuche.de<br />this must be the path right in front of '/viewtopic.php?'</dt>
+          <dd><input type="text" name="content.phpbb3.urlstub" value="#[content.phpbb3.urlstub]#" size="60" /></dd>
+          
+          <dt><b>Type</b> of database<br />(use either 'mysql' or 'pgsql')</dt>
+          <dd><input type="text" name="content.phpbb3.dbtype" value="#[content.phpbb3.dbtype]#" size="6" /></dd>
+          
+          <dt><b>Host</b> of the database</dt>
+          <dd><input type="text" name="content.phpbb3.dbhost" value="#[content.phpbb3.dbhost]#" size="40" /></dd>
+          
+          <dt><b>Port</b> of database service<br />(usually 3306 for mySQL)</dt>
+          <dd><input type="text" name="content.phpbb3.dbport" value="#[content.phpbb3.dbport]#" size="6" /></dd>
+          
+          <dt><b>Name of the database</b> on the host</dt>
+          <dd><input type="text" name="content.phpbb3.dbname" value="#[content.phpbb3.dbname]#" size="20" /></dd>
+          
+          <dt><b>Table prefix string</b> for table names</dt>
+          <dd><input type="text" name="content.phpbb3.tableprefix" value="#[content.phpbb3.tableprefix]#" size="20" /></dd>
+          
+          <dt><b>User</b> that can access the database</dt>
+          <dd><input type="text" name="content.phpbb3.dbuser" value="#[content.phpbb3.dbuser]#" size="20" /></dd>
+          
+          <dt><b>Password</b> for the account of that user given above</dt>
+          <dd><input type="text" name="content.phpbb3.dbpw" value="#[content.phpbb3.dbpw]#" size="20" /></dd>
+          
+          <dt><b>Posts per file</b><br />in exported surrogates</dt>
+          <dd><input type="text" name="content.phpbb3.ppf" value="#[content.phpbb3.ppf]#" size="20" /></dd>
+          
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="check" value="Check database connection" class="btn btn-primary" style="width:240px"/>
+          </dd>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="export" value="Export Content to Surrogates" class="btn btn-primary" style="width:240px"/>
+          </dd>
+        </dl>
+      </fieldset>
+      <fieldset>
+        <dl>
+          <dt><b>Import a database dump</b>,<br /></dt>
+          <dd><input type="file" name="content.phpbb3.dumpfile" value="#[content.phpbb3.dumpfile]#" size="60" /></dd>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="import" value="Import Dump" class="btn btn-primary" style="width:240px"/>
+          </dd>
+		</dl>
+      </fieldset>
+    </form>
+    
+    #(check)#::
+    <form>
+      <fieldset>
+        <dl>
+          <dt>Posts in database</dt>
+          <dd>#[posts]#</dd>
+          
+          <dt>first entry</dt>
+          <dd>#[first]#</dd>
+          
+          <dt>last entry</dt>
+          <dd>#[last]#</dd>
+          
+        </dl>
+      </fieldset>
+    </form>::
+    <p>Info failed: #[error]#</p>
+    #(/check)#
+    
+    #(export)#::
+    <p>Export successful! Wrote #[files]# files in DATA/SURROGATES/in</p>::
+    <p>Export failed: #[error]#</p>
+    #(/export)#
+    
+    #(import)#::
+    <p>Import successful!::
+    <p>Import failed: #[error]#</p>
+    #(/import)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>YaCy '#[clientname]#': Field Re-Indexing</title>
+        #%env/templates/metas.template%#
+        <script type="text/javascript" src="js/IndexReIndexMonitor.js"></script>
+	</head>
+    <body id="IndexReindexMonitor">
+        #%env/templates/header.template%#
+        #%env/templates/submenuIndexControl.template%#
+      <div class="container-fluid">
+       <div class="row">
+        <h2>Field Re-Indexing</h2>
+        <p>In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.</p>
+        <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="col-md-10 col-lg-6">
+            <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+            <fieldset>
+            	<dl>
+                	<dt>Documents in current queue</dt>
+                	<dd>#[querysize]#</dd>
+                	<dt>Documents processed</dt>
+                	<dd>#[docsprocessed]#</dd>
+                	<dt>current select query </dt>
+                	<dd>#[currentselectquery]#</dd>
+                </dl>
+                #(reindexjobrunning)#::<input type="submit" value="refresh page" class="btn btn-success"/>#(/reindexjobrunning)#
+                #(reindexjobrunning)#                
+                <input type="submit" name="reindexnow" value="start reindex job now" class="btn btn-primary"/>
+                ::<input type="submit" name="stopreindex" value="stop reindexing" class="btn btn-danger"/>
+                #(/reindexjobrunning)# 
+                <p class="info">#[infomessage]#</p>                            
+            </fieldset>
+            #(reindexjobrunning)#::
+            <fieldset><legend>Remaining field list</legend>
+              <p>reindex documents containing these fields: </p>
+              <table>
+                <tr><th>Field</th><th>count</th></tr>
+                #{fieldlist}#
+                <tr>
+                  <td>#[fieldname]#</td> <td align="right">#[fieldscore]#</td>
+                </tr>
+                #{/fieldlist}#
+              </table>
+            </fieldset>
+            #(/reindexjobrunning)#
+        </form>
+      </div>
+      <div class="row">
+        <h2>Re-Crawl Index Documents</h2>
+        <p>Searches the local index and selects documents to add to the crawler (recrawl the document).
+           This runs transparent as background job. Documents are added to the crawler only if no other crawls are active
+           and are added in small chunks.</p>
+         <form action="IndexReIndexMonitor_p.html?setup=recrawljob" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="col-md-10 col-lg-6">
+          <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+
+          #(recrawljobrunning)#
+           <fieldset id="newJobFieldset">
+            #(error)#::
+            <div class="alert alert-danger" role="alert">Re-crawl works only with an embedded local Solr index!</div>
+            #(/error)#
+            <div class="form-group">
+            	<label>Solr query <input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /></label>
+            	<input type="submit" name="simulateRecrawl" value="Simulate" class="btn btn-default" title="Check only how many documents would be selected for recrawl"/>
+            </div>
+            #(simulationResult)#
+            ::
+            <div class="alert alert-success" role="alert">#[docCount]# #(showSelectLink)#document(s)::<a href="#[browseSelectedUrl]#" target="recrawlCandidates" title="Browse metadata of the #[rows]# first selected documents">document(s)</a>#(/showSelectLink)# selected for recrawl.</div>
+            ::
+            <div class="alert alert-danger" role="alert">An error occurred when trying to run the selection query.</div>
+            ::
+            <div class="alert alert-danger" role="alert">The Solr index is not connected. Please restart your peer.</div>
+            #(/simulationResult)#
+            <div class="form-group">
+            	<label>Include failed URLs <input type="checkbox" name="includefailedurls" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></label>
+            </div>
+            <div class="form-group">
+              <label>Delete URLs <input type="checkbox" name="deleteOnRecrawl" #(deleteOnRecrawl)#::checked="checked"#(/deleteOnRecrawl)# /></label>
+            </div>
+            <input type="submit" name="recrawlDefaults" value="Set defaults" class="btn btn-default" title="Reset to default values"/>
+            <input type="submit" name="recrawlnow" value="start recrawl job now" class="btn btn-primary"/>
+            to re-crawl documents selected with the given query.
+           </fieldset>
+           ::
+           <fieldset id="updateJobFieldset"><legend>Re-Crawl Query Details</legend>
+              <dl>
+                <dt>Documents to process</dt>
+                <dd id="urlsToRecrawlCount">#[docCount]#</dd>
+                <dt>Current Query</dt>
+                <dd>#[recrawlquerytext]#</dd>
+              </dl>
+              <div class="form-group">
+              	<label>Edit Solr Query <input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /></label><input type="submit" name="updquery" value="update" class="btn btn-sm btn-default"/>
+              </div>
+              <div class="form-group">
+              	<label>Include failed urls <input type="checkbox" name="includefailedurls" onchange="this.form.submit()" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></label>
+              </div>
+              <div class="form-group">
+                <label>Delete urls <input type="checkbox" name="deleteOnRecrawl" onchange="this.form.submit()" #(deleteOnRecrawl)#::checked="checked"#(/deleteOnRecrawl)# /></label>
+              </div>
+              <input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/>
+            </fieldset>
+          #(/recrawljobrunning)#
+        </form>
+        
+           #(recrawlReport)#::
+            <div class="col-md-10 col-lg-6">
+          		<div class="panel panel-info">
+          			<div class="panel-heading">
+          				<h3 class="panel-title">#(jobStatus)#::::Last #(/jobStatus)#Re-Crawl job report 
+          					<span id="refreshingIcon" class="glyphicon glyphicon-transfer hidden" title="Automatically refreshing"></span>
+          					<span id="refreshFailureIcon" class="glyphicon glyphicon-warning-sign warning hidden" title="An error occurred while trying to refresh automatically"></span>
+          				</h3>
+          			</div>
+          			<div class="panel-body">
+          				<div id="earlyRecrawlTermination" class="alert alert-danger #(error)#hidden::#(/error)#" role="alert">The job terminated early due to an error when requesting the Solr index.</div>
+	          			<table class="table">
+          					<tbody>
+	          				    <tr>
+          							<th scope="row">Status</th>
+									<td id="recrawlStatus"
+										arial-live="polite"
+										data-status="#(jobStatus)#0::1::2#(/jobStatus)#"
+										data-status0="Running" data-status1="Shutdown in progress"
+										data-status2="Terminated">#(jobStatus)#Running::Shutdown in progress::Terminated#(/jobStatus)#</td>
+								</tr>
+	          				    <tr>
+          							<th scope="row">Query</th>
+          							<td id="recrawlQueryText">#[recrawlquerytext]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">Start time</th>
+          							<td id="recrawlStartTime">#[startTime]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">End time</th>
+          							<td id="recrawlEndTime">#[endTime]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row" title="URLs added to the crawler queue for recrawl">Recrawled URLs</th>
+          							<td id="recrawledUrlsCount" aria-live="polite">#[recrawledUrlsCount]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row" title="URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.">Rejected URLs</th>
+          							<td id="rejectedUrlsCount">#[rejectedUrlsCount]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">Malformed URLs</th>
+          							<td id="malformedUrlsCount" title="#[malformedUrlsDeletedCount]# deleted from the index">#[malformedUrlsCount]#</td>
+          						</tr>
+          					</tbody>
+          				</table>
+          				#(jobStatus)#
+          					<a id="recrawlRefreshBtn" class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+          					::
+          					<a id="recrawlRefreshBtn" class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+          					::
+          				#(/jobStatus)#
+          			</div>
+          	 	</div>
+          	 </div>
+          	#(/recrawlReport)#
+       </div>
+      </div>
+        #%env/templates/footer.template%#
+    </body>
+</html>

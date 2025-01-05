@@ -1,0 +1,8 @@
+<div class="SubMenu" role="navigation" aria-labelledby="designTitle">
+  <h3 id="designTitle">Design</h3>
+  <ul class="SubMenu">
+    <li><a href="ConfigAppearance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Appearance</a></li>
+    <li><a href="ConfigLanguage_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Language</a></li>
+    <li><a href="ConfigSearchPage_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Search Page Layout</a></li>
+  </ul>
+</div>

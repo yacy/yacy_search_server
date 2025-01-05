@@ -1,0 +1,104 @@
+/* Skin dark */
+
+body	{
+    background-color: #000;
+    color: #777;
+}
+
+a:link, a:visited	{ color: #888; }
+a:hover			{ color: #999; }
+
+
+/* Menu */
+.menugroup h3,
+.SubMenugroup h3,
+.SubMenu h3				{ background-color: #222; color: #777; }
+
+a.MenuItemLink,
+ul.SubMenu em			{ background-color: #444; color: #888; }
+a:hover.MenuItemLink	{ color:#AAA; }
+
+/* Head */
+div.head h1			{ background-color: #333; color: #AAA; }
+
+/* Tables */
+.TableHeader		{ color: #777; background-color: #333; }
+.TableCellDark		{ color: #666; background-color: #252525; }
+.TableCellLight		{ color: #666; background-color: #2C2C2C; }
+.TableCellSummary	{ color: #777; background-color: #333; }
+.TableCellActive	{ color: #666; background-color: #2C2C2C; }
+
+/* Blog and Wiki*/
+.Post			{ background-color: #222; }
+.PostSubject	{ background-color: #555; }
+.PostSubject a	{ color: #666; }
+.PostInfo		{ background-color:#333; }
+.PostInfo a		{ color: #666; }
+.PostBody		{ color: #666; }
+
+/* Wiki */
+.WikiTOCBox		{ background-color: #2C2C2C; border: 1px solid #555; }
+
+a.unknown		{ color: #666; }
+a.known			{ color: #600; }
+a.known:hover	{ color: #722; }
+a.extern		{ color: #635; }
+
+/* in Bookmarks */
+.bookmark		{ border-bottom: 1px #000 dashed; }
+.Tags			{ border-left: 2px solid black; }
+
+a.bookmarkTitle			{ color: #4070a0; }
+a:hover.bookmarkTitle	{ color: #4070a0; }
+a.bookmarkTags			{ color: #007050; }
+a:hover.bookmarkTags	{ color: #4070a0; }
+a.bookmarkAction		{ color: #999999; }
+
+.Navigation a		{ color: #555; }
+.Navigation a:hover	{ color: #777; }
+.navbar-default{background-color:#000;border-color:#000}
+
+.diff 				{ background-color: #171717; }
+.diff .unchanged 	{ color: #666; }
+.diff .added 		{ color: #0A0; background-color: #053005; }
+.diff .deleted 		{ color: #B00; background-color: #390505; }
+
+/* in Status.html */
+.ProgressBar		{ border: 1px solid #777; }
+.ProgressBarFill	{ background-color: #944; }
+
+/* Copyright info */
+.info				{ border-top: 1px solid gray; }
+
+/* Searchresults */
+.searchresults		{ border-top: 1px #000 dashed; }
+.searchresults .url a	{ color: #008000; }
+.snippetLoading		{ color: #999999; }
+.snippetLoaded b { color: #999999; }
+.snippetError		{ color: red; }
+.searchHighlight1	{ font-weight: bold; color: #FFFF64; }
+.searchHighlight2	{ font-weight: bold; color: #FF9B9B; }
+.searchHighlight3	{ font-weight: bold; color: #0F0; }
+.searchHighlight4	{ font-weight: bold; color: #0FF; }
+.searchHighlight5	{ font-weight: bold; color: #C90; }
+.searchHighlight6	{ font-weight: bold; color: #C9F; }
+
+/* other */
+.settingsValue		{ color: #556699; }
+.Headline			{ background-color: #4070a0; color: white; }
+.Heading			{ background-color: #4070a0; }
+.error, .warning	{ color: red; }
+.success			{ color: green; }
+.Message			{ background-color: #eeeeee; }
+.example			{ background-color: #D3D3D3; }
+.hides:hover .hoverShow { background-color: #111; border-color: #333; }
+
+/* Log */
+body#ViewLog pre	{ color: #777; background-color: #333; }
+
+/* Forms */
+fieldset		{ color: #777; background-color: #222; border: 1px solid #555; }
+legend			{ color: #777; background-color: #2A2A2A; }
+form dt, dl.pairs dt	{ background-color: #2A2A2A; }
+form dd, dl.pairs dd	{ background-color: #222; }
+input, select, textarea, button	{ color: #777; background-color: #000; }

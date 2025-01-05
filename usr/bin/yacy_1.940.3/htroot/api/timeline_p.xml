@@ -1,0 +1,4 @@
+<timeline count="#[count]#">#{event}#
+    <event time="#[time]#" isPeriod=#(isPeriod)#"false"::"true" duration="#[duration]#" count="#[count]#"#(/isPeriod)# type="#[type]#">#[description]#</event>
+#{/event}#
+</timeline>

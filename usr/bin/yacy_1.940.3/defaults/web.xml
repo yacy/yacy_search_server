@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    
+    <!-- Default YaCy web.xml
+         Note: if DATA/SETTINGS/web.xml exists, it is applied after defaults/web.xml
+    -->
+    <display-name>YaCy</display-name>
+    <description>Decentralized Web Search</description>
+
+    <!-- Quality of Service filter to prioritize service for requests from localhost -->
+    <!-- uncomment this to activate
+    <filter>
+        <description>Quality of Service Filter, to prioritize requests from localhost</description>
+        <filter-name>YaCyQoSFilter</filter-name>
+        <filter-class>net.yacy.http.servlets.YaCyQoSFilter</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+    <filter-mapping>
+        <filter-name>YaCyQoSFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    -->
+    
+    <!-- Standard YaCy Servlets -->
+    
+    <!-- Default servlet for all YaCy output
+         -as this is mandatory the servlet is activated automatically by the application
+         -no need to include this in this web.xml (provided only for completness)
+    <servlet>
+        <servlet-name>YaCyDefaultServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.YaCyDefaultServlet</servlet-class>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>YaCyDefaultServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>    
+    -->
+    
+    <!-- servlet to provide direct access to the embedded solr, also used for P2P searches -->
+    <servlet>
+        <servlet-name>SolrSelectServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.SolrSelectServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>SolrServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>RAGProxyServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.RAGProxyServlet</servlet-class>
+    </servlet>
+    
+    <!-- servlet to provide searchresults via proxy -->
+    <servlet>
+        <servlet-name>URLProxyServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.UrlProxyServlet</servlet-class>
+        <init-param> 
+            <description>Link text on top of proxied page to stop use of proxy</description> 
+            <param-name>stopProxyText</param-name> 
+            <param-value>YaCy stop proxy</param-value> 
+        </init-param>
+    </servlet>
+    
+    <!-- mappings activated by the application - hardcoded (added here for completness) -->
+    <servlet-mapping>
+        <servlet-name>SolrSelectServlet</servlet-name>
+        <url-pattern>/solr/select</url-pattern>
+        <url-pattern>/solr/collection1/select</url-pattern>
+        <url-pattern>/solr/webgraph/select</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>URLProxyServlet</servlet-name>
+        <url-pattern>/proxy.html</url-pattern>
+        <url-pattern>/proxy</url-pattern>
+    </servlet-mapping>    
+    
+    <servlet-mapping>
+        <servlet-name>SolrServlet</servlet-name>
+        <url-pattern>/solr/collection1/admin/luke</url-pattern>
+        <url-pattern>/solr/webgraph/admin/luke</url-pattern>
+        <!-- uncomment this to use YaCy as remote solr -->
+        <!-- <url-pattern>/solr/collection1/update</url-pattern> --> <!-- only with server.response.compress.gzip=false  -->
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RAGProxyServlet</servlet-name>
+        <url-pattern>/v1/chat/completions</url-pattern>
+    </servlet-mapping>
+    <!-- eof hardcoded mappings --> 
+            
+    <!-- additional (optional) mappings --> 
+       <!-- you may add individual mappings of standard servlets here also -->     
+    <!-- eof additional (optional mappings -->    
+                                                                          
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>Index.html</welcome-file>
+        <welcome-file>Welcome.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- security configuration -->
+    <!-- authentication method and default roles are preconfigured by the application (provided only for completness) -->    
+  
+    <login-config>
+        <!-- supported BASIC or DIGEST -->
+        <!-- Note: with DIGEST the name of this peer is part of password hashes
+        changing the peer name will invalidate all passwords 
+        !!! Attention !!! prior to change this to DIGEST you have to reenter your password
+        to calculate a correct password hash -->
+        <auth-method>DIGEST</auth-method>
+    </login-config>
+
+    <!-- Roles -->
+    <security-role>
+        <description>Administrator</description>
+        <role-name>adminRight</role-name>
+    </security-role>
+</web-app>

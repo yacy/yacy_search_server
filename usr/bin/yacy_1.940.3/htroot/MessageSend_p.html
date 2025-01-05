@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Send message</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="MessageSend">
+    #%env/templates/header.template%#
+    #(mode)#
+    <!-- (mode=0) =========================== write message =========================== -->
+    <h2>Send message</h2>
+      #(permission)#
+      <!-- we have no permission to send the message -->
+      <p>You cannot send a message to <strong>#[peerName]#</strong>.<br />
+      The peer does not respond. It was now removed from the peer-list.
+      </p>
+      ::
+      <!-- we have the permission to send the message -->
+      <p>The peer <b>#[peerName]#</b> is alive and responded:</p>
+      <p><tt class="MessageBackground">#[response]#
+        You are allowed to send me a message &le; #[messagesize]# kb and an 
+        attachment &le; #[attachmentsize]#.</tt>
+      </p>
+
+      <form action="MessageSend_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Your Message</legend>
+        <dl>
+          <dt>
+            <label for="subject">Subject:</label>
+          </dt>
+          <dd>
+            <input name="subject" id="subject" type="text" size="80" maxlength="80" value="#[subject]#" />
+          </dd>
+          <dt>
+            <label for="message">Text:</label>
+          </dt>
+          <dd>
+            <textarea name="message" id="message" cols="80" rows="8">#[message]#</textarea>
+            <p class="help">
+              You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.
+            </p>
+          </dd>
+          <dt></dt>
+          <dd>
+            <input type="hidden" name="hash" value="#[hash]#" />
+            <input type="hidden" name="messagesize" value="#[messagesize]#" />
+            <input type="hidden" name="attachmentsize" value="#[attachmentsize]#" />
+            <input name="new" type="submit" value="Enter" class="btn btn-primary" />
+            <input type="submit" name="preview" value="Preview" class="btn btn-default" />
+          </dd>
+        </dl>
+      </fieldset>
+      </form>
+    ::
+    <!-- peer cannot respond -->
+    <p>
+      You cannot send a message to <strong>#[peerName]#</strong>.<br />
+      The peer is alive but cannot respond. Sorry.
+    </p>	
+    #(/permission)#
+    ::
+    <!-- (mode=1) =========================== preview message =========================== -->
+    <h2>Preview message</h2>
+    #(permission)#
+    <!-- we have no permission to send the message -->
+    <p>You cannot send a message to <strong>#[peerName]#</strong>.<br />
+      The peer does not respond. It was now removed from the peer-list.
+    </p>
+    ::
+    <!-- we have the permission to send the message -->
+    <p>The peer <b>#[peerName]#</b> is alive and responded:</p>
+    <p><tt class="MessageBackground">#[response]#
+        You are allowed to send me a message &le; #[messagesize]# kb and an 
+        attachment &le; #[attachmentsize]#.</tt>
+    </p>
+
+    <p>The message has not been sent yet!</p>
+    <!--[if IE]>
+    <div class="gainlayout">
+    <![endif]-->
+    <dl class="pairs">
+      <dt>Subject:</dt><dd>#[subject]#</dd>
+      <dt>Message:</dt>
+      <dd>
+        #[previewmessage]#
+      </dd>
+    </dl>
+    <!--[if IE]>
+    </div>
+    <![endif]-->
+
+    <br style="clear:left;" />
+
+    <form action="MessageSend_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Your Message</legend>
+        <dl>
+          <dt>
+            <label for="subject">Subject:</label>
+          </dt>
+          <dd>
+            <input name="subject" id="subject" type="text" size="80" maxlength="80" value="#[subject]#" />
+          </dd>
+          <dt>
+            <label for="message">Text:</label>
+          </dt>
+          <dd>
+            <textarea name="message" id="message" cols="80" rows="8">#[message]#</textarea>
+            <p class="help">
+              You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.
+            </p>
+          </dd>
+          <dt></dt>
+          <dd>
+            <input type="hidden" name="hash" value="#[hash]#" />
+            <input type="hidden" name="messagesize" value="#[messagesize]#" />
+            <input type="hidden" name="attachmentsize" value="#[attachmentsize]#" />
+            <input name="new" type="submit" value="Enter" class="btn btn-primary" />
+            <input type="submit" name="preview" value="Preview" class="btn btn-default" />
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    ::
+    <!-- peer cannot respond -->
+    <p>
+      You cannot send a message to <strong>#[peerName]#</strong>.<br />
+      The peer is alive but cannot respond. Sorry.
+    </p>	
+    #(/permission)#
+    ::
+    <!-- (mode=2) =========================== send message =========================== -->
+    <h2>Send message</h2>
+    #(status)#
+    <!-- Message send successfully -->
+
+    <p>Your message has been sent. The target peer responded:</p>
+    <p class="Message"><tt>#[response]#</tt></p>
+
+    :: <!-- Message could not be send -->
+
+    <p>The target peer is alive but did not receive your message. Sorry.</p>
+    <p>
+      Here is a copy of your message, so you can copy it to save it for further attempts:
+    </p>
+    <p class="Message">
+      <tt>#[message]#</tt>
+    </p>
+    #(/status)#
+
+    ::
+    <!-- (mode=3) ==== illegal usage of this page ==== -->
+      <p>You cannot call this page directly. Instead, use a link on the <a href="Network.html?page=1&maxCount=1000">Network</a> page.</p>
+    #(/mode)#
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

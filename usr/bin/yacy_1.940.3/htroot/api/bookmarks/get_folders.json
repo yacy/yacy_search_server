@@ -1,0 +1,9 @@
+[
+#{folders}#{
+"text": "#[foldername]#",
+"expanded": #[expanded]#,
+"classes": "#[type]#",
+"id": "#[hash]#",
+"hasChildren": #[hasChildren]#
+}#[comma]##{/folders}#
+]

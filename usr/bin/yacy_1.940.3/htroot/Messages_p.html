@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Messages</title>
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="Messages_p.rss" />
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Messages">
+    #%env/templates/header.template%#
+    <h2>Messages</h2>
+    #(peersKnown)#::
+    <form action="MessageSend_p.html" method="get" accept-charset="UTF-8">
+      <fieldset><legend>Compose Message</legend>
+      <dl>
+        <dt><label for="peers">Send message to peer</label>:</dt>
+        <dd>
+          <select id="peers" name="hash">#{peers}#
+            <option value="#[hash]#">#[name]#</option>#{/peers}#
+          </select>
+          <input type="submit" name="submit" class="btn btn-primary" value="Compose" />
+        </dd>
+      </dl>
+    </fieldset></form>
+    #(/peersKnown)#
+    #(mode)#
+    <!-- List -->
+    <table border="0">
+      <tr class="TableHeader">
+        <td>Date</td>
+        <td>From</td>
+        <td>To</td>
+        <td>Subject</td>
+        <td>Action</td>
+      </tr>
+    #{messages}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[date]#</td>
+        <td><a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[from]#">#[from]#</a></td>
+        <td>#[to]#</td>
+        <td>#[subject]#</td>
+        <td>
+          <a href="Messages_p.html?action=view&amp;object=#[key]#">view</a>
+          &nbsp;/&nbsp;
+          <a href="MessageSend_p.html?hash=#[hash]#&amp;subject=Re: #[subject]#">reply</a>
+          &nbsp;/&nbsp;
+          <a href="Messages_p.html?action=delete&amp;object=#[key]#">delete</a>
+        </td>
+      </tr>
+    #{/messages}#
+    </table>
+    #(error)#::<p class="error">I/O error reading message table: #[message]#</p>#(/error)#
+    ::
+    <!-- View -->
+    <!--[if IE]>
+    <div class="gainlayout">
+    <![endif]-->
+    <dl class="pairs">
+      <dt>From:</dt><dd><a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[from]#">#[from]#</a></dd>
+      <dt>To:</dt><dd>#[to]#</dd>
+      <dt>Date:</dt><dd>#[date]#</dd>
+      <dt>Subject:</dt><dd>#[subject]#</dd>
+      <dt>Message:</dt>
+      <dd>
+        #[message]#
+      </dd>
+      <dt>Action:</dt>
+      <dd>
+        <a href="Messages_p.html">inbox</a>
+        &nbsp;/&nbsp;
+        <a href="MessageSend_p.html?hash=#[hash]#&amp;subject=Re: #[subject]#">reply</a>
+        &nbsp;/&nbsp;
+        <a href="Messages_p.html?action=delete&amp;object=#[key]#">delete</a>
+      </dd>
+    </dl>
+    <!--[if IE]>
+    </div>
+    <![endif]-->
+    #(/mode)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

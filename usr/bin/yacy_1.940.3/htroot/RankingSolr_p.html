@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Solr Ranking Configuration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="RankingSolr_p">
+    #%env/templates/header.template%#
+    #%env/templates/submenuRanking.template%#
+    <h2>Solr Ranking Configuration</h2>
+    <p>These are ranking attributes for Solr. This ranking applies for internal and remote (P2P or shard) Solr access.</p>
+
+    <form action="RankingSolr_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+    Select a profile:
+      <select id="profile" name="profileNr" onchange='submit()'>
+          #{profiles}#
+            <option value="#[nr]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          #{/profiles}#
+      </select>
+    </form>
+    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
+        <legend>Boost Function</legend>
+        A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.
+        To see all available fields, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for numeric values (these are names with suffix '_i').
+        To find out which kind of operations are possible, see the <a href="https://lucene.apache.org/solr/guide/6_6/function-queries.html" target="_blank">Solr Function Query</a> documentation.
+        Example: to order by date, use "recip(ms(NOW,last_modified),3.16e-11,1,1)", to order by crawldepth, use "div(100,add(crawldepth_i,1))".
+        <dl>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bf" id="bf_label">boost=</label></dt>
+          <dd style="width:360px;margin:0;padding:0;float:left;display:inline;" id="bf_dd">
+            <textarea name="bf" id="bf" align="left" cols="96" rows="1"/>#[bf]#</textarea>
+          </dd>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterBF" class="btn btn-primary" value="Set Boost Function" />
+            <input type="submit" name="ResetBF" class="btn btn-primary" value="Re-Set to default" />
+          </dd>
+        </dl><br/>
+        #(boosthint)#::You can boost with vocabularies, use the occurrence counters #[vocabulariesvoccount]# and #[vocabulariesvoclogcount]#.#(/boosthint)#
+      </fieldset>
+    </form>
+    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
+        <legend>Boost Query</legend>
+        The Boost Query is attached to every query. Use this to statically boost specific content in the index.
+        Example: "fuzzy_signature_unique_b:true^100000.0f" means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).
+        To find appropriate fields for this query, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for boolean values (with suffix '_b') or tags inside string fields (with suffix '_s' or '_sxt').
+        <dl>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bq" id="bq_label">bq=</label></dt>
+          <dd style="width:360px;margin:0;padding:0;float:left;display:inline;" id="bq_dd">
+            <textarea name="bq" id="bq" align="left" cols="96" rows="5"/>#[bq]#</textarea>
+          </dd>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterBQ" class="btn btn-primary" value="Set Boost Query" />
+            <input type="submit" name="ResetBQ" class="btn btn-primary" value="Re-Set to default" />
+          </dd>
+        </dl><br/>
+        #(boosthint)#::
+        You can boost with vocabularies, use the field '#[vocabulariesfield]#' with values #[vocabulariesavailable]#. You can also boost on logarithmic occurrence counters of the fields #[vocabulariesvoclogcounts]#.<br/>
+      #{facets}#
+      <table class="sortable" border="0" style="float:left">
+      <tr class="TableCellDark">
+        <td align="left" colspan="5" nowrap class="pending">#[facetname]#</td>
+ 	    <td align="right" colspan="5" nowrap class="listingok">#</td>
+      </tr>
+      #{facet}#
+      <tr class="TableCellLight">
+        <td align="left" colspan="5" nowrap class="pending">#[key]#</td>
+ 	    <td align="right" colspan="5" nowrap class="listingok">#[count]#</td>
+      </tr>
+      #{/facet}#
+      </table>&nbsp;&nbsp;
+      #{/facets}#
+        #(/boosthint)#
+      </fieldset>
+    </form>
+    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
+        <legend>Filter Query</legend>
+        The Filter Query is attached to every query. Use this to statically add a selection criteria to reduce the set of results.
+        Example: "http_unique_b:true AND www_unique_b:true" will filter out all results where urls appear also with/without http(s) and/or with/without 'www.' prefix.
+        To find appropriate fields for this query, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a>. Warning: bad expressions here will cause that you don't have any search result!
+        <dl>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="fq" id="fq_label">fq=</label></dt>
+          <dd style="width:360px;margin:0;padding:0;float:left;display:inline;" id="fq_dd">
+            <textarea name="fq" id="fq" align="left" cols="96" rows="1"/>#[fq]#</textarea>
+          </dd>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterFQ" class="btn btn-primary" value="Set Filter Query" />
+            <input type="submit" name="ResetFQ" class="btn btn-primary" value="Re-Set to default" />
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
+        <legend>Solr Boosts</legend>
+        This is the set of searchable fields (see <a href="IndexSchema_p.html">YaCy Solr Schema</a>). Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.
+        <dl style="margin:0;">#{boosts}# 
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="boost_#[field]#">#[field]#</label>
+            <input type="checkbox" id="#[field]#" name="#[field]#"#(checked)#:: checked="checked"#(/checked)#
+            onclick="if (document.getElementById('#[field]#').checked) document.getElementById('boost_#[field]#').value='1.0'; else document.getElementById('boost_#[field]#').value='';"/>
+          </dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="boost_dd_#[field]#">
+            <input #(notinindexwarning)#::class="TableCellActive"#(/notinindexwarning)# name="boost_#[field]#" id="boost_#[field]#" type="text" align="right" size="10" value="#[boost]#" />
+            #(notinindexwarning)#::field not in local index (boost has no effect)#(/notinindexwarning)#&nbsp;#[comment]#
+          </dd>#{/boosts}#
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterBoosts" class="btn btn-primary" value="Set Field Boosts" />
+            <input type="submit" name="ResetBoosts" class="btn btn-primary" value="Re-Set to default" />
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+  #%env/templates/footer.template%#
+  </body>
+</html>

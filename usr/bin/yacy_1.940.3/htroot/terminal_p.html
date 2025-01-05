@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+<title>YaCy System Terminal Monitor</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<meta name="description" content="YaCy Peer Live Monitoring Terminal" />
+<meta name="keywords" content="open,source,search,engine,monitor,terminal" />
+<link rel="stylesheet" type="text/css" href="env/terminal.css" />
+<script type="text/javascript" src="js/highslide/highslide.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var loaderBanner = null;
+var loaderPerformance = null;
+var loaderNetwork = null;
+var cnt=0;
+
+function loadBanner() {
+  document.images[0].src = "Banner.png?textcolor=ffffff&amp;bgcolor=000000&amp;bordercolor=aaaaaa&amp;cnt=" + cnt++;
+}
+function loadPerformance() {
+  document.images[1].src = "PerformanceGraph.png?cnt=" + cnt++;
+}
+function loadNetwork() {
+  document.images[3].src = "NetworkPicture.png?width=660&amp;height=360&amp;bgcolor=000000&amp;cnt=" + cnt++;
+}
+
+function init() {
+  loaderBanner = window.setInterval("loadBanner()", 28000);
+  loaderPerformance = window.setInterval("loadPerformance()", 4000);
+  loaderNetwork = window.setInterval("loadNetwork()", 57000);
+}
+//]]>
+</script>
+
+</head>
+
+<body onload="init();">
+
+<div id="outer">
+
+<div id="location">
+<a href="https://yacy.net"><img src="Banner.png?textcolor=ffffff&amp;bgcolor=000000&amp;bordercolor=aaaaaa" alt="YaCy" style="width:468px;height:60px;border-width:0px;vertical-align:bottom;" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="index.html">&lt;Search Form&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="CrawlStartSite.html">&lt;Crawl Start&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="Status.html">&lt;Status Page&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="Steering.html">&lt;Shutdown&gt;</a>
+</div>
+
+<div class="bars"></div>
+
+<div id="left"> <!-- begin left side -->
+
+<div class="navouter">
+<div class="navheader">Event Terminal</div>
+<div class="navcontent">
+<iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,DHTRECEIVE,DHTSEND&amp;width=430px&amp;height=200px&amp;maxlines=22&amp;maxwidth=95&amp;color=fff&amp;background=000"
+              style="width:430px;height:200px;margin:0;border-width:0;" scrolling="no" name="newsframe"></iframe>
+</div>
+</div>
+<h1>Image Terminal</h1>
+<iframe src="Collage.html?emb=&amp;width=468&amp;height=460&amp;max=3"
+              style="width:468px;height:460px;margin:0;border-width:0;" scrolling="no" name="collageframe"></iframe>
+
+</div> <!-- end left side -->
+
+
+
+<div id="right"> <!-- start right side -->
+
+<h1>Domain Monitor</h1>
+<div style="text-align:left;margin:0;padding:0;">
+
+			<!--[if !IE]> -->
+				<object classid="java:domaingraph.class" 
+            			type="application/x-java-applet"
+            			archive="domaingraph.jar"
+            			width="660" height="400"
+            			standby="Loading Processing software..." >
+            	    
+            		<param name="codebase" value="processing/domaingraph/applet/" /> 
+					<param name="archive" value="domaingraph.jar" />
+				
+					<param name="mayscript" value="true" />
+					<param name="scriptable" value="true" />
+				
+					<param name="image" value="processing/domaingraph/applet/loading.gif" />
+					<param name="boxmessage" value="Loading Processing software..." />
+					<param name="boxbgcolor" value="#FFFFFF" />
+				
+					<param name="test_string" value="outer" />
+			<!--<![endif]-->
+				
+				<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" 
+						codebase="http://java.sun.com/update/1.4.2/jinstall-1_4_2_12-windows-i586.cab"
+						width="660" height="400"
+						standby="Loading Processing software..."  >
+						
+					<param name="code" value="domaingraph" />
+					<param name="codebase" value="processing/domaingraph/applet/" />
+					<param name="archive" value="domaingraph.jar" />
+					
+					<param name="mayscript" value="true" />
+					<param name="scriptable" value="true" />
+					
+					<param name="image" value="processing/domaingraph/applet/loading.gif" />
+					<param name="boxmessage" value="Loading Processing software..." />
+					<param name="boxbgcolor" value="#FFFFFF" />
+					
+					<param name="test_string" value="inner" />
+					
+					<p>
+						<strong>
+							This browser does not have a Java Plug-in.
+							<br />
+							<a href="http://java.sun.com/products/plugin/downloads/index.html" title="Download Java Plug-in">
+								Get the latest Java Plug-in here.
+							</a>
+						</strong>
+					</p>
+				
+				</object>
+				
+			<!--[if !IE]> -->
+				</object>
+			<!--<![endif]-->
+</div>
+
+<h1>Resource Monitor</h1>
+<a href="PerformanceGraph.png" onclick="return hs.expand(this)"><img src="PerformanceGraph.png" style="width:330px;height:120px;border-width:0;" id="graph" alt="PerformanceGraph"/></a>
+<a href="WebStructurePicture_p.png?host=auto&amp;depth=2&amp;width=660&amp;height=240&amp;nodes=100&amp;time=1000" onclick="return hs.expand(this)"><img src="WebStructurePicture_p.png?host=auto&amp;depth=2&amp;width=660&amp;height=240&amp;nodes=100&amp;time=1000" style="width:330px;height:120px;border-width:0;" alt="WebStructurePicture"/></a>
+
+<h1>Network Monitor</h1>
+<div style="text-align:left;margin:0;padding:0;">
+<a href="NetworkPicture.png?width=660&amp;height=360&amp;bgcolor=000000" onclick="return hs.expand(this)"><img src="NetworkPicture.png?width=660&amp;height=360&amp;bgcolor=000000" style="width:330px;height:180px;border-width:0;" alt="The yacy Network" /></a>
+<!--<embed src="http://widgets.amung.us/flash/v2map.swf" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" wmode="transparent" allowScriptAccess="always" allowNetworking="all" type="application/x-shockwave-flash" flashvars="wausitehash=qp3j5gox&amp;map=night&amp;pin=star-orange&amp;link=no" width="330" height="180" />-->
+<!-- Because embed is not XHTML 1.0 Transitional replaced by object -->
+<script type="text/javascript" src="http://widgets.amung.us/map.js"></script><script type="text/javascript">WAU_map('qp3j5gox', 330, 180, 'night', 'star-orange')</script>
+
+</div>
+
+</div> <!-- end right side -->
+</div>
+
+</body>
+</html>

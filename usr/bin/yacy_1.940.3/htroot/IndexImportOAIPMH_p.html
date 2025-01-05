@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': OAI-PMH Import</title>
+    #%env/templates/metas.template%#
+    #(import)#::<!--<meta http-equiv="REFRESH" content="10" />-->#(/import)#
+  </head>
+  <body id="IndexImportOAIPMH">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+    <h2>OAI-PMH Import</h2>
+    <p>Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates</a></p>
+    
+    <form action="IndexImportOAIPMH_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Single request import</legend>
+        This will submit only a single request as given here to a OAI-PMH server and imports records into the index<br />
+        <input name="urlstartone" type="text" value="#[defaulturl]#" size="80" />
+        <input name="submit" type="submit" class="btn btn-primary" value="Import OAI-PMH source" />
+        #(import-one)#::
+        <dl>
+          <dt>Source:</dt><dd>#[source]#</dd>
+          <dt>Processed:</dt><dd>#[count]# records</dd>
+          <dt>ResumptionToken:</dt><dd>#[rt]#</dd>
+        </dl>
+        ::<p class="error">Import failed: #[error]#</p>
+        #(/import-one)#
+        </fieldset>
+    </form>
+    
+    
+    <form action="IndexImportOAIPMH_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <fieldset>
+          <legend>Import all Records from a server</legend>
+          Import all records that follow according to resumption elements into index<br />
+          <input name="urlstart" type="text" value="" size="80" />
+          <input name="importroot" type="submit" class="btn btn-primary" value="import this source" />
+          #(optiongetlist)#::or&nbsp;<input name="getlist" type="submit" class="btn btn-primary" value="import from a list" />#(/optiongetlist)#
+          #(status)#::<p>Import started!</p>::<p>Bad input data: #[message]# </p>#(/status)#
+        </fieldset>
+    </form>
+    <iframe name="OAI-PMH_ImportList"
+       src="IndexImportOAIPMHList_p.html#(iframetype)#::?import=::?source=#(/iframetype)#"
+       width="100%"
+       height="420"
+       frameborder="0"
+       scrolling="auto"
+       id="OAI-PMH_ImportList">
+      </iframe>
+    #%env/templates/footer.template%#
+  </body>
+</html>

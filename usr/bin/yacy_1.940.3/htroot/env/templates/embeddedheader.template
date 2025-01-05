@@ -1,0 +1,14 @@
+<!-- top navigation -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" id="navbar-brand" href="#[promoteSearchPageGreeting.homepage]#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+        <img id="greeting-icon" class="yacylogo" src="#[relativeBase]##[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;<span id="greeting"></span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="starter-template">
+  

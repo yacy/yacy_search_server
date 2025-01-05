@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Language selection</title>
+  	#%env/templates/metas.template%#
+  </head>
+  <body id="ConfigLanguage">
+    #%env/templates/header.template%#
+    #%env/templates/submenuDesign.template%#
+    <h2>Language selection</h2>
+    <p>
+      You can change the language of the YaCy-webinterface with translation files. 
+    </p>
+    <form action="ConfigLanguage_p.html" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="cur_lang">Current language</label>:</dt>
+          <dd id="cur_lang"><!-- lang -->default(english)&nbsp;</dd>
+          
+          <dt><label for="lang_file">Author(s) (chronological)</label>:</dt>
+          <dd id="lang_file"><!-- author -->&nbsp;</dd>
+          
+          <dt><label for="lang_maintainer"><em>Send additions to maintainer</em></label>:</dt>
+          <dd id="lang_maintainer"><!-- maintainer -->&nbsp;</dd>
+          
+          <dt><label for="lang_list">Available Languages</label>:</dt>
+          <dd>
+            <select name="language" id="lang_list">#{langlist}#
+              <option value="#[file]#" #[selected]#>#[name]#</option>#{/langlist}#
+            </select>
+          </dd>
+          <dt></dt>
+          <dd>
+            <input type="submit" name="use_button" value="Use" class="btn btn-primary"/>
+            <input type="submit" name="delete" value="Delete" class="btn btn-danger"/>
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    
+    <form action="ConfigLanguage_p.html" accept-charset="UTF-8">
+      <fieldset><legend>Download Language File</legend>
+        <p>Supported formats are the internal language file (extension .lng) or XLIFF (extension .xlf) format.</p>
+        <dl>
+          <dt><label for="url_install">Install new language from URL</label>:</dt>
+          <dd>
+            <input type="text" name="url" id="url_install" size="30" />
+          </dd>
+          
+          <dt><label for="use_lang">Use this language</label></dt>
+          <dd>
+            <input type="checkbox" name="use_lang" id="use_lang" value="on" checked="checked" />
+          </dd>
+          <dt></dt>
+          <dd><input type="submit" value="Install" class="btn btn-primary"/></dd>
+        </dl>
+        <p>Make sure that you only download data from trustworthy sources. The new language file
+           might overwrite existing data if a file of the same name exists already.</p>
+      </fieldset>
+      <p><a href="Translator_p.html">Simple Editor</a> to add untranslated text</p>
+    </form>
+    #(status)#
+    ::<p><strong>Unable to get URL: #[url]#</strong></p>
+    ::<p><strong>Error saving the language file.</strong></p>
+    #(/status)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

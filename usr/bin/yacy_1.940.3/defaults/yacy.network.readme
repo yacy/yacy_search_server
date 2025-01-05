@@ -1,0 +1,65 @@
+# YaCy Network Unit Definition
+# ----------------------------
+# There is not only a single global YaCy network, but there can be also separated networks
+# This file describes the properties of the network, how it is bootstraped, if it is moderated
+# and so on. It is also possible to describe authentification methods for in-protocol communication
+# To distinguish between index areas where the shared web index is for a intranet or the public internet,
+# we distinguish local and global networks. Each network type can have different user groups.
+# Groups can be uncontrolled, moderated or controlled. The whole network may also have a global master.
+# This file is adressed by the network.unit.definition property in defaults/yacy.init. If necessary this
+# property can also address a URL where a network definition file can be hosted, so that a network
+# can easily be moderated from a single central. In case of the public network of all independent peers
+# for global indexing, the network definition is attached to the release and defines no network master or
+# any other supervision.
+
+# peer-to-peer construction using the bootstrap properties:
+# 1st: a file within every distribution that has a list of URLs,
+#      or a location with a file containing a list of URLs:
+#      -> these are the superseed files (there are only two of these files)
+# 2nd: the files that can be retrieved by the superseeds' URLs
+#      are called seed list-files. (there can be many of those)
+#      -> the seed list-files contain b.o. IP/port combinations of running YaCy peers
+#      -> seed-list files are written by principal peers
+
+# Control Modes for Peer Groups:
+# we have three different types of moderation:
+# uncontrolled: only the peer's administrator may use protected pages of the YaCy interface
+# moderated   : the unit/group moderator may access some protected pages i.e. Crawl Start
+# controlled  : the unit/group moderator may access all pages of the peers within the same unit/group
+
+# Defintion of property domains:
+#     network.unit.name = <any word, name of network; appears in network graphic>
+#     network.unit.description = <any string, just informal; appears in network graphic>
+#     network.unit.domain = 'global'|'local'|'any'
+#     network.unit.domainlist = <url or file relative to yacy root path: text file like blacklist, only urls in this file are indexed and searchable>
+#     network.unit.dhtredundancy = <integer number, 0 means no DHT enabled>
+#     network.unit.dht.partitionExponent = <integer number, 0 means no DHT parition, 1 is partition in two, 2 is partition in four and so on>
+#     network.unit.bootstrap.seedlist<n> = <an url to a seedlists-file, which is stored by a principal peer>
+#     network.unit.protocol.control = 'uncontrolled'|'moderated'|'controlled'
+#     network.unit.protocol.request.authentication.method = 'salted-magic'
+#     network.unit.protocol.request.authentication.essentials = <any string, a secret password>
+#     network.unit.protocol.response.authentication.method = 'challenge-pwresponse'
+#     network.unit.protocol.response.authentication.essentials = <a challenge string>':'<a secret response-string>
+#     network.unit.administration.control = 'uncontrolled'|'moderated'|'controlled'
+#     network.unit.administration.manager = <a .yacy or .yacyh - domain, naming the manager peer>
+#     network.unit.administration.request.authentication.method = 'salted-magic'
+#     network.unit.administration.request.authentication.essentials = <any string, a secret password>
+
+# two lists of wildcards may be used to control the limited or unlimited access to the
+# peers and search functionality. By default, all clients from any IP may access the peers
+# and use a limited amount of search requests. The number of requests is limited to apply a
+# DoS functionality. The DoS check may be removed for a given number of IPs (separated by comma)
+# or a number of IP patterns (patterns as defined by match operator in java); this IP-pattern list
+# can be configured in the whitelist.
+# In contrast also a list of IPs may be given to be not allowed to access the peers at all
+# The YaCy-httpd will not respond on any request from IPs given in the blacklist
+#   Entries in whitelist take precedence over blacklist entries
+#       1. whitelist is checked if match - access is allowed
+#       2. blacklist is checked if match - access is denied
+# By default both lists should be empty to provide a basic search functionality for everyone.
+# When running a private YaCy network, all peers that are in the own network should be configured
+# in the whitelist. Otherwise the access from whitelisted clients is allowed, but the executing
+# search requests in the private network for a single request from outside is also blocked.
+# Put simply all IPs from you peers in the whitelist.
+# network.unit.access.whitelist =
+# network.unit.access.blacklist =

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<QuickCrawlLink>
+#(mode)#::
+	<title>#[title]#</title>
+	<url>#[url]#</url>
+	<status code="#[code]#">#(status)#URL successfully added to Crawler Queue
+		::Malformed URL
+		::Unable to create new crawling profile for URL: #[error]#
+		::Unable to add URL to crawler queue: #[error]#
+		#(/status)#
+	</status>
+#(/mode)#	
+</QuickCrawlLink>

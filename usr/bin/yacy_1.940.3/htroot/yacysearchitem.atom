@@ -1,0 +1,12 @@
+#(content)#::<entry>
+<title type="html">#[title-xml]#</title>
+<link href="#[link]#" type="#[mimetype]#" />
+<summary type="html">#[description-xml]#</summary>
+<updated>#[date822]#</updated>
+<dc:publisher><![CDATA[#[publisher]#]]></dc:publisher>
+<author><name><![CDATA[#[creator]#]]></name></author>
+<dc:subject><![CDATA[#[subject]#]]></dc:subject>
+<id>#[link]#</id>
+<updated>#[date822]#</updated>
+</entry>
+#(/content)#

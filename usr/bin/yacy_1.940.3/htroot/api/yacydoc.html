@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+this is a XHTML+RDFa file. It contains RDF annotations with dublin core properties
+you can validate it with http://validator.w3.org/
+-->
+ 
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+       
+  <head profile="http://www.w3.org/2003/g/data-view">
+    <link rel="transformation" href="http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl"/>
+<div id="api">
+<a href="yacydoc.xml"><img src="../env/grafics/api.png" width="60" height="40" alt="API" /></a>
+<span>This search result can also be retrieved as XML.
+Click the API icon to see an example call to the search rss API.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>	
+    #%env/templates/metas.template%#
+    <title>#[dc_title]#</title>
+  </head>
+   
+  <body>
+  <form name="yacydoc" method="post" action="yacydoc.html" enctype="multipart/form-data" accept-charset="UTF-8">
+  <fieldset>
+  <h1 property="dc:Title">#[dc_title]#</h1>
+
+  <dl>
+  <dt>Title</dt><dd property="dc:title">#[dc_title]#</dd>
+  <dt>Author</dt><dd property="dc:creator">#[dc_creator]#</dd>
+  <dt>Description</dt><dd property="dc:description">#[dc_description]#</dd>
+  <dt>Subject</dt><dd property="dc:subject">#[dc_subject]#</dd>
+  <dt>Publisher</dt><dd property="dc:publisher">#[dc_publisher]#</dd>
+  <dt>Contributor</dt><dd property="dc:contributor">#[dc_contributor]#</dd>
+  <dt>Date</dt><dd property="dc:date">#[dc_date]#</dd>
+  <dt>Type</dt><dd property="dc:type">yacy:doctype:#[dc_type]#</dd>
+  <dt>YaCy Identifier</dt><dd property="dc:identifier">yacy:urlhash:#[yacy_urlhash]#</dd>
+  <dt>Identifier</dt><dd><a href="#[dc_identifier]#" property="dc:identifier">#[dc_identifier]#</a></dd>
+  <dt>Language</dt><dd property="dc:language">#[dc_language]#</dd>
+  <dt>Collections</dt><dd property="collection">#[collection]#</dd>
+  
+  <dt>Load Date</dt><dd property="yacy:loaddate">#[yacy_loaddate]#</dd>
+  <dt>Referrer Identifier</dt><dd property="yacy:referrer.hash">yacy:urlhash:#[yacy_referrer_hash]#</dd>
+  <dt>Referrer URL</dt><dd property="yacy:referrer.url">#[yacy_referrer_url]#</dd>
+  <dt>Document size</dt><dd property="yacy:size">#[yacy_size]#</dd>
+  <dt>Number of Words</dt><dd property="yacy:words">#[yacy_words]#</dd>
+  
+  <dt>Inbound Links (anchors)</dt><dd property="yacy:inbound">#[yacy_inbound]#</dd>
+  <dt>Outbound Links (anchors)</dt><dd property="yacy:outbound">#[yacy_outbound]#</dd>
+  <dt>Incoming Links (citation)</dt><dd property="yacy:citations">#[yacy_citations]#</dd>
+        
+  <dt>Location</dt><dd><a href="../osm.png?lon=#[geo_long]#&lat=#[geo_lat]#&zoom=14" onclick="return hs.expand(this)">lat=#[geo_lat]#, lon=#[geo_long]#</a></dd>
+	  
+  </dl>
+  </fieldset>
+  </form>
+  </body>
+</html>

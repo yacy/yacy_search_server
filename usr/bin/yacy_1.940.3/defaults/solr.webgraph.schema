@@ -1,0 +1,201 @@
+## this is a list of all solr keys for the webgraph index 'webgraph', an index of all links
+## this complete list of keys can be changed; the actual schema is stored in:
+## DATA/SETTINGS/solr.webgraph.schema
+
+## the syntax of this file:
+## - all lines beginning with '##' are comments
+## - all non-empty lines not beginning with '#' are keyword lines
+## - all lines beginning with '#' and where the second character is not '#' are commented-out keyword lines
+
+
+##
+## document organization
+##
+
+## primary key of document, a combination of <source-url-hash><target-url-hash><four-digit-hex-counter> (28 characters)
+id
+
+## last-modified from http header, date (mandatory field)
+last_modified
+
+## time when resource was loaded
+#load_date_dt
+
+## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
+collection_sxt
+
+## needed (post-)processing steps on this metadata set
+#process_sxt
+
+## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
+harvestkey_s
+    
+
+##
+## url construction information about the source
+##
+
+## primary key of document, the URL hash (source)
+source_id_s
+
+## the protocol of the url (source)
+#source_protocol_s
+
+## the url without the protocol (source)
+#source_urlstub_s
+
+## the file name without the extension (source)
+#source_file_name_s
+
+## the file name extension (source)
+#source_file_ext_s
+
+## number of all characters in the url (source)
+#source_chars_i
+
+## path of the url (source)
+#source_path_s
+
+## count of all path elements in the url (source)
+#source_path_folders_count_i
+
+## all path elements in the url without the file name (source)
+#source_path_folders_sxt
+
+## number of key-value pairs in search part of the url (source)
+#source_parameter_count_i
+
+## the keys from key-value pairs in the search part of the url (source)
+#source_parameter_key_sxt
+
+## the values from key-value pairs in the search part of the url (source)
+#source_parameter_value_sxt
+
+## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)
+#source_crawldepth_i
+
+## copy of the citation rank norm value from the source link
+#source_cr_host_norm_i
+
+
+## host of the url (source)
+#source_host_s
+
+## id of the host (source)
+source_host_id_s
+    
+## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used (source)
+#source_host_dnc_s
+
+## either the second level domain or, if a ccSLD is used, the third level domain
+#source_host_organization_s
+
+## the organization and dnc concatenated with '.' (source)
+#source_host_organizationdnc_s
+
+## the remaining part of the host without organizationdnc (source)
+#source_host_subdomain_s
+
+
+##
+## Information in the source about the target
+##
+
+## the text content of the a-tag (in source, but pointing to a target)
+target_linktext_s
+
+## the length of the a-tag content text as number of characters (in source, but pointing to a target)
+#target_linktext_charcount_i
+
+## the length of the a-tag content text as number of words (in source, but pointing to a target)
+#target_linktext_wordcount_i
+
+## if the link is an image link, this contains the alt tag if the image is also liked as img link (in source, but pointing to a target)
+target_alt_s
+
+## the length of the a-tag content text as number of characters (in source, but pointing to a target)
+#target_alt_charcount_i
+
+## the length of the a-tag content text as number of words (in source, but pointing to a target)
+#target_alt_wordcount_i
+
+## the name property of the a-tag (in source, but pointing to a target)
+target_name_t
+
+## the rel property of the a-tag (in source, but pointing to a target)
+#target_rel_s
+
+## the rel property of the a-tag, coded binary (in source, but pointing to a target)
+#target_relflags_i
+
+
+##
+## url construction information about the target
+##
+
+## primary key of document, the URL hash (target)
+target_id_s
+
+## order number of target url, a count from first to last URL on the source page (target)
+target_order_i    
+
+## the protocol of the url (target)
+target_protocol_s
+
+## the url without the protocol (target)
+target_urlstub_s
+
+## the file name without the extension (target)
+target_file_name_s
+
+## the file name extension (target)
+target_file_ext_s
+
+## number of all characters in the url (target)
+#target_chars_i
+
+## path of the url (target)
+#target_path_s
+
+## count of all path elements in the url (target)
+#target_path_folders_count_i
+
+## all path elements in the url without the file name (target)
+target_path_folders_sxt
+
+## number of key-value pairs in search part of the url (target)
+#target_parameter_count_i
+
+## the keys from key-value pairs in the search part of the url (target)
+#target_parameter_key_sxt
+
+## the values from key-value pairs in the search part of the url (target)
+#target_parameter_value_sxt
+
+## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)
+#target_crawldepth_i
+
+## copy of the citation rank norm value from the target link; this is only filled if the target host is identical to the source host
+#target_cr_host_norm_i
+
+
+## host of the url (target)
+#target_host_s
+
+## id of the host (target)
+target_host_id_s
+    
+## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used (target)
+#target_host_dnc_s
+
+## either the second level domain or, if a ccSLD is used, the third level domain (target)
+#target_host_organization_s
+
+## the organization and dnc concatenated with '.' (target)
+#target_host_organizationdnc_s
+
+## the remaining part of the host without organizationdnc (target)
+#target_host_subdomain_s
+
+## flag shows if the target host is equal to the source host
+target_inbound_b

@@ -1,0 +1,5 @@
+# proxy yellow list
+# if any keyword in this list appears in a domain name,
+# then the proxy passes the client's user agent to the domain's server
+google
+yahoo

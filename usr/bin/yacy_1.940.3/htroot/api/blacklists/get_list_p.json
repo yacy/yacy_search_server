@@ -1,0 +1,13 @@
+{
+  "name":"#[name]#",
+  "shared":#(shared)#false::true#(/shared)#,
+  "types": {
+  #{types}#
+  "#[name]#":#(value)#false::true#(/value)##(comma)#::,#(/comma)#
+  #{/types}#
+  },
+  "items":
+    [
+    #{items}#"#[item]#"#(comma)#::,#(/comma)#
+    #{/items}#]
+}

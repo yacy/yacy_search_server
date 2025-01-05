@@ -1,0 +1,22 @@
+#(pagination)#
+	::
+	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;">
+		<ul id="paginationButtons" class="pagination#(hidePagination)#:: hidden#(/hidePagination)#">
+			<li id="prevpage" class="#(prevDisabled)#::disabled#(/prevDisabled)#">
+				<a title="Previous page" 
+					#(prevDisabled)#href="#[prevHref]#"::href="#"#(/prevDisabled)# 
+					#(prevDisabled)#accesskey="p"#(/prevDisabled)#>&laquo;</a>
+			</li>
+			#{pages}#
+			<li class="#(active)#::active#(/active)#">
+				<a #(active)#href="#[href]#"::href="#"#(/active)#">#[pageNum]#</a>
+			</li>
+			#{/pages}#
+			<li id="nextpage" class="#(nextDisabled)#::disabled#(/nextDisabled)#">
+				<a title="Next page" 
+					#(nextDisabled)#href="#[nextHref]#"::href="#"#(/nextDisabled)# 
+					#(prevDisabled)#accesskey="n"#(/prevDisabled)#>&raquo;</a>
+			</li>
+		</ul>
+	</span>
+#(/pagination)#

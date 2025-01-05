@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Content Analysis</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ContentAnalysis_p">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Content Analysis</h2>
+    <p>These are document analysis attributes.</p>
+    <form class="dsearch" action="ContentAnalysis_p.html" method="post" enctype="multipart/form-data">      
+      <fieldset>
+        <legend>Double Content Detection</legend><p>Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.
+      This field is set during parsing and is influenced by two attributes for the <a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">TextProfileSignature</a> class.</p>
+        <dl>
+          <dt style="width:260px"><label for="minTokenLen">minTokenLen</label></dt>
+          <dd style="width:360px; float:left; display:inline;" id="dd_minTokenLen">
+            <input name="minTokenLen" id="minTokenLen" type="text" align="right" size="10" value="#[minTokenLen]#" /><br />
+            This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.
+          </dd>
+          <dt style="width:260px"><label for="quantRate">quantRate</label></dt>
+          <dd style="width:360px; float:left; display:inline;" id="dd_quantRate">
+            <input name="quantRate" id="quantRate" type="text" align="right" size="10" value="#[quantRate]#" /><br />
+            The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less
+            words are used for the signature.
+            For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.
+          </dd>
+          <dt style="width:260px"></dt>
+          <dd style="width:360px; float:left; display:inline;">
+            <input type="submit" name="EnterDoublecheck" class="btn btn-primary" value="Set" />
+            <input type="submit" name="ResetDoublecheck" class="btn btn-primary" value="Re-Set to default" />
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+  #%env/templates/footer.template%#
+  </body>
+</html>

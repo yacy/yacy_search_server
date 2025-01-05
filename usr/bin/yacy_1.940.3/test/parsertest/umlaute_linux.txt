@@ -1,0 +1,2 @@
+﻿In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen
+URL reference in raw text file : http://localhost/umlaute_linux.txt

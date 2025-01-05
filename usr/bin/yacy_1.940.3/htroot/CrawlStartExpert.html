@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Crawl Start</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="js/ajax.js"></script>
+    <script type="text/javascript" src="js/IndexCreate.js"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        /**
+         * Set the state of all elements based on other elements state.
+         * @param {String} cId id of the element that had changed it's state
+         */
+        function setStates(cId) {
+            // order matters!
+            // crawl start points
+            if ($('#url').isChecked()) {
+                $('#crawlingURL').enable();
+                $('#sitemapURL, #crawlingFile').disable();
+                if (cId === "url") { $('#crawlingURL').focus(); }
+            } else if ($('#sitemap').isChecked()) {
+                $('#sitemapURL').enable();
+                $('#crawlingURL, #crawlingFile').disable();
+                if (cId === "sitemap") { $('#sitemapURL').focus(); }
+            } else if ($('#file').isChecked()) {
+                $('#crawlingFile').enable();
+                $('#crawlingURL, #sitemapURL').disable();
+                if (cId === "file") { $('#crawlingFile').focus(); }
+            }
+
+            // Load Filters
+            if (cId === "rangeDomain" || cId === "rangeSubpath" ||
+                    cId === "rangeWide" || typeof cId === 'undefined') {
+                if ($('#rangeDomain').isChecked() ||
+                        $('#rangeSubpath').isChecked()) {
+                    // restrict to sub-path / domain
+                    $('#mustmatch').disable();
+                    // skip these on initial load
+                    if (typeof cId !== 'undefined') {
+                        $('#deleteoldoff, #deleteoldage').uncheck();
+                        $('#deleteoldon').check();
+                    }
+                } else if ($('#rangeWide').isChecked()) {
+                    // use Filter
+                    $('#mustmatch').enable();
+                    // skip these on initial load
+                    if (typeof cId !== 'undefined') {
+                        $('#deleteoldon, #deleteoldage').uncheck();
+                        $('#deleteoldoff').check();
+                        if (cId === "rangeWide") { $('#mustmatch').focus(); }
+                    }
+                }
+            }
+
+            // crawl start: From File
+            if ($("#sitelist").isChecked()) {
+                document.getElementById('rangeDomainDescription').innerHTML ='Restrict to the domains in the link-list';
+                document.getElementById('rangeSubpathDescription').innerHTML ='Restrict to the subpaths in the link-list';
+
+                if ($("#rangeWide").isChecked()) {
+                    // we allow also #rangeSubpath
+                    $('#rangeDomain').check();
+                }
+            }
+
+            // Delete only old
+            if ($('#deleteoldage').isChecked()) {
+                $('#deleteIfOlderNumber, #deleteIfOlderUnit').enable();
+            } else {
+                $('#deleteIfOlderNumber, #deleteIfOlderUnit').disable();
+            }
+
+            // Reload if old
+            if ($('#reloadoldage').isChecked()) {
+                $('#reloadIfOlderNumber, #reloadIfOlderUnit').enable();
+            } else {
+                $('#reloadIfOlderNumber, #reloadIfOlderUnit').disable();
+            }
+
+            // Use Must-Match List for Country Codes?
+            if ($('#noCountryMustMatchSwitch').isChecked()) {
+                $('#countryMustMatchList').disable();
+            } else {
+                $('#countryMustMatchList').enable();
+                if (cId === "countryMustMatchSwitch") {
+                    $('#countryMustMatchList').focus();
+                }
+            }
+
+            // Maximum pages per domain
+            if ($('#crawlingDomMaxCheck').isChecked()) {
+                $('#crawlingDomMaxPages').enable();
+                if (cId === "crawlingDomMaxCheck") {
+                    $('#crawlingDomMaxPages').focus();
+                }
+            } else {
+                $('#crawlingDomMaxPages').disable();
+            }
+
+            // Remote crawl
+            var remoteCrawlerDisabledInfo = document.getElementById('remoteCrawlerDisabledInfo');
+            if ($('#crawlOrder').isChecked()) {
+                if(remoteCrawlerDisabledInfo != null) {
+                    remoteCrawlerDisabledInfo.className = '';
+                }
+                $('#intention').enable();
+                if (cId === "crawlOrder") { $('#intention').focus(); }
+            } else {
+                if(remoteCrawlerDisabledInfo != null) {
+                    remoteCrawlerDisabledInfo.className = 'hidden';
+                }
+                $('#intention').disable();
+            }
+        }
+
+        /** 
+         * Disable element if value matches val.
+         * @param {String} id element id
+         * @param {String} val value to comapre to elements value */
+        function disableIf(id, val) {
+            var e = $('#'+id);
+            if (e.val() === val) {
+                e.disable();
+            }
+        }
+
+        $(document).ready(function() {
+            (function($) {
+                /** Disable a form element. */
+                $.fn.disable = function() {
+                    return this.each(function() {
+                        $(this).prop('disabled', true);
+                    });
+                };
+
+                /** Enable a form element. */
+                $.fn.enable = function() {
+                    return this.each(function() {
+                        $(this).prop('disabled', false);
+                    });
+                };
+
+                /** Check DOM & properties if element is checked. */
+                $.fn.isChecked = function() {
+                    return $(this).prop("checked");
+                };
+
+                /** Set checked state for checkoxes/radio buttons. */
+                $.fn.check = function() {
+                    return this.each(function() {
+                        $(this).attr("checked", "checked").prop("checked", true);
+                    });
+                };
+
+                /** Unset checked state for checkoxes/radio buttons. */
+                $.fn.uncheck = function() {
+                    return this.each(function() {
+                        $(this).removeAttr("checked").prop("checked", false);
+                    });
+                };
+            })(jQuery);
+
+            /**
+             * On form submission remove text fields with default values as they
+             * are set to those by yacy values by yacy, if missing.
+             * @param {eventObject} ev */
+            $('#Crawler').on('submit', function(ev){
+                var defaultMatchAll = "#[matchAllStr]#";
+                var defaultMatchNone = "#[matchNoneStr]#";
+
+                // remove empty textfields
+                disableIf('crawlingDepthExtension', '');
+                disableIf('intention', '');
+
+                // remove if MATCH_NEVER_STRING
+                disableIf('mustnotmatch', defaultMatchNone);
+                disableIf('crawlerOriginURLMustNotMatch', defaultMatchNone);
+                disableIf('ipMustnotmatch', defaultMatchNone);
+                disableIf('indexmustnotmatch', defaultMatchNone);
+                disableIf('indexcontentmustnotmatch', defaultMatchNone);
+                disableIf('indexMediaTypeMustNotMatch', defaultMatchNone);
+                disableIf('indexSolrQueryMustMatch', "#[solrQueryMatchAllStr]#");
+                disableIf('indexSolrQueryMustNotMatch', "#[solrEmptyQueryStr]#");
+
+                // remove if MATCH_ALL_STRING
+                disableIf('mustmatch', defaultMatchAll);
+                disableIf('crawlerOriginURLMustMatch', defaultMatchAll);
+                disableIf('ipMustmatch', defaultMatchAll);
+                disableIf('indexmustmatch', defaultMatchAll);
+                disableIf('indexcontentmustmatch', defaultMatchAll);
+                disableIf('indexMediaTypeMustMatch', defaultMatchAll);
+
+                // remove default collection name
+                disableIf('collection', '#[defaultCollection]#');
+            });
+
+            // add event handlers to all checkoxes & radio buttons
+            $(document).on('change', 'input:checkbox,input:radio', function() {
+                setStates($(this).attr("id"));
+            });
+
+            // set initial states
+            if ($('#crawlingURL').val() !== '') { changed(); }
+            setStates();
+        });
+        //]]>
+    </script>
+    <style type="text/css">
+        .nobr {
+            white-space: nowrap;
+        }
+    </style>
+  </head>
+  <body id="IndexCreate">
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+
+<div id="api">
+<a href="https://yacy.net/api/crawler/" id="apilink" target="_blank"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>Click on this API button to see a documentation of the POST request parameter for crawl starts.</span>
+</div>
+
+    <h2>Expert Crawl Start</h2>
+
+    <p id="startCrawling">
+    <strong>Start Crawling Job:</strong>&nbsp;
+    You can define URLs as start points for Web page crawling and start crawling here.
+    "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links.
+    This is repeated as long as specified under "Crawling Depth".
+    A crawl can also be started using wget and the <a href="https://wiki.yacy.net/index.php/Dev:APICrawler" target="_blank">post arguments</a> for this web page.
+    </p>
+
+    <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Crawl Job</legend>
+        <p>A Crawl Job consist of one or more start point, crawl limitations and document freshness rules.</p>
+        <fieldset>
+          <legend>Start Point</legend>
+          <dl>
+            <dt>One Start URL or a list of URLs:<br/>(must start with http:// https:// ftp:// smb:// file://)</dt>
+            <dd>
+          <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">Define the start-url(s) here. You can submit more than one URL, each line one URL please.
+            Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.
+            Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
+          </span></span>
+              <input type="radio" style="vertical-align: top" name="crawlingMode" id="url" value="url" #(crawlingMode_url)#::checked="checked"#(/crawlingMode_url)# />
+              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" onkeydown="changed()">#[starturl]#</textarea>
+                &nbsp;
+                <span id="robotsOK"></span>
+                <span id="title"><br/></span>
+                   <img id="ajax" src="env/grafics/empty.gif" alt="empty" />
+            </dd>
+            <dt></dt>
+            <dd>
+              <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="46" maxlength="256" value="#[bookmarkTitle]#" readonly="readonly" style="background:transparent; border:0px"/>
+            </dd>
+            <dt>From Link-List of URL</dt>
+            <dd>
+              <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" #(has_url)#disabled="disabled"::#(/has_url)# #(crawlingMode_sitelist)#::checked="checked"#(/crawlingMode_sitelist)#/><br />
+              <div id="sitelistURLs"></div>
+              <button id="expandSiteListBtn" style="visibility:hidden" type="button" onclick="this.disabled = true;loadInfos(true);" class="btn btn-default btn-xs" title="Show all links">
+                  <span class="glyphicon glyphicon-option-horizontal"></span>
+              </button>
+            </dd>
+            <dt>From Sitemap</dt>
+            <dd>
+              <input type="radio" name="crawlingMode" id="sitemap" value="sitemap" #(crawlingMode_sitemap)#::checked="checked"#(/crawlingMode_sitemap)# #(has_sitemapURL)#disabled="disabled"::#(/has_sitemapURL)#/><input name="sitemapURL" id="sitemapURL" type="text" size="71" maxlength="256" value="#[sitemapURL]#"/>
+            </dd>
+            <dt>From File (enter a path<br/>within your local file system)</dt>
+            <dd>
+              <input type="radio" name="crawlingMode" id="file" value="file" #(crawlingMode_file)#::checked="checked"#(/crawlingMode_file)#/><input type="text" name="crawlingFile" id="crawlingFile" value="#[crawlingFile]#" size="71" maxlength="256"/>
+            </dd>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Crawler Filter</legend>
+          <p>These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.</p>
+          <dl>
+          <dt>Crawling Depth</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This defines how often the Crawler will follow links (of links..) embedded in websites.
+            0 means that only the page you enter under "Starting Point" will be added
+            to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will
+            index approximately 25.600.000.000 pages, maybe this is the whole WWW.
+            </span></span>
+            <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="directDocByURL" id="directDocByURL" #(directDocByURLChecked)#::checked="checked"#(/directDocByURLChecked)# />also all linked non-parsable documents
+          </dd>
+          <dt>Unlimited crawl depth for URLs matching with</dt>
+          <dd>
+            <input name="crawlingDepthExtension" id="crawlingDepthExtension" type="text" size="40" maxlength="100" value="#[crawlingDepthExtension]#" />
+          </dd>
+
+          <dt>Maximum Pages per Domain</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.
+            You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
+            the given depth. Domains outside the given depth are then sorted-out anyway.
+            </span></span>
+            <label for="crawlingDomMaxCheck">Use</label>:
+            <input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
+            <label for="crawlingDomMaxPages">Page-Count</label>:
+            <input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" />
+          </dd>
+
+          <dt><label>misc. Constraints</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.
+            However, there are sometimes web pages with static content that
+            is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
+            Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. 'nofollow' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.
+            </span></span>
+            Accept URLs with query-part ('?'): <input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /><br/>
+            Obey html-robots-noindex: <input type="checkbox" name="obeyHtmlRobotsNoindex" id="obeyHtmlRobotsNoindex" #(obeyHtmlRobotsNoindexChecked)#::checked="checked"#(/obeyHtmlRobotsNoindexChecked)# /><br/>
+            Obey html-robots-nofollow: <input type="checkbox" name="obeyHtmlRobotsNofollow" id="obeyHtmlRobotsNofollow" #(obeyHtmlRobotsNofollowChecked)#::checked="checked"#(/obeyHtmlRobotsNofollowChecked)# /><!--<br/>
+            Follow Frames: <input type="checkbox" name="followFrames" id="followFrames" #(followFramesChecked)#::checked="checked"#(/followFramesChecked)# />-->
+          </dd>
+             <dt>Media Type detection</dt>
+            <dd>
+                <div class="info" style="float:right">
+                    <img src="env/grafics/i16.gif" width="16" height="16" alt="Media Type checking info"/>
+                    <span style="right:0px; width:30em;" id="mediaTypeCheckingInfo">
+                        Not loading URLs with unsupported file extension is faster but less accurate. 
+                        Indeed, for some web resources the actual Media Type is not consistent with the URL file extension. Here are some examples:
+                        <ul>
+                            <li><a href="https://en.wikipedia.org/wiki/.de"  target="_blank">https://en.wikipedia.org/wiki/.de</a> : the .de extension is unknown, but the actual Media Type of this page is text/html</li>
+                            <li><a href="https://en.wikipedia.org/wiki/Ask.com"  target="_blank">https://en.wikipedia.org/wiki/Ask.com</a> : the .com extension is not supported (executable file format), but the actual Media Type of this page is text/html</li>
+                            <li><a href="https://commons.wikimedia.org/wiki/File:YaCy_logo.png"  target="_blank">https://commons.wikimedia.org/wiki/File:YaCy_logo.png</a> : the .png extension is a supported image format, but the actual Media Type of this page is text/html</li>
+                        </ul> 
+                    </span>
+                </div>
+                <label>
+                      <input type="radio" aria-describedby="mediaTypeCheckingInfo" name="crawlerAlwaysCheckMediaType" value="false" #(crawlerAlwaysCheckMediaType)#checked="checked"::#(/crawlerAlwaysCheckMediaType)# /> Do not load URLs with an unsupported file extension
+                  </label>
+                  <label>
+                      <input type="radio" name="crawlerAlwaysCheckMediaType" value="true" #(crawlerAlwaysCheckMediaType)#::checked="checked"#(/crawlerAlwaysCheckMediaType)# /> Always cross check file extension against Content-Type header
+                  </label>
+            </dd>
+            <dt>Load Filter on URLs</dt>
+            <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>.
+            Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'. 
+            You can also use an automatic domain-restriction to fully crawl a single domain.
+            Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
+            </span></span>
+            <table style="border-width: 0px">
+            <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td></td></tr>
+            <tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/><div id="rangeDomainDescription" style="display:inline">Restrict to start domain(s)</div></td></tr>
+            <tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/><div id="rangeSubpathDescription" style="display:inline">Restrict to sub-path(s)</div></td></tr>
+            <tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)#/>Use filter</td>
+            <td style="vertical-align: bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+            <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
+            </table>
+            </dd>
+
+            <dt>Load Filter on URL origin of links</dt>
+            <dd>
+                <span class="info" style="float:right">
+                    <img src="env/grafics/i16.gif" width="16" height="16" alt="info"/>
+                    <span style="right:0px;">
+                        The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>.
+                        Example: to allow loading only links from pages on example.org domain, set the must-match filter to '.*example.org.*'. 
+                        Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
+                    </span>
+                </span>
+                <table style="border-width: 0px">
+                    <tr>
+                        <td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td>
+                        <td><input name="crawlerOriginURLMustMatch" id="crawlerOriginURLMustMatch" type="text" size="55" maxlength="100000" value="#[crawlerOriginURLMustMatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td>
+                    </tr>
+                    <tr>
+                        <td><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
+                        <td><input name="crawlerOriginURLMustNotMatch" id="crawlerOriginURLMustNotMatch" type="text" size="55" maxlength="100000" value="#[crawlerOriginURLMustNotMatch]#" /></td>
+                    </tr>
+                </table>
+            </dd>
+
+            <dt>Load Filter on IPs</dt>
+            <dd>
+            <table style="border-width: 0px">
+            <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+            <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
+            </table>
+            </dd>
+          <dt><label>Must-Match List for Country Codes</label>
+          </dt>
+          <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            Crawls can be restricted to specific countries. This uses the country code that can be computed from
+            the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
+            </span></span>
+            <input type="radio" name="countryMustMatchSwitch" id="noCountryMustMatchSwitch" value="0" #(countryMustMatchSwitchChecked)#checked="checked"::#(/countryMustMatchSwitchChecked)# />no country code restriction<br />
+            <input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="1" #(countryMustMatchSwitchChecked)#::checked="checked"#(/countryMustMatchSwitchChecked)# />Use filter&nbsp;&nbsp;
+            <input name="countryMustMatchList" id="countryMustMatchList" type="text" size="60" maxlength="256" value="#[countryMustMatch]#" />
+          </dd>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Document Filter</legend>
+          <p>These are limitations on index feeder. The filters will be applied after a web page was loaded.</p>
+          <dl>
+            <dt>Filter on URLs</dt>
+            <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>
+            that <b>must not match</b> with the URLs to allow that the content of the url is indexed.
+            Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
+            </span></span>
+            <table style="border-width: 0px">
+            <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+            <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+            <tr>
+              <td colspan="2"><input type="checkbox" name="noindexWhenCanonicalUnequalURL" id="noindexWhenCanonicalUnequalURL" #(noindexWhenCanonicalUnequalURLChecked)#::checked="checked"#(/noindexWhenCanonicalUnequalURLChecked)#/> No Indexing when Canonical present and Canonical != URL</td>
+            </tr>
+            </table>
+            </dd>
+            <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
+            <dd>
+            <table style="border-width: 0px">
+            <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+            <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
+            </table>
+            </dd>
+             <dt>Filter on Document Media Type (aka MIME type)</dt>
+            <dd>
+                <div class="info" style="float:right">
+                    <img src="env/grafics/i16.gif" width="16" height="16" alt="Media Type filter info"/>
+                    <span style="right:0px;" id="mediaTypeMustMatchInfo">
+                        The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>
+                        that <b>must match</b> with the document Media Type (also known as MIME Type) to allow the URL to be indexed. 
+                        Standard Media Types are described at the <a href="https://www.iana.org/assignments/media-types/media-types.xhtml" target="_blank">IANA registry</a>.
+                        Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
+                    </span>
+                </div>
+                <table style="border-width: 0px">
+                    <tr>
+                        <td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td>
+                        <td><input name="indexMediaTypeMustMatch" id="indexMediaTypeMustMatch" type="text" size="55" maxlength="100000" value="#[indexMediaTypeMustMatch]#" aria-describedby="mediaTypeMustMatchInfo" /></td>
+                    </tr>
+                    <tr>
+                        <td><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
+                        <td><input name="indexMediaTypeMustNotMatch" id="indexMediaTypeMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexMediaTypeMustNotMatch]#" /></td>
+                    </tr>
+                </table>
+            </dd>
+             <dt>Solr query filter on any active <a href="IndexSchema_p.html" target="_blank">indexed</a> field(s)</dt>
+            <dd>
+                <div class="info" style="float:right">
+                    <img src="env/grafics/i16.gif" width="16" height="16" alt="Solr query filter info"/>
+                    <span style="right:0px;" id="indexSolrQueryInfo">
+                        Each parsed document is checked against the given Solr query before being added to the index. 
+                        The query must be written in respect to the <a href="https://lucene.apache.org/solr/guide/6_6/the-standard-query-parser.html#the-standard-query-parser" target="_blank">standard</a> Solr query syntax.
+                    </span>
+                </div>
+                <table style="border-width: 0px" role="presentation">
+                    #(embeddedSolrConnected)#
+                    <tr>
+                        <td>
+                            <div class="info"><p>The embedded local Solr index must be connected to use this kind of filter.</p>
+                            <p>You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.</p></div>
+                        </td>
+                    </tr>
+                    ::
+                    <tr>
+                        <td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td>
+                        <td>
+                            <input name="indexSolrQueryMustMatch" id="indexSolrQueryMustMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustMatch]#" aria-describedby="indexSolrQueryInfo" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:110px"><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
+                        <td>
+                            <input name="indexSolrQueryMustNotMatch" id="indexSolrQueryMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustNotMatch]#" aria-describedby="indexSolrQueryInfo" enabled="false"/>
+                        </td>
+                    </tr>
+                    #(/embeddedSolrConnected)#
+                </table>
+            </dd>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Content Filter</legend>
+          <p>These are limitations on parts of a document. The filter will be applied after a web page was loaded.
+          You can choose to:</p>
+          <dl>
+            <dt>Evaluate by default</dt>
+            <dd><input type="radio" name="default_valency" id="default_valency_eval" value="EVAL" #(default_valency_eval)#::checked="checked"#(/default_valency_eval)#/>
+            Use all words in document by default until a CSS class as listed below appears; then ignore all
+            </dd>
+            <dt>Ignore by default</dt>
+            <dd><input type="radio" name="default_valency" id="default_valency_ignore" value="IGNORE" #(default_valency_ignore)#::checked="checked"#(/default_valency_ignore)#/>
+            Ignore all words in document by default until a CSS class as listed below appears, then evaluate all
+            </dd>
+            <dt>Filter div or nav class names</dt>
+            <dd>
+            <table style="border-width: 0px">
+              <tr>
+                <td><input name="valency_switch_tag_names" id="valency_switch_tag_names" type="text" size="55" maxlength="100000" value="#[valency_switch_tag_names]#" onblur="if (this.value=='') this.value='';"/></td>
+                <td>comma-separated list of &lt;div&gt; or &lt;nav&gt; element class names which should be filtered out/in according to switch above.</td>
+              </tr>
+            </table>
+            </dd>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Clean-Up before Crawl Start</legend>
+          <dl>
+            <dt><label for="cleanSearchCache">Clean up search events cache</label></dt>
+            <dd>
+                <input type="checkbox" name="cleanSearchCache" id="cleanSearchCache" #(cleanSearchCacheChecked)#::checked="checked"#(/cleanSearchCacheChecked)# aria-describedby="cleanSearchCacheInfo"/>
+                <div class="info" style="float:right">
+                    <img src="env/grafics/i16.gif" width="16" height="16" alt="Clean up search events cache info"/>
+                    <span style="right:0px;" id="cleanSearchCacheInfo">
+                        Check this option to be sure to get fresh search results including newly crawled documents. Beware that it will also interrupt any refreshing/resorting of search results currently requested from browser-side.
+                    </span>
+                </div>
+            </dd>
+            <dt>No Deletion</dt>
+            <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.
+            To remove old files from the search index it is not sufficient to just consider them for re-load but it may be necessary
+            to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.
+            </span></span><input type="radio" name="deleteold" id="deleteoldoff" value="off" #(deleteold_off)#::checked="checked"#(/deleteold_off)#/>Do not delete any document before the crawl is started.</dd>
+            <dt>Delete sub-path</dt>
+            <dd><input type="radio" name="deleteold" id="deleteoldon" value="on" #(deleteold_on)#::checked="checked"#(/deleteold_on)#/>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
+            <dt>Delete only old</dt>
+            <dd><input type="radio" name="deleteold" id="deleteoldage" value="age" #(deleteold_age)#::checked="checked"#(/deleteold_age)#/>Treat documents that are loaded
+            <select name="deleteIfOlderNumber" id="deleteIfOlderNumber">
+                            #(deleteIfOlderSelect)#::
+                                   #{list}#<option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/deleteIfOlderSelect)#
+                        </select>
+                        <select name="deleteIfOlderUnit" id="deleteIfOlderUnit">
+                            #(deleteIfOlderUnitSelect)#::
+                                   #{list}#<option value="#[value]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/deleteIfOlderUnitSelect)#
+                            </select> ago as stale and delete them before the crawl is started.
+            </dd>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Double-Check Rules</legend>
+          <dl>
+            <dt>No&nbsp;Doubles</dt>
+            <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
+            then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
+            to use that check the 're-load' option.
+            </span></span><input type="radio" name="recrawl" id="reloadoldoff" value="nodoubles" #(recrawl_nodoubles)#::checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
+            <dt>Re-load</dt>
+            <dd><input type="radio" name="recrawl" id="reloadoldage" value="reload" #(recrawl_reload)#::checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
+                            <select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
+                            #(reloadIfOlderSelect)#::
+                                   #{list}#<option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/reloadIfOlderSelect)#
+                            </select>
+                            <select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
+                            #(reloadIfOlderUnitSelect)#::
+                                   #{list}#<option value="#[value]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/reloadIfOlderUnitSelect)#
+                            </select> ago as stale and load them again. If they are younger, they are ignored.
+            </dd>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Document Cache</legend>
+          <dl><dt><label for="storeHTCache">Store to Web Cache</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This option is used by default for proxy prefetch, but is not needed for explicit crawling.
+            </span></span>
+            <input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# />
+          </dd>
+
+          <dt><label for="mustmatch">Policy for usage of Web Cache</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The caching policy states when to use the cache during crawling:
+              <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
+              <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
+              <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Otherwise use online source;
+              <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable
+              </span></span>
+            <input type="radio" name="cachePolicy" value="nocache" #(cachePolicy_nocache)#::checked="checked"#(/cachePolicy_nocache)#/>no&nbsp;cache&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="cachePolicy" value="iffresh" #(cachePolicy_iffresh)#::checked="checked"#(/cachePolicy_iffresh)# />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="cachePolicy" value="ifexist" #(cachePolicy_ifexist)#::checked="checked"#(/cachePolicy_ifexist)#/>if&nbsp;exist&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="cachePolicy" value="cacheonly" #(cachePolicy_cacheonly)#::checked="checked"#(/cachePolicy_cacheonly)#/>cache&nbsp;only
+          </dd>
+          </dl>
+        </fieldset>
+
+        <fieldset>
+          <legend>Robot Behaviour</legend>
+          <dl>
+          <dt><label>Use Special User Agent and robot identification</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            Because YaCy can be used as replacement for commercial search appliances
+            (like the Google Search Appliance aka GSA) the user must be able to crawl all web pages that are granted to such commercial platforms.
+            Not having this option would be a strong handicap for professional usage of this software. Therefore you are able to select
+            alternative user agents here which have different crawl timings and also identify itself with another user agent and obey the corresponding robots rule.
+            </span></span>
+            <select name="agentName" id="agentName">
+            #{list}#
+              <option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>
+            #{/list}#
+            </select>
+          </dd>
+          </dl>
+        </fieldset>
+
+        #(vocabularySelect)#::
+        <fieldset>
+          <legend>Enrich Vocabulary</legend>
+          <dl>
+          <dt><label>Scraping Fields</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            You can use class names to enrich the terms of a vocabulary based on the text content that appears on web pages. Please write the names of classes into the matrix.
+            </span></span>
+            <table class="table table-condensed">
+            <tr><th>Vocabulary</th><th>Class</th></tr>
+            #{vocabularyset}#
+            <tr>
+            <td>#[name]#</td>
+            <td><input name="vocabulary_#[name]#_class" id="vocabulary_#[name]#_class" type="text" size="55" maxlength="1028" value="#[value]#" /></td>
+            </tr>
+            #{/vocabularyset}#
+            </table>
+          </dd>
+          </dl>
+        </fieldset>
+        #(/vocabularySelect)#
+
+        <fieldset>
+          <legend>Snapshot Creation</legend>
+          <dl>
+          <dt><label>Max Depth for Snapshots</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            Snapshots are xml metadata and pictures of web pages that can be created during crawling time.
+            The xml data is stored in the same way as a Solr search result with one hit and the pictures will be stored as pdf into subdirectories
+            of HTCACHE/snapshots/. From the pdfs the jpg thumbnails are computed. Snapshot generation can be controlled using a depth parameter; that
+            means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,
+            no snapshots are generated.
+            </span></span>
+            <input type="text" name="snapshotsMaxDepth" id="snapshotsMaxDepth" size="2" maxlength="2" value="#[snapshotsMaxDepth]#" />
+          </dd>
+          <dt><label>Multiple Snapshot Versions</label></dt>
+          <dd>
+            <input type="radio" name="snapshotsReplaceOld" value="on" checked="checked"/> replace old snapshots with new one&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="snapshotsReplaceOld" value="off" /> add new versions for each crawl
+          </dd>
+          <dt><label for="snapshotsMustnotmatch">must-not-match filter for snapshot generation</label></dt>
+          <dd><input name="snapshotsMustnotmatch" id="snapshotsMustnotmatch" type="text" size="55" maxlength="100000" value="#[snapshotsMustnotmatch]#" /></dd>
+          #(snapshotEnableImages)#
+          <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>
+          <dt><label>Image Creation</label></dt>
+          <dd>
+            <div class="info">Only XML snapshots can be generated. as the <a href="https://wkhtmltopdf.org/" target="_blank">wkhtmltopdf</a> util is not found by YaCy on your system.
+                            It is required to generate PDF snapshots from crawled pages that can then be converted to images.</div>
+          </dd>::
+          <dt><label>Image Creation</label></dt>
+          <dd>
+            <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage"#(snapshotsLoadImageChecked)#:: checked="checked"#(/snapshotsLoadImageChecked)#/>
+          </dd>
+          #(/snapshotEnableImages)#
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Index Attributes</legend>
+          <dl>
+          <dt>Indexing</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
+            Document Cache without indexing.
+            </span></span>
+            <label for="indexText">index text</label>:
+            <input type="checkbox" name="indexText" id="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
+            <label for="indexMedia">index media</label>:
+            <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
+          </dd>
+          #(remoteindexing)#::
+          <dt><label for="crawlOrder">Do Remote Indexing</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
+            If you need your crawling results locally, you should switch this off.
+            Only senior and principal peers can initiate or receive remote crawls.
+            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
+            so they can omit starting a crawl with the same start point.
+            </span></span>
+            <table style="border-width: 0px">
+              #(remoteCrawlerDisabled)#::
+              <tr #(crawlOrderChecked)#class="hidden"::#(/crawlOrderChecked)# id="remoteCrawlerDisabledInfo">
+                  <td colspan="2"><div class="info"><p>Remote crawl results won't be added to the local index as the remote crawler is disabled on this peer.</p>
+                            <p>You can activate it in the <a href="RemoteCrawl_p.html">Remote Crawl Configuration</a> page.</p></div>
+                </td>
+              </tr>
+              #(/remoteCrawlerDisabled)#
+              <tr>
+                <td>
+                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)#/>
+                </td>
+                <td>
+                  <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
+                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="#[intention]#" /><br />
+                  This message will appear in the 'Other Peer Crawl Start' table of other peers.
+                </td>
+              </tr>
+            </table>
+          </dd>
+          #(/remoteindexing)#
+
+          <dt><label for="collection">Add Crawl result to collection(s)</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A crawl result can be tagged with names which are candidates for a collection request.
+            These tags can be selected with the <a href="gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator.
+            To use this option, the 'collection_sxt'-field must be switched on in the <a href="IndexFederated_p.html">Solr Schema</a>
+            </span></span>
+            <input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
+          </dd>
+
+          <dt><label for="collection">Time Zone Offset</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The time zone is required when the parser detects a date in the crawled web page. Content can be searched with the on: - modifier which
+            requires also a time zone when a query is made. To normalize all given dates, the date is stored in UTC time zone. To get the right offset
+            from dates without time zones to UTC, this offset must be given here.  The offset is given in minutes;
+            Time zone offsets for locations east of UTC must be negative; offsets for zones west of UTC must be positve.
+            </span></span>
+            <input id="timezoneOffset" type="text" size="4" maxlength="4" name="timezoneOffset" value=""><script>document.getElementById("timezoneOffset").value = new Date().getTimezoneOffset();</script>
+          </dd>
+
+          </dl>
+        </fieldset>
+
+        <dl>
+          <dt><input type="hidden" name="crawlingstart" value="1"/><input type="submit" value="Start New Crawl Job" class="btn btn-primary"/></dt><dd></dd>
+        </dl>
+      </fieldset>
+    </form>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

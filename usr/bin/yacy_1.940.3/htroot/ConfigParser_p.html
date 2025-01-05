@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Advanced Settings</title>
+    #%env/templates/metas.template%#
+	<script type="text/javascript">
+    <!--
+	function checkAll(formToCheckAll, checkStatus) {
+		var inputs=document.getElementById(formToCheckAll);	
+		for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
+    }
+    -->
+    </script>
+  </head>
+  <body id="Settings">
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawler.template%#
+    <h2>Parser Configuration</h2>
+<form id="parsersettings" action="ConfigParser_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="parser">Content Parser Settings</legend>
+<p>
+  With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.<br />
+  For a detailed description of the various MIME-types take a look at
+  <a href="https://www.iana.org/assignments/media-types/media-types.xhtml" target="_blank">https://www.iana.org/assignments/media-types/media-types.xhtml</a>.</br>
+  If you want to test a specific parser you can do so using the <a href="ViewFile.html">File Viewer</a>.
+</p>
+<table border="0">
+  <tr class="TableHeader" valign="bottom">
+    <td class="small" width="30" align="center"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);"/></td>
+    <td class="small" width="60">Extension</td>
+    <td class="small" width="300">Mime-Type</td>
+  </tr>#{parser}#
+  <tr class="TableCellDark">
+    <td colspan="3">#[name]#</td>
+  </tr>#{ext}#
+  <tr id="#[name]#" class="TableCellLight">
+    <td class="small" align="center"><input type="checkbox" name="extension_#[extension]#" #(status)#::checked="checked" #(/status)#/></td>
+    <td class="small">#[extension]#</td>
+    <td class="small"></td>
+  </tr>#{/ext}##{mime}#
+  <tr class="TableCellLight">
+    <td class="small" align="center"><input type="checkbox" name="mimename_#[mimetype]#" #(status)#::checked="checked" #(/status)#/></td>
+    <td class="small"></td>
+    <td class="small">#[mimetype]#</td>
+  </tr>#{/mime}#
+  #{/parser}#
+  <tr class="TableCellDark">
+    <td colspan="3" class="small" ><input type="submit" name="parserSettings" value="Submit" class="btn btn-primary"/></td>
+  </tr>
+</table>
+</fieldset>
+</form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

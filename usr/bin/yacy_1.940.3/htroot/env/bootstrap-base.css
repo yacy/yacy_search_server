@@ -1,0 +1,137 @@
+/*
+ * Base bootstrap structure, this should become part of base.css later
+ */
+
+.navbar {
+  padding-top: 5px;
+  min-height: 60px;
+}
+
+/* Move down content because we have a fixed navbar that is 60px tall */
+body {
+  padding-top: 70px;
+}
+
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+  border: 0;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  display: none;
+  margin-top: -1px;
+  margin-left: 8px;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    width: 15%;
+    position: fixed;
+    top: 61px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 10px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -11px; /* 20px padding + 1px border */
+  margin-bottom: 10px;
+  margin-left: -10px;
+}
+.nav-sidebar > li > a {
+  padding-right: 10px;
+  padding-left: 18px;
+  padding-top: 4px;
+  padding-bottom: 3px;
+}
+.nav-sidebar > li {
+  padding: 0px;
+  margin-left: 6px;
+  margin-right: 6px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+.nav-sidebar h3 {
+  padding-right: 10px;
+  padding-left: 16px;
+  padding-top: 4px;
+  padding-bottom: 1px;
+  margin: 0px;
+  font-size: 14px;
+}
+.navbar-header a:link, .navbar-collapse a:link {
+  text-decoration:none;
+}
+.navbar-right {
+  padding-right:20px;
+  font-size: 14px;
+}
+legend {
+  width: auto;
+  margin: 0px;
+  line-height: 16px;
+  border: 0;
+}
+label {
+  font-weight:normal;
+  padding-left:6px;
+}
+ul.nav li.dropdown:hover ul.dropdown-menu{
+    display: block;
+    margin-top:0px
+}
+
+/*
+ * typeahead
+ * sets the following classes: 
+ * twitter-typeahead, tt-dropdown-menu, tt-dataset-%CLASS%, tt-suggestions, tt-suggestion
+ * tt-hint, tt-input, tt-cursor
+ */
+
+.tt-dropdown-menu {
+  width: 396px;
+  margin-top: 4px;
+  padding: 4px 0;
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+}
+
+.tt-suggestion {
+  padding: 3px 10px;
+  font-size: 16px;
+}
+
+.tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #428bca;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+.popover {
+    z-index: 1600;
+}
+.col-md-9 {
+    overflow-x: hidden;
+	margin-left: 15%;
+	width: 85%;
+}

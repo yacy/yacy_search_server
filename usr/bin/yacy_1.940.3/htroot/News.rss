@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+	<title><![CDATA[YaCy '#[clientname]#': #(page)#News Overview::Incoming News::Processed News::Outgoing News::Published News#(/page)#]]></title>
+	<link>#[context]#/News.html?page=#[page]#</link>
+	<image>
+		<url>#[context]#/env/grafics/YaCyLogo_60ppi.png</url>
+		<title>YaCy</title>
+		<link>#[context]#/</link>
+	</image>
+	#(table)#<!-- News Overview -->
+	::<!-- News Tables -->
+	#{list}#<item>
+		<author><![CDATA[#[ori]#]]></author>
+		<title><![CDATA[#[title]#]]></title>
+		<link><![CDATA[#[link]#]]></link>
+		<pubDate>#[crerfcdate]#</pubDate>
+		<guid>#[id]#</guid>
+		<description><![CDATA[
+			<p>#[description]#</p>
+			<hr />
+			<table border="1">
+				#{attributes}#<tr>
+					<td>#[name]#</td>
+					<td>#[value]#</td>
+				</tr>#{/attributes}#
+			</table>
+		]]></description>
+		<category><![CDATA[#[cat]#]]></category>
+	</item>#{/list}#
+	#(/table)#
+</channel>
+</rss>	

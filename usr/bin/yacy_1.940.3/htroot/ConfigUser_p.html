@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': User Editor</title>
+    #%env/templates/metas.template%#
+  </head>
+<body>
+    #%env/templates/header.template%#
+    #%env/templates/submenuUseCaseAccount.template%#
+    <h2>User Account Editor</h2>
+    
+    <!-- Page 1: Results -->
+    #(text)#
+    ::
+    <p>User created: #[username]#</p>
+    ::
+    <p>User changed: #[username]#</p>
+    #(/text)#
+    #(error)#
+    ::
+    <p class="error">Generic error.</p>
+    ::
+    <p class="error">Passwords do not match.</p>
+    ::
+    <p class="error">Username too short. Username must be &gt;= 4 Characters.</p>
+    ::
+    <p class="error">Username already used (not allowed).</p>
+    #(/error)#
+
+    <form action="ConfigUser_p.html" method="post" accept-charset="UTF-8">
+      <fieldset><legend>Edit current user: #[username]#</legend>
+        <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
+        <input type="hidden" name="current_user" value="#[current_user]#" />
+        <dl>
+          <dt><label for="username">Username</label>:</dt>
+          <dd><input type="text" id="username" name="username" value="#[username]#" /></dd>
+          <dt><label for="password">Password</label>:</dt>
+          <dd><input type="password" id="password" name="password" /></dd>
+          <dt><label for="password2">Repeat password</label>:</dt>
+          <dd><input type="password" id="password2" name="password2" /></dd>
+          <dt><label for="firstname">First name</label>:</dt>
+          <dd><input type="text" id="firstname" name="firstname" value="#[firstname]#" /></dd>
+          <dt><label for="lastname">Last name</label>:</dt>
+          <dd><input type="text" id="lastname" name="lastname" value="#[lastname]#" /></dd>
+          <dt><label for="address">Address</label>:</dt>
+          <dd><input type="text" id="address" name="address" value="#[address]#" /></dd>
+          <dt>Rights:</dt>
+          <dd>
+            #{rights}#
+            <input type="checkbox" id="#[name]#" name="#[name]#"#(set)#:: checked="checked"#(/set)# /><label for="#[name]#">#[friendlyName]# right</label><br />
+            #{/rights}#
+          </dd>
+          <dt><label for="tlimit">Timelimit</label>:</dt>
+          <dd><input type="text" id="tlimit" name="timelimit" value="#[timelimit]#" /></dd>
+          <dt><label for="tused">Time used</label>:</dt>
+          <dd><input type="text" id="tused" name="timeused" value="#[timeused]#" /></dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="change" value="Save User" class="btn btn-primary"/> 
+            <input type="submit" name="delete" value="Delete User" class="btn btn-danger"/>
+            <button name="cancel" class="btn btn-default btn-link" value="ConfigAccountList_p.html">back to user list</button></dd>
+        </dl>
+      </fieldset>
+    </form>
+
+#%env/templates/footer.template%#
+</body>
+</html>

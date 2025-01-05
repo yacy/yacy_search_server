@@ -1,0 +1,34 @@
+#(content)#::#(nl)#::    ,#(/nl)#
+    {
+      "title": "#[title-json]#",
+      "link": "#[link]#",
+      "code": "#[code]#",
+      "description": "#[description-json]#",
+      "pubDate": "#[date822]#",
+      #(image)#::"image": "#[url]#",#(/image)#
+      #(showEvent)#::"eventDate": "#[date822]#",#(/showEvent)#
+      "size": "#[size]#",
+      "sizename": "#[sizename]#",
+      "guid": "#[urlhash]#",
+      #(favicon)#::"faviconUrl": "#[faviconUrl]#",#(/favicon)#
+      "host": "#[host]#",
+      "path": "#[path]#",
+      "file": "#[file]#",
+      "urlhash": "#[urlhash]#",
+      "ranking": "#[ranking]#"
+    }::#(item)#::#(nl)#::    ,#(/nl)#
+    {
+      "title": "#[name]#",
+      "icon": "/ViewImage.png?maxwidth=256&amp;maxheight=256&amp;code=#[code]#",
+      "image": "#[href]#",
+      "cache": "#[hrefCache]#",
+      "url": "#[source]#",
+      "urlhash": "#[urlhash]#",
+      "host": "#[sourcedom]#",
+      "width": "#[width]#",
+      "height": "#[height]#"
+    }#(/item)#::
+::
+::
+::
+#(/content)#

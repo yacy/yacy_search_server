@@ -1,0 +1,71 @@
+# robots.txt for #[clientname]#.yacy
+
+User-agent: *
+
+Disallow: /*query=
+Disallow: /proxy.html
+Disallow: /IndexBrowser_p.html
+
+#(all)#
+
+# dirs
+#{dirs}#
+Disallow: /#[dir]#
+#{/dirs}#
+
+
+# locked
+#{locked}#
+Disallow: /#[page]#
+#{/locked}#
+
+#(bookmarks)#::
+# bookmarks
+Disallow: /Bookmarks.html#(/bookmarks)#
+
+#(wiki)#::
+# wiki
+Disallow: /Wiki.html#(/wiki)#
+
+#(blog)#::
+# blog
+Disallow: /Blog.html
+Disallow: /Blog.rss
+Disallow: /Blog.xml#(/blog)#
+
+#(news)#::
+# news
+Disallow: /News.html#(/news)#
+
+#(status)#::
+# status
+Disallow: /Status.html#(/status)#
+
+#(network)#::
+# network
+Disallow: /Network.html
+Disallow: /Network.csv
+Disallow: /Network.xml#(/network)#
+
+#(homepage)#::
+# homepage
+Disallow: /www#(/homepage)#
+
+#(fileshare)#::
+# fileshare
+Disallow: /share#(/fileshare)#
+
+#(surftips)#::
+# surftips
+Disallow: /Surftips.html#(/surftips)#
+
+#(profile)#::
+# view profile
+Disallow: /ViewProfile.html
+Disallow: /ViewProfile.vcf
+Disallow: /ViewProfile.xml#(/profile)#
+
+::
+# all
+Disallow: /
+#(/all)#

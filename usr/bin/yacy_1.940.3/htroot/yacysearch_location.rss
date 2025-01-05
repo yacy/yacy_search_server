@@ -1,0 +1,28 @@
+#(kml)#::<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>
+<rss version="2.0"
+    xmlns:yacy="http://www.yacy.net/"
+    xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" 
+>
+    <!-- YaCy Search Engine; https://yacy.net -->
+    <channel>
+        <title>#[promoteSearchPageGreeting]#</title>
+        <description>Search for #[rss_query]#</description>
+        <link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
+        <image>
+            <url>#[rssYacyImageURL]#</url>
+            <title>Search for #[rss_query]#</title>
+            <link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
+        </image>
+        #{placemark}#
+        <item>
+          <title><![CDATA[#[location]#]]></title>
+          <link>#[url]#</link>
+          <pubDate>#[date]#</pubDate>
+          <summary><![CDATA[<a href="#[url]#">#[url]#</a><br/><br/>#[name]#<br/><br/><a href="ViewFile.html?url=#[url]#">[metadata]</a>]]></summary>
+          <geo:long>#[lon]#</geo:long>
+          <geo:lat>#[lat]#</geo:lat>
+        </item>
+        #{/placemark}#
+    </channel>
+</rss>#(/kml)#

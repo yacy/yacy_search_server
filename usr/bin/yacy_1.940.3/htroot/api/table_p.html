@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Table Viewer</title>
+    #(showtable)#::
+    <link rel="alternate" type="application/xml" title="Table" href="table_p.xml?table=#[table]#&pk=" />
+    #(/showtable)#
+    #%env/templates/metas.template%#
+  </head>
+  <script type="text/javascript" src="../js/sorttable.js"></script>
+  <body id="Table">
+    #(showtable)#::
+    <form action="../Tables_p.html" method="post" target="_parent" enctype="multipart/form-data" accept-charset="UTF-8" name="tablelisting">
+      <fieldset>
+      <legend><label for="table">Table: '#[table]#'</label></legend>
+      <table class="sortable" border="0">
+        <tr class="TableHeader" valign="bottom">
+          #(showpk)#::<td>PK</td>#(/showpk)#
+          #{columns}#
+          <td>#[header]#</td>
+          #{/columns}#
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          #(showpk)#::<td>#[pk]#</td>#(/showpk)#
+          #{columns}#
+          <td align="left">#[cell]#</td>
+          #{/columns}#
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="table" value="#[table]#" />
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="edittable" value="Edit Table" class="btn btn-primary"/>
+      </p>
+      </fieldset>
+    </form>
+    #(/showtable)#
+  </body>
+</html>

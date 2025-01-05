@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Server Log</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ViewLog">
+    #%env/templates/header.template%#
+    #(submenu)#::#%env/templates/submenuComputation.template%##(/submenu)#
+    <h2>Server Log</h2>
+    
+    <form action="ViewLog_p.html" method="get" accept-charset="UTF-8">
+      <fieldset>
+        <input type="text" name="lines" id="lines" size ="6" value="#[lines]#" maxlength="9" /><label for="lines"> Lines (max. #[maxlines]#)</label>
+        <input type="checkbox" name="mode" id="mode" value="reversed" #(reverseChecked)#::checked="checked"#(/reverseChecked)# /><label for="mode">reversed order</label>
+        <input type="text" name="filter" id="filter" size ="30" value="#[filter]#" maxlength="60" />
+        <input type="submit" value="refresh" />
+      </fieldset>
+    </form>
+    
+    <div class="log">
+    #{log}#<p class="log#(level)#Debug::Info::System::Warning::Severe#(/level)#" style="font-family:Monospace;margin-top:0px;margin-bottom:0px;">#[line]#</p>#{/log}#
+	</div>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

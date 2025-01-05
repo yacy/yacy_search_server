@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<status>
+  <ppm>#[ppm]#</ppm>
+  
+  <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
+  <wordCacheMaxSize>#[wordCacheMaxSize]#</wordCacheMaxSize>
+
+  <memory>
+    <used>#[usedMemory]#</used>
+    <free>#[freeMemory]#</free>
+    <total>#[totalMemory]#</total>
+    <max>#[maxMemory]#</max>
+  </memory>
+  
+  <disk>
+    <used>#[usedDisk]#</used>
+    <free>#[freeDisk]#</free>
+  </disk>
+  
+  <processors>#[processors]#</processors>
+  <load>#[load]#</load>
+  
+  <traffic>
+	<in>#[trafficIn]#</in>
+	<proxy>#[trafficProxy]#</proxy>
+	<crawler>#[trafficCrawler]#</crawler>
+  </traffic>
+  
+  <dbsize>
+    <urlpublictext>#[urlpublictextSize]#</urlpublictext>
+    <urlpublictextSegmentCount>#[urlpublictextSegmentCount]#</urlpublictextSegmentCount>
+    <webgraph>#[webgraphSize]#</webgraph>
+    <webgraphSegmentCount>#[webgraphSegmentCount]#</webgraphSegmentCount>
+    <citation>#[citationSize]#</citation>
+    <citationSegmentCount>#[citationSegmentCount]#</citationSegmentCount>
+    <rwipublictext>#[rwipublictextSize]#</rwipublictext>    
+    <rwipublictextSegmentCount>#[rwipublictextSegmentCount]#</rwipublictextSegmentCount>    
+  </dbsize>
+  
+  <loaderqueue>
+    <size>#[loaderSize]#</size>
+    <max>#[loaderMax]#</max>
+  </loaderqueue>
+  
+  <localcrawlerqueue>
+    <size>#[localCrawlSize]#</size>
+    <state>#[localCrawlState]#</state>
+  </localcrawlerqueue>
+  
+  <limitcrawlerqueue>
+    <size>#[limitCrawlSize]#</size>
+    <state>#[limitCrawlState]#</state>
+  </limitcrawlerqueue>
+  
+  <remotecrawlerqueue>
+    <size>#[remoteCrawlSize]#</size>
+    <state>#[remoteCrawlState]#</state>
+  </remotecrawlerqueue>
+  
+  <noloadcrawlerqueue>
+    <size>#[noloadCrawlSize]#</size>
+    <state>#[noloadCrawlState]#</state>
+  </noloadcrawlerqueue>
+
+<!-- crawl profile list -->
+#(crawlProfiles)#<crawls count="0"/>::
+  <crawls count="#[count]#">
+  #{list}#
+    <crawl>
+      <name>#[name]#</name>
+      <count>#[count]#</count>
+      <handle>#[handle]#</handle>
+      <depth>#[depth]#</depth>
+      <status>#(terminateButton)#terminated::alive#(/terminateButton)#</status>
+    </crawl>
+  #{/list}# 
+  </crawls>
+#(/crawlProfiles)#
+  
+  <postprocessing>
+    <collectionRemainingCount>#[postprocessingCollectionRemainingCount]#</collectionRemainingCount>
+    <webgraphRemainingCount>#[postprocessingWebgraphRemainingCount]#</webgraphRemainingCount>
+    <status>#(postprocessingRunning)#idle::busy:#[activity]##(/postprocessingRunning)#</status>
+    <speed>#[postprocessingSpeed]#</speed>
+    <elapsedTime>#[postprocessingElapsedTime]#</elapsedTime>
+    <remainingTime>#[postprocessingRemainingTime]#</remainingTime>
+    <remainingTimeMinutes>#[postprocessingRemainingTimeMinutes]#</remainingTimeMinutes>
+    <remainingTimeSeconds>#[postprocessingRemainingTimeSeconds]#</remainingTimeSeconds>
+  </postprocessing>
+  
+</status>

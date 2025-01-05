@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Blacklist Administration</title>
+    #%env/templates/metas.template%#
+#(disabled)##(edit)#
+    <script type="text/javascript">
+    function switchTargetBlacklist(value){
+        if (value == "moveBlacklistEntry") {
+            document.getElementById("editBlacklistPatterns").targetBlacklist.disabled=false;
+        } else {
+            document.getElementById("editBlacklistPatterns").targetBlacklist.disabled=true;
+        }
+    }
+    </script>
+::#(/edit)#::#(/disabled)#
+  </head>
+  <body id="Blacklist"#(disabled)##(edit)# onload="switchTargetBlacklist('');"::#(/edit)#::#(/disabled)#>
+    #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+  
+    <h2>Blacklist Administration</h2>
+    <p>
+      This function provides an URL filter to the proxy; any blacklisted URL is blocked
+      from being loaded. You can define several blacklists and activate them separately.
+      You may also provide your blacklist to other peers by sharing them; in return you may
+      collect blacklist entries from other peers.
+    </p>
+    <h3>Active list: #(disabled)#
+      #{blackLists}#      
+      &nbsp;[&nbsp;<em><a href="Blacklist_p.html?selectList&selectedListName=#[name]#">#[name]#</a></em>&nbsp;]&nbsp;
+      #{/blackLists}#
+      ::<span class="error">No blacklist selected</span>#(/disabled)#</h3>
+    <!-- blacklist selection -->
+    <fieldset class="selectList">
+      <legend>Select list to edit:</legend>
+      #(disabled)#
+      <form id="selectListName" action="Blacklist_p.html" method="post" enctype="multipart/form-data"><fieldset>
+        <select name="selectedListName" size="1" onchange="document.getElementById('selectListName').submit();">
+          #{blackLists}#
+          <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]# [#(shared)#not shared::shared#(/shared)#]</option>
+          #{/blackLists}#
+        </select>
+        <input type="hidden" name="selectList" value="select" />
+        <input type="submit" class="btn btn-primary" />
+      </fieldset></form>
+        ::
+      #(/disabled)#
+    </fieldset>
+    
+    <fieldset class="createList">
+      <legend>Create new list:</legend>
+      #(error)#
+          ::
+          <p>Unable to create list <strong>#[name]#</strong> since it contains illegal characters. 
+          A legal name is made up from a letter, digit, minus, plus or underscore as the first character
+          followed by letters, digits, minus, plus, underscores or dots.</p>
+          ::
+          <p>Unable to create list <strong>#[name]#</strong> since a list of this name exists already.</p>
+      #(/error)#
+        <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8"><fieldset>
+          <input type="text" id="newListName" size ="50" name="newListName" />
+          <input type="submit" name="createNewList" class="btn btn-primary" value="create" />
+        </fieldset></form>
+    </fieldset>  
+    <br /><br />
+#(disabled)#
+    <fieldset class="editList">
+      <legend>Edit list <b style="color: black"><em>#[currentBlacklist]#</em></b></legend>
+      <!-- Blacklist configuration -->
+      #(edit)#
+      
+      #(addError)#::<div class="alert alert-danger" role="alert">Could not add entry <code>#[entry]#</code>. Please check syntax.</div>#(/addError)#
+      #(moveError)#::<div class="alert alert-danger" role="alert">An error occurred while moving entries to the target list.</div>#(/moveError)#
+
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <p>Add new pattern:</p>
+        <div>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="text" name="newEntry" size="50" />
+          <input type="submit" name="addBlacklistEntry" class="btn btn-primary" value="Add URL pattern" />
+        </div>
+        <p>The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.</p>
+        <ul>
+          <li>domain.net/fullpath</li>
+          <li>domain.net/*</li>
+          <li>*.domain.net/*</li>
+          <li>*.sub.domain.net/*</li>
+          <li>sub.domain.*/*</li>
+          <li>domain.*/*</li>          
+          <li>domain and path <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expressions</a> separated by a '/' (slow)</li>
+       </ul>
+
+      </form>
+
+      <form id="editBlacklistPatterns" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+        <p>These are the domain name/path patterns in <strong><em>#[currentBlacklist]#</em></strong>:</p>
+        <div>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <table border="0">
+            <tr class="TableHeader">
+              <td></td>
+              <td><strong>Blacklist Pattern</strong></td>
+            </tr>
+            #{Itemlist}#
+              <tr class="TableCell#(dark)#Light::Dark#(/dark)#"> 
+                <td><input type="checkbox" name="selectedEntry.#[count]#" id="selectedEntry.#[count]#" value="#[item]#" /></td>
+                <td><label for="selectedEntry.#[count]#">#[item]#</label></td>
+              </tr>  
+            #{/Itemlist}#
+          </table>
+          <br />
+          <select name="action" size="1" onchange="switchTargetBlacklist(this.value);">
+            <option value="editBlacklistEntry">Edit selected pattern(s)</option>
+            <option value="deleteBlacklistEntry">Delete selected pattern(s)</option>
+            <option value="moveBlacklistEntry">Move selected pattern(s) to</option>
+          </select>
+          &nbsp;
+          <select name="targetBlacklist" size="1">
+            #{blackListsMove}#
+            <option value="#[name]#">#[name]#</option>
+            #{/blackListsMove}#
+          </select>
+          &nbsp;
+          <input type="submit" class="btn btn-primary" />
+          </div>
+      </form>
+
+      <form id="selectRange" action="Blacklist_p.html" method="post"><fieldset>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="hidden" name="action" value="selectRange" />
+          <p>Show entries:
+            <table><tr>
+              #{subListOffset}#
+              <td  style="padding: 5px;"><button type="submit"  name="offset" class="btn btn-sm btn-default" style="padding:3px" value="#[fvalue]#" #(selected)#:: disabled="true"#(/selected)# />#[fvalue]# - #[tvalue]#</button></td>
+              #{/subListOffset}#
+            </tr></table>
+          &nbsp;
+          Entries per page:
+          <select name="size" size="1" onchange="submit();">
+                #{subListSize}#
+                <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[text]#</option>
+                #{/subListSize}#
+          </select>
+          &nbsp;
+          <input type="submit" class="btn btn-sm btn-default" value="set" />
+          </p>
+      </fieldset></form>
+
+      ::
+      <p>Edit existing pattern(s):</p>
+      #(editError)#::<div class="alert alert-danger" role="alert">An error occurred while editing the following entries. Please check syntax.
+      	<ul>
+      	  #{list}#
+          	<li><code>#[item]#</code></li>
+          #{/list}#
+          #(hasMore)#::<li>#[more]# more...</li>#(/hasMore)#
+        </ul>
+      </div>
+      #(/editError)#
+      <form name="editBlacklistEntry" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+        <div>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="hidden" name="action" value="editBlacklistEntry" />
+          #{editList}#
+          <input type="text" name="editedBlacklistEntry.#[count]#" size="50" value="#[item]#"/>
+          <input type="hidden" name="selectedBlacklistEntry.#[count]#" value="#[item]#"/>
+          #{/editList}#
+          <br /><br />
+          <input type="submit" class="btn btn-primary" value="Save URL pattern(s)" />
+        </div>
+      </form>
+      #(/edit)#
+
+    </fieldset>
+    
+    <fieldset class="listSettings">
+      <legend>Settings for this list <b style="color: black"><em>#[currentBlacklist]#</em></b></legend>
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <div>
+          <input type="hidden" name="selectedListName" value="#[currentBlacklist]#" />
+          <input type="submit" name="shareList" class="btn btn-default" value="Share/don't share this list" />
+          <input type="submit" name="deleteList" class="btn btn-danger" value="Delete this list" />
+        </div>
+      </form>
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <fieldset>
+          <legend>Activate this list for ...</legend>
+          <dl>
+            #{currentActiveFor}#
+            <dt><label for="activateList4#[blTypeName]#">#[blTypeName]#</label></dt>
+            <dd>
+              <input type="checkbox" id="activateList4#[blTypeName]#" name="activateList4#[blTypeName]#" value="on" #(checked)#checked="checked"::#(/checked)# />
+            </dd>
+          #{/currentActiveFor}#
+          </dl>
+          <input type="hidden" name="selectedListName" value="#[currentBlacklist]#" />
+          <dl><dt></dt><dd><input type="submit" name="activateList" class="btn btn-primary" value="Save" /></dd></dl>
+        </fieldset>
+      </form>
+    </fieldset>    
+    ::#(/disabled)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

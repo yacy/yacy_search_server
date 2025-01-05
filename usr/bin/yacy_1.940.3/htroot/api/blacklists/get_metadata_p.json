@@ -1,0 +1,12 @@
+[
+  #{lists}#{
+    "name":"#[name]#",
+    "shared":#(shared)#false::true#(/shared)#,
+    "types": {
+    #{types}#
+ "#[name]#":#(value)#false::true#(/value)##(comma)#::,#(/comma)#
+    #{/types}#
+}
+  }#(comma)#::,#(/comma)#
+#{/lists}#
+]

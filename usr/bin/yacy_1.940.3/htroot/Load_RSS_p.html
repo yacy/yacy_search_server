@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Configuration of a RSS Search</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+	// The chrome browser is getting the wrong value if we try to get the value inside the script "var checkStatus=inputs.elements[0].checked;" - so now the value is a parameter
+	function checkAll (formToCheckAll, checkStatus) {
+	var inputs=document.getElementById(formToCheckAll);	
+	//var checkStatus=inputs.elements[0].checked;
+	for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+    <h2>Loading of RSS Feeds</h2>
+    <p>
+      RSS feeds can be loaded into the YaCy search index.
+      This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.
+    </p>
+    
+    <form action="Load_RSS_p.html" method="post" accept-charset="UTF-8">
+       <fieldset>
+        <dl>
+          <dt><b>URL of the RSS feed</b></dt>
+          <dd><input type="text" name="url" value="#[url]#" size="60" maxlength="256"/></dd>
+          <dt>Preview</dt>
+          <dd><input type="submit" name="showrss" class="btn btn-default" value="Show RSS Items" /></dd>
+          <dt>Indexing</dt>
+          <dd>#(showload)#<input type="hidden" name="collection" id="collection" value="#[collection]#" />Available after successful loading of rss feed in preview::
+          <dl>
+            <dt>once<input type="radio" name="repeat" value="off" checked="checked"/></dt>
+            <dd>load this feed once now</dd>
+			<dt>scheduled<input type="radio" name="repeat" value="on"/></dt>
+			<dd>repeat the feed loading every<br/>
+			  <select name="repeat_time">
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                <option value="7" selected="selected">7</option>
+                <option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                <option value="12">12</option><option value="14">14</option><option value="21">21</option>
+                <option value="28">28</option><option value="30">30</option>
+			  </select>
+			  <select name="repeat_unit">
+                <option value="selminutes">minutes</option>
+                <option value="selhours">hours</option>
+                <option value="seldays" selected="selected">days</option>
+              </select> automatically.
+			</dd>
+            <dt>collection</dt>
+            <dd><input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# /></dd>
+          </dl>
+          <input type="submit" name="indexAllItemContent" class="btn btn-primary" value="Add All Items to Index (full content of url)" />
+          #(/showload)#</dd>
+          #(showerrmsg)#::<dd class="error">#[msgtxt]#</dd>#(/showerrmsg)#   
+        </dl>
+      </fieldset>
+    </form>
+    
+	#(showscheduledfeeds)#::
+    <form id="scheduledfeeds" action="Load_RSS_p.html" method="post" enctype="multipart/form-data"><fieldset>
+	  <legend>List of Scheduled RSS Feed Load Targets</legend>
+      <table class="sortable" border="0">
+        <tr class="TableHeader" valign="bottom">
+          <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
+          <td>Title</td>
+          <td>URL/Referrer</td>
+          <td>Recording</td>
+          <td>Last Load</td>
+          <td>Next Load</td>
+          <td>Last Count</td>
+          <td>All Count</td>
+          <td>Avg. Update/Day</td>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td><a href="Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[title]#</a></td>
+          <td><a href="Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
+          <td>#[recording]#</td>
+          <td>#[lastload]#</td>
+          <td>#[nextload]#</td>
+          <td>#[lastcount]#</td>
+          <td>#[allcount]#</td>
+          <td>#[updperday]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="removeSelectedFeedsScheduler" class="btn btn-danger" value="Remove Selected Feeds from Scheduler" />
+      <input type="submit" name="removeAllFeedsScheduler" class="btn btn-danger" value="Remove All Feeds from Scheduler" />
+      </p>
+    </fieldset></form>
+	#(/showscheduledfeeds)#
+	
+	#(shownewfeeds)#::
+    <form id="newfeeds" action="Load_RSS_p.html" method="post" enctype="multipart/form-data"><fieldset>
+	  <legend>Available RSS Feed List</legend>
+      <table class="sortable" border="0">
+        <tr class="TableHeader" valign="bottom">
+          <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
+          <td>Title</td>
+          <td>URL/Referrer</td>
+          <td>Recording</td>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td><a href="Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[title]#</a></td>
+          <td><a href="Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
+          <td>#[recording]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="removeSelectedFeedsNewList" class="btn btn-danger" value="Remove Selected Feeds from Feed List" />
+      <input type="submit" name="removeAllFeedsNewList" class="btn btn-danger" value="Remove All Feeds from Feed List" />
+      <input type="submit" name="addSelectedFeedScheduler" class="btn btn-primary" value="Add Selected Feeds to Scheduler" />
+      </p>
+    </fieldset></form>
+	#(/shownewfeeds)#
+	
+	#(showitems)#::
+	<form id="rssfeed" method="post" action="Load_RSS_p.html"><fieldset>
+	  <legend>RSS Feed of #[rss]#</legend>
+      <dl>
+		<dt>Title</dt><dd>#[title]#</dd>
+		<dt>Author</dt><dd>#[author]#</dd>
+		<dt>Description</dt><dd>#[description]#</dd>
+		<dt>Language</dt><dd>#[language]#</dd>
+		<dt>Date</dt><dd>#[date]#</dd>
+		<dt>Time-to-live</dt><dd>#[ttl]#</dd>
+		<dt>Docs</dt><dd>#[docs]#</dd>
+	  </dl>
+      <table class="sortable" border="0">
+        <tr class="TableHeader" valign="bottom">
+          <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
+          <td>State</td>
+          <td>Title</td>
+          <td>URL</td>
+          <td>Author</td>
+          <td>Language</td>
+          <td>Date</td>
+          <td>Description</td>
+        </tr>
+        #{item}#
+        <tr class="TableCellLight">
+          <td align="left">#(indexable)#&nbsp;::<input type="checkbox" name="item_#[count]#" value="#[inputValue]#" />#(/indexable)#</td>
+          #(state)#<td>new</td>::<td class="info">enqueued</td>::<td class="commit">indexed</td>#(/state)#
+          <td>#(hasLink)#::<a href="#[link]#">#(/hasLink)##[title]##(hasLink)#::</a>#(/hasLink)#</td>
+          <td>#(hasLink)#::<a href="#[link]#">#[link]#</a>#(/hasLink)#</td>
+          <td>#[author]#</td>
+          <td>#[language]#</td>
+          <td>#[date]#</td>
+          <td>#[description]##(defaultMediaDesc)#::Attached media#(/defaultMediaDesc)#</td>
+        </tr>
+        #{/item}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="hidden" name="url" value="#[rss]#" />
+      <input type="submit" name="indexSelectedItemContent" class="btn btn-primary" value="Add Selected Items to Index (full content of url)" />
+      </p>
+    </fieldset></form>
+	#(/showitems)#
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

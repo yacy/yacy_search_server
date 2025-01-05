@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Crawl Results</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="CrawlResults">
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawlMonitor.template%#
+    
+    #(process)#
+    <h2>Crawl Results Overview</h2>
+    <p>These are monitoring pages for the different indexing queues.</p>
+    <p>YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed
+    above which also will show you a table with indexing results so far. The information in these tables is considered as private,
+    so you need to log-in with your administration password.</p>
+    <p>Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private
+    since it shows crawl requests from other peers.
+    </p>
+    <p>Case (7) occurs if surrogate files are imported</p>
+    <p><img src="env/grafics/indexmonitor.png" width="600" height="308" alt="An illustration how yacy works" /></p>
+    <p>The image above illustrates the data flow initiated by web index acquisition.
+    Some processes occur double to document the complex index migration structure.
+    </p>
+    ::
+    <h2>(1) Results of Remote Crawl Receipts</h2>
+    <p>This is the list of web pages that this peer initiated to crawl,
+    but had been crawled by <em>other</em> peers.
+    This is the 'mirror'-case of process (6).
+    </p>
+    <p><em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the
+    'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.
+    </p>
+    <p>Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.</p>
+    #(remoteCrawlerDisabled)#::<div class="info"><p>No remote crawl results can currently been added to the local index as the remote crawler is disabled on this peer.<p></div>#(/remoteCrawlerDisabled)#
+    ::
+    <h2>(2) Results for Result of Search Queries</h2>
+    <p>This index transfer was initiated by your peer by doing a search query.
+    The index was crawled and contributed by other peers.</p>
+    <p><em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'</p>
+    ::
+    <h2>(3) Results for Index Transfer</h2>
+    <p>The url fetch was initiated and executed by other peers.
+    These links here have been transmitted to you because your peer is the most appropriate for storage according to
+    the logic of the Global Distributed Hash Table.</p>
+    <p><em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page</p>
+    ::
+    <h2>(4) Results for Proxy Indexing</h2>
+    <p>These web pages had been indexed as result of your proxy usage.
+    <strong>No personal or protected page is indexed</strong>;
+    such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)
+    and automatically excluded from indexing.</p>
+    <p><em>Use Case:</em> You must use YaCy as proxy to fill up this table.
+    Set the proxy settings of your browser to the same port as given
+    on the 'Settings'-page in the 'Proxy and Administration Port' field.</p>
+    ::
+    <h2>(5) Results for Local Crawling</h2>
+    <p>These web pages had been crawled by your own crawl task.</p>
+    <p><em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.</p>
+    ::
+    <h2>(6) Results for Global Crawling</h2>
+    <p>These pages had been indexed by your peer, but the crawl was initiated by a remote peer.
+    This is the 'mirror'-case of process (1).</p>
+    <p><em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page</p>
+    #(remoteCrawlerDisabled)#::<div class="info"><p>The remote crawler is currently disabled<p></div>#(/remoteCrawlerDisabled)#
+    ::
+    <h2>(7) Results from surrogates import</h2>
+    <p>These records had been imported from surrogate files in DATA/SURROGATES/in</p>
+    <p><em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)</p>
+    #(/process)#
+    
+    
+    #(table)#
+    <p><em>The stack is empty.</em></p>
+    ::
+    <p><em>Statistics about #[domains]# domains in this stack:</em></p>
+    <table >
+      <tr class="TableHeader">
+   	<td align="center"></td>
+        <td><strong>Domain</strong></td>
+        <td><strong>URLs</strong></td>
+        <td>Blacklist to use 
+          <form name="selectblacklistform" action="#[feedbackpage]#">
+              <select name="selectedblacklist" style="color:black" onchange="forms.selectblacklistform.submit();">
+                #{blacklists}#
+                <option #[selected]# value="#[name]#">#[name]#</option>
+                #{/blacklists}#
+            </select>
+            <input type="hidden" name="process" value="#[tabletype]#" />
+          </form>
+        </td>
+      </tr>
+      #{domains}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td align="center">
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <div>
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="hidden" name="domain" value="#[domain]#" />
+              <input type="hidden" name="blacklistname" value="#[blacklistname]#" />
+              <input type="submit" name="deletedomain" value="delete all" class="btn btn-danger btn-xs"/>
+            </div>
+          </form>
+        </td>
+        <td><a href="http://#[domain]#/" target="_blank">#[domain]#</a></td>
+        <td>#[count]#</td>
+        <td>
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <div align="center">
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="hidden" name="domain" value="#[domain]#" />
+              <input type="hidden" name="blacklistname" value="#[blacklistname]#" />
+              <input type="submit" name="delandaddtoblacklist" value="del & blacklist" class="btn btn-danger btn-xs"/>
+            </div>
+          </form>  
+        </td>
+      </tr>
+      #{/domains}#
+    </table><br />
+    
+    <p><em>
+    #(size)#
+    Showing all #[all]# entries in this stack.
+    ::
+    Showing latest #[count]# lines from a stack of #[all]# entries. <a href="CrawlResults.html?process=#[tabletype]#&count=2147483647">Show all</a>
+    #(/size)#
+    </em></p>
+    <table >
+      <tr class="TableHeader">
+        <td align="center">
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <div>
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="submit" name="clearlist" class="btn btn-default btn-xs" value="clear list" />
+            </div>
+          </form>
+        </td>
+        #(showCollection)#::<td><strong>Collection</strong></td>#(/showCollection)#
+        #(showInit)#::<td><strong>Initiator</strong></td>#(/showInit)#
+        #(showExec)#::<td><strong>Executor</strong></td>#(/showExec)#
+        #(showDate)#::<td><strong>Modified</strong></td>#(/showDate)#
+        #(showWords)#::<td><strong>Words</strong></td>#(/showWords)#
+        #(showTitle)#::<td><strong>Title</strong></td>#(/showTitle)#
+        #(showCountry)#::<td><strong>Country</strong></td>#(/showCountry)#
+        #(showIP)#::<td><strong>IP of Host</strong></td>#(/showIP)#
+        #(showURL)#::<td><strong>URL</strong></td>#(/showURL)#
+      </tr>
+      #{indexed}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td align="center">
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <div>
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="hidden" name="hash" value="#[urlhash]#" />
+              <input type="submit" name="deleteentry" value="delete" class="btn btn-danger btn-xs"/>
+            </div>
+          </form>
+        </td>
+        #(showCollection)#::<td>#[collection]#</td>#(/showCollection)#
+        #(showInit)#::<td>#[initiatorSeed]#</td>#(/showInit)#
+        #(showExec)#::<td>#[executorSeed]#</td>#(/showExec)#
+
+        #(showDate)#::<td>#[modified]#</td>#(/showDate)#
+        #(showWords)#::<td>#[count]#</td>#(/showWords)#
+
+        #(showTitle)#
+        ::
+        <td>
+          #(available)#
+            <span class="tt">-not cached-</span>
+          ::          
+            <a href="ViewFile.html?action=info&amp;urlHash=#[urlHash]#" class="small" title="#[urltitle]#">#(nodescr)#no title::#[urldescr]##(/nodescr)#</a>
+          #(/available)#
+        </td>
+        #(/showTitle)#
+        
+        #(showCountry)#::<td>#[country]#</td>#(/showCountry)#
+        #(showIP)#::<td>#[ip]#</td>#(/showIP)#
+
+        #(showURL)#
+        ::
+        <td>
+          #(available)#
+            <span class="tt">-not cached-</span>
+          ::
+            <a href="ViewFile.html?action=info&amp;urlHash=#[urlHash]#" class="small" title="#[urltitle]#">#[url]#</a>
+          #(/available)#
+        </td>
+        #(/showURL)#
+
+      </tr>
+      #{/indexed}#
+    </table>
+    ::
+    #(/table)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

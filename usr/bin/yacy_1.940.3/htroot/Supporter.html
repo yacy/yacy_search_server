@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Supporter</title>
+    <meta name="keywords" content="YaCy P2P peer-to-peer Supporter Social Bookmarking Link Voting" />
+    <meta name="description" content="Supporter provided by the YaCy peer-to-peer network using public bookmarks, link votes and crawl start points" />
+    	<link rel="alternate" type="application/rss+xml" title="YaCy Supporter" href="Supporter.rss" />
+    #%env/templates/metas.template%#
+	<script type="text/javascript">
+  //<![CDATA[
+	function pcomment(link) {
+  		var c = window.prompt("Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)", "");
+		return link + "&amp;comment=" + c;
+	}
+  //]]>
+	</script>
+  <script type="text/javascript" src="js/yacysearch.js"></script>
+  </head>
+  <body id="Supporter">
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#
+    #(/display)#
+
+    <h2 class="yacy">Supporter</h2>
+
+    #(supporter)#
+    Supporter are switched off for users without authorization
+    ::
+    #{results}#
+     <!-- link begin -->
+     <div class="searchresults">
+       #(authorized)#::
+       <div class="urlactions">
+         <a href="Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="env/grafics/empty.gif" title="bookmark" alt="Add to bookmarks" class="bookmarkIcon" /></a>
+         #(recommend)#
+         <img src="env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
+         <img src="env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
+         ::
+         <a href="Supporter.html?votePositive=#[urlhash]#&amp;refid=#[refid]#&amp;url=#[url]#&amp;title=#[title]#&description=#[description]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="positive vote" class="recommendlink" onclick="pcomment(this.href);void(0);"><img src="env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
+         <a href="Supporter.html?voteNegative=#[urlhash]#&amp;refid=#[refid]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="negative vote" class="deletelink" ><img src="env/grafics/empty.gif" title="negative vote" alt="Give negative vote" class="deleteIcon" /></a>
+         #(/recommend)#
+       </div>
+       #(/authorized)#
+       <h4 class="linktitle"><a href="#[url]#">#[title]#</a></h4>
+       <p class="snippet">#[description]#</p>
+     </div>
+    <!-- link end -->
+    #{/results}#
+    <p class="aftersurftips">
+    ...provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.<br />
+    </p>
+    <script type="text/javascript">
+      addHover();
+    </script>
+	#(/supporter)#
+    
+    #(display)#
+    #%env/templates/simplefooter.template%#
+    ::
+    #%env/templates/footer.template%#
+    #(/display)#
+  </body>
+</html>

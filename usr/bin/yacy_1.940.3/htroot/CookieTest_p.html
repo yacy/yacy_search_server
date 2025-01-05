@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Cookie - Test Page</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="CookieTest">
+    #%env/templates/header.template%#
+    <p>Here is a cookie test page.</p>
+    <hr />
+    <form action="">
+      <fieldset>
+        <input type="hidden" name="act" value="clear_cookie" />
+        <input type="submit" name="set_action" value="Just clean it" class="btn btn-primary" style="width:260px"/>
+      </fieldset>
+    </form>
+    <hr />
+    <form action="">
+      <fieldset>
+        <input type="hidden" name="act" value="set_cookie" />
+        <dl>
+          <dt><label for="cookie_name">Name:</label></dt> 
+          <dd><input type="text" name="cookie_name" id="cookie_name" /></dd>
+          <dt><label for="cookie_value">Value:</label></dt>
+          <dd><input type="text" name="cookie_value" id="cookie_value" /></dd>
+        </dl>
+        <input type="submit" name="set_action" value="Dear server, set this cookie for me!" class="btn btn-primary" style="width:260px"/>
+      </fieldset>
+    </form>
+    <hr />
+    <h3>Cookies at this browser:</h3>
+    <p>
+    <script type="text/javascript">
+       <!--
+       document.write(document.cookie.split(';').join(';<br />'))
+       //-->
+    </script>
+    </p>
+    #(cookiesout)#
+    ::
+    <hr />
+    <h3>Cookies coming to server:</h3>
+    #(/cookiesout)#
+    <p>#{cookiesout}#
+    #[string]#<br />
+    #{/cookiesout}#</p>
+
+    #(cookiesin)#
+    ::
+    <hr />
+    <h3>Cookies server sent:</h3>
+    #(/cookiesin)#
+    <p>#{cookiesin}#
+    #[name]# = #[value]#
+    #{/cookiesin}#</p>
+
+    <p class="info">YaCy is a GPL'ed project
+      with the target of implementing a P2P-based global search engine.<br />
+      Architecture (C) by Michael Peter Christen,
+    </p>
+    #%env/templates/footer.template%#
+  </body>
+</html>

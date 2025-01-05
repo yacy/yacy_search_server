@@ -1,0 +1,22 @@
+{
+	#(reindexReport)#::"reindexJob": {
+		"currentQuery": #[currentQuery]#,
+		"currentQuerySize": #[currentQuerySize]#,
+		"processedCount": #[processedCount]#
+	}#(/reindexReport)#
+	#(recrawlReport)#::"recrawlJob": {
+		"status": #(jobStatus)#0::1::2#(/jobStatus)#,
+		"statusLabel": "#(jobStatus)#Running::Shutdown in progress::Terminated#(/jobStatus)#",
+		"earlyTerminated": #(error)#false::true#(/error)#,
+		"query": "#[recrawlquerytext]#",
+		"startTime": "#[startTime]#",
+		"endTime": "#[endTime]#",
+		"urlCounts": {
+			"toRecrawl": #[urlsToRecrawlCount]#,
+			"recrawled": #[recrawledUrlsCount]#,
+			"rejected": #[rejectedUrlsCount]#,
+			"malformed": #[malformedUrlsCount]#,
+			"malformedDeleted": #[malformedUrlsDeletedCount]#
+		}
+	}#(/recrawlReport)#
+}

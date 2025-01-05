@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Federated Index</title>
+    #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.discoverobjectspace.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=100&nav=none&query=" + query + "+inurl:" + query, true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var raw = document.getElementById("raw");
+  if (raw != null) raw.innerHTML = str;
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<thead><tr class=\"TableHeader\" style=\"vertical-align: bottom\">";
+    html += "<th>URL from index (total results = " + totalResults + ")<\/th>";
+    html += "</thead><tbody>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td style=\"text-align: left\" onclick=\"document.getElementById('searchform').value='" + item.link + "';\">" + item.link + "<\/td>";
+    }
+    html += "</tbody><\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
+  </head>
+  <body id="Vocabulary_p">
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuSemantic.template%#
+    
+#(edit)#::
+<div id="api">
+<a href="Vocabulary_p.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<script type="text/javascript">
+//<![CDATA[
+document.getElementById('apilink').setAttribute('href', 'Vocabulary_p.xml?' + window.location.search.substring(1));
+//]]>
+</script>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the RDF Ontology definition for this vocabulary.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+#(/edit)#
+    
+    <h2>Vocabulary Administration</h2>
+    <p>
+      Vocabularies can be used to produce a search navigation. A vocabulary must be created before content is indexed.
+      The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.
+      The object can be denoted by a url stub that, combined with the term, becomes the url for the object.
+    </p>
+    
+    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8" class="form-horizontal">
+      <fieldset>
+        <legend>Vocabulary Selection</legend>
+        <div class="form-group">
+        	<label for="vocabularyName" class="col-sm-4 col-lg-3 control-label">Vocabulary Name</label>
+        	<div class="col-sm-5">
+         		<select name="vocabulary" id="vocabularyName" onchange="this.form.submit()" class="form-control">
+            		#{vocabularyset}#
+            		<option value="#[name]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>
+            		#{/vocabularyset}#
+          		</select>
+          	</div>
+        </div>
+        <div class="form-group">
+        	<div class="col-sm-offset-4 col-lg-offset-3 col-sm-7">
+        		<input type="submit" class="btn btn-primary" name="view" value="View" />
+        	</div>
+        </div>
+    </fieldset>
+    </form>
+    
+    #(create)#::
+    <form action="Vocabulary_p.html" id="searchform" method="post" accept-charset="UTF-8" class="form-horizontal">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+      <fieldset>
+        <legend>Vocabulary Production</legend>
+      #(csvFileStatus)#
+        ::<div class="alert alert-danger" role="alert">Please provide a CSV file path or <abbr title="Uniform Resource Locator">URL</abbr>.</div>
+    	::<div class="alert alert-danger" role="alert">CSV file not found "#[csvPath]#".</div>
+    	::<div class="alert alert-danger" role="alert">Can not read CSV file at "#[csvFile]#".</div>
+    	::<div class="alert alert-danger" role="alert">CSV file error : you selected a directory ("#[csvPath]#").</div>
+    	::<div class="alert alert-danger" role="alert">CSV file URL is malformed "#[csvUrl]#".</div>
+      #(/csvFileStatus)#
+      #(vocabWriteError)#
+        ::<div class="alert alert-danger" role="alert">Could not write vocabulary file at "#[vocabPath]#".</div>
+      #(/vocabWriteError)#
+        <div class="form-group">
+          <label for="discoverName" class="col-sm-4 col-lg-3 control-label">Vocabulary Name</label>
+          <div class="col-sm-5">
+          	<input type="text" id="discoverName" name="discovername" value="" maxlength="128" required="required" class="form-control"/>
+          </div>
+        </div>
+        <div class="form-group">
+        	<div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          		<label>
+          			<input type="radio" name="discovermethod" value="none" checked="checked"/> Empty Vocabulary
+          		</label>
+        	</div>
+        </div>
+    	<label class="col-sm-4 col-lg-3 control-label">Auto-Discover</label>
+    	<div class="form-group">
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="path" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from file name
+          	</label>
+          </div>
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="title" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from page title
+          	</label>
+          </div>
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="titlesplitted" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from page title (splitted)
+          	</label>
+          </div>
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="author" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from page author
+          	</label>
+          </div>
+        </div>
+        <div class="form-group">
+            <label for="discoverobjectspace" class="col-sm-4 col-lg-3 control-label">Objectspace</label>
+            <div class="col-sm-5">
+          		<input type="text" id="discoverobjectspace" name="discoverobjectspace" value="http://" size="78" maxlength="512" disabled="disabled" class="form-control" aria-describedby="helpDiscoverObjectSpace"/>
+            </div>
+        	<div id="helpDiscoverObjectSpace" class="col-sm-offset-1 col-sm-11 col-lg-offset-0 col-lg-4">It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
+                This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
+                This works best with wikis. Try to use a wiki url as objectspace path.</div>
+            <div id="searchresults"></div>
+        </div>
+        <div class="form-group">
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="csv" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discoverLineStart').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnsynonyms').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';document.getElementById('discoverCharset').disabled='';document.getElementById('discoverColSeparator').disabled='';"/>
+          		Import from a csv file
+          	</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discoverpath" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>File Path or <abbr title="Uniform Resource Locator">URL</abbr></i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-5">
+          	<input type="text" id="discoverpath" name="discoverpath" value="" size="78" maxlength="256" disabled="disabled" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discoverLineStart" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Start line</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-2">
+          	<input type="number" id="discoverLineStart" name="discoverLineStart" min="0" max="99" step="1" size="2" value="0" disabled="disabled" class="form-control" aria-describedby="helpLineStart">
+          </div>
+          <span id="helpLineStart" class="col-xs-offset-2 col-sm-offset-0 help-block">(first has index 0)</span>
+        </div>
+        <div class="form-group">
+          <label for="discovercolumnliteral" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Column for Literals</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-2">
+          	<input type="number" id="discovercolumnliteral" name="discovercolumnliteral" min="0" max="99" step="1" size="2" value="0" disabled="disabled" class="form-control" aria-describedby="helpDiscoverColumnLiteral">
+          </div>
+          <span id="helpDiscoverColumnLiteral" class="col-xs-offset-2 col-sm-offset-0 help-block">(first has index 0)</span>
+        </div>
+    	<label class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Synonyms</i></label>
+    	<div class="form-group">
+          <div class="radio col-xs-offset-1 col-sm-offset-5 col-lg-offset-4 col-sm-7">
+          	<label>
+          		<input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodNo" value="none" checked="checked"/> <i>no Synonyms</i>
+          	</label>
+          </div>
+          <div class="radio col-xs-offset-1 col-sm-offset-5 col-lg-offset-4 col-sm-7">
+          	<label>
+          		<input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodAuto" value="enrichsynonyms"/> <i>Auto-Enrich with Synonyms from Stemming Library</i>
+          	</label>
+          </div>
+          <div class="radio col-xs-offset-1 col-sm-offset-5 col-lg-offset-4 col-sm-2">
+          	<label>
+          		<input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodReadCol" value="readcolumn" onclick="document.getElementById('discovercolumnsynonyms').value=parseInt(document.getElementById('discovercolumnliteral').value)+1;"/>
+          		<i>Read Column</i>
+          	</label>
+          </div>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-5">
+          	<div class="col-sm-6">
+          		<input type="number" id="discovercolumnsynonyms" name="discovercolumnsynonyms" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" class="form-control" aria-describedby="helpDiscoverColumnSynonyms">
+          	</div>
+          	<span id="helpDiscoverColumnSynonyms" class="help-block col-sm-6">(first has index 0)</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discovercolumnobjectlink" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Column for Object Link (optional)</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-2">
+          	<input type="number" id="discovercolumnobjectlink" name="discovercolumnobjectlink" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" class="form-control" aria-describedby="helpDiscoverColumnObjectLink">
+          </div>
+          <span id="helpDiscoverColumnObjectLink" class="col-xs-offset-2 col-sm-offset-0 help-block">(first has index 0, if unused set -1)</span>
+        </div>
+        <div class="form-group">
+          <label for="discoverCharset" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Charset of Import File</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-3">
+          	<select name="charset" id="discoverCharset" disabled="disabled" class="form-control">
+          	#{charset}#<option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/charset}#
+          	</select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discoverColSeparator" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Column separator</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-3">
+          	<select name="columnSeparator" id="discoverColSeparator" disabled="disabled" class="form-control">
+            	<option value="," title="Standard CSV field delimiter">Comma ','</option>
+            	<option value=";">Semicolon ';'</option>
+          	</select>
+          </div>
+        </div>
+        <div class="form-group">
+        	<div class="col-sm-offset-4 col-lg-offset-3 col-sm-7">
+       	        <input type="submit" class="btn btn-primary" name="create" value="Create" />
+        	</div>
+        </div>
+
+    </fieldset>
+    </form>
+    #(/create)#
+    
+    #(edit)#::
+    <form action="Vocabulary_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="form-horizontal">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+      <fieldset><legend>Vocabulary Editor</legend>
+      <dl>
+        <dt>Vocabulary Name</dt><dd>#[name]#</dd>
+        <dt>File</dt><dd>#(editable)#[automatically generated, not stored, cannot be edited]::#[file]##(/editable)#</dd>
+        <dt>Size</dt><dd>#[size]# literals</dd>
+        <dt>Namespace</dt><dd>#[namespace]#</dd>
+        <dt>Predicate</dt><dd>#[predicate]#</dd>
+        <dt>Prefix</dt><dd>#[prefix]#</dd>
+      </dl>
+        <div class="form-group">
+            <label #(editable)#::for="editObjectSpace"#(/editable)# class="col-xs-12 col-sm-3 control-label">Objectspace</label>
+            <div class="col-xs-5 col-sm-5">
+            	#(editable)#<p class="form-control-static">#[objectspace]#</p>::
+            	<input type="text" id="editObjectSpace" name="objectspace" value="#[objectspace]#" maxlength="128" class="form-control" aria-describedby="helpEditObjectSpace"/>
+            	#(/editable)#
+            </div>
+        	#(editable)#::<div id="helpEditObjectSpace" class="col-xs-12 col-sm-offset-3 col-sm-7 help-block">
+        	if set, uses the predicate <a href="#[objectspacepredicate]#" target="_blank">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.
+        	</div>
+        	#(/editable)#
+        </div>
+        <div class="form-group">
+        	<label for="editIsFacet" class="col-xs-1 col-sm-3 control-label">Is Facet?</label>
+        	<div class="checkbox-inline">
+          		<input type="checkbox" id="editIsFacet" name="isFacet"#(isFacet)#:: checked="checked"#(/isFacet)# aria-describedby="helpEditIsFacet"/>
+				<span id="helpEditIsFacet" class="help-block">
+        			(If checked, this vocabulary is used for search facets. Not feasible for large vocabularies!)
+        		</span>
+        	</div>
+        </div>
+    	<div class="form-group">
+    	  <label class="col-xs-2 col-sm-3 control-label">Match terms from</label>
+          <div class="radio-inline">
+        	<label>
+          		<input type="radio" name="vocabularies.matchLinkedData" value="false" #(vocabularies.matchLinkedData)#checked="checked"::#(/vocabularies.matchLinkedData)# #(editable)#disabled="disabled"::#(/editable)#/>Cleartext
+          	</label>
+          </div>
+          <div class="radio-inline">
+          	<label>
+          		<input type="radio" name="vocabularies.matchLinkedData" value="true" #(vocabularies.matchLinkedData)#::checked="checked"#(/vocabularies.matchLinkedData)# #(editable)#disabled="disabled"::#(/editable)#/>Linked data/Semantic web annotations
+          	</label>
+          </div>
+        </div>
+      <table class="sortable">
+      <thead>
+      	<tr class="TableHeader">
+        	<th>Modify</th>
+        	<th>Delete</th>
+        	<th>Literal</th>
+        	<th>Synonyms</th>
+        	<th>Object Link</th>
+      	</tr>
+      </thead>
+      <tbody>
+      	#{terms}#
+      	<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        	<td class="text-center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
+        	<td class="text-center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" />#(/editable)#</td>
+        	<td class="text-left">#[term]#</td>
+        	<td class="text-left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+        	<td class="text-left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+      	</tr>
+      	#{/terms}#
+      </tbody>
+      #(editable)#::
+      <tfoot>
+      	<tr class="TableCellDark">
+        	<td class="text-center" colspan="2"><label><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/> <i>add</i></label></td>
+        	<td class="text-left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
+        	<td class="text-left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
+        	<td class="text-left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
+      	</tr>
+      	<tr class="TableCellDark">
+        	<td colspan="3"></td>
+        	<td colspan="2" class="TableCellSummary text-right"><label><input type="checkbox" name="clear_table" id="clear_table" value="checked" /> <i>clear table (remove all terms)</i></label></td>
+      	</tr>
+      	<tr class="TableCellDark">
+        	<td colspan="3"></td>
+        	<td colspan="2" class="TableCellSummary text-right"><label><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /> <i>delete vocabulary</i></label></td>
+      	</tr>
+      </tfoot>
+      #(/editable)#
+      </table>
+      <input type="hidden" name="vocabulary" value="#[name]#" />
+      <input type="submit" class="btn btn-primary" name="set" value="Submit" />
+    </fieldset>
+    </form>
+    #(/edit)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

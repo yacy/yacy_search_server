@@ -1,0 +1,75 @@
+    "navigation": [#(nav-dates)#::{
+      "facetname": "dates",
+      "displayname": "Date",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-dates)##(nav-filetypes)#::{
+      "facetname": "filetypes",
+      "displayname": "Filetype",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-filetypes)##(nav-protocols)#::{
+      "facetname": "protocols",
+      "displayname": "Protocol",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-protocols)##{navs}#{
+      "facetname": "#[name]#",
+      "displayname": "#[displayname]#",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#{/navs}##{nav-vocabulary}#{
+      "facetname": "#[navname]#",
+      "displayname": "#[navname]#",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#{/nav-vocabulary}##(nav-topics)#{}::{
+      "facetname": "topics",
+      "displayname": "Topics",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    }#(/nav-topics)#
+    ],
+    "totalResults": "#[num-results_totalcount]#"

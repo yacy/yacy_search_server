@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>YaCy '#[clientname]#': Image Collage</title>
+#%env/templates/metas.template%#
+<style type="text/css">
+#left {
+  float: left;
+  width: 224px;
+}
+form dt {
+  width: 160px;
+}
+form dd {
+  width: 160px;
+  text-align:right;
+}
+</style>
+<meta http-equiv="REFRESH" content="#[refresh]#" />
+<script type="text/javascript">
+var CollageLastImageZIndex;
+
+function raise (element)
+{
+  var img = document.getElementById("col" + element);
+
+  CollageLastImageZIndex = img.style.zIndex;
+  img.style.zIndex = 0xffff;
+}
+
+function lower (element)
+{
+  var img = document.getElementById("col" + element);
+
+  img.style.zIndex = CollageLastImageZIndex;
+}
+</script>
+#(emb)#
+<script type="text/javascript">
+document.body.style.background = "#000";
+</script>
+::
+#(/emb)#
+</head>
+<body>
+#(emb)#
+::
+#%env/templates/header.template%#
+#%env/templates/submenuWebStructure.template%#
+<h2>Image Collage</h2>
+
+<div id="left">
+<form action="Collage.html" accept-charset="UTF-8">
+<dl>
+	<dt>Private Queue</dt>
+	<dd>#[privateQueueSize]#</dd>
+	<dt>Public Queue</dt>
+	<dd>#[publicQueueSize]#</dd>
+</dl>
+</form>
+</div>
+#(/emb)#
+#(imgurl)#
+::
+  #{list}#
+    #[url]#
+  #{/list}#
+#(/imgurl)#
+#(emb)#::
+#%env/templates/footer.template%#
+#(/emb)#
+</body>
+</html>

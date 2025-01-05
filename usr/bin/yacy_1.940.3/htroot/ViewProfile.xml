@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile>
+	<status code="#[success]#">
+	#(success)#Wrong access of this page
+    ::The requested peer is unknown or a potential peer.The profile can't be fetched.
+    ::The peer #[peername]# is not online.
+    ::Peer profile successfully fetched
+    #(/success)#
+	</status>
+	
+	#(success)#::::::
+	<name>#(name)#::<![CDATA[#[value]#]]>#(/name)#</name>
+	<nickname>#(nickname)#::<![CDATA[#[value]#]]>#(/nickname)#</nickname>
+	<homepage>#(homepage)#::<![CDATA[#[value]#]]>#(/homepage)#</homepage>
+	<email>#(email)#::<![CDATA[#[value]#]]>#(/email)#</email>
+	<icq>#(icq)#::<![CDATA[#[value]#]]>#(/icq)#</icq>
+	<jabber>#(jabber)#::<![CDATA[#[value]#]]>#(/jabber)#</jabber>
+	<yahoo>#(yahoo)#::<![CDATA[#[value]#]]>#(/yahoo)#</yahoo>
+	<msn>#(msn)#::<![CDATA[#[value]#]]>#(/msn)#</msn>
+	<skype>#(skype)#::<![CDATA[#[value]#]]>#(/skype)#</skype>
+	<comment>#(comment)#::<![CDATA[#[value]#]]>#(/comment)#</comment>
+	
+	<!-- optional profile fields -->
+      #{other}#
+    <optional>
+      <name><![CDATA[#[key]#]]></name>
+      <value><![CDATA[#[value]#]]></value>
+    </optional>
+      #{/other}#	
+	#(/success)#	
+</profile>

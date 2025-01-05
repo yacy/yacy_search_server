@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+   <title>YaCy '#[clientname]#': Incoming Cookies Monitor</title>
+   #%env/templates/metas.template%#
+  </head>
+  <body id="CookieMonitorIncoming">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAccessTracker.template%#
+    <h2>Cookie Monitor: Incoming Cookies</h2>
+    <p>This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:</p>
+    <p>Showing #[num]# entries from a total of #[total]# Cookies.</p>
+    <table border="0">
+      <tr class="TableHeader">
+        <td>Sending Host</td>
+        <td>Date</td>
+        <td>Receiving Client</td>
+        <td>Cookie</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[client]#</td>
+        <td><ul>#{cookies}#<li>#[item]#</li>#{/cookies}#</ul></td>
+      </tr>
+      #{/list}#
+    </table>
+    <form action="" method="post" accept-charset="UTF-8">
+      <fieldset>
+        #(monitorCookies.off)#::<input type="submit" name="enableCookieMonitoring" value="Enable Cookie Monitoring" class="btn btn-primary" style="width:240px"/>#(/monitorCookies.off)#
+        #(monitorCookies.on)#::<input type="submit" name="disableCookieMonitoring" value="Disable Cookie Monitoring" class="btn btn-primary" style="width:240px"/>#(/monitorCookies.on)#
+      </fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

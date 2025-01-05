@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Shared Blacklist</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+    function selectall(name){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i<= count; i++){
+            //If it isn't "undefined" and it isn't "null", then it exists.
+            if(typeof(selectForm.elements["item" + i]) != 'undefined' && selectForm.elements["item" + i] != null) {
+                //thecheckbox.checked = true;
+                selectForm.elements["item" + i].checked = true;
+            }
+        }
+    }
+    
+    function deselectall(name){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i<= count; i++){
+            if(typeof(selectForm.elements["item" + i]) != 'undefined' && selectForm.elements["item" + i] != null){
+                selectForm.elements["item" + i].checked = false;
+            }
+        }
+    }
+    -->
+    </script>
+  </head>
+  <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+    #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+    <br />
+    <br />
+    <h2>Add Items to Blacklist</h2>
+    <p class="info">#(status)#
+      <!-- [0] -->
+::
+      <!-- [1] -->
+	  Unable to store the items into the blacklist file:<br />
+	  <font color="red">#[error]#</font>
+::
+      <!-- [2] -->
+	  File Error! Unable to fetch data from file.
+::
+      <!-- [3] -->
+	  YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; not found.
+::
+      <!-- [4] -->
+	  URL &quot;<span class="settingsValue">#[address]#</span>&quot; not found or empty list.
+::
+      <!-- [5] -->
+	  Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
+::
+      <!-- [6] -->
+	  Parse Error! An error occured while parsing XML data. Please check if the XML is valid.
+	  #(/status)#
+    </p>
+    <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="blacklist_0">
+      <input type="hidden" name="num" value="#[num]#" />
+      #(page)#<!-- [0] -->
+      <table>
+        <tr>
+          <td><b>Blacklist source:</b></td>
+          <td><span class="settingsValue">#[source]#</span></td>
+        </tr>
+        <tr>
+          <td><b>Blacklist target:</b></td>
+          <td>
+              
+          <select name="currentBlacklist" size="1">
+          #{blackLists}#
+            <option value="#[name]#" #[options]#>#[name]#</option>
+          #{/blackLists}#
+        </select>
+              
+          </td>
+        </tr>
+      </table>
+      <table border="0">
+        <tr class="TableHeader">
+		  <th class="small" width="100%" align="left">Blacklist item</th>
+		  <th class="small">&nbsp;</th>
+        </tr>#{urllist}#
+        <tr class="TableCell#(dark)#Light::Dark#(/dark)#"  class="small">
+          <td>#[url]#</td>
+          <td>
+          #(toimport)#
+            &nbsp;
+          ::
+            <input type="checkbox" name="item#[count]#" value="#[url]#" />
+          #(/toimport)#
+          </td>
+        </tr>#{/urllist}#
+        <tr class="small" style="background-color: #eeeeee">
+          <td colspan="2">
+            <input type="button" class="btn btn-primary" onclick="selectall(this.form.name)" value="select all" />
+            <input type="button" class="btn btn-primary" onclick="deselectall(this.form.name)" value="deselect all" />
+            <input type="submit" class="btn btn-primary" value="add" name="add" />
+          </td>
+        </tr>
+      </table>
+      ::<!-- [1] -->
+      #(/page)#
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

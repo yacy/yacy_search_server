@@ -1,0 +1,87 @@
+# Network definition file for the freeworld network
+# this is the default standard network for fresh YaCy Peers
+
+# -----------------------------------------------------------------#
+# for an explanation please see the file yacy.network.readme       #
+# this is a work in progress. disabled properties are not yet used #
+# -----------------------------------------------------------------#
+
+# define the name of the nework
+# this nickname is also used to identifiy network requests
+network.unit.name = freeworld
+
+# the visible name of the network
+network.unit.description = Public YaCy Community
+
+# definition of the content domain: possible values are:
+# global, local, any
+network.unit.domain = global
+
+# maximum search time for remote queries (milliseconds)
+network.unit.remotesearch.maxtime = 3000
+
+# maximum number of results per remote query
+network.unit.remotesearch.maxcount = 10
+
+# flag to switch on dht transmission
+# if the dht transmission is set to 'false' then for a global
+# query all targets are accessed
+network.unit.dht = true
+
+# the number of redundant target peers:
+# redundant peers get a copy of the original dht target information
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 3
+
+# the vertical partition of the dht: this applies a division
+# of the dht into 2^^<partitionExponent> fragments which get
+# all the same word-partition targets but a document-dht computed
+# fragment of all documents
+network.unit.dht.partitionExponent = 4
+
+# network request burst attributes: this enables non-dht target
+# positions for certain situations. This is not a 'traditional' burst-mode
+# since it does not refer to a handshake to a single client but it refers
+# to not-handshaking in a distributed way. It means to get data without using
+# a dht transmission logic.
+
+# switch to enable verification of search results
+# must be set to true in untrusted networks and can be
+# set to false in completely trusted networks
+network.unit.inspection.searchverify = true
+
+# speed of remote crawl de-queueing. this is the number of milliseconds
+# as a pause between two requests
+network.unit.remotecrawl.speed = 300
+
+# addresses of seed-list bootstrap locations
+network.unit.bootstrap.seedlist0 = http://sixcooler.de/yacy/seed.txt
+network.unit.bootstrap.seedlist1 = https://sonst.mifritscher.de/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://5.45.105.16/yacyseed
+network.unit.bootstrap.seedlist3 = http://yacy.v16.de/seed/seed.txt
+network.unit.bootstrap.seedlist4 = https://frank-siebert.de/seed.txt
+network.unit.bootstrap.seedlist5 = http://seedlist.wertewesten.net/seed.txt
+network.unit.bootstrap.seedlist6 = https://search.joestr.at/www/seed.txt
+network.unit.bootstrap.seedlist7 = https://aahso.net/yacyseed
+network.unit.bootstrap.seedlist8 = https://lodwich.net/static/seeds/seed.txt
+network.unit.bootstrap.seedlist9 = https://tonibot.ddns.net:8892/other/seed.txt
+network.unit.bootstrap.seedlist10 = https://s1002.xpcom-online.de/yacy/seed2.txt
+
+# each network may use different yacy distributions.
+# the auto-updater can access network-specific update locations
+network.unit.update.location0 = https://download.yacy.net/
+network.unit.update.location0.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
+network.unit.update.location1 = https://release.yacy.net/
+# add github releases - binary distribution archives must be attache (uploaded) to the git release
+# network.unit.update.location2 = https://github.com/yacy/yacy_search_server/releases
+
+# properties for in-protocol response authentication:
+network.unit.protocol.control = uncontrolled
+
+# white/blacklists
+network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,localhost
+network.unit.access.blacklist =
+
+# greedy learning: fast information acquisition heuristic for new peers
+greedylearning.enabled = true
+greedylearning.limit.doccount = 1000

@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Blacklist Test</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Blacklist">
+    #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+  
+    <h2>Blacklist Test</h2>
+    <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
+    <!-- blacklist selection -->
+    <form action="BlacklistTest_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Test list:</legend>
+        <input type="text" name="testurl" size="50" value="#[url]#" />
+        <input type="submit" name="testList" class="btn btn-primary" value="Test" />
+        
+        #(testlist)#::
+          <br /><br />
+          <div>
+            The tested URL was #[url]#<br>
+            #(isnotblocked)#It is blocked for the following cases:<br>::<br><b>is not blocked</b><br>#(/isnotblocked)#
+            <ul>
+              #(listedincrawler)#::<li>Crawling</li>#(/listedincrawler)#
+              #(listedindht)#::<li>DHT</li>#(/listedindht)#
+              #(listedinnews)#::<li>News</li>#(/listedinnews)#
+              #(listedinproxy)#::<li>Proxy</li>#(/listedinproxy)#
+              #(listedinsearch)#::<li>Search</li>#(/listedinsearch)#
+              #(listedinsurftips)#::<li>Surftips</li>#(/listedinsurftips)#
+            </ul>
+          </div>
+          ::
+          <br /><br />
+          <div>The tested URL was not valid.</div>
+        #(/testlist)#
+      </fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

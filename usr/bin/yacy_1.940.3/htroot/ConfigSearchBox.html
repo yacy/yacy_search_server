@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Integration of a Search Box</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigSkins">
+    #%env/templates/header.template%#
+    #%env/templates/submenuPortalConfiguration.template%#
+    <h2>Integration of a Search Box</h2>
+    <p>
+      We give information how to integrate a search box on any web page that
+      calls the normal YaCy search window.
+    </p>
+    
+    <h3>
+      Simply use the following code:
+    </h3>
+    <fieldset><pre>
+&lt;form method="get" accept-charset="UTF-8" action="#[myaddress]#/yacysearch.html"&gt;
+  &lt;div style="text-align:center; padding:5px; background-color:#eeeeee; border:1px solid #cccccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px; display:block; float:left; margin-right:5px;"&gt;
+    &lt;div style="font-family:Arial,Helvetica,sans-serif; font-size:16px; display:block; float:left; padding-top:3px; padding-right:5px;"&gt;
+      MySearch
+    &lt;/div&gt;
+    &lt;input type="text" name="query" value="" maxlength="80" 
+           style="width:300px; font-size:16px; float:left;" /&gt;
+    &lt;input type="hidden" name="verify" value="cacheonly" /&gt;
+    &lt;input type="hidden" name="maximumRecords" value="10" /&gt;
+    &lt;input type="hidden" name="meanCount" value="5" /&gt;
+    &lt;input type="hidden" name="resource" value="local" /&gt;
+    &lt;input type="hidden" name="urlmaskfilter" value=".*" /&gt;
+    &lt;input type="hidden" name="prefermaskfilter" value="" /&gt;
+    &lt;input type="hidden" name="display" value="2" /&gt;
+    &lt;input type="hidden" name="nav" value="all" /&gt;
+    &lt;div style="font-size:18px; display:block; float:right; padding-top:1px;"&gt;
+      &lt;input type="submit" name="Enter" value="Search" /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;p style="clear:both;"&gt;&lt;/p&gt;
+&lt;/form&gt;
+    </pre></fieldset>
+    
+    This would look like:
+<form method="get" accept-charset="UTF-8" action="yacysearch.html">
+  <div style="text-align:center; padding:5px; background-color:#eeeeee; border:1px solid #cccccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px; display:block; float:left; margin-right:5px;">
+    <div style="font-family:Arial,Helvetica,sans-serif; font-size:16px; display:block; float:left; padding-top:3px; padding-right:5px;">
+      MySearch
+    </div>
+    <input type="text" name="query" value="" maxlength="80" 
+           style="width:300px; font-size:16px; float:left;" />
+    <input type="hidden" name="verify" value="cacheonly" />
+    <input type="hidden" name="maximumRecords" value="10" />
+    <input type="hidden" name="meanCount" value="5" />
+    <input type="hidden" name="resource" value="local" />
+    <input type="hidden" name="urlmaskfilter" value=".*" />
+    <input type="hidden" name="prefermaskfilter" value="" />
+    <input type="hidden" name="display" value="2" />
+    <input type="hidden" name="nav" value="all" />
+    <div style="font-size:18px; display:block; float:right; padding-top:1px;">
+      <input type="submit" name="Enter" value="Search" />
+    </div>
+  </div>
+  <p style="clear:both;"></p>
+</form>
+This does not use a style sheet file to make the integration into another web page with a different style sheet easier.
+You would need to change the following items:
+<ul>
+<li>Replace the given colors #eeeeee (box background) and #cccccc (box border)</li>
+<li>Replace the word "MySearch" with your own message</li>
+</ul>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

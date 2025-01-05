@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+#(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexExport_p.html">#(/reload)#
+  <head>
+    <title>YaCy '#[clientname]#': URL Database Administration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+
+    <h2>Index Export</h2>
+    <p>The local index currently contains #[ucount]# documents, only #[ucount200]# exportable with status code 200 - the remaining are error documents.</p>
+
+    #(lurlexport)#::
+    <form action="IndexExport_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Loaded URL Export</legend>
+      <dl>
+        <dt class="TableCellDark">Export Path</dt>
+        <dd><input type="text" name="exportfilepath" value="#[exportfilepath]#" size="120" maxlength="250" />
+        </dd>
+        <dt class="TableCellDark">URL Filter</dt>
+        <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />&nbsp;.*.* (default) is a catch-all; format: java regex
+        </dd>
+        <dt class="TableCellDark">query</dt>
+        <dd><input type="text" name="exportquery" value="*:*" size="20" maxlength="250" />&nbsp;*:* (default) is a catch-all; format: <field-name>:<solr-pattern>
+        </dd>
+        <dt class="TableCellDark">maximum age (seconds)</dt>
+        <dd><input type="text" name="exportmaxseconds" value="-1" size="20" maxlength="250" />&nbsp;-1 = unlimited -> no document is too old
+        </dd>
+        <dt class="TableCellDark">maximum number of records per chunk</dt>
+        <dd><input type="text" name="maxchunksize" value="-1" size="20" maxlength="250" />&nbsp;if exceeded: several chunks are stored; -1 = unlimited (makes only one chunk)
+        </dd>
+        <dt class="TableCellDark">Export Size</dt>
+        <dd>
+          full size, all fields:<input type="radio" name="minified" value="no" checked="checked">&nbsp;
+          minified; only fields sku, date, title, description, text_t<input type="radio" name="minified" value="yes" >
+        </dd>
+        <dt class="TableCellDark">Export Format</dt>
+        <dd>
+        <dl>
+        <dt>Full Data Records:</dt>
+        <dd><input type="radio" name="format" value="full-elasticsearch" checked="checked" />
+            JSON (Rich and full-text Elasticsearch data, one document per line in one flat JSON file,
+            can be bulk-imported to elasticsearch. Here is an example for opensearch, using docker:<br />
+Start docker container of opensearch:<br />
+<code>docker run --name opensearch -p 9200:9200 -d -e OPENSEARCH_JAVA_OPTS="-Xms2G -Xmx2G" -e discovery.type=single-node -e DISABLE_SECURITY_PLUGIN=true -v $(pwd)/opensearch_data:/usr/share/opensearch/data opensearchproject/opensearch:latest</code><br />
+Unblock index creation:<br />
+<code>curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+{
+  "persistent": {
+    "cluster.blocks.create_index": null
+  }
+}'</code><br />
+Create the search index:<br />
+<code>curl -X PUT "http://localhost:9200/collection1/yacy"</code><br />
+Bulk-upload the index file:<br />
+<code>curl -XPOST "http://localhost:9200/collection1/yacy/_bulk?filter_path=took,errors" -H "Content-Type: application/x-ndjson" --data-binary @yacy_dump_XXX.flatjson</code><br />
+Make a search, get 10 results, search in fields text_t, title, description with boosts:<br />
+<code>curl -X POST "http://localhost:9200/collection1/yacy/_search" -H 'Content-Type: application/json' -d'
+{"size": 10, "query": {"multi_match": {
+    "query": "one two three",
+    "fields": ["text_t", "title^10", "description^3"], "fuzziness": "AUTO"
+}}}'</code><br />
+            <input type="radio" name="format" value="full-solr" />
+            XML (Rich and full-text Solr data, one document per line in one large xml file,
+            can be processed with shell tools, can be imported with DATA/SURROGATE/in/)
+            <br />
+            <input type="radio" name="format" value="full-rss" />
+            XML (RSS)
+        </dd>
+        <dt>Full URL List:</dt>
+        <dd><input type="radio" name="format" value="url-text" /> Plain Text List (URLs only)<br />
+            <input type="radio" name="format" value="url-html" /> HTML (URLs with title)</dd>
+        <dt>Only Domain:</dt>
+        <dd><input type="radio" name="format" value="dom-text" /> Plain Text List (domains only)<br />
+            <input type="radio" name="format" value="dom-html" /> HTML (domains as URLs, no title)</dd>
+        <dt>Only Text:</dt>
+        <dd><input type="radio" name="format" value="text-text" /> Fulltext of Search Index Text</dd>
+        </dl>
+        </dd>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="lurlexport" value="Export" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    <div class="alert alert-info" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far</div>::
+    #(/lurlexport)#
+
+    #(lurlexportfinished)#::
+    <div class="alert alert-success">Finished export of #[urlcount]# Documents to file <a href="file://#[exportfile]#" target="_">#[exportfile]#</a><br/>
+    <em>Import this file by moving it to DATA/SURROGATES/in</em></div>::
+    #(/lurlexportfinished)#
+
+    #(lurlexporterror)#::
+    <div class="alert alert-warning">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
+    #(/lurlexporterror)#
+
+    #(dumprestore)#::
+    <form action="IndexExport_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Dump and Restore of Solr Index</legend>
+      #(dumpRestoreEnabled)#<div class="alert alert-info">This feature is available only when a local embedded Solr is active.</div>::#(/dumpRestoreEnabled)#
+      <dl>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="indexdump" value="Create Dump" class="btn btn-primary" style="width:240px;" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
+        </dd>
+      </dl>
+      <dl>
+        <dt class="TableCellDark">Dump File</dt>
+        <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
+        </dd>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="btn btn-primary" style="width:240px;" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    #(/dumprestore)#
+    
+    #(indexdump)#::
+    <div class="alert alert-success" role="alert">Stored a solr dump to file #[dumpfile]#</div>::
+    <div class="alert alert-danger" role="alert">Could not create the Solr dump : no embedded Solr is available.</div>::
+    <div class="alert alert-danger" role="alert">An error occurred while trying to create the Solr dump.</div>
+    #(/indexdump)#
+    
+    #(indexRestore)#::
+    <div class="alert alert-success" role="alert">Successfully restored Solr index from dump file!</div>::
+    <div class="alert alert-danger" role="alert">Could not restore the Solr dump : no embedded Solr is available.</div>::
+    <div class="alert alert-danger" role="alert">An error occurred while trying to restore the Solr dump.</div>
+    #(/indexRestore)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

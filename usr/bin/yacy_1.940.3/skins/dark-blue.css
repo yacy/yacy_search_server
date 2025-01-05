@@ -1,0 +1,196 @@
+/* Skin dark-blue */
+
+body {
+background-color:#000000;
+color:#BBBBBB;
+}
+h1 {
+font-family:Helvetica, sans-serif;
+font-size:16pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+margin-bottom:0pt;
+}
+h2 {
+font-family:Helvetica, sans-serif;
+font-size:14pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+margin-bottom:0pt;
+}
+h3 {
+font-family:Helvetica, sans-serif;
+font-size:12pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+margin-bottom:0pt;
+}
+h4 {
+font-family:Helvetica, sans-serif;
+font-size:10pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+margin-bottom:0pt;
+}
+a, body, div, li, ol, span, table, td, tr, ul {
+color:#666666;
+font-family:Helvetica, sans-serif;
+font-size:10pt;
+font-style:normal;
+line-height:14px;
+margin-top:0px;
+margin-bottom:0px;
+}
+*.small {
+font-family:Helvetica, sans-serif;
+font-size:8pt;
+font-style:normal;
+line-height:9px;
+margin-top:0px;
+margin-bottom:0px;
+}
+body, div, li, ol, span, table, td, tr, ul {
+
+text-decoration:none;
+}
+a:hover {
+color:#AAAAFF;
+}
+a.unknown {
+color:#666666;
+}
+a.known {
+color:#555555;
+}
+*.yellow {
+color:#0000FF;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+}
+*.blue {
+color:#556699;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+}
+*.tt {
+font-family:Courier,Terminal,sans-serif;
+font-size:8pt;
+line-height:9px;
+}
+.Menu {
+width: 140;
+}
+.MenuHeader {
+background-color: #000000;
+color:white;
+font-size: 9px;
+font-weight:bold;
+}
+.MenuItem {
+background-color: #2A2A2A;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+padding-top: 2;
+padding-bottom: 2;
+}
+.MenuItemLink {
+color:#777777;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+}
+a.MenuItemLink:hover {
+color:#AAAAFF;
+font-weight:bold;
+text-decoration:none;
+}
+.MenuSpacer {
+height: 4;
+}
+.Headline {
+color:#7777AA;
+font-weight: bold;
+font-size: 160%;
+font-family: Helvetica, Arial;
+text-align: center;
+}
+.Heading {
+background-color: #2A2A2A;
+height: 38px;
+}
+.TableHeader {
+background-color: #2A2A2A;
+}
+.TableCellDark {
+background-color: #202020;
+}
+.TableCellLight {
+background-color: #252535;
+}
+.TableCellActive {
+background-color: #ffbbaa;
+}
+.TableCellSummary {
+background-color: #004000;
+}
+.WikiBackground {
+background-color: #202020;
+}
+.MessageBackground {
+background-color: #202020;
+}
+.bookmarkTags{
+color: #007050;
+font-weight:bold;
+text-decoration:none;
+white-space:nowrap;
+}
+.bookmarkTitle{
+line-height: 120%;
+color: #4070a0;
+font-size:17px;
+font-weight:bold;
+text-decoration:none;
+}
+.bookmarkDescription{
+font-style:normal;
+}
+.bookmarkAction{
+color: #999999;
+text-decoration:none;
+}
+img.bookmarkIcon, img.deleteIcon, img.recommendIcon{
+height: 16px;
+width: 16px;
+}
+
+.ResultDescription {
+color:#4070a0;
+font-weight:bold;
+}
+
+.ResultDateYBR {
+color:#007050
+}
+
+.settingsValue {
+color:#556699;
+font-weight:bold;
+}
+
+div.ProgressBarFill {
+  background-color:#71D500;
+}
+
+.snippetLoaded b {
+  color: #999999;
+}
+
+.navbar-default{background-color:#000;border-color:#000}

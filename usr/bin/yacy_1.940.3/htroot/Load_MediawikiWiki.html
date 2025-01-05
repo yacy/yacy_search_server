@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Configuration of a Wiki Search</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Integration in MediaWiki</h2>
+    <p>
+      It is possible to insert wiki pages into the YaCy index using a web crawl on that pages.
+      This guide helps you to crawl your wiki and to insert a search window in your wiki pages.
+    </p>
+    
+    <h3>Retrieval of Wiki Pages</h3>
+    <p>
+      The following form is a simplified crawl start that uses the proper values for a wiki crawl.
+      Just insert the front page URL of your wiki. After you started the crawl you may want to get back
+      to this page to read the integration hints below.
+    </p>
+    
+   <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
+       <fieldset>
+        <dl>
+          <dt><b>URL of the wiki main page</b><br />This is a crawl start point</dt>
+          <dd>
+		  <input type="text" name="crawlingURL" value="#[starturl]#" size="60" maxlength="256" onkeypress="changed()" onfocus="check('url')" />
+          
+          <input type="hidden" name="crawlingMode" id="url" value="url" checked="checked" />
+          <input type="hidden" name="createBookmark" value="off" />		  
+          <input type="hidden" name="crawlingDepth" value="8" />
+	  <input type="hidden" name="mustmatch" value=".*" />
+	  <input type="hidden" name="mustnotmatch" value="(.*Recentchangeslinked.*)|(.*Whatlinkshere.*)|(.*MediaWiki.*)" />
+	  <input type="hidden" name="range" value="subpath" />
+	  <input type="hidden" name="crawlingIfOlderCheck" value="on"/>
+	      <input type="hidden" name="cleanSearchCache" id="cleanSearchCache" value=#(cleanSearchCacheChecked)#"off"::"on"#(/cleanSearchCacheChecked)# />
+          <input type="hidden" name="crawlingIfOlderNumber" value="1" />
+          <input type="hidden" name="crawlingIfOlderUnit" value="day" />
+          <input type="hidden" name="crawlingDomFilterCheck" value="off" />
+          <input type="hidden" name="crawlingDomFilterDepth" value="0" />
+          <input type="hidden" name="crawlingDomMaxCheck" value="off" />
+          <input type="hidden" name="crawlingDomMaxPages" value="" />
+          <input type="hidden" name="crawlingQ" value="off" />
+          <input type="hidden" name="storeHTCache" value="off" />
+          <input type="hidden" name="indexText" value="on" />
+          <input type="hidden" name="indexMedia" value="on" />
+          <input type="hidden" name="crawlOrder" value="off" />
+          <input type="hidden" name="intention" value="" />
+          <input type="hidden" name="xsstopw" value="off" />
+          <input type="hidden" name="xdstopw" value="off" />
+          <input type="hidden" name="xpstopw" value="off" />
+          </dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="crawlingstart" class="btn btn-primary" value="Get content of Wiki: crawl wiki pages" /></dd>
+          
+        </dl>
+      </fieldset>
+    </form>
+
+
+    <h3>Inserting a Search Window to MediaWiki</h3>
+    <p>
+      To integrate a search window into a MediaWiki, you must insert some code into the wiki template.
+      There are several templates that can be used for MediaWiki, but in this guide we consider that
+      you are using the default template, 'MonoBook.php':
+	</p>
+    <ul>
+        <li>open skins/MonoBook.php</li>
+        <li>find the line where the default search window is displayed, there are the following statements:
+         <pre>&lt;form name="searchform" action="&lt;?php $this-&gt;text('searchaction') ?&gt;" id="searchform"&gt;
+              &lt;input id="searchInput" name="search" type="text"
+                &lt;?php if($this-&gt;haveMsg('accesskey-search')) {
+                  ?&gt;accesskey="&lt;?php $this-&gt;msg('accesskey-search') ?&gt;"&lt;?php }
+                if( isset( $this-&gt;data['search'] ) ) {
+                  ?&gt; value="&lt;?php $this-&gt;text('search') ?&gt;"&lt;?php } ?&gt; /&gt;
+              &lt;input type='submit' name="go" class="searchButton" id="searchGoButton"
+                value="&lt;?php $this-&gt;msg('go') ?&gt;"
+                /&gt;&nbsp;&lt;input type='submit' name="fulltext"
+                class="searchButton"
+                value="&lt;?php $this-&gt;msg('search') ?&gt;" /&gt;
+            &lt;/form&gt;
+         </pre></li>
+        <li>Remove that code or set it in comments using '&lt;!--' and '--&gt;' </li>
+        <li>Insert the following code:
+         <pre>
+&lt;p&gt;Search with YaCy in this Wiki:&lt;/p&gt;
+&lt;script src="#[address]#/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script&gt;
+   $(document).ready(function() {
+      yconf = {
+         url : '#[address]#/',
+         theme : 'smoothness',
+         title : 'YaCy Wiki Search',
+         urlmaskfilter : '.*',
+         width : 500,
+         height : 600
+      };
+      $.getScript(yconf.url+'/js/yacyui-portalsearch.js', function(){});
+   });
+&lt;/script&gt;
+&lt;div id="yacylivesearch"&gt;
+   &lt;form id="ysearch" method="get" accept-charset="UTF-8" action="#[address]#/yacysearch.html"&gt;
+      &lt;input name="search" id="yquery" type="text" size="15" maxlength="80" value=""/&gt;
+      &lt;input type="hidden" name="verify" value="false" /&gt;
+      &lt;input type="hidden" name="maximumRecords" value="10" /&gt;
+      &lt;input type="hidden" name="resource" value="local" /&gt;
+      &lt;input type="hidden" name="urlmaskfilter" value=".*" /&gt;
+      &lt;input type="hidden" name="prefermaskfilter" value="" /&gt;
+      &lt;input type="hidden" name="former" value="" /&gt;
+      &lt;input type="hidden" name="display" value="2" /&gt;
+      &lt;input type="hidden" name="nav" value="all" /&gt;
+      &lt;input type="submit" name="Enter" value="Search" /&gt;
+   &lt;/form&gt;
+&lt;/div&gt;
+</pre></li>
+        <li>Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name</li>
+        <li>You may want to change the default text elements in the code snippet</li>
+        <li>To see all options for the search widget, look at the more generic description of search widgets at
+            the <a href="ConfigLiveSearch.html">configuration for live search</a>.</li>
+    </ul>
+    #%env/templates/footer.template%#
+  </body>
+</html>

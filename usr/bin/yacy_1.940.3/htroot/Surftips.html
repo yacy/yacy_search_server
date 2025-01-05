@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Surftips</title>
+    <meta name="keywords" content="YaCy P2P peer-to-peer Surftips Social Bookmarking Link Voting" />
+    <meta name="description" content="Surftips provided by the YaCy peer-to-peer network using public bookmarks, link votes and crawl start points" />
+    	<link rel="alternate" type="application/rss+xml" title="YaCy Surftips" href="Surftips.rss" />
+    #%env/templates/metas.template%#
+	<script type="text/javascript">
+  //<![CDATA[
+	function pcomment(link) {
+  		var c = window.prompt("Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)", "");
+		return link + "&amp;comment=" + c;
+	}
+  //]]>
+	</script>
+  <script type="text/javascript" src="js/yacysearch.js"></script>
+  </head>
+  <body id="Surftips">
+    #%env/templates/header.template%#
+    #%env/templates/submenuComputation.template%#
+    <h2 class="yacy">Surftips</h2>
+
+    #(surftips)#
+    Surftips are switched off for users without authorization
+    ::
+    #{results}#
+     <!-- link begin -->
+     <div class="searchresults">
+       #(authorized)#::
+       <div class="urlactions">
+         <a href="Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="env/grafics/empty.gif" title="bookmark" alt="Add to bookmarks" class="bookmarkIcon" /></a>
+         #(recommend)#
+         <img src="env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
+         <img src="env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
+         ::
+         <a href="Surftips.html?votePositive=#[urlhash]#&amp;refid=#[refid]#&amp;url=#[url]#&amp;title=#[title]#&amp;description=#[description]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="positive vote" class="recommendlink" onclick="pcomment(this.href);void(0);"><img src="env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
+         <a href="Surftips.html?voteNegative=#[urlhash]#&amp;refid=#[refid]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="negative vote" class="deletelink" ><img src="env/grafics/empty.gif" title="negative vote" alt="Give negative vote" class="deleteIcon" /></a>
+         #(/recommend)#
+       </div>
+       #(/authorized)#
+       <h4 class="linktitle"><a href="#[url]#">#[title]#</a></h4>
+       <p class="snippet">#[description]#</p>
+     </div>
+    <!-- link end -->
+    #{/results}#
+    <!-- supporter page (appears like surf tip) -->
+     <div class="searchresults">
+       <h4 class="linktitle"><a href="Supporter.html">YaCy Supporters</a></h4>
+       <p class="snippet">a list of home pages of yacy users</p>
+     </div>
+    <!-- supporter page -->
+    <p class="aftersurftips">
+    ...provided by YaCy peers using public bookmarks, link votes and crawl start points
+    </p>
+    
+    <form action="Surftips.html" method="get" class="PeerControl" accept-charset="UTF-8"><div>
+      #(publicSurftips)#
+      <button type="submit" name="publicPage" class="btn btn-primary" value="1">
+        <img src="env/grafics/lockclose.png" alt="authentication required" />
+          Show surftips to everyone
+      </button>
+      ::
+      <button type="submit" name="publicPage" class="btn btn-primary" value="0">
+        <img src="env/grafics/lockclose.png" alt="authentication required" />
+          Hide surftips for users without autorization
+      </button>
+      #(/publicSurftips)#
+    </div></form>
+    <script type="text/javascript">
+      addHover();
+    </script>
+    #(/surftips)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': YaCy Search Network</title>
+    #%env/templates/metas.template%#
+    <style type="text/css">
+    .left {
+      float: left;
+    }
+    </style>
+
+  <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="Network">
+
+    #(menu)#
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#    
+    <div class="SubMenu">
+      <h3>YaCy Network</h3>
+      <ul class="SubMenu">
+        <li><a href="Network.html" class="MenuItemLink">Network Overview</a></li>
+        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=5" class="MenuItemLink">Network History</a></li>
+      </ul>
+    </div>
+    #(/menu)#
+    
+<div id="api"><a href="Network.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML.
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+<script type="text/javascript">
+document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.location.search.substring(1));
+</script>
+
+    #(page)#
+    <h2>YaCy Search Network '#[networkName]#'</h2>
+  <script type="text/javascript">
+  <!--
+    imagestub = "NetworkPicture.png?width=1024&height=720&bgcolor=FFFFFF&ct=15000&coronaangle=";
+    imageanimindex = 0;
+    imageloadindex = 0;
+    imagecycles = 0;
+    imagearray = new Array(6);
+    setTimeout("initanimation()", 100);
+    setTimeout("doanimation()", 1000);
+    function initanimation() {
+      handle = new Date().getTime();
+      for (j = 0; j < 6; j++) initanimationphase(j, handle);
+    }
+    function initanimationphase(phase, handle) {
+      imagearray[phase] = new Image(1024, 720);
+      angle = phase * 60;
+      imagearray[phase].src = imagestub + angle + "&handle=" + handle;
+    }
+    function doanimation() {
+      var networkPicture = document.getElementById("NetworkPicture");
+      if (networkPicture != null) {
+        networkPicture.src = imagearray[imageanimindex].src;
+        imageanimindex++;
+        if (imageanimindex == 6) { imageanimindex = 0; }
+        imagecycles++;
+        if (imagecycles == 25) {
+          initanimationphase(imageloadindex, new Date().getTime());
+          imageloadindex++;
+          if (imageloadindex == 6) { imageloadindex = 0; }
+          imagecycles = 0;
+        }
+        setTimeout("doanimation()", 100);
+      }
+    }
+  -->
+  </script>
+    ::
+    <h2>Active Principal and Senior Peers in '#[networkName]#' Network</h2>
+    ::
+    <h2>Passive Senior Peers in '#[networkName]#' Network</h2>
+    ::
+    <h2>Junior Peers (a fragment) in '#[networkName]#' Network</h2>
+    ::
+    <h2>Manually contacting Peer</h2>
+    ::
+    <h2>Network History</h2>
+    #(/page)#
+    #(regexerror)#
+    ::
+    <p><strong>ERROR</strong>: Unable to execute query. &quot;<strong>#[wrongregex]#</strong>&quot; is no valid regular expression, please enter a valid regular expression to search for a peername.</p>
+    #(/regexerror)#
+    #(table)#
+    <p>no remote #[peertype]# peer for this list known</p>
+    ::
+    <p>Showing #[num]# entries from a total of #[total]# peers.</p>
+    <form action="Network.html?page=#[page]#" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <label for="match">Search for a peername (RegExp allowed)</label>:
+        <input type="text" id="match" name="match" value="#[searchpattern]#" />
+        <input type="hidden" name="page" value="#[page]#" />
+        <input type="submit" name="search" class="btn btn-default" value="Search" />
+      </fieldset>
+    </form>
+    <table class="sortable" border="0">
+      <tr class="TableHeader" valign="bottom">
+        <td><strong>Hash</strong></td>
+        <td><strong>Name</strong><br/></td>
+        <td width="34"><strong>Info</strong></td>
+        <td><strong>Release</strong></td>
+        <td><strong>Age</strong></td>
+        <td><strong>#Seeds</strong></td>
+        <td><strong>con/h<br/></strong></td>
+        <td><strong>PPM</strong></td>
+        <td><strong>QPH</strong></td>
+        <td><strong>Last<br/>Seen</strong></td>
+        <td><strong>UTC</strong><br/>Offset</td>
+        <td style="width:70px;"><strong>Uptime</strong></td>
+        <td><strong>Links</strong></td>
+        <td><strong>RWIs</strong></td>
+        <td><strong>URLs<br/>for<br/>Remote<br/>Crawl</strong></td>
+        <td><strong>Sent DHT<br/>Word Chunks</strong></td>
+        <td><strong>Sent<br/>URLs</strong></td>
+        <td><strong>Received DHT<br/>Word Chunks</strong></td>
+        <td><strong>Received<br/>URLs</strong></td>
+        <td><strong>Location</strong><br/></td>
+        #(c)#::<td><strong>user agent<br/></strong></td>#(/c)#
+        <td>send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td >#[hash]#</td>
+        <td #(special)#::class="TableCellActive"#(/special)#>#[shortname]##(ssl)#::<a href="https://#[ip]#:#[portssl]#/Network.html?page=1" class="forceNoExternalIcon" target="_blank"><img src="env/grafics/lockclose.png" width="11" height="15" title="https supported" alt="https supported" /></a>#(/ssl)#</td>
+        <td nowrap>
+          #(type)##(direct)#<img src="env/grafics/JuniorPassive.gif" width="11" height="11" title="Type: Junior | Contact: passive" alt="Junior passive" />::<img src="env/grafics/JuniorDirect.gif" width="11" height="11" title="Type: Junior | Contact: direct" alt="Junior direct" />::<img src="env/grafics/JuniorOffline.gif" width="11" height="11" title="Type: Junior | Contact: offline" alt="Junior offline" />#(/direct)#::#(direct)#<img src="env/grafics/SeniorPassive.gif" width="11" height="11" title="Type: Senior | Contact: passive" alt="senior passive" />::<img src="env/grafics/SeniorDirect.gif" width="11" height="11" title="Type: Senior | Contact: direct" alt="Senior direct" />::<img src="env/grafics/SeniorOffline.gif" width="11" height="11" title="Type: Senior | Contact: offline" alt="Senior offline" />#(/direct)#::<a href="#[url]#" class="forceNoExternalIcon">#(direct)#<img src="env/grafics/PrincipalPassive.gif" width="11" height="11" title="Type: Principal | Contact: passive | Seed download: possible" alt="Principal passive" />::<img src="env/grafics/PrincipalDirect.gif" width="11" height="11" title="Type: Principal | Contact: direct | Seed download: possible" alt="Principal active" />::<img src="env/grafics/PrincipalOffline.gif" width="11" height="11" title="Type: Principal | Contact: offline | Seed download: ?" alt="Principal offline" />#(/direct)#</a>#(/type)##(acceptcrawl)#<img src="env/grafics/CrawlNo.gif" width="11" height="11" title="Accept Crawl: no" alt="no crawl" />::<img src="env/grafics/CrawlYes.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />::<img src="env/grafics/CrawlYesOffline.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />#(/acceptcrawl)##(dhtreceive)#<img src="env/grafics/DHTReceiveNo.gif" width="11" height="11" title="DHT Receive: no; #[peertags]#" alt="no DHT receive" />::<img src="env/grafics/DHTReceiveYes.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />::<img src="env/grafics/DHTReceiveYesOffline.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />#(/dhtreceive)##{ips}#<a href="#(c)#http://#(ipv6)#::[#(/ipv6)##[ip]##(ipv6)#::]#(/ipv6)#:#[port]#/Network.html?page=1::Network.html?page=4&amp;peerHash=#[hash]#&amp;peerIP=#[ip]#&amp;peerPort=#[port]#&amp;addPeer=add+Peer#(/c)#"#(c)#:: target="_blank"#(/c)#class="forceNoExternalIcon"><img src="env/grafics/#(nodestate)#NodeDisqualified::NodeQualified#(/nodestate)##(c)##(ipv6)#IPv4::IPv6#(/ipv6)#::#(ipv6)#IPv4::IPv6#(/ipv6)##(/c)#.gif" width="11" height="11" title="#(c)##(ipv6)#IPv4::IPv6#(/ipv6)#::#(ipv6)#IPv4::IPv6#(/ipv6)##(/c)# #(nodestate)#Peer::Node Peer#(/nodestate)#" /></a>#{/ips}#</td>
+        <td align="right">#[version]#</td>
+        <td align="right">#[age]#</td>
+        <td align="right">#[seeds]#</td>
+        <td align="right">#[connects]#</td>
+        <td align="right">#[ppm]#</td>
+        <td align="right">#[qph]#</td>
+        <td align="right">#[lastSeen]#</td>
+        <td align="right">#[utc]#</td>
+        <td align="right" nowrap>#[uptime]#</td>
+        <td align="right">#[LCount]#</td>
+        <td align="right">#[ICount]#</td>
+        <td align="right">#[RCount]#</td>
+        <td align="right">#[sI]#</td>
+        <td align="right">#[sU]#</td>
+        <td align="right">#[rI]#</td>
+        <td align="right">#[rU]#</td>
+        <td align="right">#[location]#</td>
+        #(c)#::<td align="right">#[userAgent]#</td>#(/c)#
+        <td><nobr>
+          <a href="MessageSend_p.html?hash=#[hash]#" title="Send message to peer #[fullname]#">m</a>&nbsp;
+          <a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[fullname]#">p</a>&nbsp;
+          <a href="goto_p.html?hash=#[hash]#&path=/Wiki.html" title="Read and edit wiki on peer #[fullname]#">w</a>&nbsp;
+          <a href="goto_p.html?hash=#[hash]#&path=/Blog.html" title="Browse blog of peer #[fullname]#">b</a>&nbsp;
+          #(updatedProfile)#::<a href="ViewProfile.html?hash=#[hash]#&amp;display=1"><img src="env/grafics/profile.gif" width="54" height="11" alt="Profile updated" /></a>#(/updatedProfile)#
+          #(updatedWiki)#::<a href="http://#[address]#/Wiki.html?page=#[page]#" title="#[page]#"><img src="env/grafics/wiki.gif" width="54" height="11" alt="Wiki updated" /></a>#(/updatedWiki)#
+          #(updatedBlog)#::<a href="http://#[address]#/Blog.html?page=#[page]#" title="#[subject]#"><img src="env/grafics/blog.gif" width="54" height="11" alt="Blog updated" /></a>#(/updatedBlog)#
+          #(isCrawling)#::<a href="#[page]#"><img src="env/grafics/crawl.gif" width="54" height="11" alt="Crawl" /></a>#(/isCrawling)#
+        </nobr></td>
+      </tr>
+      #{/list}#
+    </table>
+    <p>
+      <em>runtime: #[rt]# ms</em>
+    </p>
+    ::
+    <div class="left">
+    <table border="0" width="1024">
+      <tr class="TableHeader">
+        <td rowspan="5" class="TableHeader" width="10%">Network</td>
+        <td colspan="#(active-switch)#2::3::4::5::6#(/active-switch)#" width="22%">Online Peers</td>
+        <td rowspan="2" width="22%">Number of<br/>Documents</td>
+        <td rowspan="2" width="22%">Indexing Speed:<br/>Pages Per Minute (PPM)</td>
+        <td rowspan="2" width="22%">Query Frequency:<br/>Queries Per Hour (QPH)</td>
+      </tr>
+      <tr class="TableHeader">
+        #(active-switch)#::
+        <td>Last Hour</td>::
+        <td>Today</td><td>Last Hour</td>::
+        <td>Last&nbsp;Week</td><td>Today</td><td>Last Hour</td>::
+        <td>Last&nbsp;Month</td><td>Last&nbsp;Week</td><td>Today</td><td>Last Hour</td>
+        #(/active-switch)#
+        <td colspan="2">Now</td>
+      </tr>
+      <tr class="TableCellLight">
+        #(active-switch)#::
+        <td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>
+        #(/active-switch)#
+        <td align="left">Active Senior</td>
+        <td align="right">#[active-count]#</td>
+        <td align="right">#[active-links]#</td>
+        <td align="right" rowspan="3">#[gppm]#</td>
+        <td align="right" rowspan="3">#[gqph]#</td>
+      </tr>
+      <tr class="TableCellLight">
+        <td align="left">Passive Senior</td>
+        <td align="right">#[passive-count]#</td>
+        <td align="right">#[passive-links]#</td>
+      </tr>
+      <tr class="TableCellLight">
+        <td align="left">Junior (fragment)</td>
+        <td align="right">#[potential-count]#</td>
+        <td align="right">#[potential-links]#</td>
+      </tr>
+      <tr class="TableCellSummary">
+        <td align="left" colspan="#(active-switch)#3::4::5::6::7#(/active-switch)#">This Peer</td>
+        <td align="right">#[my-LCount]#</td>
+        <td align="right">#[my-ppm]#</td>
+        <td align="right">#[my-qph]#</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="left">
+      <p>
+        <a href="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="720" /></a>
+      </p>
+    </div>
+    <div class="left">
+    Your Peer:
+    <table border="0" width="600">
+      <tr class="TableHeader">
+        <td>Name</td>
+        <td>Info</td>
+        <td>Version</td>
+        <td>UTC</td>
+        <td>Uptime</td>
+        <td>Links</td>
+        <td>RWIs</td>
+        <td>URLs for<br/>Remote Crawl</td>
+        <td>Sent<br/>DHT Word Chunks</td>
+        <td>Sent<br/>URLs</td>
+        <td>Received<br/>DHT Word Chunks</td>
+        <td>Received<br/>URLs</td>
+        <td>Known<br/>Seeds</td>
+        <td>Connects<br/>per hour</td>
+        <td>Indexing<br/>PPM</td>
+        <td>QPH<br/>(public&nbsp;local)</td>
+        <td>QPH<br/>(remote)</td>
+      </tr>
+      <tr class="TableCellLight">
+        <td>#[my-name]##(my-ssl)#::<img src="env/grafics/lockclose.png" width="11" height="15" title="https supported" alt="https supported" />#(/my-ssl)#</td>
+        <td nowrap>#(my-info)#<img src="env/grafics/Virgin.gif" width="11" height="11" title="Type: Virgin" alt="Virgin" />::<img src="env/grafics/JuniorDirect.gif" width="11" height="11" title="Type: Junior" alt="Junior" />::<img src="env/grafics/SeniorDirect.gif" width="11" height="11" title="Type: Senior" alt="Senior" />::<img src="env/grafics/PrincipalDirect.gif" width="11" height="11" title="Type: Principal" alt="Principal" />#(/my-info)##(my-acceptcrawl)#<img src="env/grafics/CrawlNo.gif" width="11" height="11" title="Accept Crawl: no" alt="no crawl" />::<img src="env/grafics/CrawlYes.gif" width="11" height="11" title="Accept Crawl: yes" alt="Crawl enabled" />#(/my-acceptcrawl)##(my-dhtreceive)#<img src="env/grafics/DHTReceiveNo.gif" width="11" height="11" title="DHT Receive: no" alt="no DHT receive" />::<img src="env/grafics/DHTReceiveYes.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT Receive enabled" />#(/my-dhtreceive)##{ips}#<a href="#(c)#http://#(ipv6)#::[#(/ipv6)##[ip]##(ipv6)#::]#(/ipv6)#:#[port]#/Network.html?page=1::Network.html?page=4&amp;peerHash=#[hash]#&amp;peerIP=#[ip]#&amp;peerPort=#[port]#&amp;addPeer=add+Peer#(/c)#"#(c)#:: target="_blank"#(/c)#class="forceNoExternalIcon"><img src="env/grafics/#(nodestate)#NodeDisqualified::NodeQualified#(/nodestate)##(c)##(ipv6)#IPv4::IPv6#(/ipv6)#::#(ipv6)#IPv4::IPv6#(/ipv6)##(/c)#.gif" width="11" height="11" title="#(c)##(ipv6)#IPv4::IPv6#(/ipv6)#::#(ipv6)#IPv4::IPv6#(/ipv6)##(/c)# #(nodestate)#Peer::Node Peer#(/nodestate)#" /></a>#{/ips}#</td>
+        <td align="right">#[my-version]#</td>
+        <td align="right">#[my-utc]#</td>
+        <td align="right">#[my-uptime]#</td>
+        <td align="right">#[my-LCount]#</td>
+        <td align="right">#[my-ICount]#</td>
+        <td align="right">#[my-RCount]#</td>
+        <td align="right">#[my-sI]#</td>
+        <td align="right">#[my-sU]#</td>
+        <td align="right">#[my-rI]#</td>
+        <td align="right">#[my-rU]#</td>
+        <td align="right">#[my-seeds]#</td>
+        <td align="right">#[my-connects]#</td>
+        <td align="right">#[my-ppm]#</td>
+        <td align="right">#[my-qph-publocal]#</td>
+        <td align="right">#[my-qph-pubremote]#</td>
+      </tr>
+    </table>
+    </div>
+
+	<div class="left">
+    <table border="0">
+            <tr>
+                    <td style="background-color:#668877">&nbsp;</td>
+                    <td>dark green font</td>
+                    <td>:</td>
+                    <td>senior/principal peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#B3CCB3">&nbsp;</td>
+                    <td>light green font</td>
+                    <td>:</td>
+                    <td>passive peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#CCB3B3">&nbsp;</td>
+                    <td>pink font</td>
+                    <td>:</td>
+                    <td>junior peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#BE6F4F">&nbsp;</td>
+                    <td>red point</td>
+                    <td>:</td>
+                    <td>this peer</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#AAAAAA">&nbsp;</td>
+                    <td>grey waves</td>
+                    <td>:</td>
+                    <td>crawling activity</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#66FF66">&nbsp;</td>
+                    <td>green radiation</td>
+                    <td>:</td>
+                    <td>strong query activity</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#FF6666">&nbsp;</td>
+                    <td>red lines</td>
+                    <td>:</td>
+                    <td>DHT-out</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#44FF44">&nbsp;</td>
+                    <td>green lines</td>
+                    <td>:</td>
+                    <td>DHT-in</td>
+            </tr>
+    </table>
+    </div>
+::
+::
+    #(comment)#
+    ::
+    <p style="color:red;">
+      <code>#[status]#</code>
+    </p>
+    ::
+    <p style="color:green">
+      <code>#[status]#</code>
+    </p>
+    <p style="color:green;">
+      <code>#[details]#</code>
+    </p>
+    #(/comment)#
+
+    <form action="Network.html" method="get" accept-charset="UTF-8">
+      <table>
+        <tr>
+          <td>Peer Hash</td>
+          <td><input name="peerHash" type="text" size="32" maxlength="128" value="#[peerHash]#" /></td>
+        </tr>
+        <tr>
+          <td>Peer IP</td>
+          <td><input name="peerIP" type="text" size="32" maxlength="128" value="#[peerIP]#" /></td>
+        </tr>
+        <tr>
+          <td>Peer Port</td>
+          <td><input name="peerPort" type="text" size="32" maxlength="128" value="#[peerPort]#" /></td>
+        </tr>
+        <tr>
+          <td>&nbsp;<input name="page" type="hidden" value="4" /></td>
+          <td><input type="submit" name="addPeer" class="btn btn-primary" value="add Peer" /></td>
+        </tr>
+      </table>
+    </form>
+    
+    <p>&nbsp;</p>
+    
+    Contacting current peer from another:
+      <table>
+        <tr>
+          <td>ip:port</td>
+          <td><input id="otherPeerAddress" type="text" size="32" maxlength="128" value=":8090" /></td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td><input type="button" value="contact current peer from this peer" onclick="top.location.href='http://' + document.getElementById('otherPeerAddress').value + '/Network.html?peerHash=#[my-hash]#&peerIP=#[my-ip]#&peerPort=#[my-port]#&page=4&addPeer=add+Peer'"/></td>
+        </tr>
+      </table>
+::
+    <!--
+      possible column values:
+           aM activeLastMonth
+           aW activeLastWeek
+           aD activeLastDay
+           aH activeLastHour
+           cC countConnected (Active Senior)
+           cD countDisconnected (Passive Senior)
+           cP countPotential (Junior)
+           cR count of the RWI entries
+           cI size of the index (number of documents)
+      maxtime: number of hours in the past
+      scale: number of hours per scale unit in the bottom line
+     -->
+    <h3><b>Count of Connected Senior Peers</b> in the last two days, scale = 1h</h3>
+    <img src="NetworkHistory.png?columns=cC&scale=1&maxtime=48&width=809" />
+    <h3><b>Count of all Active Peers Per Day</b> in the last week, scale = 1d</h3>
+    <img src="NetworkHistory.png?columns=aD&scale=24&maxtime=168" />
+    <h3><b>Count of all Active Peers Per Week</b> in the last 30d, scale = 7d</h3>
+    <img src="NetworkHistory.png?columns=aW&scale=168&maxtime=720" />
+    <h3><b>Count of all Active Peers Per Month</b> in the last 365d, scale = 30d</h3>
+    <img src="NetworkHistory.png?columns=aM&scale=720&maxtime=8760" />
+    #(/table)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

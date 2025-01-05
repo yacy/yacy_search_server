@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>YaCy '#[clientname]#': Location Search</title>
+  #%env/templates/metas.template%#
+  <script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>
+  <script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+  <script type="text/javascript">
+    // possible values for dom: location,metatag,alltext,title,publisher,creator,subject
+    
+    var map;
+    var searchLayer_md0 = null; // two layers each for double-buffering during search
+    var searchLayer_md1 = null;
+    var searchLayer_co0 = null;
+    var searchLayer_co1 = null;
+    var path_mdsearch = 'yacysearch_location.rss?dom=alltext&query=';
+    var path_losearch = 'yacysearch_location.rss?dom=location&query=';
+    var marker_md = new OpenLayers.Icon("env/grafics/marker_red.png", new OpenLayers.Size(11,16));
+    var marker_co = new OpenLayers.Icon("env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
+    var shallZoom   = true;  // flag if the map shall be zoomed to the search result
+    var shallReload = false; // flag if the search shall be repeated upon next resize of the window
+    var poisfound = 0;
+    var poisxml = "";
+    var kmNormal = 100; // ca. 1km grid for radius
+    var meterNormal = 100000; // ca. 1m grid for location
+    
+    // automatically adapt height of map upon window resize
+    function adaptHeight() {
+      document.getElementById('map').style.height = (document.documentElement.clientHeight - 70) + "px";
+    }
+    window.onresize = adaptHeight;
+    
+    // initialize the map layers
+    function init() {
+      map = new OpenLayers.Map('map', {
+              maxResolution:'auto',
+              controls:[
+                new OpenLayers.Control.Navigation(),
+                new OpenLayers.Control.PanZoomBar(),
+                new OpenLayers.Control.ZoomBox(),
+                new OpenLayers.Control.LayerSwitcher(),
+                new OpenLayers.Control.Attribution()]
+      });
+      //layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
+      layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
+      layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
+      layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
+      map.addLayer(layerMapnik);
+      map.addLayer(layerCycleMap);
+      //map.addLayer(layerMaplint);
+      map.addLayer(layerWMS);
+        
+      map.addControl(new OpenLayers.Control.LayerSwitcher());
+      map.setCenter(new OpenLayers.LonLat(9,48) // Center of the map
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+          ), 5 // Zoom level
+        );
+      map.events.register( "zoomend", map, zoomChanged );
+      map.events.register( "movestart", map, zoomChanged );
+      
+      //#(initsearch)#::
+      var query = '#[query]#'.replace(' ', '+');
+      //#(/initsearch)#        
+        
+      window.setInterval("refresh()", 1000);
+    }
+
+    function zoomChanged() {
+      shallZoom = false; // no automatic zoom if user hs zoomed
+      refreshsearch();
+    } 
+      
+    // called if a search is submitted
+    function search() {
+      shallZoom = true;
+      refreshsearch();
+    }
+    
+    // refresh is called if the map is zoomed or paned to get a new search result for the viewport
+    function refreshsearch() {
+      var query = document.getElementById('query').value.replace(' ', '+');
+      if (searchLayer_md0 != null) searchLayer_md0.destroy();
+      if (searchLayer_co0 != null) searchLayer_co0.destroy();
+      var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+      var extend = map.getExtent().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+      var radius = Math.sqrt(extend.getWidth() * extend.getWidth() + extend.getHeight() * extend.getHeight()) / 2;
+      radius = Math.floor(radius * kmNormal + 1) / kmNormal;
+      var lon = Math.floor(center.lon * meterNormal) / meterNormal;
+      var lat = Math.floor(center.lat * meterNormal) / meterNormal;
+      poisxml = path_mdsearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom();
+      searchLayer_co0 = new OpenLayers.Layer.GeoRSS('Communities',       path_losearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_co});
+      searchLayer_md0 = new OpenLayers.Layer.GeoRSS('Point Of Interest', poisxml, {'icon':marker_md});
+      map.addLayer(searchLayer_co0);
+      map.addLayer(searchLayer_md0);
+      //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
+      poisfound = 0;
+      document.getElementById('resultline').innerHTML = "";
+      document.getElementById('query').select();
+    }
+    
+    function refresh() {
+      // check double-buffer state
+      if (searchLayer_md0 != null) {
+        // switch the double-buffer
+        if (searchLayer_md1 != null) searchLayer_md1.destroy();
+        if (searchLayer_co1 != null) searchLayer_co1.destroy();
+        searchLayer_md1 = searchLayer_md0;
+        searchLayer_co1 = searchLayer_co0;
+        searchLayer_md0 = null;
+        searchLayer_co0 = null;
+      }
+      
+      // check if we need to do something
+      if (searchLayer_co1 == null || searchLayer_md1 == null) {
+        return;
+      }
+      var cocount = searchLayer_co1.markers.length;
+      var mdcount = searchLayer_md1.markers.length;
+      //if (mdcount + cocount <= poisfound) {
+      //  return;
+      //}
+      
+      // update map and result line
+      poisfound = mdcount;
+      document.getElementById('resultline').innerHTML = (poisfound == 0) ? "" : poisfound + " <a href=\"" + poisxml + "\">POIs</a> found in region";
+      
+      // check if any of the markers is visible on the screen.
+      // this is only necessary if shallZoom = false since this would set shallZoom = true
+      var bounds = searchLayer_md1.getDataExtent();
+      if (bounds == null) bounds = searchLayer_co1.getDataExtent();
+      
+	  /*
+      if (!shallZoom) {
+        // check all markers
+        //if (!bounds.intersectsBounds(map.getExtent())) shallZoom = true;
+        var anyInScreen = false;
+        var mapbounds = map.getExtent();
+        //alert(searchLayer_md1.markers.length + " markers");
+        for (var marker in searchLayer_md1.markers) {
+          if (marker.lonlat != null && mapbounds.containsLonLat(marker.lonlat, {})) {anyInScreen = true; break;}
+        }
+        if (!anyInScreen) shallZoom = true;
+      }
+      */
+      // zoom to layer bounds
+      if (shallZoom && bounds != null) {
+        map.panTo(bounds.getCenterLonLat());
+        map.zoomTo(map.getZoomForExtent(bounds));
+      }
+    }
+  </script>
+
+</head>
+<body id="yacysearch_location" onload="init(); #(initsearch)#::search();#(/initsearch)#">
+    #(topmenu)#
+    #%env/templates/embeddedSearchHeader.template%#
+    ::
+    #%env/templates/simpleSearchHeader.template%#
+    #(/topmenu)#
+<div id="api" style="top:58px;">
+<a href="yacysearch_location.rss" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<script type="text/javascript">
+//<![CDATA[
+document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?dom=metatag|alltext&' + window.location.search.substring(1));
+//]]>
+</script>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+
+<div class="row">
+<div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+#(topmenu)#
+<form class="search small" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+::
+<form class="search small col-xs-9 col-sm-5 col-lg-5" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+#(/topmenu)#
+  <div class="input-group" style="max-width:445px;">
+    <input type="text" class="form-control searchinput typeahead" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" autofocus="autofocus" onFocus="this.select()" />
+    <div class="input-group-btn">
+       <button id="Enter" class="btn btn-default" type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;">search</button>
+    </div>
+  </div>
+  <div id="resultline"></div>
+</form>
+</div> <!-- close sidebar -->
+</div> <!-- close row -->
+<div id="map" style="clear:both; width:100%; height:720px"></div>
+<script type="text/javascript">
+adaptHeight();
+</script>
+
+</body>
+</html>

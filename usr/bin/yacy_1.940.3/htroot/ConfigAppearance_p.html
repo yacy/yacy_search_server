@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Appearance and Integration</title>
+    <link rel="stylesheet" media="screen" type="text/css" href="env/styles/colorpicker.css" />
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigSkins">
+    #%env/templates/header.template%#
+    #%env/templates/submenuDesign.template%#
+
+    <script type="text/javascript" src="js/jquery.colorpicker.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('#color_background, #color_text, #color_legend, #color_tableheader, #color_tableitem, #color_tableitem2, #color_tablebottom, #color_borderline, #color_signbad, #color_signgood, #color_signother, #color_searchheadline, #color_searchurl, #color_searchurlhover').ColorPicker({
+            onSubmit: function(hsb, hex, rgb, el) {
+                $(el).val(hex);
+                $(el).ColorPickerHide();
+            },
+            onBeforeShow: function () {
+                $(this).ColorPickerSetColor(this.value);
+            }
+        })
+        .bind('keyup', function(){
+            $(this).ColorPickerSetColor(this.value);
+        });
+      });
+
+      // force reload of css
+      var a = document.getElementsByTagName('link');
+      var h;
+      for (h = 0; h < a.length; h++) {
+          var f = a[h];
+          if (f.href && f.href.endsWith(".css")) {
+              var g = f.href.replace(/(&|\?)rnd=\d+/, '');
+              f.href = g + (g.match(/\?/) ? '&' : '?');
+              f.href += 'rnd=' + (new Date().valueOf());
+          }
+      }
+    </script>
+
+    <h2>Appearance and Integration</h2>
+    <p>
+      You can change the appearance of the YaCy interface with skins.
+      The selected skin and language also affects the appearance of the search page.
+      If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can
+      change the appearance of the search page here.
+    </p>
+
+    <form action="ConfigAppearance_p.html" accept-charset="UTF-8">
+      <fieldset>
+      <legend>Skin Selection</legend>
+        <p>Select one of the default skins. <b>After selection it might be required to reload the web page while holding the shift key to refresh cached style files.</b></p>
+        <dl>
+          <dt><label for="cur_skin">Current skin</label>:</dt>
+          <dd id="cur_skin">#[currentskin]#&nbsp;</dd>
+
+          <dt><label for="skins">Available Skins</label>:</dt>
+          <dd>
+            <select id="skins" name="skin">#{skinlist}#
+              <option value="#[file]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/skinlist}#
+            </select>
+          </dd>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="use_button" value="Use" class="btn btn-primary"/>
+            <input type="submit" name="delete_button" value="Delete" class="btn btn-danger"/>
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+
+    <form action="ConfigAppearance_p.html" accept-charset="UTF-8">
+      <fieldset>
+      <legend>Skin Color Definition</legend>
+      <p>The generic skin 'generic_pd' can be configured here with custom colors:</p>
+      <table border="0"><tr><td style="width:500px;" valign="top">
+        <dl>
+          <dt>Background</dt><dd><input type="text" maxlength="6" size="6" id="color_background" name="color_background" value="#[color_background]#" /></dd>
+          <dt>Text</dt><dd><input type="text" maxlength="6" size="6" id="color_text" name="color_text" value="#[color_text]#" /></dd>
+          <dt>Legend</dt><dd><input type="text" maxlength="6" size="6" id="color_legend" name="color_legend" value="#[color_legend]#" /></dd>
+          <dt>Table&nbsp;Header</dt><dd><input type="text" maxlength="6" size="6" id="color_tableheader" name="color_tableheader" value="#[color_tableheader]#" /></dd>
+          <dt>Table&nbsp;Item</dt><dd><input type="text" maxlength="6" size="6" id="color_tableitem" name="color_tableitem" value="#[color_tableitem]#" /></dd>
+          <dt>Table&nbsp;Item&nbsp;2</dt><dd><input type="text" maxlength="6" size="6" id="color_tableitem2" name="color_tableitem2" value="#[color_tableitem2]#" /></dd>
+          <dt>Table&nbsp;Bottom</dt><dd><input type="text" maxlength="6" size="6" id="color_tablebottom" name="color_tablebottom" value="#[color_tablebottom]#" /></dd>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="hidden" name="skin" value="generic_pd.css" />
+            <input type="submit" name="set_colors" value="Set Colors" class="btn btn-primary"/>
+          </dd>
+        </dl>
+        </td><td style="width:500px;" valign="top">
+        <dl>
+          <dt>Border&nbsp;Line</dt><dd><input type="text" maxlength="6" size="6" id="color_borderline" name="color_borderline" value="#[color_borderline]#" /></dd>
+          <dt>Sign&nbsp;'bad'</dt><dd><input type="text" maxlength="6" size="6" id="color_signbad" name="color_signbad" value="#[color_signbad]#" /></dd>
+          <dt>Sign&nbsp;'good'</dt><dd><input type="text" maxlength="6" size="6" id="color_signgood" name="color_signgood" value="#[color_signgood]#" /></dd>
+          <dt>Sign&nbsp;'other'</dt><dd><input type="text" maxlength="6" size="6" id="color_signother" name="color_signother" value="#[color_signother]#" /></dd>
+          <dt>Search&nbsp;Headline</dt><dd><input type="text" maxlength="6" size="6" id="color_searchheadline" name="color_searchheadline" value="#[color_searchheadline]#" /></dd>
+          <dt>Search&nbsp;URL</dt><dd><input type="text" maxlength="6" size="6" id="color_searchurl" name="color_searchurl" value="#[color_searchurl]#" /></dd>
+          <dt>Search&nbsp;URL&nbsp;+&nbsp;hover</dt><dd><input type="text" maxlength="6" size="6" id="color_searchurlhover" name="color_searchurlhover" value="#[color_searchurlhover]#" /></dd>
+        </dl>
+        </td></tr></table>
+      </fieldset>
+    </form>
+
+    <form action="ConfigAppearance_p.html" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Skin Download</legend>
+        <p>Skins can be installed from download locations:</p>
+        <dl>
+          <dt><label for="url">Install new skin from URL</label>:</dt>
+          <dd><input type="text" name="url" id="url" size="30" /></dd>
+
+          <dt><label for="use_url">Use this skin</label></dt>
+          <dd><input type="checkbox" name="use_skin" id="use_url" value="on" checked="checked" /></dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="install_button" value="Install" class="btn btn-primary"/></dd>
+        </dl>
+        <p>Make sure that you only download data from trustworthy sources. The new Skin file
+           might overwrite existing data if a file of the same name exists already.</p>
+      </fieldset>
+    </form>
+
+    #(status)#
+    ::<p><strong>Unable to get URL: #[url]#</strong></p>
+    ::<p><strong>Error saving the skin.</strong></p>
+    #(/status)#
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

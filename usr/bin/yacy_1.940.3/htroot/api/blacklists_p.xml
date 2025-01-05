@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<blacklists>
+#{lists}#
+	<list name="#[name]#" shared="#[shared]#" #{types}# 
+	      #[name]#="#[value]#"#{/types}#>
+	#{items}#
+		<item>#[item]#</item>
+	#{/items}#
+	</list>
+#{/lists}#
+</blacklists>

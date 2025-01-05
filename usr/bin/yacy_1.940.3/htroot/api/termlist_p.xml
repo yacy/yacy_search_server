@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<terms
+  allcount="#[termnumber]#"
+  selectcount="#[terms]#"
+  selectmemory="#[totalmemory]#"
+  over1000="#[over1000]#"
+  over10000="#[over10000]#"
+  over100000="#[over100000]#"
+  over1000000="#[over1000000]#"
+  over10000000="#[over10000000]#"
+  over100000000="#[over100000000]#"
+>
+  <maxterm hash="#[maxterm]#" count="#[maxcount]#" memory="#[maxcountmemory]#"/>
+#{terms}#
+  <term hash="#[termhash]#" id="#[termhash]#" count="#[count]#" memory="#[memory]#"/>
+#{/terms}#
+</terms>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Peer Steering</title>
+    
+    #%env/templates/metas.template%#
+	<script type="text/javascript">
+    <!--
+	// The chrome browser is getting the wrong value if we try to get the value inside the script "var checkStatus=inputs.elements[0].checked;" - so now the value is a parameter
+	function checkAll (formToCheckAll, checkStatus) {
+	var inputs=document.getElementById(formToCheckAll);	
+	//var checkStatus=inputs.elements[0].checked;
+	for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
+    }
+    -->
+    </script>
+    <script type="text/javascript">
+    function submitchange(from) {
+    	document.getElementById("apilist").action = "Table_API_p.html#" + from;
+        document.getElementById ("scheduleeventaction").value = "true";
+        document.getElementById("current_pk").value = from;
+    	document.getElementById("apilist").submit();
+    }
+    
+    /**
+    * Reset the start record to display first results page
+    */
+    function resetStartRecord() {
+    	var startRecordField = document.getElementById("startRecordField");
+    	if(startRecordField != null) {
+    		startRecordField.value = "0";
+    	}
+    }
+    </script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="Tables">
+
+    <div id="fullcontent">
+  	#(inline)##%env/templates/header.template%#
+    <h2>Process Scheduler</h2>
+    <p>This table shows actions that had been issued on the YaCy interface
+    to change the configuration or to request crawl actions.
+    These recorded actions can be used to repeat specific actions and to send them
+    to a scheduler for a periodic execution.
+    </p>::#(/inline)#
+          
+<div id="api">
+<a href="Tables_p.xml?table=api&count=100&search=" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML.
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+
+    #(showtable)#::	
+    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="apilist">
+	  <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+      <fieldset>
+      <legend>Recorded Actions</legend>
+      <br />
+      <span id="resCounter" style="display: inline;">
+      #(navigation)#
+      ::
+      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
+      #[startRecord]#-#[to]# of #[of]#
+      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
+      <img src="env/grafics/nave.gif" alt="" />
+      #(/navigation)#
+
+      <input type="hidden" name="startRecord" value="#[startRecord]#" id="startRecordField"/>
+      <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+      <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
+      <input type="hidden" name="filter" value="#[filter]#" />
+      <input type="hidden" name="sort" value="#[sort]#" />
+      <input type="text" name="query" value="#[query]#" onchange="resetStartRecord()" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;"/>
+
+      </span>
+      <br/>
+      <div style="clear:both;">
+      <table style="border:0px; padding:2px; border-spacing:1px" role="grid">
+        <tr class="TableHeader" valign="bottom">
+          <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
+          <th #(sortedByType)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByType)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortTypeDesc)#::-#(/nextSortTypeDesc)#type&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortTypeDesc)#ascending::descending#(/nextSortTypeDesc)# types">Type</a>
+          	#(sortedByType)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByType)#
+          </th>
+          <th style="width: 100%;" #(sortedByComment)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByComment)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortCommentDesc)#::-#(/nextSortCommentDesc)#comment&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortCommentDesc)#ascending::descending#(/nextSortCommentDesc)# comments">Comment</a>
+          	#(sortedByComment)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByComment)#
+          </th>
+          <th #(sortedByApiCallCount)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByApiCallCount)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortApiCallCountDesc)#::-#(/nextSortApiCallCountDesc)#apicall_count&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortApiCallCountDesc)#ascending::descending#(/nextSortApiCallCountDesc)# call counts">Call Count</a>
+          	#(sortedByApiCallCount)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByApiCallCount)#
+          </th>
+          <th #(sortedByDateRecording)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateRecording)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateRecordingDesc)#::-#(/nextSortDateRecordingDesc)#date_recording&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateRecordingDesc)#ascending::descending#(/nextSortDateRecordingDesc)# recording dates">Recording&nbsp;Date</a>
+          	#(sortedByDateRecording)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateRecording)#
+          </th>
+          <th #(sortedByDateLastExec)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateLastExec)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateLastExecDesc)#::-#(/nextSortDateLastExecDesc)#date_last_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateLastExecDesc)#ascending::descending#(/nextSortDateLastExecDesc)# last execution dates">Last&nbsp;Exec&nbsp;Date</a>
+          	#(sortedByDateLastExec)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateLastExec)#
+          </th>
+          <th #(sortedByDateNextExec)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateNextExec)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateNextExecDesc)#::-#(/nextSortDateNextExecDesc)#date_next_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateNextExecDesc)#ascending::descending#(/nextSortDateNextExecDesc)# last execution dates">Next&nbsp;Exec&nbsp;Date</a>
+          	#(sortedByDateNextExec)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateNextExec)#
+          	#(hasEditableNextExecDate)#:: <button type="submit" name="submitNextExecDates" class="btn btn-default btn-xs" title="Apply edited next execution dates">
+          		<span class="glyphicon glyphicon-ok"></span>
+				<span> Apply</span>
+          	</button>
+          	#(/hasEditableNextExecDate)#
+          </th>
+          <th class="sorttable_nosort">Event Trigger</th>
+          <th class="sorttable_nosort">Scheduler</th>
+          #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" id="#[pk]#">
+          <td valign="top" align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td valign="top">#[type]#
+          #(isCrawlerStart)#::<br/><br/>
+          <a href="#[url]#" title="clone" target="_parent"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>::<br/><br/>
+         
+         <script>
+           var f = document.createElement("form");
+           f.setAttribute("method", "post");
+           f.setAttribute("enctype", "multipart/form-data");
+           f.setAttribute("accept-charset", "UTF-8");
+           f.setAttribute("action", "#[servlet]#");
+           f.setAttribute("target", "_parent");
+           f.setAttribute("id", "#[pk]#");
+           f.setAttribute("name", "#[pk]#");
+           #{attr}#
+           var e = document.createElement("input");
+           e.setAttribute("type", "hidden");
+           e.setAttribute("name", "#[key]#");
+           e.setAttribute("value", "#[value]#");
+           f.appendChild(e);
+           #{/attr}#
+           document.body.appendChild(f);
+         </script>
+         <a href="#" title="clone" onclick="document.forms['#[pk]#'].submit(); return false;"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>
+
+          #(/isCrawlerStart)#</td>
+          <td valign="top">#[comment]#</td>
+          <td valign="top">#[callcount]#</td>
+          <td valign="top">#[dateRecording]#</td>
+          <td valign="top">#[dateLastExec]#</td>
+          <td valign="top">#(editableDateNext)# #[dateNextExec]# 
+          	::
+    		#(dateFormatError)#::<div class="alert alert-danger" role="alert">Malformed date "#[invalidDate]#".</div>#(/dateFormatError)#
+    		#(dateBeforeNowError)#::<div class="alert alert-danger" role="alert">"#[invalidDate]#" is before the current date.</div>#(/dateBeforeNowError)#
+          	<input name="date_next_exec_#[pk]#" type="text" required="required" 
+          		maxlength="19" minlength="19" pattern="#[dateLastExecPattern]#" 
+          		value="#[dateNextExec]#" size="19" title="yyyy/MM/dd HH:mm:ss"/>#(/editableDateNext)#
+          </td>
+          <td valign="top">
+          #(event)#
+            <select name="event_select_#[pk]#" onchange='submitchange("#[pk]#")'>
+              <option value="off" selected="selected">no event</option>
+              <option value="on">activate event</option>
+            </select>
+          ::         
+            <table>
+                <tr><td>
+                    <select name="event_kind_#[pk]#" onchange='submitchange("#[pk]#")'>
+                      <option value="off" #(selectedoff)#::selected="selected"#(/selectedoff)#>off</option>
+                      <option value="once" #(selectedonce)#::selected="selected"#(/selectedonce)#>run once</option>
+                      <option value="regular" #(selectedregular)#::selected="selected"#(/selectedregular)#>run regular</option>
+                    </select>
+                </td><td>
+                    <select name="event_action_#[pk]#" onchange='submitchange("#[pk]#")'>
+                      <option value="startup" #(selectedstartup)#::selected="selected"#(/selectedstartup)#>after start-up</option>
+                      <option value="0000" #(selected0000)#::selected="selected"#(/selected0000)#>at 00:00h</option>
+                      <option value="0100" #(selected0100)#::selected="selected"#(/selected0100)#>at 01:00h</option>
+                      <option value="0200" #(selected0200)#::selected="selected"#(/selected0200)#>at 02:00h</option>
+                      <option value="0300" #(selected0300)#::selected="selected"#(/selected0300)#>at 03:00h</option>
+                      <option value="0400" #(selected0400)#::selected="selected"#(/selected0400)#>at 04:00h</option>
+                      <option value="0500" #(selected0500)#::selected="selected"#(/selected0500)#>at 05:00h</option>
+                      <option value="0600" #(selected0600)#::selected="selected"#(/selected0600)#>at 06:00h</option>
+                      <option value="0700" #(selected0700)#::selected="selected"#(/selected0700)#>at 07:00h</option>
+                      <option value="0800" #(selected0800)#::selected="selected"#(/selected0800)#>at 08:00h</option>
+                      <option value="0900" #(selected0900)#::selected="selected"#(/selected0900)#>at 09:00h</option>
+                      <option value="1000" #(selected1000)#::selected="selected"#(/selected1000)#>at 10:00h</option>
+                      <option value="1100" #(selected1100)#::selected="selected"#(/selected1100)#>at 11:00h</option>
+                      <option value="1200" #(selected1200)#::selected="selected"#(/selected1200)#>at 12:00h</option>
+                      <option value="1300" #(selected1300)#::selected="selected"#(/selected1300)#>at 13:00h</option>
+                      <option value="1400" #(selected1400)#::selected="selected"#(/selected1400)#>at 14:00h</option>
+                      <option value="1500" #(selected1500)#::selected="selected"#(/selected1500)#>at 15:00h</option>
+                      <option value="1600" #(selected1600)#::selected="selected"#(/selected1600)#>at 16:00h</option>
+                      <option value="1700" #(selected1700)#::selected="selected"#(/selected1700)#>at 17:00h</option>
+                      <option value="1800" #(selected1800)#::selected="selected"#(/selected1800)#>at 18:00h</option>
+                      <option value="1900" #(selected1900)#::selected="selected"#(/selected1900)#>at 19:00h</option>
+                      <option value="2000" #(selected2000)#::selected="selected"#(/selected2000)#>at 20:00h</option>
+                      <option value="2100" #(selected2100)#::selected="selected"#(/selected2100)#>at 21:00h</option>
+                      <option value="2200" #(selected2200)#::selected="selected"#(/selected2200)#>at 22:00h</option>
+                      <option value="2300" #(selected2300)#::selected="selected"#(/selected2300)#>at 23:00h</option>
+                    </select>
+                </td></tr>
+            </table>          
+          #(/event)#
+          </td>
+          <td valign="top">
+          #(scheduler)#
+            <select name="repeat_select_#[pk]#" onchange='submitchange("#[pk]#")'#(disabled)#:: disabled="disabled"#(/disabled)#>
+              <option value="off" selected="selected">no repetition</option>
+              <option value="on">activate scheduler</option>
+            </select>
+          ::         
+            <table>
+                <tr><td>
+                    <select name="repeat_time_#[pk]#" onchange='submitchange("#[pk]#")'>
+                    #{scale}#
+                      <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
+                    #{/scale}#
+                    </select>
+                </td><td>
+                    <select name="repeat_unit_#[pk]#" onchange='submitchange("#[pk]#")'>
+                      <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
+                      <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
+                      <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
+                    </select>
+                </td></tr>
+            </table>          
+          #(/scheduler)#
+          </td>
+          #(inline)#<td valign="top">#[url]#</td>::#(/inline)#
+        </tr>
+        #{/list}#
+      </table>
+      </div>
+      </fieldset>
+      
+      <input type="hidden" name="scheduleeventaction" id="scheduleeventaction" value="false" />
+      <input type="hidden" name="current_pk" id="current_pk" value="" />
+      <input type="hidden" name="num" value="#[num]#" />
+      <div class="form-group col-sm-12">
+        <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
+      </div>
+      <div class="form-group col-sm-6">
+        <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
+        <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
+          <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
+          <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
+          <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
+          <option value="30">1 month</option><option value="60" selected="selected">2 months</option><option value="90">3 months</option>
+          <option value="180">6 months</option><option value="270">9 months</option>
+          <option value="365">1 year</option><option value="730">2 years</option>
+        </select>
+      </div>
+      #(hasEditableNextExecDate)#::
+      <div class="form-group col-sm-6">
+ 		<input type="submit" name="submitNextExecDates" class="btn btn-default" value="Apply edited next execution dates"/>
+      </div>
+      #(/hasEditableNextExecDate)#
+      
+    </form>
+    #(/showtable)#
+    #(showexec)#::
+    <form action="#">
+      <fieldset>
+      <legend><label for="table">Result of API execution</label></legend>
+      <table class="sortable" style="border:0px; padding:2px; border-spacing:1px">
+        <tr class="TableHeader" valign="bottom">
+          <td>Status</td>
+          <td>URL</td>
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td>#[status]#</td>
+          <td>#[url]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      </fieldset>
+    </form>
+
+    #(/showexec)#
+    #(showschedulerhint)#::
+    Scheduled actions are executed after the next execution date has arrived within a time frame of #[tfminutes]# minutes.
+    #(/showschedulerhint)#
+    #(inline)##%env/templates/footer.template%#::#(/inline)#
+    </div>
+    <script type="text/javascript">
+    <!--
+      parentPage = parent.document.getElementById('APITable');
+      if (parentPage != null) parentPage.height = document.getElementById('fullcontent').offsetHeight + 30;
+    -->
+    </script>
+  </body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>YaCy '#[clientname]#': System Update</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body style="margin:0px;">
+    #%env/templates/header.template%#
+    #%env/templates/submenuMaintenance.template%#
+	<h2>System Update</h2>
+	
+	#(deploys)#::Release will be installed. Please wait.#(/deploys)#
+	
+    #(candeploy)#
+    This servlet can only be used on operation systems that are currently supported for deploy functions.
+    If you see this message this means that your operation system is not supported. 
+    ::
+      <fieldset>
+      <legend>Manual System Update</legend>
+      <dl>
+      <dt>Current installed Release</dt>
+      <dd>#[versionpp]#</dd>
+      <dt><br />Available Releases (<a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank">changelog</a> and <a href="https://github.com/yacy/yacy_search_server/commits/master.atom" target="_blank"><img width="16" height="16" src="env/grafics/rss.png"> RSS feed</a>)</dt>
+      <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
+        &nbsp;<select name="releasedownload">
+        #{availreleases}#
+        <option #(selected)#::selected="selected"#(/selected)# value="#[url]#">#[name]# #(signatures)#(unsigned)::(signed)#(/signatures)#</option>
+        #{/availreleases}#
+        </select>
+    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" class="btn btn-primary" value="Download Release"/>
+    	&nbsp;&nbsp;<input type="submit" name="checkRelease" class="btn btn-default" value="Check for new Release"/>
+        #(downloadError)#::
+        <div class="error">Download of release #[releasedownload]# failed.</div>
+        #(/downloadError)#
+      </p></form></dd>
+      <dt><br />Downloaded Releases</dt>
+      <dd><form action="Steering.html" method="post" accept-charset="UTF-8"><p>
+		#(downloadsAvailable)#
+		No downloaded releases available for deployment.
+		::
+		<input type="hidden" name="update" value="1"/>
+		&nbsp;<select name="releaseinstall">
+		#(/downloadsAvailable)#
+        #{downloadedreleases}#
+        <option #(selected)#::selected="selected"#(/selected)# value="#[file]#">#[name]# #(signature)#(no signature)::(signed)#(/signature)#</option>
+        #{/downloadedreleases}#
+        #(downloadsAvailable)#::</select>#(/downloadsAvailable)#
+        #(deployenabled)#::no&nbsp;automated installation on development environments::
+		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+    	&nbsp;&nbsp;<input type="submit" name="update" class="btn btn-primary" value="Install Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
+        &nbsp;&nbsp;<input type="submit" name="deleteRelease" formaction="ConfigUpdate_p.html" class="btn btn-danger" value="Delete Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
+        #(/deployenabled)#		
+      </p></form></dd>
+      <dt><br />Automatic Update</dt>
+      <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
+        &nbsp;check for new releases, download if available and restart with downloaded release<br />
+        &nbsp;&nbsp;<input type="submit" name="autoUpdate" class="btn btn-primary" value="Check + Download + Install Release Now" /><br />
+        #(autoUpdate)#::
+        <div class="commit">Download of release #[downloadedRelease]# finished. Restart Initiated.</div>::
+        <div class="error">No more recent release found.</div>::
+        <div class="error">Omitting update because this is a development environment.</div>::
+        <div class="error">Omitting update because download of release #[downloadedRelease]# failed.</div>::
+        <div class="error">Omitting update because an error occurred while trying to deploy the release.</div>
+        #(/autoUpdate)#
+      </p></form></dd>
+      </dl>
+      </fieldset>
+      
+      <form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8">
+      <fieldset>
+      <legend>Automated System Update</legend>
+      <dl>
+      
+      <dt>
+        manual update&nbsp;<input type="radio" name="updateMode" value="manual" #(manualUpdateChecked)#::checked="checked" #(/manualUpdateChecked)#/>&nbsp;
+      </dt>
+      <dd>
+        no automatic look-up, updates can be made manually using this interface (see options above)<br /><br />
+      </dd>
+      
+      <dt>
+        automatic update&nbsp;<input type="radio" name="updateMode" value="auto" #(autoUpdateChecked)#::checked="checked" #(/autoUpdateChecked)#/>&nbsp;
+      </dt>
+      <dd>
+        updates are made within fixed cycles:
+        <fieldset>
+        <dl>
+        <dt>Time between lookup</dt>
+        <dd><input type="text" name="cycle" value="#[cycle]#" size="4" maxlength="4" />hours</dd>
+        <dt>Release blacklist</dt>
+        <dd><input type="text" name="blacklist" value="#[blacklist]#" size="20" maxlength="20" />(regex on release number strings)</dd>
+        <dt>Release type</dt>
+        <dd>
+          <input type="radio" name="releaseType" value="main" #(releaseTypeMainChecked)#::checked="checked" #(/releaseTypeMainChecked)#/>only main releases&nbsp;&nbsp;
+          <input type="radio" name="releaseType" value="any" #(releaseTypeAnyChecked)#::checked="checked" #(/releaseTypeAnyChecked)#/>any release including developer releases
+        </dd>
+        </dl>
+        </fieldset>
+      </dd>
+      <dt>
+        Signed autoupdate:&nbsp;
+      </dt>
+      <dd>
+        <input type="checkbox" name="onlySignedFiles" value="true" #(onlySignedFiles)#::checked="checked" #(/onlySignedFiles)#/>
+        only accept signed files
+      </dd>
+      <dt><input type="submit" name="configSubmit" class="btn btn-primary" value="Submit" /></dt>
+      <dd>#(configCommit)#&nbsp;::<div class="commit">Accepted Changes.</div>#(/configCommit)#</dd>
+      </dl>
+      </fieldset>
+      </form>
+      
+      <fieldset>
+      <legend>System Update Statistics</legend>
+      <dl>
+      <dt>Last System Lookup</dt><dd><p>#(lastlookup)#never::#[time]##(/lastlookup)#</p></dd>
+      <dt>Last Release Download</dt><dd><p>#(lastdownload)#never::#[time]##(/lastdownload)#</p></dd>
+      <dt>Last Deploy</dt><dd><p>#(lastdeploy)#never::#[time]##(/lastdeploy)#</p></dd>
+      </dl>
+      </fieldset>
+      ::
+      <p>You installed YaCy with a package manager. To update YaCy, use the package manager:</p>
+      <p>manual update:<br/>apt-get update &amp;&amp; apt-get install yacy</p>
+      <p>automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy</p>
+      ::
+      <p>YaCy has been installed to the Program Files directory. Automatic update is not possible.<br/>Download and install the latest version from the web page <a href="http://www.yacy.net/" target="_blank">http://www.yacy.net/</a></p>
+      ::
+    #(/candeploy)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<webstructure maxhosts="#[maxhosts]#">
+
+#(out)#::
+<!-- accumulated list of outgoing links to other domains (per host accumulated anchors)-->
+<references direction="out" count="#[domains]#" maxref="#[maxref]#">
+#{domains}#
+<domain host="#[domain]#" id="#[hash]#" date="#[date]#">
+#{citations}#
+  <reference id="#[refhash]#" count="#[refcount]#">#[refdom]#</reference>
+#{/citations}#
+</domain>
+#{/domains}#
+</references>
+#(/out)#
+
+#(in)#::
+<!-- accumulated list of incoming links from other domains (per host accumulated references)-->
+<references direction="in" count="#[domains]#">
+#{domains}#
+<domain host="#[domain]#" id="#[hash]#" date="#[date]#">
+#{citations}#
+  <reference id="#[refhash]#" count="#[refcount]#">#[refdom]#</reference>
+#{/citations}#
+</domain>
+#{/domains}#
+</references>
+#(/in)#
+
+#(references)#::
+<!-- detailed list of outgoing links (anchors) from documents to references -->
+<anchors direction="out" count="#[count]#">
+#{documents}#
+<document id="#[hash]#" date="#[date]#" count="#[count]#">
+  #(urle)#::<url>#[url]#</url>#(/urle)#
+#{anchors}#
+  <anchor id="#[hash]#" type="#(outbound)#inbound::outbound#(/outbound)#">#[url]#</anchor>
+#{/anchors}#
+</document>
+#{/documents}#
+</anchors>
+#(/references)#
+
+#(citations)#::
+<!-- detailed list of incoming links (citations) from other documents (their references) - reverse link structure -->
+<anchors direction="in" count="#[count]#">
+#{documents}#
+<document id="#[hash]#" date="#[date]#" count="#[count]#">
+  #(urle)#::<url>#[url]#</url>#(/urle)#
+#{anchors}#
+  #(urle)#<anchor id="#[hash]#" date="#[date]#"/>::<anchor id="#[hash]#" date="#[date]#">#[url]#</anchor>#(/urle)#
+#{/anchors}#
+</document>
+#{/documents}#
+</anchors>
+#(/citations)#
+
+</webstructure>

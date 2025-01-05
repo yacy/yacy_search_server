@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<latency>
+#{domains}#
+  <domain host="#[host]#" id="#[hosthash]#">
+	<lastaccess>#[lastaccess]#</lastaccess>
+	<count>#[count]#</count>
+	<average>#[average]#</average>
+	<robots>#[robots]#</robots>
+	<flux>#[flux]#</flux>
+  </domain>
+#{/domains}#
+</latency>

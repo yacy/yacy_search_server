@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': User Accounts</title>
+    #%env/templates/metas.template%#
+  </head>
+<body>
+    #%env/templates/header.template%#
+    #%env/templates/submenuUseCaseAccount.template%#
+    <h2>User Administration</h2>
+
+    <!-- Page 1: Results -->
+    #(text)#
+    ::
+    <p>User created: #[username]#</p>
+    ::
+    <p>User changed: #[username]#</p>
+    #(/text)#
+    #(error)#
+    ::
+    <p class="error">Generic error.</p>
+    ::
+    <p class="error">Passwords do not match.</p>
+    ::
+    <p class="error">Username too short. Username must be &gt;= 4 Characters.</p>
+    ::
+    <p class="error">Username already used (not allowed).</p>
+    #(/error)#
+    #(changedfltpw)#::
+    <div class="alert alert-danger" role="alert">
+        <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy". 
+        Change the password as soon as possible!
+    </div>
+    #(/changedfltpw)#
+
+    <fieldset><legend>Admin Account</legend>
+      <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+            <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+          <fieldset>
+            <legend>
+            <input type="radio" name="access" id="access_localhost" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
+            <label for="access_localhost">Access from localhost without account</label>
+            </legend>
+            Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.
+                <div class="alert alert-warning" role="alert">
+                    This setting is convenient but less secure than using a qualified admin account. 
+                    Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.
+                </div>
+            </fieldset>
+
+            <fieldset>
+            <legend>
+            <input type="radio" name="access" id="access_account" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
+            <label for="access_account">Access only with qualified account</label>
+            </legend>
+            This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.
+            <dl class="userConfig">
+              <dt><label for="adminuser">Peer User:</label></dt>
+              <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" onFocus="document.getElementById('access_account').checked = true;"/></dd>
+              <dt><label for="adminpw1">New Peer Password:</label></dt>
+              <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
+              <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
+              <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
+              <dt></dt>
+              <dd><input type="submit" name="setAdmin" value="Define Administrator" class="btn btn-primary"/></dd>
+            </dl>
+          </fieldset>
+      </form>
+    </fieldset>
+
+    <fieldset><legend>Access Rules</legend>
+      <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+              <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+            <dl class="userConfig">
+              <dt>Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.</dt>
+              <dd><input type="checkbox" name="adminAccountAllPages" data-size="small"#(adminAccountAllPages.checked)#:: checked="checked"#(/adminAccountAllPages.checked)#></dd>
+              <script>$("[name='adminAccountAllPages']").bootstrapSwitch();
+              $("[name='adminAccountAllPages']").bootstrapSwitch('onText', 'ON');
+              $("[name='adminAccountAllPages']").bootstrapSwitch('offText', 'OFF');</script>
+              <dt></dt>
+              <dd><input type="submit" name="setAccess" value="Set Access Rules" class="btn btn-primary"/></dd>
+            </dl>
+      </form>
+    </fieldset>
+
+    <fieldset><legend>User Accounts</legend>
+      <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+      <fieldset><legend>Select user</legend>
+        <dl>
+          <dt><label for="user">Select user</label>:</dt>
+          <dd>
+            <select name="user" id="user">
+              <option value="newuser">New user</option>#{users}#
+              <option>#[user]#</option>#{/users}#
+            </select> or goto user <a href="ConfigAccountList_p.html">account list</a>
+          </dd>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="change_user" value="Edit User" class="btn btn-primary"/>
+            <input type="submit" name="delete_user" value="Delete User" class="btn btn-danger"/>
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+
+    <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+      <fieldset><legend>Edit current user: #[username]#</legend>
+        <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
+        <input type="hidden" name="current_user" value="#[current_user]#" />
+        <dl>
+          <dt><label for="username">Username</label>:</dt>
+          <dd><input type="text" id="username" name="username" value="#[username]#" /></dd>
+          <dt><label for="password">Password</label>:</dt>
+          <dd><input type="password" id="password" name="password" /></dd>
+          <dt><label for="password2">Repeat password</label>:</dt>
+          <dd><input type="password" id="password2" name="password2" /></dd>
+          <dt><label for="firstname">First name</label>:</dt>
+          <dd><input type="text" id="firstname" name="firstname" value="#[firstname]#" /></dd>
+          <dt><label for="lastname">Last name</label>:</dt>
+          <dd><input type="text" id="lastname" name="lastname" value="#[lastname]#" /></dd>
+          <dt><label for="address">Address</label>:</dt>
+          <dd><input type="text" id="address" name="address" value="#[address]#" /></dd>
+          <dt>Rights:</dt>
+          <dd>#{rights}#
+            <input type="checkbox" id="#[name]#" name="#[name]#"#(set)#:: checked="checked"#(/set)# /><label for="#[name]#">#[friendlyName]# right</label><br />
+          #{/rights}#</dd>
+          <dt><label for="tlimit">Timelimit</label>:</dt>
+          <dd><input type="text" id="tlimit" name="timelimit" value="#[timelimit]#" /></dd>
+          <dt><label for="tused">Time used</label>:</dt>
+          <dd><input type="text" id="tused" name="timeused" value="#[timeused]#" /></dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="change" value="Save User" class="btn btn-primary"/></dd>
+        </dl>
+      </fieldset>
+    </form>
+  </fieldset>
+    
+#%env/templates/footer.template%#
+</body>
+</html>

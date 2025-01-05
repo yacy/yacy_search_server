@@ -1,0 +1,28 @@
+{
+	"name": "YaCy",
+	"description": "Decentralized Web Search",
+	"keywords": [
+		"yacy",
+		"search",
+		"p2p",
+		"decentralized",
+		"java"
+	],
+	"website": "https://yacy.net",
+	"repository": "https://github.com/yacy/yacy_search_server",
+	"logo": "https://yacy.net/material/YaCyLogo2011.svg",
+	"env": {
+		"YACY_INIT_ADMIN_PASSWORD": {
+			"description": "Administrator initial password : please fill with a Base64 MD5 value",
+			"required": false
+		},
+		"YACY_PUBLIC_URL": {
+			"description": "External URL used by other peers to reach yours, required to run in 'Senior' mode. You chould set it with [your_app_name].herokuapp.com.",
+			"required": false
+		},
+		"MAVEN_CUSTOM_OPTS": {
+			"description": "Custom options required for maven build on Heroku.",
+			"value": "-f libbuild/pom.xml -DskipTests=true"
+		}
+	}
+}

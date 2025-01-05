@@ -1,0 +1,125 @@
+#(content)#::
+  <div class="searchresults" data-ranking="#[ranking]#" data-nav-generation="#[nav-generation]#">
+  <h4 class="linktitle">
+  #(favicon)#::
+  <img width="16" height="16" src="#[faviconUrl]#" id="f#[urlhash]#" class="favicon" style="width:16px; height:16px;" alt="" />
+  #(/favicon)#  
+  <a href="#[link]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[title]#</a></h4>
+  <div class="urlactions">
+    #(heuristic)#::
+    <img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:#[name]# (redundant)" style="width:16px; height:9px;" alt="heuristic:#[name]# (redundant)"/>::
+    <img width="16" height="9" src="env/grafics/heuristic_new.gif" title="heuristic:#[name]# (new link)" style="width:16px; height:9px;" alt="heuristic:#[name]# (new link)"/>
+    #(/heuristic)#
+    #(authorized)#::
+    #(bookmark)#::
+      <a href="#[bookmarklink]#" class="bookmarklink" title="bookmark"><img width="11" height="11" src="env/grafics/empty.gif" title="bookmark" alt="bookmark" class="recommendIcon" /></a>
+    #(/bookmark)#
+    #(recommend)#
+      <img width="11" height="11" src="env/grafics/empty.gif" title="" alt="recommend" class="recommendIcon" />
+      <img width="11" height="11" src="env/grafics/empty.gif" title="" alt="delete" class="deleteIcon" />
+      ::
+      <a href="#[recommendlink]#" class="recommendlink" title="recommend"><img width="11" height="11" src="env/grafics/empty.gif" title="recommend" alt="recommend" class="recommendIcon" /></a>
+      <a href="#[deletelink]#" title="delete" class="deletelink" ><img width="11" height="11" src="env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
+    #(/recommend)#
+    #(blacklist)#::
+      <a href="#[blacklistlink]#" title="blacklist host" class="blacklistlink"><img width="11" height="11" src="env/grafics/empty.gif" title="blacklist host" alt="blacklist host" /></a>
+    #(/blacklist)#
+    #(/authorized)#
+  </div>
+  <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[urlname]#</a></p>
+  <p class="snippet"><span class="snippetLoaded" id="h#[urlhash]#">#[description]#</span></p>
+  #(showKeywords)#::<p class="tags">Tags: #{keywords}#<span class="tag label label-default"><a href="#[tagurl]#" style="color: inherit; text-decoration: inherit;">#[tagword]#</a></span> #{/keywords}#
+  		#(moreKeywords)#::<span id="moreKeywords#[urlhash]#" class="hidden">
+  				#{keywords}#<span class="tag label label-default"><a href="#[tagurl]#" style="color: inherit; text-decoration: inherit;">#[tagword]#</a></span> #{/keywords}#
+  			</span>
+  		<button class="expandKeywordsBtn btn btn-default btn-xs" type="button" 
+  			aria-controls="moreKeywords#[urlhash]#" aria-expanded="false" title="Show all"
+  			onclick="toggleMoreTags(this, 'moreKeywords#[urlhash]#')">
+  			<span class="glyphicon"></span>
+  		</button>
+  		#(/moreKeywords)#
+  	</p>
+  #(/showKeywords)#
+  <p class="urlinfo">
+  #(showDate)#::<span title="Last known modification date">#[date]#</span>#(/showDate)#
+  #(showEvent)#::on #[date]##(/showEvent)#
+  #(showSize)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span>#[sizename]##(/showSize)#
+  #(showMetadata)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="solr/select?q=id:%22#[urlhash]#%22&start=0&rows=1&core=collection1&wt=html&omitHeader=true" target="_blank">Metadata</a>#(/showMetadata)#
+  #(showParser)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
+  #(showCitation)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="api/citation.html?hash=#[urlhash]#&filter=true" target="_blank">Citations</a>#(/showCitation)#
+  #(showPictures)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html?contentdom=image#(authSearch)#::&auth#(/authSearch)#&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
+  #(showCache)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#
+  #(showProxy)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="proxy.html?url=#[link]#" target="_blank">View via proxy</a>#(/showProxy)#
+  #(showIndexBrowser)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="IndexBrowser_p.html?path=#[link]#"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a>#(/showIndexBrowser)#
+  #(showVocabulary)#::<br/>#{vocabulary}##[name]#:#[terms]# #{/vocabulary}##(/showVocabulary)#
+  #(showSnapshots)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="#[link]#" target="_blank">#[extension]# Snapshot</a>#(/showSnapshots)#
+  #(showRanking)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><span title="Raw ranking score value">Ranking: #[ranking]#</span>#(/showRanking)#
+  </p>
+  </div>
+  ::
+  #(item)#::<div class="thumbcontainer">
+    <a href="#[hrefFullPreview]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
+      <img src="#[hrefCache]#" width="256" height="256" style="#[style]#" alt="#[name]#" onerror="handleResultThumbError(this)"/>
+    </a>
+    <div class="highslide-caption"><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[name]#</a><br /><a href="#[source]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[sourcedom]#</a></div>
+  </div>#(/item)#
+  ::
+  #(item)#::
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#">
+  	<td>#[name]#</td>
+  	<td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a>
+  	<td class="text-center">#(embed)#::#(list)#::<ul class="embeddedAudios list-unstyled">#(/list)#
+  		#{audioSources}#
+  			#(list)#::<li>#(/list)#
+  			<audio src="#[href]#"
+  				title="#[title]#"
+				preload="none" controls="controls"
+				onplaying="handleAudioPlaying(event)"
+				onpause="handleAudioPause(event)"
+				onerror="handleAudioLoadError(event)"
+				onended="handleAudioEnded(event)">Not supported
+			</audio>
+			#(list)#::</li>#(/list)#
+		#{/audioSources}#
+		#(list)#::</ul>#(/list)#
+  		#(moreAudios)#::
+  			<ul id="expandableAudios_#[urlhash]#" class="list-unstyled hidden">
+			#{audioSources}#<li>
+  			<audio src="#[href]#"
+  				title="#[title]#"
+  				class="hidden"
+				preload="none" controls="controls"
+				onplaying="handleAudioPlaying(event)"
+				onpause="handleAudioPause(event)"
+				onerror="handleAudioLoadError(event)"
+				onended="handleAudioEnded(event)">Not supported
+			</audio></li>#{/audioSources}#
+			</ul>
+			<ul class="list-unstyled">
+				<li>
+					<span id="hiddenCount_#[urlhash]#">#[hiddenCount]# more...</span>
+  					<button class="expandAudiosBtn btn btn-default btn-xs hidden" type="button"
+  						aria-controls="expandableAudios_#[urlhash]#" aria-expanded="false" 
+  						title="Show #[expandableCount]# more" 
+  						data-title-collapsed="Show #[expandableCount]# more" 
+  						data-title-expanded="Show only the first #[firstLimit]#"
+  						onclick="toggleExpandableAudios(this, 'expandableAudios_#[urlhash]#', 'hiddenCount_#[urlhash]#', 'evenMoreCount_#[urlhash]#')">
+  						<span class="glyphicon"></span>
+  					</button>
+					#(evenMore)#<span id="evenMoreCount_#[urlhash]#" class="hidden">#[count]# more...</span>#(/evenMore)#
+				</li>
+			</ul>
+  		#(/moreAudios)##(/embed)#
+	</td>
+  </tr>#(/item)#
+  ::
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
+  ::
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
+#(/content)#
+
+#(statistics)#::
+  <script type="text/javascript">
+	statistics("#[offset]#", "#[itemscount]#", "#[itemsperpage]#", "#[totalcount]#", "#[localIndexCount]#", "#[remoteIndexCount]#", "#[remotePeerCount]#", "#[navurlBase]#", #[localQuery]#, #[feedRunning]#);
+  </script>
+#(/statistics)#

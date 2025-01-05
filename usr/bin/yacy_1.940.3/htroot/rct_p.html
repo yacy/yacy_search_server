@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Control</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    <h2>remote crawl fetch test</h2>
+    
+	<form name="selection" action="rct_p.html" method="post" enctype="multipart/form-data">
+    <fieldset><legend>Retrieve remote crawl url list</legend>
+      <dl>
+        <dt class="TableCellDark">Target Peer:</dt>
+        <dd>select <select name="peer">
+              #{hosts}#
+              <option value="#[hosthash]#">#[hostname]#</option>
+              #{/hosts}#
+            </select>
+        </dd>
+        <dt class="TableCellLight"></dt>
+        <dd><input type="submit" name="retrieve" value="retrieve" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

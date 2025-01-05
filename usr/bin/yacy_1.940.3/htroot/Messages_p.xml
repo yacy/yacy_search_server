@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+#(mode)#
+<messages>
+#{messages}#
+	<message id="#[key]#">
+		<date>#[date]#</date>
+		<from hash="#[hash]#">#[from]#</from>
+		<to>#[to]#</to>
+		<subject><![CDATA[#[subject]#]]></subject>
+	</message>
+#{/messages}#
+</messages>
+::
+<message id="#[key]#">
+	<date>#[date]#</date>
+	<from hash="#[hash]#">#[from]#</from>
+	<to>#[to]#</to>
+	<subject><![CDATA[#[subject]#]]></subject>
+	<message><![CDATA[#[message]#]]></message>
+</message>
+#(/mode)#

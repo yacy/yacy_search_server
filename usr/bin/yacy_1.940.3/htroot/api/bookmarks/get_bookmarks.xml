@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+#(display)#
+<!-- DOCTYPE YaCy Bookmarks http://www.yacy.net -->
+<posts>
+#{bookmarks}#
+	<post href="#[link]#" description="#[title-xml]#" extended="#[desc-xml]#" hash="#[hash]#" tag="#[tags-xml]#" time="#[date]#" #(public)#private="false"::private="true"#(/public)#/>
+#{/bookmarks}#
+</posts>
+::
+<!-- DOCTYPE flexigrid http://www.flexigrid.info/ -->
+<rows>
+	<page>#[page]#</page>
+	<total>#[total]#</total>
+	#{bookmarks}#<row id='#[id]#'>
+		<cell><![CDATA[#[hash]#]]></cell>
+		#(public)#<cell><![CDATA[<img src='img-2/world2.png' alt='public' title='public bookmark'/>]]></cell>::
+		<cell><![CDATA[<img src='img-2/lock.png' alt='private' title='private bookmark'/>]]></cell>#(/public)#
+		<cell><![CDATA[<h3 class='linktitle'>#[title-html]#</h3><p class='desc'>#[desc-html]#</p><p class='url'><a href='#[link]#'>#[link]#</a>]]></cell>
+		<cell><![CDATA[<p class='tags'>#[tags-html]#</p>]]></cell>
+		<cell><![CDATA[<p class='folders'>#[folders-html]#</p>]]></cell>
+		<cell><![CDATA[<p class='date'>#[rfc822date]#</p>]]></cell>
+	</row>#{/bookmarks}#
+</rows>
+::
+<!DOCTYPE xbel PUBLIC "+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML" "http://pyxml.sourceforge.net/topics/dtds/xbel-1.0.dtd">
+<xbel>
+#(folder)#::
+	<folder id="#[folderhash]#">
+	<title>#[foldername]#</title>
+#(/folder)#	
+#{xbel}#
+	#[elements]#
+#{/xbel}#
+#(folder)#::</folder>#(/folder)#
+</xbel>
+::
+<rss version="2.0">
+	<channel>
+		<title><![CDATA[YaCy '#[peer]#': Bookmarks]]></title>
+		<link>#[address]#/api/bookmarks/get_bookmarks.xml</link>
+		<description><![CDATA[#[user]#'s Bookmark-Feed]]></description>
+	</channel>
+	#{bookmarks}#<item>
+		<title><![CDATA[#[title-xml]#]]></title>
+		<link>#[link]#</link>
+		<pubDate>#[rfc822date]#</pubDate>
+		<guid>#[hash]#</guid>
+		<description><![CDATA[<p>#[desc-xml]#</p>]]></description>
+		<category><![CDATA[#[tags-xml]#]]></category>
+	</item>#{/bookmarks}#
+</rss>
+#(/display)#

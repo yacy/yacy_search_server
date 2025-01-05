@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+<solr persistent="false">
+  <logging enabled="true">
+        <watcher size="100" threshold="INFO" />
+  </logging>
+  <cores adminPath="/admin/cores" defaultCoreName="collection1" host="${host:}" hostPort="${jetty.port:}">
+    <core name="collection1" instanceDir="collection1" />
+    <core name="webgraph" instanceDir="webgraph" />
+  </cores>
+</solr>
+-->
+<!--
+<solr>
+  <solrcloud>
+    <str name="host">127.0.0.1</str>
+    <int name="hostPort">8983</int>
+    <str name="hostContext">solr</str>
+    <bool name="genericCoreNodeNames">true</bool>
+    <int name="zkClientTimeout">30000</int>
+    <int name="distribUpdateSoTimeout">600000</int>
+    <int name="distribUpdateConnTimeout">60000</int>
+  </solrcloud>
+  <shardHandlerFactory name="shardHandlerFactory"
+    class="HttpShardHandlerFactory">
+    <int name="socketTimeout">600000</int>
+    <int name="connTimeout">60000</int>
+  </shardHandlerFactory>
+</solr>
+-->
+
+
+<!--old
+<solr persistent="${solr.xml.persist:false}">
+  <cores adminPath="/admin/cores" defaultCoreName="collection1" host="127.0.0.1" hostPort="${hostPort:8983}"
+         hostContext="${hostContext:solr}" zkClientTimeout="${solr.zkclienttimeout:30000}" shareSchema="${shareSchema:false}"
+         genericCoreNodeNames="${genericCoreNodeNames:true}">
+    <core name="core1" instanceDir="core1" shard="${shard:}" collection="${collection:core1}" config="${solrconfig:solrconfig.xml}" schema="${schema:schema.xml}" coreNodeName="${coreNodeName:}"/>
+    <core name="core2" instanceDir="core2" />
+    <shardHandlerFactory name="shardHandlerFactory" class="HttpShardHandlerFactory">
+      <int name="socketTimeout">${socketTimeout:120000}</int>
+      <int name="connTimeout">${connTimeout:15000}</int>
+    </shardHandlerFactory>
+  </cores>
+</solr>
+-->
+
+<!--new:-->
+<solr>
+  <solrcloud>
+    <str name="host">127.0.0.1</str>
+    <int name="hostPort">${hostPort:8983}</int>
+    <str name="hostContext">${hostContext:solr}</str>
+    <int name="zkClientTimeout">${solr.zkclienttimeout:30000}</int>
+    <!--<str name="shareSchema">${shareSchema:false}</str>-->
+    <bool name="genericCoreNodeNames">${genericCoreNodeNames:true}</bool>
+  </solrcloud>
+ 
+  <shardHandlerFactory name="shardHandlerFactory" class="HttpShardHandlerFactory">
+    <int name="socketTimeout">${socketTimeout:120000}</int>
+    <int name="connTimeout">${connTimeout:15000}</int>
+  </shardHandlerFactory>
+</solr>
+
+<!--
+In each of "core1" and "core2" directories, there would be a core.properties file that might look like these.
+name=core1
+shard=${shard:}
+collection=${collection:core1}
+config=${solrconfig:solrconfig.xml}
+schema=${schema:schema.xml}
+coreNodeName=${coreNodeName:}
+-->

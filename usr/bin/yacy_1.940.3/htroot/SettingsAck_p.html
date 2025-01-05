@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Settings Acknowledge</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body>
+    #%env/templates/header.template%#
+    <h2>Settings Receipt:</h2>
+    
+    #(info)#<!-- 0 -->
+    <p><strong>No information has been submitted</strong><br />
+    Nothing changed.</p>
+    ::<!-- 1 -->
+    <p><strong>Error with submitted information.</strong><br />
+    Nothing changed.</p>
+    ::<!-- 2 -->
+    <p><strong>The user name must be given.</strong><br />
+    Your request cannot be processed.<br />Nothing changed.</p>
+    ::<!-- 3 -->
+    <p><strong>The password redundancy check failed. You have probably misstyped your password.</strong><br />
+    Your request cannot be processed.<br />Nothing changed.</p>
+    ::<!-- 4 -->
+    <p><strong>Shutting down.</strong><br />Application will terminate after working off all crawling tasks.</p>
+    ::<!-- 5 -->
+    <p><strong>Your administration account setting has been made.</strong><br />
+    Your new administration account name is #[user]#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.</p>
+    ::<!-- 6 -->
+    <p>
+      <strong>Your proxy access setting has been changed.<br />
+      Your proxy account check has been disabled.</strong>
+      The new proxy IP filter is set to <span class="settingsValue">#[filter]#</span><br />
+      The proxy port is: <span class="settingsValue">#[port]#</span>
+      #(restart)#
+      ::
+        Port rebinding will be done in a few seconds.<br />
+        You can reach your YaCy server under the new location <a href="http://#[ip]#:#[port]#/">http://#[ip]#:#[port]#/</a>
+      #(/restart)#
+    </p>
+    ::<!-- 7 -->
+    <p>
+      <strong>Your proxy access setting has been changed.</strong><br />
+      If you open any public web page through the proxy, you must log-in.<br />
+      The new proxy IP filter is set to <span class="settingsValue">#[filter]#</span><br />
+      The proxy port is: <span class="settingsValue">#[port]#</span>
+      #(restart)#
+      ::
+        Port rebinding will be done in a view seconds.<br />
+        You can reach your YaCy server under the new location <a href="http://#[ip]#:#[port]#/">http://#[ip]#:#[port]#/</a>
+      #(/restart)#
+    </p>
+    ::<!-- 8 -->
+    <p><strong>Your server access filter is now set to #[filter]#</strong><br />
+    <!--Your new server account name is #[user]#. The password has been accepted.<br />
+    If you go back to the Settings page, you must log-in again.-->
+    </p>
+    ::<!-- 9 -->
+    <p>Auto pop-up of the Status page is now <strong>disabled</strong></p>
+    ::<!-- 10 -->
+    <p>Auto pop-up of the Status page is now <strong>enabled</strong></p>
+    ::<!-- 11 -->
+    <p>You are now permanently <strong>online</strong>. After a short while you should see the effect on the <a href="Status.html">status</a> page.</p>
+    ::<!-- 12 -->
+    <p><strong>The Peer Name is:</strong> <span class="settingsValue">#[peerName]#</span><br />
+    <strong>Your static Ip(or DynDns) is:</strong> <span class="settingsValue">#[staticIP]#</span>
+      <strong>Your public port is:</strong> <span class="settingsValue">#[publicPort]#</span>
+    </p>
+    ::<!-- 13 -->
+    <p><strong>Seed Settings changed.#(success)#::You are now a principal peer.#(/success)#</strong></p>
+    ::<!-- 14 -->
+    <p><strong>Seed Settings changed, but something is wrong.</strong></p>
+    <p class="error">#[errormsg]#</p>
+    <p>Seed Uploading was deactivated automatically. 
+    Please return to the settings page and modify the data.</p>
+    ::<!-- 15 -->
+    <p><strong>The remote-proxy setting has been changed</strong><br />
+    The new setting is effective immediately, you don't need to re-start.</p>
+    ::<!-- 16 -->
+    <p><strong>The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.<br />
+    Your Peer Language is: <span class="settingsValue">#[peerLang]#</span></p>
+    ::<!-- 17 -->
+    <p><strong>The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.<br />
+    Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
+    Your Peer Language is: <span class="settingsValue">#[peerLang]#</span></p>
+    ::<!-- 18 Parser (removed) -->
+    ::<!-- 19 -->
+    <p>Seed Upload method was changed successfully.
+    #(success)#::<br />You are now a principal peer.#(/success)#
+    </p>
+    <table>
+      <tr>
+        <td>Seed Upload Method:</td>
+        <td class="settingsValue">#[seedUploadMethod]#</td>
+      </tr>
+      <tr>
+        <td>Seed File URL:</td>
+        <td class="settingsValue"><a href="#[seedURL]#">#[seedURL]#</a></td>
+      </tr>
+    </table>
+    ::<!-- 20: HTTP-Networking -->
+    <p><strong>Your proxy networking settings have been changed.</strong></p>
+    <table>
+      <tr>
+          <td>Transparent Proxy Support is:</td>
+          <td class="settingsValue">#[isTransparentProxy]#</td>
+      </tr>
+      <tr>
+          <td>Always Fresh is:</td>
+          <td class="settingsValue">#[proxyAlwaysFresh]#</td>
+      </tr>
+      <tr>
+          <td>Send via header is:</td>
+          <td class="settingsValue">#[proxy.sendViaHeader]#</td>
+      </tr>
+      <tr>
+        <td>Send X-Forwarded-For header is:</td>
+        <td class="settingsValue">#[proxy.sendXForwardedForHeader]#</td>
+      </tr>
+    </table>
+    ::<!-- 21: message forwarding -->
+    <p><strong>Your message forwarding settings have been changed.</strong></p>
+    <table>
+      <tr>
+          <td>Message Forwarding Support is:</td>
+          <td class="settingsValue">#[msgForwardingEnabled]#</td>
+      </tr>
+      <tr>
+          <td>Message Forwarding Command:</td>
+          <td class="settingsValue">#[msgForwardingCmd]#</td>
+      </tr>
+      <tr>
+          <td>Recipient Address:</td>
+          <td class="settingsValue">#[msgForwardingTo]#</td>
+      </tr>
+    </table>
+    ::<!-- 22 -->
+    ::<!-- 23 : Port forwarding - error -->
+    ::<!-- 24 -->
+    <p>You are now <strong>event-based online</strong>. After a short while you should see the effect on the <a href="Status.html">status</a> page.</p>
+    ::<!-- 25 -->
+    <p>You are now in <strong>Cache Mode</strong>. Only Proxy-cache ist available in this mode. After a short while you should see the effect on the <a href="Status.html">status</a> page.</p>
+    ::<!-- 26 -->
+    ::<!-- 27 -->
+    <p class="error"><strong>Invalid IP-Number filter:</strong> <tt>#[filter]#</tt><br />
+    <strong>Error in pattern nr #[nr]#</strong> "<tt>#[pattern]#</tt>": <tt>#[error]#</tt>
+    </p> 
+    ::<!-- 28 : Crawler settings OK -->
+    <p><strong>Your crawler settings have been changed.</strong></p>
+    <table>
+      <tr>
+        <td colspan="2"><strong>Generic Settings:</strong></td>
+      </tr>
+      <tr>
+        <td>Crawler timeout:</td>
+        <td class="settingsValue">#[crawler.clientTimeout]#</td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>http Crawler Settings:</strong></td>
+      </tr>
+      <tr>
+        <td>Maximum HTTP Filesize:</td>
+        <td class="settingsValue">#[crawler.http.maxFileSize]#</td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>ftp Crawler Settings:</strong></td>
+      </tr>
+      <tr>
+        <td>Maximum FTP Filesize:</td>
+        <td class="settingsValue">#[crawler.ftp.maxFileSize]#</td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>smb Crawler Settings:</strong></td>
+      </tr>
+      <tr>
+        <td>Maximum SMB Filesize:</td>
+        <td class="settingsValue">#[crawler.smb.maxFileSize]#</td>
+      </tr>
+      <tr>
+        <td>Maximum file Filesize:</td>
+        <td class="settingsValue">#[crawler.file.maxFileSize]#</td>
+      </tr>
+    </table>
+    ::<!-- 29: Crawler settings timeout error -->
+    <p class="error">Invalid crawler timeout value: <tt>#[crawler.clientTimeout]#</tt></p>
+    ::<!-- 30: Cralwer settings, maxHttpFileSize error -->
+    <p class="error">Invalid maximum file size for http crawler: <tt>#[crawler.http.maxFileSize]#</tt></p>
+    ::<!-- 31: Cralwer settings, maxFtpFileSize error -->
+    <p class="error">Invalid maximum file size for ftp crawler: <tt>#[crawler.http.maxFileSize]#</tt></p>
+    ::<!-- 32: https port setting changed -->
+    <p>HTTPS port is now: <span class="settingsValue">#[port.ssl]#</span></p>
+    <p>the change will take effect after restart.</p>
+    <p>Note: the SSL option must be switched on, see <a href="ConfigBasic.html">Basic Configuration</a></p>
+    ::<!-- 33: Url/Web proxy settings changed -->
+    <p>URL Proxy settings have been saved.</p>
+    ::<!-- 34: Debug/Analysis settings changed -->
+    <p>Debug/Analysis settings have been saved.</p>
+    ::<!-- 35: Referrer policy settings changed -->
+    <p>Referrer policy settings have been saved.</p>
+    ::<!-- 36: Server port settings changed -->
+    <p>The ports are now configured as follows (active on next start).</p>
+      <table>
+        <tr>
+          <td>HTTP port</td><td> <span class="settingsValue">#[port]#</span></td>
+        </tr>
+        <tr>
+          <td>HTTPS port</td><td> <span class="settingsValue">#[port.ssl]#</span></td>
+        </tr>
+        <tr>          
+          <td>Shutdown port</td><td> <span class="settingsValue">#[port.shutdown]#</span></td>
+        </tr>
+      </table>
+	::<!-- 37: Compression settings changed -->
+    <p>Compression settings have been saved.</p>
+	::<!-- 38: HTTP client settings changed -->
+    <p>HTTP client settings have been saved.</p>
+    
+    #(/info)#
+    <p></p>
+    #(needsRestart)#
+    <p>You can now go back to the <a href="#[referer]#">Settings</a> page if you want to make more changes.</p>
+    ::
+    <p class="warning">Your need to restart YaCy to activate the changes.</p>
+    <p>or go back to the <a href="#[referer]#">Settings</a> page to make more changes.</p>
+    #(/needsRestart)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

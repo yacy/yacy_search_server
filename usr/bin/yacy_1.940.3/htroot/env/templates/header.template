@@ -1,0 +1,225 @@
+<!-- top navigation -->
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse navbar-header">
+      <a class="navbar-brand" id="navbar-brand" href="./">
+        <span><img id="header-greeting-icon" class="yacylogo" src="env/grafics/yacy.png" alt="YaCy"></span>
+        <span>&nbsp;Administration</span>
+      </a>
+    </div>
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <form id="header-search-form" class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html">
+        <input name="query" placeholder="Search..." class="form-control" type="text" size="21" maxlength="200" value=""/>
+        <input type="hidden" name="resource" value="global" />
+        <input type="hidden" name="urlmaskfilter" value=".*" />
+        <input type="hidden" name="prefermaskfilter" value="" />
+        <input type="hidden" name="nav" value="all" />
+    	#(authorized)#::
+  		<input type="hidden" name="auth" value=""/>
+  		#(/authorized)#
+      </form>
+    </div>
+	<script type="text/javascript">
+	    /**
+	    * Request the server for a valid transaction token and then send a steering request
+	    * @param tokenInputId HTML identifier of the transaction token input field
+	    * @param formId identifier of the form
+	    */
+		function sendSteeringRequest(tokenInputId, formId) {
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == XMLHttpRequest.DONE) {
+					if(xhr.status != 200) {
+						if(xhr.status == 401) {
+							alert("Please authenticate with administrator credentials.");
+						} else {
+							alert("The server rejected the request or is not responding!");
+						}
+					} else {
+						var requestSent = false;
+						var transactionTokenInput = document.getElementById(tokenInputId);
+						if(transactionTokenInput) {
+							transactionTokenInput.value = xhr.getResponseHeader("X-YaCy-Transaction-Token")
+							var restartForm = document.getElementById(formId);
+							if(restartForm) {
+								requestSent = true;
+								restartForm.submit();
+							}
+						}
+						if(!requestSent) {
+							alert("Could not send the request to the server!");
+						}
+					}
+				}
+			};
+			xhr.open("get", "Steering.html", true);
+			xhr.send();
+		}
+		
+		/** Trigger the server restart after asking for user confirm */
+		function confirmRestart() {
+			if(confirm('Confirm Re-Start')) {
+				sendSteeringRequest("restartTransactionToken", "restartForm");
+			}
+		}
+		
+		/** Trigger the server restart after asking for user confirm */
+		function confirmShutdown() {
+			if(confirm('Confirm Shutdown')) {
+				sendSteeringRequest("shutdownTransactionToken", "shutdownForm");
+			}
+		}
+	</script>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li id="header_restart">
+          <form action="Steering.html" method="post" id="restartForm">
+			<input type="hidden" name="transactionToken" value="" id="restartTransactionToken"/>
+            <input type="hidden" name="restart" value="" />
+          </form>
+          <form action="Steering.html" method="get">
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="confirmRestart(); return false;" title="Restart">
+            	<span class="glyphicon glyphicon-fire"></span>
+            	<span class="hidden-sm"> Re-Start</span>
+            </button>
+          </form>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_shutdown">
+          <form action="Steering.html" method="post" id="shutdownForm">
+			<input type="hidden" name="transactionToken" value="" id="shutdownTransactionToken"/>
+            <input type="hidden" name="shutdown" value="" />
+          </form>
+          <form action="Steering.html" method="get">
+            <button accesskey="h" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="confirmShutdown(); return false;" title="Shutdown">
+            	<span class="glyphicon glyphicon-off"></span>
+            	<span class="hidden-sm"> Shutdown</span>
+            </button>
+          </form>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_community">
+          <form action="https://community.searchlab.eu" target="_blank" method="get">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-info" title="Community">
+                <span class="glyphicon glyphicon-user"></span>
+                <span class="hidden-sm"> Forum</span>
+            </button>
+          </form>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_help" class="dropdown">
+          <div href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false">
+          <form action="#" method="get">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-success" title="Help">
+                <span class="glyphicon glyphicon-question-sign"></span>
+                <span class="hidden-sm"> Help</span>
+            </button>
+          </form>
+          </div>
+          <ul class="dropdown-menu">
+          <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
+          <li id="header_jslicense"><a href="jslicense.html" data-jslicense="1">JavaScript information</a></li>
+          <li class="divider" role="separator"></li>
+          <li id="header_tutorial"><a href="https://www.youtube.com/user/YaCyTutorials/videos" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;YaCy Tutorials</a></li>
+          <li id="header_download"><a href="https://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
+          <li id="header_community"><a href="https://community.searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
+          <li id="header_git"><a href="https://github.com/yacy/yacy_search_server" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
+          </ul>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_sponsor" class="dropdown">
+          <div href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false">
+          <form action="#" method="get">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-warning" title="Help">
+                <span class="glyphicon glyphicon-heart"></span>
+                <span class="hidden-sm"> Sponsor</span>
+            </button>
+          </form>
+          </div>
+          <ul class="dropdown-menu">
+          <li><a href="#">YaCy is free software, so we need the help of many to support the development.<br/><b>You</b> can help by joining a sponsoring plan:</a></li>
+          <li><a href="https://github.com/users/Orbiter/sponsorship" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;<b>become a Github Sponsor</b></a></li>
+          <li><a href="https://www.patreon.com/bePatron?u=185903" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;<b>become a YaCy Patreon</b></a></li>
+          <li><a href="#">Please help! We need financial help to move on with the development!</a></li>
+          </ul>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_administration">
+          <form action="index.html" method="get">
+    		#(authorized)#::
+  				<input type="hidden" name="auth" value=""/>
+  			#(/authorized)#
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search">
+            	<span class="glyphicon glyphicon-search"></span>
+            	<span class="hidden-sm"> Search</span>
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- left navigation -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-3 col-md-2 sidebar">
+    
+    <ul class="nav nav-sidebar menugroup" id="first-steps"
+      data-trigger="hover" data-placement="right" data-container="body"
+      data-original-title="You just started a YaCy peer!"
+      data-content="As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options."
+    >
+      <li><h3>First Steps</h3></li>
+      <li><a href="ConfigBasic.html" class="MenuItemLink">Use Case &amp; Account</a></li>
+      <li><a href="CrawlStartSite.html" class="MenuItemLink">Load Web Pages, Crawler</a></li>
+      <li><a href="Performance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">RAM/Disk Usage &amp; Updates</a></li>
+    </ul>
+    #(navigation-advanced)#<script>$("#first-steps").popover();</script>::#(/navigation-advanced)#
+
+    <ul class="nav nav-sidebar menugroup" id="monitoring"
+      data-trigger="hover" data-placement="right" data-container="body"
+      data-original-title="You did not yet start a web crawl!"
+      data-content="You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!"
+    >
+      <li><h3>Monitoring</h3></li>
+      <li><a href="Status.html?noforward=" class="MenuItemLink">System Status</a></li>
+      #(navigation-p2p)#::<li><a href="Network.html" accesskey="w" class="MenuItemLink">Peer-to-Peer Network</a></li>#(/navigation-p2p)#
+      #(navigation-crawlmonitor)#::<li><a href="IndexBrowser_p.html?admin=true&hosts=" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Browser</a></li>#(/navigation-crawlmonitor)#
+      <li><a href="AccessGrid_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Network Access</a></li>
+      #(navigation-crawlmonitor)#::<li><a href="Crawler_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Crawler Monitor</a></li>#(/navigation-crawlmonitor)#
+      <!-- <li><a href="terminal_p.html" accesskey="t" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Terminal</a></li> -->
+    </ul>
+    #(navigation-crawlmonitor)#<script>$("#monitoring").popover();</script>::#(/navigation-crawlmonitor)#
+    
+    #(navigation-advanced)#::
+    <ul class="nav nav-sidebar menugroup">
+      <li><h3>Production</h3></li>
+      <li><a href="CrawlStartExpert.html" class="MenuItemLink">Advanced Crawler</a></li>
+      <li><a href="IndexExport_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Export/Import</a></li>
+      <li><a href="Vocabulary_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Content Semantic</a></li>
+      <li><a href="CrawlCheck_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Target Analysis</a></li>      
+    </ul>
+    <ul class="nav nav-sidebar menugroup">
+      <li><h3>Administration</h3></li>
+      <li><a href="IndexControlURLs_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Administration</a></li>
+      <li><a href="Settings_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">System Administration</a></li>
+      <li><a href="Blacklist_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Filter &amp; Blacklists</a></li>
+      <li><a href="Table_API_p.html?sort=-date_recording" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Process Scheduler</a></li>
+    </ul>
+    <ul class="nav nav-sidebar menugroup">
+      <li><h3>Search Portal Integration</h3></li>
+      <li><a href="ConfigPortal_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Portal Configuration</a></li>
+      <li><a href="ConfigAppearance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Portal Design</a></li>
+      <li><a href="RankingSolr_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Ranking and Heuristics</a></li>
+    </ul>
+    #(/navigation-advanced)#
+    </div>
+  
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

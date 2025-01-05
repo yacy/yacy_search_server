@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<schema name="YaCy2Solr" version="1.4">
+    <types>
+        <fieldType name="string"   class="solr.StrField"         omitNorms="true" sortMissingLast="true" docValues="true" />
+        <fieldType name="boolean"  class="solr.BoolField"        omitNorms="true" sortMissingLast="true" />
+        <fieldType name="int"      class="solr.IntPointField"    docValues="true" omitNorms="true" />
+        <fieldType name="tint"     class="solr.IntPointField"    docValues="true" />
+        <fieldType name="long"     class="solr.LongPointField"   docValues="true" />
+        <fieldType name="tlong"    class="solr.LongPointField"   docValues="true" />
+        <fieldType name="double"   class="solr.DoublePointField" docValues="true" omitNorms="true" />
+        <fieldType name="tdouble"  class="solr.DoublePointField" docValues="true" omitNorms="true" />
+        <fieldType name="date"     class="solr.DatePointField"   docValues="true" omitNorms="true" />
+        <fieldType name="float"    class="solr.FloatPointField"  docValues="true" />
+        <fieldType name="tfloat"   class="solr.FloatPointField"  docValues="true" />
+        <fieldType name="location" class="solr.LatLonPointSpatialField" />
+    
+        <fieldType name="text" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
+            <analyzer type="index">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.SynonymGraphFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+    
+        <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+                <filter class="solr.SynonymGraphFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="text_en_splitting_tight" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
+            <analyzer>
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.SynonymGraphFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="false"/>
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+                <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
+                <filter class="solr.LowerCaseFilterFactory"/><filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <filter class="solr.EnglishMinimalStemFilterFactory"/>
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+            </analyzer>
+        </fieldType>
+    </types>
+    
+    <fields>
+       <field name="_version_" type="long" indexed="true" stored="true" docValues="true" /> <!-- a mandatory solr field used for operation in SolrCloud -->
+       <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/> <!-- this is default in solrconfix.xml; not used but you get errors when not defining it -->
+
+        <!-- primary key of document, the URL hash **mandatory field** -->
+        <field name="id" type="string" indexed="true" stored="true" docValues="true"/>
+
+        <!-- url of document -->
+        <field name="sku" type="string" indexed="true" stored="true" omitNorms="true" docValues="true"/>
+
+        <!-- last-modified from http header -->
+        <field name="last_modified" type="date" indexed="true" stored="true" docValues="true"/>
+
+        <!-- mime-type of document -->
+        <field name="content_type" type="string" indexed="true" stored="true" multiValued="true" docValues="true"/>
+
+        <!-- content of title tag -->
+        <field name="title" type="text_general" indexed="true" stored="true" multiValued="true"/>
+
+        <!-- content of author-tag -->
+        <field name="author" type="text_general" indexed="true" stored="true"/>
+
+        <!-- content of keywords tag; words are separated by comma, semicolon or spacee -->
+        <field name="keywords" type="text_general" indexed="true" stored="true"/>
+        
+        <!-- all visible text -->
+	<field name="text_t" type="text_general" indexed="true" stored="true"/>
+
+	<dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
+	<dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
+	<dynamicField name="*_b"  type="boolean" indexed="true" stored="true"/>
+	<dynamicField name="*_s"  type="string"  indexed="true"  stored="true" />
+	<dynamicField name="*_sxt" type="string" indexed="true" stored="true" multiValued="true"/> <!-- YaCy special -->
+	<dynamicField name="*_dt"  type="date"    indexed="true"  stored="true"/>
+	<dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
+	<dynamicField name="*_t"  type="text_general"    indexed="true"  stored="true"/>
+	<dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
+	<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" />
+	<dynamicField name="*_txt" type="text_general"   indexed="true"  stored="true" multiValued="true"/>
+	<dynamicField name="*_val" type="int" indexed="true" stored="true" multiValued="true"/> <!-- YaCy special -->
+	<!-- unused dynamicFields?
+	<dynamicField name="*_ls" type="long"   indexed="true"  stored="true"  multiValued="true"/>
+	<dynamicField name="*_bs" type="boolean" indexed="true" stored="true"  multiValued="true"/>
+	<dynamicField name="*_f"  type="float"  indexed="true"  stored="true"/>
+	<dynamicField name="*_fs" type="float"  indexed="true"  stored="true"  multiValued="true"/>
+	<dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
+	<dynamicField name="*_ds" type="double" indexed="true"  stored="true"  multiValued="true"/>
+	<dynamicField name="*_ti" type="tint"    indexed="true"  stored="true"/>
+	<dynamicField name="*_tl" type="tlong"   indexed="true"  stored="true"/>
+	<dynamicField name="*_tf" type="tfloat"  indexed="true"  stored="true"/>
+	<dynamicField name="*_td" type="tdouble" indexed="true"  stored="true"/>
+	<dynamicField name="attr_*" type="text_general" indexed="true" stored="true" multiValued="true"/>
+	-->
+        <copyField source="author" dest="author_sxt" maxChars="100" />
+    </fields>
+    
+    <uniqueKey>id</uniqueKey>
+
+    <!-- if you are using a search client using the default search field "text", then use this line to get to all indexed documents -->
+    <!-- <copyField source="*_t" dest="text" maxChars="3000"/> -->    
+</schema>

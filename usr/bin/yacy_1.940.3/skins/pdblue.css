@@ -1,0 +1,322 @@
+/* Skin */
+
+body {
+  background-color:#FCFCFF;
+  color:#18294A;
+}
+
+a:link {
+  color:#18294A;
+  background-color:transparent;
+}
+
+a:visited {
+  color:#18294A;
+  background-color:transparent;
+}
+
+a:hover {
+  color: #65AC2A;
+  background-color:transparent;
+}
+
+/* Menu */
+
+.menugroup h3 {
+  -webkit-border-top-left-radius: 3px;
+  -webkit-border-top-right-radius: 3px;
+  -khtml-border-top-left-radius: 3px;
+  -khtml-border-top-right-radius: 3px;
+  -moz-border-radius-topleft: 3px;
+  -moz-border-radius-topright: 3px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+ 
+  background-color: #5090D0;
+  font-weight: bold;
+  padding-top:6px;
+  padding-bottom:6px;
+  color:white;
+}
+
+.SubMenugroup h3, .SubMenu h3 {
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+
+  background-color: #5090D0;
+  font-weight: bold;
+  padding-top:2px;
+  padding-bottom:2px;
+  color:white;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color: #DEE6F3;
+  color:#18294A;
+}
+
+div.SubMenu h3 {
+    padding: 6px 10px;
+}
+
+a:hover.MenuItemLink {
+  background-color:transparent;
+  color:#18294A;
+}
+
+/* Head */
+
+div.head h1 {
+  background-color:transparent;
+  text-align:left;
+  padding-left:70px;
+  color:#18294A;
+}
+
+/* Tables */
+
+table {
+}
+
+.TableHeader {
+  background-color: #65AC2A;
+  color:white;
+}
+
+.TableCellDark {
+  background-color: #DEE6F3;
+}
+
+.TableCellLight {
+  background-color: #ECF1F8;
+}
+
+.TableCellDark:target, .TableCellLight:target {
+  background-color: #FFCCCC;
+}
+
+.TableCellSummary {
+  background-color: #FFCCCC;
+}
+
+.TableCellActive {       
+  background-color: #ffbbaa;     
+}
+
+/* Blog and Wiki*/
+
+.Post {
+  background-color:#eee;
+}
+
+.PostSubject {
+  background-color:#8aa;
+}
+
+.PostSubject a {
+  color:#18294A;
+}
+
+.PostInfo {
+  background-color:#bdcdd4;
+}
+
+/* Wiki */
+
+.WikiTOCBox {
+  border: 1px solid #aaa;
+  background-color: #FFFFFF;
+}
+
+a.unknown {
+  color:#990000;
+}
+
+a.known {
+  color:#009900;
+}
+
+a.extern {
+  color:#000099;
+}
+
+/* in Bookmarks */
+
+.bookmark {
+  border-bottom:1px #000 dashed;
+}
+
+a.bookmarkTitle {
+  color: #5090D0;
+}
+
+a:hover.bookmarkTitle {
+  color: #5090D0;
+}
+
+a.bookmarkTags {
+  color: #007050;
+}
+
+a:hover.bookmarkTags {
+  color: #5090D0;
+}
+
+a.bookmarkAction {
+  color: #999999;
+}
+
+.Tags {
+  border-left: 2px solid #18294A;
+}
+
+.diff               { background-color: #E8E8EE; }
+.diff .unchanged    { color: #333; }
+.diff .added        { color: #090; background-color: #B5F0B5; }
+.diff .deleted      { color: #B00; background-color: #F9B5B5; }
+
+/* in Status.html */
+
+.ProgressBar {
+  border: #FFFFFF solid 1px;
+}
+div.ProgressBarFill {
+  background-color:#DEE6F3;
+}
+
+/* Searchresults */
+
+fieldset.maininput, fieldset.yacys { 
+  background-color:#DEE6F3;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+form.search.small h2 {
+  border-bottom:1px solid #CAD5E3;
+}
+
+.searchresults {
+  /*border-top:1px #000 dashed;*/
+  margin-top: 15px;
+}
+
+.searchresults h4 a {
+  font-size:1.3em;
+  font-weight:normal;
+  color:#2840A8;
+  text-decoration: none;
+  margin-bottom: 5px;
+}
+.searchresults h4 a:hover {
+  color:#2840A8;
+  text-decoration: underline;
+}
+
+.snippetLoaded {
+  font-size:1.2em;
+  line-height: 1.2;
+}
+.snippetLoaded strong {
+  color:black;
+}
+
+.searchresults .url a {
+  font-size:1.2em;
+  color:#086020;
+  text-decoration: none;
+  line-height: 1.2;
+}
+.searchresults .url a:hover {
+  color:#086020;
+  text-decoration: underline;
+}
+
+
+/* other */
+
+.settingsValue {
+  color:#556699;
+}
+
+.Headline {
+  background-color: #5090D0;
+  color: white;
+}
+
+.Heading {
+  background-color: #5090D0;
+}
+
+.error, .warning {
+  color:red;
+}
+
+.success {
+  color:green;
+}
+
+.Message {
+  background-color: #eeeeee;
+}
+
+.example {
+  background-color:#D3D3D3;
+}
+
+.hides:hover .hoverShow { background-color: #FFFFFF; }
+
+/* Log */
+
+body#ViewLog pre {
+  background-color:white;
+}
+
+/* Forms */
+
+fieldset {
+  background-color:#DEE6F3;
+  color:#18294A;
+  border:0px solid #DEE6F3;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+/* input, select, textarea, button {
+  color: black;
+  background-color: white;
+} */
+
+legend {
+  background-color:#65AC2A;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  text-align:left;
+  font-weight: bold;
+  color:white;
+}
+
+legend a:link {
+  color:white;
+}
+
+legend a:hover {
+  color:white;
+}
+
+form dt, dl.pairs dt {
+  background-color:#DEE6F3;
+  font-weight:bold;
+}
+
+form dd, dl.pairs dd {
+  background-color:#DEE6F3;
+}

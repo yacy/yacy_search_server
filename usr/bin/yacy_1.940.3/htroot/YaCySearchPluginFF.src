@@ -1,0 +1,37 @@
+# Mozilla/YACY plug-in
+
+<search 
+   name="YaCy #[name]#"
+   description="YaCy P2P Websearch"
+   method="GET"
+   action="http://#[host]#:#[port]#/yacysearch.html"
+   queryEncoding="utf-8"
+   queryCharset="utf-8"   
+>
+
+<input name="search" user>
+<input name="Enter" value="Search">
+
+<input name="display" value="1">
+<input name="former" value="">
+
+<input name="count" value="20">
+<input name="order" value="Date-YBR-Quality">
+<input name="resource" value="global">
+<input name="time" value="6">
+<input name="urlmaskfilter" value=".*">
+<input name="prefermaskfilter" value="">
+
+
+<interpret 
+    browserResultType="result" 
+    resultListStart="<!-- resultlist start -->" 
+    resultListEnd="<!-- resultlist end -->" 
+    resultItemStart="<!-- result start -->" 
+    resultItemEnd="<!-- result end -->"
+>
+</search>
+<browser
+	update="http://#[host]#:#[port]#/YaCySearchPluginFF.src" 
+	updateIcon="http://#[host]#:#[port]#/YaCySearchPluginFF.gif" 
+	updateCheckDays="7">

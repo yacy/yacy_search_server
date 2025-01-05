@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <title>YaCy '#[clientname]#': Performance Settings</title>
+  #%env/templates/metas.template%#
+  <script type="text/javascript" src="js/html.js"></script>
+  </head>
+  <body id="PerformanceQueues">
+    <script type="text/javascript"><!--
+    function reloadGraph() {
+      if(document.forms["optionreloadGraph"].option.checked)
+        document.images["graph"].src="PerformanceGraph.png?nopeers=&time="+(new Date()).getTime();
+      window.status="";
+    }
+    window.setInterval("reloadGraph()", 1000);
+    //--></script>
+    #%env/templates/header.template%#
+    #%env/templates/submenuMaintenance.template%#
+    <h2>Performance Settings</h2>
+
+    <p><img src="PerformanceGraph.png?nopeers=" id="graph" alt="PerformanceGraph" width="660" height="240"/></p>
+    <form id="optionreloadGraph" action="" method="get"><p><input type="checkbox" name="option" id="autoreload"/> <label for="autoreload">refresh graph</label></p></form>
+
+    <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+      <fieldset>
+        <legend>Memory Settings</legend>
+        <dl>
+          <dt><label for="Xmx">Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr></label></dt>
+          <dd><input name="Xmx" id="Xmx" type="text" style="text-align:right;" size="6" maxlength="6" value="#[Xmx]#" /> MByte&nbsp;
+              <input type="submit" class="btn btn-primary" name="setStartup" value="Set" />&nbsp;
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    #(setStartupCommit)#::<div class="commit">Accepted change. This will take effect after <strong>restart</strong> of YaCy. <br/>
+        <form action="Steering.html" method="post">
+            <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+            <input type="hidden" name="restart" value="" />
+            <button type="submit" class="btn btn-warning" onclick="return confirm('Confirm Re-Start')" title="Restart now">Restart now</button>
+        </form>
+    </div>
+    ::<div class="error"></div>#(/setStartupCommit)#
+
+    <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+       <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+      <fieldset>
+        <legend>Resource Observer</legend>
+        <div class="col-sm-6">
+            <fieldset>
+                <legend>Free space disk</legend>
+                <div class="form-group">
+                    <label for="diskFree">Steady-state minimum</label>
+                      <input name="diskFree" id="diskFree" type="text" size="4" value="#[diskFree]#" title="Amount of space (in Mebibytes) that should be kept free as steady state"/> <abbr title="Mebibyte">MiB</abbr>. Disable crawls when free space is below.
+                </div>
+                <div class="form-group">
+                    <label for="diskFreeHardlimit">Absolute minimum</label>
+                    <input name="diskFreeHardlimit" id="diskFreeHardlimit" type="text" size="4" value="#[diskFreeHardlimit]#" title="Amount of space (in Megabytes) that should at least be kept free as hard limit"/> <abbr title="Mebibyte">MiB</abbr>. Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when free space is below.
+                </div>
+                <div class="form-group">
+                    <label for="diskFreeAutoregulate">Autoregulate</label>
+                    <input name="diskFreeAutoregulate" id="diskFreeAutoregulate" type="checkbox" #(diskFreeAutoregulate)#::checked#(/diskFreeAutoregulate)# aria-describedby="autoregulateFreeInfo"/> when absolute minimum limit has been reached.
+                      <div class="info" style="float:right">
+                          <img src="env/grafics/i16.gif" width="16" height="16" alt="Free space disk autoregulation info"/>
+                          <div class="infobox" style="right:0px;" id="autoregulateFreeInfo">
+                            The autoregulation task performs the following sequence of operations, stopping once free space disk is over the steady-state value :
+                            <ol>
+                                <li>delete old releases</li>
+                                <li>delete logs</li>
+                                <li>delete robots.txt table</li>
+                                <li>delete news</li>
+                                <li>clear HTCACHE</li>
+                                <li>clear citations</li>
+                                <li>throw away large crawl queues</li>
+                                <li>cut away too large RWIs</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="col-sm-6">
+            <fieldset>
+                <legend>Used space disk</legend>
+                <div class="form-group">
+                    <label for="diskUsed">Steady-state maximum</label>
+                      <input name="diskUsed" id="diskUsed" type="text" size="7" value="#[diskUsed]#" title="Maximum amount of space (in Mebibytes) that should be used as steady state"/> <abbr title="Mebibyte">MiB</abbr>. Disable crawls when used space is over.
+                </div>
+                <div class="form-group">
+                      <label for="diskUsedHardlimit">Absolute maximum</label>
+                      <input name="diskUsedHardlimit" id="diskUsedHardlimit" type="text" size="7" value="#[diskUsedHardlimit]#" title="Maximum amount of space (in Mebibytes) that should be used as hard limit"/> <abbr title="Mebibyte">MiB</abbr>. Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when used space is over.
+                </div>
+                <div class="form-group">
+                      <label for="diskUsedAutoregulate">Autoregulate</label>
+                      <input name="diskUsedAutoregulate" id="diskUsedAutoregulate" type="checkbox" #(diskUsedAutoregulate)#::checked#(/diskUsedAutoregulate)# aria-describedby="autoregulateUsedInfo"> when absolute maximum limit has been reached.
+                      <div class="info" style="float:right">
+                          <img src="env/grafics/i16.gif" width="16" height="16" alt="Used space disk autoregulation info"/>
+                          <div class="infobox" style="right:0px;" id="autoregulateUsedInfo">
+                            The autoregulation task performs the following sequence of operations, stopping once used space disk is below the steady-state value:
+                            <ol>
+                                <li>delete old releases</li>
+                                <li>delete logs</li>
+                                <li>delete robots.txt table</li>
+                                <li>delete news</li>
+                                <li>clear HTCACHE</li>
+                                <li>clear citations</li>
+                                <li>throw away large crawl queues</li>
+                                <li>cut away too large RWIs</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="col-sm-12">
+            <fieldset>
+                <legend><abbr title="Random Access Memory">RAM</abbr></legend>
+                <div class="form-group">
+                    Memory state : #(observerTrigger)#<span aria-describedby="properStateInfo">proper</span>
+                    <span class="info">
+                        <img src="env/grafics/i16.gif" width="16" height="16" alt="Proper state info"/>
+                        <span class="infobox" id="properStateInfo">Enough memory is available for proper operation.</span>
+                    </span>::
+                    <strong aria-describedby="exhaustedStateInfo">exhausted</strong>
+                    <span class="info">
+                        <img src="env/grafics/i16.gif" width="16" height="16" alt="Exhausted state info"/>
+                        <span class="infobox" id="exhaustedStateInfo">Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.</span>
+                    </span>
+                    <input type="submit" class="btn btn-warning" name="resetObserver" value="Reset state" title="Manually reset to 'proper' state"/>
+                    #(/observerTrigger)#
+                </div>
+                  <div class="form-group">
+                      <label for="memoryAcceptDHT">Minimum required</label>
+                      <input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" style="text-align:right;"  size="4" value="#[memoryAcceptDHT]#" title="Amount of memory (in Mebibytes) that should at least be free for proper operation"/> <abbr title="Mebibyte">MiB</abbr> free space. Disable <abbr title="Distributed Hash Table">DHT</abbr>-in below.
+                  </div>
+            </fieldset>
+        </div>
+        <div class="col-sm-6">
+               <input type="submit" class="btn btn-primary" name="setObserver" value="Save" />
+           </div>
+      </fieldset>
+    </form>
+
+  <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+      <fieldset><legend>Online Caution Settings:</legend>
+      <p>
+        This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.
+        The delay is extended by this time each time the proxy is accessed afterwards.
+        This shall improve performance of the affected process (proxy or search).
+        (current delta is #[crawlPauseProxyCurrent]#/#[crawlPauseLocalsearchCurrent]#/#[crawlPauseRemotesearchCurrent]#
+        seconds since last proxy/local-search/remote-search access.)
+      </p>
+        <table border="0">
+          <tr class="TableHeader" valign="bottom">
+            <td>Online Caution Case</td>
+            <td>indexer delay (milliseconds) after case occurency</td>
+          </tr>
+          <tr class="TableCellDark">
+            <td>Proxy:</td>
+            <td align="right"><input id="crawlPauseProxy" name="crawlPauseProxy" type="text" size="20" maxlength="100" value="#[crawlPauseProxy]#" /></td>
+          </tr>
+          <tr class="TableCellDark">
+            <td>Local Search:</td>
+            <td align="right"><input id="crawlPauseLocalsearch" name="crawlPauseLocalsearch" type="text" size="20" maxlength="100" value="#[crawlPauseLocalsearch]#" /></td>
+          </tr>
+          <tr class="TableCellDark">
+            <td>Remote Search:</td>
+            <td align="right"><input id="crawlPauseRemotesearch" name="crawlPauseRemotesearch" type="text" size="20" maxlength="100" value="#[crawlPauseRemotesearch]#" /></td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left" colspan="2"><input type="submit" class="btn btn-sm btn-primary" name="onlineCautionSubmit" value="Enter New Parameters" />
+            Changes take effect immediately</td>
+          </tr>
+        </table>
+      </fieldset>
+  </form>
+
+  #%env/templates/footer.template%#
+  </body>
+</html>

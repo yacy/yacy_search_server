@@ -1,0 +1,32 @@
+## API datacite.org
+## This service is also available as an API. We use Solr Search Handler for our API calls, the endpoint is: http://search.datacite.org/api.
+
+## Please check Solr's common query parameters documentation in order to understand how to use API.
+## Examples
+
+##    http://search.datacite.org/api?q=wind simple search for wind
+##    http://search.datacite.org/api?q=wind&fl=doi,title&rows=5 search for wind, retrieve only doi and title, and return (at max.) 5 results
+##    http://search.datacite.org/api?q=wind&fl=doi,title&wt=csv csv output
+##    http://search.datacite.org/api?q=wind&fl=doi,title&wt=json&indent=true json output
+
+## YaCy solrconnector specific settings
+## the basic url to acces the system
+_baseurl = https://search.datacite.org/
+## Solr core, is appended to the _baseurl
+_corename = api
+## some systems store a identifier instead of a url for the resource, the prefix is prepended the identifier in _skufieldname
+_skuprefix = http://dx.doi.org/
+## the field name of the url of resource (in yacy/solr = sku)
+_skufieldname = doi
+
+## field mappings
+## YaCyFieldname = remoteFieldname
+keywords = subject
+author = creator
+publisher_t = publisher
+title = title
+description_txt = description
+language_s = language
+text_t = description
+size_i = size
+coordinate_p = geoLocationPoint

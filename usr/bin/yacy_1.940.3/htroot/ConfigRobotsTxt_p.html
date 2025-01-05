@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Local robots.txt</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigRobotsTxt">
+    #%env/templates/header.template%#
+    #%env/templates/submenuPortalConfiguration.template%#
+    <h2>Exclude Web-Spiders</h2>
+    <p>
+      Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.
+      <span class="tt">robots.txt</span> is a voluntary agreement most search-engines (including YaCy) follow.
+      It disallows crawlers to access webpages or even entire domains.
+    </p>
+    #(error)#
+    ::<p class="error">Unable to access the local file: <span class="error tt">#[msg]#</span></p>
+    ::<p class="error">Deletion of <span class="error tt">htroot/robots.txt</span> failed</p>#(/error)#
+    <form method="post" action="ConfigRobotsTxt_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Deny access to</legend>
+        <input type="hidden" name="directories" value="checked" />
+        <input type="hidden" name="locked" value="checked" />
+        <dl>
+          <dt><label for="all"><em>Entire Peer</em></label></dt>
+          <dd><input type="checkbox" id="all" name="all"#(all.checked)#:: checked="checked"#(/all.checked)# /></dd>
+          <dt><label for="status">Status page</label></dt>
+          <dd><input type="checkbox" id="status" name="status"#(status.checked)#:: checked="checked"#(/status.checked)# /></dd>
+          <dt><label for="network">Network pages</label></dt>
+          <dd><input type="checkbox" id="network" name="network"#(network.checked)#:: checked="checked"#(/network.checked)# /></dd>
+          <dt><label for="surftips">Surftips</label></dt>
+          <dd><input type="checkbox" id="surftips" name="surftips"#(surftips.checked)#:: checked="checked"#(/surftips.checked)# /></dd>
+          <dt><label for="news">News pages</label></dt>
+          <dd><input type="checkbox" id="news" name="news"#(news.checked)#:: checked="checked"#(/news.checked)# /></dd>
+          <dt><label for="blog">Blog</label></dt>
+          <dd><input type="checkbox" id="blog" name="blog"#(blog.checked)#:: checked="checked"#(/blog.checked)# /></dd>
+          <dt><label for="wiki">Wiki</label></dt>
+          <dd><input type="checkbox" id="wiki" name="wiki"#(wiki.checked)#:: checked="checked"#(/wiki.checked)# /></dd>
+          <dt><label for="bookmarks">Public bookmarks</label></dt>
+          <dd><input type="checkbox" id="bookmarks" name="bookmarks"#(bookmarks.checked)#:: checked="checked"#(/bookmarks.checked)# /></dd>
+          <dt><label for="homepage">Home Page</label></dt>
+          <dd><input type="checkbox" id="homepage" name="homepage"#(homepage.checked)#:: checked="checked"#(/homepage.checked)# /></dd>
+          <dt><label for="fileshare">File Share</label></dt>
+          <dd><input type="checkbox" id="fileshare" name="fileshare"#(fileshare.checked)#:: checked="checked"#(/fileshare.checked)# /></dd>
+          <dt><label for="profile">Impressum</label></dt>
+          <dd><input type="checkbox" id="profile" name="profile"#(profile.checked)#:: checked="checked"#(/profile.checked)# /></dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="save" value="Save restrictions" class="btn btn-primary"/></dd>
+        </dl>
+      </fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,8 @@
+<div class="SubMenu">
+  <h3>Ranking and Heuristics</h3>
+  <ul class="SubMenu">
+    <li><a href="RankingSolr_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Solr Ranking Config</a></li>
+    <li><a href="RankingRWI_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">RWI Ranking Config</a></li>
+    <li><a href="ConfigHeuristics_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Heuristics</a></li>
+  </ul>
+</div>

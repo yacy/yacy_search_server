@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Crawl Profile Editor</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ProfileEditor">
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawlMonitor.template%#
+    <h2>Crawler Steering</h2>
+
+	<h3>Crawl Scheduler</h3>
+    <p>Scheduled Crawls can be modified in this table</p>
+
+	<iframe id="APITable" src="Table_API_p.html?inline=true&amp;filter=crawler" width="100%" height="0" scrolling="no" marginheight="0" marginwidth="0" frameborder="0" ></iframe>
+
+	<h3>Crawl Profile Editor</h3>
+    <p>Crawl profiles hold information about a crawl process that is currently ongoing.</p>
+    
+    
+<!-- crawl profile list -->
+<fieldset><legend>Crawl Profile List</legend>
+<table border="0" summary="A list of crawl profiles and their current settings.">
+  <colgroup>
+  <col width="120" />
+  <col />
+  <col width="16" />
+  <col width="60" />
+  <col width="10" span="2" />
+  <col />
+  <col width="10" span="5" />
+  </colgroup>
+  <tr class="TableHeader"> 
+    <td><strong>Crawl Thread</strong></td>
+    <td><strong>Collections</strong></td>
+    <td><strong>Status</strong></td>
+    <td><strong>Depth</strong></td>
+    <td><strong>Must Match</strong></td>
+    <td><strong>Must Not Match</strong></td>
+    <td><strong>Recrawl if older than</strong></td>
+    <td><strong>Domain Counter Content</strong></td>
+    <td><strong>Max Page Per Domain</strong></td>
+    <td><strong>Accept '?' URLs</strong></td>
+    <td><strong>Fill Proxy Cache</strong></td>
+    <td><strong>Local Text Indexing</strong></td>
+    <td><strong>Local Media Indexing</strong></td>
+    <td><strong>Remote Indexing</strong></td>
+  </tr>
+  #{crawlProfiles}# 
+  <tr class="TableCell#(dark)#Light::Dark#(/dark)#"> 
+    <td>#[name]#</td>
+    <td>#[collections]#</td>
+    <td>#(terminateButton)#::
+        <div style="text-decoration:blink">Running</div>
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
+        <input type="hidden" name="handle" value="#[handle]#" />
+        <input type="submit" name="terminate" value="Terminate"/>
+        </div></form>
+        #(/terminateButton)#
+	    #(deleteButton)#::
+	    Finished
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
+        <input type="hidden" name="handle" value="#[handle]#" />
+        <input type="submit" name="delete" value="Delete" class="btn btn-danger btn-xs"/>
+        </div></form>
+        #(/deleteButton)#
+	</td>
+    <td>#[depth]#</td>
+    <td>#[crawlerURLMustMatch]#</td>
+    <td>#[crawlerURLMustNotMatch]#</td>
+    <td>#[recrawlIfOlder]#</td>
+    <td>#{crawlingDomFilterContent}##[item]#<br />#{/crawlingDomFilterContent}#</td>
+    <td>#[domMaxPages]#</td>
+    <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
+    <td>#(storeHTCache)#no::yes#(/storeHTCache)#</td>
+    <td>#(indexText)#no::yes#(/indexText)#</td>
+    <td>#(indexMedia)#no::yes#(/indexMedia)#</td>
+    <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
+    
+  </tr>
+  #{/crawlProfiles}# 
+</table>
+#(existPassiveCrawls)#::
+<form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8"><div>
+<input type="submit" name="deleteTerminatedProfiles" value="Delete finished crawls" class="btn btn-danger" />
+</div></form>
+#(/existPassiveCrawls)#
+</fieldset>
+
+
+    <!-- crawl profile editor -->
+    <form action="CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Select the profile to edit</legend>
+        <select name="handle">#{profiles}# 
+          <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
+        </select>
+        <input type="submit" name="edit" value="Edit profile" class="btn btn-primary"/>
+      </fieldset>
+    </form>
+    
+    #(error)#::
+    <p class="error">An error occurred during editing the crawl profile: #[message]#</p>
+    #(/error)#
+    
+    #(edit)#::
+    <a name="edit"></a>
+    <form action="CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Edit Profile #[name]#</legend>
+        <input type="hidden" name="handle" value="#[handle]#" />
+        <dl>#{entries}# 
+          <dt>#(readonly)#<label for="#[name]#">#[label]#</label>::#[label]##(/readonly)#</dt>
+          <dd>#(readonly)# 
+            <input id="#[name]#" name="#[name]#"
+                   #(type)# type="checkbox"#(checked)#:: checked="checked"#(/checked)#::
+                    type="text" value="#[value]#" size="120" maxlength="10000"::
+                    type="text" value="#[value]#" size="120" maxlength="10000"#(/type)# />::
+            <strong>#(type)##(checked)#false::true#(/checked)#::#[value]#::#[value]##(/type)#</strong>#(/readonly)# 
+          </dd>#{/entries}# 
+        <dt>&nbsp;</dt><dd><input type="submit" name="submit" value="Submit changes" class="btn btn-primary"/></dd>
+        </dl>
+      </fieldset>
+    </form>
+    #(/edit)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

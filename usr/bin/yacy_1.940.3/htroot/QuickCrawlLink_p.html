@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Quick Crawl Link</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="QuickCrawlLink">
+    <div class="head">
+      <h1 class="head">#[clientname]#: Quick Crawl Link</h1>
+    </div>
+    #(mode)#<!-- 0 -->
+    <h4>Quickly adding Bookmarks:</h4>
+    <p>
+      Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.
+      If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.
+    </p>
+    <p>
+      <a class="BookmarkLink" href="javascript:w = window.open('http://#[host]#:#[port]#/QuickCrawlLink_p.html?indexText=on&amp;indexMedia=on&amp;crawlingQ=on&amp;followFrames=on&amp;obeyHtmlRobotsNoindex=on&amp;xdstopw=on&amp;title='+escape(document.title)+'&amp;url='+escape(location.href),'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();">Crawl with YaCy</a>
+    </p>
+    
+    ::<!-- 1 -->
+    <dl class="pairs">
+      <dt>Title:</dt>
+      <dd>#[title]#</dd>
+      <dt>Link:</dt>
+      <dd><a href="#[url]#">#[url]#</a></dd>
+      <dt>Status:</dt>
+      #(status)#<!-- 0 -->
+      <dd class="success">URL successfully added to Crawler Queue
+      ::<!-- 1 -->
+      <dd class="error">Malformed URL
+      ::<!-- 2 -->
+      <dd class="error">Unable to create new crawling profile for URL: #[error]#
+      ::<!-- 3 -->
+      <dd class="error">Unable to add URL to crawler queue: #[error]#
+      #(/status)#
+      </dd>
+    </dl>
+    #(/mode)#
+    
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>YaCy '#[clientname]#': Translation News</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body>
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2 class="yacy">Translation News for Language #[currentlang]#</h2>
+
+    <form method="post" enctype="multipart/form-data">
+      <p>
+        You can share your local addition to translations and distribute it to other peers.
+        The remote peer can vote on your translation and add it to the own local translation.<br>
+        (#[transsize]# entries available)&nbsp;&nbsp;<input type="submit" class="btn btn-default" name="publishtranslation" value="Publish">
+          &nbsp;&nbsp;<small>You can check your outgoing messages <a href="News.html?page=3">here</a>.</small>
+        To edit or add local translations you can use <a href="Translator_p.html">Translator_p.html</a>.
+      </p>
+    </form>
+    #(errmsg)#::<p class="error">Please activate a different language <a href='ConfigBasic.html'>here</a></p>#(/errmsg)#
+    #{results}#
+    <!-- link begin -->
+ 
+    <fieldset>
+      <table>
+        <tr>
+          <th>File:</th><th><a href="#[url]#" target="transnewsfile">#[filename]#</a></th><th>Originator</th>
+        </tr>
+        <tr>
+          <td>English:</td><td>#[source]#</td><td></td>
+        </tr>
+        #(existing)#::
+        <tr>
+          <td>existing</td><td class="warning">#[target]#</td><td></td>
+        </tr>
+       #(/existing)#
+        <tr>
+          <td>Translation:</td><td>#[target]#</td><td>#[peername]#</td>
+        </tr>
+
+        <tr><td><small>score #[score]#</small></td>
+          <td>&nbsp;
+            <a href="TransNews_p.html?voteNegative=#[refid]#" title="negative vote">
+              <span class="warning glyphicon glyphicon-thumbs-down"></span></a>
+            &nbsp;&nbsp;
+            <a href="TransNews_p.html?votePositive=#[refid]#&amp;filename=#[filename]#&amp;source=#[source]#&amp;target=#[target]#" title="positive vote"  >
+              <span class="success glyphicon glyphicon-thumbs-up"></span></a>
+              &nbsp;&nbsp;<small>Vote on this translation. If you vote positive the translation is added to your local translation list.</small>
+          </td><td></td>
+        </tr>
+        </table>
+    </fieldset>
+   
+    <!-- link end -->
+    #{/results}#
+    <p>
+      <br>
+    </p>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

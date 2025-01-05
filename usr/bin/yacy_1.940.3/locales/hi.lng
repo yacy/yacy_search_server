@@ -1,0 +1,1136 @@
+﻿# hi.lng
+# English-->Hindi
+# -----------------------
+# This is a part of YaCy, a peer-to-peer based web search engine
+
+#File: ConfigLanguage_p.html
+#---------------------------
+<!-- lang -->default(english)==हिंदी
+#<!-- author -->==सारांश शर्मा
+#<!-- maintainer -->==
+#-----------------------------
+
+#File: AccessTracker_p.html
+#---------------------------
+
+Access Tracker== पहुँच खौजै
+Server Access Overview==सरवर की पहुँच निरीक्षण करे 
+This is a list of #[num]# requests to the local http server within the last hour.== यह पिछले एक घंटे के भीतर स्थानीय http सर्वर के लिए की गई अनुरोध की संख्या#[num]# की एक सूची है
+This is a list of requests to the local http server within the last hour.==यह पिछले एक घंटे के भीतर स्थानीय http सर्वर को की गई अनुरोध की एक सूची है.
+Showing #[num]# requests.==अनुरोधों को संख्या दिखा रहा है
+>Path<==>मार्ग<
+Date<==तारीख<
+Access Count During==पहुंच के दौरान गिनती 
+last Second==आखिरी सेकंड
+last Minute==आखिरी मिनट
+last 10 Minutes==पिछले दस मिनट
+last Hour==पिछला एक घंटा
+The following hosts are registered as source for brute-force requests to protected pages==निम्नलिखित होस्ट संरक्षित पृष्ठों के लिए  brute-force अनुरोधों के लिए स्रोत के रूप में पंजीकृत हैं
+#>Host==>होस्ट
+Access Times==एक्सेस समय
+Server Access Details==	सर्वर का उपयोग विस्तार
+Local Search Log==स्थानीय खोज लोग
+Local Search Host Tracker==स्थानीय खोज होस्ट ट्रैकर
+Remote Search Log==रिमोट खोज लोग
+Total:==संपूर्ण:
+Success:==सफल:
+Remote Search Host Tracker==रिमोट खोज होस्ट ट्रैकर
+This is a list of searches that had been requested from this' peer search interface.?=यह इस सहकर्मी खोज इंटरफ़ेस से अनुरोध किए  गए खोजों की सूची है
+Showing #[num]# entries from a total of #[total]# requests.==यह एंट्रीज दिखा रहा है  #[num]# अनुरोध के कुल से #[total]#
+Requesting Host==होस्ट  का अनुरोध
+#Offset==ओफ़्सेट 
+Offset==ओफ़्सेट 
+Expected Results==अपेक्षित परिणाम
+Returned Results==लौटे होए  परिणाम
+Known Results==ज्ञात परिणाम
+Used Time (ms)==प्रयुक्त समय (ms)
+URL fetch (ms)==यूआरएल लायें (ms)
+Snippet comp (ms)==स्निपेट कंप्यूटर अनुप्रयोग (ms) 
+Query==क्वेरी 
+#>User Agent<==>यूजर  एजेंट<
+Search Word Hashes==हाशेस   शब्द  खोजे 
+Count</td>==काउंट </td>
+Queries Per Last Hour==पिछले घंटे की क्वेरी 
+Access Dates==एक्सेस   दिनांक
+This is a list of searches that had been requested from remote peer search interface==यह रिमोट  से  की  गए  खोजो  की  सूचि  है 
+Peer Name==पीयर नाम 
+#-----------------------------
+
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Administration==ब्लैकलिस्ट  एडमिनिस्ट्रेशन
+Used Blacklist engine:==उपयोग किया गया ब्लैकलिस्ट  इंजन : 
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==इस समारोह प्रॉक्सी के लिए एक यूआरएल फिल्टर प्रदान करता है, किसी भी काली सूची में डाला यूआरएल अवरुद्ध है
+from being loaded. You can define several blacklists and activate them separately.==लोड किये जाने से . आप कई काली सूची को परिभाषित करने और उन्हें अलग से सक्रिय कर सकते हैं.
+You may also provide your blacklist to other peers by sharing them; in return you may==आप अपनी ब्लैकलिस्ट दुसरे पीअर्स के साथ शेयर कर सकते हैं और बदले में 
+collect blacklist entries from other peers.==आप दुसरे पीअर्स  की  ब्लैकलिस्ट एन्त्रिएस ले सकते हैं 
+Active list:==एक्टिव लिस्ट :
+No blacklist selected==कोई भी ब्लैकलिस्ट सेलेक्ट नहीं की हुई 
+Select list:==सेलेक्ट लिस्ट 
+not shared::shared==शेयर नहीं किया हुआ ::शेयर किया हुआ
+"select"=="सेलेक्ट"
+Create new list:==नयी लिस्ट बनाये :
+"create"=="बनाये"
+Settings for this list==इस लिस्ट की सेत्त्तिंग करे 
+"Save"=="सेव करे"
+Share/don't share this list==शेयर / शेयर ना करे इस लिस्ट को 
+Delete this list==इस लिस्ट को डिलीट करे 
+Edit this list==इस लिस्ट को एडिट करे 
+These are the domain name/path patterns in==यह बह डोमेन नाम / पथ पैटर्न है  इन 
+Blacklist Pattern==ब्लैकलिस्ट पैटर्न 
+Edit selected pattern(s)==सेलेक्ट किये गए पैटर्न (ओं) को एडिट करें 
+Delete selected pattern(s)==सिलेक्टेड पैटर्न (ओं) को डिलीट करे 
+Move selected pattern(s) to==सलेक्टेड पैटर्न (ओं) को हटाये 
+#You can select them here for deletion==आप इन्हें देलेतिओन के लिए सेलेक्ट कर सकते हैं 
+Add new pattern:==नया पैटर्न जोड़े :
+"Add URL pattern"=="नया यूआरएल पैटर्न जोड़े "
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== दाहिने"*" के बाद "/" बदला जा सकता है <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स के द्वारा </a>.
+domain.net/fullpath<==डोमेन .नेट /फुल्ल्पथ <
+>domain.net/*<==>डोमेन .नेट /* <
+*.domain.net/*<==*.डोमेन .नेट /*<
+*.sub.domain.net/*<==*.सुब .डोमेन .दे /*<
+#sub.domain.*/*<==सुब .डोमेन .*/*<
+#domain.*/*<==डोमेन .*/*<
+#was removed from blacklist==ब्लैकलिस्ट से हटा दिया गया था 
+#was added to the blacklist==ब्लैकलिस्ट में जोड़ा गया था 
+Activate this list for==इस लिस्ट को सक्रिय करें
+Show entries:==एन्त्रिएस देखिये/दिखाएँ :
+Entries per page:==एन्तिरेस प्रति पेज :
+#"Go"=="आगे बढे"
+Edit existing pattern(s):==मौजूदा पैटर्न (ओं) को एडिट करें  :
+"Save URL pattern(s)"=="यूआरएल पैटर्न (ओं) सेव करें "
+</body>==<script>window.onload = function () {$("label:contains('proxy')").text('प्रॉक्सी '); $("label:contains('crawler')").text('क्रेल्वेर '); $("label:contains('dht')").text('DHT'); $("label:contains('search')").text('खोज'); $("label:contains('surftips')").text('सर्फिंगटिप्स '); $("label:contains('news')").text('समाचार');}</script></body>
+#-----------------------------
+
+#File: BlacklistCleaner_p.html
+#---------------------------
+Blacklist Cleaner==ब्लैकलिस्ट क्लीनर 
+Here you can remove or edit illegal or double blacklist-entries.==यहाँ से आप अवैध और डबल ब्लैकलिस्टेड एन्त्रिएस हटा सकते हैं 
+Check list==चेक लिस्ट 
+"Check"=="चेक"
+Allow regular expressions in host part of blacklist entries.==रेगुलर एक्सप्रेशन को ब्लैकलिस्ट एन्त्रिएस के होस्ट पार्ट में अनुमति दे 
+The blacklist-cleaner only works for the following blacklist-engines up to now:==ब्लैक लिस्ट क्लीनर केवल अब तक का निम्न ब्लैक लिस्ट इंजन के लिए काम करता है:
+Illegal Entries in #[blList]# for==अवैध एन्त्रिएस #[blList]# के लिए  
+Deleted #[delCount]# entries==मिटाई हुई #[delCount]# एन्त्रिएस 
+Altered #[alterCount]# entries!==बदली हुई #[alterCount]# एन्त्रिएस 
+Two wildcards in host-part==होस्ट भाग में दो वाइल्डकार्ड
+Either subdomain <u>or</u> wildcard==या तो उपडोमेन <u> या </ u>  वाइल्डकार्ड
+Path is invalid Regex== अवैध रेगेक्स का पथ 
+Wildcard not on begin or end==वाइल्डकार्ड नहीं पर  शुरू या खत्म पर
+Host contains illegal chars==होस्ट  में अवैध करैक्टर  शामिल
+Double==डबल 
+"Change Selected"=="बदलना चुना गया"
+"Delete Selected"=="मिटाना चुना गया "
+No Blacklist selected==कोई भी ब्लैकलिस्ट नहीं चुना गया 
+#-----------------------------
+
+#File: BlacklistImpExp_p.html
+#---------------------------
+#Blacklist Import==Blacklist Import
+Used Blacklist engine:==ब्लैकलिस्ट इंजन उपयोग किया गया :
+Import blacklist items from...==ब्लैकलिस्ट सूची इम्पोर्ट करें ...
+other YaCy peers:==अन्य यासी पीअर्स :
+"Load new blacklist items"=="नयी ब्लैकलिस्ट सूची लोड करैं "
+#URL:==URL:
+plain text file:<==प्लेन टेक्स्ट फाइल :<
+XML file:==क्स्म्ल फाइल :
+Upload a regular text file which contains one blacklist entry per line.==एक रेगुलर टेक्स्ट फाइल अपलोड करे जिसमे एक ब्लैकलिस्ट प्रति लाइन  में शामिल हो 
+Upload an XML file which contains one or more blacklists.==एक क्स्म्ल फाइल अपलोड करे जिसमे एक या एक से अधिक ब्लैकलिस्ट हो 
+Export blacklist items to...==ब्लैकलिस्ट सूची को एक्सपोर्ट करे ...
+Here you can export a blacklist as an XML file. This file will contain additional==यहाँ से आप ब्लैकलिस्ट एक्सपोर्ट कर सकते हैं क्स्म्ल के रूप में, यह फाइल अतिरिक्त
+information about which cases a blacklist is activated for.== जानकारी रखती है की किस मामले के लिए ब्लैकलिस्ट एक्टिवेटिड है 
+"Export list as XML"=="सूची को क्स्म्ल में एक्सपोर्ट करे "
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==यहाँ से आप ब्लैकलिस्ट एक रेगुलर टेक्स्ट फाइल में एक्सपोर्ट कर सकते हैं जिसमे ,जो की ब्लैकलिस्ट प्रति एंट्री होगा  
+This file will not contain any additional information==यह फाइल कोई अत्रिकित जानकारी नहीं देगी 
+"Export list as text"=="इस सूची को टेक्स्ट में एक्सपोर्ट करे "
+
+#File: BlacklistTest_p.html
+#---------------------------
+Blacklist Test==ब्लैकलिस्ट टेस्ट 
+Used Blacklist engine:==इस्तेमाल किया हुआ ब्लैकलिस्ट इंजन :
+Test list:==टेस्ट की सूची :
+"Test"=="टेस्ट"
+The tested URL was==टेस्ट किया हुआ यूआरएल था 
+It is blocked for the following cases:==यह निम्नलिखित मामलों के लिए ब्लॉक किया गया है:
+#Crawling==क्रेव्लिंग 
+#DHT==DHT
+#News==न्यूज़ 
+#Proxy==प्रॉक्सी 
+Search==सर्च 
+Surftips==सर्फ टिप्स 
+#-----------------------------
+
+#File: Blog.html
+#---------------------------
+by==से
+Comments</a>==टिप्पणी</a>
+>edit==>एडिट 
+>delete==>डिलीट 
+Edit<==एडिट<
+previous entries==पिछली एन्त्रिएस 
+next entries==अगली एन्त्रिएस 
+new entry==नयी  एन्त्रिएस 
+import XML-File==क्स्म्ल फाइल इम्पोर्ट करे 
+export as XML==क्स्म्ल फाइल में एक्सपोर्ट करे 
+Comments</a>==टिप्पणी</a>
+Blog-Home==ब्लॉग घर
+Author:==लेखक:
+Subject:==विषय:
+#Text:==टेक्स्ट:
+You can use==आप उपयोग कर सकते हैं
+Yacy-Wiki Code==यासी -विकी कोड 
+here.==यहां.
+Comments:==टिप्पणी:
+deactivated==निष्क्रिय
+>activated==>सक्रिय
+moderated==मॉडरेटेड 
+"Submit"=="सबमिट "
+"Preview"=="प्रीव्यू "
+"Discard"=="दिस्कार्द "
+>Preview==>प्रीव्यू 
+No changes have been submitted so far!==अभी तक कोई चनगेस सबमिट नहीं हुआ !
+Access denied==ऐक्सेस डिनाइड
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==यदि आप नया ब्लॉग या एडिट करना चाहते है तो आपको एडमिन से लॉग इन होना होगा  या यूजर जिसके पास ब्लॉग राईट हो 
+Are you sure==क्या आप यह   
+that you want to delete== हटाना चाहते हैं:
+Confirm deletion==हटाने की पुष्टि
+Yes, delete it.==हाँ, इसे हटा दे 
+No, leave it.==नहीं ,रहने दे 
+Import was successful!==इम्पोर्ट सफल रहा !
+Import failed, maybe the supplied file was no valid blog-backup?==इम्पोर्ट असफल रहा ! शायद यह फाइल सही नहीं है ?
+Please select the XML-file you want to import:==क्स्म्ल फाइल सेलेक्ट करे जो आपको इम्पोर्ट करनी है :
+#-----------------------------
+
+#File: BlogComments.html
+#---------------------------
+by==से
+Comments</a>==टिप्पणी</a>
+Login==लॉग इन 
+Blog-Home==ब्लॉग घर 
+delete</a>==डिलीट </a>
+allow</a>==अनुमति देना</a>
+Author:==लेखक:
+Subject:==विषय:
+#Text:==टेक्स्ट:
+You can use==आप उपयोग कर सकते हैं
+Yacy-Wiki Code==यासी -विकी कोड
+here.==यहां.
+"Submit"=="सबमिट"
+"Preview"=="प्रीव्यू"
+"Discard"=="दिस्कार्द"
+#-----------------------------
+
+#File: Bookmarks.html
+#---------------------------
+YaCy '#[clientname]#': Bookmarks==यासी '#[clientname]#': बुकमार्क्स
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==यह बुकमार्क्स की सूचि आरएसएस फीड्स में  पुनः प्राप्त की जा सकती है . आप एक विशिष्ट टैग का चयन करते हैं तो यह भी किया जा सकता है..
+Click the API icon to load the RSS from the current selection.==मौजूदा चयन से आरएसएस लोड करने के लिए एपीआई आइकन पर क्लिक करें.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==एपीआई की लिस्ट देखने के लिए विजिट करे  <a href="https://wiki.yacy.net/index.php/Dev:API">एपीआई विकी पेज </a>.
+<h3>Bookmarks==<h3>बुकमार्क्स 
+Bookmarks (==बुकमार्क्स  (
+#Login==लॉग इन 
+List Bookmarks==लिस्ट बुकमार्क्स 
+Add Bookmark==ऐड बुकमार्क्स 
+Import Bookmarks==इम्पोर्ट बुकमार्क्स 
+Import XML Bookmarks==इम्पोर्ट क्स्म्ल बुकमार्क्स 
+Import HTML Bookmarks==इम्पोर्ट हटमल बुकमार्क्स 
+"import"=="इम्पोर्ट "
+Default Tags:==डिफ़ॉल्ट टैग :
+imported==इम्पोर्टेड 
+#Edit Bookmark==एडिट बुकमार्क 
+#URL:==यूआरएल :
+Title:==टाइटल :
+Description:==विवरण:
+Folder (/folder/subfolder):==फोल्डर  (/फोल्डर /सुब्फोल्डर ):
+Tags (comma separated):==टैग्स (अल्पविराम अलग):
+>Public:==>सार्वजनिक:
+yes==हाँ
+no==नहीं 
+Bookmark is a newsfeed==यह बुकमार्क एक नेव्स्फीद है 
+"create"=="बनाये "
+"edit"=="एडिट "
+File:==फाइल :
+import as Public==सार्वजनिक रूप में आयात करे 
+"private bookmark"=="निजी बुकमार्क"
+"public bookmark"=="सार्वजनिक बुकमार्क"
+Tagged with==के साथ टैग:
+'Confirm deletion'=='हटाने की पुष्टि'
+Edit==एडिट 
+Delete==डिलीट 
+Folders==फ़ोल्डर्स 
+Bookmark Folder==बुकमार्क्स फोल्डर 
+#Tags==टैग्स 
+Bookmark List==बुकमार्क लिस्ट 
+previous page==पिछले पृष्ठ पर
+next page==अगले पेज पर
+All==सब
+Show==दिखा
+Bookmarks per page.==प्रति पृष्ठ बुकमार्क्स
+-----------------------------
+
+#File: Collage.html
+#---------------------------
+Image Collage==छवि कोलाज़
+Private Queue==निजी कतार
+Public Queue==सार्वजनिक कतार
+#-----------------------------
+
+#File: compare_yacy.html
+#---------------------------
+Websearch Comparison==वेब सर्च तुलना करें
+Left Search Engine==बाएं खोज इंजन
+Right Search Engine==दाएँ खोज इंजन
+Query==प्रश्न
+"Compare"=="तुलना करें" 
+Search Result==खोज के परिणाम
+#-----------------------------
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==उपयोगकर्ता खातों
+User Administration==उपयोगकर्ता एडमिनिस्ट्रेशन
+User created:==उपयोगकर्ता बन गया है :
+User changed:==उपयोगकर्ता बदला गया है :
+Generic error.==सामान्य एरर .
+Passwords do not match.==पासवर्ड मेल नहीं खाते.
+Username too short. Username must be >= 4 Characters.==उपयोगकर्ता का नाम बहुत छोटा है .उपयोगकर्ता का नाम >  = 4 अक्षरों का होना चाहिए.
+No password is set for the administration account.== एडमिनिस्ट्रेशन खाते के लिए कोई पासवर्ड निर्धारित नहीं है.
+Please define a password for the admin account.==एडमिनिस्ट्रेशन खाते के लिए एक पासवर्ड को परिभाषित करें.
+Admin Account==एडमिनिस्ट्रेशन खाता
+Access from localhost without account==खाते के बिना लोकलहोस्ट से एक्सेस करे.
+Access only with qualified account==योग्य खाते के साथ ही प्रवेश है .
+Peer User:==पीयर यूज़र:
+New Peer Password:==नया पीयर पासवर्ड :
+Repeat Peer Password:==पीयर पासवर्ड दोहराएँ :
+"Define Administrator"=="एडमिनिस्ट्रेशन को परिभाषित करे"
+Select user==उपयोगकर्ता का चयन करें
+New user==नया उपयोगकर्ता
+Edit User==उपयोगकर्ता को एडिट  करें
+Delete User==उपयोगकर्ता को डिलीट करें
+Edit current user:==वर्तमान उपयोगकर्ता को एडिट  करें :
+Username</label>==उपयोगकर्ता का नाम</label>
+Password</label>==पासवर्ड </label>
+Repeat password==पासवर्ड दोहराएँ
+First name==पहला नाम
+Last name==पिछला नाम
+Address==पता
+Rights==अधिकार
+Timelimit==समय सीमा
+Time used==समय का इस्तेमाल
+Save User==उपयोगकर्ता सेव करें 
+#-----------------------------
+#File: ConfigAppearance_p.html
+#---------------------------
+Appearance and Integration==अप्पेअरेञ्चे और इंटीग्रेशन 
+You can change the appearance of the YaCy interface with skins.==Yacy के इंटरफ़ेस और स्किन्स को आप बदल सकते हैं,
+#You can change the appearance of YaCy with skins==Yacy के इंटरफ़ेस और स्किन्स को आप बदल सकते हैं,
+The selected skin and language also affects the appearance of the search page.==चयनित स्किन्स और भाषा भी सर्च पेज की अपीयरेंस को प्रभावित करता है.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==अगर आप YaCy साथ <a href="ConfigPortal_p.html">एक सर्च पोर्टल बनाते हैं</a> तो आप
+change the appearance of the search page here.==यहाँ सर्च पेज के स्वरूप को बदल सकते हैं.
+#and the default icons and links on the search page can be replaced with you own.==और सर्च पेज पर डिफ़ॉल्ट चिह्न और लिंक आप के अनुसार बदला जा सकता है
+Skin Selection==स्किन चयन
+Select one of the default skins, download new skins, or create your own skin.==डिफ़ॉल्ट स्किन्स में से एक का चयन करें अथवा नए खाल डाउनलोड अथवा अपनी त्वचा बनाऐ .
+Current skin==वर्तमान स्किन
+Available Skins==उपलब्ध स्किन
+"Use"=="उपयोग"
+"Delete"=="डिलीट "
+>Skin Color Definition<==>स्किन कलर डेफिनिशन <
+The generic skin 'generic_pd' can be configured here with custom colors:==सामान्य स्किन कस्टम कलर के साथ यहाँ कॉन्फ़िगर किया जा सकता है
+>Background<==>बैकग्राउंड<
+#>Text<==>टेक्स्ट<
+>Legend<==>लीजेंड <
+>Table&nbsp;Header<==>टेबल &nbsp; हैडर<
+>Table&nbsp;Item<==>टेबल &nbsp;आइटम<
+>Table&nbsp;Item&nbsp;2<==>टेबल &nbsp;आइटम&nbsp;2<
+>Table&nbsp;Bottom<==>टेबल&nbsp;बॉटम<
+>Border&nbsp;Line<==>बॉर्डर&nbsp;लाइन<
+>Sign&nbsp;'bad'<==>सिग्न&nbsp;'बुरा'<
+>Sign&nbsp;'good'<==>सिग्न&nbsp;'अच्छा'<
+>Sign&nbsp;'other'<==>सिग्न&nbsp;'अन्य'<
+>Search&nbsp;Headline<==>सर्च&nbsp;हैडर <
+>Search&nbsp;URL==>सर्च&nbsp;यू आर एल 
+"Set Colors"==" रंग निर्धारित करे "
+#>Skin Download<==>स्किन डाउनलोड<
+Skins can be installed from download locations==स्किन्स डाउनलोड स्थानों से इनस्टॉल किया जा सकता है
+Install new skin from URL==यू आर एल से नई स्किन्स इनस्टॉल करे 
+Use this skin==यह स्किन्स का उपयोग करे
+"Install"=="इनस्टॉल "
+Make sure that you only download data from trustworthy sources. The new Skin file==आप केवल भरोसेमंद सूत्रों से डेटा डाउनलोड करें. नई स्किन्स की फाइल.
+might overwrite existing data if a file of the same name exists already.==एक ही नाम की एक फ़ाइल पहले से मौजूद है तो मौजूदा डेटा ओवरराईट हो सकता है
+Unable to get URL:==>यू आर एल प्राप्त करने में असमर्थ है:
+Error saving the skin.==एरर सेविंग स्किन्स.
+#-----------------------------
+
+#File: ConfigBasic.html
+#---------------------------
+Access Configuration==एक्सेस कॉन्फ़िगरेशन
+Basic Configuration==बेसिक कॉन्फ़िगरेशन
+Your YaCy Peer needs some basic information to operate properly==आपकी YaCy पीअर को ठीक से संचालित करने के लिए कुछ बुनियादी जानकारी की जरूरत है
+Select a language for the interface==इंटरफेस के लिए एक भाषा का चयन करें
+Use Case: what do you want to do with YaCy:==यूज़ केस  : आप YaCy के साथ क्या करना चाहते हो :
+Community-based web search==कम्युनिटी-बेस्ड  वेब  सर्च
+Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==ग्लोबल नेटवर्क में शामिल हो और समर्थन 'freeworld', वेब खोज करे एक अनसेंसर्ड  यूजर-ओन्ड  सर्च नेटवर्क से.
+Search portal for your own web pages==अपने खुद के वेब पेजस के लिए सर्च पोर्टल
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==आपकी YaCy इंस्टालेशन के अन्य साथियों से स्वतंत्र रूप से व्यवहार करती है, और आप अपने खुद के वेब क्रॉलर शुरू करके अपने खुद के वेब इंडेक्स बना सकते हैं. यह अपने खुद के वेब पेजस को खोजने के लिए या एकटॉपिक -ओरिएंटेड  खोज पोर्टल को परिभाषित करने के लिए इस्तेमाल किया जा सकता है
+Files may also be shared with the YaCy server, assign a path here:==YaCy सर्वर के साथ फाइलें भी शेयर की जा सकती है ,यहाँ पाथ असाइन करे  :
+This path can be accessed at ==इस पाथ पर एक्सेस करे 
+Use that path as crawl start point.==क्रॉल स्टार्टिंग पॉइंट के रूप में उस पाथ का प्रयोग करें.
+Intranet Indexing==इंट्रानेट इंडेक्सिंग 
+Create a search portal for your intranet or web pages or your (shared) file system.==अपने इंट्रानेट या वेब पेजेज  या अपने  (शेयर्ड  ) फाइल सिस्टम के लिए एक खोज पोर्टल बनाएँ
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==यूआरएल HTTP / HTTPS / FTP और एक स्थानीय डोमेन नाम या IP के साथ या रूप से एक यूआरएल के साथ इस्तेमाल किया जा सकता है
+or smb:==या एसएमबी
+Your peer name has not been customized; please set your own peer name==अपने पीर  के नाम कस्टमाइज्ड  नहीं किया गया है, अपने ही पीर  के नाम सेट कृपया
+You may change your peer name==आप अपने पीर  के नाम बदल सकते हैं
+Peer Name:==साथियों के नाम:
+Your peer cannot be reached from outside==अपने साथियों के बाहर से नहीं पहुँचा जा सकता
+which is not fatal, but would be good for the YaCy network==जो घातक नहीं है, लेकिन YaCy नेटवर्क के लिए अच्छा होगा
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==इस पोर्ट  और / के लिए अपने फ़ायरवॉल खोलने या इस पोर्ट पर कनेक्शन की अनुमति देने के लिए अपने रूटर में एक वर्चुअल सर्वर विकल्प सेट करें
+Your peer can be reached by other peers==अपने पीर के अन्य पीर द्वारा पहुंचा जा सकता है
+Peer Port:==पीर पोर्ट:
+Configuration was not successful. This may take a moment.==कॉन्फ़िगरेशन असफल रहा . इसे थोडा समय लगेगा 
+Set Configuration==कॉन्फ़िगरेशन सेट करे 
+What you should do next:==आगे आप क्या करे 
+Your basic configuration is complete! You can now (for example)==आपकी सामान्य कॉन्फ़िगरेशन पूरी हो चुकी हे ! अब आप (उधारण के तोर पर )
+just <==अभी  <
+start an uncensored search==अपरीक्षित खोज शुरू कीजिये 
+start your own crawl</a> and contribute to the global index, or create your own private web index==आप अपना खुद का  क्रॉल शुरू कर सकते हे और ग्लोबल इंडेक्स में योगदान दे सकते हे या अपना खुदका निजी वेबइंडेक्स बना सकते हे 
+set a personal peer profile</a> (optional settings)==आप अपनी निजी पीर  रुपरेखा निर्धारित कीजिये </a> (वैकल्पिक सेटिंग्स)
+monitor at the network page</a> what the other peers are doing==नेटवर्क पेजेज  पर अनुश्रवण कीजिए</a> दुसरे पीर क्या कर रहे हे 
+Your Peer name is a default name; please set an individual peer name.==आपका पीर नाम डिफ़ॉल्ट हे कृपया उसे व्यक्तिक नाम में बदले 
+You did not set a user name and/or a password.==आपने उपयोगकर्ता का नाम और पासवर्ड सेट नहीं किया हे 
+Some pages are protected by passwords.==कुछ पेजेज पासवर्ड से सुरक्षित हे 
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==अपने याची पीर की सुरक्षा के लिए आपको इस मार्ग पर अपना पासवर्ड सेट करना चाइये <a href="ConfigAccounts_p.html">Accounts Menu</a>
+You did not open a port in your firewall or your router does not forward the server port to your peer.==आपने अपने फ़ायरवॉल में पोर्ट नहीं खोला हे या फिर  आपके राऊटर ने सर्वर पोर्ट को याची पीर की तरफ नहीं बढाया हे 
+This is needed if you want to fully participate in the YaCy network.==अगर आप पूरी तरह से याची नेटवर्क में भाग लेना चाहते हे तो यह जुरुरी होगा 
+You can also use your peer without opening it, but this is not recomended.==आप बिना खोले पीर का इस्तमाल कर सकते हे पर इस बात की सलाह उचित नहीं हे 
+#-----------------------------
+
+#File: ConfigHeuristics_p.html
+#---------------------------
+Heuristics Configuration==स्वानुभविक कॉन्फ़िगरेशन 
+A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> अनुभव पे आधारित तरीका जो आपको सुल्जाने में सिखने में और खोज में मदत्गर साबित होगा 
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==खोज के स्वानुभविक जो तरीके यहाँ स्विच किये जा सकते हे वो आपके लिए मदत्गर  साबित होगे खोज के रिजल्ट में जोकि लिंक गुएस्सिङ्ग पर आधारित हे 
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==जब स्वानुभविक खोज इस्तमाल की जाती हे तब जो नतीजो के रूप में लिनक्स होती हे वो सीधे इस्तमाल नहीं की जाती बल्कि उन लोडेड पेजेज की चटाई की जाती और कंटेंट के तोर पर जमा किये जाते हे 
+This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==इस बात यह  सुनिश्चित होता हे की ब्लैकलिस्ट इस्तमाल की जा सकती हे और जो शब्द खोजा जा रहा हे वो स्वनुभाविक के नतीजे हे       
+The success of heuristics are marked with an image==स्वनुभाविक की सफलता छवि से चिन्हित की जाती हे 
+heuristic:&lt;name&gt;==स्वनुभाविक:&lt;नाम &gt;
+#(redundant)==(अतिरिक्त )
+(new link)==(नयी  कड़ी )
+below the favicon left from the search result entry:==फ़ेविकॉन के निचे खोज के प्रवेश के बाये में :
+The search result was discovered by a heuristic, but the link was already known by YaCy==खोज के नतीजे स्वनुभाविक से इजाद हुए हे पर जो कड़ी हे उसकी जानकारी याची के पास पहले से हे 
+The search result was discovered by a heuristic, not previously known by YaCy==खोज के नतीजे स्वनुभाविक से इजाद हुए हे जिसका याची को कोई पूर्वानुमान नहीं हे 
+'site'-operator: instant shallow crawl=='site'-ऑपरेटर: इंस्टेंट शाल्लो क्रॉल 
+When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==जब भी कोई खोज की जाती हे 'site'-operator (like: 'download site:yacy.net')तभी तुरंत जो होस्ट होता हे साईट ऑपरेटर का वो क्रॉल किया जाता हे रिस्ट्रिक्टेड होस्ट से  
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==इसका मतलब हे की खोज की विनती के तुरंत जो होस्ट का पोर्टल पेज होता हे वो लोड किया जाता हे और हर पेज उसी होस्ट से जोड़ दिया जाता हें 
+Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==क्युकी 'instant crawl'को पालन करना पड़ेगा robots.txt और जो पेजेज को एक्सेस करने का मिनिमम समय हे ,यह स्वनुभाविक काफी धीमा हे,पर सारी खोज जो ज़रूरी हे वह दूसरी खोज से निकली जा सकती हे(कुछ समय के बाद )  
+search-result: shallow crawl on all displayed search results==खोज के नतीजे :शाल्लो क्रॉल हर नतीजे पे दिखेगा 
+When a search is made then all displayed result links are crawled with a depth-1 crawl.==जब भी कोई खोज की जाती हे तब उस के सारे नतीजे डेप्थ १ क्रॉल से क्रॉल किये जाते हे 
+This means: right after the search request every page is loaded and every page that is linked on this page.==इसका मतलब हे की खोज की विनती के बाद हर पेज लोड किया जाता और कड़ी के द्वारा हर पेज से जोड़ा जाता हे 
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==अगर आप देखे थो जो पेजेज क्रॉल किये जाने हे वो ग्लोबल क्रॉल कतार में जोड़ दिए जाते हे 
+Default is to add the links to the local crawl queue (your peer crawls the linked pages).==डिफ़ॉल्ट के मुताबित सारी कडिया लोकल क्रॉल कतार में जोड़ी जनि चाइये(आपके पीर कड़ीयो से जुड़े पेजेज क्रॉल करेगे )
+add as global crawl job==ग्लोबल क्रॉल जॉब के हिसाब से जोडीये 
+blekko: load external search result list from==blekko: एक्सटर्नल खोज के नतीजे की लिस्ट यहा से लीजिये 
+When using this heuristic, then every search request line is used for a call to blekko.==इस स्वनुभाविक को इस्तमाल करते समय खोज की विनती की सारी लाइन ब्लेक्को को कॉल के लिए इस्तमाल की जाएगी
+20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==करीबन २० नतीजे ब्लेक्को से लिए जाते हे और साथ ही साथ उनकी चटाई की जाती हे 
+#-----------------------------
+#File: ConfigHTCache_p.html
+#---------------------------
+Hypertext Cache Configuration==हाइपरटेक्स्ट कैश कॉन्फ़िगरेशन 
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==जो कंटेंट एचटीटीपी और फ्त्प प्रोटोकॉल से मिलता हे वो ह्त्काचे में जमा होता हे .
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==कैश एक रोटेटिंग कैश हे :अगर वो भरी हुई हे थो पुराणी एन्त्रिएस डिलीट करदी जाएगी और उसकी जगह नयी एन्त्रिएस भर दी जाएगी 
+HTCache Configuration==ह्त्काचे कॉन्फ़िगरेशन 
+The path where the cache is stored==वो रास्ता  जहा कैश स्टोर होती हे 
+The current size of the cache==कैश का मोजुदा साइज़ 
+The maximum size of the cache==कैश का अधिकतम  साइज़ 
+"Set"=="सेट "
+Cleanup==सफ़ाई
+Cache Deletion==कैश मिटाना
+Delete HTTP &amp; FTP Cache== मिटाना HTTP &amp; FTP कैश
+Delete robots.txt Cache==मिटाना robots.txt कैश
+"Delete"=="मिटाना"
+#-----------------------------
+
+#File: ConfigLanguage_p.html
+#---------------------------
+Language selection==भाषा चयन
+You can change the language of the YaCy-webinterface with translation files.==आप अनुवाद फाइलों के साथ याची वेबिन्तेर्फास  की भाषा बदल सकते हैं
+Current language</label>==वर्तमान भाषा </label>
+#default(english)==# डिफ़ॉल्ट  (अंग्रेजी )
+Author(s) (chronological)</label>==लेखक  (एस )  (कालानुक्रमिक ) </label>
+Send additions to maintainer</em>==जोड़ भेजें मेंटेनर को</em>
+Available Languages</label>==उपलब्ध भाषाएँ </label>
+Install new language from URL==यूआरएल से नई भाषा को स्थापित करें
+Use this language==इस भाषा का प्रयोग करें
+"Use"=="प्रयोग"
+"Delete"=="मिटाना"
+"Install"=="स्थापित करें"
+Unable to get URL:==यूआरएल पाने में असमर्थ:
+Error saving the language file.==भाषा फाइल सहेजने में त्रुटि
+Make sure that you only download data from trustworthy sources. The new language file==आप भरोसेमंद सूत्रों से डेटा केवल डाउनलोड करें. नई भाषा फाइल
+might overwrite existing data if a file of the same name exists already.==एक ही नाम की एक फ़ाइल पहले से मौजूद है तो मौजूदा डेटा अधिलेखित हो सकता है.
+#-----------------------------
+
+#File: ConfigLiveSearch.html
+#---------------------------
+Integration of a Search Field for Live Search==लाइव खोज के लिए एक खोज क्षेत्र की एकता
+A 'Live-Search' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==एक पॉप अप विंडो में खोज के रूप में तुम प्रकार के रूप में प्रतिक्रिया करता है कि एक  'लाइव खोज ' इनपुट क्षेत्र आसानी से किसी भी वेब पेज में एकीकृत किया जा सकता है
+This is the same function as can be seen on all pages of the YaCy online-interface (look at the window in the upper right corner)==यह (ऊपरी दायें कोने में खिड़की पर नज़र ) याची ऑनलाइन इंटरफ़ेस  के सभी पृष्ठों पर देखा जा सकता है के रूप में एक ही समारोह है
+Just use the code snippet below to integrate that in your own web pages==बस अपने खुद के वेब पन्नों में है कि एकीकृत करने के लिए नीचे दिए गए कोड स्निपेट का उपयोग
+Please check if the address, as given in the example '#[ip]#:#[port]#' here is correct and replace it with more appropriate values if necessary==पता अगर उदाहरण के रूप में दिया, जाँच  ' #  [आईपी ]  #   #  [पोर्ट ]  # ' कृपया यहां सही है और अधिक उचित मूल्यों के साथ की जगह यदि आवश्यक
+Code Snippet:==कोड स्निपेट
+YaCy Portal Search==YaCy पोर्टल खोज
+"Search"=="खोज"
+Configuration options and defaults for 'yconf':== 'Yconf ' के लिए विन्यास विकल्प और चूक
+Defaults<==चूक<
+url<==URL<
+is a mandatory property - no default<==कोई डिफ़ॉल्ट - एक अनिवार्य संपत्ति है<
+YaCy P2P Web Search== पी 2 पी वेब खोज
+Size and position (width | height | position)==आकार और स्थिति  (चौड़ाई  | ऊंचाई  | स्थिति )
+Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==निर्दिष्ट करता है जहाँ संवाद प्रदर्शित किया जाना चाहिए. पद के लिए संभावित मान:  'केंद्र '  ​​'बाएँ ',  'ठीक '  ​​'शीर्ष '  ​​'नीचे ', या एक समन्वय जोड़ी  (पिक्सेल में शीर्ष बाएँ से ऑफसेट युक्त सरणी के व्यूपोर्ट ) या संभव स्ट्रिंग मूल्यों  (जैसे  [ 'ठीक '  ​​'शीर्ष ' ] ऊपरी दाएँ कोने के लिए )
+Animation effects (show | hide)==एनिमेशन प्रभाव  (शो | छिपाने )
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==रभाव इस्तेमाल किया जाएगा. संभावित मान:  'अंधा '  ​​'क्लिप '  ​​'ड्रॉप '  ​​'विस्फोट '  ​​'गुना '  ​​'कश '  ​​'स्लाइड '  ​​'पैमाने ' ,  'आकार '  ​​'धड़कना '
+Interaction (modal | resizable)==इंटरेक्शन  (मोडल  | बदलने योग्य )
+If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==मोडल सही पर सेट किया जाता है, तो संवाद मोडल व्यवहार होगा; पेज पर अन्य मदों (यानी  के साथ बातचीत नहीं कर सकते हैं)  निष्क्रिय किया जाएगा
+Modal dialogs create an overlay below the dialog but above other page elements.==मोडल संवाद संवाद नीचे लेकिन अन्य पृष्ठ तत्वों ऊपर ओवरले बना
+If resizable is set to true, the dialog will be resizeable.==बदलने योग्य सत्य पर नियत किया जाता है, तो संवाद resizeable होगा
+Load JavaScript load_js==जावास्क्रिप्ट load_js लोड
+If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==लोड गलत पर सेट कर दिया जाता है, तो आप मैन्युअल रूप से अपने पोर्टल पेज पर जरूरत जावास्क्रिप्ट लोड है
+This can help to avoid timing problems or double loading.==यह समय की समस्याओं या डबल लोड से बचने में मदद कर सकते हैं
+Load Stylesheets load_css==Stylesheets load_css लोड
+If load_css is set to false, you have to manually load the needed CSS on your portal page.==लोड सीएसएस गलत पर सेट है, तो आप स्वयं अपने पोर्टल पेज पर जरूरत सीएसएस लोड करने के लिए है 
+#Themes==विषयों
+You can <==आप कर सकते हैं <
+download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a>==डाउनलोड </ a> के लिए तैयार किए गए विषयों या <a href="http://jqueryui.com/themeroller/" target="_blank"> बनाएँ </ a>
+your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==अपने स्वयं के कस्टम विषय. <br/> विषयों में स्थापित कर रहे हैं: आंकड़े / htdocs / yacy / यूआई / सीएसएस / विषयों /
+#-----------------------------
+
+#File: ConfigNetwork_p.html
+#---------------------------
+<html lang="en">==<html lang="hi">
+Network Configuration==संजाल विन्यास
+No changes were made!==कोई परिवर्तन नहीं किया गया
+Accepted Changes==स्वीकृत परिवर्तन
+Inapplicable Setting Combination==अयोग्य स्थापना युग्म
+#P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==# पी 2 पी आपरेशन दूरस्थ अनुक्रमण के बिना चलाने के लिए, लेकिन पर बंद दूरस्थ अनुक्रमण के साथ बेहतर रन कर सकते हैं. पर 'रिमोट क्रॉल अनुरोध स्वीकार करें' स्विच करें
+For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration==पी 2 पी आपरेशन के लिए, कम से कम DHT के वितरण या DHT  (या दोनों ) प्राप्त निर्धारित किया जाना चाहिए. तुम इस तरह एक रॉबिन्सन विन्यास परिभाषित किया है
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==सूचकांक प्राप्त पर बंद है तो पी 2 पी विन्यास में वैश्विक खोज न केवल अनुमति दी है. आप एक P2P विन्यास है, लेकिन अन्य साथियों की खोज करने के लिए अनुमति नहीं है
+For Robinson Mode, index distribution and receive is switched off==रॉबिन्सन मोड, सूचकांक वितरण और प्राप्त बंद है के लिए
+#This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==# इस रॉबिन्सन मोड पर दूरस्थ अनुक्रमण स्विच, लेकिन एक ही समूह के भीतर साथियों को लक्ष्य की सीमा. एक ही समूह के भीतर साथियों से दूरस्थ अनुक्रमण अनुरोध को स्वीकार कर रहे हैं
+#This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it)==# इस रॉबिन्सन मोड की अनुमति नहीं है किसी भी दूरस्थ अनुक्रमण  (न तो अनुरोधों दूरस्थ अनुक्रमण, और न ही यह  स्वीकार)
+Network and Domain Specification==नेटवर्क और डोमेन विशिष्टता
+# With this configuration it is not allowed to authentify automatically from localhost!==# इस विन्यास के साथ यह लोकलहोस्ट से स्वतः authentify करने की अनुमति नहीं है
+# Please open the <a href="ConfigAccounts_p.html">Account Configuration</a> and set a new password.==# <a Href="ConfigAccounts_p.html"> खाता करें configuration को खोलने के कृपया </ एक> और एक नया पासवर्ड सेट कर दिया
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==YaCy YaCy साथियों के एक कंप्यूटिंग ग्रिड संचालित या एक खड़े अकेले नोड के रूप में कर सकते हैं
+To control that all participants within a web indexing domain have access to the same domain,==एक वेब अनुक्रमण डोमेन के भीतर सभी प्रतिभागियों को एक ही डोमेन के लिए उपयोग किया है कि नियंत्रित करने के लिए
+this network definition must be equal to all members of the same YaCy network.==इस नेटवर्क परिभाषा ही YaCy नेटवर्क के सभी सदस्यों को बराबर होना चाहिए.
+Network Definition==नेटवर्क परिभाषा
+Network Nick==नेटवर्क निक
+Long Description==लांग विवरण
+Indexing Domain==इंडेक्सिंग डोमेन
+#DHT==DHT
+"Change Network"=="नेटवर्क बदलें"
+Distributed Computing Network for Domain==डोमेन के लिए वितरित कम्प्यूटिंग नेटवर्क
+You can configure if you want to participate at the global YaCy network or if you want to have your==आप वैश्विक YaCy नेटवर्क में भाग लेने के लिए चाहते हैं कॉन्फ़िगर कर सकते हैं या आप अपने करना चाहते हैं
+own separate search cluster with or without connection to the global network. You may also define==वैश्विक नेटवर्क के लिए कनेक्शन के साथ या बिना अपना अलग खोज क्लस्टर. आप भी परिभाषित कर सकते हैं
+a completely independent search engine instance, without any data exchange between your peer and other==आपके सहकर्मी और अन्य के बीच किसी भी डेटा विनिमय के बिना एक पूरी तरह से स्वतंत्र खोज इंजन मसलन,
+peers, which we call a 'Robinson' peer.==हम एक 'रॉबिन्सन सहकर्मी जो फोन साथियों,
+Peer-to-Peer Mode==पीर -तो -पीर  मोड 
+>Index Distribution==>सूचकांक वितरण
+This enables automated, DHT-ruled Index Transmission to other peers==यह अन्य साथियों को स्वचालित, DHT शासित सूचकांक पारेषण सक्षम बनाता है
+>enabled==>सक्षम
+disabled during crawling==रेंगने के दौरान निष्क्रिय
+disabled during indexing==अनुक्रमण के दौरान निष्क्रिय
+>Index Receive==>सूचकांक मिले
+Accept remote Index Transmissions==दूरस्थ सूचकांक प्रसारण स्वीकारें
+This works only if you have a senior peer. The DHT-rules do not work without this function==This works only if you have a senior peer. The DHT-rules do not work without this function
+>reject==>अस्वीकार
+accept transmitted URLs that match your blacklist==अपनी काली सूची से मेल खाने वाली प्रेषित यूआरएल स्वीकार
+#>Accept Remote Crawl Requests==रिमोट क्रॉल अनुरोध स्वीकार करें
+#Perform web indexing upon request of another peer==एक अन्य सहकर्मी के अनुरोध पर वेब अनुक्रमण प्रदर्शन करना
+#This works only if you are a senior peer==आप एक वरिष्ठ सहकर्मी हैं, तो यह केवल काम करता है
+#Load with a maximum of==की एक अधिकतम के साथ लोड
+#pages per minute==प्रति मिनट पृष्ठों
+>Robinson Mode==>रॉबिन्सन मोड
+If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==आपके सहकर्मी 'रॉबिन्सन' मोड में चलाता है, तो आप अन्य साथियों को डेटा विनिमय के बिना अपनी खुद की खोज पोर्टल के लिए एक खोज इंजन के रूप में YaCy चलाने
+There is no index receive and no index distribution between your peer and any other peer==कोई सूचकांक वहाँ प्राप्त करते हैं और आपके सहकर्मी और किसी भी अन्य साथियों के बीच कोई सूचकांक वितरण है
+In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==रॉबिन्सन क्लस्टरिंग के मामले में है कि क्लस्टर के साथियों से दूरस्थ क्रॉल अनुरोध की स्वीकृति है हो सकता है
+>Private Peer==>निजी सहकर्मी
+Your search engine will not contact any other peer, and will reject every request==आपकी खोज इंजन किसी भी अन्य सहकर्मी से संपर्क नहीं करेगा, और हर अनुरोध को अस्वीकार कर देंगे
+#>Private Cluster==>निजी क्लस्टर
+#Your peer is part of a private cluster without public visibility
+#Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
+#Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
+#List of ip:port - addresses of the cluster: (comma-separated)
+>Public Cluster==>सार्वजनिक क्लस्टर
+Your peer is part of a public cluster within the YaCy network==आपके सहकर्मी YaCy नेटवर्क के भीतर एक सार्वजनिक क्लस्टर का हिस्सा है
+Index data is not distributed, but remote crawl requests are distributed and accepted==सूचकांक डेटा वितरित नहीं है, लेकिन दूरदराज क्रॉल अनुरोधों को वितरित और स्वीकार किए जाते हैं
+Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==खोज अनुरोधों क्लस्टर के सभी साथियों में फैला हुआ है, और क्लस्टर के सभी साथियों से जवाब कर रहे हैं
+List of .yacy or .yacyh - domains of the cluster: (comma-separated)==Yacy या yacyh की सूची - क्लस्टर के डोमेन:  (अल्पविराम से अलग )
+>Public Peer==>लोक सहकर्मी
+You are visible to other peers and contact them to distribute your presence==आप अन्य साथियों के लिए दिखाई दे रहे हैं और अपनी उपस्थिति में वितरित करने के लिए उनसे संपर्क
+Your peer does not accept any outside index data, but responds on all remote search requests==अपने साथियों के किसी भी बाहर सूचकांक डेटा स्वीकार करते हैं, लेकिन सभी दूरस्थ खोज अनुरोधों पर प्रतिक्रिया करता नहीं है
+#>Peer Tags==>सहकर्मी टैग
+When you allow access from the YaCy network, your data is recognized using keywords==आप YaCy नेटवर्क से उपयोग की अनुमति है, जब आपके डेटा कीवर्ड का उपयोग कर मान्यता प्राप्त है
+Please describe your search portal with some keywords (comma-separated)==कुछ कीवर्ड  ( अल्पविराम द्वारा अलग) के साथ अपने खोज पोर्टल का वर्णन करें
+If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.==आप मैदान खाली छोड़ देते हैं, कोई सहकर्मी आपके सहकर्मी पूछता है. आप में भरने एक  ' * ', अपने सहकर्मी हमेशा कहा है.
+"Save"=="बचाना"
+
+
+#-----------------------------
+
+#File: ConfigParser_p.html
+#---------------------------
+Parser Configuration==पार्सर कॉन्फ़िगरेशन
+Content Parser Settings==कंटेन्ट पार्सर सेटिंग्स
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.== इस सेटिंग के साथ आप अपने एम.आई.एमई प्रकार के आधार पर अतिरिक्त सामग्री प्रकार के पार्स को सक्रिय या निष्क्रिय कर सकते हैं.
+For a detailed description of the various MIME-types take a look at== विभिन्न एमआईएमई प्रकार की एक विस्तृत विवरण पर एक नज़र रखना
+enable/disable Parser== सक्षम / पार्सर डिसएबल  करें
+Microsoft Powerpoint Parser== माइक्रोसॉफ़्ट पावरपोइंट पार्सर
+Torrent Metadata Parser== टोरेंट मेटाडाटा पार्सर
+HTML Parser== एचटीएमएल पार्स
+GNU Zip Compressed Archive Parser== जि.न .उ  ज़िप कंप्रेस्ड आर्काइव पार्सर
+Adobe Flash Parser== एडोब फ्लैश पार्सर
+Word Document Parser== वर्ड  डॉक्यूमेंट  पार्सर
+vCard Parser==व्कार्द  पर्सेर 
+Bzip 2 UNIX Compressed File Parser==ब्जिप  2 यूनिक्स संपीडित फ़ाइल पार्सर
+OASIS OpenDocument V2 Text Document Parser== ओएसिस ओपन डॉक्यूमेंट  पाठ दस्तावेज़ पार्सर व२ 
+Microsoft Excel Parser==माइक्रोसॉफ्ट एक्सेल पार्सर
+ZIP File Parser== ज़िप फ़ाइल पार्सर
+Rich Site Summary/Atom Feed Parser==रिच साइट  समरी / एटम फ़ीड पार्सर
+Comma Separated Value Parser== कॉमा  सेपरेटेड  वैल्यू  पर्सेर 
+Microsoft Visio Parser==माइक्रोसॉफ्ट  विसिओ  पर्सेर 
+Tape Archive File Parser==टेप  आर्काइव  फाइल  पर्सेर 
+7zip Archive Parser== ७शिप  आर्काइव  पर्सेर 
+Acrobat Portable Document Parser== एक्रोबेट पोर्टेबल डॉक्यूमेंट पार्सर
+Rich Text Format Parser== रिच टेक्स्ट स्वरूप पार्सर
+Generic Image Parser== सामान्य छवि पार्सर
+PostScript Document Parser== पोस्टस्क्रिप्ट दस्तावेज़ पार्सर
+Open Office XML Document Parser== ओपन ऑफ़िस क्स्म्ल  डॉक्यूमेंट  पार्सर
+BMP Image Parser==बीएमपी छवि पार्सर
+# --- Parser Names are hard-coded END ---
+"Submit"==" सबमिट "
+#-----------------------------
+
+#File: ConfigPortal_p.html
+#---------------------------
+Integration of a Search Portal== एक खोज पोर्टल की इंटीग्रेशन 
+If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.== यदि आप अपने वेब पृष्ठों के लिए पोर्टल के रूप में याची  एकीकृत करना चाहते हैं, तो आप खोज पृष्ठ पर माउस और संदेशों को बदलने के लिए चाह सकते हैं.
+The search page may be customized.== खोज पृष्ठ कस्टमाइज्ड  किया जा सकता है.
+You can change the 'corporate identity'-images, the greeting line== आप  'कॉर्पोरेट पहचान ' छवियों को ग्रीटिंग लाइन बदल सकते हैं
+and a link to a home page that is reached when the 'corporate identity'-images are clicked.==और  'कॉर्पोरेट पहचान ' छवियों को क्लिक किया जाता है जब पहुँच जाता है कि एक होम  पृष्ठ का लिंक.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.== भी बदलने के लिए रंग और शैलियों अलग खाल और भाषाओं के लिए </ a> <a href="ConfigAppearance_p.html"> शेव सेर्व्लेट  का उपयोग करें.
+Greeting Line<== ग्रीटिंग लाइन <
+URL of Home Page<==होम पेज का यूआरएल
+URL of a Small Corporate Image<== एक छोटे कॉर्पोरेट छवि का यूआरएल <
+URL of a Large Corporate Image<== एक बड़े कॉर्पोरेट छवि का यूआरएल <
+Show Navigation Bar on Search Page?== खोज पृष्ठ पर नेविगेशन बार दिखाएँ?
+Show Navigation Top-Menu&nbsp;== दिखाएँ नेविगेशन टॉप मेनू
+no link to YaCy Menu (admin must navigate to /Status.html manually)==यास्य   मेनू  करने के लिए कोई लिंक (एडमिन नेविगेट चाहिए मैन्युअल   Status.html को मैन्युअल )
+Show Advanced Search Options on Search Page?== खोज पृष्ठ पर एडवांस्ड  सर्च  विकल्प दिखाएँ?
+Show Advanced Search Options on index.html&nbsp;== index.html&nbsp; पर एडवांस्ड  सर्च  विकल्प दिखाएँ
+do not show Advanced Search== एडवांस्ड  सर्च   नहीं दिखाते
+Show Information Links for each Search Result Entry== प्रत्येक खोज परिणाम प्रवेश के लिए सूचना लिंक्स दिखाएँ
+Date&==तिथि और
+>Size&==> साइज और
+>Metadata&== > मेटाडाटा और
+>Parser&== > पार्सर और
+>Pictures== > तस्वीरे
+Default Pop-Up Page<== डिफ़ॉल्ट पॉप अप पृष्ठ <
+>Status Page== > स्थिति पृष्ठ
+>Search Front Page== > सर्च फ्रंट पेज
+>Search Page (small header)== > पृष्ठ  (छोटे हेडर )
+>Interactive Search Page== > इंटरएक्टिव पृष्ठ
+Default index.html Page (by forwarder)==डिफ़ॉल्ट index.html  पृष्ठ  (फारवर्डर  द्वारा)
+Target for Click on Search Results== खोज परिणाम पर क्लिक करने के लिए टारगेट
+"_blank" (new window)==  "_खाली "  (नई विंडो )
+"_self" (same window)== "_स्वयं "  (उसी विंडो को )
+"_parent" (the parent frame of a frameset)==  "_पैरेंट "  (एक फ्रेमसेट के पैरेंट फ्रेम )
+"_top" (top of all frames)==  "_टॉप "  (ऊपर के सभी फ्रेम  )
+"searchresult" (a default custom page name for search results)== "खोजपरिणाम "  (खोज परिणामों करने के लिए एक डिफ़ॉल्ट कस्टम पेज का नाम )
+"Change Search Page"=="पृष्ठ को बदलें"
+"Set to Default Values"=="डिफ़ॉल्ट मान पर सेट करें"
+The search page can be integrated in your own web pages with an iframe. Simply use the following code:== खोज पृष्ठ एक आइफ्रेम साथ अपने स्वयं के वेब पृष्ठों में एकीकृत किया जा सकता है. बस निम्नलिखित कोड का उपयोग करें:
+This would look like:== इस तरह दिखेगा:
+For a search page with a small header, use this code:== एक छोटा हेडर के साथ एक खोज पृष्ठ के लिए, इस कोड का उपयोग करें:
+A third option is the interactive search. Use this code:== एक तीसरा विकल्प इंटरैक्टिव खोज है. इस कोड का उपयोग करें:
+
+#-----------------------------
+ 
+#File: ConfigProfile_p.html
+#---------------------------
+Your Personal Profile==आपकी व्यक्तिगत प्रोफ़ाइल
+You can create a personal profile here, which can be seen by other YaCy-members==आप अन्य YaCy सदस्यों द्वारा देखा जा सकता है, यहां एक निजी प्रोफाइल बना सकते हैं
+#or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+#Name==नाम
+#Nick Name==उपनाम 
+#Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==Homepage (erscheint auf der <a href="Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
+#eMail==ईमेल
+#ICQ==आईसीक्यू
+#Jabber==गपशप
+#Yahoo!==याहू!
+#MSN==एमएसएन
+#Skype==स्काइप
+Comment==टिप्पणी
+"Save"=="सहेजें"
+You can use <==आप उपयोग कर सकते हैं <
+> here.==>  यहां
+
+
+
+ 
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==उन्नत विन्यास
+Here are all configuration options from YaCy.==यहाँ YaCy से सभी विन्यास विकल्प हैं.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==आप कुछ भी बदल सकते हैं, लेकिन कुछ विकल्प एक पुनः आरंभ करने की आवश्यकता है, और गलत मूल्यों को इस्तेमाल कर रहे हैं तो कुछ विकल्प, YaCy दुर्घटना कर सकते हैं.
+For explanation please look into defaults/yacy.init==स्पष्टीकरण के लिए चूक / yacy पर गौर करें.init
+"Save"=="बचाना"
+#-----------------------------
+ 
+#File: ConfigRobotsTxt_p.html
+#---------------------------
+Exclude Web-Spiders==वेब मकड़ियों को बाहर करें
+Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==यहाँ आप अपने सहकर्मी की webinterface तक पहुँचने का प्रयास है कि सभी webcrawlers के लिए एक robots.txt स्थापित कर सकते हैं.
+is a volunteer agreement most search-engines (including YaCy) follow.==एक स्वयंसेवक समझौता है सबसे खोज इंजन  (YaCy सहित ) का पालन करें.
+It disallows crawlers to access webpages or even entire domains.==यह अनुमति नहीं देता क्रॉलर्स वेबपेजों या यहां तक कि पूरे डोमेन का उपयोग करने के लिए.
+Deny access to==करने के लिए उपयोग से इनकार
+Entire Peer==पूरे पेशाब
+Status page==स्थिति पेज
+Network pages==नेटवर्क पृष्ठों
+Surftips==der Surftipps
+News pages==समाचार पृष्ठों
+Blog==ब्लॉग
+Wiki=des विक
+Public bookmarks==ीलोक बुकमार्क्स
+Home Page==मुख पृष्ठ
+File Share==फ़ाइल शेयर
+"Save restrictions"=="प्रतिबंध सहेजें"
+
+
+
+
+
+
+
+
+
+#-----------------------------
+
+#File: ConfigSearchBox.html
+#---------------------------
+Integration of a Search Box== एक सर्च बॉक्स का इंटीग्रेशन
+We give information how to integrate a search box on any web page that== हम किसी वेब पेज पर एक सर्च बॉक्स इन्तेग्रेट करने के लिए जानकारी देते हैं जो
+calls the normal YaCy search window.== सामान्य YaCy सर्चविंडो कॉल करता हैं.
+Simply use the following code:== बस निम्न कोड का उपयोग करे:
+  MySearch==  मेरी सर्च
+"Search"==" सर्च "
+This would look like:== यह ऐसा दिखाई देगा:
+This does not use a style sheet file to make the integration into another web page with a different style sheet easier.== यह वेब पेज के साथ एकीकरण करने के लिए एक स्टाइलशीट फ़ाइल का उपयोग नहीं करता 
+You would need to change the following items:== आपको निम्न आइटम्स को बदलने की आवश्यकता होगी:
+Replace the given colors #eeeeee (box background) and #cccccc (box border)== दिए गए रंग बदलें  # eeeeee  (बॉक्स बैकग्राउंड ) और  # cccccc  (बॉक्स बॉर्डर )
+Replace the word "MySearch" with your own message==   "MySearch " को अपने खुद के संदेश के साथ बदलें 
+#-----------------------------
+#File: ConfigUpdate_p.html
+#---------------------------
+Manual System Update== मैनुअल सिस्टम अपडेट
+Current installed Release== करंट इन्सटाल्ड रिलीज़
+Available Releases== अवेलेबल रिलीज
+(unsigned)==( उन्सिग्नेड)
+(signed)==(साइंड  )
+"Download Release"==" रिलीज डाउनलोड "
+"Check for new Release"==" नई रिलीज के लिए जाँच करें "
+Downloaded Releases== डाउनलोड की गई रिलीज
+No downloaded releases available for deployment.== डेवलपमेंट के लिए कोई भी डाउनलोड रिलीज उपलब्ध नहीं है
+no&nbsp;automated installation on development environments== ऑटोमेटेड इंस्टालेशन के लिए डेवलपमेंट एन्विरोन्मेन्त्स 
+"Install Release"==" इनस्टॉल रिलीज़  "
+"Delete Release"==" डिलीट रिलीज़ "
+Automatic Update== आटोमेटिक अपडेट
+check for new releases, download if available and restart with downloaded release== नई रिलीज के लिए जाँच करें, अगर उपलब्ध है डाउनलोड  करें और डाउनलोड की रिलीज के साथ रीस्टार्ट करे
+"Check + Download + Install Release Now"==" चेक + डाउनलोड +  इनस्टॉल रिलीज़ नाउ "
+Download of release #[downloadedRelease]# finished. Restart Initiated.== डाउनलोड के रिलीज  #  [downloadedRelease ]  # समाप्त हो गया. रीस्टार्ट शुरू 
+No more recent release found.== और अधिक हाल के रिलीज नहीं मिले.
+Release will be installed. Please wait.== रिलीज इनस्टॉल हो जाएगा. कृपया प्रतीक्षा करें.
+You installed YaCy with a package manager.== आपने पैकेज मैनेजर के साथ YaCy इनस्टॉल किया हैं.
+To update YaCy, use the package manager:== YaCy अपडेट करने के लिए, पैकेज मैनेजर का उपयोग करें 
+Omitting update because this is a development environment.== अपडेट छोड़ना पड़ेगा क्योंकि  यह एक डेवलपमेंट एनवायरनमेंट है
+Omitting update because download of release #[downloadedRelease]# failed.== अपडेट छोड़ना पड़ेगा क्योंकि रिलीज के डाउनलोड  #  [downloadedRelease ]  # विफल रहा है
+Automated System Update== ऑटोमेटेड सिस्टम अपडेट
+manual update== मैन्युअल अपडेट 
+no automatic look-up, updates can be made manually using this interface (see options above)== आटोमेटिक लुक - उप नहीं है, इस इंटरफ़ेस का उपयोग करके अपडेट मैन्युअली किया जा सकता है  ( ऊपर विकल्प देखें).
+automatic update== आटोमेटिक  अपडेट
+updates are made within fixed cycles:== अपडेट तय साइकिल के भीतर बने हैं:
+Time between lookup== लुक - उप के बीच का समय
+hours== घंटे
+Release blacklist== रिलीज ब्लैकलिस्ट
+regex on release number strings== रिलीज संख्या तार पर रिजेक्स करे
+Release type== रिलीज टाइप
+only main releases== केवल मुख्य रिलीज
+any release including developer releases== डेवलपर रिलीज सहित कोई भी रिलीज
+Signed autoupdate:== साइंड  ऑटो अपडेट:
+only accept signed files== केवल साइंड फाइलें हैं स्वीकार करते हैं
+"Submit"==" सबमिट "
+Accepted Changes.== स्वीकृत परिवर्तन
+System Update Statistics== सिस्टम अपडेट स्टेटिस्टिक्स
+Last System Lookup== आखरी सिस्टम लुक अप
+never== कभी नहीं
+Last Release Download== आखरी रिलीज डाउनलोड 
+Last Deploy== आखरी डेप्लोय 
+#-----------------------------
+ 
+#File: Connections_p.html
+#---------------------------
+Connection Tracking==कनेक्शन ट्रैकिंग
+Incoming Connections==इनकमिंग कनेक्शन
+Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==एक अधिकतम से  #  [numActiveRunning ]  # सक्रिय,  #  [numActivePending ]  # लंबित कनेक्शन दिखा रहा है.  #  [numMax ]  # अनुमति आवक कनेक्शन की.
+Protocol</td>==प्रोटोकॉल</td>
+Duration==अवधि
+Source IP[:Port]==स्रोत IP[:Port]
+Dest. IP[:Port]== डेस्त IP[:Port]
+Command</td>==आदेश</td>
+Used==प्रयोग किया
+Close==बंद
+Waiting for new request nr.==नई अनुरोध एन.आर. के लिए प्रतीक्षा कर रहा है.
+Outgoing Connections==आउटगोइंग कनेक्शन
+Showing #[clientActive]# pooled outgoing connections used as:==के रूप में इस्तेमाल किया  दिखा #  [क्लाइंटएक्टिव  ]  # जमा निवर्तमान कनेक्शन:
+Duration==अवधि
+#ID==आईडी
+#-----------------------------
+
+#File: CookieMonitorIncoming_p.html
+#---------------------------
+Incoming Cookies Monitor==आवक कुकीज़ मॉनिटर
+Cookie Monitor: Incoming Cookies==कुकी मॉनिटर: आने वाले कुकीज़
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==यह एक वेब सर्वर यासी प्रॉक्सी के ग्राहकों के लिए भेजा गया है कुकीज़ की एक सूची है:
+Showing #[num]# entries from a total of #[total]# Cookies.== #  [कुल ]  # कुकीज़ की कुल से  #  [संख्या ]  # एन्त्रिस  दिखा रहा है.
+Sending Host==होस्ट भेजा जा रहा है
+Date</td>==तारीख</td>
+Receiving Client==क्लाइंट प्राप्त करना
+#Cookie==कुकी
+"Enable Cookie Monitoring"=="कुकी निगरानी सक्षम"
+"Disable Cookie Monitoring"=="कुकी निगरानी अक्षम"
+#-----------------------------
+
+#File: CookieMonitorOutgoing_p.html
+#---------------------------
+Outgoing Cookies Monitor==आउटगोइंग कुकीज़ मॉनिटर
+Cookie Monitor: Outgoing Cookies==कुकी मॉनिटर: आउटगोइंग कुकीज़
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==इस यासी  प्रॉक्सी का उपयोग ब्राउज़र वेबसर्वर  के लिए भेजा कि कुकीज़ की एक सूची है:
+Showing #[num]# entries from a total of #[total]# Cookies.== #  [कुल ]  # कुकीज़ की कुल से  #  [संख्या ]  # प्रविष्टियों दिखा रहा है
+Receiving Host==होस्ट प्राप्त करना
+Date</td>==तारीख</td>
+Sending Client==क्लाइंट भेजा जा रहा है
+#Cookie==कुकी
+"Enable Cookie Monitoring"=="कुकी निगरानी सक्षम"
+"Disable Cookie Monitoring"=="कुकी निगरानी अक्षम"
+#-----------------------------
+
+#File: CrawlProfileEditor_p.html
+#---------------------------
+>Crawl Profile Editor<==>क्रॉल  प्रोफाइल एडिटर <
+>Crawler Steering<==>ट्रेक संचालन
+>Crawl Scheduler<==>समयबद्धक क्रॉल<
+>Scheduled Crawls can be modified in this table<==>इस तालिका में संशोधित किया जा सकता क्रॉल अनुसूचित<
+Crawl profiles hold information about a crawl process that is currently ongoing.==क्रॉल प्रोफाइल में वर्तमान में चल रही है कि एक क्रॉल करने की प्रक्रिया के बारे में जानकारी पकड़.
+#Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==क्रॉल प्रोफाइल को आंतरिक रूप से यह के अंतर्गत आता है क्रॉल प्रदर्शन करने के लिए प्रयोग किया जाता है जो एक विशिष्ट यूआरएल के बारे में जानकारी रखना है.
+#The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==दूरदराज के लिए प्रोफाइल प्रॉक्सी के माध्यम से, <a href="ProxyIndexingMonitor_p.html"> अनुक्रमण क्रॉल </ a> और टुकड़ा fetches
+#cannot be altered here as they are hard-coded.==वे हार्ड कोडित रहे हैं यहाँ के रूप में परिवर्तित नहीं किया जा सकता है.
+Crawl Profile List==प्रोफ़ाइल सूची क्रॉल
+Crawl Thread==धागा क्रॉल
+#Status==# हैसियत
+#Start URL==# यूआरएल प्रारंभ
+>Depth</strong>==>> गहराई </ मजबूत>
+Must Match==मिलान अवश्य
+Must Not Match==मैच नहीं होना चाहिए
+MaxAge</strong>==अधिकतमउम्र </ मजबूत>
+#Auto Filter Depth</strong>==ऑटो फ़िल्टर गहराई </ मजबूत>
+#Auto Filter Content</strong>==ऑटो फ़िल्टर सामग्री </ मजबूत>
+Max Page Per Domain</strong>==डोमेन प्रति अधिकतम पृष्ठ </ मजबूत>
+Accept==स्वीकार करना
+Fill Proxy Cache==प्रॉक्सी कैश भरें
+Local Text Indexing==स्थानीय पाठ अनुक्रमण
+Local Media Indexing==स्थानीय मीडिया अनुक्रमण
+Remote Indexing==दूरस्थ अनुक्रमण
+#Status / Action==# स्थिति / कार्रवाई
+#terminated::active==# समाप्त :: सक्रिय
+no::yes==कोई :: हाँ
+Running==रनिंग
+"Terminate"=="समाप्त"
+Finished==समाप्त
+"Delete"=="हटाएँ"
+"Delete finished crawls"=="समाप्त हटाएँ क्रॉल"
+Select the profile to edit==प्रोफाइल संपादित करने के लिए चयन करें
+"Edit profile"=="प्रोफ़ाइल संपादित करें
+An error occurred during editing the crawl profile:==एक त्रुटि क्रॉल प्रोफ़ाइल संपादन के दौरान हुई:
+Edit Profile==प्रोफ़ाइल संपादित करें
+"Submit changes"=="Änderungen speichern""परिवर्तनों को भेजें"
+#---------------------------
+
+#File: CrawlResults.html
+#---------------------------
+Crawl Results<==क्रॉल परिणाम<
+Overview</a>==ओवरव्यू</a>
+Receipts</a>==रसीदें</a>
+Queries</a>==प्रश्न</a>
+DHT Transfer==DHT के ट्रांसफर
+Proxy Use==प्रॉक्सी उपयोग
+Local Crawling</a>==लोकल क्रॉलिंग</a>
+Global Crawling</a>==ग्लोबल क्रॉलिंग</a>
+Surrogate Import</a>==सरोगेट इम्पोर्ट</a>
+>Crawl Results Overview<==>क्रॉल का परिणाम ओवरव्यू<
+These are monitoring pages for the different indexing queues.==ये अलग अनुक्रमण कतारों के लिए पृष्ठों की निगरानी कर रहे हैं.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy वेब अनुक्रमित प्राप्त करने के लिए 5 अलग अलग तरीकों से जानता है. इन प्रक्रियाओं का ब्यौरा  (1-5 ) सबमेनू सूचीबद्ध भीतर वर्णित हैं
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==जो ऊपर भी अब तक आप अनुक्रमण परिणामों के साथ एक मेज दिखा देंगे. इन तालिकाओं में जानकारी निजी के रूप में माना जाता है
+so you need to log-in with your administration password.==इसलिए आप लॉग इन करने के लिए अपने प्रशासन पासवर्ड के साथ की जरूरत.
+Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==प्रकरण  (6 ) स्थानीय रसीद जनरेटर,  (1 ) का विरोध करने के मामले की निगरानी है. यह भी एक अनुक्रमण परिणाम की निगरानी शामिल है, लेकिन निजी विचार नहीं किया है
+since it shows crawl requests from other peers.==यह अन्य साथियों से क्रॉल अनुरोधों से पता चलता है
+Case (7) occurs if surrogate files are imported==किराए की फ़ाइलें आयात कर रहे हैं यदि प्रकरण  (7 ) होता है
+The image above illustrates the data flow initiated by web index acquisition.==छवि ऊपर वेब सूचकांक अधिग्रहण द्वारा शुरू डाटा प्रवाह दिखाता है.
+Some processes occur double to document the complex index migration structure.==कुछ प्रक्रियाओं को जटिल सूचकांक प्रवास संरचना करने के लिए दस्तावेज़ डबल घटित.
+(1) Results of Remote Crawl Receipts==(1 ) रिमोट क्रॉल प्राप्तियों के का परिणाम
+This is the list of web pages that this peer initiated to crawl,==यह इस सहकर्मी क्रॉल करने के लिए शुरू की है कि वेब पृष्ठों की सूची है,
+but had been crawled by <em>other</em> peers.==लेकिन <em> अन्य </ em> साथियों द्वारा क्रॉल किया गया था.
+This is the 'mirror'-case of process (6).==इस प्रक्रिया के 'mirror' मामले है  (6 )
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em> प्रयोग करें प्रकरण: </ em> आप '<a href="CrawlStartExpert.html">सूचकांक Creation</a>' page पृष्ठ पर एक स्थानीय क्रॉल शुरू, यहाँ प्रविष्टियों मिलता है और जाँच
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='Indexing' झंडा रिमोट करो,  and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==हर पृष्ठ कि इस सहकर्मी के अनुरोध पर एक दूरस्थ सहकर्मी अनुक्रमित वापस सूचना दी है और यहाँ पर नजर रखी जा सकती है.
+(2) Results for Result of Search Queries==(2) खोज प्रश्नों का रिजल्ट के लिए परिणाम
+This index transfer was initiated by your peer by doing a search query.==इस सूचकांक में स्थानांतरण एक खोज क्वेरी कर रही द्वारा अपने साथियों के द्वारा शुरू किया गया था
+The index was crawled and contributed by other peers.==सूचकांक अन्य साथियों द्वारा क्रॉल और योगदान था.
+<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em> प्रयोग करें प्रकरण: </ em> आप 'पृष्ठ' पर एक खोज क्वेरी करते हैं तो इस सूची में भरता है.
+(3) Results for Index Transfer==(3) सूचकांक के ट्रांसफर के लिए परिणाम
+The url fetch was initiated and executed by other peers.==लाने यूआरएल अन्य साथियों द्वारा शुरू की और मार डाला गया था.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==आपके सहकर्मी के अनुसार भंडारण के लिए सबसे उपयुक्त है क्योंकि यहां ये लिंक आप के लिए प्रेषित किया गया है
+the logic of the Global Distributed Hash Table.==ग्लोबल वितरित हैश तालिका के तर्क.
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em> प्रयोग करें प्रकरण: </ em> आप सूचकांक कंट्रोल 'पेज' पर सूचकांक Receive' झंडा 'की जांच अगर इस सूची में भर सकते हैं.
+(4) Results for Proxy Indexing==(4) प्रॉक्सी इंडेक्सिंग के लिए परिणाम
+These web pages had been indexed as result of your proxy usage.==इन वेब पृष्ठों के अपने प्रॉक्सी के उपयोग के परिणाम के रूप में सूचीबद्ध किया गया था.
+No personal or protected page is indexed==कोई व्यक्तिगत या सुरक्षित पृष्ठ अनुक्रमित है
+such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)==ऐसे पन्नों कुकी का प्रयोग करें या बाद के पैरामीटर्स  (यूआरएल में या HTTP प्रोटोकॉल  के रूप में या तो) से पता चला रहे हैं
+and automatically excluded from indexing.==और स्वतः अनुक्रमण से बाहर रखा गया है.
+<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em> प्रयोग करें प्रकरण: </ em> आप इस तालिका को भरने के लिए प्रॉक्सी के रूप में YaCy का उपयोग करना चाहिए
+Set the proxy settings of your browser to the same port as given==दिया के रूप में एक ही बंदरगाह के लिए अपने ब्राउज़र के प्रॉक्सी सेटिंग्स सेट
+on the 'Settings'-page in the 'Proxy and Administration Port' field.==प्रॉक्सी और प्रशासन पोर्ट 'क्षेत्र' में Settings' पृष्ठ 'पर.
+(5) Results for Local Crawling==(5) लोकल रेंगने के लिए परिणाम
+These web pages had been crawled by your own crawl task.==इन वेब पृष्ठों के अपने खुद क्रॉल कार्य द्वारा क्रॉल किया गया था.
+<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em> प्रयोग करें प्रकरण: </ em> 'सूचकांक बनाएं' पृष्ठ पर एक क्रॉल प्रारंभ बिंदु निर्धारित करके एक क्रॉल शुरू.
+(6) Results for Global Crawling==(6) ग्लोबल रेंगने के लिए परिणाम
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==इन पृष्ठों के अपने साथियों द्वारा अनुक्रमित किया गया था, लेकिन क्रॉल एक दूरस्थ सहकर्मी से शुरू किया गया था
+This is the 'mirror'-case of process (1).==इस प्रक्रिया के 'mirror' मामले है (1).
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the 'Index Crate' page==<em> प्रयोग करें प्रकरण: </ em> आप जाँच अगर इस सूची में भर सकते हैं 'स्वीकार रिमोट पर requests' झंडा रेंगने' सूचकांक टोकरा 'पेज
+The stack is empty.==ढेर खाली है.
+Statistics about #[domains]# domains in this stack:==इस ढेर में  #  [डोमेन ]  # डोमेन के बारे में सांख्यिकी:
+(7) Results from surrogates import==(7) Surrogates के आयात से का परिणाम
+These records had been imported from surrogate files in DATA/SURROGATES/in==ये रिकॉर्ड आंकड़े / surrogates में / में सरोगेट फ़ाइलों से आयात किया गया था
+<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em> प्रयोग करें प्रकरण: </ em> डबलिन कोर मेटाडेटा सामग्री के साथ जगह फाइलें आंकड़े / surrogates में / में या एक सूचकांक आयात विधि का उपयोग
+(i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)== (यानी <a href="IndexImportMediawiki_p.html"> साँचा आयात </ a> <a href="IndexImportOAIPMH_p.html"> OAI-PMH पुनर्प्राप्ति </ a> )
+#Domain==डोमेन
+#URLs=यूआरएल
+"delete all"=="सब नष्ट"
+Showing all #[all]# entries in this stack.==इस ढेर में सभी  #  [सभी ]  # प्रविष्टियों दिखा रहा है..
+Showing latest #[count]# lines from a stack of #[all]# entries.==नवीनतम दिखा  #  [गिनती ]  #  [सभी ]  # प्रविष्टियों का एक ढेर से  # लाइनों.
+"clear list"=="स्पष्ट सूची"
+#Initiator==सर्जक
+>Executor==>निष्पादक
+>Modified==>संशोधित
+>Words==>शब्द
+>Title==>शीर्षक
+#URL==यूआरएल
+"delete"=="हटाना"
+#-----------------------------
+
+#File: CrawlStartExpert.html
+#---------------------------
+<html lang="en">==<html lang="hi">
+Expert Crawl Start==विशेषज्ञ क्रॉल प्रारंभ
+Start Crawling Job:==नौकरी रेंगने प्रारंभ:
+You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==आप वेब पेज रेंगने के लिए प्रारंभ बिंदु के रूप में यूआरएल को परिभाषित करने और यहां रेंगने शुरू कर सकते हैं.  "क्रॉलिंग " YaCy, किसी वेबसाइट डाउनलोड कर इसमें सभी लिंक निकालें और फिर इन कड़ियों के पीछे सामग्री डाउनलोड जाएगा. लंबे समय के रूप में  "क्रॉलिंग गहराई के तहत निर्दिष्ट के रूप में यह दोहराया है.
+Attribute<==विशेषता<
+Value<==मूल्य<
+Description<==विवरण<
+>Starting Point:==>प्रारंभ बिंदु:
+>From URL==>यूआरएल से
+From Sitemap== साइट मैप से
+From File== इस फ़ाइल से
+Existing start URLs are always re-crawled.==मौजूदा शुरू यूआरएल हमेशा फिर से क्रॉल हैं..
+Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.==अन्य पहले से दौरा यूआरएल के रूप में बाहर हल कर रहे हैं  "डबल ", वे फिर से क्रॉल विकल्प का उपयोग करने की अनुमति नहीं है अगर
+Create Bookmark==बुकमार्क बनाएँ
+(works with "Starting Point: From URL" only)==((के साथ काम करता है "प्वाइंट शुरू: यूआरएल से" केवल ))
+Title<==शीर्षक<
+Folder<==फोल्डर<
+This option lets you create a bookmark from your crawl start URL.==यह विकल्प आपको अपने क्रॉल शुरू यूआरएल से एक बुकमार्क बनाने की सुविधा देता है.
+Crawling Depth</label>==रेंगने की गहराई</label>
+This defines how often the Crawler will follow links (of links..) embedded in websites.==इस ट्रेक लिंक  पालन करेंगे कितनी बार परिभाषित करता है (लिंक का .. ) वेबसाइटों में एम्बेडेड
+0 means that only the page you enter under "Starting Point" will be added==0 आप  तहत प्रवेश केवल पृष्ठ "शुरुआती बिंदु " जोड़ दिया जाएगा मतलब है कि
+to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==सूचकांक के लिए. 2-4 सामान्य अनुक्रमण के लिए अच्छा है. 8 से अधिक मान उपयोगी नहीं हैं, एक गहराई -8 क्रॉल जाएगा के बाद से
+index approximately 25.600.000.000 pages, maybe this is the whole WWW.==सूचकांक लगभग 25.600.000.000 पृष्ठों, शायद इस पूरे डब्लूडब्लूडब्लू है.
+Scheduled re-crawl<==फिर क्रॉल अनुसूचित<
+>no&nbsp;doubles<==>डबल्स नहीं<
+run this crawl once and never load any page that is already known, only the start-url may be loaded again.==एक बार इस क्रॉल चलाने के लिए और केवल शुरू यूआरएल को फिर से लोड किया जा सकता है, पहले से ही जाना जाता है कि किसी भी पेज लोड कभी नहीं.
+>re-load<==>पुनः लोड<
+run this crawl once, but treat urls that are known since==एक बार इस क्रॉल चलाने के लिए, लेकिन के बाद से जाना जाता है कि यूआरएल का इलाज
+>years<==>साल<
+>months<==>महीने<
+>days<==>दिन<
+>hours<==>घंटे<
+not as double and load them again. No scheduled re-crawl.==डबल के रूप में और फिर उन्हें लोड नहीं. कोई अनुसूचित फिर से क्रॉल.
+>scheduled<==>अनुसूचित<
+after starting this crawl, repeat the crawl every==इस क्रॉल शुरू करने के बाद, हर क्रॉल दोहराने
+> automatically.==> स्वतः.
+A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==एक वेब क्रॉल आंतरिक डेटाबेस के खिलाफ इंटरनेट में पाया सभी लिंक पर एक डबल जांच करता है. उसी यूआरएल को फिर से पाया जाता है
+then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,==आप  विकल्प 'नहीं  डबल्स' जब जांच तो यूआरएल डबल के रूप में व्यवहार किया जाता है. यह एक विशेष आयु तक पहुँच गया है जब एक यूआरएल को फिर से लोड किया जा सकता है.
+to use that check the 're-load' option. When you want that this web crawl is repeated automatically, then check the 'scheduled' option.== 'पुनः लोड ' विकल्प की जाँच करें कि उपयोग करने के लिए. आप इस वेब क्रॉल स्वचालित रूप से दोहराया है कि जब चाहते हैं, तो  'अनुसूचित ' विकल्प की जाँच.
+In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==इस मामले में क्रॉल पिछले क्रॉल से भी समय और कोई यूआरएल के बाद दोहराया जाता है डबल के रूप में छोड़ दिया जाता है.
+Must-Match Filter==-मिलान अवश्य फ़िल्टर
+Use filter==फिल्टर का प्रयोग करें
+Restrict to start domain==डोमेन शुरू करने के लिए प्रतिबंधित
+Restrict to sub-path==उप पथ के लिए प्रतिबंधित
+#The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==फिल्टर क्रॉल करने के लिए उपयोग किया जाता है जो यूआरएल के साथ मैच चाहिए कि एक ईमैक्स की तरह नियमित अभिव्यक्ति है
+The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression==फिल्टर एक<b> <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank"> नियमित अभिव्यक्ति है 
+that must match with the URLs which are used to be crawled; default is 'catch all'.==कि क्रॉल करने के लिए उपयोग किया जाता है जो यूआरएल के साथ मेल खाना चाहिए, डिफ़ॉल्ट है  'सभी को पकड़ने '
+Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==उदाहरण: '.. * विज्ञान * ' शब्द शामिल है केवल यूआरएल  'विज्ञान ', फिल्टर सेट की अनुमति देने के लिए 
+You can also use an automatic domain-restriction to fully crawl a single domain.==आप यह भी पूरी तरह से एक ही डोमेन क्रॉल करने के लिए डोमेन प्रतिबंध एक स्वत: उपयोग कर सकते हैं.
+Must-Not-Match Filter==द मैच नहीं होना चाहिए फिल्टर
+This filter must not match to allow that the page is accepted for crawling.==इस फिल्टर पेज खंगालने के लिए स्वीकार कर लिया है कि अनुमति देने के लिए मैच नहीं होना चाहिए.
+The empty string is a never-match filter which should do well for most cases.==खाली स्ट्रिंग अधिकांश मामलों के लिए अच्छी तरह से करना चाहिए जो कभी मैच फिल्टर है.
+If you don't know what this means, please leave this field empty.==आप इस का मतलब क्या है पता नहीं है, तो इस क्षेत्र खाली छोड़ दें
+#Re-crawl known URLs:==पुनः क्रॉल जाना जाता यूआरएल:
+Use</label>:==</ लेबल> का उपयोग करें
+#It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==यह इस किया है या नहीं अगर पिछले क्रॉल की उम्र पर निर्भर करता है: पिछले क्रॉल दी से अधिक पुराना है तो
+#Auto-Dom-Filter:==ऑटो डोम-फ़िल्टर:
+#This option will automatically create a domain-filter which limits the crawl on domains the crawler==यह विकल्प स्वतः डोमेन क्रॉलर पर क्रॉल सीमा है, जो एक डोमेन फिल्टर का निर्माण करेगा
+#will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==दी गहराई पर मिल जाएगा. आप बुकमार्क्स जबकि साथ एक पृष्ठ क्रॉल करने के लिए इस विकल्प यानी उपयोग कर सकते हैं
+#restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==बुकमार्क पृष्ठ पर दिखाई देते हैं कि केवल उन डोमेन पर क्रॉल सीमित. पर्याप्त गहराई
+#for this example would be 1.==इस उदाहरण के लिए 1 होगा.
+#The default value 0 gives no restrictions.==डिफ़ॉल्ट मान 0 कोई प्रतिबंध नहीं देता.
+Maximum Pages per Domain:==डोमेन प्रति अधिकतम पन्ने:
+Page-Count==पृष्ठ गणना
+You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==आप दिलवाया जाता है कि पृष्ठों की अधिकतम संख्या सीमित है और इस विकल्प के साथ एक ही डोमेन से अनुक्रमित कर सकते हैं
+You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==आप सीमा के भीतर सभी डोमेन के लिए लागू किया जाता है, जिससे कि 'ऑटो डोम-फिल्टर' के साथ इस सीमा को जोड़ सकते हैं
+the given depth. Domains outside the given depth are then sorted-out anyway.==दी गहराई. दी depth बाहर डोमेन तो वैसे भी बाहर हल कर रहे हैं.
+Accept URLs with==साथ यूआरएल स्वीकारें
+dynamic URLs==गतिशील यूआरएल
+A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==एक क़ुएस्तिओन्मरक आमतौर पर एक गतिशील पृष्ठ के लिए एक संकेत है. गतिशील सामग्री की ओर इशारा करते यूआरएल आमतौर पर क्रॉल नहीं किया जाना चाहिए. हालांकि, स्थैतिक सामग्री के साथ कभी कभी वेब पन्नों रहे हैं कि
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==प्रश्न चिह्न युक्त यूआरएल के साथ पहुँचा है. यदि आप अनिश्चित हैं, क्रॉल छोरों से बचने के लिए इस जाँच नहीं है..
+Store to Web Cache==वेब पर कैश करने के लिए स्टोर
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==यह विकल्प प्रॉक्सी प्रेफेत्च के लिए डिफ़ॉल्ट रूप से प्रयोग किया जाता है, लेकिन स्पष्ट रेंगने के लिए की जरूरत नहीं है.
+
+Policy for usage of Web Cache==वेब कैश के उपयोग के लिए नीति
+The caching policy states when to use the cache during crawling:==कैशिंग नीति रेंगने दौरान कैश का उपयोग करने के लिए जब कहा गया
+#no&nbsp;cache==# कोई कैश
+no&nbsp;cache==कोई कैश
+#if&nbsp;fresh==# ताजा अगर
+if&nbsp;fresh==ताजा अगर
+#if&nbsp;exist==अगर मौजूद
+if&nbsp;exist==अगर मौजूद
+#cache&nbsp;only==केवल कैश
+cache&nbsp;only==केवल कैश
+never use the cache, all content from fresh internet source;== ताजा इंटरनेट स्रोत से कैश, सभी सामग्री का उपयोग कभी नहीं;
+use the cache if the cache exists and is fresh using the proxy-fresh rules;== कैश मौजूद है और प्रॉक्सी ताजा नियमों का उपयोग ताजा है अगर कैश का उपयोग करें;
+use the cache if the cache exist. Do no check freshness. Otherwise use online source;== कैश मौजूद कैश का उपयोग करें. कोई ताजगी की जांच करते हैं. अन्यथा ऑनलाइन स्रोत का उपयोग;
+never go online, use all content from cache. If no cache exist, treat content as unavailable== ऑनलाइन जाना कभी नहीं, कैश से सभी सामग्री का उपयोग करें. कोई कैश मौजूद है, अनुपलब्ध के रूप में सामग्री का इलाज
+
+Do Local Indexing:== स्थानीय इंडेक्सिंग करो:
+index text== सूचकांक पाठ	
+index media== सूचकांक मीडिया
+This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the== इस क्रॉलर डाउनलोड करेंगे wepages का अनुक्रमण सक्षम बनाता है. आप केवल भरने के लिए क्रॉल करना चाहते हैं जब तक यह डिफ़ॉल्ट रूप से बंद किया जाना चाहिए
+Document Cache without indexing.== अनुक्रमण के बिना दस्तावेज़ कैश.
+Do Remote Indexing== दूरस्थ अनुक्रमण करो
+Describe your intention to start this global crawl (optional)== इस वैश्विक क्रॉल शुरू करने के अपने इरादे का वर्णन  (वैकल्पिक )
+This message will appear in the 'Other Peer Crawl Start' table of other peers.== इस संदेश के अन्य साथियों की 'अन्य सहकर्मी क्रॉल आरंभ' तालिका में दिखाई देगा.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.== जाँच की है, क्रॉलर अन्य साथियों से संपर्क करें और अपने क्रॉल के लिए दूरदराज के indexers के रूप में उन्हें इस्तेमाल करेगा.
+If you need your crawling results locally, you should switch this off.== आप अपने स्थानीय रेंगने परिणामों की जरूरत है, तो आप इस बंद कर देना चाहिए.
+Only senior and principal peers can initiate or receive remote crawls.== केवल वरिष्ठ और प्रमुख साथियों दूरस्थ क्रॉल आरंभ या प्राप्त कर सकते हैं.
+A YaCyNews message will be created to inform all peers about a global crawl== एक YaCyNews संदेश एक वैश्विक क्रॉल के बारे में सभी साथियों को सूचित करने के लिए बनाया जाएगा 
+so they can omit starting a crawl with the same start point.== ताकि वे एक ही प्रारंभ बिंदु के साथ एक क्रॉल शुरू छोड़ सकते हैं.
+Exclude <em>static</em> Stop-Words <em> स्थिर </ em> बंद करो, शब्दों को शामिल न करें 
+This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,== यह बेहद आम शब्द डेटाबेस में जोड़ रहे हैं कि नाकाम करने के लिए उपयोगी हो सकता है, यानी  "",  "वह ",  "वह ",  "यह " ... ==, <tt> Yacy.stopwords </ टीटी> अनुक्रमण से फ़ाइल में दिए गए सभी शब्दों को बाहर करने के लिए
+check this box.== इस बॉक्स को चेक करो.
+"Start New Crawl"==" नई क्रॉल प्रारंभ "
+
+
+#-----------------------------
+
+#File: CrawlStartIntranet_p.html
+#---------------------------
+#Intranet Crawl Start==इंट्रानेट क्रॉल प्रारंभ
+When an index domain is configured to contain intranet links,==एक सूचकांक डोमेन इंट्रानेट लिंक शामिल करने के लिए कॉन्फ़िगर किया गया है,
+the intranet may be scanned for available servers.==इंट्रानेट उपलब्ध सर्वरों के लिए स्कैन किया जा सकता है.
+Please select below the servers in your intranet that you want to fetch into the search index.==आप खोज सूचकांक में लाने के लिए चाहते हैं कि आपके इंट्रानेट में सर्वर नीचे का चयन करें.
+This network definition does not allow intranet links.==इस नेटवर्क परिभाषा इंट्रानेट लिंक की अनुमति नहीं है.
+A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==आप सूचकांक इंट्रानेट लक्ष्य को YaCy confiugure अगर इंट्रानेट सर्वर की एक सूची ही उपलब्ध है.
+To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==ऐसा करने के लिए, <a href="ConfigBasic.html"> मूल विन्यास </ a> सर्वलेट खुला और  'इंट्रानेट इंडेक्सिंग ' उपयोग के मामले का चयन करें.
+Available Intranet Server==उपलब्ध इंट्रानेट सर्वर
+#>IP<==>आईपी<
+#>URL<==>यूआरएल<
+>Process<==>प्रक्रिया<
+>not in index<==>नहीं सूचकांक में<
+>indexed<==>अनुक्रमित<
+"Add Selected Servers to Crawler"=="ट्रेक के लिए चयनित सर्वर जोड़ें"
+#-----------------------------
+
+#File: CrawlStartScanner_p.html
+#---------------------------
+Network Scanner==नेटवर्क स्कैनर
+YaCy can scan a network segment for available http, ftp and smb server.==YaCy उपलब्ध HTTP, FTP और किसी सर्वर के लिए एक नेटवर्क खंड स्कैन कर सकते हैं.
+You must first select a IP range and then, after this range is scanned,==इस श्रृंखला स्कैन के बाद आप पहली बार, तो एक आईपी श्रेणी का चयन करना चाहिए
+it is possible to select servers that had been found for a full-site crawl.==यह एक पूरी साइट क्रॉल के लिए पाया गया था कि सर्वर का चयन करने के लिए संभव है.
+#No servers had been detected in the given IP range==
+Please enter a different IP range for another scan.==एक और स्कैन के लिए एक अलग आईपी रेंज दर्ज करें.
+Please wait...==कृपया प्रतीक्षा करें ...
+>Scan the network<==>नेटवर्क स्कैन<
+Scan Range==रेंज स्कैन
+Scan sub-range with given host==दिया मेजबान के साथ उप रेंज स्कैन
+Full Intranet Scan:==पूर्ण इंट्रानेट स्कैन:
+Do not use intranet scan results, you are not in an intranet environment!==इंट्रानेट परिणाम स्कैन का उपयोग न करें, आप एक इंट्रानेट वातावरण में नहीं कर रहे हैं!
+#>Scan Cache<==>Scan Cache<
+accumulate scan results with access type "granted" into scan cache (do not delete old scan result)==पहुंच प्रकार  "दी " स्कैन कैश  (पुराने स्कैन परिणाम  नष्ट नहीं है) में से परिणाम स्कैन जमा
+>Service Type<==>सेवा के प्रकार<
+#>ftp==>एफटीपी
+#>smb==>एसएमबी
+#>http==>एचटीटीपी
+#>https==>HTTPS
+>Scheduler<==>अनुसूचक<
+run only a scan==केवल एक स्कैन चलाने
+scan and add all sites with granted access automatically. This disables the scan cache accumulation.==स्कैन और स्वचालित रूप से दी उपयोग के साथ सभी साइटों जोड़ें. इस स्कैन कैश संचय निष्क्रिय करता है.
+Look every==हर देखो
+>minutes<==>मिनट<
+>hours<==>घंटे<
+>days<==>दिन<
+again and add new sites automatically to indexer.==फिर और इंडेक्सर को स्वचालित रूप से नए स्थलों को जोड़ने.
+Sites that do not appear during a scheduled scan period will be excluded from search results.==एक अनुसूचित स्कैन अवधि के दौरान दिखाई नहीं देते हैं कि साइट खोज परिणामों से बाहर रखा जाएगा.
+"Scan"=="स्कैन"
+#-----------------------------
+
+#File: CrawlStartSite.html
+#---------------------------
+#-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+#The following servers had been detected:==निम्न सर्वर पाया गया था:
+#The following servers can be searched:==The following servers can be searched:
+Available server within the given IP range==दी आईपी सीमा के भीतर उपलब्ध सर्वर
+>Protocol<==>प्रोटोकॉल<
+>IP<==>आईपी<
+>URL<==>यूआरएल<
+>Access<==>पहुंच<
+>Process<==>प्रक्रिया<
+>unknown<==>अज्ञात<
+>empty<==>खाली<
+>granted<==>दी गई<
+>denied<==>वंचित<
+>not in index<==>नहीं सूचकांक में<
+>indexed<==>अनुक्रमित<
+"Add Selected Servers to Crawler"=="ट्रेक के लिए चयनित सर्वर जोड़ें"
+#------------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==बेसिक कॉन्फ़िगरेशन
+#>Accounts<==>Accounts<
+Network Configuration==संजाल विन्यास
+#-----------------------------

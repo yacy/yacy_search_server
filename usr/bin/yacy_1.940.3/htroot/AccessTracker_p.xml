@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<AccessTracker>
+#(page)#<!-- 0: server access overview -->
+      <serverAccessOverview>#{list}#
+      <entry>
+        <host>#[host]#</host>
+        <countSecond>#[countSecond]#</countSecond>
+        <countMinute>#[countMinute]#</countMinute>
+        <count10Minutes>#[count10Minutes]#</count10Minutes>
+        <countHour>#[countHour]#</countHour>
+      </entry>
+	  #{/list}#</serverAccessOverview>
+	  ::<!-- 1: server access details -->
+	  <serverAccessDetails>#{list}#
+      <entry>
+        <host>#[host]#</host>
+        <date>#[date]#</date>
+        <path>#[path]#</path>
+      </entry>
+	  #{/list}#</serverAccessDetails>
+	  ::<!-- 2: Search Statistics: Local Searches -->
+	  <localSearchLog>#{list}#
+      <entry>
+        <host>#[host]#</host>
+        <date timestamp="#[timestamp]#">#[date]#</date>
+        <offset>#[offset]#</offset>
+        <querycount>#[querycount]#</querycount>
+        <transmitcount>#[transmitcount]#</transmitcount>
+        <resultcount>#[resultcount]#</resultcount>
+        <resulttime>#[resulttime]#</resulttime>
+        <urltime>#[urltime]#</urltime>
+        <snippettime>#[snippettime]#</snippettime>
+        <querystring>#[querystring]#</querystring>
+        <useragent>#[userAgent]#</useragent>
+	  </entry>
+	  #{/list}#</localSearchLog>
+	  
+	  ::<!-- 3: Search Statistics: Local Search Tracker -->
+	  <localSearchHostTracker>#{list}#
+	  <entry>
+        <host>#[host]#</host>
+        <count>#[count]#</count>
+        <qph>#[qph]#</qph>
+        <dates>#{dates}#
+        	<date timestamp="#[timestamp]#">#[date]#</date>
+        #{/dates}#</dates>
+	  </entry>
+	  #{/list}#</localSearchHostTracker>
+	  
+	  ::<!-- 4: Search Statistics: Remote Searches -->
+	  <remoteSearchLog>#{list}#
+	  <entry>
+      	<host>#[host]#</host>
+        <peername>#[peername]#</peername>
+        <date timestamp="#[timestamp]#">#[date]#</date>
+        <querycount>#[querycount]#</querycount>
+        <resultcount>#[resultcount]#</resultcount>
+        <querytime>#[querytime]#</querytime>
+        <resulttime>#[resulttime]#</resulttime>
+        <urltime>#[urltime]#</urltime>
+        <snippettime>#[snippettime]#</snippettime>
+        <queryhashes>#[queryhashes]#</queryhashes>
+	  </entry>
+	  #{/list}#</remoteSearchLog>
+	  
+	  ::<!-- 5: Search Statistics: Remote Search Tracker -->
+	  <remoteSearchHostTracker>#{list}#
+	  <entry>
+        <host>#[host]#</host>
+        <count>#[count]#</count>
+        <qph>#[qph]#</qph>
+        <dates>#{dates}#
+        	<date timestamp="#[timestamp]#">#[date]#</date>
+        #{/dates}#</dates>
+	  </entry>
+	  #{/list}#</remoteSearchHostTracker>
+
+#(/page)#
+</AccessTracker>

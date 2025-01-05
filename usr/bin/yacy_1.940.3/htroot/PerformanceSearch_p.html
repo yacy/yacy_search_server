@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <title>YaCy '#[clientname]#': Performance Settings of Search Sequence</title>
+  #%env/templates/metas.template%#
+  </head>
+  <body id="PerformanceSearch">
+    #%env/templates/header.template%#
+    #%env/templates/submenuComputation.template%#
+    <h2>Search Sequence Timing</h2>
+    
+    <p>
+      <strong>Timing results of latest search request:</strong>
+    </p>
+    <table border="0">
+      <tr class="TableHeader" valign="bottom">
+        <td>Query</td>
+        <td>Event</td>
+        <td>Comment</td>
+        <td>Time</td>
+        <td>Delta (ms)</td>
+        <td>Duration (ms)</td>
+        <td>Result-Count</td>
+      </tr>
+    #{table}#
+      <tr class="TableCellDark" valign="bottom">
+        <td>#[query]#</td>
+        <td>#[event]#</td>
+        <td>#[comment]#</td>
+        <td>#[time]#</td>
+        <td>#[delta]#</td>
+        <td>#[duration]#</td>
+        <td>#[count]#</td>
+      </tr>
+    #{/table}#
+    </table>
+    
+    <p>
+      The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:<br/>
+      red -&gt; request list alive<br/>
+      green -&gt; request has terminated<br/>
+      grey -&gt; the search target hash order position(s) (more targets if a dht partition is used)<br/>      
+      <img src="SearchEventPicture.png" alt="Search event picture" />
+    </p>
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,53 @@
+
+#Outbound {
+  fill: lightblue;
+}
+#Dead {
+  fill: red;
+}
+#Inbound {
+  fill: green;
+}
+.hypertree {
+  border: solid;
+}
+.hypertree-link {
+  fill: none;
+  stroke-width: 1.2px;
+}
+.hypertree-link.Outbound {
+  stroke: lightblue;
+}
+.hypertree-link.Dead {
+  stroke: red;
+  stroke-dasharray: 0,2 1;
+}
+.hypertree-link.Inbound {
+  stroke: green;
+}
+circle {
+  fill: lightgreen;
+  stroke: darkgreen;
+  stroke-width: 1.5px;
+}
+text {
+  font: 9px sans-serif;
+  cursor: default;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+text tspan.truncated {
+	display: none;
+}
+
+text:hover tspan.truncated {
+	display: inherit;
+}
+
+text tspan.ellipsis {
+	display: inherit;
+}
+
+text:hover tspan.ellipsis {
+	display: none;
+}

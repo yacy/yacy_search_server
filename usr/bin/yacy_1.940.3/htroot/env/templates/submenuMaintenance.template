@@ -1,0 +1,8 @@
+<div class="SubMenu">
+  <h3>RAM/Disk Usage &amp; Updates</h3>
+  <ul class="SubMenu">
+    <li><a href="Performance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Performance</a></li>
+    <li><a href="ConfigHTCache_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Web Cache</a></li>
+    <li><a href="ConfigUpdate_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Download System Update</a></li>
+  </ul>
+</div>

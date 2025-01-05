@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+    xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:yacy="http://www.yacy.net/"
+>
+	<!-- YaCy Search Engine; https://yacy.net -->
+	
+		<title>#[promoteSearchPageGreeting]#: #[rss_query]#</title>
+		<subtitle>Search for #[rss_query]#</subtitle>
+		<logo>#[rssYacyImageURL]#</logo>
+		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
+		<opensearch:itemsPerPage>#[num-results_itemsPerPage]#</opensearch:itemsPerPage>
+                <link rel="self" href="#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[search.verify]#"/>
+		<link rel="search" href="#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
+		<opensearch:Query role="request" searchTerms="#[rss_queryenc]#" />
+                <id>http://#[clientid]#.yacyh/</id>
+
+#{results}#
+<!--#include virtual="yacysearchitem.atom?item=#[item]#&eventID=#[eventID]#" -->
+#{/results}#
+<!--#include virtual="yacysearchtrailer.xml?eventID=#[eventID]#" -->	
+</feed>

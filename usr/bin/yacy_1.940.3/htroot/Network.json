@@ -1,0 +1,38 @@
+{"peers":[#(table)#::
+#{list}#
+  {
+    "hash": "#[hash]#",
+    "fullname": "#[fullname]#",
+    "version": "#[version]#",
+    "ppm": #[ppm]#,
+    "qph": #[qph]#,
+    "uptime": "#[uptime]#",
+    "links": #[LCount]#,
+    "words": #[ICount]#,
+    "rurls": #[RCount]#,
+    "lastseen": #[lastSeen]#,
+    "sendWords": #[sI]#,
+    "receivedWords": #[rI]#,
+    "sendURLs": #[sU]#,
+    "receivedURLs": #[rU]#,
+    "type": "#(type)#junior::senior::principal#(/type)#",
+    "direct": "#(type_direct)#direct::passive#(/type_direct)#",
+    "acceptcrawl": #[acceptcrawl]#,
+    "dhtreceive": #[dhtreceive]#,
+    "nodestate": #(nodestate)#false::true#(/nodestate)#,
+    "location": "#[location]#",
+    "seedurl": "#[type_url]#",
+    "age": #[age]#,
+    "seeds": #[seeds]#,
+    "connects": #[connects]#,
+    #{ips}#"ip": "#(c)##[ip]#::#[ip]##(/c)#",#{/ips}#
+
+    #{ips}#"address": "#(c)##(ipv6)#::[#(/ipv6)##[ip]##(ipv6)#::]#(/ipv6)#:#[port]#::#(/c)#",#{/ips}#
+
+    "port": #[port]#, #(c)#::"useragent": "#[userAgent]#",#(/c)#
+    "last": "entry"
+  },
+#{/list}#
+{}]
+::
+#(/table)#}

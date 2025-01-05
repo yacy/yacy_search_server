@@ -1,0 +1,12 @@
+<div class="SubMenu">
+  <h3>Index Administration</h3>
+  <ul class="SubMenu">
+    <li><a href="IndexControlURLs_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">URL Database Administration</a></li>
+    <li><a href="IndexDeletion_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Deletion</a></li>
+    <li><a href="IndexFederated_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Sources &amp; Targets</a></li>
+    <li><a href="IndexSchema_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Solr Schema Editor</a></li>
+    <li><a href="IndexReIndexMonitor_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Field Re-Indexing</a></li>
+    #(navigation-p2p)#::<li><a href="IndexControlRWIs_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Reverse Word Index</a></li>#(/navigation-p2p)#
+    <li><a href="ContentAnalysis_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Content Analysis</a></li>
+  </ul>
+</div>

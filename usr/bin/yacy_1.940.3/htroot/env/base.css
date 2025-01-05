@@ -1,0 +1,1188 @@
+/* base.css - Layout and general style */
+/*
+	$LastChangedDate$
+	$LastChangedRevision$
+	$LastChangedBy$
+*/
+
+/*
+# use section names to jump
+
+############ Sections: ########################
+## "global elements"                         ##
+# all html elements without ".class" or "#id"
+###############################################
+## "global classes"                          ##
+# i.e. ".strong"; ".left"; ".error";
+###############################################
+## "private classes"                          ##
+# all HTML-elements with a specific class
+# i.e. "div.content"; "span.left";
+# and
+# "div.content span a."; "form.search fieldset legend";
+# sorted by the last html-element
+###############################################
+## "site specific"                           ##
+# all site specific elements
+# i.e. "body#search form"; "body#stats table td.strong";
+###############################################
+## "other"                                   ##
+# all "other" elements
+# i.e. "#left"; "#myID.div";
+*/
+
+/* --------------- global elements -------------------------- */
+
+* {
+  font-family:sans-serif;
+}
+
+/* the following dl style is needed to patch a bug in Safari
+   which occurs when definition lists appears inside of fieldsets */
+dl {
+  display:inline-block;
+  width:96%;
+}
+
+body, table, textarea {
+  font-size: 12px;
+}
+
+h1, h2, h3, h4 {
+  font-style:normal;
+}
+
+h1 {
+  font-size:2em;
+}
+
+h2 {
+  margin-top:40px;
+  font-size:1.6em;
+  clear:left; /* The heading after the submenu has to be left again */
+}
+
+h3 {
+  font-size:1.3em;
+}
+
+h4 {
+  font-size:1.1em;
+  margin-bottom: 4px;
+}
+
+a:link {
+  color:#18294A;
+  text-decoration:underline;
+}
+
+a:visited {
+  color:#18294A;
+  text-decoration:underline;
+}
+
+a:hover {
+  color:#18294A;
+  text-decoration:underline;
+}
+
+/* mark external links */
+a[href^="http://"], a[href^="https://"]  {
+  background: url(grafics/external.png) center right no-repeat;
+  padding-right: 14px;
+}
+
+/* exception for links in search results and image links */
+a[target="_self"], a[class="forceNoExternalIcon"], a[class="navbar-brand hidden-xs"], a[class="navbar-brand"], a[class="yacylogo"], .searchresults a {
+  background: transparent;
+  padding-right: 0px;
+}
+/* (fix for IE 10) prevent borders on img within links */
+a img {border: none}
+
+table {
+    border-spacing: 1px;
+    border-collapse: separate;
+}
+
+td {
+  padding:1px 2px;
+}
+
+fieldset {
+  margin:10px 5px;
+  padding:10px;
+}
+
+legend {
+  font-size:1.2em;
+  padding:0.3em 0.8em;
+  text-align:center;
+}
+
+label {
+    cursor:pointer;
+}
+
+pre {
+    font-family:monospace;
+}
+
+/* --------------- global classes --------------------- */
+
+tt, *.tt {
+  font-family:Courier,Terminal,sans-serif;
+}
+
+.commit {
+  font-weight:bold;
+  color:green;
+}
+
+.pending {
+  font-weight:bold;
+  color:darkblue;
+}
+
+.error {
+  font-weight:bold;
+  color:red;
+}
+
+.info {
+  font-weight:bold;
+  color:olive;
+}
+
+.help {
+  font-size:90%;
+}
+
+.hidden {
+  display:none;
+}
+
+.listing {
+  font-family:Courier,Terminal,sans-serif;
+  color:black;
+}
+
+.listingem {
+  font-family:Courier,Terminal,sans-serif;
+  color:DimGray;
+}
+
+.listingok {
+  font-family:Courier,Terminal,sans-serif;
+  color:green;
+}
+
+.listingnok {
+  font-family:Courier,Terminal,sans-serif;
+  color:red;
+}
+
+/* .snippetLoaded {
+  font-style:italic;
+  color: #666;
+} */
+
+.snippetLoaded b {
+  font-weight:bold;
+}
+
+.snippetError {
+  font-style:italic;
+}
+
+.settingsValue {
+  font-weight:bold;
+}
+
+.strike {
+  text-decoration: line-through;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.Headline {
+  font-weight: bold;
+  font-size: 160%;
+  text-align: center;
+  height: 36px;
+  width:100%;
+}
+
+.Heading {
+  height: 36px;
+}
+
+.Post {
+  padding:10px;
+  margin-bottom:10px;
+}
+
+.PostSubject {
+  padding:5px;
+  margin:0;
+}
+
+.PostBody {
+  margin:10px;
+}
+
+.PostBody h2 { margin: .4em 0 0; }
+.PostBody h3 { margin: .3em 0 0; }
+.PostBody h4 { margin: .2em 0 0; }
+
+.PostInfo {
+  padding:1px 10px;
+}
+
+.WikiTOCBox {
+  padding: 8px;
+}
+
+.diff {
+  margin: 10px 5px;
+  border: 1px dashed #722;
+  padding: .5em;
+  font-family: monospace;
+}
+
+.diff .unchanged { font-family: monospace; }
+.diff .added { font-family: monospace; }
+.diff .deleted { font-family: monospace; text-decoration: line-through; }
+
+.thumbcontainer {
+  margin: 2px;
+  width: 256px;
+  height: 256px; /* 96px thumbnail + some lines of text */
+  float: left;
+  /* Cut non square images not rendered by YaCy ViewImage */
+  overflow: hidden;
+}
+
+.hides .hoverShow {
+  display: none;
+}
+
+.hides:hover .hoverShow {
+  display: block;
+  position: absolute;
+  border: 3px double;
+  margin: 0 0 0 2em;
+  padding: .3em;
+  height: 20em;
+  overflow: auto;
+  width: 30em;
+}
+
+/* ---------------- private classes ---------------------*/
+
+/*----------
+<div>
+*/
+
+div.TagList {
+  float:right;
+  width:25em;
+  text-align:left;
+  padding-left: 5px;
+}
+
+div.ProgressBarCaption {
+	float:left;
+}
+div.ProgressBar {
+	float:left;
+	width:100px;
+	height:10px;
+}
+div.ProgressBarFill {
+	margin:0px;
+	padding:0px;
+	height:100%; /*not valid value for Netscape 8*/
+}
+
+#results {
+clear:both;
+}
+
+#resCounter {
+	/* left part of the progress bar */
+	float:left;
+}
+
+#resProgBar {
+	height: 1.5em;
+	/* margin: 1em auto; */
+	position: relative; /* for "relative" absolute pos of children */
+	text-align: left;
+	width: 100%;
+	float: none;
+}
+
+#resNav {
+	/* right part of the progress bar */
+	float:left;
+}
+
+#resProgFill {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: -10;
+}
+
+div.bookmarkList {
+	margin-top:3em;
+	margin-right:1em;
+	padding-right:13em;
+}
+
+div.bookmark {
+  margin-top:1em;
+  margin-right:13em;
+  padding-bottom:1em;
+}
+
+
+div.SubMenugroup{
+  float:left;
+  margin-right:1px;
+  margin-top:0px;
+  margin-bottom:2px;
+}
+
+div.content {
+  position:absolute;
+  top:3em;
+  left:13em;
+  right:10px;
+  margin:0;
+}
+
+div.yacysearch {
+  margin-top: .8em;
+  display:block;
+}
+
+div.searchresults {
+  padding-top:1em;
+  width:100%;
+}
+
+div.searchresults.hidden {
+  display:none;
+}
+
+div.urlactions {
+  float:left;
+  clear:left;
+  margin: 0px 6px 0px 2px;
+}
+
+h4.linktitle {
+  margin:2px;
+  padding-left: 20px;
+}
+
+img.favicon, object.favicon {
+  margin: 0px 4px 0px -20px;
+  width: 16px;
+  height: 16px;
+  float: left;
+}
+
+br {
+   display: block;
+   margin: 0;
+}
+
+/*----------
+<p>
+*/
+
+p {
+  line-height: 14px;
+}
+
+p.aftersurftips {
+  clear:both;
+}
+
+p.info {
+  margin-top:5em;
+  padding-top:5px;
+  text-align:center;
+}
+
+p.tags {
+  line-height: 1.4;
+}
+
+/* Button to expand/collapse tags beyond the initial number of tags display limit */
+.expandKeywordsBtn {
+	margin-top: 0.2em;
+}
+
+.expandKeywordsBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
+}
+
+.expandKeywordsBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
+
+div.bookmark p {
+  margin:1px;
+}
+
+div.searchresults p{
+  margin:2px 2px 2px 2px;
+  padding-left: 20px;
+}
+
+form.search.small div.yacylogo { /* The logo in yacysearch.html */
+  display:inline;
+  padding:0;
+  margin: 5px;
+}
+
+div.yacylogo {
+	float:left;
+}
+
+/*----------
+<h1>, <h2>, <h3>, <h4>, <h5>
+*/
+
+div.head h1 {
+  padding:6px;
+  background:url(grafics/yacy.png) 10px center no-repeat;
+  font-weight: bold;
+  font-size: 1.8em;
+  text-align: center;
+  margin:0;
+}
+
+h2.yacy { /* The heading in index.html */
+  margin:10px auto;
+  text-align:center;
+  padding-top:20px;
+  width:256px;
+  min-width:256px; /*min-width does not exist in IE 5.5, 6 and Safari */
+}
+
+div.welcome { /* The heading in Status.html */
+  clear:left;
+  float:left;
+  margin: 0;
+  padding-top:0px;
+  text-align:left;
+  width:680px;
+}
+
+div.rightbar { /* sidebar on the right side */
+  float:left;
+/*  width:120px; too small */
+  margin:10px 0;
+  padding-top:10px;
+  text-align:left;
+}
+
+form.search.small h2 {
+  clear:none;
+  /*font-size: 1.2em;*/
+  margin:0px;
+  margin-bottom:5px;
+}
+
+li.menugroup h3 {
+  font-size: 1em;
+  margin: 0; padding: 1px 10px;
+}
+
+div.SubMenugroup h3 {
+  font-size:1.1em;
+  margin:0;
+  padding:3px 10px;
+}
+div.SubMenu h3 {
+  font-size:1.1em;
+  margin:0;
+  margin-bottom:1px;
+  padding:3px 10px;
+  clear: both;
+}
+
+h4.bookmarkTitle {
+  margin:0;
+}
+
+/*----------
+<a>
+*/
+
+a.bookmarkTags {
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+a.bookmarkTitle {
+  font-size:17px;
+  font-weight:bold;
+}
+
+a.BookmarkLink {
+  background:url(grafics/addlink.png) left center no-repeat;
+  padding-left:15px;
+}
+
+a.MenuItemLink {
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:4px 10px 3px 18px;
+  font-size:1.1em;
+}
+
+a.MenuItemLink.lock {
+  background-image:url(grafics/lockclose.png);
+  background-position:1px center;
+  background-repeat:no-repeat;
+  background-size: 16px 16px;
+}
+
+a.MenuItemLink.unlock {
+  background-image:url(grafics/lockopen.png);
+  background-position:1px center;
+  background-repeat:no-repeat;
+  background-size: 16px 16px;
+}
+
+a:hover.MenuItemLink {
+  text-decoration:none;
+}
+
+li.menugroup a {
+	white-space:normal;
+}
+
+div.urlactions a {
+  display:block;
+  width: 11px;
+  height: 11px;
+  margin: 0px 0px 0px 3px;
+}
+
+a.bookmarklink:hover, a.bookmarklink:focus, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
+  background:url(grafics/bookmark.gif) center center no-repeat;
+}
+
+a.recommendlink:hover, a.recommendlink:focus, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
+  background:url(grafics/plus.gif) center center no-repeat;
+}
+
+a.deletelink:hover, a.deletelink:focus, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
+  background:url(grafics/minus.gif) center center no-repeat;
+}
+
+a.blacklistlink:hover, a.blacklistlink:focus, div.searchresults:hover a.blacklistlink, div.searchresults.hover a.blacklistlink {
+  background:url(grafics/blkl.gif) center center no-repeat;
+}
+
+ul.SubMenu a.MenuItemLink {
+  margin-top:0;
+}
+
+a.thumblink {
+  display:block;
+  width: 256px;
+  height: 256px;
+  margin: 2px;
+  line-height: 256px;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Link in a table header that triggers server-side table sorting */
+a.sortTableLink, a.sortTableLink:link, a.sortTableLink:visited, a.sortTableLink:hover {
+	text-decoration: none; 
+	color: white;
+}
+
+/*----------
+<em>
+*/
+
+ul.SubMenu em {
+  margin-top:0;
+}
+
+ul.SubMenu em.lock {
+  background-image:url(grafics/lock.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
+}
+
+ul.SubMenu em {
+  display:block;
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:1px 10px 1px 15px;
+  font-size:0.9em;
+}
+
+/*	<ul>, <li>	*/
+
+ul.tagList {
+  list-style:none;
+  padding:0;
+  margin-left:0;
+}
+
+ul.menu, ul.SubMenu {
+  clear:left;
+  padding:0;
+  margin:0;
+  margin-top:6px;
+}
+
+ul.menu li, ul.SubMenu li {
+  list-style:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:0;
+}
+
+ul.SubMenu li {
+  float:left;
+  margin-right:1px;
+  margin-top:0;
+}
+
+li.menugroup {
+  margin-left:5px;
+  margin-bottom:10px;
+  list-style:none;
+}
+
+/*----------
+<dl>, <dd>, <dt>
+*/
+
+dd {
+  text-align:left;
+  vertical-align:top;
+}
+
+dl.pairs dd, form dd {
+  padding:0.25%;
+  float:left;
+  width:74%;
+}
+
+form dt, dl.pairs dt {
+  float:left;
+  clear:left;
+  width:24%;
+  margin:0 0 0.25% 0.25%;
+  padding:0.25% 0.25%;
+  text-align:right;
+}
+
+dt.hintIcon {
+	float:left;
+    clear:both;
+}
+
+dd.hint {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+dl.bplike
+{
+	float: left;
+	margin: 0 0;
+	width: 194px;
+	padding: 0;
+}
+
+.bplike dt
+{
+	clear: left;
+	float: left;
+	width: 20px;
+	margin: 0;
+	padding: 0px;
+}
+
+.bplike dd
+{
+	float: left;
+	width: 155px;
+	margin: 0px;
+	padding: 0px;
+}
+
+/*----------
+<form>
+*/
+form.search {
+  text-align:center;
+  margin:0;
+}
+form.search.small {
+  text-align:left;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  margin-left: -15px;
+  white-space:nowrap;
+}
+
+.searchinput {
+  font-size:18px;
+}
+
+/*----------
+<table>, <tr>, <th>, <td>
+*/
+
+table.networkTable{
+  font-size:90%;
+}
+table.StatusTable {
+	border-width:0px;
+	border-spacing:1px;
+}
+
+form.search table {
+  margin:0 auto;
+  text-align:left;
+}
+
+/*----------
+<fieldset>
+*/
+
+fieldset {
+  text-align:left;
+}
+
+fieldset.yacysearch {
+  text-align:left;
+  padding-top:10px;
+  display:block;
+}
+
+form.PeerControl fieldset { /* on Status.html */
+	text-align:right;
+}
+
+form.search fieldset {
+	display:inline;
+	white-space:nowrap;
+}
+
+form.search.small fieldset {
+	margin:0px;
+}
+
+form.search.small fieldset * {
+  margin-left:0;
+}
+
+/*----------
+<img>
+*/
+
+img.deleteIcon, img.recommendIcon {
+  height: 11px;
+  width: 11px;
+}
+img.bookmarkIcon {
+  height: 18px;
+  width: 18px;
+}
+
+.thumblink img {
+  vertical-align: bottom;
+}
+
+/* site specific ------------------------------------*/
+
+body#Blacklist fieldset.selectList {
+  float:left;
+  margin-top:0;
+  width:45%;
+}
+body#Blacklist fieldset.createList {
+  margin-top:0;
+  width:45%;
+}
+body#Blacklist fieldset.editList {
+  float:left;
+  margin-top:0;
+  width:45%;
+}
+body#Blacklist fieldset.listSettings {
+  margin-top:0;
+  width:45%;
+}
+body#PerformanceQueues table, body#PerformanceQueues table input, body#PerformanceMemory table, body#PerformanceMemory table input {
+  font-size:90%;
+}
+body#help dt {
+  margin-top:0.2em;
+  font-weight:bold;
+}
+body#Settings ul.settingsMenu li {
+  list-style-image:url(grafics/down.gif);
+}
+body#Surftips div.searchresults {
+  float:left;
+  width:35em;
+  height:6em;
+  margin-left:1em;
+  margin-bottom:0;
+  overflow:hidden;
+}
+body#ViewLog div.log {
+  height:900px;
+  overflow:scroll;
+}
+
+body#ViewLog pre {
+  width:100%; /* TODO: fix width in IE */
+  margin-top:0px;
+  margin-bottom:0px;
+  font-family: Courier,monospace;
+  font-weight: normal;
+  font-size: small;
+}
+
+body#ViewLog pre.logSevere {
+  color:#ff0000;
+}
+
+body#ViewLog pre.logWarning {
+  color:#FF9C60;
+}
+
+body#ViewLog pre.logSystem {
+  color:#000000;
+}
+
+body#ViewLog pre.logInfo {
+  color:#000000;
+}
+
+body#ViewLog pre.logDebug {
+  color:#000000;
+}
+
+body#QuickCrawlLink p, body#QuickCrawlLink h4 {
+  padding:0 5%;
+}
+
+body#Wiki form fieldset p.help{
+	clear:both;
+}
+/* Crawler_p.html */
+body#watchCrawler table.watchCrawler {float:left; margin: 0px 5px 5px 0px;}
+body#watchCrawler p.watchCrawler {clear:both;}
+body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}
+
+/* BlogComments.html */
+div.BlogCommentPost {
+margin: 0px 30px 0px 30px;
+background-color:#eeeeee;
+}
+
+div.BlogCommentPrevNext {
+text-align: center;
+}
+
+/* SnapshotImagesReponseWriter.java */
+body#SnapshotImagesReponseWriter img {
+	word-break: break-all; /* prevent snapshot image alternate text (original URL) to overflow over image width */
+	overflow: hidden; /* prevent snapshot image alternate text (original URL) to overflow over image height */
+	display: inline-block; /* constant width and heigth even for snapshot image in error */
+	background-color: #eeeeee; /* light background colour to distinguish snapshots images in error */
+}
+
+/* other ------------------------------------*/
+ul#menu {
+  padding:0;
+  margin:0;
+  margin-left:1px;
+  position:absolute;
+  top:3em;
+  left:0;
+  width:12em;
+  overflow:hidden;
+}
+ul#menu a.MenuItemLink {
+  width:80%;
+  padding:1px 5% 1px 15%;
+}
+/* Bookmark Folder---------------------------*/
+ul.folder {
+	list-style-type: none;
+	margin-left: -3em;
+	white-space:nowrap;
+	overflow:hidden;
+}
+ul.folder > li a {
+	list-style-type: none;
+	padding-left: 20px;
+ 	background: url(grafics/doc2.gif) no-repeat;
+}
+ul.folder li.treeMenu_opened a {
+	list-style-type: none;
+	padding-left: 20px;
+ 	background: url(grafics/doc2.gif) no-repeat;
+}
+ul.folder li.treeMenu_closed {
+	list-style-type: none;
+	padding-left: 20px;
+ 	background: url(grafics/closed.gif) no-repeat;
+}
+ul.folder li.treeMenu_opened {
+	list-style-type: none;
+	padding-left: 20px;
+ 	background: url(grafics/opened.gif) no-repeat;
+}
+/*
+ul.folder li.treeMenu_opened ul {
+ 	list-style-type: none;
+ 	margin-left: -2em;
+}
+*/
+ul.folder li.treeMenu_closed ul {
+ 	display: none;
+}
+
+div#kiosk {
+  position:absolute;
+  top:0px;
+  right:0px;
+  z-index: 100;
+}
+div#kiosk span {
+  display: none;
+}
+div#kiosk:hover span {
+   display: block;
+   position: absolute;
+   font-size:1em;
+   top: 18px;
+   left: -80px;
+   width: 80px;
+   padding: 3px;
+   color: #000000;
+   background: #DDDDDD;
+   text-align: center;
+   border: 1px dashed black;
+   z-index: 100;
+}
+
+/* API */
+div#api {
+  position:absolute;
+  top:0px;
+  right:20px;
+  z-index: 1600;
+}
+
+div#api span {
+  display: none;
+}
+
+div#api:hover span {
+  display: block;
+  position: absolute;
+  font-size:1em;
+  top: 48px;
+  left: -120px; /* 30 - width */
+  width: 160px;
+  padding: 3px;
+  color: #000000;
+  background: #DDDDDD;
+  text-align: center;
+  border: 1px dashed black;
+  z-index: 100;
+ }
+
+div#searchmode {
+  position:absolute;
+  top:65px;
+  right:20px;
+  z-index: 100;
+}
+
+div#searchmode span {
+  display: none;
+}
+
+div#searchmode:hover span {
+  display: block;
+  position: absolute;
+  font-size:1em;
+  top: 1px;
+  left: -169px; /* 30 - width */
+  width: 160px;
+  padding: 3px;
+  color: #000000;
+  background: #DDDDDD;
+  text-align: center;
+  border: 1px dashed black;
+  z-index: 100;
+ }
+
+div#yacylivesearch {
+}
+
+div#info {
+  float:left;
+}
+
+div#info span {
+  display: none;
+}
+
+div#info:hover span {
+  display: block;
+  position: absolute;
+  font-size:1em;
+  width: 200px;
+  padding: 3px;
+  color: #000000;
+  background: #DDDDDD;
+  text-align: center;
+  border: 1px dashed black;
+  z-index: 100;
+ }
+
+div#tagcloud {
+	line-height:16px;
+    margin: 10px 0;
+}
+
+.info span, .info .infobox {
+  display: none;
+}
+
+.info:hover span, .info:hover .infobox {
+  display: block;
+  position: absolute;
+  font-size:1em;
+  width: 200px;
+  padding: 3px;
+  color: #000000;
+  background: #DDDDDD;
+  text-align: left;
+  border: 1px dashed black;
+  z-index: 100;
+ }
+ 
+ 
+ /******* yacysearch.html ********** 
+ 
+ /* Higlight overall audio controls when playing all results */
+#audioControls:not([data-current-track="-1"]) {
+	border-style: solid;
+	border-color: #1e90ff;
+}
+
+#stopAllBtn:hover {
+	color: red;
+}
+
+#playAllBtn:hover .glyphicon-play {
+	color: #32cd32;
+}
+
+#playAllBtn:hover .glyphicon-pause {
+	color: #ff8c00;
+}
+
+.embeddedAudios {
+	/* Remove bootstrap ul bottom margin so that there is no interval with the expandable list */
+	margin-bottom: 0px;
+}
+
+/* Button to expand/collapse audio results beyond the initial number of elements display limit */
+.expandAudiosBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
+}
+
+.expandAudiosBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
+/******* yacysearch.html end ***********/ 
+
+/******* yacysearchtrailer.html **********/
+#resource-switch-form .btn-lg {
+	/* Reduce bootstrap btn-lg padding to avoid text overlapping */
+	padding: 6px 1px;
+}
+/******* yacysearchtrailer.html end ***********/
+
+/******* yacysearchitem.html **********/
+
+/* Mark audio element with media playing error */
+.audioError {
+	border-style: solid;
+	border-color: orange;
+}
+
+/******* yacysearchitem.html end ***********/ 
+
+/******* Vocabulary_p.html **********/
+
+#Vocabulary_p label {
+	font-weight: bold;
+}
+
+/******* Vocabulary_p.html end ***********/ 
+
+/************* header.template ****************/
+/* Specific styles for the header template */
+
+/* Header search form bootstrap styles overrides for extra smal screen sizes*/
+#header-search-form {
+	max-width: 80%;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    border: 0 !important;
+    -webkit-box-shadow: unset !important;
+    box-shadow: unset !important;
+}
+
+/* Header greeting icon */
+#header-greeting-icon {
+	height:auto; 
+	width:auto; 
+	max-width:200px; 
+	max-height:32px;
+	vertical-align:middle;
+	margin-top: -6px;
+}
+
+
+/************* header.template end ************/

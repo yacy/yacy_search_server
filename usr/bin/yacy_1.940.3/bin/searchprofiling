@@ -1,0 +1,27 @@
+touch /tmp/yp$$.dump
+echo "cleaning search buffer"
+curl -s --user $1:$2 http://localhost:8080/Ranking_p.html > /dev/null
+echo "start search for $4"
+curl -s -o /tmp/yp$$.query "http://localhost:8080/yacysearch.rss?maximumRecords=10&resource=local&query=$4" &
+curl -s --user $1:$2 http://localhost:8080/Status.html > /dev/null &
+curl -s --user $1:$2 http://localhost:8080/Status.html > /dev/null &
+curl -s --user $1:$2 http://localhost:8080/Status.html > /dev/null &
+curl -s --user $1:$2 http://localhost:8080/Status.html > /dev/null &
+curl -s --user $1:$2 http://localhost:8080/Status.html > /dev/null &
+echo "search started"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=0&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 1 ready"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=$3&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 2 ready"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=$3&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 3 ready"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=$3&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 4 ready"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=$3&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 5 ready"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=$3&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 6 ready"
+curl -s --user $1:$2 "http://localhost:8080/Threaddump_p.html?sleep=$3&createThreaddump=&plain=true" >> /tmp/yp$$.dump
+echo "thread dump 7 ready"
+cat /tmp/yp$$.dump
+rm -f /tmp/yp$$.dump

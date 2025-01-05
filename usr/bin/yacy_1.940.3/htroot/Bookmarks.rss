@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title><![CDATA[YaCy '#[clientname]#': Bookmarks]]></title>
+        <link>#[address]#/Bookmarks.html</link>
+        <description><![CDATA[#[user]#'s Bookmark-Feed]]></description>
+        #{display_bookmarks}#<item>
+            <title><![CDATA[#[title]#]]></title>
+            <link>#[link]#</link>
+            <pubDate>#[rfc822date]#</pubDate>
+            <guid>#[hash]#</guid>
+            <description><![CDATA[<p>#[description]#</p><p>Tagged with | #{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#</p>]]></description>
+            #{tags}#<category><![CDATA[#[tag]#]]></category>#{/tags}#
+        </item>#{/display_bookmarks}#
+    </channel>
+</rss>

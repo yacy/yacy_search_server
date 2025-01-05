@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<version>
+	<file>#[versionstring]#</file>
+    <buildDate>#[buildDate]#</buildDate>
+    <buildTime>#[buildTime]#</buildTime>
+    <buildDateTime>#[buildDateTime]#</buildDateTime>
+    <buildHash>#[buildDateTime]#</buildHash>
+    <buildVersion>#[buildVersion]#</buildVersion>
+</version>

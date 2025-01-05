@@ -1,0 +1,85 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<h1>File Upload</h1>
+		#(mode)#
+		<!-- mode = 0 - display an upload form -->
+		<p>This form can be used to upload a file and assign it to an url.
+		Example usage is the direct attachment of a content management system to YaCy to push newly changed files directly to the YaCy indexer.</p>
+		<form id="push" action="push_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+			<dl>
+				<dt>File Count</dt>
+				<dd><input name="count" type="hidden" value="#[count]#">#[count]#</dd>
+				<dt>synchronous</dt>
+				<dd><input name="synchronous" value="true" type="checkbox"></dd>
+				<dt>commit</dt>
+				<dd><input name="commit" value="true" type="checkbox"></dd>
+				<dt>&nbsp;<dt><dd>&nbsp;</dd>
+				<dt>Files to process:<dt>
+				
+				#{input}#
+				<dt>&nbsp;<dt><dd>&nbsp;</dd>
+				<dd>
+					<dl>
+						<dt>File Number</dt>
+						<dd>#[count]#</dd>
+						
+						<dt>Data</dt>
+						<dd>data-#[count]#=<input name="data-#[count]#" type="file"></dd>
+						
+						<dt>URL</dt>
+						<dd>url-#[count]#=<input name="url-#[count]#" type="text" value="http://nowhere.cc/example.txt" size="80" maxlength="512"></dd>
+						
+						<dt>Collection</dt>
+						<dd>collection-#[count]#=<input name="collection-#[count]#" type="text" value="push" size="80" maxlength="512"></dd>
+						
+						<dt>Last-Modified</dt><!-- see: http://tools.ietf.org/html/rfc2616#section-14.29 -->
+						<!--<dd><input name="lastModified-#[count]#" type="text" value="Tue, 15 Nov 1994 12:45:26 GMT" size="30" maxlength="40"></dd>-->
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="Last-Modified:Tue, 15 Nov 1994 12:45:26 GMT" size="80" maxlength="80"></dd>
+						
+						<dt>Content-Type</dt><!-- see: http://www.iana.org/assignments/media-types/media-types.xhtml -->
+						<!--<dd><input name="contentType-#[count]#" type="text" value="text/plain" size="30" maxlength="80"></dd>-->
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="Content-Type:text/plain" size="80" maxlength="80"></dd>
+
+						<dt></dt><dd>The following attributes are only used for media type content</dd>
+						<dt>Media-Title</dt>
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="X-YaCy-Media-Title:Hello Pictureworld" size="80" maxlength="200"></dd>
+						
+						<dt>Media-Keywords ()</dt>
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="X-YaCy-Media-Keywords:uno dos tres cuatro cinco" size="80" maxlength="200"></dd>
+					</dl>
+				</dd>
+				#{/input}#
+			</dl>
+			<input type="submit" value="Submit">
+		</form>
+		::
+		<!-- mode 1 - display the push results -->
+		Result for the recently submitted file(s). You can also submit the same form using the servlet push_p.json to get push confirmations in json format.
+		<dl>
+			<dt>count</dt><dd>#[count]#</dd>
+			<dt>successall</dt><dd>#(successall)#false::true#(/successall)#</dd>
+			<dt>countsuccess</dt><dd>#[countsuccess]#</dd>
+			<dt>countfail</dt><dd>#[countfail]#</dd>
+		</dl>
+		<table border="1">
+		<tr><th>Item</th><th>URL</th><th>Success</th><th>Message</th></tr>
+		#{results}#
+		<tr>
+		<td>#[item]#</td>
+		<td><a href="#[url]#">#[url]#</a></td>
+		<td>#(success)#fail::ok#(/success)#</td>
+		<td>#(success)##[message]#::<a href="#[message]#" target="_blank">#[message]#</a>#(/success)#</td>
+		</tr>
+		#{/results}#
+		</table>
+		<p>
+		If you want to push again files, use this form to pre-define a number of upload forms:
+		<form id="push" action="push_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+		<input name="c" type="text" value="1" size="4" maxlength="8"><input type="submit" value="Submit">
+		</form>
+		</p>
+		#(/mode)#
+	</body>
+</html>

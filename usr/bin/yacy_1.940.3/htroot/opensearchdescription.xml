@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription
+    xmlns="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:suggestions="http://www.opensearch.org/specifications/opensearch/extensions/suggestions/1.1">
+  <ShortName>#(compareyacy)#::Compare #(/compareyacy)#YaCy '#[clientname]#'</ShortName>
+  <LongName>YaCy.net - #[SearchPageGreeting]#</LongName>
+  <Image type="image/gif">#[thisContext]#/env/grafics/yacy.png</Image>
+  <Image width="16" height="16">data:image/x-icon;base64,AAABAAEAEBAAAAAAGABoAwAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD////////Chiu+fBm+fRq+fRq+fRq+fRq+fRq8ehXMmk////////////////////////////++exjUqGfZsnjYsXbYsXbYsXbZsnjTp2W+fBr///////////////////////////+9exfs2r/69/L58+z58+z58+z59e/z59bChSn///////////////////////////+9fBnnz638+fX69O369e748un38Ob59O3Ll0fVrGz////////////////////////Jk0HJlUjXuYrWt4jVtYPr28T58+r59OzPn1fPnlX////////////////////////Rolu8eRXCiTPEjTvCijbNnlj169359e7Zs3vLlkf////////////////////////UqmrAgSLt3MP27eH1693169327+T59Ozo0rG/gB////////////////////////////+/gCDv4Mn48+v38Of59Oz58+v48+vr2b2+fRv///////////////////////////+9ehXr17n58+z48ejo0bDp07T48+zx49DBhCj///////////////////////////+/fhzjyJ/59Oz59OzQoVvNmU759Oz58+vKlUbXrnH////////////////////////LlkfUqmn59Oz48+vZtHzNm1D48+v59OzPoFjOnlX////////////////////////OnVPOnFL59e348+vq1rnEiC7u38j69vDXsHTIkT3////////////////////////UqWjIkD327+T58+3s2bzAgSLp07T79/Pmzqq+fBn///////////////////////////+/fx7v4Mr7+PTx5NDHkD3kyqP8+vjs2r+9exf///////////////////////////++fBjQoFnVq2zTp2bGjTjJk0LWrW7SpWC+exf////////////////////////////Nm1C6dQy7eBG8eBK9exe8ehS7dxC6dQzLlkj////////////AH///wB8x+sAf///AD/+PwA///8AP///AD///4A9PU+APoz/gB///4AdxvOAHoz/gB3368AfjU/AHT1PwB/+P
+</Image>
+  <Language>en-us</Language>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <InputEncoding>UTF-8</InputEncoding>
+  <AdultContent>true</AdultContent>
+  <Description>YaCy is an open-source GPL-licensed software that can be used for stand-alone search engine installations or as a client for a multi-user P2P-based web indexing cluster. This is the access to peer '#[clientname]#'.</Description>
+  #(compareyacy)#
+  <Url type="text/html" method="GET" template="#[thisContext]#/yacysearch.html?query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;nav=all&amp;resource=global" />
+  <Url type="application/rss+xml" method="GET" template="#[thisContext]#/yacysearch.rss?nav=&amp;query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;nav=all&amp;resource=global" />
+  <Url type="application/atom+xml" method="GET" template="#[thisContext]#/yacysearch.atom?query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;resource=global" />
+  ::
+  <Url type="text/html" method="GET" template="#[thisContext]#/compare_yacy.html?query={searchTerms}&amp;left=#[search_left]#&amp;right=#[search_right]#&amp;display=2" />
+  #(/compareyacy)#
+  <Url type="application/x-suggestions+json" template="#[thisContext]#/suggest.json?query={searchTerms}"/>
+  <Url type="application/x-suggestions+xml" template="#[thisContext]#/suggest.xml?query={searchTerms}"/>
+  <!-- syntax according to http://www.loc.gov/standards/sru/. Set verify=true to get snippets in the search results -->
+  <Developer>See https://github.com/orgs/yacy/teams/yacy_developers</Developer>
+  <Query role="example" searchTerms="yacy+free+software" />
+  <Tags>YaCy Free Software Open Source P2P Peer-to-Peer Uncensored Distributed Web Search Engine</Tags>
+  <Contact>See #[thisContext]#/ViewProfile.html?hash=localhash</Contact>
+  <Attribution>https://yacy.net YaCy Software &amp;copy; 2004-2018 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
+  <SyndicationRight>open</SyndicationRight>
+</OpenSearchDescription>

@@ -1,0 +1,51 @@
+<div class="SubMenu">
+  <h3>Web Crawler</h3>
+</div>
+<div class="SubMenu">
+  <div class="SubMenugroup">
+    <h3>Processing Monitor</h3>
+    <ul class="SubMenu">
+      <li><a href="Crawler_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Crawler</a></li>
+      <li><a href="IndexCreateLoaderQueue_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Loader</a></li>
+      <li><a href="IndexCreateParserErrors_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Rejected URLs</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Queues</h3>
+    <ul class="SubMenu">
+      <li><a href="IndexCreateQueues_p.html?stack=LOCAL" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Local</a></li>
+      #(navigation-p2p)#::<li><a href="IndexCreateQueues_p.html?stack=GLOBAL" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Global</a></li>#(/navigation-p2p)#
+      #(navigation-p2p)#::<li><a href="IndexCreateQueues_p.html?stack=REMOTE" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Remote</a></li>#(/navigation-p2p)#
+      <li><a href="IndexCreateQueues_p.html?stack=NOLOAD" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">No-Load</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Crawler Steering</h3>
+    <ul class="SubMenu">
+      <li><a href="CrawlProfileEditor_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Scheduler and Profile Editor</a></li>
+      <li><a href="Table_RobotsTxt_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">robots.txt Monitor</a></li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="SubMenu">
+  <h3>Crawl Results</h3>
+</div>
+
+<div class="SubMenu">
+  <div class="SubMenugroup">
+      <ul class="SubMenu">
+        <li><a href="CrawlResults.html" class="MenuItemLink">Overview</a></li>
+        #(navigation-p2p)#::<li><a href="CrawlResults.html?process=1" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">(1) Receipts</a></li>#(/navigation-p2p)#
+        <li><a href="CrawlResults.html?process=2" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">(2) Queries</a></li>
+        #(navigation-p2p)#::<li><a href="CrawlResults.html?process=3" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">(3) DHT Transfer</a></li>#(/navigation-p2p)#
+        <li><a href="CrawlResults.html?process=4" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">(4) Proxy Use</a></li>
+        <li><a href="CrawlResults.html?process=5" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">(5) Local Crawling</a></li>
+        #(navigation-p2p)#::<li><a href="CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>#(/navigation-p2p)#
+        <li><a href="CrawlResults.html?process=7" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">(7) Surrogate Import</a></li>
+      </ul>
+  </div>
+</div>

@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>YaCy '#[clientname]#': Bookmarks</title>
+		#%env/templates/metas.template%#		
+		<script src="js/ajax.js" type="text/javascript"></script>
+		<script src="js/Bookmarks.js" type="text/javascript"></script>
+		#(display)#				
+		<link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
+		::
+		#(/display)#
+	</head>
+	<body id="Bookmarks" 
+		#(display)#
+		onload="treeMenu_init(document.getElementById('folder'), window.name)"
+		onunload="window.name = treeMenu_store(document.getElementById('folder'))"
+		::
+		#(/display)#
+	>
+
+		#%env/templates/header.template%#	
+		<div class="SubMenu">
+			<h3>Bookmarks</h3>
+		#(mode)#
+		<!-- SubMenu (mode=0) -->
+			<ul class="SubMenu">
+				<li><a href="Bookmarks.html?login=true" class="MenuItemLink">Login</a></li>
+                <li><a href="Bookmarks.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">List Bookmarks</a></li>
+				<li><a href="Bookmarks.html?login=true&amp;mode=add" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Add Bookmark</a></li>
+				<li><a href="Bookmarks.html?login=true&amp;mode=importxml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Import Bookmarks</a></li>
+				<li><a href="api/bookmarks/xbel/xbel.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XBEL)</a></li>
+				<li><a href="api/bookmarks/posts/all.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XML)</a></li>
+				<li><a href="Bookmarks.rss" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (RSS)</a></li>
+			</ul>
+			<p/>
+		:: <!-- Submenu isAdmin (mode=1) -->
+			<ul class="SubMenu">
+				<li><a href="Bookmarks.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">List Bookmarks</a></li>
+                <li><a href="Bookmarks.html?mode=add" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Add Bookmark</a></li>
+                <li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Import Bookmarks</a></li>
+				<li><a href="api/bookmarks/xbel/xbel.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XBEL)</a></li>
+				<li><a href="api/bookmarks/posts/all.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XML)</a></li>
+				<li><a href="Bookmarks.rss" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (RSS)</a></li>
+			</ul>
+			<p/>
+		:: <!-- add or edit Bookmark (mode=2) -->
+		<form action="Bookmarks.html" method="get" accept-charset="UTF-8">
+			<fieldset>
+				<legend>#(edit)#Add Bookmark::Edit Bookmark#(/edit)#</legend>
+				<dl>
+					<dt>
+						<label for="url">URL:</label>					
+					</dt>
+					<dd>
+						<input type="text" name="url" id="url" value="#[url]#" onblur="loadTitle()" size="80" />
+					</dd>
+					<dt>
+						<label for="title">Title:</label>
+					</dt>
+					<dd>
+						<input type="text" name="title" id="title" value="#[title]#" size="80" />
+					</dd>
+					<dt>
+						<label for="description">Description:</label>
+					</dt>
+					<dd>
+						<input type="text" name="description" id="description" value="#[description]#" size="80" />
+					</dd>
+                                        #(hasquery)#::
+					<dt>
+						<label for="query">Query:</label>
+					</dt>
+					<dd>
+						<input type="text" name="query" id="query" value="#[query]#" size="80" />
+					</dd>  
+                                        #(/hasquery)#
+					<dt>
+						<label for="folder">Folder (/folder/subfolder):</label>
+					</dt>
+					<dd>
+						<input type="text" name="path" id="path" value="#[path]#" size="80" />
+					</dd>
+					<dt>
+						<label for="tags">Tags (comma separated):</label>
+					</dt>
+					<dd>
+						<input type="text" name="tags" id="tags" value="#[tags]#" size="80" />
+					</dd>
+					<dt>
+						<label for="public">Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public" #(public)#::selected="selected"#(/public)#>yes</option>
+							<option value="private" #(public)#selected="selected"::#(/public)#>no</option>
+						</select>
+					</dd>
+					<dt>
+						<input type="checkbox" value="true" name="feed" id="feed" #(feed)#::checked#(/feed)# />
+						<label for="feed">Bookmark is a newsfeed</label>
+					</dt>
+				</dl>
+                                <p style="text-align: center">
+				#(edit)#
+				<input type="submit" class="btn btn-primary" name="add" value="create" />
+				::
+				<input type="submit" class="btn btn-primary" name="add" value="Save" />
+				#(/edit)#
+                                </p>
+				<img src="env/grafics/empty.gif" name="ajax" />
+			</fieldset>
+		</form>
+		:: <!-- import XML Bookmarks (mode=3) -->		
+		<form action="Bookmarks.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+			<fieldset>
+				<legend>Import XML Bookmarks</legend>
+				<dl>
+					<dt>
+						<label for="xmlfile">File:</label>
+					</dt>
+					<dd>
+						<input type="file" name="xmlfile" id="xmlfile" />
+					</dd>
+					<dt>
+						<label for="public">import as Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public">yes</option>
+							<option value="private">no</option>
+						</select>
+					</dd>
+				</dl>
+				<input type="submit" class="btn btn-primary" name="importxml" value="import" />
+			</fieldset>
+		</form>
+		<!-- import Netscape Bookmarks -->
+		<form action="Bookmarks.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+			<fieldset>
+				<legend>Import HTML Bookmarks</legend>
+				<dl>
+					<dt>
+						<label for="file">File:</label>
+					</dt>
+					<dd>
+						<input type="file" name="htmlfile" id="htmlfile" />
+					</dd>
+					<dt>
+						<label for="tags">Default Tags:</label>
+					</dt>
+					<dd>
+						<input type="text" name="tags" id="tags" value="imported" />
+					</dd>
+					<dt>
+						<label for="public">import as Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public">yes</option>
+							<option value="private">no</option>
+						</select>
+					</dd>
+				</dl>
+				<input type="submit" class="btn btn-primary" name="importbookmarks" value="import" />
+			</fieldset>
+		</form>
+		:: 
+		<!-- (mode=4) -->
+		#(/mode)#
+		</div>
+		
+#(display)#
+<div id="api">
+<script type="text/javascript">
+//<![CDATA[
+document.write("\<a href=\"Bookmarks.rss?" + window.location.search.substring(1) + "\"\>")
+//]]>
+</script>
+<a href="#"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+<span>The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.
+Click the API icon to load the RSS from the current selection.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+::
+#(/display)#
+		
+		#(display)#
+		<!-- show Folders -->
+		<div class="TagList">
+			<fieldset>
+				<legend>Folders</legend>					
+					<ul class="folder" id="folder">
+						<li>Bookmark Folder
+								<ul class="folder">
+								#{folderlist}#
+								#[folder]#
+								#{/folderlist}#	
+								</ul>
+						</li>
+					</ul>
+			</fieldset>
+		
+		<!-- show TagList -->		
+		
+			<fieldset>
+				<legend>Tags</legend>
+				<form action="Bookmarks.html" id="choosetag" method="get" accept-charset="UTF-8"><div>
+					<select size="1" name="tag" onchange="document.choosetag.submit();">
+						<option value=""#[selected]#>All (#[num-bookmarks]#)</option>
+						#{optlist}#<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
+						#{/optlist}#
+					</select>
+					<input type="submit" class="btn btn-xs btn-primary" value=" ... " />
+				</div></form>
+				<p>
+					#{taglist}#<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[name]#">#[name]#</a></span>
+					#{/taglist}#
+				</p>
+			</fieldset>
+                <!-- show AutoSearch infobox -->
+                <fieldset>
+                    <legend>Auto Search</legend>
+                    #(autosearchrunning)#
+                    <p>
+                     <form action="Bookmarks.html" method="post">start autosearch of new bookmarks <input type="submit" name="startautosearch" class="btn btn-primary btn-xs" value="start it"/>
+                    </p>
+                    <div class="info">#[msg]#</div>
+                    ::
+                    <table>
+                      <tr>
+                          <td>autosearch queue:</td><td>#[jobcount]#</td><td><form action="Bookmarks.html" method="post"><input type="submit" name="stopautosearch" class="btn btn-danger btn-xs" value="stop it"/></form></td>
+                      </tr>
+                      <tr>
+                          <td>received results:</td><td>#[totalcount]#</td><td></td>
+                      </tr>
+                      <tr>
+                          <td>current query:</td><td colspan="2">#[query]#</td>
+                      </tr>                        
+                    </table>
+                    #(/autosearchrunning)#
+                    <br />
+                    <p>This starts a search of new or modified bookmarks since startup
+                        in folder "search" with "query=&lt;original_search_term&gt;"<br />
+                        Every peer online will be ask for results.                        
+                    </p>
+                </fieldset>
+		</div>
+		<!-- show BookmarkList -->		
+		<div class="bookmarkList">			
+			<h3>Bookmark List</h3>
+			#{bookmarks}#
+			<div class="bookmark #(public)#public::private#(/public)#">
+				<h4 class="bookmarkTitle">
+					#(public)#
+					<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.png" alt="private bookmark" title="private bookmark"/>
+					::
+					<img class="bookmarkIcon" src="env/grafics/bookmarkpub.png" alt="public bookmark" title="public bookmark"/>
+					#(/public)#
+					<a href="#[link]#" target="_blank" class="bookmarkTitle">#[title]#</a>
+				</h4>
+				<p class="bookmarkDescription">#[description]#</p>
+                                #(hasquery)#::<p class="bookmarkDescription">query=#[query]#</p>#(/hasquery)#
+				<p class="tags">Tagged with | #{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#</p>
+				<p class="bookmarkActions">
+					<a href="Bookmarks.html?edit=#[hash]#" class="bookmarkAction">Edit</a>
+					/
+					<a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction" onclick="return confirm('Confirm deletion')">Delete</a>
+					/
+					<a href="api/getpageinfo_p.xml?url=#[link]#" target="_blank" class="bookmarkAction">Info</a>
+                                        #(hasquery)#::
+                                        /
+                                        <a href="yacysearch.html?query=#[query]#" class="bookmarkAction">search</a>
+                                        #(/hasquery)#
+				</p>
+			</div>
+			#{/bookmarks}#
+			<p class="Navigation">
+				#(prev-page)#
+				::<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=#[num]#">previous page</a>
+				#(/prev-page)#
+				#(next-page)#
+				::<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=#[num]#">next page</a>
+				#(/next-page)#
+			</p>
+			<p class="bookmarkNavigation">
+				Show
+				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=10">10</a>
+				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=50">50</a>
+				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=100">100</a>
+                                 Bookmarks per page. 
+			</p>
+		</div>
+		::
+		#(/display)#
+		#%env/templates/footer.template%#
+	</body>
+</html>

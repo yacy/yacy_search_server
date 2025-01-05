@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>YaCy Bookmarks</title>
+		
+		<link media="screen" type="text/css" href="../jquery/themes/start/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+		<link media="screen" type="text/css" href="../jquery/css/jquery-ui-combobox.css" rel="stylesheet" />
+		<link media="screen" type="text/css" href="yacy-portalsearch.css" rel="stylesheet" />
+	
+		<script src="../jquery/js/jquery-1.7.min.js" type="text/javascript"></script>    
+		<script src="../jquery/js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+		
+		<script src="../jquery/js/jquery-ui-combobox.js" type="text/javascript"></script>
+		<script src="../jquery/js/jquery.query-2.1.7.js" type="text/javascript"></script>
+		<script src="../jquery/js/jquery.form-2.73.js" type="text/javascript"></script>
+		<script src="../jquery/js/jquery.field-0.9.2.min.js" type="text/javascript"></script>
+		
+		<script type="text/javascript">
+		   //<![CDATA[
+			$(document).ready(function() {
+				if ($("#yacylivesearch").length ) {
+					yconf = {
+						url      : '..', /* URL of the backend YaCy peer : 
+							'..' is used as a default relative prefix when this widget is deployed directly on a YaCy peer.
+							Otherwise should be something like 'https://peerdomain:port' */
+						global   : true,
+						width    : 500,	
+						height   : 600,			
+						theme    : 'start',
+						title    : 'YaCy Search Widget: local peer',
+						load_js  : false,
+						load_css : false
+					};
+					$.getScript('yacy-portalsearch.js', function(){});
+				}
+			});
+			//]]>
+		</script>
+	</head>
+	<body>
+	<h3>YaCy Portalsearch:</h3>
+	<div id="yacylivesearch">
+		<form id="ysearch" method="get" accept-charset="UTF-8" action="yacysearch.html"><p>
+			<input name="query" id="yquery" class="fancy" type="text" size="20" maxlength="80" value=""/>
+			<input type="hidden" name="verify" value="cacheonly" />
+			<input type="hidden" name="maximumRecords" value="10" />
+			<input type="hidden" name="resource" value="local" />
+			<input type="hidden" name="urlmaskfilter" value=".*" />
+			<input type="hidden" name="prefermaskfilter" value="" />
+			<input type="hidden" name="former" value="" />
+			<input type="hidden" name="nav" value="all" /></p>
+		</form>
+	</div>
+	</body>
+</html>

@@ -1,0 +1,56 @@
+#(content)#::<item>
+<title>#[title-xml]#</title>
+<link>#[link]#</link>
+<description>#[description-xml]#</description>
+<pubDate>#[date822]#</pubDate>
+#(image)#::<media:content medium="image" url="#[url]#"/>#(/image)#
+#(showEvent)#::<ev:startdate>#[date822]#</ev:startdate><ev:enddate>#[date822]#</ev:enddate>#(/showEvent)#
+<dc:publisher><![CDATA[#[publisher]#]]></dc:publisher>
+<dc:creator><![CDATA[#[creator]#]]></dc:creator>
+<dc:subject><![CDATA[#[subject]#]]></dc:subject>
+<yacy:size>#[size]#</yacy:size>
+<yacy:sizename>#[sizename]#</yacy:sizename>
+<yacy:host>#[host]#</yacy:host>
+<yacy:path>#[path]#</yacy:path>
+<yacy:file>#[file]#</yacy:file>
+<guid isPermaLink="false">#[urlhash]#</guid>
+#(loc)#::<geo:lat>#[lat]#</geo:lat><geo:long>#[lon]#</geo:long>#(/loc)#
+</item>::
+#(item)#::<item>
+<title>#[name]#</title>
+<link>#[source-xml]#</link>
+<description></description>
+<pubDate></pubDate>
+<guid isPermaLink="false">#[urlhash]#</guid>
+<yacy:host>#[sourcedom]#</yacy:host>
+<media:group>
+<media:content 
+  url="#[href]#" 
+  fileSize="#[fileSize]#"  
+  type="#[mimetype]#"
+  medium="image"
+  isDefault="true" 
+  expression="full" 
+  height="#[width]#"
+  width="#[height]#" />
+<media:content 
+  url="#[hrefCache]#" 
+  fileSize="#[fileSize]#"  
+  type="#[mimetype]#"
+  medium="image"
+  isDefault="false" 
+  expression="full" 
+  height="#[width]#"
+  width="#[height]#" />
+<media:content 
+  url="/ViewImage.png?maxwidth=256&amp;maxheight=256&amp;code=#[code]#" 
+  fileSize="#[fileSize]#" 
+  type="#[mimetype]#"
+  medium="image"
+  isDefault="false" 
+  expression="sample" 
+  height="256"
+  width="256" />
+</media:group>
+</item>#(/item)#::
+#(/content)#

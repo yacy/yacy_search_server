@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Parser Errors</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreateIndexingQueue">
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawlMonitor.template%#
+    <h2>Rejected URLs</h2>
+    
+    #(rejected)#
+    ::
+    <form action="IndexCreateParserErrors_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <p><strong>Rejected URL List:</strong>&nbsp;There are #[num]# entries in the rejected-urls list. </p>
+      #(only-latest)#
+      <fieldset>
+      ::
+      <p>Showing latest #[num]# entries.</p>
+      <fieldset>
+        <input type="hidden" name="showRejected" value="#[newnum]#" />
+        <input type="submit" name="moreRejected" class="btn btn-success" value="show more" />&nbsp;
+      #(/only-latest)#
+        <input type="submit" name="clearRejected" class="btn btn-danger" value="clear list" />
+      </fieldset>
+    </form>
+    <p>There are #[num]# entries in the rejected-queue:</p>
+    <table border="0">
+      <colgroup>
+        <col width="60" span="2" />
+        <col span="2" />
+      </colgroup>
+      <tr class="TableHeader">
+        <th>Time</th>
+        <th>URL</th>
+        <th>Fail-Reason</th>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[time]#</td>
+        <td><a href="#[url]#" target="_blank">#[url]#</a></td>
+        <td>#[failreason]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    #(/rejected)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

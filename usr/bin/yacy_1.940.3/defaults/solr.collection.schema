@@ -1,0 +1,547 @@
+## this is a list of all solr keys for the default index 'collection1', the fulltext search index
+## this complete list of keys can be changed; the actual schema is stored in:
+## DATA/SETTINGS/solr.collection.schema
+
+## the syntax of this file:
+## - all lines beginning with '##' are comments
+## - all non-empty lines not beginning with '#' are keyword lines
+## - all lines beginning with '#' and where the second character is not '#' are commented-out keyword lines
+
+### mandatory values, do not disable them, YaCy won't work without them
+
+## primary key of document, the URL hash, string (mandatory field)
+id
+
+##url of document, string (mandatory field)
+sku
+
+## last-modified from http header, date (mandatory field)
+last_modified
+
+## time when resource was loaded
+load_date_dt
+
+## mime-type of document, string (mandatory field)
+content_type
+
+## content of title tag, text (mandatory field)
+title
+
+## id of the host, a 6-byte hash that is part of the document id (mandatory field)
+host_id_s
+
+## host of the url, string
+host_s
+
+## the size of the raw source (mandatory field)
+size_i
+
+## fail reason if a page was not loaded. if the page was loaded then this field is empty, string (mandatory field)
+failreason_s
+
+## fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'
+failtype_s
+    
+## html status return code (i.e. "200" for ok), -1 if not loaded (see content of failreason_t for this case), int (mandatory field)
+httpstatus_i
+
+## the file name extension
+url_file_ext_s
+
+## either the second level domain or, if a ccSLD is used, the third level domain. Needed to search in the url
+host_organization_s
+
+## internal links, only the protocol. Needed for IndexBrowser
+inboundlinks_protocol_sxt
+
+## internal links, the url only without the protocol. For correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed
+inboundlinks_urlstub_sxt
+
+## external links, only the protocol. For correct assembly of outboundlinks  outboundlinks_protocol_sxt + outboundlinks_urlstub_sxt is needed
+outboundlinks_protocol_sxt
+
+## external links, the url only without the protocol. Needed to enhance the crawler
+outboundlinks_urlstub_sxt
+
+## all image links without the protocol and '://'. For correct assembly of image url  images_protocol_sxt + images_urlstub_sxt is needed
+images_urlstub_sxt
+
+## all image link protocols
+images_protocol_sxt
+
+
+### optional but highly recommended values, part of the index distribution process
+
+## date until resource shall be considered as fresh
+fresh_date_dt
+
+## id of the referrer to this document, discovered during crawling
+referrer_id_s
+
+## the name of the publisher of the document
+publisher_t
+
+## the language used in the document
+language_s
+
+## number of links to audio resources
+audiolinkscount_i
+
+## number of links to video resources
+videolinkscount_i
+
+## number of links to application resources
+applinkscount_i
+
+
+### optional but highly recommended values, not part of the index distribution process
+
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b
+#title_exact_signature_l
+
+## flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false, boolean
+#title_unique_b
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#exact_signature_copycount_i
+
+## intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies
+#fuzzy_signature_text_t
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#fuzzy_signature_copycount_i
+
+## needed (post-)processing steps on this metadata set
+#process_sxt
+
+## if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances
+dates_in_content_dts
+
+## the number of entries in dates_in_content_sxt
+dates_in_content_count_i
+
+## content of itemprop attributes with content='startDate'
+startDates_dts
+
+## content of itemprop attributes with content='endDate'
+endDates_dts
+
+## number of unique http references, should be equal to references_internal_i + references_external_i
+references_i
+
+## number of unique http references from same host to referenced url
+references_internal_i
+
+## number of unique http references from external hosts
+references_external_i
+
+## number of external hosts which provide http references
+references_exthosts_i
+
+## crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth
+crawldepth_i
+
+## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
+harvestkey_s
+
+## unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false
+http_unique_b
+
+## unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false
+www_unique_b
+
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t
+exact_signature_l
+
+## flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search
+exact_signature_unique_b
+
+## 64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t
+fuzzy_signature_l
+    
+## flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search
+fuzzy_signature_unique_b
+
+## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
+collection_sxt
+
+## geospatial point in degrees of latitude,longitude as declared in WSG84, location; this creates two additional subfields, coordinate_p_0_coordinate (latitude) and coordinate_p_1_coordinate (longitude)
+coordinate_p
+
+## content of author-tag, texgen
+author
+
+## content of description-tag(s), text
+description_txt
+
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of description, used to compute description_unique_b
+#description_exact_signature_l
+
+## flag shows if description is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same description, the unique-flag is set to false, boolean
+#description_unique_b
+
+## content of keywords tag; words are separated by comma, semicolon or space
+keywords
+
+## character encoding, string
+charset_s
+
+## number of words in visible area, int
+wordcount_i
+
+## number of all outgoing links; including linksnofollowcount_i, int
+linkscount_i
+
+## number of all outgoing inks with nofollow tag, int
+linksnofollowcount_i
+
+## number of outgoing inbound (to same domain) links; including inboundlinksnofollowcount_i, int
+inboundlinkscount_i
+
+## number of outgoing inbound (to same domain) links with nofollow tag, int
+#inboundlinksnofollowcount_i
+
+## number of outgoing outbound (to other domain) links, including outboundlinksnofollowcount_i, int
+outboundlinkscount_i
+
+## number of outgoing outbound (to other domain) links with nofollow tag, int
+#outboundlinksnofollowcount_i
+
+## number of images, int
+imagescount_i
+
+## response time of target server in milliseconds, int
+responsetime_i
+
+## all visible text, text
+text_t
+
+## additional synonyms to the words in the text
+synonyms_sxt
+
+## h1 header
+h1_txt
+
+## h2 header
+h2_txt
+
+## h3 header
+h3_txt
+
+## h4 header
+h4_txt
+
+## h5 header
+h5_txt
+
+## h6 header
+h6_txt
+
+### unused, delete candidates
+
+## the md5 of the raw source
+#md5_s
+
+## redirect url if the error code is 299 < httpstatus_i < 310
+#httpstatus_redirect_s
+
+### optional values, not part of standard YaCy handling (but useful for external applications)
+
+## ip of host of url (after DNS lookup), string
+#ip_s
+
+## tags of css entries, normalized with absolute URL
+#css_tag_sxt
+
+## urls of css entries, normalized with absolute URL
+#css_url_sxt
+
+## number of css entries, int
+#csscount_i
+
+## urls of script entries, normalized with absolute URL
+#scripts_sxt
+
+## number of entries in scripts_sxt, int
+#scriptscount_i
+
+## noindex and nofollow attributes
+## from HTML (meta-tag in HTML header: robots)
+## and HTTP header (X-Robots-Tag property)
+## coded as binary value:
+## bit  0: "all" contained in html header meta
+## bit  1: "index" contained in html header meta
+## bit  2: "follow" contained in html header meta
+## bit  3: "noindex" contained in html header meta
+## bit  4: "nofollow" contained in html header meta
+## bit  8: "all" contained in http header X-Robots-Tag
+## bit  9: "noindex" contained in http header X-Robots-Tag
+## bit 10: "nofollow" contained in http header X-Robots-Tag
+## bit 11: "noarchive" contained in http header X-Robots-Tag
+## bit 12: "nosnippet" contained in http header X-Robots-Tag
+## bit 13: "noodp" contained in http header X-Robots-Tag
+## bit 14: "notranslate" contained in http header X-Robots-Tag
+## bit 15: "noimageindex" contained in http header X-Robots-Tag
+## bit 16: "unavailable_after" contained in http header X-Robots-Tag
+#robots_i
+
+## content of <meta name="generator" content=#content#> tag, text
+#metagenerator_t
+
+## internal links, the visible anchor text
+inboundlinks_anchortext_txt
+
+## external links, the visible anchor text
+outboundlinks_anchortext_txt
+
+## all icon links without the protocol and '://'
+icons_urlstub_sxt
+
+## all icon links protocols : split from icons_urlstub to provide some compression, as http protocol is implied as default and not stored
+icons_protocol_sxt
+
+## all icon links relationships space separated (e.g. 'icon apple-touch-icon')
+icons_rel_sxt
+
+## all icon sizes space separated (e.g. '16x16 32x32')
+icons_sizes_sxt
+
+## all text/words appearing in image alt texts or the tokenized url
+images_text_t
+
+## all image link alt tag
+images_alt_sxt
+
+## size of images:height
+images_height_val
+
+## size of images:width
+images_width_val
+
+## size of images as number of pixels (easier for ranking than using with and height)
+#images_pixel_val
+
+## number of image links with alt tag
+#images_withalt_i
+
+## binary pattern for the existance of h1..h6 headlines, int
+#htags_i
+
+## url inside the canonical link element, string
+#canonical_s
+
+## flag shows if the url in canonical_t is equal to sku, boolean
+#canonical_equal_sku_b
+
+## link from the url property inside the refresh link element, string
+#refresh_s
+
+## all texts in <li> tags
+#li_txt
+
+## number of <li> tags, int
+#licount_i
+
+## all texts in <dt> tags
+#dt_txt
+
+## number of <dt> tags, int
+#dtcount_i
+
+## all texts in <dd> tags
+#dd_txt
+
+## number of <dd> tags, int
+#ddcount_i
+
+## all texts in <article> tags
+#article_txt
+
+## number of <article> tags, int
+#articlecount_i
+
+## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order
+bold_txt
+
+## number of occurrences of texts in bold_txt
+#bold_val
+
+## total number of occurrences of <b> or <strong>, int
+#boldcount_i
+
+## all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order
+italic_txt
+
+## number of occurrences of texts in italic_txt
+#italic_val
+
+## total number of occurrences of <i>, int
+#italiccount_i
+
+## all texts inside of <u> tags. no doubles. listed in the order of number of occurrences in decreasing order
+underline_txt
+
+## number of occurrences of texts in underline_txt
+#underline_val
+
+## total number of occurrences of <u>, int
+#underlinecount_i
+
+## flag that shows if a swf file is linked, boolean
+#flash_b
+
+## list of all links to frames
+#frames_sxt
+
+## number of attr_frames, int
+#framesscount_i
+
+## list of all links to iframes
+#iframes_sxt
+
+## number of attr_iframes, int
+#iframesscount_i
+
+## url of the hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077
+#hreflang_url_sxt
+
+## country code of the hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077
+#hreflang_cc_sxt
+
+## page navigation url, see http://googlewebmastercentral.blogspot.de/2011/09/pagination-with-relnext-and-relprev.html
+#navigation_url_sxt
+
+## page navigation rel property value, can contain one of {top,up,next,prev,first,last}
+#navigation_type_sxt
+
+## publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de
+#publisher_url_s
+
+## the protocol of the url
+url_protocol_s
+
+## the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension
+url_file_name_s
+
+## tokens generated from url_file_name_s which can be used for better matching and result boosting
+#url_file_name_tokens_t
+
+## number of all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name
+url_paths_count_i
+    
+## all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name
+url_paths_sxt
+
+## number of key-value pairs in search part of the url
+#url_parameter_i
+
+## the keys from key-value pairs in the search part of the url
+#url_parameter_key_sxt
+
+## the values from key-value pairs in the search part of the url
+#url_parameter_value_sxt
+
+## number of all characters in the url == length of sku field
+url_chars_i
+
+## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used.
+#host_dnc_s
+    
+## the organization and dnc concatenated with '.'
+#host_organizationdnc_s
+    
+## the remaining part of the host without organizationdnc
+#host_subdomain_s
+
+## number of documents from the same host; can be used to measure references_internal_i for likelihood computation, integer
+host_extent_i
+
+## number of titles (counting the 'title' field) in the document
+#title_count_i
+
+## number of characters for each title
+#title_chars_val
+
+## number of words in each title
+#title_words_val
+
+## number of descriptions in the document. Its not counting the 'description' field since there is only one. But it counts the number of descriptions that appear in the document (if any)
+#description_count_i
+
+## number of characters for each description
+#description_chars_val
+
+## number of words in each description
+#description_words_val
+
+## number of h1..h6 header lines
+#h1_i
+#h2_i
+#h3_i
+#h4_i
+#h5_i
+#h6_i
+
+## breadcrumbs, see http://schema.org/WebPage; this is a counter how many itemprop="breadcrumb" properties in div tags appears within a page
+#schema_org_breadcrumb_i
+
+## Open Graph Metadata field, see http://ogp.me/ns#
+#opengraph_title_t
+#opengraph_type_s
+#opengraph_url_s
+#opengraph_image_s
+
+
+## citation ranking
+
+## the number of documents within a single host
+#cr_host_count_i
+
+## the chance to click on this page when randomly clicking on links within on one host
+#cr_host_chance_d
+
+## normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10
+#cr_host_norm_i
+
+## custom rating; to be set with external rating information
+#rating_i
+
+## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
+#ext_cms_txt
+
+## number of attributes that count for a specific cms in attr_cms
+#ext_cms_val
+
+## names of ad-servers/ad-services
+#ext_ads_txt
+
+## number of attributes counts in attr_ads
+#ext_ads_val
+
+## names of recognized community functions
+#ext_community_txt
+
+## number of attribute counts in attr_community
+#ext_community_val
+
+## names of map services
+#ext_maps_txt
+
+## number of attribute counts in attr_maps
+#ext_maps_val
+
+## names of tracker server
+#ext_tracker_txt
+
+## number of attribute counts in attr_tracker
+#ext_tracker_val
+
+## names matching title expressions
+#ext_title_txt
+
+## number of matching title expressions
+#ext_title_val
+
+## collection of all vocabulary names that have a matcher in the document - use this to boost with vocabularies
+vocabularies_sxt
+    

@@ -1,0 +1,32 @@
+# Network definition file for a private web index
+# to be used as a network without any other peers
+# for a personal web portal
+
+# general network definition
+network.unit.name = webportal
+network.unit.description = Personal Web Search Portal
+network.unit.domain = global
+network.unit.search.time = 4
+network.unit.dht = false
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 1
+network.unit.dht.partitionExponent = 0
+network.unit.inspection.searchverify = false
+network.unit.remotecrawl.speed = 1
+
+# each network may use different yacy distributions.
+# the auto-updater can access network-specific update locations
+network.unit.update.location0 = https://download.yacy.net/
+network.unit.update.location0.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
+network.unit.update.location1 = https://release.yacy.net/
+
+# properties for in-protocol response authentication:
+network.unit.protocol.control = uncontrolled
+
+# white/blacklists
+network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,localhost
+network.unit.access.blacklist =
+
+# greedy learning: fast information acquisition heuristic for new peers 
+greedylearning.enabled = false
+greedylearning.limit.doccount = 1000

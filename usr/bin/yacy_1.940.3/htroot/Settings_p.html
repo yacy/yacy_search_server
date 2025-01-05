@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Advanced Settings</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Settings">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Advanced Settings</h2>
+    <p>If you want to restore all settings to the default values,
+    but <strong>forgot your administration password</strong>, you must stop the proxy,
+    delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.
+    </p>
+    <table>
+      <tr>
+        <td valign="top">
+          <ul class="settingsMenu">
+            <li><a href="?page=ServerAccess">Server Access Settings</a></li>
+            <li><a href="?page=referrer">Referrer Policy Settings</a></li>
+            <li><a href="?page=crawler">Crawler Settings</a></li>
+            <li><a href="?page=seed">Seed Upload Settings</a></li>
+            <li><a href="?page=messageForwarding">Message Forwarding (optional)</a></li>
+          </ul>
+        </td>
+        <td valign="top">
+          <ul class="settingsMenu">
+            <li><a href="?page=ProxyAccess">Transparent Proxy Access Settings</a></li>
+            <li><a href="?page=UrlProxyAccess">URL/Web Proxy Access Settings</a></li>
+            <li><a href="?page=proxy">Remote Proxy (optional)</a></li>
+            <li><a href="?page=debug">Debug/Analysis Settings</a></li>
+            <li><a href="?page=httpClient">HTTP client Settings</a></li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+    #%[settingsTables]%#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Websearch Comparison</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="Compare Yacy '#[clientname]#'" href="opensearchdescription.xml?compare_yacy=true&amp;left=#[search_left]#&amp;right=#[search_right]#" /> 
+    #%env/templates/metas.template%#
+  </head>
+<body>
+#(display)#
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#
+    ::
+    #%env/templates/embeddedheader.template%#
+#(/display)#
+<script type="text/javascript">
+  document.getElementById("header_comparesearch").className += " active";
+</script>
+    <fieldset>
+        <legend>Websearch Comparison</legend>
+        <form action="" method="get" accept-charset="UTF-8">
+            <p><input type="text" class="searchinput" name="query" value="#[search_query]#" size="40" onFocus="this.select()"/> <input type="submit" class="btn btn-primary" value="Compare" />
+               Left Search Engine
+                   <select id="selforobjleft" name="left">
+                   #{searchengines}#
+                   <option #(leftengine)#::selected="selected"#(/leftengine)#>#[searchengine]#</option>
+                   #{/searchengines}#
+                   </select>
+                &nbsp;&nbsp;Right Search Engine
+                   <select id="selforobjright" name="right">
+                   #{searchengines}#
+                   <option #(rightengine)#::selected="selected"#(/rightengine)#>#[searchengine]#</option>
+                   #{/searchengines}#
+                   </select>
+               <input type="hidden" name="display" value="#[display]#" />
+           </p>
+        </form>
+    </fieldset>
+    #(search)#
+    ::
+    <fieldset>
+        <legend>Search Result</legend>
+        <object id="objleft" onerror="loadErrorFunction('objleft')"  type="text/html" data="#[left]##[query]#" style="width:49%;height:1600px;overflow:scroll;min-width:30%;"></object> 
+        <object id="objright" onerror="loadErrorFunction('objright')" type="text/html" data="#[right]##[query]#" style="width:49%;height:1600px;overflow:scroll;">loading....</object>
+        <script>
+            function loadErrorFunction(theObject) {
+                var htobj = document.getElementById(theObject);
+                htobj.innerHTML = "&nbsp;&nbsp;&nbsp;Error: no results received...    from " + document.getElementById("selfor"+theObject).value + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                htobj.style.verticalAlign = "top";
+                htobj.style.color = "red";                  
+            }
+        </script>
+    </fieldset>
+    #(/search)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

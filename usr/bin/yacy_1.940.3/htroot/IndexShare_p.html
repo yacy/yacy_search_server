@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Sharing</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexShare">
+    #%env/templates/header.template%#
+    <h2>Index Sharing</h2>
+    <!-- Diese Seite ist noch nicht komplett überarbeitet. Da mir jedoch
+    der Sinn der unteren table vollkommen unklar ist, mache ich jetzt
+    nichts mehr. Infos zum Sinn der unteren Table gerne per yacy-Message
+    an Michitux -->
+    <p>
+      The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references
+    </p>
+    <form action="IndexShare_p.html" method="get" accept-charset="UTF-8">
+      <table border="0" cellpadding="6" cellspacing="0">
+        <tr valign="top" bgcolor="#CCDDCC">
+        <td>Index:&nbsp;</td>
+        <td>
+        <input type="checkbox" name="distribute" value="" align="top" #(distributecheck)#::checked="checked" #(/distributecheck)#/>distribute&nbsp;<br />
+        <input type="checkbox" name="receive" value="" align="top" #(receivecheck)#::checked="checked" #(/receivecheck)#/>receive
+        </td>
+        <td>
+        &nbsp;&nbsp;&nbsp;receive grant default: <br />
+        &nbsp;&nbsp;&nbsp;for each remote peer&nbsp;
+        </td>
+        <td>
+        &nbsp;<input type="text" name="linkfreq" value="#[linkfreq]#" size="4" maxlength="4" />&nbsp;links/minute&nbsp;<br />
+        &nbsp;<input type="text" name="wordfreq" value="#[wordfreq]#" size="4" maxlength="4" />&nbsp;words/minute&nbsp;
+        </td><td>
+        &nbsp;<input type="submit" name="indexsharesetting" value="Set" />
+        </td>
+        </tr>
+      </table>
+        
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr valign="top">
+          <td width="240"><center>#[dtable]#</center></td>
+          <td bgcolor="#889988" width="1px"></td>
+          <td width="240"><center>#[rtable]#</center></td>
+        </tr>
+      </table>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

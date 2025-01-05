@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<blacklists>
+#{lists}#
+	<list name="#[name]#">
+	#{items}#
+		<item>#[item]#</item>
+	#{/items}#
+	</list>
+#{/lists}#
+</blacklists>

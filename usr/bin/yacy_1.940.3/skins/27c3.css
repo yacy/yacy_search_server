@@ -1,0 +1,287 @@
+/* this skin was made for the ftp file share search during 27c3 */
+
+
+body {
+  background-color:#222222;
+  color:#9cdeed;
+}
+
+a:link {
+  color:#9cdeed;
+  background-color:transparent;
+}
+
+a:visited {
+  color:#9cdeed;
+  background-color:transparent;
+}
+
+a:hover {
+  color: #52943e;
+  background-color:transparent;
+}
+
+
+/* Menu */
+
+.menugroup h3 {
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+
+  background-color: #5090D0;
+  color:white;
+}
+
+.SubMenugroup h3, .SubMenu h3 {
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+
+  background-color:#5090D0;
+  color:white;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color:#333333;
+  color:#9cdeed;
+}
+
+a:hover.MenuItemLink {
+  background-color:transparent;
+  color:#9cdeed;
+}
+
+/* Head */
+
+div.head h1 {
+  background-color:transparent;
+  text-align:left;
+  padding-left:70px;
+  color:#9cdeed;
+}
+
+/* Tables */
+
+table {
+}
+
+.TableHeader {
+  background-color: #52943e;
+  color:white;
+}
+
+.TableCellDark {
+  background-color: #666666;
+}
+
+.TableCellLight {
+  background-color: #333333;
+}
+
+.TableCellSummary {
+  background-color: #554422;
+  border:1px solid #888888;
+}
+
+.TableCellActive {
+  background-color: #FFCCCC;
+}
+
+/* Blog and Wiki*/
+
+.Post {
+  background-color:#222222;
+}
+
+.PostSubject {
+  background-color:#222222;
+}
+
+.PostSubject a {
+  color:#9cdeed;
+}
+
+.PostInfo {
+  background-color:#222222;
+}
+
+/* Wiki */
+
+.WikiTOCBox {
+  border: 1px solid #888888;
+  background-color: #222222;
+}
+
+a.unknown {
+  color:#990000;
+}
+
+a.known {
+  color:#009900;
+}
+
+a.extern {
+  color:#000099;
+}
+
+/* in Bookmarks */
+
+.bookmark {
+  border-bottom:1px #888888 dashed;
+}
+
+a.bookmarkTitle {
+  color: #5090D0;
+}
+
+a:hover.bookmarkTitle {
+  color: #5090D0;
+}
+
+a.bookmarkTags {
+  color: #ffffff;
+}
+
+a:hover.bookmarkTags {
+  color: #5090D0;
+}
+
+a.bookmarkAction {
+  color: #888888;
+}
+
+.Tags {
+  border-left: 2px solid #9cdeed;
+}
+
+.diff               { background-color: #222222; }
+.diff .unchanged    { color: #000099; }
+.diff .added        { color: #009900; background-color: #222222; }
+.diff .deleted      { color: #990000; background-color: #222222; }
+
+/* in Status.html */
+
+.ProgressBar {
+  border: #222222 solid 1px;
+}
+div.ProgressBarFill {
+  background-color:#666666;
+}
+
+/* Searchresults */
+
+fieldset.maininput, fieldset.yacys {
+  background-color:#666666;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+form.search.small h2 {
+  border-bottom:1px solid #888888;
+}
+
+.searchresults {
+  /*border-top:1px #888888 dashed;*/
+}
+
+.searchresults h4 a {
+  font-size:1.2em;
+  color:#ffffff;
+}
+.searchresults h4 a:hover {
+  color:#ffffff;
+}
+
+.snippetLoaded strong {
+  color:#ffffff;
+}
+
+.searchresults .url a {
+  color:#808080;
+}
+.searchresults .url a:hover {
+  color:#808080;
+}
+
+
+/* other */
+
+.settingsValue {
+  color:#000099;
+}
+
+.Headline {
+  background-color: #5090D0;
+  color: white;
+}
+
+.Heading {
+  background-color: #5090D0;
+}
+
+.error, .warning {
+  color:red;
+}
+
+.success {
+  color:green;
+}
+
+.Message {
+  background-color: #222222;
+}
+
+.example {
+  background-color:#000099;
+}
+
+.hides:hover .hoverShow { background-color: #222222; }
+
+.navbar-default{background-color:#222222;border-color:#222222}
+
+/* Log */
+
+body#ViewLog pre {
+  background-color:white;
+}
+
+/* Forms */
+
+fieldset {
+  background-color:#666666;
+  color:#9cdeed;
+  border:0px solid #666666;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+/* input, select, textarea, button {
+  color: black;
+  background-color: white;
+} */
+
+legend {
+  background-color:#52943e;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  text-align:left;
+  color:white;
+}
+
+form dt, dl.pairs dt {
+  background-color:#666666;
+  font-weight:bold;
+}
+
+form dd, dl.pairs dd {
+  background-color:#666666;
+}

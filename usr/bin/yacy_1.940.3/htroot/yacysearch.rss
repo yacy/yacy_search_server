@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>
+<rss version="2.0"
+    xmlns:yacy="http://www.yacy.net/"
+    xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:media="http://search.yahoo.com/mrss/"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+    xmlns:ev="http://purl.org/rss/1.0/modules/event/"
+>
+	<!-- YaCy Search Engine; https://yacy.net -->
+	<channel>
+		<title>#[promoteSearchPageGreeting]#: #[rss_query]#</title>
+		<description>Search for #[rss_query]#</description>
+		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[search.verify]#</link>
+		<image>
+			<url>#[rssYacyImageURL]#</url>
+			<title>Search for #[rss_query]#</title>
+			<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[search.verify]#</link>
+		</image>
+		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
+		<opensearch:itemsPerPage>#[num-results_itemsPerPage]#</opensearch:itemsPerPage>
+		<atom:link rel="search" href="#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
+		<opensearch:Query role="request" searchTerms="#[rss_queryenc]#" />
+#{results}#
+<!--#include virtual="yacysearchitem.xml?item=#[item]#&eventID=#[eventID]#" -->
+#{/results}#
+<!--#include virtual="yacysearchtrailer.xml?eventID=#[eventID]#" -->
+	</channel>
+</rss>

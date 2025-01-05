@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Monitor for remotely started global crawls</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="js/ajax.js"></script>
+    <script type="text/javascript" src="js/IndexCreate.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Recently started remote crawls in progress</h2>
+    
+    <p><strong>Remote crawl start points, crawl is ongoing</strong></p>
+    <table border="0">
+      <tr class="TableHeader">
+        <td><strong>Start Time</strong></td>
+        <td><strong>Peer Name</strong></td>
+        <td><strong>Start URL</strong></td>
+        <td><strong>Intention/Description</strong></td>
+        <td><strong>Depth</strong></td>
+        <td><strong>Accept '?' URLs</strong></td>
+      </tr>
+    #{otherCrawlStartInProgress}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#" >
+        <td>#[cre]#</td>
+        <td>#[peername]#</td>
+        <td><a href="#[startURL]#">#[startURL]#</a></td>
+        <td>#[intention]#</td>
+        <td>#[generalDepth]#</td>
+        <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
+      </tr>
+    #{/otherCrawlStartInProgress}#
+    </table>
+    <p><strong>Remote crawl start points, finished:</strong></p>
+    <table border="0">
+      <tr class="TableHeader">
+        <td><strong>Start Time</strong></td>
+        <td><strong>Peer Name</strong></td>
+        <td><strong>Start URL</strong></td>
+        <td><strong>Intention/Description</strong></td>
+        <td><strong>Depth</strong></td>
+        <td><strong>Accept '?' URLs</strong></td>
+      </tr>
+      #{otherCrawlStartFinished}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#" >
+        <td>#[cre]#</td>
+        <td>#[peername]#</td>
+        <td><a href="#[startURL]#">#[startURL]#</a></td>
+        <td>#[intention]#</td>
+        <td>#[generalDepth]#</td>
+        <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
+      </tr>
+      #{/otherCrawlStartFinished}#
+    </table>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

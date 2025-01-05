@@ -1,0 +1,9 @@
+<div class="SubMenu">
+  <h3>Portal Configuration</h3>
+  <ul class="SubMenu">
+    <li><a href="ConfigPortal_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Generic Search Portal</a></li>
+    <li><a href="ConfigSearchBox.html" class="MenuItemLink">Search Box Anywhere</a></li>
+    <li><a href="ConfigProfile_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">User Profile</a></li>
+    <li><a href="ConfigRobotsTxt_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Local robots.txt</a></li>
+  </ul>
+</div>

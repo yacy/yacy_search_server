@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>YaCy '#[clientname]#': Search Page</title>
+  #%env/templates/metas.template%#
+  <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
+  <script type="text/javascript" src="js/yacysearch.js"></script>
+  <script type="text/javascript" src="js/highslide/highslide.js"></script>
+  <script type="text/javascript" src="js/jquery.tagcloud.js"></script>
+</head>
+
+<body id="ConfigSearchPage" >
+#%env/templates/header.template%#
+#%env/templates/submenuDesign.template%#
+
+  <h2>Search Result Page Layout Configuration</h2>
+  <p>
+    Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.
+    To change colors and styles use the <a href="ConfigAppearance_p.html">Appearance</a> menu for different skins.
+    Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.
+  </p>
+  <h4>Page Template</h4>
+
+  <form action="ConfigSearchPage_p.html" method="post" enctype="multipart/form-data" id="ConfigSearchPageForm" accept-charset="UTF-8">
+  	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+    <table role="presentation">
+      <tr>
+        <td style="border-width: 1px; border-color: grey; border-style: solid; padding: 5px;">
+          <table style="width:100%" role="presentation">
+            <tr>
+              <td style="vertical-align: middle;"><input type="checkbox" name="publicTopmenu" title="Top navigation bar" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
+              <td>
+                <!-- top navigation (imported from env/templates/simpleheader.template) -->
+                <div class="navbar navbar-default">
+                  <div class="container-fluid">
+                    <div class="navbar-header">
+                      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                      </button>
+      				  <a class="navbar-brand" id="navbar-brand-cfg" href="#[promoteSearchPageGreeting.homepage]#" style="margin-top:-6px;white-space:nowrap;">
+        				<img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;
+        				<span id="greeting"></span>
+      				  </a>
+                    </div>
+                    <div class="navbar-collapse collapse">
+                      <input type="checkbox" name="search.publicTopNavBar.login" title="Enable login link/status" value="true" #(search.publicTopNavBar.login)#::checked="checked" #(/search.publicTopNavBar.login)# />
+    				  <ul class="nav navbar-nav">
+       					<li id="header_login">
+        					<a title="Log in to use extended search features" href="#" onclick="document.getElementById('header_login').className='hidden';document.getElementById('header_login_logged').className='navbar-text';return false;">
+	      						<span>Log in</span>
+        						<span class="glyphicon glyphicon-log-in"></span>
+        					</a>
+      					</li>
+      					<li id="header_login_logged" title="You are authenticated as userName" class="navbar-text hidden">
+      						<span class="glyphicon glyphicon-user text-info"></span>
+     						<span>userName</span>
+      					</li>
+    				  </ul>
+                      <ul class="nav navbar-nav navbar-right">
+                        <li id="header_search-cfg" class="dropdown">
+                          <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
+                        </li>
+                        <li id="header_help-cfg" class="dropdown">
+                          <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button"><span class="glyphicon glyphicon-question-sign"></span></a>
+                        </li>
+                        <li id="header_administration-cfg">
+                          <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div> 
+              </td>
+            </tr>
+          </table>
+          <table role="presentation">
+            <tr>
+              <td>
+                <!-- the sidebar navigation -->
+                <div>
+                  <fieldset>
+                    <table role="presentation">
+                      <tr>
+                        <td><input type="checkbox" aria-label="Protocols" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
+                        <td>
+                          <p class="navbutton"></p>
+                          <div class="btn-group">
+                            <span><button class="btn btn-default btn-xs">http</button><button class="btn btn-default btn-xs">https</button><button class="btn btn-default btn-xs">&nbsp;ftp&nbsp;</button><button class="btn btn-default btn-xs">&nbsp;smb&nbsp;</button><button class="btn btn-default btn-xs">file</button></span>
+                          </div>
+                        </td>
+                      </tr>                       
+                      <tr>
+                        <td><input type="checkbox" aria-label="Tag cloud" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
+                        <td>
+                          <div style="padding-left:15px;  padding-bottom:10px; width: 100%;">
+                            <div id="tagcloud" style="text-align:justify">
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 9px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 12px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 13px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 15px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 14px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 12px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 9px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Tag</a>                              
+                            </div>
+                            <script type="text/javascript">
+          $.fn.tagcloud.defaults = {
+            size: {start: 8, end: 16, unit: 'pt'},
+          };
+          $(document).ready(function(){
+            $("#tagcloud a").tagcloud();
+            return false;
+          })
+                            </script>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                          <td><input type="checkbox" aria-labelledby="locationTitle" name="search.navigation.location" value="true" #(search.navigation.location)#::checked="checked" #(/search.navigation.location)# /></td>
+                          <td><ul class="nav nav-sidebar menugroup" id="sidebarLocation" style="padding-left:15px; padding-right:10px;">
+                            <li><h3 id="locationTitle">Location</h3></li>  
+                            #(search.navigation.location)#::
+                            <li>
+                              <img src="env/grafics/earthsearch.png" style="width:100%" height="86" alt="earthsearchlogo" /><br/>
+                              show search results on map
+                            </li>#(/search.navigation.location)#                                
+                          </ul></td>
+                      </tr>                          
+                      #{search.navigation.plugin}#
+                      <tr>
+                        <td><button class="btn btn-xs" title="Delete navigator" aria-label="Delete navigator" aria-describedby="title-#[name]#" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"></span></button></td>
+                        <td>
+                        	<ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
+                          		<li>
+                          			<h3 id="title-#[name]#">#[displayname]#
+                          					#(navSort)#<span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span>
+											::<span class="glyphicon glyphicon-sort-by-attributes" title="Sorted by ascending counts"></span>
+											::<span class="glyphicon glyphicon glyphicon-sort-by-alphabet-alt" title="Sorted by descending labels"></span>
+											::<span class="glyphicon glyphicon-sort-by-alphabet" title="Sorted by ascending labels"></span>
+											#(/navSort)#
+									</h3>
+						  		</li>
+						  		<li>
+						  			<label>Sort by 
+						  				<select name="search.navigation.#[name]#.navSort">
+						  					<option value="count:desc" #(navSort)#selected="selected"::#(/navSort)#>Descending counts</option>
+						  					<option value="count:asc" #(navSort)#::selected="selected"#(/navSort)#>Ascending counts</option>
+						  					<option value="label:desc" #(navSort)#::::selected="selected"#(/navSort)#>Descending labels</option>
+						  					<option value="label:asc" #(navSort)#::::::selected="selected"#(/navSort)#>Ascending labels</option>
+						  				</select>
+						  			</label>
+						  		</li>
+                        	</ul>
+                        	<input type="hidden" name="search.navigation.active" value="#[name]#" />
+                        </td>
+                      </tr>
+                      #{/search.navigation.plugin}#
+                      <tr>
+                        <td></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="vocabulary" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Vocabulary <span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span></h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>    
+                        <td></td>
+                        <td><div id="sidebarAbout" style="padding-left:15px; padding-right:10px; margin-top: 5px;">
+                          <h3>#[about.headline]#</h3>
+                          <div>#[about.body]#</div>
+                          </div></td>
+                      </tr>
+                    </table>
+                  </fieldset>
+                </div>    
+              </td>
+              <td style="vertical-align: top;">
+                <div style="float: left;">
+                  <fieldset class="yacys">
+                    <div class="input-group">
+                      <input type="text" class="form-control searchinput typeahead" size="40" maxlength="80" placeholder="Web Search by the People, for the People" name="query"  />
+                        <div class="input-group-btn">
+                          <button id="Enter" class="btn btn-default" type="submit">search</button>
+                        </div>
+                    </div>
+                    <div class="yacysearch">
+                      <input type="checkbox" id="text" name="search.text" value="true" #(search.text)#::checked="checked" #(/search.text)# /><label for="text">Text</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="image" name="search.image" value="true" #(search.image)#::checked="checked" #(/search.image)# /><label for="image">Images</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="audio" name="search.audio" value="true" #(search.audio)#::checked="checked" #(/search.audio)# /><label for="audio">Audio</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="video" name="search.video" value="true" #(search.video)#::checked="checked" #(/search.video)# /><label for="video">Video</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="app" name="search.app" value="true" #(search.app)#::checked="checked" #(/search.app)# /><label for="app">Applications</label>
+                        &nbsp;<input type="checkbox" id="options" name="search.options" value="true" #(search.options)#::checked="checked" #(/search.options)# /><label for="options"><a href="#" target="LayouTest">more options</a></label>
+                    </div>
+                  </fieldset>
+                </div>
+                
+
+                <!-- the search result -->
+                <div style="float: left;">
+                
+                
+                <label><input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation</label>
+                <label title="Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.">Maximum range (in days)
+                	<input type="number" name="search.navigation.dates.maxcount" value="#[search.navigation.dates.maxcount]#" min="6" max="2147483647"/>
+                </label>
+<link rel="stylesheet" href="env/morris.css">
+<script src="js/raphael.min.js"></script>
+<script src="js/morris.js"></script>
+<script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
+<div id="graph" style="height:200px"></div>
+<script>
+var solr= $.getJSON("solr/collection1/select?q=*:*&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index&facet.limit=#[search.navigation.dates.maxcount]#", function(data) {
+	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
+	var parsed = [];
+    for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
+        var date = dates_in_content_dts[i];
+        var count = dates_in_content_dts[i + 1];
+        if (date && count) {parsed[parsed.length] = {x: date,y: count};};
+    };
+    if (parsed.length > 0) {
+    	var histogram = Morris.Bar({
+     		element: 'graph',
+      		data: parsed,
+      		xkey: 'x',
+      		ykeys: ['y'],
+      		labels: ['number of documents about this date'],
+      		yLabelFormat: function (y) { return y.toString() + ' docs'; },
+      		barColors: function (row, series, type) {
+    	  		var d = new Date(row.label);
+          		if (d.getDay() === 6) return '#4aaf46'; //saturday
+          		if (d.getDay() === 0) return '#4aaf46'; //sunday
+    	  		return '#3574c0';
+      		},
+      		hideHover: 'false'
+    	}).on('click', function(i, row) {
+    		console.log(i, row);
+    	});
+    	
+		/* Add keyboard navigation support and accessible attributes */
+		makeAccessibleMorrisBar(histogram, 
+				"Number of documents per date histogram", 
+				function(data) {return data.x + " : " + data.y + " docs"}); 
+    }
+});
+</script>
+
+                  <fieldset>
+					<label>
+						<input type="checkbox" name="search.result.show.favicon" aria-describedby="faviconDesc" value="true" #(search.result.show.favicon)#::checked="checked"#(/search.result.show.favicon)# /> 
+						Show websites favicon
+					</label> 
+					<span class="info" style="padding-left: 10px">
+						<img src="env/grafics/i16.gif" alt="info"/>
+						<span id="faviconDesc">Not showing websites favicon can help you save some CPU time and network bandwidth.
+						</span>
+					</span>
+					<div class="searchresults">
+                      <h4 class="linktitle">
+                        <img width="16" height="16" src="env/grafics/dfltfvcn.ico" class="favicon" alt="" title="Website favicon"/>
+                        <a href="yacysearch.html" target="LayouTest">Title of Result</a>
+                      </h4>
+                    <p class="snippet">
+                    <span class="snippetLoaded" id="hhash">Description and text snippet of the search result</span>
+                    </p>
+                    <p class="url">
+                      <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
+                    </p>
+                    <p class="tags">
+                      <input type="checkbox" name="search.result.show.keywords" aria-labelledby="tagsTitle" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# />
+                      <span id="tagsTitle">Tags</span>: <span class="tag label label-default">keyword</span> <span class="tag label label-default">subject</span> <span class="tag label label-default">keyword2</span> <span class="tag label label-default">keyword3</span>
+                      <label>
+                      	Max. tags initially displayed
+                      	<input type="number" name="search.result.keywords.firstMaxCount" value="#[search.result.keywords.firstMaxCount]#" min="1" max="2147483647"/>
+                      	(remaining can then be expanded)
+                      </label>
+                    </p>
+                    <div class="urlinfo">
+                      <table style="border-width:0">
+                        <tr>
+                          <td style="width:15px;"></td>
+                          <td><span title="Last known modification date">#[content_showDate_date]#</span></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span>42 kbyte</td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="metadataLink" href="solr/select?q=*:*&start=0&rows=1&core=collection1&wt=html&omitHeader=true" target="LayouTest">Metadata</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="parserLink" href="ViewFile.html" target="LayouTest">Parser</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="citationLink" href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="picturesLink" href="yacysearch.html" target="LayouTest">Pictures</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="cacheLink" href="CacheResource_p.html" target="LayouTest">Cache</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="proxyLink" href="proxy.html" target="LayouTest">View via Proxy</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="IndexBrowser_p.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="snapshotsLink" href="yacysearch.html" target="LayouTest">JPG Snapshot</a></td>
+                          #(search.result.show.ranking)#::<td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><span title="Raw ranking score value">Ranking: 1.12195955E9</span>#(/search.result.show.ranking)#
+                        </tr>
+                        <tr>
+                          <td></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.date" aria-label="Date" value="true" #(search.result.show.date)#::checked="checked" #(/search.result.show.date)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.size" aria-label="Size" value="true" #(search.result.show.size)#::checked="checked" #(/search.result.show.size)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.metadata" aria-labelledby="metadataLink" value="true" #(search.result.show.metadata)#::checked="checked" #(/search.result.show.metadata)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.parser" aria-labelledby="parserLink" value="true" #(search.result.show.parser)#::checked="checked" #(/search.result.show.parser)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.citation" aria-labelledby="citationLink" value="true" #(search.result.show.citation)#::checked="checked" #(/search.result.show.citation)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.pictures" aria-labelledby="picturesLink" value="true" #(search.result.show.pictures)#::checked="checked" #(/search.result.show.pictures)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.cache" aria-labelledby="cacheLink" value="true" #(search.result.show.cache)#::checked="checked" #(/search.result.show.cache)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.proxy" aria-labelledby="proxyLink" aria-describedby="proxyDesc" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# />
+                            <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span id="proxyDesc">
+                              For this option URL proxy must be enabled.<br>
+                              see <a href="Settings_p.html?page=UrlProxyAccess">Settings_p.html</a><br>
+                              menu: System Administration > Advanced Settings
+                            </span></span>
+                          </td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.indexbrowser" aria-labelledby="browseIndexLink" value="true" #(search.result.show.indexbrowser)#::checked="checked" #(/search.result.show.indexbrowser)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.snapshots" aria-labelledby="snapshotsLink" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
+                          #(search.result.show.ranking)#::<td style="text-align:center;">
+                            <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>
+                              Ranking score value, mainly for debug/analysis purpose, configured in <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a><br>
+                              Menu: System Administration > Advanced Settings > Debug/Analysis Settings
+                            </span></span>
+                          </td>
+                          #(/search.result.show.ranking)#
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>                        
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  <table role="presentation">
+    <tr>
+      <td>
+        <fieldset><legend>Add Navigators</legend>
+          <label>append
+          	<select name="search.navigation.navname">
+            	#{search.navigation.list}#
+            	<option value="#[name]#">#[displayname]#</option>
+            	#{/search.navigation.list}#
+          	</select>
+          </label>
+          <button type="submit" title="Add navigator" name="add.nav" class="btn btn-xs btn-default" ><span class="glyphicon glyphicon-plus-sign" style="color: green"></span></button><br>
+          <label for="search.navigation.maxcount">max. items</label>
+          <input type="text" id="search.navigation.maxcount" name="search.navigation.maxcount" size="3" value="#[search.navigation.maxcount]#">
+        </fieldset>
+      </td>
+      <td>
+        <div style="padding-left:25px;">
+          <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
+          <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
+        </div>
+      </td>
+    </tr>
+  </table>
+</form>
+#%env/templates/footer.template%#
+</body>
+</html>

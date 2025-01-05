@@ -1,0 +1,69 @@
+# Wenn man diese Liste benutzen moechte, muss diese zuerst in "yacy.badwords"
+# umbenannt werden!
+#
+# Alles was hier gelistet ist, wird dann bei den "Topwoerter", die nach einer
+# Suche angezeigt werden, gefiltert.
+#
+# AEnderungen werden aber erst nach einen Neustart aktiv.
+#
+# Fehlt hier was, wird zu viel gefiltert, dann bitte aendern.
+# Wenn was entfernt wird, bitte auch schreiben, warum das hier raus muss.
+#
+# Jeder darf und sollte mitmachen !
+#
+# $LastChangedDate$
+# $LastChangedRevision$
+# $LastChangedBy$
+#
+# if list exists in DATA/SETTINGS/ it takes preference otherwise list is loaded from defaults/ directory
+aber
+allen
+alles
+auch
+auf
+aus
+bei
+bringt
+das
+dass
+dem
+den
+der
+die
+dir
+eine
+fuer
+ich
+ist
+kein
+mehr
+meine
+meldung
+mit
+nach
+nicht
+oder
+ueber
+und
+vom
+von
+was
+weg
+weitere
+wer
+werde
+wie
+zum
+>>>
+***
+ads
+all
+app
+are
+enc
+from
+jhtml
+the
+shtml
+site=all
+referrer=default

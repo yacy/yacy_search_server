@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Crawl Start</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="js/ajax.js"></script>
+    <script type="text/javascript" src="js/IndexCreate.js"></script>
+    <script type="text/javascript">
+        function check(key){
+            document.getElementById(key).checked = 'checked';
+        }
+    </script>
+    <style type="text/css">
+    	.nobr {
+    		white-space: nowrap;
+    	}
+    </style>
+  </head>
+  <body id="IndexCreate">
+  
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawler.template%#
+    <div id="api"></div>
+    <h2>Site Crawling</h2>
+    
+    <p id="startCrawling">
+    <strong>Site Crawler:</strong>&nbsp;
+    Download all web pages from a given domain or base URL.
+    </p>
+    
+    <fieldset>
+      <legend>Site Crawl Start</legend>
+      <form id="Crawler" method="post" action="Crawler_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <dl>
+        <dt><label>Site</label></dt>
+        <dd>
+          <table border="0" cellpadding="0" cellspacing="0"><tr valign="top">
+            <td valign="top"><input type="radio" name="crawlingMode" id="url" value="url" checked="checked"
+            onmousedown="document.getElementById('rangeDomain').disabled=false;document.getElementById('rangeSubpath').disabled=false;document.getElementById('crawlingDomMaxCheck').disabled=false;document.getElementById('crawlingDomMaxPages').disabled=false;"/>Start URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)</td>
+            <td valign="top">
+            <input name="crawlingURL" id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeydown="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
+            <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
+            </td>
+	        <td>
+            <span id="robotsOK"></span>
+			<img id="ajax" src="env/grafics/empty.gif" alt="empty" style="vertical-align: top;" />
+            </td>
+          </tr><tr>
+            <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" />Link-List of URL</td>
+            <td>
+            	<div id="sitelistURLs"></div>
+            	<button id="expandSiteListBtn" style="visibility:hidden" type="button" onclick="this.disabled = true;loadInfos(true);" class="btn btn-default btn-xs" title="Show all links">
+            		<span class="glyphicon glyphicon-option-horizontal"/>
+            	</button>
+            </td>
+          </tr><tr>
+            <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"
+            onmousedown="document.getElementById('rangeDomain').disabled=true;document.getElementById('rangeSubpath').disabled=true;document.getElementById('crawlingDomMaxCheck').disabled=true;document.getElementById('crawlingDomMaxPages').disabled=true;"/>Sitemap URL</td>
+            <td><input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/></td>
+          </tr>
+          </table><br/>
+		  <input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99" />
+        </dd>
+        <dt><label>Path</label></dt>
+        <dd>
+            <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>load all files in domain<br />
+			<input type="radio" name="range" id="rangeSubpath" value="subpath" />load only files in a sub-path of given url
+			<input type="hidden" name="deleteold" id="deleteold" value="on" />
+			<input type="hidden" name="mustnotmatch" id="mustnotmatch" value="" />
+			<input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off" />
+		</dd>
+        <dt><label>Limitation</label></dt>
+        <dd><table border="0" cellpadding="0" cellspacing="0"><tr valign="top">
+          <td valign="top"><input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# /> not more than </td>
+          <td valign="top"><input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" /></td>
+          <td valign="top">documents</td>
+          </tr></table>
+        </dd>
+        <dt><label>Collection</label></dt>
+        <dd>
+          <input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
+        </dd>
+        <dt><label>Start</label></dt>
+        <dd>
+          <input type="hidden" name="directDocByURL" id="directDocByURL" value="off" />
+          <input type="hidden" name="recrawl" id="recrawl" value="reload" />
+          <input type="hidden" name="reloadIfOlderNumber" id="reloadIfOlderNumber" value="3" />
+          <input type="hidden" name="reloadIfOlderUnit" id="reloadIfOlderUnit" value="day" />
+          <input type="hidden" name="cleanSearchCache" id="cleanSearchCache" value=#(cleanSearchCacheChecked)#"off"::"on"#(/cleanSearchCacheChecked)# />
+		  <input type="hidden" name="deleteold" id="deleteold" value="on" />
+		  <input type="hidden" name="storeHTCache" id="storeHTCache" value="on" />
+          <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh" />
+          <input type="hidden" name="crawlingQ" id="crawlingQ" value="on" />
+          <input type="hidden" name="followFrames" id="followFrames" value="on" />
+          <input type="hidden" name="obeyHtmlRobotsNoindex" id="obeyHtmlRobotsNoindex" value="on" />
+          <input type="hidden" name="indexText" id="indexText" value="on" />
+          <input type="hidden" name="indexMedia" id="indexMedia" value="on" />
+          <input type="hidden" name="intention" id="intention" value="" />
+		  <input id="timezoneOffset" type="hidden" name="timezoneOffset" value=""><script>document.getElementById("timezoneOffset").value = new Date().getTimezoneOffset();</script>
+          <input type="submit" name="crawlingstart" value="Start New Crawl" class="btn btn-primary"/>
+        </dd>
+      </dl>
+      
+    </form>
+    </fieldset>
+    <h3>Hints</h3>
+    <ul>
+    <li><h4>Crawl Speed Limitation</h4> No more that four pages are loaded from the same host in one second (not more that 120 document per minute) to limit the load on the target server.</li>
+    <li><h4>Target Balancer</h4> A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.</li>
+    <li><h4>High Speed Crawling</h4> A 'shallow crawl' which is not limited to a single host (or site)
+    can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.
+    This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.</li>
+    <li><h4>Scheduler Steering</h4> The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.</li>
+    </ul>
+    #%env/templates/footer.template%#
+  </body>
+</html>

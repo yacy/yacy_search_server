@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Advanced Config</title>
+    #%env/templates/metas.template%#
+    <style type="text/css"> <!--
+    	.filtered { display:none; }
+    //--> </style>
+    <script type="text/javascript">
+      <!--
+      function element_clicked(element){
+    	var key = element.id.substring(1);
+        document.getElementById("key").value = key;
+        var valueField = document.getElementById("value");
+        if(key.endsWith("Password")) {
+        	valueField.type = "password";
+        } else {
+        	valueField.type = "text";
+        }
+        valueField.value=element.value;
+      }
+	  function filterList(){
+			  list=document.getElementsByName("options")[0];
+			  node=list.firstChild;
+			  key=document.getElementById("key").value;
+			  while(node!=null){
+					  if(node.nodeType==1 && node.nodeName.toLowerCase()=="option"){
+							  if(key!="" && node.firstChild.nodeValue.toLowerCase().indexOf(key.toLowerCase())==-1){
+									  node.setAttribute("class", "filtered");
+							  }else{
+									  node.setAttribute("class", "");
+							  }
+					  }
+					  node=node.nextSibling;
+			  }
+	  }
+	  function clear_form() {
+	  	document.getElementById("key").value="";
+        document.getElementById("value").value="";
+        filterList();
+	  }
+      //-->
+    </script>
+  </head>
+  <body id="ConfigAdvanced" onload="filterList()">
+  #%env/templates/header.template%#
+  #%env/templates/submenuConfig.template%#
+
+  <h2>Advanced Config</h2>
+  <p>
+    Here are all configuration options from YaCy.
+  </p>
+  <p>
+    You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.
+  </p>
+  <p>
+    For explanation please look into defaults/yacy.init
+  </p>
+  <select name="options" size="36" style="width: 600px">
+    #{options}#
+    <option id="k#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[visibleValue]#</option>
+    #{/options}#
+  </select><br />
+  <form action="ConfigProperties_p.html" method="post" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset>
+      <input type="text" id="key" name="key" size="40" onkeyup="filterList()" value="#[keyPosted]#"/>:<input type="text" id="value" name="value" size="40" value="#[valuePosted]#" />
+      <input type="submit" value="Save" class="btn btn-primary"/>&nbsp;
+      <input type="button" value="Clear" onclick="clear_form()" class="btn btn-primary"/>
+    </fieldset>
+  </form>
+  
+  #%env/templates/footer.template%#
+  </body>
+</html>
+

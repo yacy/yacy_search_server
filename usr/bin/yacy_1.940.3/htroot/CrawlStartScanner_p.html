@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Network Scanner</title>
+    #%env/templates/metas.template%#
+	<script type="text/javascript">
+    <!--
+	// The chrome browser is getting the wrong value if we try to get the value inside the script "var checkStatus=inputs.elements[0].checked;" - so now the value is a parameter
+	function checkAll (formToCheckAll, checkStatus) {
+	var inputs=document.getElementById(formToCheckAll);	
+	//var checkStatus=inputs.elements[0].checked;
+	for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Network Scanner</h2>
+
+    <p>
+      YaCy can scan a network segment for available http, ftp and smb server.
+      You must first select a IP range and then, after this range is scanned,
+      it is possible to select servers that had been found for a full-site crawl.
+    </p>
+	
+    #(noserverdetected)#::
+    <p>
+      No servers had been detected in the given IP range #[iprange]#. Please enter a different IP range for another scan.
+    </p>
+    #(/noserverdetected)#
+    
+    <form onsubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
+    <fieldset>
+      <legend>Scan the network</legend>
+    <dl>
+    <dt>Scan Range</dt>
+    <dd align="top">
+        <input type="radio" name="source" id="sourcehost" value="hosts"#(intranet.checked)# checked="checked"::#(/intranet.checked)# />Scan sub-range with given host
+        <textarea name="scanhosts" id="scanhosts" value="#[scanhosts]#"  cols="64" rows="3" size="41"></textarea><br/><br/>
+        <input type="radio" name="source" id="sourcenet" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
+        #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#<br/><br/>
+        <input type="radio" name="source" id="sourceall" value="all" />All known hosts in the search index (/31 subnet recommended!)
+    </dd>
+    <dt>Subnet</dt>
+    <dd>
+        <input type="radio" name="subnet" value="31"/>/31 (only the given host(s)) <input type="radio" name="subnet" value="24" checked="checked"/>/24 (254 addresses) <input type="radio" name="subnet" value="20"/>/20 (4064 addresses) <input type="radio" name="subnet" value="16"/>/16 (65024 addresses)
+    </dd>
+    <dt>Time-Out</dt>
+    <dd>
+        <input type="text" name="timeout" value ="2000" size="4"/> ms
+    </dd>
+    <dt>Scan Cache</dt>
+    <dd>
+        <input type="checkbox" name="accumulatescancache" id="accumulatescancache" checked="checked" />accumulate scan results with access type "granted" into scan cache (do not delete old scan result)
+    </dd>
+    <dt>Service Type</dt>
+    <dd>
+        <input type="checkbox" name="scanftp" checked="checked" />ftp&nbsp;
+        <input type="checkbox" name="scansmb" checked="checked" />smb&nbsp;
+        <input type="checkbox" name="scanhttp" />http&nbsp;<input type="number" name="scanhttpport" value="80" size="5" min="0" max="65535" />&nbsp;
+        <input type="checkbox" name="scanhttps" />https&nbsp;<input type="number" name="scanhttpsport" value="443" size="5" min="0" max="65535" />
+    </dd>
+    
+    <dt>Scheduler</dt>
+    <dd>
+        <input type="radio" name="rescan" value="off" #(rescanCheck)#checked="checked"::#(/rescanCheck)#/>run only a scan<br/>
+		<input type="radio" name="rescan" value="scheduler" onclick="document.getElementById('accumulatescancache').checked = false" #(rescanCheck)#::checked="checked"#(/rescanCheck)# />
+		scan and add all sites with granted access automatically. This disables the scan cache accumulation.
+		<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Look every
+		<select name="repeat_time">
+           <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+           <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+           <option value="7" selected="selected">7</option><option value="8">8</option>
+           <option value="9">9</option><option value="10">10</option>
+           <option value="12">12</option><option value="14">14</option><option value="15">15</option>
+           <option value="21">21</option><option value="28">28</option><option value="30">30</option>
+		</select>
+		<select name="repeat_unit">
+           <option value="selminutes">minutes</option>
+           <option value="selhours">hours</option>
+           <option value="seldays" selected="selected">days</option>
+        </select> again and add new sites automatically to indexer.<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sites that do not appear during a scheduled scan period will be excluded from search results.
+    </dd>
+    
+    <dt>&nbsp;</dt>
+    <dd><input type="submit" id="scan" name="scan" value="Scan" class="btn btn-primary"/><div class="info" id="scanhostinfo" style="text-decoration: blink;">&nbsp;</div></dd>
+    </dl>
+    </fieldset>
+    </form>
+    
+	<iframe name="target"
+       src="ServerScannerList.html?embedded=&edit="
+       width="100%"
+       height="410"
+       frameborder="0"
+       scrolling="auto"
+       id="target">
+    </iframe>	
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': MediaWiki Dump Import</title>
+    #%env/templates/metas.template%#    
+    #(refresh)#::<meta http-equiv="REFRESH" content="10;url=IndexImportMediawiki_p.html?report=" />
+                <!-- the url= removes http get parameters on refresh, preventing restart of import -->
+    #(/refresh)#
+  </head>
+  <body id="IndexImportMediawiki">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+    <h2>MediaWiki Dump Import</h2>
+    
+    #(import)#
+    <p>#(prevReport)#::<a href="IndexImportMediawiki_p.html?report=">Check</a> the last import report.#(/prevReport)#</p>
+    <p>#(status)#<div class="alert alert-info" role="alert">No import thread is running, you can start a new thread here</div>
+    ::<div class="alert alert-danger" role="alert">Error : dump <abbr title="Uniform Resource Locator">URL</abbr> is malformed.</div>
+    ::<div class="alert alert-danger" role="alert">Error : file not found "#[sourceFile]#"</div>
+    ::<div class="alert alert-danger" role="alert">Error : can not read file "#[sourceFile]#"</div>
+    ::<div class="alert alert-danger" role="alert">Error : you selected a directory ("#[sourceFile]#")</div>
+    ::<div class="alert alert-danger" role="alert">Error : dump file ("#[sourceFile]#") was not modified since last import (#[lastImportDate]#).</div>
+    #(/status)#</p>
+    <form action="IndexImportMediawiki_p.html" method="post" accept-charset="UTF-8" class="form-horizontal">
+    	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+        <fieldset>
+          <legend>MediaWiki Dump File Selection</legend>
+          <p>
+          You can import <a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">MediaWiki dumps</a> here. An example is the file
+          <a href="https://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2">
+          https://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2</a>.
+          </p>
+          <p>
+          Dumps can be stored in the local file system or on a remote server in XML format and may be compressed in gz or bz2.
+          </p>
+          <div class="form-group">
+          	<div class="col-sm-3 col-md-2 col-lg-2">
+          		<label for="file" class="control-label" >Dump file path or <abbr title="Uniform Resource Locator">URL</abbr></label>
+           	</div>
+           	<div class="col-sm-9 col-md-8 col-lg-8">
+           		<input id="file" class="form-control" name="file" type="text" title="Dump file path on this YaCy server file system, or any remote URL" required="required"/>
+           	</div>
+          </div>
+		  <div class="form-group">
+			<div class="col-sm-3">
+				<div class="checkbox">
+					<label>
+						<input name="iffresh" id="iffresh" 
+							type="checkbox" checked="checked" 
+							aria-describedby="iffreshInfo"/>
+						Import only when modified since last import
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-5" id="iffreshInfo">
+	 			When checked, the dump file is imported only if its last modified date is unknown or is after the last import execution date on this same file 
+	 			(see <a href="Table_API_p.html?filter=dump">recorded API calls</a> with the "dump" type).  
+            </div>
+		  </div>
+          <input name="submit" class="btn btn-primary" type="submit" value="Import MediaWiki Dump" />
+        </fieldset>
+    </form>
+    <p>
+    When the import is started, the following happens:
+    </p><ul>
+    <li>The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:
+    <pre>
+    &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;surrogates xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;
+  &lt;record&gt;
+    &lt;dc:Title&gt;&lt;![CDATA[Alan Smithee]]&gt;&lt;/dc:Title&gt;
+    &lt;dc:Identifier&gt;http://de.wikipedia.org/wiki/Alan%20Smithee&lt;/dc:Identifier&gt;
+    &lt;dc:Description&gt;&lt;![CDATA[Der als Filmregisseur oft genannte Alan Smithee ist ein Anagramm]]&gt;&lt;/dc:Description&gt;
+    &lt;dc:Language&gt;de&lt;/dc:Language&gt;
+    &lt;dc:Date&gt;2009-05-07T06:03:48Z&lt;/dc:Date&gt;
+  &lt;/record&gt;
+  &lt;record&gt;
+    ...
+  &lt;/record&gt; 
+&lt;/surrogates&gt;
+    </pre>
+    </li>
+    <li>Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.</li>
+    <li>When each of the generated output file is finished, it is renamed to a .xml file</li>
+    <li>Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.</li>
+    <li>When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out</li>
+    <li>You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in</li>
+    </ul>
+    <br />
+    ::
+    <p>#(status)#::<div class="alert alert-danger" role="alert">Error encountered : #[message]#</div>
+    #(/status)#</p>
+    <form><fieldset><legend>Import Process</legend>
+      <dl>
+        <dt>Thread:</dt><dd>#(thread)#terminated. You can check the next step in the <a href="CrawlResults.html?process=7">Crawl Results page</a> 
+        or start a <a href="IndexImportMediawiki_p.html">new import</a>.::started::running#(/thread)#</dd>
+        <dt>Dump:</dt><dd>#[dump]#</dd>
+        <dt>Processed:</dt><dd>#[count]# Wiki Entries</dd>
+        <dt>Speed:</dt><dd>#[speed]# articles per second</dd>
+        <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
+        <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
+      </dl>    
+    </fieldset></form>
+    #(/import)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

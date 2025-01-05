@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': News Monitor</title>
+    #(table)#
+    <link rel="alternate" type="application/rss+xml" title="Incoming News" href="News.rss?page=1" />
+    <link rel="alternate" type="application/rss+xml" title="Processed News" href="News.rss?page=2" />
+    <link rel="alternate" type="application/rss+xml" title="Outgoing News" href="News.rss?page=3" />
+    <link rel="alternate" type="application/rss+xml" title="Published News" href="News.rss?page=4" />
+    ::
+    <link rel="alternate" type="application/rss+xml" title="#(page)#News Overview::Incoming News::Processed News::Outgoing News::Published News#(/page)#" href="News.rss?page=#[page]#" />
+    #(/table)#
+    #%env/templates/metas.template%#
+  </head>
+  <body id="News">
+    #%env/templates/header.template%#
+    #%env/templates/submenuComputation.template%#
+    #(page)#
+    <h2>Overview</h2>
+    ::
+    <h2>Incoming&nbsp;News</h2>
+    ::
+    <h2>Processed&nbsp;News</h2>
+    ::
+    <h2>Outgoing&nbsp;News</h2>
+    ::
+    <h2>Published&nbsp;News</h2>
+    #(/page)#
+    #(table)#
+    <p>
+    This is the YaCyNews system (currently under testing).
+    </p>
+    <p>
+    The news service is controlled by several entry points:
+    </p>
+    <ul>
+      <li>
+        A crawl start with activated remote indexing will automatically create a news entry.
+        Other peers may use this information to prevent double-crawls from the same start point.
+        A table with recently started crawls is presented on the Index Create - page
+      </li>
+      <li>
+        A change in the personal profile will create a news entry. You can see recently made changes of
+        profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.
+      </li>
+      <li>
+        Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.
+        To publish a translation, use the integrated <a href="Translator_p.html">translation editor</a> to add a translation and publish it afterwards.
+      </li>
+    </ul>
+    <p>
+      More news services will follow.
+    </p>
+    <p>
+      Above you can see four menues:
+    </p>
+    <ul>
+      <li>
+        <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.
+        Only these news will be used to display specific news services as explained above.
+        You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page
+      </li>
+      <li>
+        <strong>Processed News (#[prsize]#)</strong>: this is simply an archive of incoming news that you removed by processing.
+      </li>
+      <li>
+        <strong>Outgoing News (#[ousize]#)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.
+        you can stop the broadcast if you want.
+      </li>
+      <li>
+        <strong>Published News (#[pusize]#)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.
+      </li>
+    </ul>
+    ::
+    <form action="News.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <input type="hidden" name="page" value="#[page]#" />
+        <input type="submit" name="deletespecific" value="#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#" />
+        <input type="submit" name="deleteall" value="#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#" />
+      </fieldset>
+      <table border="0">
+        <tr class="TableHeader" valign="bottom">
+          <td>&nbsp;</td>
+          <td>Originator</td>
+          <td>Created</td>
+          <td>Category</td>
+          <td>Received</td>
+          <td>Distributed</td>
+          <td>Attributes</td>
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="del_#[id]#" /></td>
+          <td align="left">#[ori]#</td>
+          <td align="left">#[cre]#</td>
+          <td align="left">#[cat]#</td>
+          <td align="left">#[rec]#</td>
+          <td align="right">#[dis]#</td>
+          <td align="left">#[att]#</td>
+        </tr>
+        #{/list}#
+      </table>
+    </form>
+    #(/table)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

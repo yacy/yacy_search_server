@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>YaCy '#[clientname]#': Web Structure</title>
+<link rel="stylesheet" media="screen" type="text/css" href="env/styles/colorpicker.css" />
+#%env/templates/metas.template%# 
+<script type="text/javascript" src="js/WatchWebStructure.js"></script>
+<style type="text/css">
+  #left {
+    float: left;
+    width: 460px;
+  }
+  form dl {
+	width:100%;
+	overflow:hidden;
+  }
+  form dt {
+	vertical-align: middle;
+	height: 25px;
+	line-height: 25px;
+    float: left;
+    width: 38%;
+  }
+  form dd {
+	float: left;
+	height: 25px;
+    width: 60%;
+    text-align:left;
+  }
+</style>
+</head>
+<body id="WebStructure" style="margin:0px;">
+#%env/templates/header.template%# 
+#%env/templates/submenuWebStructure.template%#
+
+    <script type="text/javascript" src="js/jquery.colorpicker.js"></script>
+	<script type="text/javascript">
+      $(document).ready(function(){
+        $('#colorback, #colortext, #colorline, #colordot0, #colordota, #colorlineend').ColorPicker({
+			onSubmit: function(hsb, hex, rgb, el) {
+				$(el).val(hex);
+				$(el).ColorPickerHide();
+			},
+			onBeforeShow: function () {
+				$(this).ColorPickerSetColor(this.value);
+			}
+		})
+		.bind('keyup', function(){
+			$(this).ColorPickerSetColor(this.value);
+		});
+      });
+    </script>
+
+<div id="api"><a href="api/webstructure.xml?about=#[besthost]#"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+<span>
+The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.
+With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.
+With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.
+Click the API icon to see the XML file.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+
+<h2>Web Structure</h2>
+    #(hosts)#::
+     <fieldset><legend>Host List</legend>
+      #{list}#
+      <div style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><a href="WatchWebStructure_p.html?host=#[host]#&depth=3&time=1000">#[host]#</a></div>
+        <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# outlinks</div>
+      </div>
+      #{/list}#
+    </fieldset>
+    #(/hosts)#
+<div id="left">
+<form action="WatchWebStructure_p.html" accept-charset="UTF-8" onsubmit="return checkform(this);">
+<fieldset>
+  <dl>
+	<dt>host</dt>
+	<dd>
+	  <input type="text" value="#[host]#" name="host" id="host" size="20" maxlength="80" />
+	</dd>
+	<dt>depth</dt>
+	<dd>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depthd]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
+	  <input type="text" name="depth" value="#[depth]#" size="1" maxlength="1" />
+      <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depthi]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus" /></a>
+	</dd>
+	<dt>nodes</dt>
+	<dd>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodesd]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
+	  <input type="text" name="nodes" value="#[nodes]#" size="4" maxlength="4" />
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodesi]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus"/></a>
+	</dd>
+    <dt>time</dt>
+	<dd>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timed]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
+	  <input type="text" name="time" value="#[time]#" size="4" maxlength="4" />
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timei]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus"/></a>
+	</dd>
+    <dt>size</dt>
+	<dd><input type="text" name="width" value="#[width]#" size="5" maxlength="5" />&nbsp;x&nbsp;<input type="text" name="height" value="#[height]#" size="5" maxlength="5" /></dd>
+    <dt>Background</dt><dd>Color <input type="text" name="colorback" id="colorback" value="#[colorback]#" size="6" maxlength="6" /></dd>
+    <dt>Text</dt><dd>Color <input type="text" name="colortext" id="colortext" value="#[colortext]#" size="6" maxlength="6" /></dd>
+    <dt>Line</dt><dd>Color <input type="text" name="colorline" id="colorline" value="#[colorline]#" size="6" maxlength="6" /></dd>
+    <dt>Pivot Dot</dt><dd>Color <input type="text" name="colordot0" id="colordot0" value="#[colordot0]#" size="6" maxlength="6" /></dd>
+    <dt>Other Dot</dt><dd>Color <input type="text" name="colordota" id="colordota" value="#[colordota]#" size="6" maxlength="6" /></dd>
+    <dt>Dot-end</dt><dd>Color <input type="text" name="colorlineend" id="colorlineend" value="#[colorlineend]#" size="6" maxlength="6" /></dd>
+    </dl>
+    <div align="center"><input type="submit" class="btn btn-primary" value="change" /></div>
+  
+</fieldset>
+</form>
+</div><br />
+<div style="text-align:left;">
+  <img id="WebPicture" src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#" alt="WebStructurePicture"/>
+</div>
+#%env/templates/footer.template%# 
+</body>
+</html>

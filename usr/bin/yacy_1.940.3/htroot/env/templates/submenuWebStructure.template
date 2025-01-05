@@ -1,0 +1,8 @@
+<div class="SubMenu">
+  <h3>Web Visualization</h3>
+  <ul class="SubMenu">
+    <li><a href="IndexBrowser_p.html?admin=true" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Browser</a></li>
+    <li><a href="WatchWebStructure_p.html?host=auto&amp;depth=3&amp;time=1000" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Web Structure</a></li>
+    <li><a href="Collage.html" class="MenuItemLink">Image Collage</a></li>
+  </ul>
+</div>

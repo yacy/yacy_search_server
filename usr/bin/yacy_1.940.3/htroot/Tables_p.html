@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Table Viewer</title>
+    #(showtable)#::
+    <link rel="alternate" type="application/xml" title="Tables" href="Tables.rss?table=#[table]#" />
+    #(/showtable)#
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+    function setall(name, check){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        if (check) for(i = 0; i < count; i++) {
+    	    if (selectForm.elements["item_" + i].checked) {
+        	    check = false;
+        	    break;
+    	    }
+        }
+        for(i = 0; i < count; i++) {
+            selectForm.elements["item_" + i].checked = check;
+        }
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="Tables">
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    
+<script type="text/javascript">
+//<![CDATA[
+if (window.location.search.length > 1) {
+document.write("<div id=\"api\"><a href=\"/Tables_p.xml" + window.location.search + "\"\ id=\"apilink\"><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\"/></a></div>");
+}
+//]]>
+</script>
+
+    #(showselection)#::
+    <h2>Table Administration</h2>
+    <form action="Tables_p.html" method="get" accept-charset="UTF-8">
+      <fieldset><legend>Table Selection</legend>
+      <dl>
+        <dt class="TableCellDark">Select Table:</dt>
+        <dd><select name="table" onchange='this.form.submit()'>
+            #{tables}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/tables}#
+          </select>
+        </dd>
+        <dt>show max. </dt>
+        <dd><select name="count" onchange='this.form.submit()'>
+            <option value="10">10</option>
+            <option value="100" selected="selected">100</option>
+            <option value="1000">1000</option>
+            <option value="all">all</option>
+          </select>entries,</dd>
+        <dt>reverse:</dt>
+        <dd><input type="checkbox" name="reverse" #(reverse)#::checked="check"#(/reverse)# onchange='this.form.submit()'></dd>
+        <dt>search rows for</dt>
+        <dd><input type="text" name="search" value="#[pattern]#" /> <input type="submit" name="edittable" class="btn btn-default" value="Search" /></dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/showselection)#
+    #(showtable)#::
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="tablelisting" name="tablelisting">
+      <fieldset>
+      <legend>Table Editor: showing table '#[table]#'</legend>
+      <table class="sortable" border="0">
+        <tr class="TableHeader" valign="bottom">
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
+          <td>PK</td>
+          #{columns}#
+          <td>#[header]#</td>
+          #{/columns}#
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="pk_#[pk]#" /></td>
+          <td><a href="Tables_p.html?editrow=pk_#[pk]#&table=#[table]#">#[pk]#</a></td>
+          #{columns}#
+          <td align="left">#[cell]#</td>
+          #{/columns}#
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="table" value="#[table]#" />
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="editrow" class="btn btn-primary" value="Edit Selected Row" />
+      <input type="submit" name="addrow" class="btn btn-primary" value="Add a new Row" />&nbsp;&nbsp;&nbsp;&nbsp;
+      <input type="submit" name="deleterows" class="btn btn-danger" value="Delete Selected Rows" />
+      <input type="submit" name="deletetable" class="btn btn-danger" value="Delete Table" />
+      </p>
+      </fieldset>
+    </form>
+    #(/showtable)#
+    #(showedit)#::
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Row Editor</legend>
+      <dl>
+        <dt class="TableCellLight">Primary Key</dt>
+        <dd>#[pk]#</dd>
+        #{list}#
+        <dt class="TableCellLight">#[key]#</dt>
+        <dd>
+          <input type="text" name="col_#[key]#" value="#[value]#" size="80"/>
+        </dd>
+        #{/list}#
+        <dt class="TableCellDark"></dt>
+        <dd>
+          <input type="hidden" name="table" value="#[table]#" />
+          <input type="hidden" name="pk" value="#[pk]#" />
+          <input type="submit" name="commitrow" value="Commit" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/showedit)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

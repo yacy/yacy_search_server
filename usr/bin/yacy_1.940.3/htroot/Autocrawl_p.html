@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+	<head>
+		<title>YaCy '#[clientname]#': Crawl Start</title>
+		#%env/templates/metas.template%#
+	</head>
+</html>
+<body id="Autocrawl">
+	#%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    
+    <h2>Autocrawler</h2>
+    Autocrawler automatically selects and adds tasks to the local crawl queue. This will work best when there are already quite a few domains in the index.  
+    
+    <fieldset>
+    	<legend>Autocralwer Configuration</legend>
+    	
+    	<form id="ConfigForm" method="post" action="Autocrawl_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    		<dl>
+    			#(changed)#::<dt></dt><dd><span class="error">You need to restart for some settings to be applied</span></dd>#(/changed)#
+    			<dt>Enable Autocrawler:</dt>
+    			<dd><input id="autocrawlEnable" name="autocrawlEnable" type="checkbox" #(autocrawlEnable)#::checked="checked"#(/autocrawlEnable)# /></dd>
+    			<dt>Deep crawl every Nth document:</dt>
+    			<dd>
+    				<input id="autocrawlRatio" name="autocrawlRatio" type="number" min="1" max="500" step="1" size="2" maxlength="2" value="#[autocrawlRatio]#" />
+    				Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.
+    			</dd>
+    			<dt>Rows to fetch at once:</dt>
+    			<dd><input id="autocrawlRows" name="autocrawlRows" type="number" min="1" max="500" step="1" size="3" maxlength="3" value="#[autocrawlRows]#" /></dd>
+    			<dt>Recrawl only older than # days:</dt>
+    			<dd><input id="autocrawlDays" name="autocrawlDays" type="number" min="1" max="360" step="1" size="3" maxlength="3" value="#[autocrawlDays]#" /></dd>
+    			<dt>Get hosts by query:</dt>
+    			<dd>
+    				<input id="autocrawlQuery" name="autocrawlQuery" type="text" size="50" value="#[autocrawlQuery]#" />
+    				Can be any valid Solr query.
+    			</dd>
+    			<dt>Shallow crawl depth (0 to 2):</dt>
+    			<dd><input id="autocrawlShallow" name="autocrawlShallow" type="number" min="0" max="2" step="1" size="1" maxlength="1" value="#[autocrawlShallow]#" /></dd>
+    			<dt>Deep crawl depth (1 to 5):</dt>
+    			<dd><input id="autocrawlDeep" name="autocrawlDeep" type="number" min="1" max="5" step="1" size="1" maxlength="1" value="#[autocrawlDeep]#" /></dd>
+    			<dt>Index text:</dt>
+    			<dd><input id="autocrawlText" name="autocrawlText" type="checkbox" #(autocrawlText)#::checked="checked"#(/autocrawlText)# /></dd>
+    			<dt>Index media:</dt>
+    			<dd><input id="autocrawlMedia" name="autocrawlMedia" type="checkbox" #(autocrawlMedia)#::checked="checked"#(/autocrawlMedia)# /></dd>
+    			
+    			<dt><input type="submit" name="save" class="btn btn-primary" value="Save" /></dt>
+    		</dl>
+    	</form>
+    </fieldset>
+</body>

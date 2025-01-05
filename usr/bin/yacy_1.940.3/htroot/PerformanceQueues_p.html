@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <title>YaCy '#[clientname]#': Performance Settings of Queues and Processes</title>
+  #%env/templates/metas.template%#
+  <script type="text/javascript" src="js/html.js"></script>
+  </head>
+  <body id="PerformanceQueues">
+  #%env/templates/header.template%#
+  #%env/templates/submenuConfig.template%#
+  <h2>Performance Settings of Queues and Processes</h2>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	<fieldset><legend>Scheduled tasks overview and waiting time settings:</legend>
+	    <table border="0">
+	      <tr class="TableHeader" valign="bottom">
+	        <td>Thread</td>
+	        <td>Queue Size</td>
+	        <td colspan="2">Total<br />Block Time</td>
+	        <td colspan="2">Total<br />Sleep Time</td>
+	        <td colspan="2">Total<br />Exec Time</td>
+	        <td>Total<br />Cycles</td>
+	        <td>Idle<br />Cycles</td>
+	        <td>Busy<br />Cycles</td>
+	        <td>Short Mem<br />Cycles</td>
+	        <td>High CPU<br />Cycles</td>
+	        <td>Sleep Time<br />per Cycle<br />(millis)</td>
+	        <td>Exec Time<br />per Busy-Cycle<br />(millis)</td>
+	        <td>Memory Use<br />per Busy-Cycle<br />(kbytes)</td>
+	        <td>Delay between<br />idle loops</td>
+	        <td>Delay between<br />busy loops</td>
+	        <td>Minimum of<br />Required Memory</td>
+	        <td>Maximum of<br />System-Load</td>
+	        <td>Full Description</td>
+	      </tr>
+	      #{table}#
+	      <tr class="TableCellDark">
+	        <td align="left">#(hasurl)##[shortdescr]#::<a href="#[url]#">#[shortdescr]#</a>#(/hasurl)#</td>
+	        <td align="right">#[queuesize]#</td>
+	        <td align="right">#[blocktime]#&nbsp;sec</td>
+	        <td align="right">#[blockpercent]#%</td>
+	        <td align="right">#[sleeptime]#&nbsp;sec</td>
+	        <td align="right">#[sleeppercent]#%</td>
+	        <td align="right">#[exectime]#&nbsp;sec</td>
+	        <td align="right">#[execpercent]#%</td>
+	        <td align="right">#[totalcycles]#</td>
+	        <td align="right">#[idlecycles]#</td>
+	        <td align="right">#[busycycles]#</td>
+	        <td align="right">#[memscycles]#</td>
+	        <td align="right">#[highcpucycles]#</td>
+	        <td align="right">#[sleeppercycle]#</td>
+	        <td align="right">#[execpercycle]#</td>
+	        <td align="right">#[memusepercycle]#</td>
+	        <td align="right"><input name="#[threadname]#_idlesleep" size="7" maxlength="7" value="#[idlesleep]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> milliseconds</td>
+	        <td align="right"><input name="#[threadname]#_busysleep" size="7" maxlength="7" value="#[busysleep]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> milliseconds</td>
+	        <td align="right"><input name="#[threadname]#_memprereq" size="7" maxlength="10" value="#[memprereq]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> kbytes</td>
+	        <td align="right"><input name="#[threadname]#_loadprereq" size="7" maxlength="7" value="#[loadprereq]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> load</td>
+	        <td align="left">#[longdescr]##(recommendation)#::<br/>recommended: #[value]# kbytes#(/recommendation)#</td>
+	      </tr>
+	      #{/table}#
+	      <tr class="TableCellLight">
+	        <td align="left" colspan="19">
+                  <input type="submit" name="submitdelay" class="btn btn-sm btn-primary" value="Submit New Delay Values" />
+	          <input type="submit" name="submitdefault" class="btn btn-sm btn-primary" value="Re-set to default" />
+	          Changes take effect immediately<br/>
+	        </td>
+	      </tr>
+	    </table>
+    </fieldset>
+  </form>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	<fieldset><legend>Remote search requests:</legend>
+	    <table style="border-width:0px;">
+	      <tr class="TableHeader" style="vertical-align:bottom;">
+	        <th style="padding:0.4em;">Type</th>
+	        <th style="padding:0.4em;" title="When the system load average is over the specified value, that type of remote search request is not used to fill search results.">Maximum system load</th>
+	        <th style="padding:0.4em;">Full Description</th>
+	      </tr>
+	      <tr class="TableCellDark">
+	        <td align="left"><abbr title="Reverse Word Index">RWI</abbr></td>
+	        <td align="right"><input name="remoteSearchRWIMaxLoad" size="7" maxlength="7" value="#[remoteSearchRWIMaxLoad]#"/> load</td>
+	        <td align="left">Search requests performed on remote peers distributed Reverse Word Index</td>
+	      </tr>
+	      <tr class="TableCellDark">
+	        <td align="left">Solr</td>
+	        <td align="right"><input name="remoteSearchSolrMaxLoad" size="7" maxlength="7" value="#[remoteSearchSolrMaxLoad]#"/> load</td>
+	        <td align="left">Search requests performed on remote peers Solr indexes</td>
+	      </tr>
+	      <tr class="TableCellLight">
+	        <td align="left" colspan="19">
+              <input type="submit" name="setRemoteSearchLoads" class="btn btn-sm btn-primary" value="Submit New Values" />
+	          <input type="submit" name="defaultRemoteSearchLoads" class="btn btn-sm btn-primary" value="Re-set to default" />
+	          Changes take effect immediately
+	        </td>
+	      </tr>
+	    </table>
+    </fieldset>
+  </form>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	  <fieldset><legend>Cache Settings:</legend>
+	    <table border="0">
+	      <tr valign="top" class="TableHeader">
+	        <td></td>
+	        <td>RAM Cache</td>
+	        <td>Description</td>
+	      </tr>
+	      <tr valign="top" class="TableCellDark">
+	        <td>Words in RAM cache:<br />(Size in KBytes)</td>
+	        <td>#[wordCacheSize]#<br />(#[wordCacheSizeKBytes]# KB)</td>
+	        <td>
+	        This is the current size of the word caches.
+	        The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.
+	        The maximum of this caches can be set below.
+	        </td>
+	      </tr>
+	      <tr valign="top" class="TableCellDark">
+	        <td>Maximum URLs currently assigned<br />to one cached word:</td>
+	        <td>#[maxURLinCache]#</td>
+	        <td>
+	        This is the maximum size of URLs assigned to a single word cache entry.
+	        If this is a big number, it shows that the caching works efficiently.
+	        </td>
+	      </tr>
+	      <tr valign="top" class="TableCellDark">
+	        <td>Maximum age of a word:</td>
+	        <td>#[maxAgeOfCache]#</td>
+	        <td>
+	        This is the maximum age of a word in an index in minutes.
+	        </td>
+	      </tr>
+	      <tr valign="top" class="TableCellDark">
+	        <td>Minimum age of a word:</td>
+	        <td>#[minAgeOfCache]#</td>
+	        <td>
+	        This is the minimum age of a word in an index in minutes.
+	        </td>
+	      </tr>
+	      <tr valign="top" class="TableCellDark">
+	        <td>Maximum number of words in cache:</td>
+	        <td>
+	          <input name="wordCacheMaxCount" type="text" size="10" maxlength="100" value="#[wordCacheMaxCount]#" />
+	        </td>
+	        <td>
+	          This is is the number of word indexes that shall be held in the
+	          ram cache during indexing. When YaCy is shut down, this cache must be
+	          flushed to disc; this may last some minutes.
+	        </td>
+	      </tr>
+	      <tr valign="top" class="TableCellLight">
+	        <td colspan="4">
+	        <input type="submit" name="cacheSizeSubmit" class="btn btn-sm btn-primary" value="Enter New Cache Size" />
+	        Changes take effect immediately</td>
+	      </tr>
+	    </table>
+	  </fieldset>
+  </form>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ThreadPoolSettings" class="col-sm-12 col-md-6">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	  <fieldset><legend>Thread Pool Settings:</legend>
+	    <table border="0">
+	      <tr class="TableHeader" valign="bottom">
+	        <td>Thread Pool</td>
+	        <td>maximum Active</td>
+	        <td>current Active</td>
+	      </tr>
+	      #{pool}#
+	      <tr class="TableCellDark">
+	        <td align="left">#[name]#</td>
+	        <td align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#" /></td>
+	        <td align="right">#[numActive]#</td>
+	      </tr>
+	      #{/pool}#
+	      <tr class="TableCellLight">
+	        <td align="left" colspan="7">
+	        <input type="submit" name="poolConfig" class="btn btn-sm btn-primary" value="Enter new Threadpool Configuration" />
+	        Changes take effect immediately</td>
+	      </tr>
+	    </table>
+	  </fieldset>
+  </form>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ConnectionPoolSettings" class="col-sm-12 col-md-6">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	  <fieldset><legend>Outgoing connections pools settings :</legend>
+	    <table style="border-width:0px;">
+	      <thead class="TableHeader">
+	      	<tr>
+	        	<th style="padding:0.4em;" rowspan="2">Connection Pool</th>
+	        	<th style="padding:0.4em;" rowspan="2" title="Total maximum number of simultaneously open connections in the pool">Total maximum</th>
+	        	<th style="padding:0.4em;" colspan="3" >Current statistics</th>
+	        </tr>
+	        <tr>
+	        	<th style="padding:0.4em;" title="Number of connections currently being used to execute requests.">Active</th>
+	        	<th style="padding:0.4em;" title="Number of reusable idle connections">Idle</th>
+	        	<th style="padding:0.4em;" title="Number of connection requests being blocked awaiting a free connection">Pending</th>
+	        </tr>
+	      </thead>
+	      <tbody>
+	      	<tr class="TableCellDark">
+	        	<td>General</td>
+	        	<td><input name="http.outgoing.pool.general.maxTotal" type="number" value="#[http.outgoing.pool.general.maxTotal]#" min="1" max="2147483647"/></td>
+	        	<td>#[pool.general.leased]#</td>
+	        	<td>#[pool.general.available]#</td>
+	        	<td>#[pool.general.pending]#</td>
+	      	</tr>
+	      	<tr class="TableCellDark">
+	        	<td>Remote Solr servers</td>
+	        	<td><input name="http.outgoing.pool.remoteSolr.maxTotal" type="number" value="#[http.outgoing.pool.remoteSolr.maxTotal]#" min="1" max="2147483647"/></td>
+	        	<td>#[pool.remoteSolr.leased]#</td>
+	        	<td>#[pool.remoteSolr.available]#</td>
+	        	<td>#[pool.remoteSolr.pending]#</td>
+	      	</tr>
+	      </tbody>
+	      <tfoot>
+	      	<tr class="TableCellLight">
+	        	<td colspan="5">
+	        		<input type="submit" name="connectionPoolConfig" class="btn btn-sm btn-primary" value="Submit New Values" />
+	        		Changes take effect immediately
+	        	</td>
+	        </tr>
+	      </tfoot>
+	    </table>
+	  </fieldset>
+  </form>
+  
+  #%env/templates/footer.template%#
+  </body>
+</html>

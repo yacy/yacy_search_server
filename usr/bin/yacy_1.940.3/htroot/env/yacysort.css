@@ -1,0 +1,64 @@
+/* Specific styling for search results resorting with JavaScript (configuration setting search.jsresort=true) */
+
+/* Apply to all freshly fetched search results on the current page, except the last inserted one which doesn't need animation */
+.searchresults.currentpage.fresh:not(:last-of-type) {
+	/* Animate when a result becomes part of the currently displayed results page */
+	animation: 1s 1 forwards showSearchResult;
+}
+
+/* Apply to all search results gone outside the current page because of a new one freshly inserted */
+.searchresults.earlierpage:not(.hidden), .searchresults.laterpage:not(.hidden) {
+	/* Animate when a result goes out of the currently displayed results page */
+	animation: 1s 1 forwards hideSearchResult;
+}
+
+/* Animation sequence used when a search result becomes visible */
+@keyframes showSearchResult {
+    from {
+      transform: scale(0);
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    99% {
+       /* Arbitrary large value, supposed to be larger than any result item height, to let the browser perform the transition from a collapsed state 
+       (as the 'display' attribute can not be used in CSS animations) */
+      max-height: 500px;
+      padding-top: 1em;
+    }
+    /* Properties of this last frame are part of the new state (with animation-fill-mode set to 'forwards')*/
+    100% {
+      /* Remove any constraint on the max-height now that the animation has been performed */
+      max-height: none;
+    }
+}
+
+/* Animation sequence used when a search result becomes hidden */
+@keyframes hideSearchResult {
+    0% {
+      /* Arbitrary large value, supposed to be larger than any result item height, to let the browser perform the transition to a collapsed state 
+       (as the 'display' attribute can not be used in CSS animations)*/
+      max-height: 500px;
+      padding-top: 1em;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    /* Properties of this last frame are part of the new state (with animation-fill-mode set to 'forwards')*/
+    100% {
+      transform: scale(0);
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+    }
+}
+
+.searchresults {
+  overflow: hidden;
+  transform-origin: top left;
+}

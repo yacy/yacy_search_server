@@ -1,0 +1,10 @@
+<div class="SubMenu">
+  <h3>System Administration</h3>
+  <ul class="SubMenu">
+    <li><a href="Settings_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Advanced Settings</a></li>
+    <li><a href="PerformanceQueues_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Performance Settings of Busy Queues</a></li>
+    <li><a href="Tables_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Viewer and administration for database tables</a></li>
+    <li><a href="ConfigProperties_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Advanced Properties</a></li>
+    <li><a href="TransNews_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">UI Translations</a></li>
+  </ul>
+</div>

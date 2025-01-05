@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because target in forms and links(a) is used to output to different frames -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': OAI-PMH source import list</title>
+    #%env/templates/metas.template%#
+    #(refresh)#::<meta http-equiv="REFRESH" content="6" />#(/refresh)#
+	<script type="text/javascript">
+    <!--
+	// The chrome browser is getting the wrong value if we try to get the value inside the script "var checkStatus=inputs.elements[0].checked;" - so now the value is a parameter
+	function checkAll (formToCheckAll, checkStatus) {
+	var inputs=document.getElementById(formToCheckAll);	
+	//var checkStatus=inputs.elements[0].checked;
+	for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body>
+    #(source)#::
+    <h3>List of #[num]# OAI-PMH Servers</h3>
+    <form action="IndexImportOAIPMH_p.html" target="_top" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="oaipmhimport">
+    <p>
+    <input type="hidden" name="num" value="#[num]#" />
+    <input type="submit" name="loadrows" class="btn btn-primary" value="Load Selected Sources" />
+    </p>
+	<!-- Making the following table sortable could really consume some CPU if the list is huge - remove the class="sortable" if that is not desired ! -->
+    <table class="sortable" >
+      <tr class="TableHeader">
+        <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
+        <td>Source</td>
+      </tr>
+      #{table}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[source]#" /></td>
+        <td>#[loadurl]#</td>
+      </tr>
+      #{/table}#
+    </table>
+    <p>
+    <input type="submit" name="loadrows" class="btn btn-primary" value="Load Selected Sources" />
+    </p>
+    </form>
+    #(/source)#
+    
+    #(import)#::
+    <h3>Import List</h3>
+    <table >
+      <tr class="TableHeader">
+        <td>Thread</td>
+        <td>Source</td>
+        <td>Processed<br />Chunks</td>
+        <td>Imported<br />Records</td>
+        <td>Complete at<br /># Records</td>
+        <td>Speed<br />(records/second)</td>
+      </tr>
+      #{table}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[thread]#</td>
+        <td>#[source]#</td>
+        <td>#[chunkCount]#</td>
+        <td>#[recordsCount]#</td>
+        <td>#[completeListSize]#</td>
+        <td>#[speed]#</td>
+      </tr>
+      #{/table}#
+    </table>
+    #(/import)#
+  </body>
+</html>

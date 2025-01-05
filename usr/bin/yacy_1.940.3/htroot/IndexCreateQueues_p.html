@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': '#[queuename]#' Crawl Queue</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreateQueues">
+  
+    <div id="fullcontent">
+    #(embed)#
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawlMonitor.template%#
+    <h2>'#[queuename]#' Crawl Queue</h2>
+    ::#(/embed)#
+<div id="api">
+<a href="api/latency_p.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>Click on this API button to see an XML with information about the crawler latency and other statistics.</span>
+</div>
+    
+    #(crawler)#
+    <p>This crawler queue is empty</p>
+    ::
+    #(embed)#
+    <form action="IndexCreateQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        Delete Entries:
+        <input type="text" name="pattern" value="#[deletepattern]#" size="40" maxlength="200" />
+        <select name="option" size="1">
+           <option value="5">Initiator</option>
+           <option value="3">Profile</option>
+           <option value="4">Depth</option>
+           <option value="6">Modified Date</option>
+           <option value="2">Anchor Name</option>
+           <option value="1" selected="selected">URL</option>
+        </select>
+        <input type="hidden" name="stack" value="#[queuename]#" />
+        <input type="submit" name="delete" value="Delete" />
+      </fieldset>
+    </form>
+    ::#(/embed)#
+    <table border="0">
+      <colgroup>
+        <col width="5" />
+        <col width="10" />
+        <col width="30" />
+        <col width="10" />
+        <col width="10" />
+        <col width="10" />
+        <col width="10" />
+        <col width="10" />
+        <col />
+      </colgroup>
+      #(showtable)#
+      <tr class="TableHeader">
+        <th #(sortedByCount)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByCount)#>
+                <a class="sortTableLink" href="IndexCreateQueues_p.html?stack=#[queuename]#&amp;sort=#(sortedByCount_asc)#::-#(/sortedByCount_asc)#count" target="_self" title="Sort #(sortedByCount_asc)#ascending::descending#(/sortedByCount_asc)#">Count</a>
+                #(sortedByCount)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByCount)#
+        </th>
+        <th>Delta/ms</th>
+        <th #(sortedByHost)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByHost)#>
+                <a class="sortTableLink" href="IndexCreateQueues_p.html?stack=#[queuename]#&amp;sort=#(sortedByHost_asc)#::-#(/sortedByHost_asc)#host" target="_self" title="Sort #(sortedByHost_asc)#ascending::descending#(/sortedByHost_asc)#">Host</a>
+                #(sortedByHost)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByHost)#
+        </th>
+        <th>Initiator</th>
+        <th>Profile</th>
+        <th>Depth</th>
+        <th>Modified Date</th>
+        <th>Anchor Name</th>
+        <th>URL</th>
+      </tr>
+      #(/showtable)#
+    #{host}#
+      <tr class="TableCellDark">
+        <td>#[hostcount]#</td>
+        <td>#[hostdelta]#</td>
+        <td><a href="IndexCreateQueues_p.html?#(embed)#::embed=&#(/embed)#delete=&stack=#[queuename]#&option=1&pattern=.*#[hostname]#.*&urlsPerHost=#[urlsPerHost]#"><img src="env/grafics/trash.gif"></a>&nbsp;#[hostnameport]#</td>
+        <td colspan="6"></td>
+      </tr>
+      #{list}#
+      <tr class="TableCellLight">
+        <td colspan="3"></td>
+        <td>#[initiator]#</td>
+        <td>#[profile]#</td>
+        <td>#[depth]#</td>
+        <td>#[modified]#</td>
+        <td>#[anchor]#</td>
+        <td><a href="#[url]#" target="_blank">#[url]#</a></td>
+      </tr>
+      #{/list}#
+      </td>
+      </tr>
+    #{/host}#
+    #(/crawler)#
+    #(embed)#
+    #%env/templates/footer.template%#
+    ::#(/embed)#
+    </div>
+    <script type="text/javascript">
+    <!--
+      parentPage = parent.document.getElementById('QueuesTable');
+      if (parentPage != null) parentPage.height = document.getElementById('fullcontent').offsetHeight + 30;
+    -->
+    </script>
+  </body>
+</html>

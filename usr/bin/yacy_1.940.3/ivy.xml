@@ -1,0 +1,110 @@
+<ivy-module version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+  <info organisation="net.yacy" module="search-server"/>
+  <configurations defaultconfmapping="default">
+    <!-- https://wrongnotes.blogspot.com/2014/02/simplest-explanation-of-ivy.html -->
+    <conf name="compile" visibility="public"/>
+    <conf name="test" visibility="public"/>
+  
+  </configurations>
+    <dependencies defaultconf="compile->default">
+      <dependency org="commons-fileupload" name="commons-fileupload" rev="1.4" conf="compile->master" />
+      <dependency org="commons-lang" name="commons-lang" rev="2.6">
+        <exclude module="junit"/>
+      </dependency>
+      <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
+      <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.19.0"  />
+      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.18.2"/>
+      <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.1.8"/>
+      <dependency org="com.google.guava" name="guava" rev="33.3.1-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="failureaccess" rev="1.0.2" />
+      <dependency org="com.ibm.icu" name="icu4j" rev="76.1"/>
+      <dependency org="com.github.mwiede" name="jsch" rev="0.2.21" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.12.0"/>
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.12.0" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.12.0"/>
+      <dependency org="commons-codec" name="commons-codec" rev="1.15" />
+      <dependency org="commons-io" name="commons-io" rev="2.17.0" />
+      <dependency org="commons-logging" name="commons-logging" rev="1.2" />
+      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="3.2.2"/>
+      <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.1.5" conf="compile->master"/>
+      <dependency org="io.opentracing" name="opentracing-noop" rev="0.33.0"/>
+      <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
+      <dependency org="javax.servlet" name="javax.servlet-api" rev="4.0.1"/>
+      <dependency org="javainetlocator" name="inetaddresslocator" rev="2.18" />
+      <dependency org="jcifs" name="jcifs" rev="1.3.17"  conf="compile->master" />
+      <dependency org="net.arnx" name="jsonic" rev="1.3.10"/>
+      <dependency org="net.jthink" name="jaudiotagger" rev="2.2.5"/>
+      <dependency org="net.sourceforge.jchardet" name="jchardet" rev="1.0"/>
+      <dependency org="org.apache.commons" name="commons-collections4" rev="4.4" />
+      <dependency org="org.apache.commons" name="commons-compress" rev="1.27.1" />
+      <dependency org="org.apache.calcite.avatica" name="avatica-core" rev="1.13.0" conf="compile->master"/>
+      <dependency org="org.apache.calcite" name="calcite-core" rev="1.18.0" conf="compile->master"/>
+      <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.18.0" conf="compile->master"/>
+      <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" />
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.13.0" />
+      <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.12"/>
+      <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.12"/>
+      <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
+      <dependency org="org.apache.lucene" name="lucene-analysis-common" rev="9.0.0"/>
+      <dependency org="org.apache.lucene" name="lucene-backward-codecs" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-classification" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-codecs" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-grouping" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-highlighter" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-join" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-memory" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-misc" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-queries" rev="9.0.0" />
+      <dependency org="org.apache.lucene" name="lucene-queryparser" rev="9.0.0" conf="compile->master"/>
+      <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="9.0.0" conf="compile->master"/>
+      <dependency org="org.apache.lucene" name="lucene-suggest" rev="9.0.0"/>
+      
+      <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.3" />
+      <dependency org="org.apache.poi" name="poi" rev="5.3.0" />
+      <dependency org="org.apache.poi" name="poi-scratchpad" rev="5.3.0" />
+      
+      <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="compile->master"/>
+      <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="compile->master"/>
+      <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
+      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.6.2" conf="compile->master" />
+      <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
+      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.79" />
+      <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
+        <exclude module="stax-api" />
+      </dependency>
+      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.56.v20240826" />
+      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.56.v20240826" conf="compile->master" />
+      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.56.v20240826"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.56.v20240826">
+        <exclude module="jetty-util-ajax" />
+      </dependency>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.56.v20240826"  />
+      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.56.v20240826"  />
+      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.56.v20240826" conf="compile->master"/>
+      <dependency org="org.jsoup" name="jsoup" rev="1.15.3"  />
+      <dependency org="org.jwat" name="jwat-warc" rev="1.1.3"  />
+      <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.8"/>
+      <!--NOT FOUND dependency org="org.restlet.jee" name="org.restlet" rev="2.2.1" / -->
+      <dependency org="org.rrd4j" name="rrd4j" rev="3.2"/>
+      <dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.36"/>
+      <dependency org="org.slf4j" name="log4j-over-slf4j" rev="1.7.36"/>
+      <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.7.36"/>
+      <!-- This does not match langdetect.jar from pre-ivy -->
+      <dependency org="org.tukaani" name="xz" rev="1.8"/>
+      <dependency org="oro" name="oro" rev="2.0.8"/>
+
+      <dependency org="junit" name="junit" rev="4.13" conf="test->default"/>
+      <dependency org="org.hamcrest" name="hamcrest" rev="2.2" conf="test->default"/>
+      <dependency org="org.hamcrest" name="hamcrest-core" rev="2.2" conf="test->default"/>
+      <dependency org="org.hamcrest" name="hamcrest-library" rev="2.2" conf="test->default"/>
+      <dependency org="com.github.luben" name="zstd-jni" rev="1.5.5-6"></dependency>
+      <dependency org="ai.djl" name ="api" rev="0.27.0"></dependency>
+    </dependencies>
+</ivy-module>

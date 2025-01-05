@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+#(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexControlURLs_p.html">#(/reload)#
+  <head>
+    <title>YaCy '#[clientname]#': URL Database Administration</title>
+    #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.urlstring.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\" OR url_paths_sxt:\"" + query + "\" OR url_file_name_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4 && self.xmlHttpReq.status == 200) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var raw = document.getElementById("raw");
+  if (raw != null) raw.innerHTML = str;
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"IndexControlURLs_p.html?urlstringsearch=&amp;urlstring=" + item.link + "\">" + item.link + "<\/a><\/td>";
+    }
+    html += "<\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <div id="api">
+    <a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&omitHeader=true&q=id:%22#[urlhash]#%22">
+    <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+    <span>These document details can be retrieved as <a href="http://www.w3.org/TR/xhtml-rdfa-primer/" target="_blank">XHTML+RDFa</a>
+    document containg <a href="http://www.w3.org/RDF/" target="_blank">RDF</a> annotations in <a href="http://dublincore.org/" target="_blank">Dublin Core</a> vocabulary.
+    The XHTML+RDFa data format is both a XML content format and a HTML display format and is considered as an important <a href="http://www.w3.org/2001/sw/" target="_blank">Semantic Web</a> content format.
+    The same content can also be retrieved as pure <a href="api/yacydoc.xml?urlhash=#[urlhash]#">XML metadata</a> with DC tag name vocabulary.
+    Click the API icon to see an example call to the search rss API.
+    To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+    </div>
+    
+    <h2>URL Database Administration</h2>
+    <p>The local index currently contains #[ucount]# URL references</p>
+    <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">
+    <fieldset><legend>URL Retrieval</legend>
+      <dl>
+        
+        <dt class="TableCellDark">Retrieve by URL:</dt>
+        <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
+            <input type="submit" name="urlstringsearch" value="Show Details for URL" class="btn btn-primary" style="width:240px;"/><br />
+            <div id="searchresults"></div>
+        </dd>
+        
+        <dt class="TableCellDark">Retrieve by URL-Hash:</dt>
+        <dd><input type="text" name="urlhash" value="#[urlhash]#" size="40" maxlength="12" />
+            <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset#(cleanup)# disabled="disabled"::#(/cleanup)#><legend>Cleanup</legend>
+      <dl>
+        <dt class="TableCellDark">Index Deletion</dt>
+        <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
+             onclick="x=document.getElementById('deleteIndex').checked;#(rwi)#::document.getElementById('deleteRWI').checked=x;#(/rwi)#document.getElementById('deleteRobots').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteFirstSeen').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;"
+            /> Delete local search index (embedded Solr and old Metadata)<br/>
+            #(cleanupsolr)#::<input type="checkbox" name="deleteRemoteSolr" id="deleteRemoteSolr" onclick="x=document.getElementById('deleteRemoteSolr').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete remote solr index<br/>#(/cleanupsolr)#
+            #(cleanuprwi)#::<input type="checkbox" name="deleteRWI" id="deleteRWI" onclick="x=document.getElementById('deleteRWI').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete RWI Index (DHT transmission words)<br/>#(/cleanuprwi)#
+            #(cleanupcitation)#::<input type="checkbox" name="deleteCitation" id="deleteCitation" onclick="x=document.getElementById('deleteCitation').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete Citation Index (linking between URLs)<br/>#(/cleanupcitation)#
+            <input type="checkbox" name="deleteFirstSeen" id="deleteFirstSeen" disabled="disabled" /> Delete First-Seen Date Table<br/>
+            <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" /> Delete HTTP &amp; FTP Cache<br/>
+            <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /> Stop Crawler and delete Crawl Queues<br/>
+            <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /> Delete robots.txt Cache<br/>
+            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="btn btn-danger" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    #(dumprestore)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset><legend>Optimize Solr</legend>
+      <dl>
+        <dt>&nbsp;</dt>
+        <dd>merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments
+        <input type="submit" name="optimizesolr" value="Optimize Solr" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset><legend>Reboot Solr Core</legend>
+      #(rebootSolrEnabled)#<div class="alert alert-info">This feature is available when using exclusively a local embedded Solr.</div>::#(/rebootSolrEnabled)#
+      <dl>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="btn btn-primary" style="width:240px;" #(rebootSolrEnabled)#disabled="disabled"::#(/rebootSolrEnabled)#/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    #(/dumprestore)#
+    
+    #(statistics)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Statistics about top-domains in URL Database</legend>
+      <dl>
+        <dt>&nbsp;</dt>
+        <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
+            <input type="submit" name="statistics" value="Generate Statistics" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/statistics)#
+    
+    #(statisticslines)#::
+    <p><em>Statistics about the top-#[domains]# domains in the database:</em></p>
+    <table >
+      <tr class="TableHeader">
+   		<td align="center"></td>
+        <td><strong>Domain</strong></td>
+        <td><strong>URLs</strong></td>
+      </tr>
+      #{domains}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>
+          <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+            <div>
+              <input type="hidden" name="domain" value="#[domain]#" />
+              <input type="hidden" name="lines" value="#[lines]#" />
+              <input type="submit" name="deletedomain" value="delete all" class="btn btn-danger btn-xs" style="padding: 0px 12px;" />
+            </div>
+          </form>
+        </td>
+        <td><a href="http://#[domain]#/" target="_blank">#[domain]#</a></td>
+        <td>#[count]#</td>
+      </tr>
+      #{/domains}#
+    </table>
+    #(/statisticslines)#
+    
+    #(genUrlProfile)#
+    ::No entry found for URL-hash #[urlhash]#
+    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&omitHeader=true&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
+    <br />
+    <p>
+      <form action="ViewFile.html" method="get" accept-charset="UTF-8">
+        <input type="hidden" name="viewMode" value="parsed" />
+        <input type="hidden" name="show" value="Show" />
+        <input type="hidden" name="urlHash" value="#[urlhash]#" />
+        <input type="submit" value="Show Content" name="showcontent" class="btn btn-primary" style="width:240px;"/><br />
+      </form>
+    </p>
+    <p>
+      <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+        <input type="hidden" name="keystring" value="" />
+        <input type="hidden" name="keyhash" value="" />
+        <input type="hidden" name="urlstring" value="" />
+        <input type="hidden" name="urlhash" value="#[urlhash]#" />
+        <input type="submit" value="Delete URL" name="urlhashdelete" class="btn btn-danger" style="width:240px;"/><br />
+        <span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
+        <input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="btn btn-danger" /><br />
+        <span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
+      </form>
+    </p>
+    #(/genUrlProfile)#
+    
+    #[result]#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Remote Crawl Configuration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="RemoteCrawl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Remote Crawler</h2>
+    The remote crawler is a process that requests urls from other peers.
+    Peers offer remote-crawl urls if the flag 'Do Remote Indexing'
+    is switched on when a crawl is started.
+    <fieldset>
+      <legend>Remote Crawler Configuration</legend>
+    <form id="ConfigForm" method="post" action="RemoteCrawl_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <dl>
+        #(disabled)#::<dt></dt><dd><span class="error">Your peer cannot accept remote crawls because you need senior or principal peer status for that!</span></dd>#(/disabled)#
+        <dt>
+        <dt>
+          <label for="crawlResponse">Accept Remote Crawl Requests</label>
+          <input type="checkbox" #(disabled)#::disabled="disabled"#(/disabled)# id="crawlResponse" name="crawlResponse" onclick="window.location.href='RemoteCrawl_p.html?#(crawlResponse)#crawlResponse=on::crawlResponse=off#(/crawlResponse)#'" #(crawlResponse)#::checked="checked" #(/crawlResponse)#/>
+        </dt>
+        <dd>
+          Perform web indexing upon request of another peer.<br />
+          <label for="acceptCrawlLimit">Load with a maximum of</label>
+          <input id="acceptCrawlLimit" name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[acceptCrawlLimit]#" /> pages per minute
+          <input type="submit" name="save" class="btn btn-primary" value="Save" />
+      <p>Crawl results will appear in the <a href="CrawlResults.html?process=6">Crawl Result Monitor</a></p>
+        </dd>
+      </dl>
+    </form>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Peers offering remote crawl URLs</legend>
+      If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:
+    <form method="get" action="#">
+      <table class="sortable" border="0">
+      <tr class="TableHeader" valign="bottom">
+        <td><strong>Name</strong><br/></td>
+        <td><strong>URLs for<br/>Remote<br/>Crawl</strong></td>
+        <td><strong>Release</strong></td>
+        <td><strong>PPM</strong></td>
+        <td><strong>QPH</strong></td>
+        <td><strong>Last<br/>Seen</strong></td>
+        <td><strong>UTC</strong><br/>Offset</td>
+        <td style="width:70px;"><strong>Uptime</strong></td>
+        <td><strong>Links</strong></td>
+        <td><strong>RWIs</strong></td>
+        <td><strong>Age</strong></td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td><a href="http://#[peeraddress]#">#[shortname]#</a></td>
+        <td align="right">#[RCount]#</td>
+        <td align="right">#[version]#</td>
+        <td align="right">#[ppm]#</td>
+        <td align="right">#[qph]#</td>
+        <td align="right">#[lastSeen]#</td>
+        <td align="right">#[utc]#</td>
+        <td align="right">#[uptime]#</td>
+        <td align="right">#[LCount]#</td>
+        <td align="right">#[ICount]#</td>
+        <td align="right">#[age]#</td>
+      </tr>
+      #{/list}#
+      </table>
+    </form>
+    </fieldset>
+    #%env/templates/footer.template%#
+  </body>
+</html>

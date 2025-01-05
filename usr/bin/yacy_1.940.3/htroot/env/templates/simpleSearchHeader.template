@@ -1,0 +1,83 @@
+<!-- top navigation -->
+<div class="navbar #[simpleheadernavbar]# navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand hidden-xs" id="navbar-brand" href="#[promoteSearchPageGreeting.homepage]#" style="margin-top:-6px;white-space:nowrap;">
+        <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" 
+        	style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;
+        <span id="greeting"></span>
+      </a>
+    </div>
+    <div class="navbar-collapse collapse">
+    <ul class="nav navbar-nav">
+      #(showLogin)#::
+      <li id="header_login" title="You are authenticated as #[userName]#" class="navbar-text">
+      	<span class="glyphicon glyphicon-user text-info"></span>
+     	<span>#[userName]#</span>
+      </li>
+      ::
+      <li id="header_login">
+        <a title="Log in to use extended search features" href="#[loginURL]#">
+	      	<span>Log in</span>
+        	<span class="glyphicon glyphicon-log-in"></span>
+        </a>
+      </li>
+      #(/showLogin)#
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li id="header_search" class="dropdown">
+        <a href="#" data-toggle="dropdown" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false" title="Search Interfaces">
+        	<span class="hidden-sm">Search Interfaces<b class="caret"></b></span>
+        	<span class="visible-sm glyphicon glyphicon-search"><b class="caret"></b></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+          <li id="header_websearch"><a href="index.html#(authSearch)#::?auth#(/authSearch)#" onclick="this.href='index.html?#(authSearch)#::auth&#(/authSearch)#former='+encodeURIComponent(document.searchform.search.value)">Web Search</a></li>
+          <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
+          <li id="header_comparesearch"><a href="compare_yacy.html?display=0">Compare Search</a></li>
+          <li id="header_urlviewer"><a href="ViewFile.html">URL Viewer</a></li>
+          <!--<li><a href="yacysearch_location.html">Location Search</a></li>-->
+          <li class="divider" role="separator"></li>
+          <li>&nbsp;&nbsp;<i>Example Calls to the Search API:</i></li>
+          <li><a href="yacysearch.json?query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;YaCy JSON</a></li>
+          <li><a href="yacysearch.rss?query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;YaCy RSS/Opensearch</a></li>
+          <li><a href="solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&sort=load_date_dt+desc&q=description_txt:%5B*%20TO%20*%5D" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr RSS/Opensearch</a></li>
+          <li><a href="solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON</a></li>
+          <li><a href="solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML</a></li>
+          <li><a href="solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core / XML</a></li>
+        </ul>
+      </li>
+      <li id="header_help" class="dropdown">
+        <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-question-sign"></span></a>
+        <ul class="dropdown-menu" role="menu">
+          <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
+          <li id="header_tutorial"><a href="https://yacy.net/tutorials/">YaCy Tutorials</a></li>
+          <li id="header_jslicense"><a href="jslicense.html" data-jslicense="1">JavaScript information</a></li>
+          <li class="divider" role="separator"></li>
+          <li id="header_download"><a href="https://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
+          <li id="header_community"><a href="https://community.searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
+          <li id="header_git"><a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
+          <li id="header_bugs"><a href="https://github.com/yacy/yacy_search_server/issues" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
+        </ul>
+      </li>
+      <li id="header_administration">
+        <form action="Status.html" method="get">
+          <button accesskey="s" type="submit" class="btn btn-default navbar-btn" title="Administration">
+          	<span class="glyphicon glyphicon-cog"></span>
+          	<span class="hidden-sm hidden-md"> Administration &raquo;</span>
+          </button>
+        </form>
+      </li>
+    </ul>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="starter-template">
+  

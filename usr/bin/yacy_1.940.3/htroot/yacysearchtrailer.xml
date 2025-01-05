@@ -1,0 +1,39 @@
+<yacy:navigation>
+#{navs}#
+<yacy:facet name="#[name]#" displayname="#[displayname]#" type="String" min="0" max="0" mean="0">
+#{element}#
+    <yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
+#{/element}#
+</yacy:facet>
+#{/navs}#
+#(nav-filetypes)#::
+<yacy:facet name="filetypes" displayname="Filetypes" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
+#{/element}#
+</yacy:facet>
+#(/nav-filetypes)#
+#(nav-protocols)#::
+<yacy:facet name="protocols" displayname="Protocols" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
+#{/element}#
+</yacy:facet>
+#(/nav-protocols)#
+#(nav-topics)#::
+<yacy:facet name="topics" displayname="Topics" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
+#{/element}#
+</yacy:facet>
+#(/nav-topics)#
+#{nav-vocabulary}#
+<yacy:facet name="#[navname]#" displayname="#[navname]#" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
+#{/element}#
+</yacy:facet>
+#{/nav-vocabulary}#
+</yacy:navigation>
+<opensearch:totalResults>#[num-results_totalcount]#</opensearch:totalResults>
+		

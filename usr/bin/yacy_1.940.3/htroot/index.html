@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    #(forward)#::<meta http-equiv="REFRESH" content="0; url=#[target]#" />#(/forward)#
+    <title>YaCy '#[clientname]#': Search Page</title>
+    #%env/templates/metas.template%#
+    <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
+    <link rel="search" type="application/opensearchdescription+xml" title="YaCy '#[clientname]#'" href="opensearchdescription.xml" />
+    <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.js"></script>
+    <script type="text/javascript" src="js/html.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      var suggestTimeoutId = null;
+      
+      /* Configure the search input field to get suggestions on key strokes */
+      $('#search').typeahead({hint:false,highlight:true,minLength:1}, {
+    	name: 'states',
+    	displayKey: 'value',
+    	source: function(query, render) {
+    		if(suggestTimeoutId != null) {
+    			/* Remove delayed call not yet done */
+    			clearTimeout(suggestTimeoutId);
+    		}
+			/* Limit the rate of calls to the suggest API by adding a delay before effective call */
+    		suggestTimeoutId = setTimeout(function() {
+    	       	 $.getJSON("suggest.json?q=" + query, function(data) {
+    	            var parsed = [];
+    	             for (var i = 0; i < data[1].length; i++) {
+    	                 var row = data[1][i];
+    	                 if (row) {
+    	                     parsed[parsed.length] = {
+    	                         data: [row],
+    	                         value: row,
+    	                         result: row
+    	                     };  
+    	                 };
+    	             };
+    	             render(parsed); 
+    	           });
+    		}, 300);
+    	}
+      });
+    });
+    </script>
+    <style type="text/css">.twitter-typeahead {margin: 0px;padding: 0px;top:3px;}</style> <!-- fix for input window -->
+  </head>
+  <body id="index" onload="#(focus)#::document.getElementById('search').focus()#(/focus)#">
+    #(topmenu)#
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleSearchHeader.template%#
+    <script type="text/javascript">
+      document.getElementById("header_websearch").className += " active";
+    </script>
+    #(/topmenu)#
+    
+    <!-- this is the single exception in page design where we do not want a top-left application icon because we show a big one in the middle of the page -->
+	<script>document.getElementById("greeting-icon").src="env/grafics/invisible.png"</script>
+	
+	<h2 class="yacy"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="margin: auto;"/></a></h2>
+    <h2 class="yacy">#[promoteSearchPageGreeting]#</h2>
+
+    <form class="search form-inline" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
+      <fieldset class="maininput">
+        <div class="input-group">
+          <input name="query" id="search" type="text" size="40" maxlength="80" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" class="form-control searchinput typeahead" />
+          <div class="input-group-btn">
+            <button id="Enter" name="Enter" class="btn btn-primary" type="submit">Search</button>
+          </div>
+        </div>
+    	#(authSearch)#::
+  		<input type="hidden" name="auth" id="auth" value=""/>
+  		#(/authSearch)#
+        <input type="hidden" name="verify" value="#[search.verify]#" />
+        #(searchdomswitches)#::
+        <div class="yacysearch">
+	        #(searchtext)#::<label><input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;</label>#(/searchtext)#
+	        #(searchimage)#::<label><input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;</label>#(/searchimage)#
+	        #(searchaudio)#::<label><input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;</label>#(/searchaudio)#
+	        #(searchvideo)#::<label><input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;</label>#(/searchvideo)#
+	        #(searchapp)#::<label><input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications</label>#(/searchapp)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#" onclick="this.href='index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#&amp;former='+encodeURIComponent(document.getElementById('search').value)+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom);">more options...</a>::#(/searchoptions)#
+        </div>
+        #(/searchdomswitches)#
+        <input type="hidden" name="nav" value="#[search.navigation]#" />
+        <input type="hidden" name="startRecord" id="startRecord" value="0" />
+        <input type="hidden" name="indexof" value="off" />
+        <input type="hidden" name="meanCount" value="5" />
+      #(searchoptions)#
+        <input type="hidden" name="resource" value="global" />
+        <input type="hidden" name="prefermaskfilter" value="" />
+        <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+        <input id="timezoneOffset" type="hidden" name="timezoneOffset" value=""><script>document.getElementById("timezoneOffset").value = new Date().getTimezoneOffset();</script>
+      </fieldset>
+      ::
+      </fieldset>
+       
+      <table role="presentation">
+        <tr>
+          <td><label id="maxResultsLabel">Results per page</label>:</td>
+          <td>
+          	<fieldset aria-labelledby="maxResultsLabel">
+            	<input type="radio" name="maximumRecords" id="mr10" value="10" #(count-10)#::checked="checked"#(/count-10)#/><label for="mr10">10</label>
+            	<input type="radio" name="maximumRecords" id="mr50" value="50" #(count-50)#::checked="checked"#(/count-50)#/><label for="mr50">50</label>
+            	<input type="radio" name="maximumRecords" id="mr100" value="100" #(count-100)#::checked="checked"#(/count-100)#/><label for="mr100">100</label>
+            </fieldset>
+          </td>
+        </tr>
+        #(resource-select)#::
+        <tr>
+          <td><label id="resourceLabel">Resource</label>:</td>
+          <td>
+          	<fieldset aria-labelledby="resourceLabel">
+            	<input type="radio" name="resource" id="rglobal" value="global" checked="checked" /><label for="rglobal">the peer-to-peer network</label>
+            	<input type="radio" name="resource" id="rlocal" value="local"><label for="rlocal">only the local index</label>
+            </fieldset>
+          </td>::
+          <td><label id="resourceLabel">Resource</label>:</td>
+          <td>
+          	<fieldset aria-labelledby="resourceLabel">
+            	<input type="radio" name="resource" id="rglobal" value="global"/><label for="rglobal">the peer-to-peer network</label>
+            	<input type="radio" name="resource" id="rlocal" value="local" checked="checked"/><label for="rlocal">only the local index</label>
+            </fieldset>
+          </td>
+        </tr>
+        #(/resource-select)#
+        <tr>
+          <td>
+            <label for="prefermaskfilter">Prefer mask</label>:
+          </td>
+          <td>
+            #(prefermaskoptions)#
+            <input id="prefermaskfilter" name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
+            ::
+            <input type="radio" name="prefermask" value="yes" checked="checked" /> restrict on <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
+            <input type="radio" name="prefermask" value="no" /> show all
+            #(/prefermaskoptions)#
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Constraints:
+          </td>
+          <td>
+            <input type="checkbox" id="indexof" name="indexof" #[indexofChecked]# /> <label for="indexof">only index pages</label>
+          </td>
+        </tr>
+        <tr>
+          <td><label id="mediaSearchLabel">Media search</label>:</td>
+          <td>
+          	<fieldset aria-labelledby="mediaSearchLabel">
+            	<label title="Extend media search results (images, videos or applications specific) to pages including such medias (provides generally more results, but eventually less relevant).">
+            		<input type="radio" name="strictContentDom" value="false" #(search.strictContentDom)#checked="checked"::#(/search.strictContentDom)#/> Extended
+            	</label>
+            	<label title="Strictly limit media search results (images, videos or applications specific) to indexed documents matching exactly the desired content domain.">
+            		<input type="radio" name="strictContentDom" value="true" #(search.strictContentDom)#::checked="checked"#(/search.strictContentDom)#> Strict
+            	</label>
+            </fieldset>
+          </td>
+        </tr>
+      </table>
+      
+      <h4>Query Operators</h4>
+
+      <dl style="width:700px">
+      <dt style="width:100px">restrictions</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>inurl:&lt;phrase&gt;</dt>
+          <dd>only urls with the &lt;phrase&gt; in the url</dd>
+          <dt>inlink:&lt;phrase&gt;</dt>
+          <dd>only urls with the &lt;phrase&gt; within outbound links of the document</dd>
+          <dt>filetype:&lt;ext&gt;</dt>
+          <dd>only urls with extension &lt;ext&gt;</dd>
+          <dt>site:&lt;host&gt;</dt>
+          <dd>only urls from host &lt;host&gt;</dd>
+          <dt>author:&lt;author&gt;</dt>
+          <dd>only pages with as-author-anotated &lt;author&gt;</dd>
+          <dt>tld:&lt;tld&gt;</dt>
+          <dd>only pages from top-level-domains &lt;tld&gt;</dd>
+          #(datesincontent)#::
+            <dt>on:&lt;date&gt;</dt>
+            <dd>only pages with &lt;date&gt; in content</dd>
+            <dt>from:&lt;date1&gt; to:&lt;date2&gt;</dt>
+            <dd>only pages with a date between &lt;date1&gt; and &lt;date2&gt; in content</dd>
+          #(/datesincontent)#
+          <dt>keyword:&lt;phrase&gt;</dt>
+          <dd>only pages with keyword anotation containing &lt;phrase&gt;</dd>
+          <dt>/http</dt>
+          <dd>only resources from http or https servers</dd>
+          <dt>/ftp</dt>
+          <dd>only resources from ftp servers (they are rare, <a href="CrawlStartSite.html">crawl them yourself</a>)</dd>
+          <dt>/smb</dt>
+          <dd>only resources from smb servers (<a href="ConfigBasic.html">Intranet Indexing</a> must be selected)</dd>
+          <dt>/file</dt>
+          <dd>only files from a local file system (<a href="ConfigBasic.html">Intranet Indexing</a> must be selected)</dd>
+        </dl>
+      </dd>
+      <dt style="width:100px">spatial restrictions</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>/location</dt>
+          <dd>only documents having location metadata (geographical coordinates)</dd>
+          <dt>/radius/&lt;latitude&gt;/&lt;longitude&gt;/&lt;distance&gt;</dt>
+          <dd>only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)</dd>
+        </dl>
+      </dd>
+      <dt style="width:100px">ranking modifier</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>/date</dt>
+          <dd>sort by date (latest first)</dd>
+          <dt>/near</dt>
+          <dd>multiple words shall appear near</dd>
+          <dt>"" (doublequotes)</dt>
+          <dd>multiple words shall appear near</dd>
+          <dt>/language/&lt;lang&gt;</dt>
+          <dd>prefer given language (an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code)</dd>
+        </dl>
+      </dd>
+      #(heuristic)#::
+      <dt style="width:100px">heuristics</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>/heuristic</dt>
+          <dd>add search results from external opensearch systems</dd>
+        </dl>
+      </dd>
+      #(/heuristic)#
+      </dl>
+      
+      <h4>Search Navigation</h4>
+
+      <dl style="width:700px">
+      <dt style="width:100px">keyboard shortcuts</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt><a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + n</dt>
+          <dd>next result page</dd>
+          <dt><a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + p</dt>
+          <dd>previous result page</dd>
+        </dl>
+      </dd>
+      <dt style="width:100px">automatic result retrieval</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>browser integration</dt>
+          <dd>after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'</dd>
+          <dt>search as rss feed</dt>
+          <dd>click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an <a href="yacysearch.rss?query=news+%2Fdate&Enter=Search&verify=cacheonly&contentdom=text&nav=hosts%2Cauthors%2Cnamespace%2Ctopics%2Cfiletype%2Cprotocol&startRecord=0&indexof=off&meanCount=5&maximumRecords=10&resource=global&prefermaskfilter=">example</a>.</dd>
+          <dt>json search results</dt>
+          <dd>for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'</dd>
+        </dl>
+      </dd>
+      </dl>
+      #(/searchoptions)#
+    </form>
+    
+    #(topmenu)#
+    #%env/templates/embeddedfooter.template%#
+    ::
+    #%env/templates/simplefooter.template%#
+    #(/topmenu)#
+  </body>
+</html>

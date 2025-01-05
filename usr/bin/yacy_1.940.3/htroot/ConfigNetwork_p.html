@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Network Configuration</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+      function CheckForRobinson() {
+         var dist = document.getElementById("ConfigForm").indexDistribute.checked;
+         var recv = document.getElementById("ConfigForm").indexReceive.checked;
+         if(!(dist || recv)) {
+            //robinson-mode
+            document.getElementById("ConfigForm").network[1].checked = true;
+         } else {
+            //p2p-mode
+            document.getElementById("ConfigForm").network[0].checked = true;
+         }
+         document.getElementById("ConfigForm").indexReceiveSearch[recv ? 0 : 1].checked = true;
+      }
+      
+      function EnableRobinson() {
+         if(document.getElementById("ConfigForm").network[1].checked) {
+            document.getElementById("ConfigForm").indexDistribute.checked = false;
+            document.getElementById("ConfigForm").indexReceive.checked = false;
+            document.getElementById("ConfigForm").indexReceiveSearch[1].checked = true;
+         }
+      }
+      
+      function EnableP2P() {
+         if(document.getElementById("ConfigForm").network[0].checked) {
+            document.getElementById("ConfigForm").indexDistribute.checked = true;
+            document.getElementById("ConfigForm").indexReceive.checked = true;
+            document.getElementById("ConfigForm").indexReceiveSearch[0].checked = true;
+         }
+      }
+    //-->
+    </script>
+  </head>
+  <body id="ConfigNetwork">
+    #%env/templates/header.template%#
+    #%env/templates/submenuUseCaseAccount.template%#
+    <h2>Network Configuration</h2>
+    #(commit)#
+        ::<div class="commit">Accepted Changes.</div>
+        ::<div class="error">Inapplicable Setting Combination:</div>
+        ::<div class="error">No changes were made!</div>
+    #(/commit)#
+    #(commitDHTIsRobinson)#::<div class="error">For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration.</div>#(/commitDHTIsRobinson)#
+    #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
+    #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
+    <form id="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+     <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+    <fieldset>
+      <legend>
+        <label>Network and Domain Specification</label>
+      </legend>
+      <p>
+      YaCy can operate a computing grid of YaCy peers or as a stand-alone node.
+      To control that all participants within a web indexing domain have access to the same domain,
+      this network definition must be equal to all members of the same YaCy network.
+      </p>
+      <dl>
+        <dt>Network Definition</dt>
+        <dd>
+        <select id="networkDefinition" name="networkDefinition">
+          <option selected="selected">#[network.unit.definition]#</option>
+          #{networks}#
+            <option>#[network]#</option>
+          #{/networks}#
+        </select> <a href="#" onclick="document.getElementById('networkDefinitionURLfield').style.display = ''; return false;" style="font-style: italic;">Enter custom URL...</a>
+        
+        </dd>
+        <span id="networkDefinitionURLfield" style="display: none;">
+        <dt>Remote Network Definition URL</dt>
+        <dd>
+        <input type="text" id="networkDefinitionURL" name="networkDefinitionURL" value="" size="100">
+        </dd>
+        </span>
+        <dt>Network Nick</dt>
+        <dd>#[network.unit.name]#</dd>
+        <dt>Long Description</dt>
+        <dd>#[network.unit.description]#</dd>
+        <dt>Indexing Domain</dt>
+        <dd>#[network.unit.domain]#</dd>
+        <dt>DHT</dt>
+        <dd>#[network.unit.dht]#</dd>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="changeNetwork" value="Change Network" class="btn btn-primary"/></dd>
+      </dl>
+    </fieldset>
+    </form>
+    <fieldset>
+      <legend>
+        <label>Distributed Computing Network for Domain</label>
+      </legend>
+      
+    <p>
+      Enable Peer-to-Peer Mode to participate in the global YaCy network, 
+      or if you want your own separate search cluster with or without connection to the global network. 
+      Enable 'Robinson Mode' for a completely independent search engine instance, 
+      without any data exchange between your peer and other peers.
+    </p>
+    <form id="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+      <fieldset>
+      <legend>
+        <input type="radio" name="network" id="p2p" onclick="EnableP2P()" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
+        <label for="p2p">Peer-to-Peer Mode</label>
+      </legend>
+      <dl>
+        <dt>
+          <label for="indexDistribute">Index Distribution</label>
+          <input type="checkbox" id="indexDistribute" name="indexDistribute" onclick="CheckForRobinson()" #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/>
+        </dt>
+        <dd>
+          This enables automated, DHT-ruled Index Transmission to other peers.<br />
+          <input type="radio" value="on" id="indexDistributeWhileCrawlingOn"
+                 name="indexDistributeWhileCrawling"
+                 #(indexDistributeWhileCrawling.on)#::checked="checked" #(/indexDistributeWhileCrawling.on)#/>
+          <label for="indexDistributeWhileCrawlingOn">enabled</label> /
+          <input type="radio" value="off" id="indexDistributeWhileCrawlingOff"
+                 name="indexDistributeWhileCrawling"
+                 #(indexDistributeWhileCrawling.off)#::checked="checked" #(/indexDistributeWhileCrawling.off)#/>
+          <label for="indexDistributeWhileCrawlingOff">disabled during crawling</label>.<br />
+          <input type="radio" value="on" id="indexDistributeWhileIndexingOn"
+                 name="indexDistributeWhileIndexing"
+                 #(indexDistributeWhileIndexing.on)#::checked="checked" #(/indexDistributeWhileIndexing.on)#/>
+          <label for="indexDistributeWhileIndexingOn">enabled</label> /
+          <input type="radio" value="off" id="indexDistributeWhileIndexingOff"
+                 name="indexDistributeWhileIndexing"
+                 #(indexDistributeWhileIndexing.off)#::checked="checked" #(/indexDistributeWhileIndexing.off)#/>
+          <label for="indexDistributeWhileIndexingOff">disabled during indexing</label>.
+        </dd>
+        <dt>
+          <label for="indexReceive">Index Receive</label>
+          <input type="checkbox" id="indexReceive" name="indexReceive" onclick="CheckForRobinson()" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#/>
+        </dt>
+        <dd>
+          Accept remote Index Transmissions.<br />
+          This works only if you have a senior peer. The DHT-rules do not work without this function.<br />
+          <input type="radio" value="on" id="indexReceiveBlockBlacklistOn"
+                 name="indexReceiveBlockBlacklist"
+                 #(indexReceiveBlockBlacklistChecked.on)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.on)#/>
+          <label for="indexReceiveBlockBlacklistOn">reject</label> /
+          <input type="radio" value="off" id="indexReceiveBlockBlacklistOff"
+                 name="indexReceiveBlockBlacklist"
+                 #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/>
+          <label for="indexReceiveBlockBlacklistOff">accept transmitted URLs that match your blacklist</label>.<br />
+          <input type="radio" value="on" id="indexReceiveSearchOn"
+                 name="indexReceiveSearch"
+                 #(indexReceiveSearchChecked)#::checked="checked"#(/indexReceiveSearchChecked)#/>
+          <label for="indexReceiveSearchOn">allow</label> /
+          <input type="radio" value="off" id="indexReceiveSearchOff"
+                 name="indexReceiveSearch"
+                 #(indexReceiveSearchChecked)#checked="checked"::#(/indexReceiveSearchChecked)#/>
+          <label for="indexReceiveSearchOff">deny remote search</label>.
+        </dd>
+        <dt></dt>
+        <dd>
+          <input type="submit" name="save" value="Save" class="btn btn-primary"/>
+        </dd>
+      </dl>
+    </fieldset>
+        
+    <fieldset>
+      <legend>
+        <input type="radio" name="network" id="robinson" onclick="EnableRobinson()" value="robinson"#(robinson.checked)#:: checked="checked"#(/robinson.checked)# />
+        <label for="robinson">Robinson Mode</label>
+      </legend>
+      <p class="help">
+        If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers.
+        There is no index receive and no index distribution between your peer and any other peer.
+        In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster.
+      </p>
+      <dl>
+        <dt>
+          <label for="privatepeer">Private Peer</label>
+          <input type="radio" id="privatepeer" value="privatepeer" name="cluster.mode"
+                 #(privatepeerChecked)#::checked="checked" #(/privatepeerChecked)#/>
+        </dt>
+        <dd>Your search engine will not contact any other peer, and will reject every request.
+        </dd>
+        <dt>
+          <label for="publicpeer">Public Peer</label>
+          <input type="radio" value="publicpeer" id="publicpeer" name="cluster.mode"
+                 #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/>
+        </dt>
+        <dd>
+          You are visible to other peers and contact them to distribute your presence.<br />
+          Your peer does not accept any outside index data, but responds on all remote search requests.
+        </dd>
+        <dt>
+          <label for="publiccluster">Public Cluster</label>
+          <input type="radio" value="publiccluster" id="publiccluster" name="cluster.mode"
+                 #(publicclusterChecked)#::checked="checked" #(/publicclusterChecked)#/>
+        </dt>
+        <dd>
+          Your peer is part of a public cluster within the YaCy network.<br />
+          Index data is not distributed, but remote crawl requests are distributed and accepted<br />
+          Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br />
+          List of .yacy or .yacyh - domains of the cluster: (comma-separated)<br />
+          <input type="text" name="cluster.peers.yacydomain" value="#[cluster.peers.yacydomain]#" size="80" maxlength="800" /><br />
+          #[cluster.peers.yacydomain.hashes]#
+        </dd>
+        <dt><label for="peertags">Peer Tags</label></dt>
+        <dd>
+          When you allow access from the YaCy network, your data is recognized using keywords.<br />
+          Please describe your search portal with some keywords (comma-separated).<br />
+          If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.
+          <input type="text" id="peertags" name="peertags" value="#[peertags]#" size="40" maxlength="80" />
+        </dd>
+        <dt></dt>
+        <dd>
+          <input type="submit" name="save" value="Save" class="btn btn-primary"/>
+        </dd>
+      </dl>
+	</fieldset>
+    </form>
+    </fieldset>
+    
+    <form method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+    	<fieldset>
+   			<legend>
+        		<label>Outgoing communications encryption</label>
+      		</legend>
+      		<dl>
+    			<dt>Protocol operations encryption</dt>
+   				<dd>
+    				<label>
+						<input type="checkbox" name="network.unit.protocol.https.preferred" value="true" #(network.unit.protocol.https.preferred)#::checked="checked"#(/network.unit.protocol.https.preferred)# /> 
+						Prefer HTTPS for outgoing connexions to remote peers.
+        			</label>
+        			<p>When <abbr title="Transport Layer Security">TLS</abbr>/<abbr title="Secure Sockets Layer">SSL</abbr> is enabled on remote peers, it should be used to encrypt outgoing communications with them (for operations such as network presence, index transfer, remote crawl...).
+        			Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.
+        			</p>
+        			<p>Note also that encryption of remote search queries is configured with a dedicated setting in the <a href="ConfigPortal_p.html">Config Portal</a> page.</p> 
+    			</dd>
+        		<dt></dt>
+        		<dd>
+          			<input type="submit" name="setEncryption" value="Save" class="btn btn-primary"/>
+        		</dd>
+    		</dl>
+    	</fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

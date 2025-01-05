@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Reverse Word Index Administration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Reverse Word Index Administration</h2>
+    <p>The local index currently contains #[wcount]# reverse word indexes</p>
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>RWI Retrieval (= search for a single word)</legend>
+      <dl>        
+        <dt class="TableCellDark">Retrieve by Word:</dt>
+        <dd><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80" />
+            <input type="submit" name="keystringsearch" value="Show URL Entries for Word" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+          
+        <dt class="TableCellDark">Retrieve by Word-Hash:</dt>
+        <dd><input type="text" name="keyhash" value="#[keyhash]#" size="40" maxlength="12" />
+            <input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash" class="btn btn-primary" style="width:240px;"/>
+            <input type="submit" name="keyhashsimilar" value="Generate List" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    #(limitations)#::
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <input type="hidden" name="maxReferencesLimit" value="Set References Limit" />
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <fieldset><legend>Limitations</legend>
+      <dl>
+        <dt class="TableCellDark">Index Reference Size</dt>
+        <dd><input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOff" value="off" #(maxReferencesRadioChecked)#checked="checked"::#(/maxReferencesRadioChecked)# onclick="this.form.submit()"/>
+            No reference size limitation (this may cause strong CPU load when words are searched that appear very often)<br/>
+            <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="this.form.submit()"/>
+            Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references are deleted if that limit is reached)<br/><br/>
+            <button type="submit" id="maxReferencesLimit" class="btn btn-primary" style="width:240px;">Set References Limit</button>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/limitations)#
+    
+    #(searchresult)#::
+    <p>No entry for word '#[word]#'</p>::
+    <p>No entry for word hash #[wordhash]#</p>::
+	<p>Search result:
+	<form name="selection" action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+    <table border="0">
+	  <tr class="TableHeader">
+	  	<td style="background-color:#FFFFFF">&nbsp;</td>
+	    <td rowspan="2">total URLs</td>
+	    <td colspan="6">appearance in</td>
+	    <td colspan="4">in link type</td>
+	    <td colspan="1">document type</td>
+	  </tr>
+      <tr class="TableCellDark">
+        <td style="background-color:#FFFFFF">&nbsp;</td>
+        <td>description</td>
+        <td>title</td>
+        <td>creator</td>
+        <td>subject</td>
+        <td>url</td>
+        <td>emphasized</td>
+        <td>image</td>
+        <td>audio</td>
+        <td>video</td>
+        <td>app</td>
+        <td>index of</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td style="background-color:#FFFFFF">&nbsp;</td>
+        <td>#[allurl]#</td>
+        <td>#[description]#</td>
+        <td>#[title]#</td>
+        <td>#[creator]#</td>
+        <td>#[subject]#</td>
+        <td>#[url]#</td>
+        <td>#[emphasized]#</td>
+        <td>#[image]#</td>
+        <td>#[audio]#</td>
+        <td>#[video]#</td>
+        <td>#[app]#</td>
+        <td>#[indexof]#</td>
+      </tr>
+      <tr class="TableCellLight">
+        <td class="TableCellDark">Selection</td>
+        <td><input type="checkbox" name="allurl" id="allurl" checked="checked" /></td>
+        <td><input type="checkbox" name="description" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="title" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="creator" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="subject" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="url" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="emphasized" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="image" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="audio" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="video" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="app" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="indexof" onclick="document.selection.allurl.checked=false" /></td>
+      </tr>
+    </table>
+    </p>
+    <fieldset><legend>Display URL List</legend>
+      <dl>
+        <dt class="TableCellDark">Number of lines:</dt>
+        <dd><input type="radio" name="lines" value="all" />all lines&nbsp;&nbsp;
+            <input type="radio" name="lines" value="100" checked="checked" />100&nbsp;&nbsp;
+            <input type="radio" name="lines" value="1000" />1000&nbsp;&nbsp;
+        </dd>
+        <dt class="TableCellLight"></dt>
+        <dd><input type="submit" name="urllist" value="List Selected URLs" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    <fieldset><legend>Word Deletion</legend>
+        <dl>
+          <dt><input type="checkbox" id="delurl" name="delurl" value="" align="top" checked /></dt>
+          <dd>delete also the referenced URL (recommended, may produce unresolved references
+              at other word indexes but they do not harm)
+          </dd>
+          <dt><input type="checkbox" id="delurlref" name="delurlref" value="" align="top" /></dt>
+          <dd>for every resolvable and deleted URL reference, delete the same reference at every other word where
+              the reference exists (very extensive, but prevents further unresolved references)
+          </dd>
+          <dt class="TableCellLight"></dt>
+          <dd>
+            <input type="submit" value="Delete Word" name="keyhashdeleteall" class="btn btn-primary" style="width:240px;"/>
+          </dd>
+        </dl>
+    </fieldset>
+    <fieldset><legend>Transfer RWI to other Peer</legend>
+      <dl>
+        <dt class="TableCellDark">Transfer by Word-Hash:</dt>
+        <dd><input type="text" name="keyhash" value="#[keyhash]#" size="40" maxlength="12" />
+            <input type="submit" name="keyhashtransfer" value="Transfer to other peer" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+        <dt class="TableCellDark">to Peer:</dt>
+        <dd>select <select name="hostHash">
+                #{hosts}#
+                <option value="#[hosthash]#">#[hostname]#</option>
+                #{/hosts}#
+            </select> <br>
+                or enter a hash or peer name:<input type="text" name="host" value="" size="21" maxlength="21" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/searchresult)#
+    
+    #(keyhashsimilar)#::<p>Sequential List of Word-Hashes:<br />
+    #{rows}# 
+    #{cols}# 
+    <a href="IndexControlRWIs_p.html?keyhash=#[wordHash]#&amp;keyhashsearch=1" class="tt">#[wordHash]#</a>#{/cols}#<br />
+    #{/rows}#
+    </p>
+    #(/keyhashsimilar)#
+	
+    #(genUrlList)#
+    ::
+    No URL entries related to this word hash <span class="tt">#[keyHash]#</span>.
+    ::
+    <p>#[count]# URL entries related to this word hash <span class="tt">#[keyHash]#</span></p>
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <p>
+      <table border="0">
+      <tr class="TableHeader">
+        <td colspan="3">Resource</td>
+        <td colspan="6">Negative Ranking Factors</td>
+        <td colspan="8">Positive Ranking Factors</td>
+        <td rowspan="2">props</td>
+        <td rowspan="2">Reverse Normalized Weighted Ranking Sum</td>
+      </tr>
+      <tr class="TableHeader">
+        <td>&nbsp;</td>
+        <td>hash</td>
+        <td>url</td>
+        <td>dom length</td>
+        <td>url comps</td>
+        <td>url length</td>
+        <td>pos in text</td>
+        <td>pos of phrase</td>
+        <td>pos in phrase</td>
+        <td>term frequency</td>
+        <td>authority</td>
+        <td>date</td>
+        <td>words in title</td>
+        <td>words in text</td>
+        <td>local links</td>
+        <td>remote links</td>
+        <td>hitcount</td>
+      </tr>
+      #{urlList}#
+      <tr class="TableCellLight">
+      #(urlExists)#
+        <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" />
+            <label for="urlhx.#[urlhxCount]#" class="tt"></label></td>
+        <td>#[urlhxValue]#</td>
+        <td colspan="20">unresolved URL Hash</td>
+        ::
+        <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked="checked" #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
+            <label for="urlhx.#[urlhxCount]#" class="tt"></label></td>
+        <td><a href="IndexControlURLs_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a></td>
+        <td><a href="#[urlString]#" target="_blank">#[urlStringShort]#</a></td>
+        <td class="TableCellDark">#[domlength]#</td>
+        <td class="TableCellDark">#[urlcomps]#</td>
+        <td class="TableCellDark">#[urllength]#</td>
+        <td class="TableCellDark">#[pos]#</td>
+        <td class="TableCellDark">#[phrase]#</td>
+        <td class="TableCellDark">#[posinphrase]#</td>
+        <td>#[tf]#</td>
+        <td>#[authority]#</td>
+        <td>#[date]#</td>
+        <td>#[wordsintitle]#</td>
+        <td>#[wordsintext]#</td>
+        <td>#[llocal]#</td>
+        <td>#[lother]#</td>
+        <td>#[hitcount]#</td>
+        <td>#[props]#</td>
+        <td align="right" class="TableCellDark">#[ranking]#</td>
+      #(/urlExists)#
+      </tr>
+      #{/urlList}#
+      </table>
+      <input type="hidden" name="flags" value="#[flags]#" />
+      <input type="hidden" name="lines" value="#[lines]#" />
+      <input type="hidden" name="ordering" value="#[ordering]#" />
+      <input type="hidden" name="keystring" value="#[keyString]#" />
+      <input type="hidden" name="keyhash" value="#[keyHash]#" />
+      <input type="hidden" name="urlstring" value="" />
+      <input type="hidden" name="urlhash" value="" /><br />
+      <fieldset><legend>Deletion of selected URLs</legend>
+        <dl>
+          <dt><input type="checkbox" id="delurl" name="delurl" value="" align="top" checked /></dt>
+          <dd>delete also the referenced URL (recommended, may produce unresolved references
+              at other word indexes but they do not harm)
+          </dd>
+          <dt><input type="checkbox" id="delurlref" name="delurlref" value="" align="top" /></dt>
+          <dd>for every resolvable and deleted URL reference, delete the same reference at every other word where
+              the reference exists (very extensive, but prevents further unresolved references)
+          </dd>
+          <dt class="TableCellLight"></dt>
+          <dd>
+            <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" class="btn btn-primary" style="width:240px;"/><br />
+          </dd>
+        </dl>
+      </fieldset>
+      <fieldset><legend>Blacklist Extension</legend>
+        <dl>
+          <dt>
+            <select name="blacklist" size="1">#{blacklists}# 
+              <option value="#[name]#">#[name]#</option>#{/blacklists}# 
+            </select>
+          </dt>
+          <dd>
+            <input type="submit" value="Add selected URLs to blacklist" name="blacklisturls" class="btn btn-primary" style="width:240px;"/><br />
+            <input type="submit" value="Add selected domains to blacklist" name="blacklistdomains" class="btn btn-primary" style="width:240px; margin-top: 5px;"/>
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    <br />#(/genUrlList)#
+    #[result]#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

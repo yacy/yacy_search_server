@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE metadata [ <!ELEMENT metadata (#PCDATA)> ]>
+
+<!-- 
+this is a xml file with embedded dublin core properties
+you can validate it with http://www.stg.brown.edu/service/xmlvalid/
+-->
+
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:yacy="https://yacy.net/" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+  <record>
+  <dc:title LANG="#[dc_language]#">#[dc_title]#</dc:title>
+  <dc:creator>#[dc_creator]#</dc:creator>
+  <dc:contributor>#[dc_contributor]#</dc:contributor>
+  <dc:subject SCHEME="item-list">#[dc_subject]#</dc:subject>
+  <dc:description LANG="#[dc_language]#">#[dc_description]#</dc:description>
+  <dc:publisher.URL>#[dc_publisher]#</dc:publisher.URL>
+  <dc:date>#[dc_date]#</dc:date>
+  <dc:type>yacy:doctype:#[dc_type]#</dc:type>
+  <dc:identifier SCHEME="yacy:urlhash">yacy:urlhash:#[yacy_urlhash]#</dc:identifier>
+  <dc:identifier SCHEME="URL">#[dc_identifier]#</dc:identifier>
+  <dc:format.extent>#[yacy_size]#</dc:format.extent>
+  <dc:language SCHEME="ISO639-2">#[dc_language]#</dc:language>
+  <collections>#[collection]#</collections>
+  <geo:Point>
+    <geo:long>#[geo_long]#</geo:long>
+    <geo:lat>#[geo_lat]#</geo:lat>
+  </geo:Point>
+  
+  <yacy:loaddate>#[yacy_loaddate]#</yacy:loaddate>
+  <yacy:referrer.hash>yacy:urlhash:#[yacy_referrer_hash]#</yacy:referrer.hash>
+  <yacy:referrer.url>#[yacy_referrer_url]#</yacy:referrer.url>
+  <yacy:words>#[yacy_words]#</yacy:words>
+
+  <yacy:inbound>#[yacy_inbound]#</yacy:inbound>
+  <yacy:outbound>#[yacy_outbound]#</yacy:outbound>
+  <yacy:citations>#[yacy_citations]#</yacy:citations>
+  </record>
+</metadata>

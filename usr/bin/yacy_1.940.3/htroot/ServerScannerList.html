@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>YaCy '#[clientname]#': Network Scanner Monitor</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreate">
+#(embedded)#
+#%env/templates/header.template%#
+<h2>Network Scanner Monitor</h2>
+::
+#(/embedded)#    
+     
+	#(servertable)#::
+	<p>
+	  The following servers can be searched:
+	</p>
+	<form id="servertable" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
+	  <legend><label for="servertable">Available server within the given IP range</label></legend>
+      <table class="sortable" border="0">
+        <tr class="TableHeader" valign="bottom">
+          #(edit)#::
+          <th class="sorttable_nosort">
+          <input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" />
+          </th>
+          #(/edit)#
+          <th>Protocol</th>
+          <th>IP</th>
+          <th>URL</th>
+          <th>Access</th>
+          <th>Process</th>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          #(edit)#::
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" #(preselected)#::checked="checked"#(/preselected)# /></td>
+          #(/edit)#
+          <td>#[protocol]#</td>
+          <td><a href="#[url]#">#[ip]#</a></td>
+          <td><a href="#[url]#">#[url]#</a></td>
+          #(accessUnknown)#::<td class="info">inaccessible</td>#(/accessUnknown)#
+          #(accessEmpty)#::<td class="info">empty</td>#(/accessEmpty)#
+          #(accessGranted)#::<td class="commit">granted</td>#(/accessGranted)#
+          #(accessDenied)#::<td class="error">denied</td>#(/accessDenied)#
+          #(process)#<td class="info">not in index</td>::<td class="commit">indexed</td>#(/process)#
+        </tr>
+        #{/list}#
+      </table>
+      #(edit)#::
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="crawl" class="btn btn-primary" value="Add Selected Servers to Crawler" />
+      </p>
+      #(/edit)#
+    </fieldset></form>
+	#(/servertable)#
+	
+    #(embedded)#
+    #%env/templates/footer.template%#
+    ::
+    #(/embedded)# 
+  </body>
+</html>

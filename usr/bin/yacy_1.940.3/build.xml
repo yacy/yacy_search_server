@@ -1,0 +1,557 @@
+<project name="YaCy" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
+  <description>
+    YaCy - a Peer to Peer Web Search Engine
+  </description>
+
+  <!-- 
+# THIS IS THE YACY BUILD SCRIPT
+# YOU CAN USE IT TO COMPILE YOUR OWN RELEASE
+# THE TARGET OF THE COMPILATION CAN BE FOUND
+# IN THE 'RELEASE' DIRECTORY AFTERWARDS
+# YOU NEED APACHE ANT TO USE THIS SCRIPT
+# ==========================================
+# This Software is Copyrighted
+# (C) by Michael Peter Christen; mc@yacy.net
+# first published on https://yacy.net
+# Frankfurt, Germany, 2005-2009
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+
+  <!-- defining all needed directory names -->
+  <property name="yacyroot" location="."/>
+  <property name="addon" location="addon"/>
+  <property name="src" location="source"/>
+  <property name="data" location="DATA"/>
+  <property name="lib" location="lib"/>
+  <property name="libt" location="libt"/>
+  <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
+  <property name="javadoc" location="javadoc"/>
+  <property name="htroot" location="htroot"/>
+  <property name="test" location="test/java"/>
+  <property name="langdetect" location="langdetect"/>
+  <property name="locales" location="locales"/>
+  <property name="skins" location="skins"/>
+  <property name="release" location="RELEASE"/>
+  <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
+  <property name="release_main" location="${release}/MAIN"/>
+  <property name="release_windows" location="${release}/WINDOWS"/>
+  <property name="release_mac" location="${release}/MAC"/>
+  <property name="defaults" location="defaults"/>
+  <property name="RDFaParser" location="RDFaParser"/>
+
+  <!-- defining all needed directory names for packing search widget-->
+  <property name="jquery" location="htroot/jquery/"/>
+  <property name="portalsearch" location="htroot/portalsearch/"/>
+  <property name="img-2" location="htroot/env/grafics"/>
+
+  <target name="install-ivy" description="--> install ivy">
+    <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
+    <local name="ivy.download.file"/><property name="ivy.download.file" value="${ivy.download.dir}/ivy.jar" />
+    <local name="ivy.download.version"/><property name="ivy.install.version" value="2.5.0"/>
+    <local name="ivy.debian.file"/><property name="ivy.debian.file" value="/usr/share/java/ivy.jar" />
+
+    <!-- Check whether ivy is already available as a Debian package -->
+    <local name="ivy.debian.exists"/><available property="ivy.debian.exists" file="${ivy.debian.file}" />
+
+    <sequential unless:set="ivy.debian.exists">
+      <mkdir dir="${ivy.download.dir}"/>
+      <echo message="downloading ivy (if not already there) to ${ify.download.file} ..."/>
+      <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.download.file}" skipexisting="true"/>
+    </sequential>
+
+    <local name="ivy.jar.file"/>
+    <property name="ivy.jar.file" value="${ivy.debian.file}" if:set="ivy.debian.exists" />
+    <property name="ivy.jar.file" value="${ivy.download.file}" unless:set="ivy.debian.exists" />
+    <echo message="using ivy.jar.file: ${ivy.jar.file}" />
+
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar.file}"/>
+  </target>
+
+  <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy" unless="target-resolve-already-run">
+    <!-- The recommended way is to [conf] in the retrieve pattern instead of two calls to retrieve.
+         We can move there in a following step.
+         ${lib} just happens to be equal to ${ivy.lib.dir}.
+    -->
+    <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
+    <property name="target-resolve-already-run" value="true" />
+  </target>
+
+   <!-- initializing all needed variables -->
+  <target name="init">
+    <loadproperties srcFile="build.properties" />
+
+    <exec executable="git" outputproperty="repository.revision.date">
+        <arg value="log"/>
+        <arg value="-1"/>
+        <arg value="--pretty=format:%ad" />
+        <arg value="--date=format:%Y%m%d" />
+    </exec>
+    <exec executable="git" outputproperty="repository.revision.time">
+        <arg value="log"/>
+        <arg value="-1"/>
+        <arg value="--pretty=format:%ad" />
+        <arg value="--date=format:%H%m" />
+    </exec>
+    <exec executable="git" outputproperty="repository.revision.hash">
+        <arg value="log"/>
+        <arg value="-1"/>
+        <arg value="--pretty=format:%h" />
+    </exec>
+
+    <mkdir dir="${data}"/>
+    <mkdir dir="${release}"/>
+
+    <!-- YaCy Release Version number -->
+    <echo message="YaCy Version number: ${releaseVersion}" />
+    <filter token="REPL_VERSION" value="${releaseVersion}" />
+
+    <!-- GIT Release revision number -->
+    <echo message="GIT Release Date: ${repository.revision.date}" />
+    <echo message="GIT Release Time: ${repository.revision.time}" />
+    <echo message="GIT Release Hash: ${repository.revision.hash}" />
+    <filter token="REPL_REPVERDATE" value="${repository.revision.date}"/>
+    <filter token="REPL_REPVERTIME" value="${repository.revision.time}"/>
+    <filter token="REPL_REPVERHASH" value="${repository.revision.hash}"/>
+
+  	<!-- set time stamp: DSTAMP should have the format yyyyMMdd, TSTAMP hhmm -->
+  	<tstamp/>
+    <filter token="REPL_DSTAMP" value="${DSTAMP}"/>
+    <filter token="REPL_TSTAMP" value="${TSTAMP}"/>
+  	
+    <!-- release file names -->
+    <property name="stdReleaseStub" value="yacy_v${releaseVersion}_${repository.revision.date}${repository.revision.time}_${repository.revision.hash}"/>
+    <property name="stdReleaseFile" value="${stdReleaseStub}.tar.gz"/>
+    <filter token="REPL_RELEASESTUB" value="${stdReleaseStub}"/>
+
+    <!-- apply replacments -->
+    <copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
+
+    <!-- prepare target -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="javadoc" depends="init" description="make javadoc for YaCy core">
+    <javadoc destdir="${javadoc}"
+      windowtitle="YaCy API: javadoc documentation"
+      encoding="UTF-8"
+      charset="UTF-8"
+      access="private"
+      useexternalfile="true">
+      <fileset dir="${src}">
+        <include name="**/*.java"/>
+      </fileset>
+    </javadoc>
+  </target>
+
+    <!-- define the classpath that should be used for compiling -->
+    <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
+    <path id="project.class.path">
+        <pathelement location="${build}" />
+        <pathelement location="${lib}/J7Zip-modified-1.0.2.jar" />
+        <pathelement location="${lib}/org.restlet.jar" />
+        <path refid="compile.path" />
+    </path>
+
+  <target name="compile-core" depends="init,resolve" description="compile YaCy core">
+    <!-- compile the core sources -->
+    <echo message="project.class.path: ${toString:project.class.path}" />
+    <javac srcdir="${src}/" destdir="${build}"
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8"
+	   nowarn="on">
+      <classpath refid="project.class.path" />
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+
+    <!-- prepare classpath for MANIFEST (manifest cp is relative to jar) -->
+    <path id="project.classpath.runtime">
+        <fileset dir="./lib">
+            <include name="**/*.jar" />
+            <exclude name="yacycore.jar"/>
+        </fileset>
+    </path>
+    <pathconvert property="manifest.classpath" pathsep=" " refid="project.classpath.runtime">
+        <flattenmapper/>
+    </pathconvert>
+
+      <!-- make the jacycore jar -->
+    <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
+      <manifest>
+        <attribute name="Main-Class" value="net.yacy.yacy"/>
+        <attribute name="Class-Path" value="${manifest.classpath}"/>
+      </manifest>
+    </jar>
+
+  </target>
+
+  <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets" />
+
+  <target name="all" depends="compile">
+  </target>
+
+  <target name="copyMain4Dist" depends="compile">      
+      <!-- copy all libs -->
+          <copy todir="${release_main}/lib">
+            <fileset dir="${lib}" 
+                     includes="**/*"/>
+          </copy>
+
+    <!-- copy configuration files -->
+    <copy todir="${release_main}">
+      <fileset dir=".">
+        <include name="yacy.yellow"/>
+        <include name="yacy.badwords.example"/>
+        <include name="yacy.stopwords"/>
+        <include name="yacy.parser"/>
+      </fileset>
+    </copy>
+
+      <!-- copy defaults -->
+    <copy todir="${release_main}/defaults">
+      <fileset dir="${defaults}" 
+               includes="**/*"/>
+    </copy>
+
+      <!-- copy Unix wrappers -->
+    <copy todir="${release_main}">
+      <fileset dir=".">
+        <include name="startYACY.sh"/>
+        <include name="stopYACY.sh"/>
+        <include name="restartYACY.sh"/>
+        <include name="killYACY.sh"/>
+        <include name="updateYACY.sh"/>
+        <include name="restart.sh"/>
+        <include name="reconfigureYACY.sh"/>
+        <include name="startYACY.command"/>
+        <include name="stopYACY.command"/>
+      </fileset>
+    </copy>
+
+    <!-- copy other wrappers -->
+    <copy todir="${release_main}">
+      <fileset dir=".">
+        <include name="startYACY.bat"/>
+        <include name="startYACY_debug.bat"/>
+        <include name="stopYACY.bat"/>
+          <include name="getWin32MaxHeap.bat"/>
+        <include name="installYaCyWindowsService.bat" />
+        <include name="uninstallYaCyWindowsService.bat" />
+      </fileset>
+    </copy>
+
+    <!-- copy locales  -->
+    <copy todir="${release_main}/locales">
+      <fileset dir="${locales}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy skins  -->
+    <copy todir="${release_main}/skins">
+      <fileset dir="${skins}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy language statistics files -->
+    <copy todir="${release_main}/langdetect">
+      <fileset dir="${langdetect}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy documentation -->
+    <copy todir="${release_main}">
+      <fileset dir=".">
+        <include name="readme.txt"/>
+        <include name="gpl.txt"/>
+        <include name="ChangeLog"/>
+          <include name="AUTHORS"/>
+          <include name="COPYRIGHT"/>
+          <include name="NOTICE"/>
+      </fileset>
+    </copy>
+
+    <!-- copy source code -->
+    <copy todir="${release_main}/source">
+      <fileset dir="${src}">
+        <include name="**/*.*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy server pages -->
+    <copy todir="${release_main}/htroot">
+      <fileset dir="${htroot}">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy add-on's -->
+    <copy todir="${release_main}/addon">
+      <fileset dir="${addon}">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy development tools -->
+    <copy todir="${release_main}">
+      <fileset dir=".">
+        <include name="build.xml"/>
+        <include name="build.properties"/>
+      </fileset>
+    </copy>
+      
+    <!-- copy searchtest -->
+    <copy todir="${release_main}/bin">
+      <fileset dir="bin">
+        <include name="**/*.sh"/>
+        <include name="searchtest*"/>
+      </fileset>
+    </copy>
+
+  </target>
+
+  <!-- run unittests-->
+  <target name="compileTest" depends="compile" description="run unittests">
+      <javac srcdir="${test}" destdir="${test}"
+           debug="true" debuglevel="lines,vars,source"
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="compile.path"/>
+        <path refid="test.path"/>
+      </classpath>
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+
+  <target name="test" depends="compileTest" description="run some unittests">
+    <junit printsummary="yes" haltonfailure="no" fork="true" dir="${yacyroot}">
+      <formatter type="plain"/>
+      <batchtest>
+        <fileset dir="${test}">
+      <include name="**/*Test*.java"/>
+        </fileset>
+      </batchtest>
+      <classpath>
+        <pathelement location="${test}"/>
+        <pathelement location="${build}"/>
+    <fileset dir="${libt}" includes="**/*.jar" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+    </junit>
+  </target>
+
+  <!-- ======================================================================================================= 
+       making a release file for yacy 
+       ======================================================================================================= -->
+
+  <target name="dist" depends="copyMain4Dist" description="make for standard YaCy">
+    <tar destfile="${release}/${stdReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">
+
+      <!-- packing all files into a gzipped tar -->
+      <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
+          <include name="**/*.sh"/>
+          <include name="**/*.command"/>
+      </tarfileset>
+      <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+        <include name="**/*"/>
+        <exclude name="**/*.sh"/>
+        <exclude name="**/*.command"/>
+      </tarfileset>
+    </tar>
+
+    <delete dir="${release_main}"/>
+    <delete dir="${release_windows}" failonerror="false" />
+    <delete dir="${release}/SPECS" failonerror="false" />
+  </target>
+    
+  <!-- packing YaCy search widget for static hosting -->
+  <target name="portalsearch" description="pack YaCy search widget for static hosting">
+      <tar destfile="${release}/yacy-portalsearch.tar.gz" compression="gzip" defaultexcludes="yes" longfile="fail">
+        <tarfileset dir="${portalsearch}" prefix="yacy/portalsearch/">
+        <include name="*.*"/>
+      </tarfileset>
+      <tarfileset dir="${jquery}" prefix="yacy/jquery/">
+          <include name="**/*"/>
+      </tarfileset>
+      <tarfileset dir="${img-2}" prefix="env/grafics">
+          <include name="magnify.png"/>
+          <include name="cancel_round.png"/>
+          <include name="stop.png"/>  
+      </tarfileset>
+      </tar>
+  </target>
+
+  <!-- make clean -->
+  <target name="clean" description="make clean">
+    <delete dir="${release_main}" failonerror="false"/>
+    <delete failonerror="false">
+      <fileset dir="${lib}" includes="**/*.jar" excludes="org.restlet.jar" /> <!-- we cannot find the org.restlet.jar in maven -->
+      <fileset dir="${src}" includes="**/*.class" />
+      <fileset dir="${build}" includes="**/*.class" />
+      <fileset dir="test/" includes="**/*.class" />
+      <fileset dir="." includes="TEST-*" />
+    </delete>
+    <delete dir="test/DATA" failonerror="false"/>
+  </target>
+
+  <!-- run YaCy (needed for NetBeans4) -->
+  <target name="run" description="Run YaCy">
+    <!-- debug options:
+     java -Xrunhprof:help
+     Hprof usage: -Xrunhprof[:help]|[:<option>=<value>, ...]
+
+     Option Name and Value  Description                Default
+     _____________________  ___________                _______
+     heap=dump|sites|all    heap profiling             all
+     cpu=samples|times|old  CPU usage                  off
+     monitor=y|n            monitor contention         n
+     format=a|b             ascii or binary output     a
+     file=<file>            write data to file         java.hprof(.txt for ascii)
+     net=<host>:<port>      send data over a socket    write to file
+     depth=<size>           stack trace depth          4
+     cutoff=<value>         output cutoff point        0.0001
+     lineno=y|n             line number in traces?     y
+     thread=y|n             thread in traces?          n
+     doe=y|n                dump on exit?              y
+     gc_okay=y|n            GC okay during sampling    y
+
+     Example: java -Xrunhprof:cpu=samples,file=log.txt,depth=3 FooClass
+
+     Note: format=b cannot be used with cpu=old|times
+-->
+    <java classname="net.yacy.yacy" fork="yes">
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${lib}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+      <!--<arg value="-Xrunhprof"/>-->
+      <arg line="-start"/>
+      <jvmarg line="-Xmx800m"/>
+      <!-- <arg line="-migratewords"/>-->
+      <!-- <arg line="-start ${user.dir}"/>-->
+    </java>
+  </target>
+
+  <!-- run a single file (selected in NetBeans4) -->
+  <target name="run-single" depends="compile" description="Run Single File">
+    <fail unless="classname">Must set property 'classname'</fail>
+    <java classname="net.yacy.yacy" fork="yes">
+      <classpath refid="run.classpath"/>
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${lib}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <!-- run YaCy with remote debugging enabled on port 8000 -->
+  <target name="debug" description="Debug YaCy">
+    <java classname="net.yacy.yacy" fork="yes">
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${lib}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+      <arg line="-start"/>
+      <jvmarg line="-Xdebug"/>
+      <jvmarg line="-Xnoagent"/>
+      <jvmarg line="-Djava.compiler=none"/>
+      <jvmarg line="-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"/>
+      <!-- Dump memory heap when an OutOfMemoryError occurs -->
+      <!-- <jvmarg line="-XX:+HeapDumpOnOutOfMemoryError"/> -->
+      <!-- Dump path -->
+      <!-- <jvmarg line="-XX:HeapDumpPath=/your_path/"/> -->
+      <!-- Display an error popup when the JVM crashes, allowing to plug a debugger before its termination -->
+      <!-- <jvmarg line="-XX:+ShowMessageBoxOnError"/> -->
+      <!-- Log JAXP XML parsers Debug information -->
+      <!-- <jvmarg line="-Djaxp.debug=1"/> -->
+    </java>
+  </target>
+
+  <!-- stop YaCy again -->
+  <target name="stop" description="Stop YaCy">
+    <java classname="net.yacy.yacy" fork="yes">
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${lib}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+      <arg line="-stop"/>
+    </java>
+  </target>
+
+
+  <!-- create the html-documentation from javadoc  -->
+  <target name="create-doc" description="Create the javadoc-HTML-Pages">
+    <javadoc destdir="doc/api"
+             author="true"
+             version="true"
+             use="false"
+             encoding="iso-8859-1"
+             windowtitle="YaCy API Documentation">
+      <classpath>
+        <fileset dir="${lib}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${build}"/>
+      </classpath>
+      <fileset dir="source" defaultexcludes="yes">
+        <include name="**/*.java" />
+      </fileset>
+    </javadoc>
+  </target>
+
+  <target name="distWinInstaller" depends="copyMain4Dist" description="Creates an NSIS Windows installer">
+    <!-- http://nsisant.sourceforge.net/ -->
+    <mkdir dir="${release_windows}" />
+    <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
+    <exec executable="makensis">
+      <arg value="-V2" />
+      <arg value="-NOCD" />
+      <arg value="${release_windows}/build.nsi" />
+    </exec>
+    <move file="${release_windows}/${stdReleaseStub}.exe"
+          tofile="${release}/${stdReleaseStub}.exe" />
+
+    <delete dir="${release_main}"/>
+    <delete dir="${release_windows}" failonerror="false" />
+  </target>
+
+  <target name="distMacApp" depends="copyMain4Dist" description="Creates a YaCy.app">
+      <copy todir="${release_mac}/YaCy.app">
+          <fileset dir="${addon}/YaCy.app"></fileset>
+      </copy>
+      <copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="false" overwrite="true" />
+      <move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
+      <!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
+      <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
+      <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
+      <exec executable="hdiutil">
+            <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/${stdReleaseStub}.dmg"/>
+      </exec>
+      <delete dir="${release_mac}" failonerror="false" verbose="false" />
+  </target>
+
+  <target name="deleteData" description="start with a fresh yacy installation">
+    <delete dir="${data}"/>
+  </target>
+</project>

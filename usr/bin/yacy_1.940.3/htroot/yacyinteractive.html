@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy Interactive Search</title>
+    #%env/templates/metas.template%#
+<script type="text/javascript" src="js/yacyinteractive.js"></script>
+<script type="text/javascript" src="js/sorttable.js"></script> 
+</head>
+<body>
+#(topmenu)#
+#%env/templates/embeddedheader.template%#
+::
+#%env/templates/simpleheader.template%#
+<script type="text/javascript">
+  document.getElementById("header_filesearch").className += " active";
+  document.getElementById("greeting").innerHTML = "&nbsp;#[promoteSearchPageGreeting]#";
+</script>
+#(/topmenu)#
+
+<div id="api" style="top:58px;">
+<script type="text/javascript">
+document.write("\<a id=\"rsslink\" href=\"/solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=" + window.location.search.substring(1) + "\"\><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>");
+</script>
+<span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.
+The query format is similar to <a href="http://www.loc.gov/standards/sru/" target="_blank">SRU</a>.
+Click the API icon to see an example call to the search rss API.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+
+<div>
+<form class="search small" id="searchform" action="yacyinteractive.html" method="get" #(allowrealtime)#onsubmit="document.getElementById('searchnavigation').innerHTML = '<div>loading from local index...</div>'"::onkeyup="xmlhttpPost(); return false;"#(/allowrealtime)#>
+  <fieldset class="yacys">
+  <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+  <input type="hidden" name="startRecord" value="#[startRecord]#" />
+  <input type="hidden" name="contentdom" value="all" />
+  <div class="input-group">
+    <input id="search" class="form-control searchinput typeahead" name="query" type="text" placeholder="Search..." value="#[query]#" size="40" maxlength="80" onFocus="this.select()" />
+    #(allowrealtime)#<input class="btn btn-default" id="Enter" type="submit" name="Enter" value="Search" />::
+    #(/allowrealtime)#
+  </div>
+  </fieldset>
+  <!--<pre>Raw JSON String: <div id="raw"></div></pre>-->
+</form>
+<div id="searchnavigation"></div>
+</div>
+<div id="downloadscript" style="clear:both;"></div>
+<div id="searchresults" class="searchresults" style="clear:both;">
+<!-- <div><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/></div> -->
+</div>
+<div id="serverlist" style="clear:both;">
+#(serverlist)#::
+<!--#include virtual="ServerScannerList.html?embedded=" -->
+#(/serverlist)#
+</div>
+<script type="text/javascript">
+//<![CDATA[
+var q = "#[query]#";
+var s = "#[startRecord]#";
+var m = "#[maximumRecords]#";
+if (q != "") search(q, m, s);
+#(focus)#::
+document.getElementById("search").focus();
+#(/focus)#
+//]]>
+</script>
+#%env/templates/footer.template%#
+</body>
+</html>

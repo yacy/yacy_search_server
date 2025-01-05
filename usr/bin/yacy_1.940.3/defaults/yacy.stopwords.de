@@ -1,0 +1,70 @@
+#Deutsche Stopwords.
+
+#Diese Datei wurde mit dem Programm YaWoStat erstellt. Als Textkorpus kamen eine deutsche Übersetzung der Bibel und eine Unmenge Webseiten zum Einsatz.
+
+#Falls jemand diese Datei ergänzen möchte, bitte ich folgendes zu bedenken:
+#Ich habe über jedes Wort einzeln nachgedacht, ob mir spontan Suchanfragen einfallen, die es rechtfertigen würden, dieses Wort zu indexieren. 
+#Hier musste ein Mittelweg zwischen Komfort (alle Worte indexieren) und Effizienz und Speicherplatzverbrauch (möglichst wenig Worte indexieren) gefunden werden.
+
+#Ich denke, diese Datei stellt erst mal einen guten Mittelweg dar und kann _vorsichtig_ im Laufe der Zeit ergänzt werden, wenn der Ergänzende gut darüber nachdenkt.
+
+die
+der
+und
+in
+von
+das
+den
+zu
+für
+ist
+mit
+auf
+sie
+im
+eine
+des
+sich
+nicht
+dem
+auch
+als
+zum
+bei
+wird
+es
+mehr
+hat
+an
+oder
+werden
+aus
+sind
+er
+ich
+in
+aber
+es
+du
+daß
+dass
+ihr
+ein
+so
+denn
+an
+da
+ihm
+wie
+hat
+euch
+ihn
+vor
+sein
+aus
+nach
+seine
+werden
+mir
+was
+ihnen
