@@ -1,17 +1,19 @@
 {
   description = "YaCy -- distributed search engine";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      devShells.default = pkgs.mkShell {
-        packages = [
-            pkgs.ant
-            pkgs.temurin-bin-11
+  outputs = inputs: let
+    systems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+    forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
+    pkgsForEach = inputs.nixpkgs.legacyPackages;
+  in {
+    devShells = forEachSystem (system: {
+      default = pkgsForEach.${system}.mkShell {
+        packages = with pkgsForEach.${system}; [
+          pkgs.ant
+          pkgs.temurin-bin-11
         ];
       };
     });
+  };
 }
