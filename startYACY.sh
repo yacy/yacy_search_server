@@ -177,9 +177,6 @@ then
     # JAVA_ARGS="$JAVA_ARGS -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 elif [ $OS = "SunOS" ]
 then
-    # the UseConcMarkSweepGC option caused a full CPU usage - bug on Darwin.
-    # It was reported that the same option causes good performance on solaris.
-    JAVA_ARGS="$JAVA_ARGS -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode"
     ENABLEHUGEPAGES=1
 fi 
 
