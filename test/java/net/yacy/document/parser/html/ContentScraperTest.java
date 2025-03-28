@@ -149,7 +149,7 @@ public class ContentScraperTest {
                 + "<time datetime='2016-12-23'>23. Dezember 2016</time>" // html5 time tag
                 + "</body></html>";
 
-        final ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+        final ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), TagValency.IGNORE, new VocabularyScraper(), 0);
         final Writer writer = new TransformerWriter(null, null, scraper, false);
 
         FileUtils.copy(new StringReader(page), writer);
@@ -425,7 +425,7 @@ public class ContentScraperTest {
     	html2Results.put(html, expectedUrls);
 
 		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
-			final ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+			final ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), TagValency.EVAL, new VocabularyScraper(), 0);
 			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
 				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
 
@@ -500,7 +500,7 @@ public class ContentScraperTest {
   
 
 		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
-			final ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+			final ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), TagValency.EVAL, new VocabularyScraper(), 0);
 			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
 				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
 
