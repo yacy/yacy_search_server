@@ -32,6 +32,7 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.data.WorkTables;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -127,11 +128,12 @@ public class HostBalancerTest {
 				CrawlProfile.MATCH_NEVER_STRING, // indexUrlMustNotMatch
 				CrawlProfile.MATCH_ALL_STRING, // indexContentMustMatch
 				CrawlProfile.MATCH_NEVER_STRING, // indexContentMustNotMatch
+				false,
 				0, false, CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE),
 				-1, true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
 				true, true, true, false, -1, false, true, CrawlProfile.MATCH_NEVER_STRING, CacheStrategy.IFEXIST,
 				"robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
-				ClientIdentification.yacyIntranetCrawlerAgentName, null, null, 0);
+				ClientIdentification.yacyIntranetCrawlerAgentName, TagValency.EVAL, null, null, 0);
 		
 		/** RobotsTxt instance */
 		private final RobotsTxt robots;
