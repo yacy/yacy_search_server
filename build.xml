@@ -403,6 +403,7 @@
     <delete failonerror="false">
       <fileset dir="${basedir}/ivy" includes="**/*.jar" />
       <fileset dir="${lib}" includes="**/*.jar" excludes="org.restlet.jar" /> <!-- we cannot find the org.restlet.jar in maven -->
+      <fileset dir="${libt}" includes="**/*.jar" />
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />
