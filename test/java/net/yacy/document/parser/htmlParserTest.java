@@ -24,6 +24,7 @@ import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.document.parser.html.TagValency;
 
 public class htmlParserTest extends TestCase {
 
@@ -221,7 +222,7 @@ public class htmlParserTest extends TestCase {
 				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
 			final Set<String> ignore = new HashSet<>();
 			ignore.add("optional");
-			final Document[] docs = parser.parse(url, mimetype, null, ignore, new VocabularyScraper(), 0, sourceStream);
+			final Document[] docs = parser.parse(url, mimetype, null, TagValency.EVAL, ignore, new VocabularyScraper(), 0, sourceStream);
 			final Document doc = docs[0];
 			final String parsedDext = doc.getTextString();
 			
@@ -368,7 +369,7 @@ public class htmlParserTest extends TestCase {
                 + "<figure><img width=\"550px\" title=\"image as exemple\" alt=\"image as exemple\" src=\"./img/my_image.png\"></figrue>" // + img width 550 (+html5 figure)
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
+        ContentScraper scraper = parseToScraper(url, charset, TagValency.IGNORE, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
         List<AnchorURL> anchorlist = scraper.getAnchors();
 
         String linktxt = anchorlist.get(0).getTextProperty();
@@ -410,7 +411,7 @@ public class htmlParserTest extends TestCase {
         }
         testHtml.append("</p></body></html>");
         
-        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testHtml.toString(), Integer.MAX_VALUE, Integer.MAX_VALUE);
+        ContentScraper scraper = parseToScraper(url, charset, TagValency.IGNORE, new HashSet<String>(), new VocabularyScraper(), 0, testHtml.toString(), Integer.MAX_VALUE, Integer.MAX_VALUE);
         assertEquals(nestingDepth, scraper.getAnchors().size());
         assertEquals(1, scraper.getImages().size());
 
@@ -431,7 +432,7 @@ public class htmlParserTest extends TestCase {
                 + "<p>" + textSource + "</p>"
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
+        ContentScraper scraper = parseToScraper(url, charset, TagValency.IGNORE, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
@@ -460,7 +461,7 @@ public class htmlParserTest extends TestCase {
                 + "</head>\n"
                 + "<body>" + textSource + "</body>\n"
                 + "</html>";
-        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
+        ContentScraper scraper = parseToScraper(url, charset, TagValency.IGNORE, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");
