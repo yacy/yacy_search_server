@@ -66,7 +66,7 @@
       <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
-      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.6.2" conf="compile->master" />
+      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.7.0" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.79" />
       <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
