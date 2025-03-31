@@ -98,10 +98,8 @@
       <dependency org="org.tukaani" name="xz" rev="1.8"/>
       <dependency org="oro" name="oro" rev="2.0.8"/>
 
-      <dependency org="junit" name="junit" rev="4.13" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest" rev="2.2" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest-core" rev="2.2" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest-library" rev="2.2" conf="test->default"/>
+      <dependency org="junit" name="junit" rev="4.13.2" conf="test->default"/>
+      <dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" conf="test->default"/>
       <dependency org="com.github.luben" name="zstd-jni" rev="1.5.5-6"></dependency>
       <dependency org="ai.djl" name ="api" rev="0.27.0"></dependency>
     </dependencies>
