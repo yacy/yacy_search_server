@@ -9,9 +9,15 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+  actions: write
+
 jobs:
   docker:
     strategy:
+      fail-fast: false
       matrix:
         dockerfile:
           - name: Dockerfile
