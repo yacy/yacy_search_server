@@ -11,6 +11,19 @@ on:
 
 jobs:
   docker:
+    strategy:
+      matrix:
+        dockerfile:
+          - name: Dockerfile
+            tag: 
+          - name: Dockerfile.aarch64
+            tag: aarch64-
+          - name: Dockerfile.alpine
+            tag: alpine-
+          - name: Dockerfile.ArchLinux
+            tag: archlinux-
+          - name: Dockerfile.armv7
+            tag: armv7-
     runs-on: ubuntu-latest
     steps:
       - name: Docker meta
@@ -48,9 +61,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          file: docker/Dockerfile
+          file: docker/${{ matrix.dockerfile.name }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ matrix.dockerfile.tag }}${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
