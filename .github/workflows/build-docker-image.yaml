@@ -22,14 +22,19 @@ jobs:
         dockerfile:
           - name: Dockerfile
             tag: 
+            platform: linux/amd64
           - name: Dockerfile.aarch64
-            tag: aarch64-
+            tag: aarch64
+            platform: linux/arm64
           - name: Dockerfile.alpine
-            tag: alpine-
+            tag: alpine
+            platform: linux/amd64,linux/arm64
           - name: Dockerfile.ArchLinux
-            tag: archlinux-
+            tag: archlinux
+            platform: linux/amd64,linux/arm64
           - name: Dockerfile.armv7
-            tag: armv7-
+            tag: armv7
+            platform: linux/arm/v7
     runs-on: ubuntu-latest
     steps:
       - name: Docker meta
@@ -40,6 +45,10 @@ jobs:
           images: |
             ghcr.io/MisterX2000/yacy_search_server
           # generate Docker tags based on the following events/attributes
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=-${{ matrix.dockerfile.tag }} 
           tags: |
             type=schedule
             type=ref,event=branch
@@ -66,10 +75,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.dockerfile.platform }}
           file: docker/${{ matrix.dockerfile.name }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ matrix.dockerfile.tag }}${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
