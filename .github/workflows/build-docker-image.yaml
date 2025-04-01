@@ -2,7 +2,7 @@ name: Build Docker Image
 
 on:
   push:
-    branches: 
+    branches:
       - "**"
     tags:
       - "v*.*.*"
@@ -19,22 +19,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dockerfile:
-          - name: Dockerfile
-            tag: 
-            platform: linux/amd64
-          - name: Dockerfile.aarch64
-            tag: aarch64
-            platform: linux/arm64
-          - name: Dockerfile.alpine
-            tag: alpine
-            platform: linux/amd64,linux/arm64
-          - name: Dockerfile.ArchLinux
-            tag: archlinux
-            platform: linux/amd64,linux/arm64
-          - name: Dockerfile.armv7
-            tag: armv7
-            platform: linux/arm/v7
+        include:
+          - tag: "" # Default Dockerfile
+            platforms: linux/amd64
+          - tag: aarch64
+            platforms: linux/arm64
+          - tag: alpine
+            platforms: linux/amd64,linux/arm64
+          - tag: archlinux
+            platforms: linux/amd64,linux/arm64
+          - tag: armv7
+            platforms: linux/arm/v7
     runs-on: ubuntu-latest
     steps:
       - name: Docker meta
@@ -48,7 +43,7 @@ jobs:
           flavor: |
             latest=auto
             prefix=
-            suffix=-${{ matrix.dockerfile.tag }} 
+            suffix=${{ matrix.tag != '' && format('-{0}', matrix.tag) || '' }}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -65,7 +60,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -75,8 +70,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ matrix.dockerfile.platform }}
-          file: docker/${{ matrix.dockerfile.name }}
+          # Use "Dockerfile" if matrix.tag is empty, otherwise use "Dockerfile.{tag}"
+          file: docker/${{ matrix.tag == '' && 'Dockerfile' || format('Dockerfile.{0}', matrix.tag) }}
+          platforms: ${{ matrix.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
