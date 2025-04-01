@@ -1,17 +1,51 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>net.yacy</groupId>
-  <artifactId>yacy</artifactId>
-  <version>1.940-SNAPSHOT</version>
+  <artifactId>yacycore</artifactId>
+  <version>1.940</version>
+  <description>YaCy - a Peer to Peer Web Search Engine</description>
+  <name>YaCy Search Server</name>
+  <url>http://www.yacy.net</url>
+  <issueManagement>
+    <system>YaCy Bugtracker</system>
+    <url>https://github.com/yacy/yacy_search_server/issues</url>
+  </issueManagement>
+  <scm>
+    <connection>scm:git:https://github.com/yacy/yacy_search_server.git</connection>
+    <url>https://github.com/yacy/yacy_search_server</url>
+  </scm>
+  <licenses>
+    <license>
+      <name>GNU General Public License</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Michael Peter Christen</name>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!--maven.compiler.release>11</maven.compiler.release--><!-- TODO check later -->
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    
+
+    <!-- fallback value if git folder not exist -->
+    <yacy.git.commit.id>9000</yacy.git.commit.id>
+    <yacy.git.commit.time>2022-01-01T00:00:00</yacy.git.commit.time>
+
+    <!-- plugin version -->
+    <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+    <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+    <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
+    <gmavenplus-plugin.version>4.1.1</gmavenplus-plugin.version>
+    <groovy.version>4.0.26</groovy.version>
+
     <!-- library versions -->
     <bouncycastle.version>1.79</bouncycastle.version>
     <caffeine.version>3.1.8</caffeine.version>
@@ -46,7 +80,7 @@
     <solr.version>9.0.0</solr.version>
     <lucene.version>9.0.0</lucene.version>
 
-    <junit.version>4.13</junit.version>
+    <junit.version>4.13.2</junit.version>
   </properties>
 
   <dependencyManagement>
@@ -286,5 +320,159 @@
     <!-- change default source and test path -->
     <sourceDirectory>./source</sourceDirectory>
     <testSourceDirectory>./test/java</testSourceDirectory>
+
+    <plugins>
+      <!-- Use this plugin to process properties -->
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
+        <version>${gmavenplus-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>process-properties</id>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <scripts>
+            <script><![CDATA[
+              import java.text.SimpleDateFormat
+
+              // git commit id - only the first 9 chars
+              commitid = project.properties['yacy.git.commit.id']
+              if (project.properties['yacy.git.commit.id'].length() > 9) {
+                commitid = project.properties['yacy.git.commit.id'].substring(0, 9)
+              }
+              project.properties.setProperty('yacy.git.commit.id.yacy', commitid)
+
+              // git time -> timestamp, date, time
+              datetime = new SimpleDateFormat('yyyy-MM-dd\'T\'HH:mm:ss').parse(project.properties['yacy.git.commit.time'])
+              project.properties.setProperty('yacy.git.commit.datetime.yacy', new SimpleDateFormat('yyyyMMddHHmm').format(datetime))
+              project.properties.setProperty('yacy.git.commit.date.yacy', new SimpleDateFormat('yyyyMMdd').format(datetime))
+              project.properties.setProperty('yacy.git.commit.time.yacy', new SimpleDateFormat('HHmm').format(datetime))
+
+              // release file
+              release = 'yacy_v${project.version}_' + project.properties['yacy.git.commit.datetime.yacy'] + '_' + project.properties['yacy.git.commit.id.yacy']
+              project.properties.setProperty('yacy.release.file', release)
+            ]]></script>
+          </scripts>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-ant</artifactId>
+            <version>${groovy.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!-- Use this plugin to generate yacyBuild.properties file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven-antrun-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>yacyBuild-properties</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <target>
+                <!-- YaCy Release Version number -->
+                <echo message="YaCy Version number: ${project.version}" />
+                <filter token="REPL_VERSION" value="${project.version}" />
+
+                <!-- GIT Release revision number -->
+                <echo message="GIT Release Date: ${yacy.git.commit.date.yacy}" />
+                <echo message="GIT Release Time: ${yacy.git.commit.time.yacy}" />
+                <echo message="GIT Release Hash: ${yacy.git.commit.id.yacy}" />
+                <filter token="REPL_REPVERDATE" value="${yacy.git.commit.date.yacy}"/>
+                <filter token="REPL_REPVERTIME" value="${yacy.git.commit.time.yacy}"/>
+                <filter token="REPL_REPVERHASH" value="${yacy.git.commit.id.yacy}"/>
+                <filter token="REPL_RELEASESTUB" value="${yacy.release.file}"/>
+
+                <!-- set time stamp: DSTAMP should have the format yyyyMMdd, TSTAMP hhmm -->
+                <tstamp/>
+                <filter token="REPL_DSTAMP" value="${DSTAMP}"/>
+                <filter token="REPL_TSTAMP" value="${TSTAMP}"/>
+
+                <!-- apply replacments -->
+                <copy file="${project.basedir}/defaults/yacyBuild.properties.template" tofile="${project.basedir}/defaults/yacyBuild.properties" overwrite="true" filtering="true" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Use this plugin to gererate the YaCy release package -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        <configuration>
+          <descriptors>
+            <descriptor>assembly.xml</descriptor>
+          </descriptors>
+          <finalName>yacy_v${project.version}_${yacy.git.commit.datetime.yacy}_${yacy.git.commit.id.yacy}</finalName>
+          <outputDirectory>RELEASE</outputDirectory>
+          <appendAssemblyId>false</appendAssemblyId>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
+
+  <!-- Profiles -->
+  <profiles>
+    <profile>
+      <id>git-folder</id>
+      <!-- Active profile when .git folder exists -->
+      <activation>
+        <file>
+          <exists>.git</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <!-- Use this plugin to retrieve Git information instead of using Git directly in Antrun, no more local Git required -->
+          <plugin>
+            <groupId>io.github.git-commit-id</groupId>
+            <artifactId>git-commit-id-maven-plugin</artifactId>
+            <version>${git-commit-id-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>git-properties</id>
+                <goals>
+                  <goal>revision</goal>
+                </goals>
+                <phase>initialize</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <prefix>yacy.git</prefix>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
