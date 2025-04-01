@@ -1,7 +1,7 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
 
 # Base image : latest stable official jdk 11 image from Docker based on Alpine Linux
-FROM openjdk:11-alpine
+FROM eclipse-temurin:17-alpine
 
 # trace java version
 RUN java -version

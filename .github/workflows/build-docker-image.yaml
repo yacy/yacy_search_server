@@ -19,17 +19,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - tag: "" # Default Dockerfile
-            platforms: linux/amd64
-          - tag: aarch64
-            platforms: linux/arm64
-          - tag: alpine
-            platforms: linux/amd64,linux/arm64
-          - tag: archlinux
-            platforms: linux/amd64,linux/arm64
-          - tag: armv7
-            platforms: linux/arm/v7
+        tag:
+          - ''
+          - alpine
+        # include:
+        #   - tag: "" # Default Dockerfile
+        #     platforms: linux/amd64
+        #   - tag: aarch64
+        #     platforms: linux/arm64
+        #   - tag: alpine
+        #     platforms: linux/amd64,linux/arm64
+        #   - tag: archlinux
+        #     platforms: linux/amd64,linux/arm64
+        #   - tag: armv7
+        #     platforms: linux/arm/v7
     runs-on: ubuntu-latest
     steps:
       - name: Docker meta
@@ -43,7 +46,7 @@ jobs:
           flavor: |
             latest=auto
             prefix=
-            suffix=${{ matrix.tag != '' && format('-{0}', matrix.tag) || '' }}
+            suffix=${{ matrix.tag != '' && format('-{0}', matrix.tag)}}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -71,8 +74,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           # Use "Dockerfile" if matrix.tag is empty, otherwise use "Dockerfile.{tag}"
-          file: docker/${{ matrix.tag == '' && 'Dockerfile' || format('Dockerfile.{0}', matrix.tag) }}
-          platforms: ${{ matrix.platforms }}
+          file: docker/Dockerfile${{ matrix.tag != '' && format('.{0}', matrix.tag) }}
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
