@@ -39,7 +39,7 @@
     <yacy.git.commit.id>9000</yacy.git.commit.id>
     <yacy.git.commit.time>2022-01-01T00:00:00</yacy.git.commit.time>
 
-    <!-- plugin version -->
+    <!-- plugin versions -->
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
     <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
@@ -343,7 +343,7 @@
     </pluginManagement>
 
     <plugins>
-      <!-- Use this plugin to process properties -->
+      <!-- plugin for processing properties -->
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
         <artifactId>gmavenplus-plugin</artifactId>
@@ -397,7 +397,7 @@
         </dependencies>
       </plugin>
 
-      <!-- Use this plugin to generate yacyBuild.properties file -->
+      <!-- plugin for generating yacyBuild.properties file -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -411,11 +411,11 @@
             <phase>generate-resources</phase>
             <configuration>
               <target>
-                <!-- YaCy Release Version number -->
+                <!-- YaCy release version number -->
                 <echo level="info" message="YaCy Version number: ${project.version}" />
                 <filter token="REPL_VERSION" value="${project.version}" />
 
-                <!-- GIT Release revision number -->
+                <!-- GIT release revision number -->
                 <echo level="info" message="GIT Release Date: ${yacy.git.commit.date.yacy}" />
                 <echo level="info" message="GIT Release Time: ${yacy.git.commit.time.yacy}" />
                 <echo level="info" message="GIT Release Hash: ${yacy.git.commit.id.yacy}" />
@@ -433,29 +433,6 @@
                 <copy file="${project.basedir}/defaults/yacyBuild.properties.template" tofile="${project.basedir}/defaults/yacyBuild.properties" overwrite="true" filtering="true" />
               </target>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Use this plugin to gererate the YaCy release package -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>${maven-assembly-plugin.version}</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly.xml</descriptor>
-          </descriptors>
-          <finalName>yacy_v${project.version}_${yacy.git.commit.datetime.yacy}_${yacy.git.commit.id.yacy}</finalName>
-          <outputDirectory>RELEASE</outputDirectory>
-          <appendAssemblyId>false</appendAssemblyId>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -483,11 +460,11 @@
     </plugins>
   </build>
 
-  <!-- Profiles -->
+  <!-- profiles -->
   <profiles>
     <profile>
       <id>git-folder</id>
-      <!-- Active profile when .git folder exists -->
+      <!-- activate this profile if the .git folder exists -->
       <activation>
         <file>
           <exists>.git</exists>
@@ -495,7 +472,7 @@
       </activation>
       <build>
         <plugins>
-          <!-- Use this plugin to retrieve Git information instead of using Git directly in Antrun, no more local Git required -->
+          <!-- plugin for retrieving Git information instead of using Git directly in Antrun plugin, no more local Git required -->
           <plugin>
             <groupId>io.github.git-commit-id</groupId>
             <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -512,6 +489,36 @@
             <configuration>
               <prefix>yacy.git</prefix>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!-- plugin for generation the release archive -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>${maven-assembly-plugin.version}</version>
+            <configuration>
+              <descriptors>
+                <descriptor>assembly.xml</descriptor>
+              </descriptors>
+              <finalName>yacy_v${project.version}_${yacy.git.commit.datetime.yacy}_${yacy.git.commit.id.yacy}</finalName>
+              <outputDirectory>RELEASE</outputDirectory>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
