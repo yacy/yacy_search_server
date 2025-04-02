@@ -38,7 +38,7 @@ COPY --from=wkhtmltopdf /lib/libwkhtmltox* /lib/
 
 # Install needed packages not in base image
 # (curl for sh scripts in /bin, imagemagick, xvfb, ghostscript, wkhtmltopdf, and apache-ant for building)
-RUN apk add --no-cache curl imagemagick xvfb ghostscript apache-ant
+RUN apk add --no-cache curl git imagemagick xvfb ghostscript apache-ant
 
 # set current working dir
 WORKDIR /opt
