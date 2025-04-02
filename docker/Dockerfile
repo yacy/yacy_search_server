@@ -25,9 +25,9 @@ RUN ant compile -f /opt/yacy_search_server/build.xml && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/yacy_search_server/
-RUN git rev-parse HEAD > .git/shallow && \
-    git tag -l | xargs git tag -d && \
-    git gc --prune=now
+#RUN git rev-parse HEAD > .git/shallow && \
+#    git tag -l | xargs git tag -d && \
+#    git gc --prune=now
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
