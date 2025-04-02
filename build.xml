@@ -60,7 +60,7 @@
   <target name="install-ivy" description="--> install ivy">
     <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
     <local name="ivy.download.file"/><property name="ivy.download.file" value="${ivy.download.dir}/ivy.jar" />
-    <local name="ivy.download.version"/><property name="ivy.install.version" value="2.5.0"/>
+    <local name="ivy.download.version"/><property name="ivy.install.version" value="2.5.3"/>
     <local name="ivy.debian.file"/><property name="ivy.debian.file" value="/usr/share/java/ivy.jar" />
 
     <!-- Check whether ivy is already available as a Debian package -->
@@ -401,7 +401,9 @@
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
     <delete failonerror="false">
+      <fileset dir="${basedir}/ivy" includes="**/*.jar" />
       <fileset dir="${lib}" includes="**/*.jar" excludes="org.restlet.jar" /> <!-- we cannot find the org.restlet.jar in maven -->
+      <fileset dir="${libt}" includes="**/*.jar" />
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />
