@@ -35,13 +35,15 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
-    <!-- fallback value if git folder not exist -->
+    <!-- fallback values if git folder not exist -->
     <yacy.git.commit.id>9000</yacy.git.commit.id>
     <yacy.git.commit.time>2022-01-01T00:00:00</yacy.git.commit.time>
 
     <!-- plugin version -->
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
     <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+    <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+    <dependency-check-maven.version>12.1.0</dependency-check-maven.version>
     <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
     <gmavenplus-plugin.version>4.1.1</gmavenplus-plugin.version>
     <groovy.version>4.0.26</groovy.version>
@@ -53,10 +55,10 @@
     <commons-lang.version>2.6</commons-lang.version>
     <commons-logging.version>1.3.3</commons-logging.version>
     <commons-compress.version>1.27.1</commons-compress.version>
-    <commons-fileupload.version>1.4</commons-fileupload.version>
+    <commons-fileupload.version>1.5</commons-fileupload.version>
     <guava.version>33.3.1-jre</guava.version>
-    <httpclient.version>4.5.12</httpclient.version>
-    <httpmime.version>4.5.12</httpmime.version>
+    <httpclient.version>4.5.14</httpclient.version>
+    <httpmime.version>4.5.14</httpmime.version>
     <icu4j.version>76.1</icu4j.version>
     <imageio-bmp.version>3.12.0</imageio-bmp.version>
     <jaudiotagger.version>2.2.5</jaudiotagger.version>
@@ -322,6 +324,16 @@
     <sourceDirectory>./source</sourceDirectory>
     <testSourceDirectory>./test/java</testSourceDirectory>
 
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>${dependency-check-maven.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <!-- Use this plugin to process properties -->
       <plugin>
@@ -438,6 +450,27 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- Use this plugin to check for dependency updates - mvn versions:display-dependency-updates -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${versions-maven-plugin.version}</version>
+        <configuration>
+          <ruleSet>
+            <ignoreVersions>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.*[-\.]alpha[-,0-9]+</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.*[-\.]rc[0-9]+</version>
+              </ignoreVersion>
+            </ignoreVersions>
+          </ruleSet>
+        </configuration>
       </plugin>
     </plugins>
   </build>
