@@ -1,6 +1,5 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
-
-# Base image : latest stable official jdk 11 image from Docker based on Alpine Linux
+# with wkhtmltopdf for PDF generation and Java 21
 FROM surnet/alpine-wkhtmltopdf:3.21.2-0.12.6-full as wkhtmltopdf
 FROM eclipse-temurin:21-alpine-3.21
 
@@ -9,27 +8,27 @@ RUN java -version
 
 # Install dependencies for wkhtmltopdf
 RUN apk add --no-cache \
-    libstdc++ \
-    libx11 \
-    libxrender \
-    libxext \
-    libssl3 \
-    ca-certificates \
-    fontconfig \
-    freetype \
-    ttf-dejavu \
-    ttf-droid \
-    ttf-freefont \
-    ttf-liberation \
-    # more fonts
-  && apk add --no-cache --virtual .build-deps \
-    msttcorefonts-installer \
-  # Install microsoft fonts
-  && update-ms-fonts \
-  && fc-cache -f \
-  # Clean up when done
-  && rm -rf /tmp/* \
-  && apk del .build-deps
+	libstdc++ \
+	libx11 \
+	libxrender \
+	libxext \
+	libssl3 \
+	ca-certificates \
+	fontconfig \
+	freetype \
+	ttf-dejavu \
+	ttf-droid \
+	ttf-freefont \
+	ttf-liberation \
+	# more fonts
+	&& apk add --no-cache --virtual .build-deps \
+	msttcorefonts-installer \
+	# Install microsoft fonts
+	&& update-ms-fonts \
+	&& fc-cache -f \
+	# Clean up when done
+	&& rm -rf /tmp/* \
+	&& apk del .build-deps
 
 # Copy wkhtmltopdf files from docker-wkhtmltopdf image
 COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
@@ -37,13 +36,10 @@ COPY --from=wkhtmltopdf /bin/wkhtmltoimage /bin/wkhtmltoimage
 COPY --from=wkhtmltopdf /lib/libwkhtmltox* /lib/
 
 # Install needed packages not in base image
-# (curl for sh scripts in /bin, imagemagick, xvfb, ghostscript, wkhtmltopdf, and apache-ant for building)
 RUN apk add --no-cache curl git imagemagick xvfb ghostscript apache-ant
 
-# set current working dir
+# set current working dir & copy sources
 WORKDIR /opt
-
-# copy sources
 COPY . /opt/yacy_search_server/
 
 RUN ant compile -f /opt/yacy_search_server/build.xml && \
@@ -51,14 +47,14 @@ RUN ant compile -f /opt/yacy_search_server/build.xml && \
 	rm -rf /opt/ant
 
 RUN \
-# Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
+	# Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 	sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
 	sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
-# Intially enable HTTPS: this is the most secure option for remote administrator authentication
+	# Intially enable HTTPS: this is the most secure option for remote administrator authentication
 	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init && \
-# Create user and group yacy: this user will be used to run YaCy main process
+	# Create user and group yacy: this user will be used to run YaCy main process
 	addgroup yacy && adduser -S -G yacy -H -D yacy && \
-# Set ownership of yacy install directory to yacy user/group
+	# Set ownership of yacy install directory to yacy user/group
 	chown yacy:yacy -R /opt/yacy_search_server
 
 RUN rm -rf /opt/yacy_search_server/DATA
