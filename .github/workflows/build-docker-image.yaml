@@ -23,7 +23,7 @@ jobs:
           - tag: "" # Default Dockerfile
             platforms: linux/amd64,linux/arm64
           - tag: alpine
-            platforms: linux/amd64
+            platforms: linux/amd64,linux/arm64
 
     runs-on: ubuntu-latest
     steps:

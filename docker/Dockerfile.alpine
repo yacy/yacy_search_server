@@ -1,14 +1,44 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
 
 # Base image : latest stable official jdk 11 image from Docker based on Alpine Linux
-FROM eclipse-temurin:17-alpine
+FROM surnet/alpine-wkhtmltopdf:3.21.2-0.12.6-full as wkhtmltopdf
+FROM eclipse-temurin:21-alpine-3.21
 
 # trace java version
 RUN java -version
 
+# Install dependencies for wkhtmltopdf
+RUN apk add --no-cache \
+    libstdc++ \
+    libx11 \
+    libxrender \
+    libxext \
+    libssl3 \
+    ca-certificates \
+    fontconfig \
+    freetype \
+    ttf-dejavu \
+    ttf-droid \
+    ttf-freefont \
+    ttf-liberation \
+    # more fonts
+  && apk add --no-cache --virtual .build-deps \
+    msttcorefonts-installer \
+  # Install microsoft fonts
+  && update-ms-fonts \
+  && fc-cache -f \
+  # Clean up when done
+  && rm -rf /tmp/* \
+  && apk del .build-deps
+
+# Copy wkhtmltopdf files from docker-wkhtmltopdf image
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
+COPY --from=wkhtmltopdf /bin/wkhtmltoimage /bin/wkhtmltoimage
+COPY --from=wkhtmltopdf /lib/libwkhtmltox* /lib/
+
 # Install needed packages not in base image
 # (curl for sh scripts in /bin, imagemagick, xvfb, ghostscript, wkhtmltopdf, and apache-ant for building)
-RUN apk add --no-cache curl imagemagick xvfb ghostscript wkhtmltopdf apache-ant
+RUN apk add --no-cache curl imagemagick xvfb ghostscript apache-ant
 
 # set current working dir
 WORKDIR /opt
