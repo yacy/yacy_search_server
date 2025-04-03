@@ -62,6 +62,7 @@
     <httpmime.version>4.5.14</httpmime.version>
     <icu4j.version>76.1</icu4j.version>
     <imageio-bmp.version>3.12.0</imageio-bmp.version>
+    <inetaddresslocator.version>2.18</inetaddresslocator.version>
     <jaudiotagger.version>2.2.5</jaudiotagger.version>
     <jackson.version>2.18.2</jackson.version>
     <jchardet.version>1.0</jchardet.version>
@@ -195,6 +196,12 @@
       <groupId>com.twelvemonkeys.imageio</groupId>
       <artifactId>imageio-bmp</artifactId>
       <version>${imageio-bmp.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javainetlocator</groupId>
+      <artifactId>inetaddresslocator</artifactId>
+      <version>${inetaddresslocator.version}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>net.jthink</groupId>
