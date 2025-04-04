@@ -6,6 +6,8 @@ on:
       - "**"
     tags:
       - "v*.*.*"
+      - "v*.*"
+      - "Release_*"
   pull_request:
   workflow_dispatch:
 
