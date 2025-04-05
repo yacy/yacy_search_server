@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }} ${{ runner.arch }} Build
-          path: dist/*
+          path: RELEASE/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -48,4 +48,4 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          files: dist/*
+          files: RELEASE/*
