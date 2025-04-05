@@ -25,7 +25,7 @@
       <dependency org="commons-codec" name="commons-codec" rev="1.15" />
       <dependency org="commons-io" name="commons-io" rev="2.17.0" />
       <dependency org="commons-logging" name="commons-logging" rev="1.2" />
-      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="3.2.2"/>
+      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="4.1.5"/>
       <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.1.5" conf="compile->master"/>
       <dependency org="io.opentracing" name="opentracing-noop" rev="0.33.0"/>
       <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
@@ -66,12 +66,10 @@
       <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
-      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.6.2" conf="compile->master" />
+      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.7.0" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.79" />
-      <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
-        <exclude module="stax-api" />
-      </dependency>
+      <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="6.2.8" />
       <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.57.v20241219" />
       <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.57.v20241219" conf="compile->master" />
       <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.57.v20241219" conf="compile->master"/>
@@ -100,10 +98,8 @@
       <dependency org="org.tukaani" name="xz" rev="1.8"/>
       <dependency org="oro" name="oro" rev="2.0.8"/>
 
-      <dependency org="junit" name="junit" rev="4.13" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest" rev="2.2" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest-core" rev="2.2" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest-library" rev="2.2" conf="test->default"/>
+      <dependency org="junit" name="junit" rev="4.13.2" conf="test->default"/>
+      <dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" conf="test->default"/>
       <dependency org="com.github.luben" name="zstd-jni" rev="1.5.5-6"></dependency>
       <dependency org="ai.djl" name ="api" rev="0.27.0"></dependency>
     </dependencies>
