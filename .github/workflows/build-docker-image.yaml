@@ -22,9 +22,9 @@ jobs:
       matrix:
         include:
           - tag: "" # Default Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - tag: alpine
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,linux/arm,linux/riscv64
+          # - tag: alpine
+          #   platforms: linux/amd64,linux/arm64
 
     runs-on: ubuntu-latest
     steps:
