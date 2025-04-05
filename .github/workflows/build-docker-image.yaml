@@ -48,8 +48,8 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-            type=regex,pattern=^Release_(\d+\.\d+),group=1
-            type=regex,pattern=^Release_(\d+),group=1
+            type=match,pattern=Release_(\d+\.\d+),group=1
+            type=match,pattern=Release_(\d+),group=1
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
