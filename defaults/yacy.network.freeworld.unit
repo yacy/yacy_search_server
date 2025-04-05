@@ -30,7 +30,7 @@ network.unit.dht = true
 
 # the number of redundant target peers:
 # redundant peers get a copy of the original dht target information
-network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.junior = 3
 network.unit.dhtredundancy.senior = 3
 
 # the vertical partition of the dht: this applies a division

@@ -171,10 +171,9 @@
     <echo message="project.class.path: ${toString:project.class.path}" />
     <javac srcdir="${src}/" destdir="${build}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
-           source="${javacSource}" target="${javacTarget}" encoding="UTF-8"
-	   nowarn="on">
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath refid="project.class.path" />
-      <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint"/>
     </javac>
 
     <!-- prepare classpath for MANIFEST (manifest cp is relative to jar) -->
