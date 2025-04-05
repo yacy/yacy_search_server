@@ -375,8 +375,8 @@ public class Html2Image {
                     convertCmd,
                     "-alpha", "remove", "-density", Integer.toString(density),
                     "-trim", pdf.getAbsolutePath() + "[0]", "-trim",
-                    "-resize" + Integer.toString(width) + "x",
-                    "-crop x" + Integer.toString(height) + "+0+0",
+                    "-resize", Integer.toString(width) + "x",
+                    "-crop", "x" + Integer.toString(height) + "+0+0",
                     "-quality", Integer.toString(quality) + "%",
                     image.getAbsolutePath()
             });
