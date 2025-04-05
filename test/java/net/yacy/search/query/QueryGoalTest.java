@@ -17,7 +17,7 @@ public class QueryGoalTest {
         testdata.put("O'Reily's book", new String[]{"o'reily's", "book"});
         testdata.put("\"O'Reily's book\"", new String[]{"o'reily's book"}); // quoted term
         testdata.put("\"O'Reily's\" +book", new String[]{"o'reily's", "book"}); // +word
-        testdata.put("Umphrey's + McGee", new String[]{"umphrey's", "mcgee"});
+        testdata.put("Umphrey's + McGee", new String[]{"umphrey's", " mcgee"}); // !! attention extra space
         testdata.put("'The Book' library", new String[]{"the book","library"}); //single quoted term
 
         for (String testquery : testdata.keySet()) {

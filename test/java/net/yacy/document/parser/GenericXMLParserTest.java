@@ -294,7 +294,7 @@ public class GenericXMLParserTest {
 			final Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(3, detectedAnchors.size());
-			assertTrue(detectedAnchors.contains(new AnchorURL("https://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://yacy.net")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://community.searchlab.eu")));
 		} finally {
@@ -330,7 +330,7 @@ public class GenericXMLParserTest {
 			final Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(3, detectedAnchors.size());
-			assertTrue(detectedAnchors.contains(new AnchorURL("https://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://yacy.net")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://community.searchlab.eu")));
 		} finally {
@@ -395,7 +395,7 @@ public class GenericXMLParserTest {
 			final Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(5, detectedAnchors.size());
-			assertTrue(detectedAnchors.contains(new AnchorURL("https://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://yacy.net")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://community.searchlab.eu")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://wiki.yacy.net/index.php/")));
@@ -417,7 +417,7 @@ public class GenericXMLParserTest {
 			final Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(2, detectedAnchors.size());
-			assertTrue(detectedAnchors.contains(new AnchorURL("https://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://yacy.net")));
 		} finally {
 			inStream.close();
@@ -457,7 +457,7 @@ public class GenericXMLParserTest {
 			final Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(3, detectedAnchors.size());
-			assertTrue(detectedAnchors.contains(new AnchorURL("https://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://yacy.net")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://community.searchlab.eu")));
 		} finally {

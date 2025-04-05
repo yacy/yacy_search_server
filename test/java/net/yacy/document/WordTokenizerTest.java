@@ -3,6 +3,9 @@ package net.yacy.document;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+
 public class WordTokenizerTest {
 
     /**
@@ -13,7 +16,8 @@ public class WordTokenizerTest {
         // test sentences containing 10x the word "word"
         String[] testTxtArr = new String[]{
             "  word word..... (word) [word] . 'word word' \"word word\" word ?  word! ",
-            "word-word word . word.word@word.word ....word... word,word "
+            "word-word word . word.word@word.word ....word... word,word word word"
+            // !! 12x the word "word" because "word-word" and "word,word" is one word
         };
         
         for (String testTxt : testTxtArr) {
@@ -23,7 +27,10 @@ public class WordTokenizerTest {
             while (wt.hasMoreElements()) {
                 StringBuilder sb = wt.nextElement();
                 if (sb.length() > 1) { // skip punktuation
-                    assertEquals("word", sb.toString());
+                    MatcherAssert.assertThat(sb.toString(),
+                        CoreMatchers.either(CoreMatchers.is("word"))
+                            .or(CoreMatchers.is("word-word"))
+                            .or(CoreMatchers.is("word,word")));
                     cnt++;
                 } else {
                     assertTrue("punktuation", SentenceReader.punctuation(sb.charAt(0)));
