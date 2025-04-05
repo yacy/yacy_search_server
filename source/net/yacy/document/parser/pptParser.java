@@ -86,7 +86,7 @@ public class pptParser extends AbstractParser implements Parser {
             final String contents = pptExtractor.getText().trim();
 
             String title = summaryInfo == null ? "" : summaryInfo.getTitle();
-            if (title.length() == 0) {
+            if (title == null || title.length() == 0) {
                 title = contents.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
                 if (title.length() > 80) title = title.substring(0, 80);
                 int l = title.length();

@@ -195,8 +195,8 @@ public class ParserTest {
         final String[][] testFiles = new String[][]{
             // meaning:  filename in test/parsertest, mimetype, title, creator, description,
             new String[]{"umlaute_linux.ppt", "application/powerpoint", "In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen", "", ""},
-            new String[]{"umlaute_windows.ppt", "application/powerpoint", "In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen", "afieg", ""},
-            new String[]{"umlaute_mac.ppt", "application/powerpoint", "In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen", "Bob", ""}
+            new String[]{"umlaute_windows.ppt", "application/powerpoint", "Folie 1", "afieg", ""},
+            new String[]{"umlaute_mac.ppt", "application/powerpoint", "Slide 1", "Bob", ""}
         };
 
         for (final String[] testFile : testFiles) {
