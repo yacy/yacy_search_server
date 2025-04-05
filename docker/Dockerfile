@@ -7,7 +7,7 @@
 # docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
 
 ## build base
-FROM eclipse-temurin:11-jdk-jammy AS base
+FROM eclipse-temurin:21 AS base
 RUN apt-get update && apt-get install -yq wkhtmltopdf imagemagick xvfb ghostscript && rm -rf /var/lib/apt/lists/*
 
 ## build app
@@ -25,15 +25,14 @@ RUN ant compile -f /opt/yacy_search_server/build.xml && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/yacy_search_server/
-RUN git rev-parse HEAD > .git/shallow && \
-    git tag -l | xargs git tag -d && \
-    git gc --prune=now
+#RUN git rev-parse HEAD > .git/shallow && \
+#    git tag -l | xargs git tag -d && \
+#    git gc --prune=now
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
     sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
     sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
-
 
 
 ## build dist
