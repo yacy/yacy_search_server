@@ -69,9 +69,7 @@
       <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.7.0" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.79" />
-      <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
-        <exclude module="stax-api" />
-      </dependency>
+      <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="6.2.8" />
       <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.57.v20241219" />
       <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.57.v20241219" conf="compile->master" />
       <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.57.v20241219" conf="compile->master"/>
