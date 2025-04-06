@@ -6,7 +6,7 @@
 # run with
 # docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
 
-## build
+## builder image
 FROM eclipse-temurin:21-jdk AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ant \
@@ -20,6 +20,7 @@ COPY . /opt/yacy_search_server/
 RUN ant compile -f /opt/yacy_search_server/build.xml
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
+# Intially enable HTTPS: this is the most secure option for remote administrator authentication
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
     sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
     sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
