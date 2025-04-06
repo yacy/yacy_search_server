@@ -105,7 +105,7 @@ public class GenericXMLParser extends AbstractParser implements Parser {
     	if((maxBytes / Character.BYTES) > Integer.MAX_VALUE) {
     		maxChars = Integer.MAX_VALUE;
     	} else {
-    		maxChars = ((int)maxBytes) / Character.BYTES;
+    		maxChars = (int)(maxBytes / Character.BYTES);
     	}
     	
         try (/* Automatically closed by this try-with-resources statement*/ CharBuffer writer = new CharBuffer(maxChars);){
@@ -165,7 +165,7 @@ public class GenericXMLParser extends AbstractParser implements Parser {
     	if((maxTextBytes / Character.BYTES) > Integer.MAX_VALUE) {
     		maxChars = Integer.MAX_VALUE;
     	} else {
-    		maxChars = ((int)maxTextBytes) / Character.BYTES;
+    		maxChars = (int)(maxTextBytes / Character.BYTES);
     	}
     	
         try (/* Automatically closed by this try-with-resources statement*/ CharBuffer writer = new CharBuffer(maxChars);){
