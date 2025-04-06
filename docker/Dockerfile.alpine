@@ -53,7 +53,7 @@ RUN apk add --no-cache \
 	&& apk del .build-deps
 
 # Copy wkhtmltopdf files from docker-wkhtmltopdf image
-COPY --from=builder /bin/wkhtmltopdf /bin/wkhtmltopdf
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
 
 RUN addgroup yacy && adduser -S -G yacy -H -D yacy
 WORKDIR /opt
