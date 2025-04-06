@@ -22,7 +22,7 @@ RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a09
 	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
 
 ## build final image
-FROM surnet/alpine-wkhtmltopdf:3.21.2-0.12.6-full AS wkhtmltopdf
+FROM surnet/alpine-wkhtmltopdf:3.21.2-0.12.6-small AS wkhtmltopdf
 FROM eclipse-temurin:21-jre-alpine-3.21 AS app
 
 RUN apk add --no-cache \
@@ -53,9 +53,7 @@ RUN apk add --no-cache \
 	&& apk del .build-deps
 
 # Copy wkhtmltopdf files from docker-wkhtmltopdf image
-COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
-COPY --from=wkhtmltopdf /bin/wkhtmltoimage /bin/wkhtmltoimage
-COPY --from=wkhtmltopdf /lib/libwkhtmltox* /lib/
+COPY --from=builder /bin/wkhtmltopdf /bin/wkhtmltopdf
 
 RUN addgroup yacy && adduser -S -G yacy -H -D yacy
 WORKDIR /opt
