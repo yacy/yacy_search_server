@@ -2,11 +2,12 @@ name: Build GitHub Release
 # This workflow builds the YaCy Search Server and creates a GitHub Release with the build artifacts.
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
-      - "Release_*"
-  pull_request:
+  # TODO: Currently disabled, because I'm not sure if this is the right way to do the release.
+  # push:
+  #   tags:
+  #     - "v*.*.*"
+  #     - "Release_*"
+  # pull_request:
   workflow_dispatch:
 
 permissions:
