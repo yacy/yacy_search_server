@@ -39,7 +39,7 @@ jobs:
           flavor: |
             latest=auto
             prefix=
-            suffix=${{ matrix.tag != '' && format('-{0}', matrix.tag) || '' }}
+            suffix=${{ matrix.tag != '' && format('-{0}', matrix.tag) || '' }},onlatest=true
           tags: |
             type=schedule
             type=ref,event=branch
