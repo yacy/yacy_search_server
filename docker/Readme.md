@@ -1,150 +1,214 @@
 # Yacy Docker image from latest sources
 
-## Supported tags and respective Dockerfiles
+## Supported tags
 
-* latest (Dockerfile)
-* latest-alpine (Dockerfile.alpine)
+* `latest` (Latest stable release)
+* `latest-alpine` (Latest stable release based on Alpine Linux)
+* `<version>` (Lock on a specific/minor/major version, e.g., `1.2.3`, `1.2`, `1`)
+* `<version>-alpine` (e.g., `1.2.3-alpine`)
+* `<branch-name>` (e.g., `master` for the latest commit of branches)
+* `pr-<number>` (e.g., `pr-42` for pull requests)
 
-## Getting built image from Docker Hub
+For a detailed explanation of supported tags, refer to [DockerImageTags.md](./DockerImageTags.md).
 
-The repository URL is https://hub.docker.com/r/yacy/yacy_search_server/
+## Getting built image from Docker Hub and GitHub Container Registry
 
-* ubuntu-based: `docker pull yacy/yacy_search_server:latest`
+The repository URLs are:
 
+* Docker Hub: <https://hub.docker.com/r/yacy/yacy_search_server/>
+* GitHub Container Registry: `ghcr.io/yacy/yacy_search_server`
+
+Examples:
+
+* `docker pull yacy/yacy_search_server:latest`
+* `docker pull ghcr.io/yacy/yacy_search_server:latest`
+* `docker pull ghcr.io/yacy/yacy_search_server:latest-alpine`
+* `docker pull ghcr.io/yacy/yacy_search_server:1.2.3`
+* `docker pull ghcr.io/yacy/yacy_search_server:master`
+* `docker pull ghcr.io/yacy/yacy_search_server:pr-42`
 
 ## Building image yourself
 
 Using files in 'yacy_search_server/docker/':
-```
+
+```sh
 cd yacy_search_server/docker
 ```
 
 Then according to the image type:
-* `yacy/yacy_search_server:latest`: This image is based on latest stable official Debian stable [openjdk](https://hub.docker.com/_/openjdk/) 11 image provided by Docker. Embed Yacy compiled from latest git repository sources.
 
-```
+* `yacy/yacy_search_server:latest`: This image is based on the latest stable official [Eclipse Temurin](https://hub.docker.com/_/eclipse-temurin) 21 release. It includes YaCy compiled from the latest git repository sources.
+* `yacy/yacy_search_server:latest-alpine`: This image is based on the latest stable [Eclipse Temurin](https://hub.docker.com/_/eclipse-temurin) 21 release with Alpine Linux as the base. It also includes YaCy compiled from the latest git repository sources.
+
+```sh
 docker build -t yacy/yacy_search_server:latest -f Dockerfile ../
 ```
 
-* `yacy/yacy_search_server:aarch64-latest`: same as yacy/yacy_search_server:latest but based on 
-
-```
-docker build -t yacy/yacy_search_server:aarch64-latest -f Dockerfile.aarch64 ../
-```
-
-
-
 ## Usage
 
-### Run the docker image
+### Run the Docker image directly
 
+You can run the YaCy Docker image directly using the following command:
 
-```
+```sh
 docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
 ```
 
-YaCy web interface is then exposed at http://[container_ip]:8090
+### Using Docker Compose
+
+You can also use Docker Compose to run the YaCy container. Create a `docker-compose.yml` file with the following content:
+
+```yaml
+services:
+    yacy:
+        container_name: yacy
+        image: yacy/yacy_search_server:latest
+        restart: unless-stopped
+        ports:
+            - "8090:8090"
+            - "8443:8443"
+        volumes:
+            - yacy_data:/opt/yacy_search_server/DATA
+        logging:
+            options:
+                max-size: "200m"
+                max-file: "2"
+
+volumes:
+    yacy_data:
+```
+
+Then start the container with:
+
+```sh
+docker-compose up -d
+```
+
+YaCy web interface is then exposed at `http://[container_ip]:8090`  
 You can retrieve the container IP address with `docker inspect`.
 
-#### Default admin account
+### Default admin account
 
 * login: admin
 * password: yacy
 
 You should modify this default password with page /ConfigAccounts_p.html when exposing publicly your YaCy container.
 
+### Handle persistent data volume
 
-#### Handle persistent data volume
+As configured in the Dockerfile, by default YaCy data (in /opt/yacy_search_server/DATA) will persist after container stop or deletion, in a volume named "yacy_data".
 
-As configured in the Dockerfile, by default yacy data (in /opt/yacy_search_server/DATA) will persist after container stop or deletion, in a volume named "yacy_data"
-
-    
 ### HTTPS support
 
 This images are default configured with HTTPS enabled, and use a default certificate stored in defaults/freeworldKeystore. You should use your own certificate. In order to do it, you can proceed as follow.
 
 #### Self-signed certificate
 
-A self-signed certificate will provide encrypted communications with your YaCy server, but browsers will still complain about an invalid security certificate with the error "SEC_ERROR_UNKNOWN_ISSUER". If it is sufficient for you, you can permanently add and exception to your browser.
+A self-signed certificate will provide encrypted communications with your YaCy server, but browsers will still complain about an invalid security certificate with the error "SEC_ERROR_UNKNOWN_ISSUER". If it is sufficient for you, you can permanently add an exception to your browser.
 
 This kind of certificate can be generated and added to your YaCy Docker container with the following:
 
-    keytool -keystore /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacykeystore -genkey -keyalg RSA -alias yacycert
-    
-Then edit YaCy config file. For example with the nano text editor:
+```sh
+keytool -keystore /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacykeystore -genkey -keyalg RSA -alias yacycert
+```
 
-    nano /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacy.conf
+Then edit YaCy config file. For example, with the nano text editor:
+
+```sh
+nano /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacy.conf
+```
 
 And configure the keyStoreXXXX properties accordingly:
 
-    keyStore=/opt/yacy_search_server/DATA/SETTINGS/yacykeystore
-    keyStorePassword=yourpassword
-    
-#### Import an existing certificate:
+```sh
+keyStore=/opt/yacy_search_server/DATA/SETTINGS/yacykeystore
+keyStorePassword=yourpassword
+```
+
+#### Import an existing certificate
 
 Importing a certificate validated by a certification authority (CA) will ensure you have full HTTPS support with no security errors when accessing your YaCy peer. You can import an existing certificate in pkcs12 format.
 
 First copy it to the YaCy Docker container volume:
 
-    cp [yourStore].pkcs12 /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/[yourStore].pkcs12
+```sh
+cp [yourStore].pkcs12 /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/[yourStore].pkcs12
+```
 
-Then edit YaCy config file. For example with the nano text editor:
+Then edit YaCy config file. For example, with the nano text editor:
 
-    nano /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacy.conf
+```sh
+nano /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacy.conf
+```
 
 And configure the pkcs12XXX properties accordingly:
 
-    pkcs12ImportFile=/opt/yacy_search_server/DATA/SETTINGS/[yourStore].pkcs12
-    pkcs12ImportPwd=yourpassword
+```sh
+pkcs12ImportFile=/opt/yacy_search_server/DATA/SETTINGS/[yourStore].pkcs12
+pkcs12ImportPwd=yourpassword
+```
 
 ### Next starts
 
 #### As attached process
 
-    docker start -a yacy
+```sh
+docker start -a yacy
+```
 
 #### As background process
 
-    docker start yacy
+```sh
+docker start yacy
+```
 
 ### Shutdown
 
 * Use "Shutdown" button in administration web interface
 * OR run:
 
-    docker exec [your_container_name] /opt/yacy_search_server/stopYACY.sh
+```sh
+docker exec yacy /opt/yacy_search_server/stopYACY.sh
+```
 
 * OR run:
 
-    docker stop [your_container_name]
+```sh
+docker stop yacy
+```
 
 ### Upgrade
 
-You can upgrade your YaCy container the Docker way with the following commands sequence.
+To upgrade your YaCy container, follow these steps:
 
-Get latest Docker image:
+1. Pull the latest Docker image:
 
+    ```sh
     docker pull yacy/yacy_search_server:latest
+    ```
 
-Create new container based on pulled image, using volume data from old container:
+2. Stop and remove the old container:
 
-    docker create --name [tmp-container_name] -p 8090:8090 -p 8443:8443 --volumes-from=[container_name] --log-opt max-size=100m --log-opt max-file=2 yacy/yacy_search_server:latest
+    ```sh
+    docker stop yacy
+    docker rm yacy
+    ```
 
-Stop old container:
+3. Run the new container using the same command as before:
 
-    docker exec [container_name] /opt/yacy_search_server/stopYACY.sh
+    ```sh
+    docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
+    ```
 
-Start new container:
+#### Update Docker Compose Images
 
-    docker start [tmp-container_name]
+To update the images created with the Docker Compose file, you can use the following command:
 
-Check everything works fine, then you can delete old container:
+```sh
+docker-compose up -d --force-recreate --pull always
+```
 
-    docker rm [container_name]
-
-Rename new container to reuse same container name:
-
-    docker rename [tmp-container_name] [container_name]
+This command ensures that the latest images are pulled and the containers are recreated with the updated images.
 
 ## License
 

@@ -1,4 +1,5 @@
-name: Build Executable
+name: Build GitHub Release
+# This workflow builds the YaCy Search Server and creates a GitHub Release with the build artifacts.
 
 on:
   push:
