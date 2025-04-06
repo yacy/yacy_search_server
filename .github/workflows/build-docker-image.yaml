@@ -36,6 +36,7 @@ jobs:
           # GitHub Container Registry & Docker Hub
           images: |
             ghcr.io/${{ github.repository }}
+            misterx/yacy_search_server
           # generate Docker tags based on the following events/attributes
           flavor: |
             latest=auto
