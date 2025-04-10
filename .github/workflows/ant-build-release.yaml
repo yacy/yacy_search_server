@@ -1,0 +1,53 @@
+name: Build GitHub Release
+# This workflow builds the YaCy Search Server and creates a GitHub Release with the build artifacts.
+
+on:
+  # TODO: Currently disabled, because I'm not sure if this is the right way to do the release.
+  # push:
+  #   tags:
+  #     - "v*.*.*"
+  #     - "Release_*"
+  # pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        #os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check-out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build
+        run: ant clean all dist
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }} ${{ runner.arch }} Build
+          path: RELEASE/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          generate_release_notes: true
+          files: RELEASE/*
