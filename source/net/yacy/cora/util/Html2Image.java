@@ -141,7 +141,6 @@ public class Html2Image {
     private static boolean wkhtmltopdfAvailableInPath() {
         boolean available = false;
         try {
-            @SuppressWarnings("deprecation")
             final Process p = Runtime.getRuntime().exec(WKHTMLTOPDF_COMMAND + " -V");
             available = p.waitFor(2, TimeUnit.SECONDS) && p.exitValue() == 0;
         } catch (final IOException e) {
@@ -184,7 +183,6 @@ public class Html2Image {
         boolean available = false;
         if(!OS.isWindows) { // on MS Windows convert is a system tool to convert volumes from FAT to NTFS
             try {
-                @SuppressWarnings("deprecation")
                 final Process p = Runtime.getRuntime().exec(CONVERT_COMMAND + " -version");
                 available = p.waitFor(2, TimeUnit.SECONDS) && p.exitValue() == 0;
             } catch (final IOException e) {
@@ -296,7 +294,6 @@ public class Html2Image {
      * @throws IOException when an unexpected error occurred
      */
     private static boolean execWkhtmlToPdf(final String proxy, final File destination, final String commandline, final long maxSeconds) throws IOException {
-        @SuppressWarnings("deprecation")
         final Process p = Runtime.getRuntime().exec(commandline);
 
         try {

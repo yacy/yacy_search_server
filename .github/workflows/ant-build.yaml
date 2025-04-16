@@ -1,0 +1,63 @@
+name: YaCy CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_DIR: RELEASE
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for git version info in build
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -yq ant git wkhtmltopdf imagemagick xvfb ghostscript
+
+    - name: Configure runtime settings
+      run: |
+        sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" defaults/yacy.init
+        sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" defaults/yacy.init
+        sed -i "/server.https=false/c\server.https=true" defaults/yacy.init
+
+    - name: Build with Ant
+      run: ant clean all dist
+
+    - name: Verify tarball creation
+      run: |
+        ls -la ${{ env.RELEASE_DIR }}/
+        tar -ztvf ${{ env.RELEASE_DIR }}/yacy_*.tar.gz | head
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: yacy-release
+        path: ${{ env.RELEASE_DIR }}/yacy_*.tar.gz
+        retention-days: 5
+
+    - name: Create GitHub Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{ env.RELEASE_DIR }}/yacy_*.tar.gz
+        body: |
+          YaCy Search Server Release
+          Built from ${{ github.sha }}
+          Version: ${{ github.ref_name }}
+        draft: false
+        prerelease: false

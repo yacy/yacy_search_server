@@ -136,7 +136,6 @@ public class Browser {
          * It is part of the LSB (Linux Standard Base) and therefore included in all recent Linux Distributions supporting it
          * (see https://www.linuxbase.org/navigator/browse/cmd_single.php?cmd=list-by-name&Section=ABI&Cname=xdg-open) */
         final String cmd = "xdg-open " + url;
-        @SuppressWarnings("deprecation")
         final Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) {
@@ -153,7 +152,6 @@ public class Browser {
             cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
         }
         //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
-        @SuppressWarnings("deprecation")
         final Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) {

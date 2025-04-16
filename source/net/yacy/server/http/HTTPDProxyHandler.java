@@ -90,7 +90,6 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 
-@SuppressWarnings("deprecation")
 public final class HTTPDProxyHandler {
 
 
