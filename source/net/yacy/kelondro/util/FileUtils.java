@@ -982,7 +982,6 @@ public final class FileUtils {
                 // deleting files on windows sometimes does not work with java
                 try {
                     final String command = "cmd /C del /F /Q \"" + p + "\"";
-                    @SuppressWarnings("deprecation")
                     final Process r = Runtime.getRuntime().exec(command);
                     if ( r == null ) {
                         ConcurrentLog.severe("FileUtils", "cannot execute command: " + command);
