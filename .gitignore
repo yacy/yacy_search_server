@@ -22,6 +22,7 @@ yacy.log
 /test/DATA/
 /javadoc/
 /build/
+.gradle
 /defaults/yacyBuild.properties
 /.idea/
 .idea/
