@@ -2660,7 +2660,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
 
-    @SuppressWarnings("deprecation")
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "file://y:/"},
