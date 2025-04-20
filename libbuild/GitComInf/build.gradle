@@ -1,0 +1,47 @@
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenCentral()
+}
+
+mainClassName = "GitComInf"
+version = "1.0"
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.13.0.202109080827-r'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.33' // to prevent warning msg about missing binding
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.33'
+}
+/*
+jar {
+    manifest {
+        attributes(
+            "Main-Class": mainClassName ,
+            "Class-Path": configurations.runtimeClasspath.collect { it.name }.join(' ')               
+        )
+    }
+}
+*/
+// copy fat-jar to deploy location ..
+task installJarToRoot (type: Copy, dependsOn: shadowJar) {
+    description 'Install jar in libbuild directory'  
+    from shadowJar.archiveFile
+    into project.projectDir.getParent()
+    doLast {
+        logger.lifecycle ("copied jar to ${projectDir.getParent()}/" + shadowJar.archiveFileName.get())
+    }
+}
+

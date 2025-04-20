@@ -20,35 +20,6 @@
 
 package net.yacy.document.parser.html;
 
-import java.awt.Dimension;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.reflect.Array;
-import java.net.MalformedURLException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.event.EventListenerList;
-
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -61,16 +32,37 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.VocabularyScraper;
-import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
+import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
+import org.apache.calcite.util.Pair;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.swing.event.EventListenerList;
+import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.util.*;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A content scraper supporting HTML tags.
  */
 public class ContentScraper extends AbstractScraper implements Scraper {
+
+    private final static ConcurrentLog log = new ConcurrentLog("SCRAPER");
 
     private final static int MAX_TAGSIZE = 1024 * 1024;
     public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
@@ -86,6 +78,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private static final Set<String> linkTags1 = new HashSet<>(15,0.99f);
 
     private static final Pattern LB = Pattern.compile("\n");
+
+    private static final Pattern URL_DATE_REGEX = Pattern.compile("([./\\-_]?(19|20)\\d{2})[./\\-_]?(([0-3]?[0-9][./\\-_])|(\\w{3,5}[./\\-_]))([0-3]?[0-9][./\\-]?)?");
 
     public enum TagType {
         /** Tag with no end tag (see https://www.w3.org/TR/html51/syntax.html#void-elements),
@@ -387,28 +381,28 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     r--;
                     if (newtext[r] == 'N') {
                         this.lat =  Double.parseDouble(new String(newtext, r + 2, p - r - 2)) +
-                                    Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                                Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
                         if (this.lon != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'S') {
                         this.lat = -Double.parseDouble(new String(newtext, r + 2, p - r - 2)) -
-                                    Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                                Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
                         if (this.lon != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'E') {
                         this.lon =  Double.parseDouble(new String(newtext, r + 2, p - r - 2)) +
-                                    Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                                Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
                         if (this.lat != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'W') {
                         this.lon = -Double.parseDouble(new String(newtext, r + 2, p - r - 2)) -
-                                    Double.parseDouble(new String(newtext, p + 2, q - p - pl - 1)) / 60.0d;
+                                Double.parseDouble(new String(newtext, p + 2, q - p - pl - 1)) / 60.0d;
                         if (this.lat != 0.0d) break location;
                         s = q + 6;
                         continue location;
@@ -499,7 +493,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
              * But when unpaired, in most cases this is that the unpaired bracket is not part of the URL, but rather used to wrap it in the text*/
             urlString = removeUnpairedBrackets(urlString, '(', ')');
             urlString = removeUnpairedBrackets(urlString, '{', '}');
-               urlString = removeUnpairedBrackets(urlString, '[', ']');
+            urlString = removeUnpairedBrackets(urlString, '[', ']');
 
             offset = schemePosition + urlString.length();
             try {
@@ -541,7 +535,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @return the original string or a truncated copy
      */
     protected static String removeUnpairedBrackets(final String str, final char openingMark,
-            final char closingMark) {
+                                                   final char closingMark) {
         if(str == null) {
             return null;
         }
@@ -901,6 +895,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String lang = tag.opts.getProperty("lang", EMPTY_STRING);
             if (!lang.isEmpty()) // fake a language meta to preserv detection from <html lang="xx" />
                 this.metas.put("dc.language",lang.substring(0,2)); // fix found entries like "hu-hu"
+        } else if (tag.name.equalsIgnoreCase("span")) {
+            final String itemprop = tag.opts.getProperty("itemprop", EMPTY_STRING);
+            if (itemprop.length() > 0 && itemprop.equalsIgnoreCase("datePublished")) {
+                this.metas.put("span.datepublished", new String(content.getChars()));
+            }
         }
 
         // fire event
@@ -936,12 +935,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         final String h;
         if (tag.name.equalsIgnoreCase("div")) {
-           final String id = tag.opts.getProperty("id", EMPTY_STRING);
-           this.evaluationScores.match(Element.divid, id);
-           final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
-           if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
-               this.breadcrumbs++;
-           }
+            final String id = tag.opts.getProperty("id", EMPTY_STRING);
+            this.evaluationScores.match(Element.divid, id);
+            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
+            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
+                this.breadcrumbs++;
+            }
         } else if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[0].add(h);
@@ -997,7 +996,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 }
                 this.evaluationScores.match(Element.scriptpath, src);
             } else {
-                this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(tag.content.getChars())).replaceAll(" "));
+                final String schema = tag.opts.getProperty("id", EMPTY_STRING);
+                if (schema.length() > 0 && schema.equalsIgnoreCase("schema")) {
+                    final String type = tag.opts.getProperty("type", EMPTY_STRING);
+                    if (type.length() > 0 && type.equalsIgnoreCase("application/ld+json")) {
+                        try {
+                            JSONObject json = new JSONObject(new String(tag.content.getChars()));
+                            this.metas.put("script.datepublished", json.getString("datePublished"));
+                        } catch (JSONException e) {
+                        }
+                    }
+                } else {
+                    this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(tag.content.getChars())).replaceAll(" "));
+                }
             }
         } else if (tag.name.equalsIgnoreCase("article")) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
@@ -1037,8 +1048,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (parentTag != null && parentTag.tv != this.defaultValency) return parentTag.tv;
 
         if (this.valencySwitchTagNames != null &&
-            tag != null &&
-            (TagName.div.name().equals(tag.name) || TagName.nav.name().equals(tag.name))) {
+                tag != null &&
+                (TagName.div.name().equals(tag.name) || TagName.nav.name().equals(tag.name))) {
             final String classAttr = tag.opts.getProperty("class", EMPTY_STRING);
             final Set<String> classes = ContentScraper.parseSpaceSeparatedTokens(classAttr);
             if (!Collections.disjoint(this.valencySwitchTagNames, classes)) return this.defaultValency.reverse();
@@ -1432,33 +1443,119 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public Date getDate() {
-        String content;
+        var currentDate = new Date();
+        // root url like: http://www.dailytimes.com.pk/digital_images/400/2015-11-26/norway-return-number-of-asylum-seekers-to-pakistan-1448538771-7363.jpg
+        String content = this.root.toString();
+        if (content != null) {
+            // Regex by Newspaper3k  - https://github.com/codelucas/newspaper/blob/master/newspaper/urls.py
+            Matcher dateMatcher = URL_DATE_REGEX.matcher(content);
+            if (dateMatcher.find()) {
+                try {
+                    log.info("Publish date found in URL with value: '" + dateMatcher.group(0) + "'");
+                    return ISO8601Formatter.FORMATTER.parse(dateMatcher.group(0).replace("/", "-"), this.timezoneOffset).getTime();
+                } catch (final ParseException e) {
+                }
+            }
+        }
 
-        // <meta name="date" content="YYYY-MM-DD..." />
-        content = this.metas.get("date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+        Date date = parseDates(List.of(Pair.of(
+                                "<script id=\"schema\" type=\"application/ld+json\">{...,\"datePublished\":\"2023-07-10T14:40:52+02:00\",..}</script>",
+                                this.metas.get("script.datepublished")),
+                        Pair.of("<span itemprop='datePublished' content='2025-01-26T20:21:00+01:00' />",
+                                this.metas.get("span.datepublished")),
+                        Pair.of("<meta name=\"pubdate\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("pubdate")),
+                        Pair.of("<meta name=\"publishdate\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("publishdate")),
+                        Pair.of("<meta name=\"timestamp\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("timestamp")),
+                        Pair.of("<meta name=\"DC.date.issued\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("dc.date.issued")),
+                        Pair.of("<meta name=\"article:published_time\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("article:published_time")),
+                        Pair.of("<meta name=\"bt:pubDate\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("bt:pubDate")),
+                        Pair.of("<meta name=\"sailthru.date\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("sailthru.date")),
+                        Pair.of("<meta name=\"sailthru.date\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("sailthru.date")),
+                        Pair.of("<meta name=\"article.published\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("article.published")),
+                        Pair.of("<meta name=\"published-date\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("published-date")),
+                        Pair.of("<meta name=\"article.created\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("article.created")),
+                        Pair.of("<meta name=\"article_date_original\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("article_date_original")),
+                        Pair.of("<meta name=\"cXenseParse:recs:publishtime\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("cXenseParse:recs:publishtime")),
+                        Pair.of("<meta name=\"DATE_PUBLISHED\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("date_published")),
+                        Pair.of("<meta name=\"datePublished\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("datePublished")),
+                        Pair.of("<meta name=\"dateCreated\" content=\"YYYY-MM-DD...\" />",
+                                this.metas.get("dateCreated")),
+                        Pair.of("<meta name=\"DC.date.modified\" content=\"YYYY-MM-DD\" />",
+                                this.metas.get("dc.date.modified")),
+                        Pair.of("<meta name=\"DC.date.created\" content=\"YYYY-MM-DD\" />",
+                                this.metas.get("dc.date.created")),
+                        Pair.of("<meta name=\"DC.date\" content=\"YYYY-MM-DD\" />",
+                                this.metas.get("dc.date")),
+                        Pair.of("<meta name=\"DC:date\" content=\"YYYY-MM-DD\" />",
+                                this.metas.get("dc:date")),
+                        Pair.of("<meta http-equiv=\"last-modified\" content=\"YYYY-MM-DD\" />",
+                                this.metas.get("last-modified"))),
+                this.timezoneOffset);
+        if (date != null) {
+            return date;
+        }
+        // find the most frequent date in starDates in the content
+        date = findMostFrequentDate(this.startDates, currentDate);
+        if (date != null) {
+            log.info("Publish date found in startDates in the page content with value: '" + date + "'");
+            return date;
+        }
+        log.info("Publish date not found, current date used: '" + currentDate + "'");
+        return currentDate;
+    }
 
-        // <meta name="DC.date.modified" content="YYYY-MM-DD" />
-        content = this.metas.get("dc.date.modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+    private Date parseDates(List<Pair<String, String>> dates, int timezoneOffset) {
+        for (Pair<String, String> date : dates) {
+            if (date.getValue() != null) {
+                try {
+                    log.info("Publish date found according to: '" + date.getKey() + "' pattern with value: '" + date.getValue() + "'");
+                    return ISO8601Formatter.FORMATTER.parse(date.getValue(), timezoneOffset).getTime();
+                } catch (final ParseException e) {
+                }
+            }
+        }
+        return null;
+    }
 
-        // <meta name="DC.date.created" content="YYYY-MM-DD" />
-        content = this.metas.get("dc.date.created");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+    public Date findMostFrequentDate(List<Date> dates, Date currentDate){
+        if (dates == null || dates.isEmpty()) {
+            return null; // Handle empty or null list
+        }
 
-        // <meta name="DC.date" content="YYYY-MM-DD" />
-        content = this.metas.get("dc.date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+        Map<Date, Integer> dateCounts = new HashMap<>();
+        for (Date date : dates) {
+            dateCounts.put(date, dateCounts.getOrDefault(date, 0) + 1);
+        }
 
-        // <meta name="DC:date" content="YYYY-MM-DD" />
-        content = this.metas.get("dc:date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+        int maxCount = Collections.max(dateCounts.values()); // Find the maximum count
 
-        // <meta http-equiv="last-modified" content="YYYY-MM-DD" />
-        content = this.metas.get("last-modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+        List<Date> maxDates = new java.util.ArrayList<>();
+        for (Map.Entry<Date, Integer> entry : dateCounts.entrySet()) {
+            if (entry.getValue() == maxCount && !entry.getKey().before(currentDate)) {
+                maxDates.add(entry.getKey());
+            }
+        }
 
-        return new Date();
+        if (maxDates.isEmpty()) {
+            return null;
+        }
+
+        return Collections.max(maxDates);
     }
 
     // parse location
@@ -1607,7 +1704,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i = 0; i < listeners.length; i += 2) {
             if (listeners[i] == ScraperListener.class || listeners[i] == ContentScraperListener.class) {
-                    ((ScraperListener)listeners[i+1]).scrapeTag0(tagname, tagopts);
+                ((ScraperListener)listeners[i+1]).scrapeTag0(tagname, tagopts);
             }
         }
     }
@@ -1616,7 +1713,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i = 0; i < listeners.length; i += 2) {
             if (listeners[i] == ScraperListener.class  || listeners[i] == ContentScraperListener.class) {
-                    ((ScraperListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
+                ((ScraperListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
             }
         }
     }
@@ -1629,7 +1726,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
         for (int i = 0; i < listeners.length; i += 2) {
             if (listeners[i] == ContentScraperListener.class) {
-                    ((ContentScraperListener)listeners[i+1]).anchorAdded(anchorURL);
+                ((ContentScraperListener)listeners[i+1]).anchorAdded(anchorURL);
             }
         }
     }
