@@ -1,0 +1,24 @@
+apiVersion: v2
+name: yacy
+description: A Helm chart for YaCy - a distributed peer-to-peer search engine
+type: application
+version: 0.1.0
+appVersion: "1.930"
+icon: https://yacy.net/images/yacy-logo.png
+home: https://yacy.net/
+sources:
+  - https://github.com/yacy/yacy_search_server
+  - https://hub.docker.com/r/yacy/yacy_search_server
+keywords:
+  - search
+  - search-engine
+  - distributed
+  - p2p
+  - web-crawler
+  - intranet-search
+  - indexing
+maintainers:
+  - name: YaCy Community
+    url: https://community.searchlab.eu
+annotations:
+  artifacthub.io/license: GPL-2.0-or-later
