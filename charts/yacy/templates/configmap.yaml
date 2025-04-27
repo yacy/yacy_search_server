@@ -1,0 +1,11 @@
+{{- if .Values.yacy.configFile }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "yacy.fullname" . }}-config
+  labels:
+    {{- include "yacy.labels" . | nindent 4 }}
+data:
+  yacy.conf: |-
+    {{- .Values.yacy.configFile | nindent 4 }}
+{{- end }}

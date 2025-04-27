@@ -1,0 +1,13 @@
+{{- if gt .Values.replicaCount 1.0 }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "yacy.fullname" . }}
+  labels:
+    {{- include "yacy.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "yacy.selectorLabels" . | nindent 6 }}
+  minAvailable: 1
+{{- end }}
