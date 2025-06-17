@@ -1,18 +1,18 @@
 #(display)#
 {
-page: #[page]#,
-total: #[total]#,
-posts: [
+"page": #[page]#,
+"total": #[total]#,
+"posts": [
 #{bookmarks}#
-{bookmark:["#[hash]#",#(public)#"public"::"private"#(/public)#,"#[title]#","#[link]#","#[tags]#","#[folders]#","#[date]#"]}#[comma]#
+"#[hash]#",#(public)#"public"::"private"#(/public)#,"#[title]#","#[link]#","#[tags]#","#[folders]#","#[date]#"]#[comma]#
 #{/bookmarks}#
 ]
 }
 ::
 {
-page: #[page]#,
-total: #[total]#,
-rows: [
+"page": #[page]#,
+"total": #[total]#,
+"rows": [
 #{bookmarks}#
 {id:"#[id]#",cell:[
 "#[hash]#",
