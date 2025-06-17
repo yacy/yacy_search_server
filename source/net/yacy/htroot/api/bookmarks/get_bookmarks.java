@@ -187,7 +187,7 @@ public class get_bookmarks {
                         prop.put("display_bookmarks_"+count+"_folders", (bookmark.getFoldersString()));
 
 
-                        prop.put("display_bookmarks_"+count+"_tagsjson", bookmark.getTagsString());
+                        prop.put("display_bookmarks_"+count+"_tagsjson", bookmark.getTagsJsonList());
 
                         count++;
                     }
