@@ -527,17 +527,28 @@ public class BookmarksDB {
             return this.tagNames;
         }
 
-        public String getTagsString() {
-            final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
-            final StringBuilder stringBuilder = new StringBuilder();
-            for (final String element : s){
-                if(!element.startsWith("/")){
-                    stringBuilder.append(element);
-                    stringBuilder.append(",");
+    public String getTagsString() {
+        Map<String, String> tagsMap = getTags(); // Assuming getTags returns a HashMap of Strings
+        StringBuilder stringBuilder = new StringBuilder();
+
+        int tagCount = tagsMap.size();
+        int currentTag = 0;
+
+        for (Map.Entry<String, String> entry : tagsMap.entrySet()) {
+            String element = entry.getValue();
+
+            if (!element.startsWith("/")) {
+                stringBuilder.append(element); // Append the element
+                currentTag++;
+
+                if (currentTag < tagCount) {
+                    stringBuilder.append(","); // Add comma if it's not the last element
                 }
             }
-            return stringBuilder.toString();
         }
+
+        return stringBuilder.toString();
+    }
 
         public String getFoldersString(){
             final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
