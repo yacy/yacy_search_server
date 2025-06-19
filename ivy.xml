@@ -15,7 +15,7 @@
       <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.19.0"  />
       <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.18.2"/>
       <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.1.8"/>
-      <dependency org="com.google.guava" name="guava" rev="33.3.1-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="guava" rev="33.4.8-jre" conf="compile->master"/>
       <dependency org="com.google.guava" name="failureaccess" rev="1.0.2" />
       <dependency org="com.ibm.icu" name="icu4j" rev="76.1"/>
       <dependency org="com.github.mwiede" name="jsch" rev="0.2.21" />
