@@ -211,10 +211,12 @@ public class RAGProxyServlet extends HttpServlet {
         String question = "Make a list of a maximum of four search words for the following question; use a JSON Array: " + prompt;
         try {
             OpenAIClient oaic = new OpenAIClient(LLM_API_HOST);
-            String[] a = OpenAIClient.stringsFromChat(oaic.chat(model, question, 80));
+            OpenAIClient.Context context = new OpenAIClient.Context(LLM_SYSTEM_PREFIX);
+            context.addPrompt(question);                
+            String[] a = OpenAIClient.stringsFromChat(oaic.chat(model, context, OpenAIClient.listSchema, 80));
             for (String s: a) query.append(s).append(' ');
             return query.toString().trim();
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
             return "";
         }
