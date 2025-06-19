@@ -9,8 +9,12 @@
 
 ## builder image
 FROM eclipse-temurin:24-jdk-noble AS builder
-RUN apt-get update && apt-get install -y --no-install-recommends ant git curl && rm -rf /var/lib/apt/lists/*
-
+RUN for i in 1 2 3; do \
+      apt-get update && break || sleep 5; \
+    done && \
+    apt-get install -y --no-install-recommends ant git curl && \
+    rm -rf /var/lib/apt/lists/*
+    
 # compile YaCy
 WORKDIR /opt
 COPY . /opt/yacy_search_server/
@@ -24,7 +28,12 @@ RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a09
 
 ## build final image
 FROM eclipse-temurin:24-jdk-noble AS app
-RUN apt-get update && apt-get install -y --no-install-recommends wkhtmltopdf xvfb ghostscript && rm -rf /var/lib/apt/lists/*
+RUN for i in 1 2 3; do \
+      apt-get update && break || sleep 5; \
+    done && \
+    apt-get install -y --no-install-recommends wkhtmltopdf xvfb ghostscript && \
+    rm -rf /var/lib/apt/lists/*
+
 LABEL maintainer="Michael Peter Christen <mc@yacy.net>"
 
 # copy YaCy to app image
