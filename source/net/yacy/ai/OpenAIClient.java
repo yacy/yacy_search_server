@@ -28,6 +28,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +41,7 @@ public class OpenAIClient {
 
     private static String[] STOPTOKENS = new String[]{"[/INST]", "<|im_end|>", "<|end_of_turn|>", "<|eot_id|>", "<|end_header_id|>", "<EOS_TOKEN>", "</s>", "<|end|>"};
 
-    private final String hoststub;
+    protected final String hoststub;
 
     public OpenAIClient(final String hoststub) {
         this.hoststub = hoststub;
@@ -93,27 +96,57 @@ public class OpenAIClient {
             throw new IOException("Request failed with response code " + responseCode);
         }
     }
+    
+    public static class Context extends JSONArray {
+    	public Context(String systemPrompt) throws JSONException {
+    		super();
+    		final JSONObject systemPromptObject = new JSONObject(true);
+    		systemPromptObject.put("role", "system");
+        	systemPromptObject.put("content", systemPrompt);
+        	this.put(systemPromptObject);
+    	}
+    	public void addDialog(String user, String assistant) throws JSONException {
+            final JSONObject userPromptObject = new JSONObject(true);
+        	userPromptObject.put("role", "user");
+        	userPromptObject.put("content", user);
+            this.put(userPromptObject);
+            final JSONObject assistantPromptObject = new JSONObject(true);
+            assistantPromptObject.put("role", "assistant");
+            assistantPromptObject.put("content", assistant);
+            this.put(assistantPromptObject);
+    	}
+    	public void addPrompt(String userPrompt) throws JSONException {
+            final JSONObject userPromptObject = new JSONObject(true);
+        	userPromptObject.put("role", "user");
+        	userPromptObject.put("content", userPrompt);
+            this.put(userPromptObject);
+    	}
+    }
 
     // OpenAI chat client, works with llama.cpp and Ollama
 
-    public String chat(final String model, final String prompt, final int max_tokens) throws IOException {
+    public String chat(final String model, final Context context, JSONObject schema, final int max_tokens) throws IOException {
         final JSONObject data = new JSONObject();
-        final JSONArray messages = new JSONArray();
-        final JSONObject systemPrompt = new JSONObject(true);
-        final JSONObject userPrompt = new JSONObject(true);
-        messages.put(systemPrompt);
-        messages.put(userPrompt);
+        
         try {
-            systemPrompt.put("role", "system");
-            systemPrompt.put("content", "Make short answers.");
-            userPrompt.put("role", "user");
-            userPrompt.put("content", prompt);
             data.put("model", model);
             data.put("temperature", 0.1);
             data.put("max_tokens", max_tokens);
-            data.put("messages", messages);
+            data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", false);
+
+            if (schema != null) {
+            	System.out.println(schema.toString());
+	            JSONObject json_schema = new JSONObject(true);
+	            json_schema.put("strict", true);
+	            json_schema.put("schema", schema);
+	            JSONObject response_format = new JSONObject();
+	            response_format.put("type", "json_schema");
+	            response_format.put("json_schema", json_schema);            
+	            data.put("response_format", response_format);
+            }
+            
             final String response = sendPostRequest(this.hoststub + "/v1/chat/completions", data);
             final JSONObject responseObject = new JSONObject(response);
             final JSONArray choices = responseObject.getJSONArray("choices");
@@ -125,28 +158,63 @@ public class OpenAIClient {
             throw new IOException(e.getMessage());
         }
     }
-
-    public static String[] stringsFromChat(final String answer) {
-        final int p = answer.indexOf('[');
-        final int q = answer.indexOf(']');
-        if (p < 0 || q < 0 || q < p) return new String[0];
+    
+    public String chat(final String model, final String systemPrompt, final String userPrompt, final int max_tokens) throws IOException {
         try {
-            final JSONArray a = new JSONArray(answer.substring(p, q + 1));
-            final String[] arr = new String[a.length()];
-            for (int i = 0; i < a.length(); i++) arr[i] = a.getString(i);
-            return arr;
-        } catch (final JSONException e) {
-            return new String[0];
+        	Context context = new Context(systemPrompt);
+        	context.addPrompt(userPrompt);
+        	return chat(model, context, null, max_tokens);
+        } catch (JSONException e) {
+            throw new IOException(e.getMessage());
         }
     }
+    
+    public static String[] stringsFromChat(String chatanswer) throws JSONException {
+    	JSONArray ja = new JSONArray(chatanswer);
+    	List<String> list = new ArrayList<>();
+    	// parse the JSON array and extract strings
+    	for (int i = 0; i < ja.length(); i++) {
+			Object item = ja.get(i);
+			if (item instanceof String) {
+				list.add((String) item);
+			} else if (item instanceof JSONObject) {
+				JSONObject jo = (JSONObject) item;
+				String answer = jo.optString("answer", null);
+				if (answer != null) {
+					list.add(answer);
+				} else {
+					// take any string value from the object
+					for (String key : jo.keySet()) {
+						Object value = jo.optString(key, null);
+						if (value != null && value instanceof String) {
+							list.add((String) value);
+							break; // take the first string found
+						}
+					}
+				}
+			}
+		}
+		// convert the list to an array
+		String[] result = new String[list.size()];
+		return list.toArray(result);    	
+    }
+    
+    public final static JSONObject listSchema = new JSONObject(Map.of(
+        "title", "Answer List",
+        "type", "array",
+        "properties", Map.of(
+            "answer", Map.of("type", "string")
+        ),
+        "required", List.of("answer")
+    ));
 
     public static void main(final String[] args) {
-        final String model = "phi3:3.8b";
+        final String model = "qwen2.5:0.5b";
         final OpenAIClient oaic = new OpenAIClient(OllamaClient.OLLAMA_API_HOST);
         // make chat completion with model
         String question = "Who invented the wheel?";
         try {
-            final String answer = oaic.chat(model, question, 80);
+            final String answer = oaic.chat(model, "Make short answers.", question, 200);
             System.out.println(answer);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -155,9 +223,13 @@ public class OpenAIClient {
         // try the json parser from chat results
         question = "Make a list of four names from Star Wars movies. Use a JSON Array.";
         try {
-            final String[] a = stringsFromChat(oaic.chat(model, question, 80));
-            for (final String s: a) System.out.println(s);
-        } catch (final IOException e) {
+        	Context context = new Context("Make short answers");
+        	context.addPrompt(question);
+            final String[] a = stringsFromChat(oaic.chat(model, context, listSchema, 1000));
+            for (String s : a) {
+				System.out.println(s);
+			}
+        } catch (final IOException | JSONException e) {
             e.printStackTrace();
         }
     }
