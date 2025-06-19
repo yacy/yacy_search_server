@@ -186,12 +186,15 @@ public class get_bookmarks {
                         prop.put("display_bookmarks_"+count+"_tags", bookmark.getTagsString());
                         prop.put("display_bookmarks_"+count+"_folders", (bookmark.getFoldersString()));
 
+
+                        prop.put("display_bookmarks_"+count+"_tagsjson", bookmark.getTagsJsonList());
+
                         count++;
                     }
             }
             // eliminate the trailing comma for Json output
 
-            prop.put("display_bookmarks_" + (itemsPerPage - 1) + "_comma", "");
+            prop.put("display_bookmarks_" + (count - 1) + "_comma", "");
             prop.put("display_bookmarks", count);
 
             while(it.hasNext()){
