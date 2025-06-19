@@ -8,6 +8,7 @@
 
 <<<<<<< HEAD
 ## builder image
+<<<<<<< HEAD
 FROM eclipse-temurin:21-jdk AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ant \
@@ -28,6 +29,16 @@ RUN apt-get update && apt-get install -yq ant git curl && rm -rf /var/lib/apt/li
 RUN java -version
 >>>>>>> Updated Dockerfile; using temurin 24 instead of temurin 11 now. The reason to update the java version here is to enhance the computation speed which is much better in more recent java versions. For now YaCy stays at java 11 and using java 24 in docker does not change that.
 
+=======
+FROM eclipse-temurin:24-jdk-noble AS builder
+RUN for i in 1 2 3; do \
+      apt-get update && break || sleep 5; \
+    done && \
+    apt-get install -y --no-install-recommends ant git curl && \
+    rm -rf /var/lib/apt/lists/*
+    
+# compile YaCy
+>>>>>>> Update Dockerfile: added retry to prevent failing builds
 WORKDIR /opt
 COPY . /opt/yacy_search_server/
 
@@ -40,6 +51,7 @@ RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a09
     sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
 
 ## build final image
+<<<<<<< HEAD
 FROM eclipse-temurin:21-jre AS app
 
 <<<<<<< HEAD
@@ -53,6 +65,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ## build dist
 FROM base
 >>>>>>> Updated Dockerfile; using temurin 24 instead of temurin 11 now. The reason to update the java version here is to enhance the computation speed which is much better in more recent java versions. For now YaCy stays at java 11 and using java 24 in docker does not change that.
+=======
+FROM eclipse-temurin:24-jdk-noble AS app
+RUN for i in 1 2 3; do \
+      apt-get update && break || sleep 5; \
+    done && \
+    apt-get install -y --no-install-recommends wkhtmltopdf xvfb ghostscript && \
+    rm -rf /var/lib/apt/lists/*
+
+>>>>>>> Update Dockerfile: added retry to prevent failing builds
 LABEL maintainer="Michael Peter Christen <mc@yacy.net>"
 
 RUN adduser --system --group --no-create-home --disabled-password yacy
