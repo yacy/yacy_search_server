@@ -49,3 +49,4 @@ EXPOSE 8090 8443
 VOLUME ["/opt/yacy_search_server/DATA"]
 USER yacy
 CMD ["/bin/sh","/opt/yacy_search_server/startYACY.sh","-f"]
+
