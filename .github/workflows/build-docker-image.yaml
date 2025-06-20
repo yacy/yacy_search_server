@@ -39,19 +39,11 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
           # generate Docker tags based on the following events/attributes
           flavor: |
-            latest=auto
-            prefix=
-            suffix=${{ matrix.tag != '' && format('-{0}', matrix.tag) || '' }},onlatest=true
+            latest=${{ github.ref == 'refs/heads/master' }}
           tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
-            type=match,pattern=Release_(\d+\.\d+),group=1
-            type=match,pattern=Release_(\d+),group=1
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
