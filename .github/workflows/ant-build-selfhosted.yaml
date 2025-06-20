@@ -1,6 +1,6 @@
 name: CI Script to build on self-hosted server
 
-on: push
+# on: push
 
 jobs:
   build:
