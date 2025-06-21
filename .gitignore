@@ -30,6 +30,7 @@ yacy.log
 /.settings/
 /.classpath
 /.project
+/.factorypath
 /ivy
 /lib
 vagrant_yacy/.vagrant/
