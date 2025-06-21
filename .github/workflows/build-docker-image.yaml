@@ -21,11 +21,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - tag: "" # Default Dockerfile
-            variant: "" # No suffix for Ubuntu
+          - tag: ""
+            suffix: "-ubuntu"
+            is_default: true
             platforms: linux/amd64,linux/arm64
           - tag: alpine
-            variant: "-alpine" # Suffix for Alpine
+            suffix: "-alpine"
+            is_default: false
             platforms: linux/amd64,linux/arm64
 
     runs-on: ubuntu-latest
@@ -35,20 +37,17 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
-          # GitHub Container Registry & Docker Hub
           images: |
-            # ghcr.io/${{ github.repository }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
-          # generate Docker tags based on the following events/attributes
           flavor: |
-            latest=${{ matrix.tag == '' }}
-            suffix=${{ matrix.variant }}  # Adds "-alpine" suffix if needed
+            latest=${{ matrix.is_default }}
+            suffix=${{ matrix.suffix }}
           tags: |
+            type=raw,value=latest${{ matrix.suffix }},enable=${{ true }}
             type=sha
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
