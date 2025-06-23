@@ -48,7 +48,7 @@ jobs:
           flavor: latest=${{ matrix.is_default }}
           tags: |
             type=raw,value=latest${{ matrix.suffix }},enable=true
-            type=raw,value=sha-${{ github.sha }}${{ matrix.suffix }},enable=true
+            #type=raw,value=sha-${{ github.sha }}${{ matrix.suffix }},enable=true
             type=raw,value='{{version}}'${{ matrix.suffix }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
             type=raw,value='{{major}}.{{minor}}'${{ matrix.suffix }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
             type=raw,value='{{major}}'${{ matrix.suffix }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
