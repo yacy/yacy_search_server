@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': ZIM File Import</title>
+    #%env/templates/metas.template%#    
+    #(import)#::<meta http-equiv="REFRESH" content="10;url=IndexImportZim_p.html" />
+                <!-- the url= removes http get parameters on refresh, preventing restart of import -->
+    #(/import)#
+  </head>
+  <body id="IndexImportZim">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+    <h2>ZIM File Import</h2>
+    
+    #(import)#
+    <p>No import thread is running, you can start a new thread here</p>
+    <form action="IndexImportZim_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <!-- no post method here, we don't want to transmit the whole file, only the path-->
+      <fieldset>
+        <legend>Zim File Selection: select a '.zim' file</legend>
+        <p>
+          You can download ZIM files for example here 
+          <a href="https://download.kiwix.org/zim/" target="_blank">Kiwix ZIM Archive</a>.
+        </p>
+		<dl>
+          <dt class="TableCellDark"><label for="file">File:</label></dt>
+          <dd><input name="file" id="file" type="file" value="" size="75" /></dd>
+          <dt></dt>
+          <dd><input name="submit" class="btn btn-primary" type="submit" value="Import ZIM File" /></dd>
+        </dl>
+      </fieldset>
+    </form>
+
+    <br />
+    ::
+    <form>
+      <fieldset><legend>Import Process</legend>
+        <dl>
+          <dt>Thread:</dt><dd>#[thread]#</dd>
+          <dt>ZIM File:</dt><dd>#[zimfile]#</dd>
+          <dt>Processed:</dt><dd>#[count]# Entries</dd>
+          <dt>Speed:</dt><dd>#[speed]# pages per second</dd>
+          <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
+          <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
+        </dl>    
+      </fieldset>
+      <input name="abort" type="submit" class="btn btn-danger" value="Stop"/>
+    </form>
+    #(/import)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

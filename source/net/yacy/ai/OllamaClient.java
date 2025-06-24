@@ -32,15 +32,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class OllamaClient {
+public class OllamaClient extends OpenAIClient {
 
     public static String OLLAMA_API_HOST  = "http://localhost:11434";
 
-    private final String hoststub;
-
     public OllamaClient(final String hoststub) {
-        this.hoststub = hoststub;
+        super(hoststub);
     }
+    
+    public String getHoststub() {
+		return this.hoststub;
+	}
 
     public LinkedHashMap<String, Long> listOllamaModels() {
         final LinkedHashMap<String, Long> sortedMap = new LinkedHashMap<>();
@@ -95,7 +97,7 @@ public class OllamaClient {
             return false;
         }
     }
-
+    
     public static void main(final String[] args) {
         final OllamaClient oc = new OllamaClient(OLLAMA_API_HOST);
 
@@ -103,7 +105,7 @@ public class OllamaClient {
         System.out.println(models.toString());
 
         // check if model exists
-        final String model = "phi3:3.8b";
+        final String model = "qwen2.5:0.5b";
         if (oc.ollamaModelExists(model))
             System.out.println("model " + model + " exists");
         else
@@ -111,7 +113,17 @@ public class OllamaClient {
 
         // pull a model
         final boolean success = oc.pullOllamaModel(model);
-        System.out.println("pulled model + " + model + ": " + success);
+        System.out.println("pulled model: " + model + ": " + success);
+        
+        String response;
+		try {
+			response = oc.chat(model, "You are a helpful assistant.", "What is the capital of France?", 1000);
+	        System.out.println("Chat response: " + response);
+		} catch (IOException e) {
+	
+			e.printStackTrace();
+		}
 
     }
+    
 }

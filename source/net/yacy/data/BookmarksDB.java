@@ -527,27 +527,84 @@ public class BookmarksDB {
             return this.tagNames;
         }
 
-        public String getTagsString() {
+    public String getTagsString() {
+        final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
+        StringBuilder stringBuilder = new StringBuilder();
+      	int currentTag = 1;
+		int tagCount = s.length;
+        for (final String element : s){
+            if (!element.startsWith("/")) {
+                stringBuilder.append(element); // Append the element
+                currentTag++;
+
+                if (currentTag < tagCount) {
+                    stringBuilder.append(","); // Add comma if it's not the last element
+                }
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+    public String getTagsJsonList() {
+        final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
+        StringBuilder stringBuilder = new StringBuilder();
+      	int currentTag = 1;
+		int tagCount = s.length;
+        stringBuilder.append("[");
+        for (final String element : s){
+            if (!element.startsWith("/")) {
+                stringBuilder.append("\"");
+                stringBuilder.append(element); // Append the element
+                   stringBuilder.append("\"");
+                currentTag++;
+
+                if (currentTag < tagCount) {
+                    stringBuilder.append(","); // Add comma if it's not the last element
+                }
+            }
+        }
+        stringBuilder.append("]");
+
+        return stringBuilder.toString();
+    }
+
+        public String getFoldersString(){
             final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
             final StringBuilder stringBuilder = new StringBuilder();
+            int currentTag = 1;
+            int tagCount = s.length;
             for (final String element : s){
-                if(!element.startsWith("/")){
+                if(element.startsWith("/")){
+                    currentTag++;
                     stringBuilder.append(element);
-                    stringBuilder.append(",");
+                             if (currentTag < tagCount) {
+                    stringBuilder.append(","); // Add comma if it's not the last element
+                }
                 }
             }
             return stringBuilder.toString();
         }
 
-        public String getFoldersString(){
+        public String getFolderJsonList() {
             final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
-            final StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
+            int currentTag = 1;
+            int tagCount = s.length;
+            stringBuilder.append("[");
             for (final String element : s){
-                if(element.startsWith("/")){
-                    stringBuilder.append(element);
-                    stringBuilder.append(",");
+                if (!element.startsWith("/")) {
+                    stringBuilder.append("\"");
+                    stringBuilder.append(element); // Append the element
+                    stringBuilder.append("\"");
+                    currentTag++;
+
+                    if (currentTag < tagCount) {
+                        stringBuilder.append(","); // Add comma if it's not the last element
+                    }
                 }
             }
+            stringBuilder.append("]");
+
             return stringBuilder.toString();
         }
 

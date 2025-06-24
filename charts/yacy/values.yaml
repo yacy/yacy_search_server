@@ -1,0 +1,176 @@
+# Default values for YaCy Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of YaCy pods to run
+# Note: For production use, consider setting up shared storage
+# if running multiple replicas
+replicaCount: 1
+
+# Image configuration
+image:
+  # -- Set to true to use a locally built image
+  # Set to false to pull from a registry
+  useLocal: false
+  
+  # -- Local image settings (when useLocal: true)
+  # Build with: docker build -t yacy_search_server:local -f docker/Dockerfile .
+  localRepository: "yacy/yacy_search_server"
+  localTag: "latest"
+  
+  # -- Official repository settings (when useLocal: false)
+  repository: yacy/yacy_search_server
+  pullPolicy: Always
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: "latest"
+
+# -- Architecture-specific image tags 
+# Used for multi-architecture deployments with the official repository
+arch:
+  amd64: latest
+  arm64: aarch64-latest
+  arm: armv7-latest
+
+# Optional: Configure image pull secrets if you have authentication for private registries
+# For Docker Hub, create a secret with: kubectl create secret docker-registry regcred --docker-username=<username> --docker-password=<password>
+imagePullSecrets: []
+# - name: regcred
+nameOverride: ""
+fullnameOverride: ""
+
+# YaCy environment variables
+# All settings from yacy.init can be set as environment variables
+# Replace dots with underscores, make uppercase, and prefix with YACY_
+env: {}
+  # YACY_NETWORK_UNIT_AGENT: "MyYaCyPeer"
+  # YACY_ADMINACCOUNT_USER: "admin"
+  # YACY_ADMINACCOUNT_PASSWORD: "yacy"  # Default password, change this!
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  httpPort: 8090
+  httpsPort: 8443
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: yacy.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: yacy-tls
+  #    hosts:
+  #      - yacy.local
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Persistence for YaCy DATA directory
+persistence:
+  enabled: true
+  # If defined, use an existing PVC
+  existingClaim: ""
+  # storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  annotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Autoscaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Network Policy
+networkPolicy:
+  # Enable network policy
+  enabled: false
+  # Custom ingress selectors
+  # ingressFrom: []
+
+# Prometheus metrics configuration
+metrics:
+  # Path for metrics endpoint
+  path: /metrics
+  serviceMonitor:
+    # If true, a ServiceMonitor CRD will be created for a prometheus operator
+    enabled: false
+    # Optional namespace for ServiceMonitor
+    namespace: ""
+    # Default scrape interval
+    interval: 1m
+    # Default scrape timeout
+    scrapeTimeout: 30s
+    # Additional labels for ServiceMonitor
+    additionalLabels: {}
+
+# -- YaCy specific configuration
+yacy:
+  # -- Admin password for the YaCy web interface
+  # IMPORTANT: Change this from the default for security!
+  adminPassword: "yacy"
+  
+  # -- Optional: Custom YaCy configuration file content
+  # This will be mounted as a ConfigMap and override default settings
+  configFile: |
+    # YaCy configuration in key=value format
+    # Disable browser auto-opening (avoids xdg-open errors in container environment)
+    browserPopUpPage=
+    browserPopUpWarning=false
+  
+  # -- YaCy runtime settings
+  settings:
+    # -- URLs to crawl automatically on startup
+    # Example: ["https://example.com/", "https://yacy.net/"]
+    crawlURLs: []
+    
+    # -- Maximum memory allocation for YaCy
+    # Recommendation: Use 60-80% of container memory limit
+    maxMemory: "600m"
+    
+    # -- Whether to join the YaCy P2P network
+    # Set to false for private/intranet installations
+    joinP2PNetwork: true
+    
+    # -- Additional YaCy settings can be added as environment
+    # variables using the 'env' section
