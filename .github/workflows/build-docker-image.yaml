@@ -7,7 +7,6 @@ on:
     tags:
       - "v*.*.*"
       - "Release_*"
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -17,6 +16,7 @@ permissions:
 
 jobs:
   docker:
+    if: github.repository == 'yacy/yacy_search_server'
     strategy:
       fail-fast: false
       matrix:
