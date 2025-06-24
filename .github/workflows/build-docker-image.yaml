@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   docker:
+    if: github.repository == 'yacy/yacy_search_server'
     strategy:
       fail-fast: false
       matrix:
