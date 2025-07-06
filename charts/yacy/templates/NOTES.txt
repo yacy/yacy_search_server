@@ -1,0 +1,76 @@
+╔════════════════════════════════════════════════════════════════╗
+║                  YaCy Search Server Deployed!                  ║
+╚════════════════════════════════════════════════════════════════╝
+
+Thank you for installing {{ .Chart.Name }} v{{ .Chart.Version }}.
+
+YaCy is a decentralized search engine that can be used for both public P2P search
+and private intranet search scenarios.
+
+GETTING STARTED
+==============================================================================
+
+1. Access YaCy Interface:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+   {{- range .paths }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+   {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+   kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "yacy.fullname" . }}
+   
+   # Then access:
+   http://<any-node-ip>:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+   # It may take a few minutes for the LoadBalancer IP to be available
+   kubectl get --namespace {{ .Release.Namespace }} svc {{ include "yacy.fullname" . }}
+   
+   # Then access:
+   http://<EXTERNAL-IP>:{{ .Values.service.httpPort }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+   # Port forward to access YaCy (for development/testing):
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "yacy.fullname" . }} 8090:{{ .Values.service.httpPort }}
+   
+   # Then access:
+   http://127.0.0.1:8090
+{{- end }}
+
+2. Login using these credentials:
+   • Username: admin
+   • Password: {{ .Values.yacy.adminPassword | default "yacy" }}
+   IMPORTANT: Change the default password via ConfigAccounts_p.html
+
+3. Check deployment status:
+   kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+DATA PERSISTENCE
+==============================================================================
+{{- if .Values.persistence.enabled }}
+• YaCy data is stored in a persistent volume:
+  - PVC: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{- else }}{{ include "yacy.fullname" . }}-data{{- end }}
+  - Size: {{ .Values.persistence.size }}
+  - Mode: {{ .Values.persistence.accessMode }}
+{{- else }}
+• WARNING: Persistence is disabled! Data will be lost when pods are terminated.
+  To enable persistence, set persistence.enabled=true
+{{- end }}
+
+IMPORTANT NOTES
+==============================================================================
+{{- if eq (.Values.replicaCount | int) 1 }}
+• YaCy is running with a single replica.
+  For production environments, consider enabling:
+  - Multiple replicas with proper shared storage
+  - Ingress with TLS
+  - Resource limits appropriate for your workload
+{{- else }}
+• YaCy is running with {{ .Values.replicaCount }} replicas.
+{{- end }}
+
+RESOURCES
+==============================================================================
+• Documentation: https://yacy.net/
+• Community: https://community.searchlab.eu/
+• Support: https://github.com/yacy/yacy_search_server/issues
+• Helm Chart README: See charts/README.md
