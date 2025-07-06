@@ -238,6 +238,30 @@ import net.yacy.utils.CryptoLib;
 import net.yacy.utils.crypt;
 import net.yacy.utils.upnp.UPnP;
 import net.yacy.visualization.CircleTool;
+import net.yacy.yacy;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.search.SyntaxError;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import java.util.zip.*;
 
 
 
@@ -2980,7 +3004,8 @@ public final class Switchboard extends serverSwitch {
                             response.profile().scraper(),
                             response.profile().timezoneOffset(),
                             response.depth(),
-                            response.getContent());
+                            response.getContent(),
+                            response.lastModified());
                 } else {
                     this.log.warn("Resource '" + response.url().toNormalform(true) + "' is not supported. " + supportError);
                     // create a new errorURL DB entry
@@ -2999,7 +3024,8 @@ public final class Switchboard extends serverSwitch {
                                 response.profile().scraper(),
                                 response.profile().timezoneOffset(),
                                 response.depth(),
-                                response.getContent());
+                                response.getContent(),
+                                response.lastModified());
             }
             if ( documents == null ) {
                 throw new Parser.Failure("Parser returned null.", response.url());

@@ -20,7 +20,7 @@
 
 package net.yacy.document.parser.html;
 
-import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.date.CustomISO8601Formatter;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -37,7 +37,6 @@ import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
-import org.apache.calcite.util.Pair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -78,8 +77,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private static final Set<String> linkTags1 = new HashSet<>(15,0.99f);
 
     private static final Pattern LB = Pattern.compile("\n");
-
-    private static final Pattern URL_DATE_REGEX = Pattern.compile("([./\\-_]?(19|20)\\d{2})[./\\-_]?(([0-3]?[0-9][./\\-_])|(\\w{3,5}[./\\-_]))([0-3]?[0-9][./\\-]?)?");
 
     public enum TagType {
         /** Tag with no end tag (see https://www.w3.org/TR/html51/syntax.html#void-elements),
@@ -255,7 +252,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param root the document root url
      * @param maxAnchors the maximum number of URLs to process and store in the anchors property.
      * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store
-     * @param valencySwitchTagNames an eventual set of CSS class names whose matching div elements content should be ignored
+     * @param valencySwitchTagNames the default switch tag names
      * @param defaultValency the valency default; should be TagValency.EVAL by default
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
@@ -649,14 +646,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     case "startDate": // <meta itemprop="startDate" content="2016-04-21T20:00">
                         try {
                             // parse ISO 8601 date
-                            final Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            final Date startDate = CustomISO8601Formatter.CUSTOM_FORMATTER.parse(propval, this.timezoneOffset).getTime();
                             this.startDates.add(startDate);
                         } catch (final ParseException e) {}
                         break;
                     case "endDate":
                         try {
                             // parse ISO 8601 date
-                            final Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            final Date endDate = CustomISO8601Formatter.CUSTOM_FORMATTER.parse(propval, this.timezoneOffset).getTime();
                             this.endDates.add(endDate);
                         } catch (final ParseException e) {}
                         break;
@@ -1017,7 +1014,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = tag.opts.getProperty("datetime"); // TODO: checkOpts() also parses datetime property if in combination with schema.org itemprop=startDate/endDate
             if (h != null) { // datetime property is optional
                 try {
-                    final Date startDate = ISO8601Formatter.FORMATTER.parse(h, this.timezoneOffset).getTime();
+                    final Date startDate = CustomISO8601Formatter.CUSTOM_FORMATTER.parse(h, this.timezoneOffset).getTime();
                     this.startDates.add(startDate);
                 } catch (final ParseException ex) { }
             }
@@ -1442,120 +1439,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return EMPTY_STRING;
     }
 
-    public Date getDate() {
-        var currentDate = new Date();
-        // root url like: http://www.dailytimes.com.pk/digital_images/400/2015-11-26/norway-return-number-of-asylum-seekers-to-pakistan-1448538771-7363.jpg
-        String content = this.root.toString();
-        if (content != null) {
-            // Regex by Newspaper3k  - https://github.com/codelucas/newspaper/blob/master/newspaper/urls.py
-            Matcher dateMatcher = URL_DATE_REGEX.matcher(content);
-            if (dateMatcher.find()) {
-                try {
-                    log.info("Publish date found in URL with value: '" + dateMatcher.group(0) + "'");
-                    return ISO8601Formatter.FORMATTER.parse(dateMatcher.group(0).replace("/", "-"), this.timezoneOffset).getTime();
-                } catch (final ParseException e) {
-                }
-            }
-        }
-
-        Date date = parseDates(List.of(Pair.of(
-                                "<script id=\"schema\" type=\"application/ld+json\">{...,\"datePublished\":\"2023-07-10T14:40:52+02:00\",..}</script>",
-                                this.metas.get("script.datepublished")),
-                        Pair.of("<span itemprop='datePublished' content='2025-01-26T20:21:00+01:00' />",
-                                this.metas.get("span.datepublished")),
-                        Pair.of("<meta name=\"pubdate\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("pubdate")),
-                        Pair.of("<meta name=\"publishdate\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("publishdate")),
-                        Pair.of("<meta name=\"timestamp\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("timestamp")),
-                        Pair.of("<meta name=\"DC.date.issued\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("dc.date.issued")),
-                        Pair.of("<meta name=\"article:published_time\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("article:published_time")),
-                        Pair.of("<meta name=\"bt:pubDate\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("bt:pubDate")),
-                        Pair.of("<meta name=\"sailthru.date\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("sailthru.date")),
-                        Pair.of("<meta name=\"sailthru.date\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("sailthru.date")),
-                        Pair.of("<meta name=\"article.published\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("article.published")),
-                        Pair.of("<meta name=\"published-date\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("published-date")),
-                        Pair.of("<meta name=\"article.created\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("article.created")),
-                        Pair.of("<meta name=\"article_date_original\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("article_date_original")),
-                        Pair.of("<meta name=\"cXenseParse:recs:publishtime\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("cXenseParse:recs:publishtime")),
-                        Pair.of("<meta name=\"DATE_PUBLISHED\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("date_published")),
-                        Pair.of("<meta name=\"datePublished\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("datePublished")),
-                        Pair.of("<meta name=\"dateCreated\" content=\"YYYY-MM-DD...\" />",
-                                this.metas.get("dateCreated")),
-                        Pair.of("<meta name=\"DC.date.modified\" content=\"YYYY-MM-DD\" />",
-                                this.metas.get("dc.date.modified")),
-                        Pair.of("<meta name=\"DC.date.created\" content=\"YYYY-MM-DD\" />",
-                                this.metas.get("dc.date.created")),
-                        Pair.of("<meta name=\"DC.date\" content=\"YYYY-MM-DD\" />",
-                                this.metas.get("dc.date")),
-                        Pair.of("<meta name=\"DC:date\" content=\"YYYY-MM-DD\" />",
-                                this.metas.get("dc:date")),
-                        Pair.of("<meta http-equiv=\"last-modified\" content=\"YYYY-MM-DD\" />",
-                                this.metas.get("last-modified"))),
-                this.timezoneOffset);
-        if (date != null) {
-            return date;
-        }
-        // find the most frequent date in starDates in the content
-        date = findMostFrequentDate(this.startDates, currentDate);
-        if (date != null) {
-            log.info("Publish date found in startDates in the page content with value: '" + date + "'");
-            return date;
-        }
-        log.info("Publish date not found, current date used: '" + currentDate + "'");
-        return currentDate;
-    }
-
-    private Date parseDates(List<Pair<String, String>> dates, int timezoneOffset) {
-        for (Pair<String, String> date : dates) {
-            if (date.getValue() != null) {
-                try {
-                    log.info("Publish date found according to: '" + date.getKey() + "' pattern with value: '" + date.getValue() + "'");
-                    return ISO8601Formatter.FORMATTER.parse(date.getValue(), timezoneOffset).getTime();
-                } catch (final ParseException e) {
-                }
-            }
-        }
-        return null;
-    }
-
-    public Date findMostFrequentDate(List<Date> dates, Date currentDate){
-        if (dates == null || dates.isEmpty()) {
-            return null; // Handle empty or null list
-        }
-
-        Map<Date, Integer> dateCounts = new HashMap<>();
-        for (Date date : dates) {
-            dateCounts.put(date, dateCounts.getOrDefault(date, 0) + 1);
-        }
-
-        int maxCount = Collections.max(dateCounts.values()); // Find the maximum count
-
-        List<Date> maxDates = new java.util.ArrayList<>();
-        for (Map.Entry<Date, Integer> entry : dateCounts.entrySet()) {
-            if (entry.getValue() == maxCount && !entry.getKey().before(currentDate)) {
-                maxDates.add(entry.getKey());
-            }
-        }
-
-        if (maxDates.isEmpty()) {
-            return null;
-        }
-
-        return Collections.max(maxDates);
+    public Date getDate(Date lastModified) {
+        return ContentScraperDateUtil.getDate(root, metas, timezoneOffset, startDates, lastModified);
     }
 
     // parse location
@@ -1720,7 +1605,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     /**
      * Fire addAnchor event to any listener implemening {@link ContentScraperListener} interface
-     * @param url anchor url
+     * @param anchorURL anchor url
      */
     private void fireAddAnchor(final String anchorURL) {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();

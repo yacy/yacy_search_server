@@ -24,11 +24,7 @@
 package net.yacy.document;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
@@ -96,8 +92,9 @@ public abstract class AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream source,
             final int maxLinks,
-            final long maxBytes) throws UnsupportedOperationException, Failure, InterruptedException {
-        return parseWithLimits(location, mimeType, charset, TagValency.EVAL, new HashSet<String>(), scraper, timezoneOffset, source, maxLinks, maxBytes);
+            final long maxBytes,
+            final Date lastModified) throws UnsupportedOperationException, Failure, InterruptedException {
+        return parseWithLimits(location, mimeType, charset, TagValency.EVAL, new HashSet<String>(), scraper, timezoneOffset, source, maxLinks, maxBytes, lastModified);
     }
 
     @Override
@@ -111,9 +108,10 @@ public abstract class AbstractParser implements Parser {
             int timezoneOffset,
             InputStream source,
             int maxLinks,
-            long maxBytes)
+            long maxBytes,
+            Date lastModified)
             throws Failure, InterruptedException, UnsupportedOperationException {
-        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, maxLinks, maxBytes);
+        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, maxLinks, maxBytes, lastModified);
     }
 
     /**
