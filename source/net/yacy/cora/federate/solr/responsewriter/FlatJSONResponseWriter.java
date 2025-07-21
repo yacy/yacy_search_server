@@ -52,10 +52,10 @@ import net.yacy.cora.federate.solr.SolrType;
 public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     private static final char lb = '\n';
-    
+
     public FlatJSONResponseWriter() {
     }
-    
+
     @Override
     public String getContentType(SolrQueryRequest arg0, SolrQueryResponse arg1) {
         return "application/json; charset=UTF-8";
@@ -88,7 +88,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
 
     private static final void writeDoc(final Writer writer, final IndexSchema schema, final List<IndexableField> fields) throws IOException {
         JSONObject json = new JSONObject();
-        
+
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
         while (fidx1 < sz) {
@@ -160,6 +160,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
         SimpleDateFormat sdf=new SimpleDateFormat("YYYY-MM-DD'T'hh:mm:ssZ");
         for (String key: fields.keySet()) {
             if (key == null)  continue;
+            if ("_version_".equals(key)) continue;
             Object value = doc.get(key);
             try {
                 if (value == null) {
@@ -176,7 +177,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                 throw new IOException(e.getMessage());
             }
         }
-        
+
         writer.write(json.toString());
         writer.write(lb);
     }
