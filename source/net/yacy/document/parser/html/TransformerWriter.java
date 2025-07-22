@@ -40,8 +40,8 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Stack;
-import net.yacy.document.parser.html.ContentScraper.TagName;
 
+import net.yacy.document.parser.html.ContentScraper.TagType;
 import net.yacy.kelondro.io.CharBuffer;
 
 
@@ -58,7 +58,7 @@ public final class TransformerWriter extends Writer {
     private OutputStreamWriter out;
     private CharBuffer buffer;
     private Stack<ContentScraper.Tag> tagStack;
-    private final Scraper scraper;
+    private final ContentScraper scraper;
     private boolean inSingleQuote;
     private boolean inDoubleQuote;
     private boolean inComment;
@@ -68,7 +68,7 @@ public final class TransformerWriter extends Writer {
     public TransformerWriter(
             final OutputStream outStream,
             final Charset charSet,
-            final Scraper scraper,
+            final ContentScraper scraper,
             final boolean passbyIfBinarySuspect
     ) {
         this(outStream, charSet, scraper, passbyIfBinarySuspect, 64);
@@ -77,14 +77,14 @@ public final class TransformerWriter extends Writer {
     public TransformerWriter(
             final OutputStream outStream,
             final Charset charSet,
-            final Scraper scraper,
+            final ContentScraper scraper,
             final boolean passbyIfBinarySuspect,
             final int initialBufferSize
     ) {
         this.outStream     = outStream;
         this.scraper       = scraper;
         this.buffer        = new CharBuffer(ContentScraper.MAX_DOCSIZE, initialBufferSize);
-        this.tagStack      = new Stack<ContentScraper.Tag>();
+        this.tagStack      = new Stack<>();
         this.inSingleQuote = false;
         this.inDoubleQuote = false;
         this.inComment     = false;
@@ -96,7 +96,7 @@ public final class TransformerWriter extends Writer {
         }
     }
 
-    public static char[] genTag0raw(final String tagname, final boolean opening, final char[] tagopts) {
+    public static char[] generateSingletonTagRaw(final String tagname, final boolean opening, final char[] tagopts) {
             final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, tagname.length() + tagopts.length + 3);
             bb.append('<');
             if (!opening) {
@@ -114,7 +114,22 @@ public final class TransformerWriter extends Writer {
             return result;
     }
 
-    public static char[] genTag1raw(final String tagname, final char[] tagopts, final char[] text) {
+    public static char[] generateSingletonTag(final String tagname, final Properties tagopts, final char quotechar) {
+            final char[] tagoptsx = (tagopts.isEmpty()) ? null : genOpts(tagopts, quotechar);
+            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
+            bb.append('<').append(tagname);
+            if (tagoptsx != null) {
+                bb.appendSpace();
+                bb.append(tagoptsx);
+            }
+            bb.append('>');
+            final char[] result = bb.getChars();
+            bb.close();
+            return result;
+    }
+
+
+    public static char[] generatePairedTagRaw(final String tagname, final char[] tagopts, final char[] text) {
             final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, 2 * tagname.length() + tagopts.length + text.length + 5);
             bb.append('<').append(tagname);
             if (tagopts.length > 0) {
@@ -129,23 +144,8 @@ public final class TransformerWriter extends Writer {
             bb.close();
             return result;
     }
-
-    public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {
-            final char[] tagoptsx = (tagopts.isEmpty()) ? null : genOpts(tagopts, quotechar);
-            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
-            bb.append('<').append(tagname);
-            if (tagoptsx != null) {
-                bb.appendSpace();
-                bb.append(tagoptsx);
-            }
-            bb.append('>');
-            final char[] result = bb.getChars();
-            bb.close();
-            return result;
-    }
-
-    public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
-            final char[] gt0 = genTag0(tagname, tagopts, quotechar);
+    public static char[] generatePairedTag(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
+            final char[] gt0 = generateSingletonTag(tagname, tagopts, quotechar);
             final CharBuffer cb = new CharBuffer(ContentScraper.MAX_DOCSIZE, gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append('<').append('/').append(tagname).append('>');
             final char[] result = cb.getChars();
@@ -181,9 +181,9 @@ public final class TransformerWriter extends Writer {
      */
     private char[] tokenProcessor(final char[] in, final char quotechar) {
         if (in.length == 0) return in;
-        
+
         // scan the string and parse structure
-        if (in.length <= 2 || in[0] != lb) return filterTag(in); // this is a text
+        if (in.length <= 2 || in[0] != lb) return this.filterTag(in); // this is a text
 
         // this is a tag
         String tag;
@@ -194,11 +194,11 @@ public final class TransformerWriter extends Writer {
             tag = new String(in, 2, tagend - 2).toLowerCase(Locale.ROOT);
             final char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
-            return filterTag(text, quotechar, tag, false);
+            return this.filterTag(text, quotechar, tag, false);
         }
 
         // don't add text from within <script> section, here e.g. a "if 1<a" expression could confuse tag detection
-        if (this.tagStack.size()>0 && this.tagStack.lastElement().name.equals(TagName.script.name())) {
+        if (this.tagStack.size()>0 && this.tagStack.lastElement().tagType == TagType.script) {
             return new char[0];
         }
 
@@ -207,9 +207,21 @@ public final class TransformerWriter extends Writer {
         tag = new String(in, 1, tagend - 1).toLowerCase(Locale.ROOT);
         final char[] text = new char[in.length - tagend - 1];
         System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
-        return filterTag(text, quotechar, tag, true);
+        return this.filterTag(text, quotechar, tag, true);
     }
-    
+
+    /* inside TransformerWriter */
+    private static void mdPrefix(final ContentScraper.Tag tag, final CharBuffer target) {
+        if (tag != null && tag.tagType != null && tag.tagType.mdPrefix != null && tag.tagType.mdPrefix.length() > 0) {
+            target.append(tag.tagType.mdPrefix);
+        }
+    }
+    private static void mdSuffix(final ContentScraper.Tag tag, final CharBuffer target) {
+        if (tag != null && tag.tagType != null && tag.tagType.mdSuffix != null && tag.tagType.mdSuffix.length() > 0) {
+            target.append(tag.tagType.mdSuffix);
+        }
+    }
+
     // distinguish the following cases:
     // - (1) not collecting data for a tag and getting no tag (not opener and not close)
     // - (2) not collecting data for a tag and getting a tag opener
@@ -218,9 +230,9 @@ public final class TransformerWriter extends Writer {
     // - (5) collecting data for a tag and getting a new/different tag opener without closing the previous tag
     // - (6) collecting data for a tag and getting a tag close for the wrong tag (a different than the opener)
     // - (7) collecting data for a tag and getting the correct close tag for that collecting tag
-    
+
     /**
-     * 
+     *
      * @param content
      * @return content or empty array
      */
@@ -242,91 +254,97 @@ public final class TransformerWriter extends Writer {
         this.tagStack.lastElement().content.append(content);
         return new char[0];
     }
-            
+
     private char[] filterTag(final char[] content, final char quotechar, final String tagname, final boolean opening) {
         assert tagname != null;
-        
+
         if (this.tagStack.size() == 0) {
             // we are not collection tag text -> case (1) - (3)
 
             // we have a new tag
             if (opening) {
                 // case (2):
-                return filterTagOpening(tagname, content);
+                return this.filterTagOpening(tagname, content);
             }
 
             // its a close tag where no should be
             // case (3): we ignore that thing and return it again
-            return genTag0raw(tagname, false, content);
+            return generateSingletonTagRaw(tagname, false, content);
 
         }
 
         // we are collection tag text for the tag 'filterTag' -> case (4) - (7)
-        if (tagname.equals("!")) filterTag(content);
+        if (tagname.equals("!")) this.filterTag(content);
 
         // it's a tag! which one?
         if (opening) {
             // case (5): the opening should not be here. But we keep the order anyway
-            this.tagStack.lastElement().content.append(filterTagOpening(tagname, content));
+            this.tagStack.lastElement().content.append(this.filterTagOpening(tagname, content));
             return new char[0];
         }
 
-        if (!tagname.equalsIgnoreCase(this.tagStack.lastElement().name)) {
+        if (!tagname.equalsIgnoreCase(this.tagStack.lastElement().tagName)) {
             // case (6): its a closing tag, but the wrong one. just add it.
-            this.tagStack.lastElement().content.append(genTag0raw(tagname, opening, content));
+            this.tagStack.lastElement().content.append(generateSingletonTagRaw(tagname, opening, content));
             return new char[0];
         }
 
         // it's our closing tag! return complete result.
-        return filterTagCloseing(quotechar);
+        return this.filterTagCloseing(quotechar);
     }
 
     private char[] filterTagOpening(final String tagname, final char[] content) {
         final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
-        ContentScraper.Tag tag = new ContentScraper.Tag(tagname, this.scraper.defaultValency(), charBuffer.propParser());
+        final ContentScraper.Tag tag = new ContentScraper.Tag(tagname, this.scraper.defaultValency(), charBuffer.propParser());
         charBuffer.close();
-        
+
         final ContentScraper.Tag parentTag;
         if(this.tagStack.size() > 0) {
             parentTag = this.tagStack.lastElement();
         } else {
             parentTag = null;
         }
-        
+
         /* Check scraper ignoring rules */
         if (this.scraper != null) {
             tag.setValency(this.scraper.tagValency(tag, parentTag));
         }
-        
+
+        // add markdown for the tag
+        mdPrefix(tag, this.scraper.content);
+
         /* Apply processing relevant for any kind of tag opening */
         if(this.scraper != null) {
             this.scraper.scrapeAnyTagOpening(tag);
         }
-        
-        if (this.scraper != null && this.scraper.isTag0(tagname)) {
+
+        if (this.scraper != null && this.scraper.isSingetonTag(tagname)) {
             // this single tag is collected at once here
-            this.scraper.scrapeTag0(tag);
+            this.scraper.scrapeSingletonTag(tag);
         }
-        if (this.scraper != null && this.scraper.isTag1(tagname)) {
+        if (this.scraper != null && this.scraper.isPairedTag(tagname)) {
             // ok, start collecting; we don't push this here to the scraper or transformer; we do that when the tag is closed.
             this.tagStack.push(tag);
             return new char[0];
         }
         // we ignore that thing and return it again
-        return genTag0raw(tagname, true, content);
+        return generateSingletonTagRaw(tagname, true, content);
     }
 
     private char[] filterTagCloseing(final char quotechar) {
         char[] ret;
-        ContentScraper.Tag tag = this.tagStack.lastElement();
-        if (this.scraper != null) this.scraper.scrapeTag1(tag);
-        ret = genTag1(tag.name, tag.opts, tag.content.getChars(), quotechar);
-        if (this.scraper != null && this.scraper.isTag1(tag.name)) {
+        final ContentScraper.Tag tag = this.tagStack.lastElement();
+        if (this.scraper != null) this.scraper.scrapePairedTag(tag);
+        ret = generatePairedTag(tag.tagName, tag.opts, tag.content.getChars(), quotechar);
+        if (this.scraper != null && this.scraper.isPairedTag(tag.tagName)) {
             // remove the tag from the stack as soon as the tag is processed
             this.tagStack.pop();
             // at this point the characters from the recently processed tag must be attached to the previous tag
             if (this.tagStack.size() > 0) this.tagStack.lastElement().content.append(ret);
         }
+
+        // add markdown for the tag
+        mdSuffix(tag, this.scraper.content);
         return ret;
     }
 
@@ -337,8 +355,8 @@ public final class TransformerWriter extends Writer {
 
         // it's our closing tag! return complete result.
         char[] ret;
-        if (this.scraper != null) this.scraper.scrapeTag1(this.tagStack.lastElement());
-        ret = genTag1(this.tagStack.lastElement().name, this.tagStack.lastElement().opts, this.tagStack.lastElement().content.getChars(), quotechar);
+        if (this.scraper != null) this.scraper.scrapePairedTag(this.tagStack.lastElement());
+        ret = generatePairedTag(this.tagStack.lastElement().tagName, this.tagStack.lastElement().opts, this.tagStack.lastElement().content.getChars(), quotechar);
         this.tagStack.pop();
         return ret;
     }
@@ -369,7 +387,7 @@ public final class TransformerWriter extends Writer {
         //System.out.println((char) c);
         if ((this.binaryUnsuspect) && (binaryHint((char)c))) {
             this.binaryUnsuspect = false;
-            if (this.passbyIfBinarySuspect) close();
+            if (this.passbyIfBinarySuspect) this.close();
         }
 
         if (this.binaryUnsuspect || !this.passbyIfBinarySuspect) {
@@ -381,7 +399,7 @@ public final class TransformerWriter extends Writer {
                 if ((c == rb) && (this.buffer.length() > 0 && this.buffer.charAt(0) == lb)) {
                     this.inSingleQuote = false;
                     // the tag ends here. after filtering: pass on
-                    filtered = tokenProcessor(this.buffer.getChars(), singlequote);
+                    filtered = this.tokenProcessor(this.buffer.getChars(), singlequote);
                     if (this.out != null) { this.out.write(filtered); }
                     // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
@@ -393,7 +411,7 @@ public final class TransformerWriter extends Writer {
                 if (c == rb && this.buffer.length() > 0 && this.buffer.charAt(0) == lb) {
                     this.inDoubleQuote = false;
                     // the tag ends here. after filtering: pass on
-                    filtered = tokenProcessor(this.buffer.getChars(), doublequote);
+                    filtered = this.tokenProcessor(this.buffer.getChars(), doublequote);
                     if (this.out != null) this.out.write(filtered);
                     // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
@@ -431,7 +449,7 @@ public final class TransformerWriter extends Writer {
                     } else if (c == rb) {
                         this.buffer.append(c);
                         // the tag ends here. after filtering: pass on
-                        filtered = tokenProcessor(this.buffer.getChars(), doublequote);
+                        filtered = this.tokenProcessor(this.buffer.getChars(), doublequote);
                         if (this.out != null) this.out.write(filtered);
                         // this.buffer = new serverByteBuffer();
                         this.buffer.reset();
@@ -439,7 +457,7 @@ public final class TransformerWriter extends Writer {
                         // this is an error case
                         // we consider that there is one rb missing
                         if (this.buffer.length() > 0) {
-                            filtered = tokenProcessor(this.buffer.getChars(), doublequote);
+                            filtered = this.tokenProcessor(this.buffer.getChars(), doublequote);
                             if (this.out != null) this.out.write(filtered);
                         }
                         // this.buffer = new serverByteBuffer();
@@ -453,7 +471,7 @@ public final class TransformerWriter extends Writer {
                     if (c == lb) {
                         // the text ends here
                         if (this.buffer.length() > 0) {
-                            filtered = tokenProcessor(this.buffer.getChars(), doublequote);
+                            filtered = this.tokenProcessor(this.buffer.getChars(), doublequote);
                             if (this.out != null) this.out.write(filtered);
                         }
                         // this.buffer = new serverByteBuffer();
@@ -472,7 +490,7 @@ public final class TransformerWriter extends Writer {
 
     @Override
     public void write(final char b[]) throws IOException {
-        write(b, 0, b.length);
+        this.write(b, 0, b.length);
     }
 
     @Override
@@ -494,17 +512,17 @@ public final class TransformerWriter extends Writer {
 
     @Override
     public void close() throws IOException {
-        flush();
+        this.flush();
         final char quotechar = (this.inSingleQuote) ? singlequote : doublequote;
         if (this.buffer != null) {
             if (this.buffer.length() > 0) {
-                final char[] filtered = tokenProcessor(this.buffer.getChars(), quotechar);
+                final char[] filtered = this.tokenProcessor(this.buffer.getChars(), quotechar);
                 if (this.out != null) this.out.write(filtered);
             }
             this.buffer.close();
             this.buffer = null;
         }
-        final char[] finalized = filterFinalize(quotechar);
+        final char[] finalized = this.filterFinalize(quotechar);
         if (this.out != null) {
             if (finalized != null) this.out.write(finalized);
             this.out.flush();
