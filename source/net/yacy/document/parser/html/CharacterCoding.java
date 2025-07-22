@@ -24,10 +24,6 @@
 
 package net.yacy.document.parser.html;
 
-import net.yacy.search.Switchboard;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -36,6 +32,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import net.yacy.search.Switchboard;
 
 /**
  * Contains methods to convert between Unicode and XML/HTML encoding.
@@ -198,29 +199,29 @@ public final class CharacterCoding {
 
     /** Mapping for XML to unicode. */
     private static final Map<String, String> HTML2UNICODE4XML =
-            new HashMap<String, String>();
+            new HashMap<>();
     /** Mapping for HTML to unicode. */
     private static final Map<String, String> HTML2UNICODE4HTML =
-            new HashMap<String, String>();
+            new HashMap<>();
     /** Mapping for unicode to XML. */
     private static final Map<Character, String> UNICODE2HTML4XML =
-            new HashMap<Character, String>(MAPPING4XML.length * 2);
+            new HashMap<>(MAPPING4XML.length * 2);
     /** Mapping for unicode to HTML. */
     private static final Map<Character, String> UNICODE2HTML4HTML =
-            new HashMap<Character, String>(MAPPING4XML.length * 2);
+            new HashMap<>(MAPPING4XML.length * 2);
 
     static void parseJsonEntities(JSONObject entities, Map<String, String> entityToChar) throws JSONException {
-        for (Iterator<String> it = entities.keys(); it.hasNext(); ) {
-            String entity = it.next();
-            String c = entities.getJSONObject(entity).getString("characters");
+        for (final Iterator<String> it = entities.keys(); it.hasNext(); ) {
+            final String entity = it.next();
+            final String c = entities.getJSONObject(entity).getString("characters");
             entityToChar.put(entity, c);
         }
     }
 
     static {
         try {
-            byte[] encoded = Files.readAllBytes(Paths.get(Switchboard.getSwitchboard() != null ? Switchboard.getSwitchboard().appPath.getAbsolutePath() : ".", "defaults", "htmlEntities.json"));
-            JSONObject json = new JSONObject(new String(encoded, StandardCharsets.UTF_8));
+            final byte[] encoded = Files.readAllBytes(Paths.get(Switchboard.getSwitchboard() != null ? Switchboard.getSwitchboard().appPath.getAbsolutePath() : ".", "defaults", "htmlEntities.json"));
+            final JSONObject json = new JSONObject(new String(encoded, StandardCharsets.UTF_8));
             parseJsonEntities(json.getJSONObject("xml"), HTML2UNICODE4XML);
             parseJsonEntities(json.getJSONObject("html4"), HTML2UNICODE4HTML);
             parseJsonEntities(json.getJSONObject("html5"), HTML2UNICODE4HTML);
@@ -302,7 +303,7 @@ public final class CharacterCoding {
         }
         return sb.toString();
     }
-    
+
     /**
      * Replaces HTML-encoded characters with unicode representation.
      * @param text text with character to replace
@@ -360,12 +361,14 @@ public final class CharacterCoding {
             }
             if (s.charAt(1) == '#') {
                 if (s.charAt(2) == 'x' || s.charAt(2) == 'X') {
-                    sb.append(new char[] {(char) Integer.parseInt(s.substring(3, s.length() - 1), 16)});
-                    continue;
+                    try {
+                        sb.append(new char[] {(char) Integer.parseInt(s.substring(3, s.length() - 1), 16)});
+                        continue;
+                    } catch (final NumberFormatException e) { }
                 }
-                String ucs = s.substring(2, s.length() - 1);
+                final String ucs = s.substring(2, s.length() - 1);
                 try {
-                    int uc = Integer.parseInt(ucs);
+                    final int uc = Integer.parseInt(ucs);
                     sb.append(new char[] {(char) uc});
                 } catch (final NumberFormatException e) { }
                 continue;
