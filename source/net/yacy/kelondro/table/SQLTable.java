@@ -211,7 +211,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+    public Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
@@ -219,6 +219,17 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             if (entry != null) map.put(key, entry);
         }
         return map;
+    }
+
+    @Override
+    public List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final List<Row.Entry> list = new ArrayList<>(keys.size());
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = this.get(key, forcecopy);
+            if (entry != null) list.add(entry);
+        }
+        return list;
     }
 
     @Override

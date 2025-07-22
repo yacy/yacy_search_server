@@ -26,6 +26,7 @@ package net.yacy.kelondro.index;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -132,27 +133,38 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     @Override
     public final synchronized boolean has(final byte[] key) {
         assert key.length == this.rowdef.primaryKeyLength;
-        final int index = find(key, 0);
+        final int index = this.find(key, 0);
         return index >= 0;
     }
 
     @Override
     public final synchronized Row.Entry get(final byte[] key, final boolean forcecopy) {
         assert key.length == this.rowdef.primaryKeyLength;
-        final int index = find(key, 0);
+        final int index = this.find(key, 0);
         if (index < 0) return null;
-        return get(index, forcecopy);
+        return this.get(index, forcecopy);
     }
 
     @Override
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+    public Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key, forcecopy);
+            entry = this.get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
+    }
+
+    @Override
+    public List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final List<Row.Entry> list = new ArrayList<>(keys.size());
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = this.get(key, forcecopy);
+            if (entry != null) list.add(entry);
+        }
+        return list;
     }
 
     /**
@@ -170,13 +182,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         final byte[] entrybytes = entry.bytes();
         assert entrybytes.length >= this.rowdef.primaryKeyLength;
         synchronized (this) {
-            final int index = find(key, 0);
+            final int index = this.find(key, 0);
             if (index < 0) {
                 super.addUnique(entry);
                 return true;
             }
             final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
-            set(index, entry);       // this may alter the sortBound, which we will revert in the next step
+            this.set(index, entry);       // this may alter the sortBound, which we will revert in the next step
             this.sortBound = sb;     // revert a sortBound altering
             return false;
         }
@@ -185,7 +197,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     private final int collectionReSortLimit() {
         return Math.min(3000, Math.max(100, this.chunkcount / 3));
     }
-    
+
     @Override
     public final Row.Entry replace(final Row.Entry entry) throws SpaceExceededException {
         assert (entry != null);
@@ -197,16 +209,16 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             int index = -1;
             Row.Entry oldentry = null;
             // when reaching a specific amount of un-sorted entries, re-sort all
-            if ((this.chunkcount - this.sortBound) > collectionReSortLimit()) {
-                sort();
+            if ((this.chunkcount - this.sortBound) > this.collectionReSortLimit()) {
+                this.sort();
             }
-            index = find(key, 0);
+            index = this.find(key, 0);
             if (index < 0) {
                 super.addUnique(entry);
             } else {
-                oldentry = get(index, true);
+                oldentry = this.get(index, true);
                 final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
-                set(index, entry);       // this may alter the sortBound, which we will revert in the next step
+                this.set(index, entry);       // this may alter the sortBound, which we will revert in the next step
                 this.sortBound = sb;     // revert a sortBound altering
             }
             return oldentry;
@@ -215,12 +227,12 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
     public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws SpaceExceededException {
         assert key.length == this.rowdef.primaryKeyLength;
-        final int index = find(key, 0);
+        final int index = this.find(key, 0);
         if (index >= 0) {
             // the entry existed before
-            final Row.Entry entry = get(index, false); // no clone necessary
+            final Row.Entry entry = this.get(index, false); // no clone necessary
             final long l = entry.incCol(col, add);
-            set(index, entry);
+            this.set(index, entry);
             return l;
         } else if (initrow != null) {
             // create new entry
@@ -244,7 +256,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         int index;
         assert a.length == this.rowdef.primaryKeyLength;
         while (true) {
-            index = find(a, 0);
+            index = this.find(a, 0);
             if (index < 0) {
                 return exists;
             }
@@ -257,7 +269,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     public final synchronized void delete(final List<byte[]> keys) {
         final int[] indexes = new int[keys.size()];
         for (int i = 0; i < keys.size(); i++) {
-            indexes[i] = find(keys.get(i), 0);
+            indexes[i] = this.find(keys.get(i), 0);
         }
         // we will delete the entries in backward order
         // That means it is necessary that the order below the indexes is stable
@@ -275,7 +287,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         int index;
         assert a.length == this.rowdef.primaryKeyLength;
         while (true) {
-            index = find(a, 0);
+            index = this.find(a, 0);
             if (index < 0) {
                 return entry;
             }
@@ -287,10 +299,10 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     private final int find(final byte[] a, final int astart) {
         // returns the chunknumber; -1 if not found
 
-        if (this.rowdef.objectOrder == null) return iterativeSearch(a, astart, 0, this.chunkcount);
+        if (this.rowdef.objectOrder == null) return this.iterativeSearch(a, astart, 0, this.chunkcount);
 
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit()) {
-            sort();
+        if ((this.chunkcount - this.sortBound) > this.collectionReSortLimit()) {
+            this.sort();
         }
 
         if (this.rowdef.objectOrder != null && this.rowdef.objectOrder instanceof Base64Order) {
@@ -299,18 +311,18 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         }
 
         // first try to find in sorted area
-        final int p = binarySearch(a, astart);
+        final int p = this.binarySearch(a, astart);
         if (p >= 0) return p;
 
         // then find in unsorted area
-        return iterativeSearch(a, astart, this.sortBound, this.chunkcount);
+        return this.iterativeSearch(a, astart, this.sortBound, this.chunkcount);
     }
 
     private final int iterativeSearch(final byte[] key, final int astart, final int leftBorder, final int rightBound) {
         // returns the chunknumber
         for (int i = leftBorder; i < rightBound; i++) {
             assert key.length - astart >= this.rowdef.primaryKeyLength;
-            if (match(key, astart, i)) return i;
+            if (this.match(key, astart, i)) return i;
         }
         return -1;
     }
@@ -326,7 +338,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         while (l < rbound) {
             p = (l + rbound) >> 1;
             assert key.length - astart >= this.rowdef.primaryKeyLength;
-            d = compare(key, astart, p);
+            d = this.compare(key, astart, p);
             if (d == 0) return p;
             if (d < 0) rbound = p; else l = p + 1;
         }
@@ -345,7 +357,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         while (l < rbound) {
             p = (l + rbound) >> 1;
             assert key.length - astart >= this.rowdef.primaryKeyLength;
-            d = compare(key, astart, p);
+            d = this.compare(key, astart, p);
             if (d == 0) return p;
             if (d < 0) rbound = p; else l = p + 1;
         }
@@ -353,7 +365,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     }
 
     public final synchronized Iterator<byte[]> keys() {
-        sort();
+        this.sort();
         return super.keys(true);
     }
 
@@ -372,7 +384,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
         public keyIterator(final boolean up, byte[] firstKey) {
             // see that all elements are sorted
-            sort();
+            RowSet.this.sort();
             this.up = up;
             if (firstKey != null && firstKey.length == 0) firstKey = null;
             this.first = firstKey;
@@ -381,7 +393,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
                 this.p = up ? 0 : this.bound - 1;
             } else {
                 assert this.first.length == RowSet.this.rowdef.primaryKeyLength : "first.length = " + this.first.length + ", rowdef.primaryKeyLength = " + RowSet.this.rowdef.primaryKeyLength;
-                this.p = up ? binaryPosition(this.first, 0) : this.bound - 1; // check this to find bug in DHT selection enumeration
+                this.p = up ? RowSet.this.binaryPosition(this.first, 0) : this.bound - 1; // check this to find bug in DHT selection enumeration
             }
         }
 
@@ -393,13 +405,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         @Override
         public final boolean hasNext() {
         	if (this.p < 0) return false;
-        	if (this.p >= size()) return false;
+        	if (this.p >= RowSet.this.size()) return false;
             return (this.up) ? this.p < this.bound : this.p >= 0;
         }
 
         @Override
         public final byte[] next() {
-            final byte[] key = getKey(this.p);
+            final byte[] key = RowSet.this.getKey(this.p);
             if (this.up) this.p++; else this.p--;
             return key;
         }
@@ -417,7 +429,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     @Override
     public final synchronized Iterator<Row.Entry> iterator() {
         // iterates kelondroRow.Entry - type entries
-        sort();
+        this.sort();
         return super.iterator();
     }
 
@@ -440,7 +452,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
         public rowIterator(final boolean up, final byte[] firstKey) {
             // see that all elements are sorted
-            sort();
+            RowSet.this.sort();
             this.up = up;
             this.first = firstKey;
             this.bound = RowSet.this.sortBound;
@@ -448,7 +460,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
                 this.p = 0;
             } else {
                 assert this.first.length == RowSet.this.rowdef.primaryKeyLength;
-                this.p = binaryPosition(this.first, 0); // check this to find bug in DHT selection enumeration
+                this.p = RowSet.this.binaryPosition(this.first, 0); // check this to find bug in DHT selection enumeration
             }
         }
 
@@ -460,13 +472,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         @Override
         public final boolean hasNext() {
         	if (this.p < 0) return false;
-        	if (this.p >= size()) return false;
+        	if (this.p >= RowSet.this.size()) return false;
             return (this.up) ? this.p < this.bound : this.p >= 0;
         }
 
         @Override
         public final Row.Entry next() {
-            final Row.Entry entry = get(this.p, true);
+            final Row.Entry entry = RowSet.this.get(this.p, true);
             if (this.up) this.p++; else this.p--;
             return entry;
         }

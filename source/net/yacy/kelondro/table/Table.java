@@ -74,7 +74,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     private final static ConcurrentLog log = new ConcurrentLog("KELONDRO TABLE");
 
     /** Map all active table instances by file name */
-    private final static Map<String, Table> tableTracker = new ConcurrentSkipListMap<String, Table>();
+    private final static Map<String, Table> tableTracker = new ConcurrentSkipListMap<>();
     private final static long maxarraylength = 134217727L; // (2^27-1) that may be the maximum size of array length in some JVMs
 
     private final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
@@ -183,7 +183,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                     if(ki.hasNext()) {
                         try {
                             ki.close();
-                        } catch(IOException ioe) {
+                        } catch(final IOException ioe) {
                             /* Do not block if closing is not possible but anyway keep a trace in log */
                             log.warn("Could not close input stream on the file " + tablefile);
                         }
@@ -228,14 +228,14 @@ public class Table implements Index, Iterable<Row.Entry> {
                     if(ri.hasNext()) {
                         try {
                             ri.close();
-                        } catch(IOException ioe) {
+                        } catch(final IOException ioe) {
                             /* Do not block if closing is not possible but anyway keep a trace in log */
                             log.warn("Could not close input stream on the file " + tablefile);
                         }
                     }
                 }
                 Runtime.getRuntime().gc();
-                if (abandonTable()) {
+                if (this.abandonTable()) {
                     this.table = null;
                 }
             }
@@ -243,7 +243,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
             // open the file
             this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);
-            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + this.filename();
 
             // clean up the file by cleaning badly formed entries
             final int errorc = errors.size();
@@ -251,16 +251,16 @@ public class Table implements Index, Iterable<Row.Entry> {
             int idx;
             for (final Map.Entry<byte[], Long> entry: errors) {
                 idx = (int) entry.getValue().longValue();
-                removeInFile(idx);
+                this.removeInFile(idx);
                 key = entry.getKey();
                 if (key == null) continue;
                 log.warn("removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
             }
             errors.close();
-            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + this.filename();
 
             // warm up
-            if (!freshFile && warmUp) {warmUp0();}
+            if (!freshFile && warmUp) {this.warmUp0();}
         } catch (final FileNotFoundException e) {
             // should never happen
             log.severe("", e);
@@ -275,7 +275,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public synchronized void warmUp() {
-        warmUp0();
+        this.warmUp0();
     }
 
     private final void warmUp0() {
@@ -285,7 +285,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             //assert index.size() + doubles.size() == i;
             //System.out.println(" -removed " + doubles.size() + " doubles- done.");
             if (doubles.isEmpty()) return;
-            log.info(filename() + ": WARNING - TABLE " + filename() + " has " + doubles.size() + " doubles");
+            log.info(this.filename() + ": WARNING - TABLE " + this.filename() + " has " + doubles.size() + " doubles");
             // from all the doubles take one, put it back to the index and remove the others from the file
             // first put back one element each
             final byte[] record = new byte[this.rowdef.objectsize];
@@ -297,7 +297,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             }
             // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
             // first aggregate all the delete positions because the elements from the top positions must be removed first
-            final TreeSet<Long> delpos = new TreeSet<Long>();
+            final TreeSet<Long> delpos = new TreeSet<>();
             for (final long[] ds: doubles) {
                 for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
             }
@@ -306,14 +306,14 @@ public class Table implements Index, Iterable<Row.Entry> {
             while (!delpos.isEmpty()) {
                 top = delpos.last();
                 delpos.remove(top);
-                removeInFile(top.intValue());
+                this.removeInFile(top.intValue());
             }
         } catch (final SpaceExceededException e) {
             log.severe("", e);
         } catch (final IOException e) {
             log.severe("", e);
         }
-        optimize();
+        this.optimize();
     }
 
     @Override
@@ -445,7 +445,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         synchronized (this) {
             assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         }
-        TableStatistics stats = new TableStatistics();
+        final TableStatistics stats = new TableStatistics();
         if (this.index == null) return stats; // possibly closed or being closed
         stats.tableSize = this.index.size();
         if(this.index instanceof RowHandleMap) {
@@ -498,7 +498,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             } catch (final SpaceExceededException e) {
                 this.table = null;
             }
-            if (abandonTable()) this.table = null;
+            if (this.abandonTable()) this.table = null;
         }
         this.file.add(rowbytes, 0);
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
@@ -508,11 +508,11 @@ public class Table implements Index, Iterable<Row.Entry> {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         for (final Entry entry: rows) {
             try {
-                addUnique(entry);
+                this.addUnique(entry);
             } catch (final SpaceExceededException e) {
                 if (this.table == null) throw e;
                 this.table = null;
-                addUnique(entry);
+                this.addUnique(entry);
             }
         }
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
@@ -528,9 +528,9 @@ public class Table implements Index, Iterable<Row.Entry> {
     @Override
     public synchronized List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
-        final List<RowCollection> report = new ArrayList<RowCollection>();
+        final List<RowCollection> report = new ArrayList<>();
         RowSet rows;
-        final TreeSet<Long> d = new TreeSet<Long>();
+        final TreeSet<Long> d = new TreeSet<>();
         final byte[] b = new byte[this.rowdef.objectsize];
         Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
@@ -568,9 +568,9 @@ public class Table implements Index, Iterable<Row.Entry> {
         while (!d.isEmpty()) {
             s = d.last();
             d.remove(s);
-            removeInFile(s.intValue());
+            this.removeInFile(s.intValue());
             if (System.currentTimeMillis() - lastlog > 30000) {
-                log.info("removing " + d.size() + " entries in " + filename());
+                log.info("removing " + d.size() + " entries in " + this.filename());
                 lastlog = System.currentTimeMillis();
             }
         }
@@ -601,12 +601,12 @@ public class Table implements Index, Iterable<Row.Entry> {
     @Override
     public Entry get(final byte[] key, final boolean _forcecopy) throws IOException {
         if (this.file == null || this.index == null) return null;
-        Entry e = get0(key);
+        Entry e = this.get0(key);
         if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
         synchronized (this) {
             //assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
-            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
-            e = get0(key);
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + this.filename();
+            e = this.get0(key);
             assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes()) : "key = " + ASCII.String(key) + ", e.k = " + ASCII.String(e.getPrimaryKeyBytes());
             return e;
         }
@@ -639,14 +639,25 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public final Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+    public final Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key, forcecopy);
+            entry = this.get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
+    }
+
+    @Override
+    public final List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final List<Row.Entry> list = new ArrayList<>(keys.size());
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = this.get(key, forcecopy);
+            if (entry != null) list.add(entry);
+        }
+        return list;
     }
 
     @Override
@@ -674,11 +685,11 @@ public class Table implements Index, Iterable<Row.Entry> {
             final int i = (int) this.index.get(key);
             if (i == -1) {
                 try {
-                    addUnique(row);
+                    this.addUnique(row);
                 } catch (final SpaceExceededException e) {
                     if (this.table == null) throw e;
                     this.table = null;
-                    addUnique(row);
+                    this.addUnique(row);
                 }
                 return null;
             }
@@ -701,7 +712,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 } catch (final SpaceExceededException e) {
                     this.table = null;
                 }
-                if (abandonTable()) this.table = null;
+                if (this.abandonTable()) this.table = null;
                 this.file.put(i, rowb, 0);
             }
             assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
@@ -732,11 +743,11 @@ public class Table implements Index, Iterable<Row.Entry> {
             final int i = (int) this.index.get(key);
             if (i == -1) {
                 try {
-                    addUnique(row);
+                    this.addUnique(row);
                 } catch (final SpaceExceededException e) {
                     if (this.table == null) throw e;
                     this.table = null;
-                    addUnique(row);
+                    this.addUnique(row);
                 }
                 return true;
             }
@@ -747,7 +758,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             } else {
                 // write new value
                 this.file.put(i, rowb, 0);
-                if (abandonTable()) this.table = null; else try {
+                if (this.abandonTable()) this.table = null; else try {
                     this.table.set(i, this.taildef.newEntry(rowb, this.rowdef.primaryKeyLength, true));
                 } catch (final SpaceExceededException e) {
                     this.table = null;
@@ -781,7 +792,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                     this.file.put(i, p, 0);
                     final byte[] k = new byte[this.rowdef.primaryKeyLength];
                     System.arraycopy(p, 0, k, 0, this.rowdef.primaryKeyLength);
-                    this.index.put(k, i);
+                    this.index.putUnique(k, i);
                     break;
                 }
             }
@@ -810,13 +821,13 @@ public class Table implements Index, Iterable<Row.Entry> {
                         continue;
                     }
                     this.file.put(i, p, 0);
-                    byte[] pk = lr.getPrimaryKeyBytes();
+                    final byte[] pk = lr.getPrimaryKeyBytes();
                     if (pk == null) {
                         // Table file might be corrupt
                         log.warn("Possible corruption found in table " + this.filename() + " detected. i=" + i + ",p=" + p);
                         continue;
                     }
-                    this.index.put(pk, i);
+                    this.index.putUnique(pk, i);
                     break;
                 }
             }
@@ -825,7 +836,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     @Override
     public final boolean delete(final byte[] key) throws IOException {
-        return remove(key) != null;
+        return this.remove(key) != null;
     }
 
     @Override
@@ -953,7 +964,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     @Override
     public final List<Row.Entry> top(int count) throws IOException {
         if (count > this.size()) count = this.size();
-        final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        final ArrayList<Row.Entry> list = new ArrayList<>();
         if (this.file == null || this.index == null || this.size() == 0 || count == 0) return list;
         long i = this.file.size() - 1;
         while (count > 0 && i >= 0) {
@@ -969,10 +980,10 @@ public class Table implements Index, Iterable<Row.Entry> {
     @Override
     public final List<Row.Entry> random(int count) throws IOException {
         if (count > this.size()) count = this.size();
-        final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        final ArrayList<Row.Entry> list = new ArrayList<>();
         if (this.file == null || this.index == null || this.size() == 0 || count == 0) return list;
         long cursor = 0;
-        int stepsize = this.size() / count;
+        final int stepsize = this.size() / count;
         while (count > 0 && cursor < this.size()) {
             final byte[] b = new byte[this.rowdef.objectsize];
             this.file.get(cursor, b, 0);
@@ -1010,7 +1021,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     @Override
     public final Iterator<Entry> iterator() {
         try {
-            return rows();
+            return this.rows();
         } catch (final IOException e) {
             return null;
         }
@@ -1051,7 +1062,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             if (this.key == null) return null;
             this.idx = entry.getValue().longValue();
             try {
-                return get(this.key, false);
+                return Table.this.get(this.key, false);
             } catch (final IOException e) {
                 return null;
             }
@@ -1061,7 +1072,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         public final void remove() {
             if (this.key != null) {
                 try {
-                    removeInFile((int) this.idx);
+                    Table.this.removeInFile((int) this.idx);
                 } catch (final IOException e) {
                 } catch (final SpaceExceededException e) {
                 }
@@ -1147,9 +1158,9 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     private static String[] permutations(final int letters) {
-        String p = "";
-        for (int i = 0; i < letters; i++) p = p + ((char) (('A') + i));
-        return permutations(p);
+        final StringBuilder p = new StringBuilder();
+        for (int i = 0; i < letters; i++) p.append((char) (('A') + i));
+        return permutations(p.toString());
     }
 
     private static String[] permutations(final String source) {
@@ -1231,14 +1242,14 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public void print() throws IOException {
-        System.out.println("PRINTOUT of table, length=" + size());
+        System.out.println("PRINTOUT of table, length=" + this.size());
         Entry row;
         byte[] key;
-        final CloneableIterator<byte[]> i = keys(true, null);
+        final CloneableIterator<byte[]> i = this.keys(true, null);
         while (i.hasNext()) {
             System.out.print("row " + i + ": ");
             key = i.next();
-            row = get(key, false);
+            row = this.get(key, false);
             System.out.println(row.toString());
         }
         System.out.println("EndOfTable");
