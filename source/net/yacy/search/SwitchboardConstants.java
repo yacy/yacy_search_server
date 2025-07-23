@@ -59,6 +59,7 @@ public final class SwitchboardConstants {
 
     // server settings
     public static final String SERVER_PORT                  = "port"; // port for the http server
+    public static final String SERVER_HOST                  = "host"; // host for the http server
     public static final String SERVER_SSLPORT               = "port.ssl"; // port for https
     public static final String SERVER_SHUTDOWNPORT          = "port.shutdown"; // local port to listen for a shutdown signal (0 <= disabled)
     public static final String SERVER_STATICIP              = "staticIP"; // static IP of http server
@@ -110,7 +111,7 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
-    public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";    
+    public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";
     // 55_autocrawl
     /**
      * <p><code>public static final String <string>CRAWLJOB_AUTOCRAWL</strong> = "55_autocrawl"</code></p>
@@ -206,7 +207,7 @@ public final class SwitchboardConstants {
     public static final String INDEX_RECEIVE_ALLOW              = "allowReceiveIndex";
     public static final String INDEX_RECEIVE_ALLOW_SEARCH       = "allowReceiveIndex.search";
     public static final String INDEX_RECEIVE_BLOCK_BLACKLIST    = "indexReceiveBlockBlacklist";
-    
+
     /**
      * <p><code>public static final String <strong>INDEX_DIST_ALLOW_WHILE_CRAWLING</strong> = "allowDistributeIndexWhileCrawling"</code></p>
      * <p>Name of the setting whether Index Distribution shall be allowed while crawling is in progress, i.e.
@@ -250,7 +251,7 @@ public final class SwitchboardConstants {
     public static final String AUTOCRAWL_QUERY                 = "autocrawl.query";
     public static final String AUTOCRAWL_DEEP_DEPTH            = "autocrawl.deep.depth";
     public static final String AUTOCRAWL_SHALLOW_DEPTH         = "autocrawl.shallow.depth";
-    
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Cluster settings
@@ -261,10 +262,10 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_MODE_PUBLIC_PEER         = "publicpeer";
     public static final String CLUSTER_MODE_PRIVATE_PEER        = "privatepeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
-    
+
     /** Key of the global HTTP Referrer policy delivered by meta tag */
     public static final String REFERRER_META_POLICY = "referrer.meta.policy";
-    
+
     /** Default value for the global HTTP Referrer policy delivered by meta tag */
     public static final String REFERRER_META_POLICY_DEFAULT = "origin-when-cross-origin";
 
@@ -278,25 +279,25 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_RESULT_STORE        = "remotesearch.result.store"; // add remote results to local index
     /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
     public static final String REMOTESEARCH_RESULT_STORE_MAXSIZE= "remotesearch.result.store.maxsize";
-    
+
     /** Setting key to configure the maximum system load allowing remote RWI searches */
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
-    
+
     /** Default maximum system load allowing remote RWI searches */
-    public static final float REMOTESEARCH_MAXLOAD_RWI_DEFAULT  = 2.0f * (float) Runtime.getRuntime().availableProcessors();
-    
+    public static final float REMOTESEARCH_MAXLOAD_RWI_DEFAULT  = 2.0f * Runtime.getRuntime().availableProcessors();
+
     /** Setting key to configure the maximum system load allowing remote Solr searches */
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
-    
+
     /** Default maximum system load allowing remote Solr searches */
-    public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = (float) Runtime.getRuntime().availableProcessors();
-    
+    public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = Runtime.getRuntime().availableProcessors();
+
     /** Key of the setting controlling whether https should be preferred for remote searches, when available on the target peer */
     public static final String REMOTESEARCH_HTTPS_PREFERRED = "remotesearch.https.preferred";
-    
+
     /** Default setting value controlling whether https should be preferred for remote searches, when available on the target peer */
     public static final boolean REMOTESEARCH_HTTPS_PREFERRED_DEFAULT = false;
-    
+
 	/**
 	 * Setting key to configure whether responses from remote Solr instances
 	 * should be binary encoded :
@@ -307,23 +308,23 @@ public final class SwitchboardConstants {
 	 * </ul>
 	 */
     public static final String REMOTE_SOLR_BINARY_RESPONSE_ENABLED = "remote.solr.binaryResponse.enabled";
-    
+
     /** Default configuration setting for remote Solr responses binary encoding */
     public static final boolean REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT            = true;
 
     /** Key of the setting controlling whether to use or not remote Solr server(s) */
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
-    
+
     /** Default setting value controlling whether to use or not remote Solr server(s) */
     public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT = false;
-    
+
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING     = "federated.service.solr.indexing.sharding";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY         = "federated.service.solr.indexing.lazy";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT      = "federated.service.solr.indexing.timeout";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED = "federated.service.solr.indexing.writeEnabled";
-    
-    /** Setting key controlling whether a self-signed certificate is acceptable from a remote Solr instance requested with authentication credentials. 
+
+    /** Setting key controlling whether a self-signed certificate is acceptable from a remote Solr instance requested with authentication credentials.
      * This has no impact on connections to remote Solr instances used in p2p search for which self-signed certificates are always accepted. */
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED = "federated.service.solr.indexing.authenticated.allowSelfSigned";
 
@@ -332,10 +333,10 @@ public final class SwitchboardConstants {
 
     /** Key of the setting controlling whether to use or not an embedded Solr instance */
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
-    
+
     /** Default setting value controlling whether to use or not an embedded Solr instance */
     public static final boolean CORE_SERVICE_FULLTEXT_DEFAULT   = true;
-    
+
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
     public static final String CORE_SERVICE_CITATION            = "core.service.citation.tmp";
     public static final String CORE_SERVICE_WEBGRAPH            = "core.service.webgraph.tmp";
@@ -349,44 +350,44 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_MAX_SAME_HOST_IN_QUEUE   = "crawler.MaxSameHostInQueue";
     public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects"; // ignore the target url and follow to the redirect
     public static final String CRAWLER_RECORD_REDIRECTS         = "crawler.http.RecordRedirects"; // record the ignored redirected page to the index store
-    
+
     public static final String CRAWLER_USER_AGENT_NAME          = "crawler.userAgent.name";
     public static final String CRAWLER_USER_AGENT_STRING        = "crawler.userAgent.string";
     public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
     public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
-    
+
     /** Key of the setting controlling the maximum time to wait for each wkhtmltopdf call when rendering PDF snapshots */
     public static final String SNAPSHOTS_WKHTMLTOPDF_TIMEOUT          = "snapshots.wkhtmltopdf.timeout";
-    
+
     /** Default maximum time in seconds to wait for each wkhtmltopdf call when rendering PDF snapshots*/
     public static final long SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT   = 30;
-    
+
     /* --- debug flags ---  */
-    
+
     /** when set to true : do not use the local dht/rwi index (which is not done if we do remote searches) */
     public static final String DEBUG_SEARCH_LOCAL_DHT_OFF       = "debug.search.local.dht.off";
-    
+
     /** when set to true : do not use local solr index */
     public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off";
-    
+
     /** when set to true : do not use remote dht/rwi */
     public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off";
-    
+
     /** when set to true : do not use remote solr indexes */
     public static final String DEBUG_SEARCH_REMOTE_SOLR_OFF     = "debug.search.remote.solr.off";
-    
+
     /** when set to true : do not use dht, search local peer in a shortcut to the own server */
     public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal";
-    
+
     /** when set to true : do not use dht, search local peer in a shortcut to the own server */
     public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal";
-    
+
     /** Key of the setting controlling whether text snippets statistics should be computed */
     public static final String DEBUG_SNIPPETS_STATISTICS_ENABLED = "debug.snippets.statistics.enabled";
-    
+
     /** Default value for the setting controlling whether text snippets statistics should be computed */
     public static final boolean DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT = false;
-    
+
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
      * <p>Name of the setting how many words the word-cache (or DHT-Out cache) shall contain maximal. Indexing pages if the
@@ -403,7 +404,7 @@ public final class SwitchboardConstants {
 
     /** Key of the setting configuring the bluelist file name */
     public static final String LIST_BLUE                = "plasmaBlueList";
-    
+
     /** Default bluelist file name */
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";
@@ -417,19 +418,19 @@ public final class SwitchboardConstants {
      */
     public static final String HTCACHE_PATH             = "proxyCache";
     public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
-    
+
     /** Key of the setting configuring the cache synchronization  */
     public static final String HTCACHE_COMPRESSION_LEVEL   = "proxyCache.compressionLevel";
-    
+
     /** Default compression level for cached content */
     public static final int HTCACHE_COMPRESSION_LEVEL_DEFAULT = Deflater.BEST_COMPRESSION;
-    
+
     /** Key of the setting configuring Cache synchronization lock timeout on getContent/store operations*/
     public static final String HTCACHE_SYNC_LOCK_TIMEOUT   = "proxyCache.sync.lockTimeout";
-    
+
     /** Default timeout value (in milliseconds) for acquiring a synchronization lock on getContent/store Cache operations */
     public static final long HTCACHE_SYNC_LOCK_TIMEOUT_DEFAULT = 2000;
-    
+
     public static final String RELEASE_PATH             = "releases";
     public static final String RELEASE_PATH_DEFAULT     = "DATA/RELEASE";
 
@@ -440,12 +441,12 @@ public final class SwitchboardConstants {
 
     public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
     public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";
-    
-    /** Setting key for a set of comma separated vocabulary names whose terms should only be matched 
-    * from linked data types annotations in documents (with microdata, RDFa, microformats...) 
+
+    /** Setting key for a set of comma separated vocabulary names whose terms should only be matched
+    * from linked data types annotations in documents (with microdata, RDFa, microformats...)
     * instead of cleartext words */
     public static final String VOCABULARIES_MATCH_LINKED_DATA_NAMES = "vocabularies.matchLinkedData.names";
-    
+
     public static final String CLASSIFICATION_SOURCE_PATH         = "classification";
     public static final String CLASSIFICATION_SOURCE_PATH_DEFAULT = "DATA/CLASSIFICATION";
 
@@ -488,35 +489,35 @@ public final class SwitchboardConstants {
      */
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
-    
+
     /** Setting key of the property that collects the names of all servlets that have been used so far. */
     public static final String SERVER_SERVLETS_CALLED    = "server.servlets.called";
-    
+
     /** Key of the setting controlling whether HTTP responses should be compressed with gzip when the user-agent accepts it (by including gzip in a 'Accept-Encoding' HTTP request header) */
     public static final String SERVER_RESPONSE_COMPRESS_GZIP = "server.response.compress.gzip";
-    
+
     /** Default setting value controlling whether HTTP responses should be compressed */
     public static final boolean SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT = true;
-    
-    
+
+
     /** Key of the setting controlling the maximum number of simultaneously open outgoing HTTP connections in the general pool (net.yacy.cora.protocol.http.HTTPClient) */
     public static final String HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL = "http.outgoing.pool.general.maxTotal";
-    
+
     /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the general pool */
     public static final int HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT = 200;
-    
+
     /** Key of the setting controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance) */
     public static final String HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL = "http.outgoing.pool.remoteSolr.maxTotal";
-    
+
     /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool */
     public static final int HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT = 100;
-    
+
     /** Key of the setting controlling whether TLS Server Name Indication (SNI) extension is enabled on outgoing HTTP connections in the general http client (net.yacy.cora.protocol.http.HTTPClient) */
     public static final String HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED = "http.outgoing.general.tls.sniExtension.enabled";
-    
+
     /** Key of the setting controlling whether TLS Server Name Indication (SNI) extension is enabled on outgoing HTTP connections in the remote Solr http client (net.yacy.cora.federate.solr.instance.RemoteInstance) */
     public static final String HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED = "http.outgoing.remoteSolr.tls.sniExtension.enabled";
-    
+
 
 
     /*
@@ -525,43 +526,43 @@ public final class SwitchboardConstants {
      * under/overshot states in the system are supposed to be regulated to match the steady-state value
      * ATTENTION: be aware that using the autoregulate-option causes that the search index data is DELETED as soon as threshold-values are reached!
      */
-    
+
     /** Setting key to enable auto-regulation on disk free threshold values */
     public static final String RESOURCE_DISK_FREE_AUTOREGULATE    = "resource.disk.free.autoregulate";
-    
+
     /** Default disk free auto-regulation activation setting */
     public static final boolean RESOURCE_DISK_FREE_AUTOREGULATE_DEFAULT    = false;
-    
+
     /** Setting key for the target steady-state of minimum disk space left */
     public static final String RESOURCE_DISK_FREE_MIN_STEADYSTATE = "resource.disk.free.min.steadystate";
-    
+
     /** Default value for target steady-state of minimum disk space left */
     public static final long RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT = 2048L;
-    
+
     /** Setting key for the undershot below the steady-state of minimum disk free as absolute size */
     public static final String RESOURCE_DISK_FREE_MIN_UNDERSHOT   = "resource.disk.free.min.undershot";
-    
+
     /** Default value for undershot below the steady-state of minimum disk free as absolute size */
     public static final long RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT   = 1024L;
-    
+
     /** Setting key to enable auto-regulation on disk used threshold values */
     public static final String RESOURCE_DISK_USED_AUTOREGULATE    = "resource.disk.used.autoregulate";
-    
+
     /** Default disk used auto-regulation activation setting */
     public static final boolean RESOURCE_DISK_USED_AUTOREGULATE_DEFAULT    = false;
-    
+
     /** Setting key for the disk used maximum steady state value */
     public static final String RESOURCE_DISK_USED_MAX_STEADYSTATE = "resource.disk.used.max.steadystate";
-    
+
     /** Default disk used maximum steady state value (in mebibyte)*/
     public static final long RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT = 524288L;
-    
+
     /** Setting key for the disk used hard upper limit value */
     public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";
-    
+
     /** Default disk used hard upper limit value (in mebibyte) */
     public static final long RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT    = 1048576L;
-    
+
     public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove"; // minimum memory to accept dht-in (MiB)
     public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT"; // set if DHT was disabled by ResourceObserver
     public static final String CRAWLJOB_LOCAL_AUTODISABLED = "memory.disabledLocalCrawler"; // set if local crawl was disabled by ResourceObserver
@@ -584,11 +585,11 @@ public final class SwitchboardConstants {
     public static final String NETWORK_BOOTSTRAP_SEEDLIST_STUB = "network.unit.bootstrap.seedlist";
 
     public static final String NETWORK_SEARCHVERIFY = "network.unit.inspection.searchverify";
-    
+
     /** Key of the setting controlling whether https should be preferred for in-protocol operations when available on remote peers.
      * A distinct general setting is available to control whether https sould be used for remote search queries : see {@link #REMOTESEARCH_HTTPS_PREFERRED} */
     public static final String NETWORK_PROTOCOL_HTTPS_PREFERRED = "network.unit.protocol.https.preferred";
-    
+
     /** Default setting value controlling whether https should be preferred for in-protocol operations when available on remote peers */
     public static final boolean NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT = false;
 
@@ -623,66 +624,66 @@ public final class SwitchboardConstants {
     public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
-    
+
 	/**
 	 * Key of the setting controlling whether content domain filtering is strict :
 	 * when false, results can be extended to documents including links to documents
 	 * of contentdom type, whithout being themselves of that type.
 	 */
     public static final String SEARCH_STRICT_CONTENT_DOM = "search.strictContentDom";
-    
+
 	/** Default setting value controlling whether content domain filtering is strict. */
     public static final boolean SEARCH_STRICT_CONTENT_DOM_DEFAULT = false;
-    
+
     /** Key of the setting controlling whether search results resorting by browser JavaScript is enabled */
     public static final String SEARCH_JS_RESORT = "search.jsresort";
-    
+
     /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
     public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
-    
+
     /** Key of the setting controlling whether the search public top navigation bar includes a login link/status */
     public static final String SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN = "search.publicTopNavBar.login";
-    
+
     /** Default setting value controlling whether the search public top navigation bar includes a login link/status */
     public static final boolean SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT = true;
 
     /** Key of the setting controlling the max lines displayed in standard search navigators/facets */
     public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount";
-    
+
     /** Key of the setting controlling the max lines displayed in the dates navigator */
     public static final String SEARCH_NAVIGATION_DATES_MAXCOUNT = "search.navigation.dates.maxcount";
-    
+
     /** Key of the setting controlling whether a noreferrer link type should be added to search result links */
     public static final String SEARCH_RESULT_NOREFERRER = "search.result.noreferrer";
-    
+
     /** Default setting value controlling whether a noreferrer link type should be added to search result links */
     public static final boolean SEARCH_RESULT_NOREFERRER_DEFAULT = false;
-    
+
     /** Key of the setting controlling whether the ranking score value should be displayed for each search result in the HTML results page */
     public static final String SEARCH_RESULT_SHOW_RANKING = "search.result.show.ranking";
-    
+
     /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
     public static final boolean SEARCH_RESULT_SHOW_RANKING_DEFAULT = false;
-    
+
     /** Key of the setting controlling whether a tags/keywords list should be displayed for each search result in the HTML results page */
     public static final String SEARCH_RESULT_SHOW_KEYWORDS = "search.result.show.keywords";
-    
+
     /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
     public static final boolean SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT = false;
-    
+
     /** Key of the setting controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
     public static final String SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT = "search.result.keywords.firstMaxCount";
-    
+
     /** Default setting value controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
     public static final int SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT = 100;
-    
+
     /** Key of the setting controlling whether the eventual website favicon should be fetched and displayed for each search result in the HTML results page */
     public static final String SEARCH_RESULT_SHOW_FAVICON = "search.result.show.favicon";
-    
+
     /** Default setting value controlling whether the eventual website favicon should be fetched and displayed for each search result in the HTML results page */
     public static final boolean SEARCH_RESULT_SHOW_FAVICON_DEFAULT = true;
-    
-    
+
+
 
     /**
      * ranking+evaluation
@@ -699,7 +700,7 @@ public final class SwitchboardConstants {
     public static final String SEARCH_RANKING_SOLR_COLLECTION_FILTERQUERY_       = "search.ranking.solr.collection.filterquery.tmpa.";
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmpa.";
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmpb.";
-    
+
     /**
      * system tray
      */
@@ -707,7 +708,7 @@ public final class SwitchboardConstants {
 	public static final String TRAY_ICON_FORCED                    = "tray.icon.force";
 	public static final String TRAY_ICON_LABEL                     = "tray.icon.label";
 	public static final String TRAY_MENU_ENABLED                   = "tray.menu.enabled";
-	
+
 	/*
 	 * search heuristics
 	 */
@@ -715,7 +716,7 @@ public final class SwitchboardConstants {
     public static final String HEURISTIC_SEARCHRESULTS             = "heuristic.searchresults";
     public static final String HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL = "heuristic.searchresults.crawlglobal";
     public static final String HEURISTIC_OPENSEARCH                = "heuristic.opensearch";
-	
+
 	/*
 	 * automatic learning heuristic
 	 */
@@ -727,7 +728,7 @@ public final class SwitchboardConstants {
      * Skins
      */
     public static final String SKINS_PATH_DEFAULT                  = "DATA/SKINS";
-    
+
     /*
      * decorations
      */
