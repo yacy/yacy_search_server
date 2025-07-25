@@ -292,10 +292,11 @@ public final class yacy {
 
             // start main threads
             final int port = sb.getLocalPort();
+            final String host = sb.getLocalHost();
             try {
                 // start http server
                 YaCyHttpServer httpServer;
-                httpServer = new YaCyHttpServer(port, "0.0.0.0");
+                httpServer = new YaCyHttpServer(port, host);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
                 // TODO: this has no effect on Jetty (but needed to reflect configured value and limit is still used)

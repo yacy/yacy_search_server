@@ -10,6 +10,9 @@
 # port number where the server should bind to
 port = 8090
 
+# The network interface this connector binds to as an IP address or a hostname.
+host = 0.0.0.0
+
 # optinal ssl port (https port) the server should bind to
 port.ssl = 8443
 
@@ -1226,7 +1229,7 @@ thumbnailProgram =
 httpd.robots.txt = locked,dirs,bookmarks,network,news,status,profile
 
 # maximum number of robots.txt loading threads
-robots.txt.MaxActiveThreads = 200
+robots.txt.MaxActiveThreads = 40
 
 # class to use for parsing wikicode
 wikiParser.class = de.anomic.data.wikiCode

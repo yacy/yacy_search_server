@@ -31,14 +31,14 @@ import java.util.Properties;
  */
 public interface ScraperListener extends java.util.EventListener {
 	/**
-	 * Triggered by {@link Scraper#scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)} implementations
+	 * Triggered by {@link Scraper#scrapeSingletonTag(net.yacy.document.parser.html.ContentScraper.Tag)} implementations
 	 * @param tagname tag name
 	 * @param tagopts tag attributes
 	 */
     public void scrapeTag0(String tagname, Properties tagopts);
     
 	/**
-	 * Triggered by {@link Scraper#scrapeTag1(net.yacy.document.parser.html.ContentScraper.Tag)} implementations
+	 * Triggered by {@link Scraper#scrapePairedTag(net.yacy.document.parser.html.ContentScraper.Tag)} implementations
 	 * @param tagname tag name
 	 * @param tagopts tag attributes
 	 * @param text tag content text
