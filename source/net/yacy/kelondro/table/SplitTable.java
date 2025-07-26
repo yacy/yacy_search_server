@@ -105,14 +105,14 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         this.useTailCache = useTailCache;
         this.exceed134217727 = exceed134217727;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
-        init();
+        this.init();
     }
 
     @Override
     public void optimize() {
-        for (Index table: tables.values()) table.optimize();
+        for (final Index table: this.tables.values()) table.optimize();
     }
-    
+
     @Override
     public long mem() {
         long m = 0;
@@ -150,7 +150,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         this.current = null;
 
         // initialized tables map
-        this.tables = new HashMap<String, Index>();
+        this.tables = new HashMap<>();
         if (!(this.path.exists())) this.path.mkdirs();
         String[] tablefile = this.path.list();
 
@@ -170,7 +170,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         tablefile = this.path.list();
 
         // first pass: find tables
-        final HashMap<String, Long> t = new HashMap<String, Long>();
+        final HashMap<String, Long> t = new HashMap<>();
         long ram, time, maxtime = 0;
         Date d;
         for (final String element : tablefile) {
@@ -200,7 +200,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         Map.Entry<String, Long> entry;
         String maxf;
         long maxram;
-        final List<Thread> warmingUp = new ArrayList<Thread>(); // for concurrent warming up
+        final List<Thread> warmingUp = new ArrayList<>(); // for concurrent warming up
         maxfind: while (!t.isEmpty()) {
             // find maximum table
             maxram = 0;
@@ -258,7 +258,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public void clear() throws IOException {
-    	close();
+    	this.close();
     	final String[] l = this.path.list();
     	for (final String element : l) {
     		if (element.startsWith(this.prefix)) {
@@ -266,7 +266,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     		    if (f.isDirectory()) delete(this.path, element); else FileUtils.deletedelete(f);
     		}
     	}
-    	init();
+    	this.init();
     }
 
     public static void delete(final File path, final String tablename) {
@@ -321,12 +321,12 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public boolean has(final byte[] key) {
-        return keeperOf(key) != null;
+        return this.keeperOf(key) != null;
     }
 
     @Override
     public Row.Entry get(final byte[] key, final boolean forcecopy) throws IOException {
-        final Index keeper = keeperOf(key);
+        final Index keeper = this.keeperOf(key);
         if (keeper == null) return null;
         synchronized (this) { // avoid concurrent IO from different methods
             return keeper.get(key, forcecopy);
@@ -334,18 +334,29 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+    public Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key, forcecopy);
+            entry = this.get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
     }
 
+    @Override
+    public List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final List<Row.Entry> list = new ArrayList<>(keys.size());
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = this.get(key, forcecopy);
+            if (entry != null) list.add(entry);
+        }
+        return list;
+    }
+
     private Index newTable() {
-        this.current = newFilename();
+        this.current = this.newFilename();
         final File f = new File(this.path, this.current);
         Table table = null;
         try {
@@ -366,7 +377,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         // check size and age of given table; in case it is too large or too old
         // create a new table
         assert table != null;
-        long t = System.currentTimeMillis();
+        final long t = System.currentTimeMillis();
         if (((t / 1000) % 10) != 0) return table; // we check only every 10 seconds because all these file and parser operations are very expensive
         final String name = new File(table.filename()).getName();
         long d;
@@ -377,7 +388,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             d = 0;
         }
         if (d + this.fileAgeLimit < t || new File(this.path, name).length() >= this.fileSizeLimit) {
-            return newTable();
+            return this.newTable();
         }
         return table;
     }
@@ -385,13 +396,13 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     @Override
     public Row.Entry replace(final Row.Entry row) throws IOException, SpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        Index keeper = keeperOf(row.getPrimaryKeyBytes());
+        Index keeper = this.keeperOf(row.getPrimaryKeyBytes());
         if (keeper != null) synchronized (this) { // avoid concurrent IO from different methods
             return keeper.replace(row);
         }
         synchronized (this) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-            keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+            keeper = (this.current == null) ? this.newTable() : this.checkTable(this.tables.get(this.current));
         }
         keeper.put(row);
         return null;
@@ -409,15 +420,15 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         assert row.objectsize() <= this.rowdef.objectsize;
         final byte[] key = row.getPrimaryKeyBytes();
         if (this.tables == null) return true;
-        Index keeper = keeperOf(key);
+        Index keeper = this.keeperOf(key);
         if (keeper != null) synchronized (this) { // avoid concurrent IO from different methods
             return keeper.put(row);
         }
         synchronized (this) {
-            keeper = keeperOf(key); // we must check that again because it could have changed in between
+            keeper = this.keeperOf(key); // we must check that again because it could have changed in between
             if (keeper != null) return keeper.put(row);
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-            keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+            keeper = (this.current == null) ? this.newTable() : this.checkTable(this.tables.get(this.current));
             final boolean b = keeper.put(row);
             assert b;
             return b;
@@ -439,7 +450,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         Index keeper = (this.current == null) ? null : this.tables.get(this.current);
         synchronized (this) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-            if (keeper == null) keeper = newTable(); else keeper = checkTable(keeper);
+            if (keeper == null) keeper = this.newTable(); else keeper = this.checkTable(keeper);
         }
         keeper.addUnique(row);
     }
@@ -447,7 +458,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     @Override
     public List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
         final Iterator<Index> i = this.tables.values().iterator();
-        final List<RowCollection> report = new ArrayList<RowCollection>();
+        final List<RowCollection> report = new ArrayList<>();
         while (i.hasNext()) {
             report.addAll(i.next().removeDoubles());
         }
@@ -456,7 +467,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public boolean delete(final byte[] key) throws IOException {
-        final Index table = keeperOf(key);
+        final Index table = this.keeperOf(key);
         if (table == null) return false;
         synchronized (this) { // avoid concurrent IO from different methods
             return table.delete(key);
@@ -465,7 +476,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public Row.Entry remove(final byte[] key) throws IOException {
-        final Index table = keeperOf(key);
+        final Index table = this.keeperOf(key);
         if (table == null) return null;
         synchronized (this) { // avoid concurrent IO from different methods
             return table.remove(key);
@@ -534,7 +545,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(this.tables.size());
+        final List<CloneableIterator<byte[]>> c = new ArrayList<>(this.tables.size());
         final Iterator<Index> i = this.tables.values().iterator();
         CloneableIterator<byte[]> k;
         while (i.hasNext()) {
@@ -546,7 +557,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
-        final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(this.tables.size());
+        final List<CloneableIterator<Row.Entry>> c = new ArrayList<>(this.tables.size());
         final Iterator<Index> i = this.tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().rows(up, firstKey));
@@ -557,7 +568,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     @Override
     public Iterator<Entry> iterator() {
         try {
-            return rows();
+            return this.rows();
         } catch (final IOException e) {
             return null;
         }

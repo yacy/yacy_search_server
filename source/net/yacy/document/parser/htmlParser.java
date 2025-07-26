@@ -108,12 +108,12 @@ public class htmlParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
 
-        return parseWithLimits(
+        return this.parseWithLimits(
                 location,
                 mimeType,
                 documentCharset,
                 TagValency.EVAL,
-                new HashSet<String>(),
+                new HashSet<>(),
                 vocscraper,
                 timezoneOffset,
                 sourceStream,
@@ -133,7 +133,7 @@ public class htmlParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
 
-        return parseWithLimits(
+        return this.parseWithLimits(
                 location, mimeType,
                 documentCharset,
                 defaultValency,
@@ -145,12 +145,12 @@ public class htmlParser extends AbstractParser implements Parser {
                 DEFAULT_MAX_LINKS,
                 Long.MAX_VALUE);
     }
-    
+
     @Override
     public boolean isParseWithLimitsSupported() {
         return true;
     }
-    
+
     @Override
     public Document[] parseWithLimits(
             final DigestURL location,
@@ -164,7 +164,7 @@ public class htmlParser extends AbstractParser implements Parser {
             final int maxLinks,
             final long maxBytes)
             throws Failure {
-        return parseWithLimits(
+        return this.parseWithLimits(
                 location,
                 mimeType,
                 documentCharset,
@@ -177,7 +177,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 maxLinks,
                 maxBytes);
     }
-    
+
     private Document[] parseWithLimits(
             final DigestURL location,
             final String mimeType,
@@ -196,17 +196,17 @@ public class htmlParser extends AbstractParser implements Parser {
             Charset[] detectedcharsetcontainer = new Charset[]{null};
             ContentScraper scraper = parseToScraper(location, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxAnchors, maxLinks, maxBytes);
             // parseToScraper also detects/corrects/sets charset from html content tag
-            final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
+            final Document document = this.transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
             Document documentSnapshot = null;
             try {
                 // check for ajax crawling scheme (https://developers.google.com/webmasters/ajax-crawling/docs/specification)
                 // and create a sub-document for snapshot page (which will be merged by loader)
                 // TODO: as a crawl request removes anchor part from original url getRef() is never successful - considere other handling as removeRef() in crawler
                 if (location.getRef() != null && location.getRef().startsWith("!")) {
-                    documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, timezoneOffset, maxAnchors, maxLinks, maxBytes);
+                    documentSnapshot = this.parseAlternativeSnapshot(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, timezoneOffset, maxAnchors, maxLinks, maxBytes);
                 } else { // head tag fragment only allowed on url without anchor hashfragment, but there are discussions that existence of hashfragment anchor takes preference (means allow both)
                     if (scraper.getMetas().containsKey("fragment") && scraper.getMetas().get("fragment").equals("!")) {
-                        documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, timezoneOffset, maxAnchors, maxLinks, maxBytes);
+                        documentSnapshot = this.parseAlternativeSnapshot(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, timezoneOffset, maxAnchors, maxLinks, maxBytes);
                     }
                 }
             } catch (Exception ex1) { // ignore any exception for any issue with snapshot
@@ -218,8 +218,8 @@ public class htmlParser extends AbstractParser implements Parser {
             throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
         }
     }
-    
-    
+
+
 
     /**
      *  the transformScraper method transforms a scraper object into a document object
@@ -268,13 +268,13 @@ public class htmlParser extends AbstractParser implements Parser {
         ppd.setIcons(scraper.getIcons());
         ppd.setLinkedDataTypes(scraper.getLinkedDataTypes());
         ppd.setPartiallyParsed(scraper.isLimitsExceeded());
-        
+
         return ppd;
     }
 
     public static ContentScraper parseToScraper(
             final DigestURL location,
-            final String documentCharset, 
+            final String documentCharset,
             final TagValency defaultValency,
             final Set<String> valencySwitchTagNames,
             final VocabularyScraper vocabularyScraper,
@@ -297,7 +297,7 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         return scraper;
     }
-    
+
     /**
      * Parse the resource at location and return the resulting ContentScraper
      * @param location the URL of the resource to parse
@@ -325,7 +325,7 @@ public class htmlParser extends AbstractParser implements Parser {
             final int maxAnchors,
             final int maxLinks,
             final long maxBytes) throws Parser.Failure, IOException {
-        
+
         // make a scraper
         String charset = null;
 
@@ -336,24 +336,20 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // nothing found: try to find a meta-tag
         if (charset == null) {
-            ScraperInputStream htmlFilter = null;
-            try {
-                htmlFilter = new ScraperInputStream(
-                        sourceStream,
-                        documentCharset,
-                        valencySwitchTagNames,
-                        defaultValency,
-                        vocabularyScraper,
-                        location,
-                        false,
-                        maxLinks,
-                        timezoneOffset);
+            try (ScraperInputStream htmlFilter = new ScraperInputStream(
+                    sourceStream,
+                    documentCharset,
+                    valencySwitchTagNames,
+                    defaultValency,
+                    vocabularyScraper,
+                    location,
+                    false,
+                    maxLinks,
+                    timezoneOffset)) {
                 sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
             } catch (final IOException e1) {
                 throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
-            } finally {
-                if (htmlFilter != null) htmlFilter.close();
             }
         }
 
@@ -379,7 +375,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 detectedcharsetcontainer[0] = Charset.defaultCharset();
             }
         }
-        
+
         // parsing the content
         // for this static method no need to init local this.scraperObject here
         final ContentScraper scraper = new ContentScraper(
@@ -405,7 +401,10 @@ public class htmlParser extends AbstractParser implements Parser {
                 }
             }
         } catch (final IOException e) {
-               throw new Parser.Failure("IO error:" + e.getMessage(), location);
+            throw new Parser.Failure("IO error:" + e.getMessage(), location);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            throw new Parser.Failure("html parser - other error:" + e.getMessage(), location);
         } finally {
             writer.flush();
             //sourceStream.close(); keep open for multipe parsing (close done by caller)
@@ -540,7 +539,7 @@ public class htmlParser extends AbstractParser implements Parser {
             try {
                 snapshotStream = locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
                 ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, detectedcharsetcontainer, timezoneOffset, snapshotStream, maxAnchors, maxLinks, maxBytes);
-                documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
+                documentSnapshot = this.transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
             } finally {
                 if(snapshotStream != null) {
                     try {

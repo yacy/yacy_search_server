@@ -25,6 +25,7 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     // furthermore, if we access a kelondroFlexTable, we can use the ram index of the underlying index
 
     // static object tracker; stores information about object cache usage
-    private static final TreeMap<String, Cache> objectTracker = new TreeMap<String, Cache>();
+    private static final TreeMap<String, Cache> objectTracker = new TreeMap<>();
     private static final long memStopGrow    = 40 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
     private static final long memStartShrink = 20 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
 
@@ -74,7 +75,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         this.index = backupIndex;
         this.hitLimit = hitLimit;
         this.missLimit = missLimit;
-        init();
+        this.init();
         objectTracker.put(backupIndex.filename(), this);
     }
 
@@ -174,7 +175,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
 
     private final Map<StatKeys, String> memoryStats() {
         // returns statistical data about this object
-        final HashMap<StatKeys, String> map = new HashMap<StatKeys, String>(20);
+        final HashMap<StatKeys, String> map = new HashMap<>(20);
         map.put(StatKeys.objectHitChunkSize, (this.readHitCache == null) ? "0" : Integer.toString(this.readHitCache.rowdef.objectsize));
         map.put(StatKeys.objectHitCacheCount, (this.readHitCache == null) ? "0" : Integer.toString(this.readHitCache.size()));
         map.put(StatKeys.objectHitMem, (this.readHitCache == null) ? "0" : Long.toString(this.readHitCache.rowdef.objectsize * this.readHitCache.size()));
@@ -303,43 +304,54 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         entry = this.index.get(key, cachecopy);
         // learn from result
         if (entry == null) {
-            if (checkMissSpace()) try {
+            if (this.checkMissSpace()) try {
                 final Row.Entry dummy = this.readMissCache.replace(this.readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             } catch (final SpaceExceededException e) {
-                clearCache();
+                this.clearCache();
             }
             return null;
         }
 
-        if (checkHitSpace()) try {
+        if (this.checkHitSpace()) try {
             final Row.Entry dummy = this.readHitCache.replace(entry);
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
         return entry;
     }
 
     @Override
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+    public Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key, forcecopy);
+            entry = this.get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
     }
 
     @Override
+    public List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final List<Row.Entry> list = new ArrayList<>(keys.size());
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = this.get(key, forcecopy);
+            if (entry != null) list.add(entry);
+        }
+        return list;
+    }
+
+    @Override
     public final synchronized boolean put(final Row.Entry row) throws IOException, SpaceExceededException {
         assert (row != null);
-        assert (row.columns() == row().columns());
+        assert (row.columns() == this.row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
 
         final byte[] key = row.getPrimaryKeyBytes();
-        checkHitSpace();
+        this.checkHitSpace();
 
         // remove entry from miss- and hit-cache
         if (this.readMissCache != null) {
@@ -354,14 +366,14 @@ public final class Cache implements Index, Iterable<Row.Entry> {
             c = this.index.put(row);
         } catch (final SpaceExceededException e1) {
             // flush all caches to get more memory
-            clearCache();
+            this.clearCache();
             c = this.index.put(row); // try again
         }
-        if (checkHitSpace()) try {
+        if (this.checkHitSpace()) try {
             final Row.Entry dummy = this.readHitCache.replace(row); // overwrite old entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
         return c;
     }
@@ -369,11 +381,11 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     @Override
     public final synchronized Row.Entry replace(final Row.Entry row) throws IOException, SpaceExceededException {
         assert (row != null);
-        assert (row.columns() == row().columns());
+        assert (row.columns() == this.row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
 
         final byte[] key = row.getPrimaryKeyBytes();
-        checkHitSpace();
+        this.checkHitSpace();
 
         // remove entry from miss- and hit-cache
         if (this.readMissCache != null) {
@@ -384,15 +396,15 @@ public final class Cache implements Index, Iterable<Row.Entry> {
                     this.index.put(row);
                 } catch (final SpaceExceededException e1) {
                     // flush all caches to get more memory
-                    clearCache();
+                    this.clearCache();
                     this.index.put(row); // try again
                 }
                 // write to backend
-                if (checkHitSpace()) try {
+                if (this.checkHitSpace()) try {
                     final Row.Entry dummy = this.readHitCache.replace(row); // learn that entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                 } catch (final SpaceExceededException e) {
-                    clearCache();
+                    this.clearCache();
                 }
                 return null;
             }
@@ -404,14 +416,14 @@ public final class Cache implements Index, Iterable<Row.Entry> {
             entry = this.index.replace(row);
         } catch (final SpaceExceededException e1) {
             // flush all caches to get more memory
-            clearCache();
+            this.clearCache();
             this.index.replace(row); // try again
         }
-        if (checkHitSpace()) try {
+        if (this.checkHitSpace()) try {
             final Row.Entry dummy = this.readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
         return entry;
     }
@@ -419,11 +431,11 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     @Override
     public final synchronized void addUnique(final Row.Entry row) throws IOException, SpaceExceededException {
         assert (row != null);
-        assert (row.columns() == row().columns());
+        assert (row.columns() == this.row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
 
         final byte[] key = row.getPrimaryKeyBytes();
-        checkHitSpace();
+        this.checkHitSpace();
 
         // remove entry from miss- and hit-cache
         if (this.readMissCache != null) {
@@ -437,28 +449,28 @@ public final class Cache implements Index, Iterable<Row.Entry> {
             this.index.addUnique(row);
         } catch (final SpaceExceededException e1) {
             // flush all caches to get more memory
-            clearCache();
+            this.clearCache();
             this.index.addUnique(row); // try again
         }
-        if (checkHitSpace()) try {
+        if (this.checkHitSpace()) try {
             final Row.Entry dummy = this.readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
     }
 
     public final synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException, SpaceExceededException {
         if (entryDate == null) {
-            addUnique(row);
+            this.addUnique(row);
             return;
         }
 
         assert (row != null);
-        assert (row.columns() == row().columns());
+        assert (row.columns() == this.row().columns());
 
         final byte[] key = row.getPrimaryKeyBytes();
-        checkHitSpace();
+        this.checkHitSpace();
 
         // remove entry from miss- and hit-cache
         if (this.readMissCache != null) {
@@ -471,14 +483,14 @@ public final class Cache implements Index, Iterable<Row.Entry> {
             this.index.addUnique(row);
         } catch (final SpaceExceededException e1) {
             // flush all caches to get more memory
-            clearCache();
+            this.clearCache();
             this.index.addUnique(row); // try again
         }
-        if (checkHitSpace()) try {
+        if (this.checkHitSpace()) try {
             final Row.Entry dummy = this.readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
     }
 
@@ -488,11 +500,11 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         while (i.hasNext()) {
             r = i.next();
             try {
-                addUnique(r);
+                this.addUnique(r);
             } catch (final SpaceExceededException e) {
                 // flush all caches to get more memory
-                clearCache();
-                addUnique(r); // try again
+                this.clearCache();
+                this.addUnique(r); // try again
             }
         }
     }
@@ -505,10 +517,10 @@ public final class Cache implements Index, Iterable<Row.Entry> {
 
     @Override
     public final synchronized boolean delete(final byte[] key) throws IOException {
-        checkMissSpace();
+        this.checkMissSpace();
 
         // add entry to miss-cache
-        if (checkMissSpace()) try {
+        if (this.checkMissSpace()) try {
             // set the miss cache; if there was already an entry we know that the return value must be null
             final Row.Entry dummy = this.readMissCache.replace(this.readMissCache.row().newEntry(key));
             if (dummy == null) {
@@ -518,7 +530,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
                 this.hasnotDouble++;
             }
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
 
         // remove entry from hit-cache
@@ -537,10 +549,10 @@ public final class Cache implements Index, Iterable<Row.Entry> {
 
     @Override
     public final synchronized Row.Entry remove(final byte[] key) throws IOException {
-        checkMissSpace();
+        this.checkMissSpace();
 
         // add entry to miss-cache
-        if (checkMissSpace()) try {
+        if (this.checkMissSpace()) try {
             // set the miss cache; if there was already an entry we know that the return value must be null
             final Row.Entry dummy = this.readMissCache.replace(this.readMissCache.row().newEntry(key));
             if (dummy == null) {
@@ -550,7 +562,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
                 this.hasnotDouble++;
             }
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
 
         // remove entry from hit-cache
@@ -570,16 +582,16 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     @Override
     public final synchronized Row.Entry removeOne() throws IOException {
 
-        checkMissSpace();
+        this.checkMissSpace();
 
         final Row.Entry entry = this.index.removeOne();
         if (entry == null) return null;
         final byte[] key = entry.getPrimaryKeyBytes();
-        if (checkMissSpace()) try {
+        if (this.checkMissSpace()) try {
             final Row.Entry dummy = this.readMissCache.replace(this.readMissCache.row().newEntry(key));
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
         } catch (final SpaceExceededException e) {
-            clearCache();
+            this.clearCache();
         }
         if (this.readHitCache != null) {
             if (this.readHitCache.delete(key)) this.cacheDelete++;
@@ -615,7 +627,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     @Override
     public final Iterator<Entry> iterator() {
         try {
-            return rows();
+            return this.rows();
         } catch (final IOException e) {
             return null;
         }
@@ -644,7 +656,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     @Override
     public final void clear() throws IOException {
         this.index.clear();
-        init();
+        this.init();
     }
 
     @Override

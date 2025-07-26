@@ -52,10 +52,10 @@ import net.yacy.cora.federate.solr.SolrType;
 public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     private static final char lb = '\n';
-    
+
     public FlatJSONResponseWriter() {
     }
-    
+
     @Override
     public String getContentType(SolrQueryRequest arg0, SolrQueryResponse arg1) {
         return "application/json; charset=UTF-8";
@@ -88,7 +88,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
 
     private static final void writeDoc(final Writer writer, final IndexSchema schema, final List<IndexableField> fields) throws IOException {
         JSONObject json = new JSONObject();
-        
+
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
         while (fidx1 < sz) {
@@ -158,25 +158,44 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
         JSONObject json = new JSONObject();
         final Map<String, Object> fields = doc.getFieldValueMap();
         SimpleDateFormat sdf=new SimpleDateFormat("YYYY-MM-DD'T'hh:mm:ssZ");
-        for (String key: fields.keySet()) {
-            if (key == null)  continue;
+        fieldloop: for (String key: fields.keySet()) {
+            if (key == null)  continue fieldloop;
+            if ("_version_".equals(key)) continue fieldloop;
             Object value = doc.get(key);
+            if (value == null) continue fieldloop;
             try {
-                if (value == null) {
-                } else if (value instanceof Collection<?>) {
+                if (value instanceof Collection<?>) {
+                    Collection<?> fcol = (Collection<?>) value;
+                    if (fcol.size() == 0) continue fieldloop;
+                    if (fcol.size() == 1) {
+                        Object el = fcol.iterator().next();
+                        if (el instanceof String) {
+                            String els = (String) el;
+                            els = els.trim();
+                            if (els.isEmpty()) continue fieldloop;
+                        }
+                    }
                     JSONArray a = new JSONArray();
                     json.put(key, a);
-                    for (Object o: ((Collection<?>) value)) {
+                    for (Object o: fcol) {
                         a.put(o instanceof Date?sdf.format((Date)o):o);
                     }
+                } else if (value instanceof Date) {
+                    Date fdate = (Date) value;
+                    json.put(key, sdf.format(fdate));
+                } else if (value instanceof String) {
+                    String fs = (String) value;
+                    fs = fs.trim();
+                    if (fs.isEmpty()) continue fieldloop;
+                    json.put(key, fs);
                 } else {
-                    json.put(key, value instanceof Date?sdf.format((Date)value):value);
+                    json.put(key, value);
                 }
             } catch (JSONException | IllegalArgumentException | NullPointerException  e) {
                 throw new IOException(e.getMessage());
             }
         }
-        
+
         writer.write(json.toString());
         writer.write(lb);
     }
