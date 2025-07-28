@@ -40,20 +40,20 @@ import net.yacy.search.schema.CollectionSchema;
  * Class to create and manipulate search navigator plugin list
  */
 public class NavigatorPlugins {
-
+	
 	/**
-	 * Separator for specific properties in each navigator configuration
+	 * Separator for specific properties in each navigator configuration 
 	 */
 	public static final String NAV_PROPS_CONFIG_SEPARATOR = ":";
-
+	
     /**
      * List of available navigators
      * @return Map key=navigatorCfgname, value=std.DisplayName
      */
     static public Map<String, String> listAvailable() {
-        final Map<String, String> defaultnavplugins = new TreeMap<>();
+        Map<String, String> defaultnavplugins = new TreeMap<String, String>();
         defaultnavplugins.put("filetype", "Filetype");
-        defaultnavplugins.put("hosts", "Domain");
+        defaultnavplugins.put("hosts", "Provider");
         defaultnavplugins.put("language", "Language");
         defaultnavplugins.put("authors", "Authors");
         defaultnavplugins.put("collections", "Collection");
@@ -63,10 +63,10 @@ public class NavigatorPlugins {
         defaultnavplugins.put("keywords", "Keywords");
         return defaultnavplugins;
     }
-
+    
     /**
      * @param navConfig a navigator configuration String
-     * @return the name identifying the navigator, or null when navConfig is null
+     * @return the name identifying the navigator, or null when navConfig is null 
      */
     public static final String getNavName(final String navConfig) {
     	String name = navConfig;
@@ -78,7 +78,7 @@ public class NavigatorPlugins {
     	}
     	return name;
     }
-
+    
     /**
      * @param navName a navigator name
      * @return the default sort properties to apply for the given navigator
@@ -89,7 +89,7 @@ public class NavigatorPlugins {
     	}
     	return NavigatorSort.COUNT_DESC;
     }
-
+    
 	/**
 	 * <p>
 	 * Parse a navigator configuration entry and return the sort properties to
@@ -107,14 +107,14 @@ public class NavigatorPlugins {
 	 * <li>"navName:label:desc" : descending sort by displayed labels</li>
 	 * </ul>
 	 * </p>
-	 *
+	 * 
 	 * @param navConfig   a navigator configuration String
 	 * @return return the sort properties of the navigator
 	 */
 	public static final NavigatorSort parseNavSortConfig(final String navConfig) {
 		return parseNavSortConfig(navConfig, getDefaultSort(getNavName(navConfig)));
 	}
-
+    
 	/**
 	 * <p>
 	 * Parse a navigator configuration entry and return the sort properties to
@@ -132,7 +132,7 @@ public class NavigatorPlugins {
 	 * <li>"navName:label:desc" : descending sort by displayed labels</li>
 	 * </ul>
 	 * </p>
-	 *
+	 * 
 	 * @param navConfig   a navigator configuration String
 	 * @param defaultSort the default sort properties to apply when the
 	 *                    configuration String does not specify sort properties
@@ -156,10 +156,10 @@ public class NavigatorPlugins {
 			if (navProperties.contains(NavigatorSortDirection.ASC.toString().toLowerCase(Locale.ROOT))) {
 				sort = NavigatorSort.COUNT_ASC;
 			}
-		}
+		} 
 		return sort;
 	}
-
+	
     /**
      * Creates map of active search navigators from navigator config strings
      * @param navConfigs navigator configuration strings
@@ -176,7 +176,7 @@ public class NavigatorPlugins {
             if ("authors".equals(navName)) {
                 navigatorPlugins.put("authors", new StringNavigator("Authors", CollectionSchema.author_sxt, parseNavSortConfig(navConfig)));
             } else if ("collections".equals(navName)) {
-                final RestrictedStringNavigator tmpnav = new RestrictedStringNavigator("Collection", CollectionSchema.collection_sxt, parseNavSortConfig(navConfig));
+                RestrictedStringNavigator tmpnav = new RestrictedStringNavigator("Collection", CollectionSchema.collection_sxt, parseNavSortConfig(navConfig));
                 // exclude default internal collection names
                 tmpnav.addForbidden("dht");
                 tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_DEEP);
@@ -195,7 +195,7 @@ public class NavigatorPlugins {
 						parseNavSortConfig(navConfig)));
             } else if("hosts".equals(navName)) {
 				navigatorPlugins.put("hosts",
-						new HostNavigator("Domain", CollectionSchema.host_s, parseNavSortConfig(navConfig)));
+						new HostNavigator("Provider", CollectionSchema.host_s, parseNavSortConfig(navConfig)));
             } else if ("language".equals(navName)) {
                 navigatorPlugins.put("language", new LanguageNavigator("Language", parseNavSortConfig(navConfig)));
             } else if ("namespace".equals(navName)) {
@@ -204,7 +204,7 @@ public class NavigatorPlugins {
             	// YearNavigator with possible def of :fieldname:title in configstring
             	final LinkedHashSet<String> navProperties = new LinkedHashSet<>();
             	Collections.addAll(navProperties, navConfig.split(NAV_PROPS_CONFIG_SEPARATOR));
-
+            		
             	/* Remove sort related properties */
             	for(final NavigatorSortType sortType : NavigatorSortType.values()) {
             		navProperties.remove(sortType.toString().toLowerCase(Locale.ROOT));
@@ -213,11 +213,11 @@ public class NavigatorPlugins {
             		navProperties.remove(sortDir.toString().toLowerCase(Locale.ROOT));
             	}
             	final String[] navfielddef = navProperties.toArray(new String[navProperties.size()]);
-
+            		
             	if (navfielddef.length > 1) {
             		try {
             			// year:fieldname:title
-            			final CollectionSchema field = CollectionSchema.valueOf(navfielddef[1]);
+            			CollectionSchema field = CollectionSchema.valueOf(navfielddef[1]);
             			if (navfielddef.length > 2) {
             				navigatorPlugins.put(navfielddef[1], new YearNavigator(navfielddef[2], field, parseNavSortConfig(navConfig)));
             			} else {

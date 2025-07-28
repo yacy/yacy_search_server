@@ -93,7 +93,7 @@ public class ViewFile {
         final Switchboard sb = (Switchboard)env;
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         prop.put("searchindocument", 0);
-        prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
+        prop.put("viewMode", VIEW_MODE_NO_TEXT);
         prop.put("viewModeValue", "sentences");
         prop.putHTML("error_words", "");
         prop.put("error_vMode-sentences", "1");
@@ -123,7 +123,7 @@ public class ViewFile {
         prop.put("error_vMode-iframeCitations", "0");
         prop.put("error_vMode-schema", "0");
         final boolean showSnippet = post.get("show", "").equals("Show Snippet");
-        final String viewMode = showSnippet ? "sentences" : post.get("viewMode", "parsed");
+        final String viewMode = showSnippet ? "sentences" : post.get("viewMode", "sentences");
         prop.put("error_vMode-" + viewMode, "1");
         prop.put("viewModeValue", viewMode);
 
@@ -484,7 +484,7 @@ public class ViewFile {
      */
 	private static void putLinks(final serverObjects prop, final String[] wordArray, final Document document, final String agentName) {
 		prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
-		boolean dark;
+		boolean dark = true;
 		int i = 0;
 
 		i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0), agentName);

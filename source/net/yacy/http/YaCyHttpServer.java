@@ -68,7 +68,6 @@ public class YaCyHttpServer {
 
     /**
      * @param port TCP Port to listen for http requests
-     * @param host The network interface this connector binds to as an IP address or a hostname.
      */
     public YaCyHttpServer(final int port, final String host) {
         final Switchboard sb = Switchboard.getSwitchboard();
@@ -97,7 +96,7 @@ public class YaCyHttpServer {
 
         if (useSSL) {
             final SslContextFactory sslContextFactory = new SslContextFactory.Server();
-            final SSLContext sslContext = this.initSslContext(sb);
+            final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
 
                 final int sslport = sb.getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);

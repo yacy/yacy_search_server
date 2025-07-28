@@ -56,12 +56,12 @@ public abstract class AbstractScraper implements Scraper {
     }
 
     @Override
-    public boolean isSingetonTag(final String tag) {
+    public boolean isTag0(final String tag) {
         return (this.tags0 != null) && (this.tags0.contains(tag.toLowerCase()));
     }
 
     @Override
-    public boolean isPairedTag(final String tag) {
+    public boolean isTag1(final String tag) {
         return (this.tags1 != null) && (this.tags1.contains(tag.toLowerCase()));
     }
 

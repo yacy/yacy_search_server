@@ -59,10 +59,10 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     private Index getIndex() {
         try {
             return new Table(this.file, this.rowdef, 1000, 0, false, this.exceed134217727, false);
-        } catch (final kelondroException e) {
+        } catch (kelondroException e) {
             ConcurrentLog.logException(e);
             return null;
-        } catch (final SpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             ConcurrentLog.logException(e);
             return null;
         }
@@ -70,25 +70,25 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized byte[] smallestKey() {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
-        final byte[] b = index.smallestKey();
+        byte[] b = index.smallestKey();
         index.close();
         return b;
     }
 
     @Override
     public synchronized byte[] largestKey() {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
-        final byte[] b = index.largestKey();
+        byte[] b = index.largestKey();
         index.close();
         return b;
     }
 
     @Override
     public synchronized void optimize() {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return;
         index.optimize();
         index.close();
@@ -96,21 +96,21 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized long mem() {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return 0;
-        final long l = index.mem();
+        long l = index.mem();
         index.close();
         return l;
     }
 
     @Override
     public synchronized void addUnique(final Entry row) throws SpaceExceededException, IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return;
         try {
             index.addUnique(row);
             if (this.sizecache >= 0) this.sizecache++;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -119,12 +119,12 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized void clear() throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return;
         try {
         index.clear();
         this.sizecache = 0;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -138,7 +138,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized void deleteOnExit() {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         index.deleteOnExit();
         index.close();
     }
@@ -151,9 +151,9 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     @Override
     public synchronized int size() {
         if (this.sizecache >= 0) return this.sizecache;
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return 0;
-        final int i = index.size();
+        int i = index.size();
         index.close();
         this.sizecache = i;
         return i;
@@ -162,11 +162,11 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     @Override
     public synchronized Entry get(final byte[] key, final boolean forcecopy) throws IOException {
         if (this.sizecache == 0) return null;
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
             return index.get(key, forcecopy);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -174,35 +174,23 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public synchronized Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
+    public synchronized Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         if (this.sizecache == 0) return map;
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = this.get(key, forcecopy);
+            entry = get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
     }
 
     @Override
-    public synchronized List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final List<Row.Entry> list = new ArrayList<>(keys.size());
-        if (this.sizecache == 0) return list;
-        Row.Entry entry;
-        for (final byte[] key: keys) {
-            entry = this.get(key, forcecopy);
-            if (entry != null) list.add(entry);
-        }
-        return list;
-    }
-
-    @Override
     public synchronized boolean has(final byte[] key) {
         if (this.sizecache == 0) return false;
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return false;
-        final boolean b = index.has(key);
+        boolean b = index.has(key);
         index.close();
         return b;
     }
@@ -210,9 +198,9 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     @Override
     public synchronized boolean isEmpty() {
         if (this.sizecache == 0) return true;
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return true;
-        final boolean b = index.isEmpty();
+        boolean b = index.isEmpty();
         if (b) this.sizecache = 0;
         index.close();
         return b;
@@ -227,13 +215,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
      */
     @Override
     public synchronized boolean put(final Entry row) throws IOException, SpaceExceededException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return false;
         try {
-            final boolean b = index.put(row);
+            boolean b = index.put(row);
             if (this.sizecache >= 0 && b) this.sizecache++;
             return b;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -250,15 +238,15 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
      * @throws SpaceExceededException
      */
     public synchronized void put(final RowSet rowset) throws IOException, SpaceExceededException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return;
         try {
             for (final Row.Entry row: rowset) {
-                final boolean b = index.put(row);
+                boolean b = index.put(row);
                 if (this.sizecache >= 0 && b) this.sizecache++;
             }
             return;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -267,13 +255,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized Entry remove(final byte[] key) throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
-            final Entry e = index.remove(key);
+            Entry e = index.remove(key);
             if (this.sizecache >= 0 && e != null) this.sizecache--;
             return e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -282,13 +270,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized boolean delete(final byte[] key) throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return false;
         try {
-            final boolean b = index.delete(key);
+            boolean b = index.delete(key);
             if (this.sizecache >= 0 && b) this.sizecache--;
             return b;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -297,13 +285,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
-            final List<RowCollection> l = index.removeDoubles();
+            List<RowCollection> l = index.removeDoubles();
             this.sizecache = index.size();
             return l;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -312,11 +300,11 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized List<Row.Entry> top(final int count) throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
             return index.top(count);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -325,11 +313,11 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized List<Row.Entry> random(final int count) throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
             return index.random(count);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -338,13 +326,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized Entry removeOne() throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
-            final Entry e = index.removeOne();
+            Entry e = index.removeOne();
             if (this.sizecache >= 0 && e != null) this.sizecache--;
             return e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -353,13 +341,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized Entry replace(final Entry row) throws SpaceExceededException, IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
-            final Entry e = index.replace(row);
+            Entry e = index.replace(row);
             if (this.sizecache >= 0 && e == null) this.sizecache++;
             return e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -373,11 +361,11 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
         try {
             return index.keys(up, firstKey);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             index.close();
@@ -386,10 +374,10 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized Iterator<Entry> iterator() {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
-        final List<Entry> list = new ArrayList<>();
-        final Iterator<Entry> i = index.iterator();
+        List<Entry> list = new ArrayList<Entry>();
+        Iterator<Entry> i = index.iterator();
         while (i.hasNext()) list.add(i.next());
         index.close();
         return list.iterator();
@@ -397,14 +385,14 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
-        final List<Entry> list = new ArrayList<>();
+        final List<Entry> list = new ArrayList<Entry>();
         final Iterator<Entry> i = index.rows(up, firstKey);
         while (i.hasNext()) list.add(i.next());
         index.close();
         final Iterator<Entry> li = list.iterator();
-        return new CloneableIterator<>(){
+        return new CloneableIterator<Entry>(){
             @Override
             public boolean hasNext() {
                 return li.hasNext();
@@ -429,14 +417,14 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized CloneableIterator<Entry> rows() throws IOException {
-        final Index index = this.getIndex();
+        Index index = getIndex();
         if (index == null) return null;
-        final List<Entry> list = new ArrayList<>();
+        final List<Entry> list = new ArrayList<Entry>();
         final Iterator<Entry> i = index.rows();
         while (i.hasNext()) list.add(i.next());
         index.close();
         final Iterator<Entry> li = list.iterator();
-        return new CloneableIterator<>(){
+        return new CloneableIterator<Entry>(){
             @Override
             public boolean hasNext() {
                 return li.hasNext();
