@@ -238,10 +238,16 @@ public class RAGProxyServlet extends HttpServlet {
         try {
             OpenAIClient oaic = new OpenAIClient(LLM_API_HOST);
             OpenAIClient.Context context = new OpenAIClient.Context(LLM_SYSTEM_PREFIX);
+<<<<<<< HEAD
+            context.addPrompt(question);                
+            String[] a = OpenAIClient.stringsFromChat(oaic.chat(model, context, OpenAIClient.listSchema, 80));
+            for (String s: a) query.append(s).append(' ');
+=======
             context.addPrompt(question);
             String[] a = OpenAIClient.stringsFromChat(oaic.chat(model, context, OpenAIClient.listSchema, 80));
             for (String s : a)
                 query.append(s).append(' ');
+>>>>>>> master
             return query.toString().trim();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
