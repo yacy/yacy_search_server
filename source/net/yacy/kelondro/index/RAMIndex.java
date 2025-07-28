@@ -55,7 +55,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         this.name = name;
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        reset();
+        this.reset();
         objectTracker.put(name, this);
     }
 
@@ -79,7 +79,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public void clear() {
-		reset();
+		this.reset();
 	}
 
     @Override
@@ -138,7 +138,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     @Override
     public final synchronized Row.Entry get(final byte[] key, final boolean forceclone) {
         assert (key != null);
-        finishInitialization();
+        this.finishInitialization();
         assert this.index0.isSorted();
         final Row.Entry indexentry = this.index0.get(key, forceclone);
         if (indexentry != null) return indexentry;
@@ -146,29 +146,40 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+    public Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key, forcecopy);
+            entry = this.get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
     }
 
     @Override
+    public List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final List<Row.Entry> list = new ArrayList<>(keys.size());
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = this.get(key, forcecopy);
+            if (entry != null) list.add(entry);
+        }
+        return list;
+    }
+
+    @Override
     public final synchronized boolean has(final byte[] key) {
-		assert (key != null);
-        finishInitialization();
+        assert (key != null);
+        this.finishInitialization();
         assert this.index0.isSorted();
         if (this.index0.has(key)) return true;
         return this.index1.has(key);
-	}
+    }
 
-	@Override
+    @Override
     public final synchronized Row.Entry replace(final Row.Entry entry) throws SpaceExceededException {
         assert (entry != null);
-        finishInitialization();
+        this.finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
         assert this.index0.isSorted();
         final byte[] key = entry.getPrimaryKeyBytes();
@@ -192,7 +203,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         assert (entry != null);
         if (entry == null) return true;
         synchronized (this) {
-            finishInitialization();
+            this.finishInitialization();
             // if the new entry is within the initialization part, just overwrite it
             assert this.index0.isSorted();
             final byte[] key = entry.getPrimaryKeyBytes();
@@ -223,12 +234,12 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 
 	public final void addUnique(final List<Entry> rows) throws SpaceExceededException {
 		final Iterator<Entry> i = rows.iterator();
-		while (i.hasNext()) addUnique(i.next());
+		while (i.hasNext()) this.addUnique(i.next());
 	}
 
 	public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws SpaceExceededException {
         assert (key != null);
-        finishInitialization();
+        this.finishInitialization();
         assert this.index0.isSorted();
         final long l = this.index0.inc(key, col, add, null);
         if (l != Long.MIN_VALUE) return l;
@@ -250,7 +261,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public final synchronized boolean delete(final byte[] key) {
-        finishInitialization();
+        this.finishInitialization();
         // if the new entry is within the initialization part, just delete it
         boolean b = this.index0.delete(key);
         if (b) {
@@ -265,7 +276,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public final synchronized Row.Entry remove(final byte[] key) {
-        finishInitialization();
+        this.finishInitialization();
         // if the new entry is within the initialization part, just delete it
         int s = this.index0.size();
         final Row.Entry indexentry = this.index0.remove(key);
@@ -295,17 +306,17 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized List<Row.Entry> top(final int count) throws IOException {
-        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        final List<Row.Entry> list = new ArrayList<>();
         List<Row.Entry> list0 = this.index1.top(count);
         list.addAll(list0);
         list0 = this.index0.top(count - list.size());
         list.addAll(list0);
         return list;
     }
-    
+
     @Override
     public synchronized List<Row.Entry> random(final int count) throws IOException {
-        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        final List<Row.Entry> list = new ArrayList<>();
         List<Row.Entry> list0 = this.index1.random(count);
         list.addAll(list0);
         list0 = this.index0.random(count - list.size());
@@ -374,7 +385,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         final CloneableIterator<byte[]> k1 = this.index1.keys(up, firstKey);
         if (k0 == null) return k1;
         if (k1 == null) return k0;
-        return new MergeIterator<byte[]>(
+        return new MergeIterator<>(
                 k0,
                 k1,
                 this.rowdef.objectOrder,
@@ -405,7 +416,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         final CloneableIterator<Row.Entry> k1 = this.index1.rows(up, firstKey);
         if (k0 == null) return k1;
         if (k1 == null) return k0;
-        return new MergeIterator<Row.Entry>(
+        return new MergeIterator<>(
                 k0,
                 k1,
                 this.entryComparator,
@@ -415,7 +426,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public final Iterator<Entry> iterator() {
-        return rows();
+        return this.rows();
     }
 
     @Override
@@ -437,7 +448,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         // sort index1 to enable working of the merge iterator
         //index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new StackIterator<Row.Entry>(this.index0.rows(), this.index1.rows(), null, true);
+        return new StackIterator<>(this.index0.rows(), this.index1.rows(), null, true);
     }
 
     @Override

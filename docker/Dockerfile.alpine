@@ -1,6 +1,18 @@
+<<<<<<< HEAD
 # Build a docker image from latest YaCy sources on Alpine Linux
 # with wkhtmltopdf for PDF generation and Java 21
 
+=======
+# Alpine Docker image for YaCy
+
+# build with
+# docker build -t yacy/yacy_search_server:alpine -f Dockerfile.alpine ../
+
+# run with
+# docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:alpine
+
+
+>>>>>>> master
 ## builder image
 FROM eclipse-temurin:21-jdk-alpine-3.21 AS builder
 
@@ -10,7 +22,18 @@ RUN apk add --no-cache curl git apache-ant
 # set current working dir & copy sources
 WORKDIR /opt
 COPY . /opt/yacy_search_server/
+RUN ant compile -f /opt/yacy_search_server/build.xml
 
+# Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
+RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
+	sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
+	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
+
+## build final image
+FROM surnet/alpine-wkhtmltopdf:3.21.2-0.12.6-small AS wkhtmltopdf
+FROM eclipse-temurin:21-jre-alpine-3.21 AS app
+
+<<<<<<< HEAD
 RUN ant compile -f /opt/yacy_search_server/build.xml
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
@@ -55,6 +78,39 @@ RUN apk add --no-cache \
 # Copy wkhtmltopdf files from docker-wkhtmltopdf image
 COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
 
+=======
+RUN apk add --no-cache \
+	imagemagick \
+	xvfb \
+	ghostscript \
+	# Install dependencies for wkhtmltopdf
+	libstdc++ \
+	libx11 \
+	libxrender \
+	libxext \
+	libssl3 \
+	ca-certificates \
+	fontconfig \
+	freetype \
+	ttf-dejavu \
+	ttf-droid \
+	ttf-freefont \
+	ttf-liberation \
+	# more fonts
+	&& apk add --no-cache --virtual .build-deps \
+	msttcorefonts-installer \
+	# Install microsoft fonts
+	&& update-ms-fonts \
+	&& fc-cache -f \
+	# Clean up when done
+	&& rm -rf /tmp/* \
+	&& apk del .build-deps
+
+# Copy wkhtmltopdf files from docker-wkhtmltopdf image
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
+
+# copy YaCy to app image
+>>>>>>> master
 RUN addgroup yacy && adduser -S -G yacy -H -D yacy
 WORKDIR /opt
 COPY --chown=yacy:yacy --from=builder /opt/yacy_search_server /opt/yacy_search_server

@@ -27,7 +27,7 @@ public class CRIgnoreWriter extends StringWriter {
     public CRIgnoreWriter() {
         super();
     }
-    
+
     public CRIgnoreWriter(final int initialSize) {
         super(initialSize);
     }
@@ -56,7 +56,8 @@ public class CRIgnoreWriter extends StringWriter {
 
     @Override
     public void write(String str) {
-        int len = str.length();
+        if (str == null) return;
+        final int len = str.length();
         char c;
         for (int i = 0; i < len; i++) {
             c = str.charAt(i);
@@ -83,14 +84,14 @@ public class CRIgnoreWriter extends StringWriter {
 
     @Override
     public CRIgnoreWriter append(CharSequence csq, int start, int end) {
-        CharSequence cs = (csq == null ? "null" : csq);
+        final CharSequence cs = (csq == null ? "null" : csq);
         this.write(cs.subSequence(start, end).toString());
         return this;
     }
 
     @Override
     public CRIgnoreWriter append(char c) {
-        if (c >= 32) write(c);
+        if (c >= 32) this.write(c);
         return this;
     }
 

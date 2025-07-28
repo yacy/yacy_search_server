@@ -7,7 +7,7 @@
   
   </configurations>
     <dependencies defaultconf="compile->default">
-      <dependency org="commons-fileupload" name="commons-fileupload" rev="1.5" conf="compile->master" />
+      <dependency org="commons-fileupload" name="commons-fileupload" rev="1.6.0" conf="compile->master" />
       <dependency org="commons-lang" name="commons-lang" rev="2.6">
         <exclude module="junit"/>
       </dependency>

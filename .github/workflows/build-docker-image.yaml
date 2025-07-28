@@ -7,7 +7,10 @@ on:
     tags:
       - "v*.*.*"
       - "Release_*"
+<<<<<<< HEAD
   pull_request:
+=======
+>>>>>>> master
   workflow_dispatch:
 
 permissions:
@@ -17,6 +20,10 @@ permissions:
 
 jobs:
   docker:
+<<<<<<< HEAD
+=======
+    if: github.repository == 'yacy/yacy_search_server'
+>>>>>>> master
     strategy:
       fail-fast: false
       matrix:
@@ -32,11 +39,22 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+<<<<<<< HEAD
+=======
+      # docker push action, see https://docs.github.com/en/actions/use-cases-and-examples/publishing-packages/publishing-docker-images
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+>>>>>>> master
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
+<<<<<<< HEAD
           images: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
           flavor: |
@@ -44,10 +62,18 @@ jobs:
           tags: |
             type=raw,value=latest${{ matrix.suffix }},enable=true
             type=raw,value=sha-${{ github.sha }}${{ matrix.suffix }},enable=true
+=======
+          images: ${{ secrets.DOCKERHUB_REPONAME }}/${{ github.event.repository.name }}
+          flavor: latest=${{ matrix.is_default }}
+          tags: |
+            type=raw,value=latest${{ matrix.suffix }},enable=true
+            #type=raw,value=sha-${{ github.sha }}${{ matrix.suffix }},enable=true
+>>>>>>> master
             type=raw,value='{{version}}'${{ matrix.suffix }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
             type=raw,value='{{major}}.{{minor}}'${{ matrix.suffix }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
             type=raw,value='{{major}}'${{ matrix.suffix }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
 
+<<<<<<< HEAD
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -55,6 +81,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+=======
+>>>>>>> master
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -62,6 +90,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push
+<<<<<<< HEAD
         uses: docker/build-push-action@v6
         with:
           # Use "Dockerfile" if matrix.tag is empty, otherwise use "Dockerfile.{tag}"
@@ -72,3 +101,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+=======
+        uses: docker/build-push-action@v5
+        with:
+          file: docker/Dockerfile${{ matrix.tag != '' && format('.{0}', matrix.tag) || '' }}
+          push: true
+          platforms: ${{ matrix.platforms }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+
+>>>>>>> master

@@ -53,7 +53,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
-import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.SwitchboardConstants;
 
@@ -94,14 +93,14 @@ public class serverSwitch {
         if (initFile.exists()) {
             initProps = FileUtils.loadMap(initFile);
         } else {
-            initProps = new ConcurrentHashMap<String, String>();
+            initProps = new ConcurrentHashMap<>();
         }
 
         // load config's from last save
         if (this.configFile.exists()) {
             this.configProps = FileUtils.loadMap(this.configFile);
         } else {
-            this.configProps = new ConcurrentHashMap<String, String>();
+            this.configProps = new ConcurrentHashMap<>();
         }
 
         // overwrite configs with values from environment variables that start with "yacy_"
@@ -114,7 +113,7 @@ public class serverSwitch {
         });
 
         // remove all values from config that do not appear in init
-        this.configRemoved = new ConcurrentHashMap<String, String>();
+        this.configRemoved = new ConcurrentHashMap<>();
         final Iterator<String> i = this.configProps.keySet().iterator();
         String key;
         while (i.hasNext()) {
@@ -150,19 +149,19 @@ public class serverSwitch {
 
         // save result; this may initially create a config file after
         // initialization
-        saveConfig();
+        this.saveConfig();
 
         // init thread control
-        this.workerThreads = new TreeMap<String, BusyThread>();
+        this.workerThreads = new TreeMap<>();
 
         // init busy state control
         // this.serverJobs = 0;
 
         // init server tracking
         serverAccessTracker.init(
-                getConfigLong("server.maxTrackingTime", 60 * 60 * 1000),
-                (int) getConfigLong("server.maxTrackingCount", 1000),
-                (int) getConfigLong("server.maxTrackingHostCount", 100));
+                this.getConfigLong("server.maxTrackingTime", 60 * 60 * 1000),
+                (int) this.getConfigLong("server.maxTrackingCount", 1000),
+                (int) this.getConfigLong("server.maxTrackingHostCount", 100));
     }
 
     /**
@@ -174,7 +173,7 @@ public class serverSwitch {
      */
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
-        final String staticIP = getConfig(SwitchboardConstants.SERVER_STATICIP, "");
+        final String staticIP = this.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() > 0)
             return staticIP;
 
@@ -193,7 +192,7 @@ public class serverSwitch {
      */
     public Set<String> myPublicIPs() {
         // if a static IP was configured, we have to return it here ...
-        final String staticIP = getConfig(SwitchboardConstants.SERVER_STATICIP, "");
+        final String staticIP = this.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() > 0) {
             final HashSet<String> h = new HashSet<>();
             h.add(staticIP);
@@ -235,7 +234,7 @@ public class serverSwitch {
 
         // TODO: add way of setting and retrieving port for manual NAT
 
-        return getConfigInt(key, dflt);
+        return this.getConfigInt(key, dflt);
     }
 
     /**
@@ -248,7 +247,11 @@ public class serverSwitch {
      * @see #getPublicPort(String, int)
      */
     public int getLocalPort() {
-        return getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
+        return this.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
+    }
+
+    public String getLocalHost() {
+        return this.getConfig(SwitchboardConstants.SERVER_HOST, "0.0.0.0");
     }
 
     // a logger for this switchboard
@@ -271,45 +274,45 @@ public class serverSwitch {
         Map.Entry<String, String> entry;
         while (i.hasNext()) {
             entry = i.next();
-            setConfig(entry.getKey(), entry.getValue());
+            this.setConfig(entry.getKey(), entry.getValue());
         }
     }
 
     public void setConfig(final String key, final boolean value) {
-        setConfig(key, (value) ? "true" : "false");
+        this.setConfig(key, (value) ? "true" : "false");
     }
 
     public void setConfig(final String key, final long value) {
-        setConfig(key, Long.toString(value));
+        this.setConfig(key, Long.toString(value));
     }
 
     public void setConfig(final String key, final float value) {
-        setConfig(key, Float.toString(value));
+        this.setConfig(key, Float.toString(value));
     }
 
     public void setConfig(final String key, final double value) {
-        setConfig(key, Double.toString(value));
+        this.setConfig(key, Double.toString(value));
     }
 
     public void setConfig(final String key, final String value) {
         // set the value
         final String oldValue = this.configProps.put(key, value);
         if (oldValue == null || !value.equals(oldValue)) {
-            saveConfig();
+            this.saveConfig();
         }
     }
 
     public void setConfig(final String key, final String[] value) {
         final StringBuilder sb = new StringBuilder();
         if (value != null) for (final String s: value) sb.append(',').append(s);
-        setConfig(key, sb.length() > 0 ? sb.substring(1) : "");
+        this.setConfig(key, sb.length() > 0 ? sb.substring(1) : "");
     }
 
     public void setConfig(final String key, final Set<String> value) {
         final String[] a = new String[value.size()];
         int c = 0;
         for (final String s: value) a[c++] = s;
-        setConfig(key, a);
+        this.setConfig(key, a);
     }
 
     public void removeConfig(final String key) {
@@ -349,7 +352,7 @@ public class serverSwitch {
      */
     public long getConfigLong(final String key, final long dflt) {
         try {
-            return Long.parseLong(getConfig(key, Long.toString(dflt)));
+            return Long.parseLong(this.getConfig(key, Long.toString(dflt)));
         } catch (final NumberFormatException e) {
             return dflt;
         }
@@ -367,7 +370,7 @@ public class serverSwitch {
      */
     public float getConfigFloat(final String key, final float dflt) {
         try {
-            return Float.parseFloat(getConfig(key, Float.toString(dflt)));
+            return Float.parseFloat(this.getConfig(key, Float.toString(dflt)));
         } catch (final NumberFormatException e) {
             return dflt;
         }
@@ -409,7 +412,7 @@ public class serverSwitch {
     public int getConfigInt(final String key, final int dflt) {
         try {
 
-            return Integer.parseInt(getConfig(key, Integer.toString(dflt)));
+            return Integer.parseInt(this.getConfig(key, Integer.toString(dflt)));
 
         } catch (final NumberFormatException e) {
             return dflt;
@@ -427,7 +430,7 @@ public class serverSwitch {
      * @return value if the parameter or default value
      */
     public boolean getConfigBool(final String key, final boolean dflt) {
-        return Boolean.parseBoolean(getConfig(key, Boolean.toString(dflt)));
+        return Boolean.parseBoolean(this.getConfig(key, Boolean.toString(dflt)));
     }
 
     /**
@@ -447,7 +450,7 @@ public class serverSwitch {
      */
     public Set<String> getConfigSet(final String key) {
         final Set<String> h = new LinkedHashSet<>();
-        for (String s: getConfigArray(key, "")) {s = s.trim(); if (s.length() > 0) h.add(s.trim());}
+        for (String s: this.getConfigArray(key, "")) {s = s.trim(); if (s.length() > 0) h.add(s.trim());}
         return h;
     }
 
@@ -465,7 +468,7 @@ public class serverSwitch {
      *         relative path setting.
      */
     public File getDataPath(final String key, final String dflt) {
-        return getFileByPath(key, dflt, this.dataPath);
+        return this.getFileByPath(key, dflt, this.dataPath);
     }
 
     /**
@@ -476,11 +479,11 @@ public class serverSwitch {
      * @return
      */
     public File getAppPath(final String key, final String dflt) {
-        return getFileByPath(key, dflt, this.appPath);
+        return this.getFileByPath(key, dflt, this.appPath);
     }
 
     private File getFileByPath(final String key, final String dflt, final File prefix) {
-        final String path = getConfig(key, dflt).replace('\\', '/');
+        final String path = this.getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
         return (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(
                 prefix, path));
@@ -494,8 +497,7 @@ public class serverSwitch {
      * write the changes to permanent storage (File)
      */
     private void saveConfig() {
-        final ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
-        configPropsCopy.putAll(this.configProps); // avoid concurrency problems
+        final ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<>(this.configProps);
         FileUtils.saveMap(this.configFile, configPropsCopy, this.configComment);
     }
 
@@ -530,17 +532,17 @@ public class serverSwitch {
             final String threadShortDescription,
             final String threadLongDescription, final String threadMonitorURL,
             final BusyThread newThread, final long startupDelay) {
-        deployThread(
+        this.deployThread(
                 threadName,
                 threadShortDescription,
                 threadLongDescription,
                 threadMonitorURL,
                 newThread,
                 startupDelay,
-                Long.parseLong(getConfig(threadName + "_idlesleep", "1000")),
-                Long.parseLong(getConfig(threadName + "_busysleep", "100")),
-                Long.parseLong(getConfig(threadName + "_memprereq", "1048576")),
-                Double.parseDouble(getConfig(threadName + "_loadprereq", "9.0")));
+                Long.parseLong(this.getConfig(threadName + "_idlesleep", "1000")),
+                Long.parseLong(this.getConfig(threadName + "_busysleep", "100")),
+                Long.parseLong(this.getConfig(threadName + "_memprereq", "1048576")),
+                Double.parseDouble(this.getConfig(threadName + "_loadprereq", "9.0")));
     }
 
     public void deployThread(final String threadName,
@@ -557,33 +559,33 @@ public class serverSwitch {
         newThread.setStartupSleep(startupDelay);
         long x;
         try {
-            x = Long.parseLong(getConfig(threadName + "_idlesleep", "novalue"));
+            x = Long.parseLong(this.getConfig(threadName + "_idlesleep", "novalue"));
             newThread.setIdleSleep(x);
         } catch (final NumberFormatException e) {
             newThread.setIdleSleep(initialIdleSleep);
-            setConfig(threadName + "_idlesleep", initialIdleSleep);
+            this.setConfig(threadName + "_idlesleep", initialIdleSleep);
         }
         try {
-            x = Long.parseLong(getConfig(threadName + "_busysleep", "novalue"));
+            x = Long.parseLong(this.getConfig(threadName + "_busysleep", "novalue"));
             newThread.setBusySleep(x);
         } catch (final NumberFormatException e) {
             newThread.setBusySleep(initialBusySleep);
-            setConfig(threadName + "_busysleep", initialBusySleep);
+            this.setConfig(threadName + "_busysleep", initialBusySleep);
         }
         try {
-            x = Long.parseLong(getConfig(threadName + "_memprereq", "novalue"));
+            x = Long.parseLong(this.getConfig(threadName + "_memprereq", "novalue"));
             newThread.setMemPreReqisite(x);
         } catch (final NumberFormatException e) {
             newThread.setMemPreReqisite(initialMemoryPreRequisite);
-            setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
+            this.setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
         try {
-            final double load = Double.parseDouble(getConfig(threadName
+            final double load = Double.parseDouble(this.getConfig(threadName
                     + "_loadprereq", "novalue"));
             newThread.setLoadPreReqisite(load);
         } catch (final NumberFormatException e) {
             newThread.setLoadPreReqisite(initialLoadPreRequisite);
-            setConfig(threadName + "_loadprereq",
+            this.setConfig(threadName + "_loadprereq",
                     (float) initialLoadPreRequisite);
         }
         newThread.setDescription(threadShortDescription, threadLongDescription,
@@ -604,13 +606,13 @@ public class serverSwitch {
             final long memprereqBytes, final double loadprereq) {
         final BusyThread thread = this.workerThreads.get(threadName);
         if (thread != null) {
-            setConfig(threadName + "_idlesleep",
+            this.setConfig(threadName + "_idlesleep",
                     thread.setIdleSleep(idleMillis));
-            setConfig(threadName + "_busysleep",
+            this.setConfig(threadName + "_busysleep",
                     thread.setBusySleep(busyMillis));
-            setConfig(threadName + "_memprereq", memprereqBytes);
+            this.setConfig(threadName + "_memprereq", memprereqBytes);
             thread.setMemPreReqisite(memprereqBytes);
-            setConfig(threadName + "_loadprereq", (float) loadprereq);
+            this.setConfig(threadName + "_loadprereq", (float) loadprereq);
             thread.setLoadPreReqisite(loadprereq);
         }
     }
@@ -618,7 +620,7 @@ public class serverSwitch {
     public synchronized void terminateThread(final String threadName,
             final boolean waitFor) {
         if (this.workerThreads.containsKey(threadName)) {
-            ((WorkflowThread) this.workerThreads.get(threadName))
+            this.workerThreads.get(threadName)
                     .terminate(waitFor);
             this.workerThreads.remove(threadName);
         }
@@ -634,13 +636,13 @@ public class serverSwitch {
     public synchronized void terminateAllThreads(final boolean waitFor) {
         Iterator<String> e = this.workerThreads.keySet().iterator();
         while (e.hasNext()) {
-            ((WorkflowThread) this.workerThreads.get(e.next()))
+            this.workerThreads.get(e.next())
                     .terminate(false);
         }
         if (waitFor) {
             e = this.workerThreads.keySet().iterator();
             while (e.hasNext()) {
-                ((WorkflowThread) this.workerThreads.get(e.next()))
+                this.workerThreads.get(e.next())
                         .terminate(true);
                 e.remove();
             }
@@ -691,8 +693,8 @@ public class serverSwitch {
                     reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
                     client.setHeader(reqHeader.entrySet());
                     final byte[] data = client.GETbytes(uri,
-                                    getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
-                                    getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), false);
+                                    this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
+                                    this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), false);
                     if (data == null || data.length == 0) {
                         continue;
                     }

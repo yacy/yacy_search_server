@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Docker image for YaCy
+=======
+# ARM64v8 Docker image for YaCy
+>>>>>>> master
 
 # build with
 # docker build -t yacy/yacy_search_server:aarch64 -f Dockerfile.aarch64 ../
@@ -21,7 +25,10 @@ COPY . /opt/yacy_search_server/
 RUN ant compile -f /opt/yacy_search_server/build.xml
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
+<<<<<<< HEAD
 # Intially enable HTTPS: this is the most secure option for remote administrator authentication
+=======
+>>>>>>> master
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
     sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
     sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
