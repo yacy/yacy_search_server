@@ -65,7 +65,7 @@ public class IndexImportOAIPMH_p {
                 try {
                     url = new DigestURL(oaipmhurl);
                     final ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, agent);
+                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.packsLoadPath, agent);
                     final ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
                     prop.put("import-one_count", (rt == null) ? "not available" : Integer.toString(rt.getRecordCounter()));
@@ -115,7 +115,7 @@ public class IndexImportOAIPMH_p {
 
             if (post.get("loadrows", "").length() > 0) {
                 // create a time-ordered list of events to execute
-                final Set<String> sources = new TreeSet<String>();
+                final Set<String> sources = new TreeSet<>();
                 for (final Map.Entry<String, String> entry: post.entrySet()) {
                     if (entry.getValue().startsWith("mark_")) {
                         sources.add(entry.getValue().substring(5));
@@ -126,7 +126,7 @@ public class IndexImportOAIPMH_p {
                 prop.put("iframetype", 1);
 
                 // prepare the set for random read from it (to protect the servers at the beginning of the list)
-                final List<String> sourceList = new ArrayList<String>(sources.size());
+                final List<String> sourceList = new ArrayList<>(sources.size());
                 for (final String oaipmhurl: sources) sourceList.add(oaipmhurl);
                 final Random r = new Random(System.currentTimeMillis());
 

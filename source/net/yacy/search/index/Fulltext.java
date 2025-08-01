@@ -47,7 +47,6 @@ import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
@@ -298,7 +297,7 @@ public final class Fulltext {
     public long collectionSize() {
         final long t = System.currentTimeMillis();
         if (t - this.collectionSizeLastAccess < 1000) return this.collectionSizeLastValue;
-        final SolrConnector sc = getDefaultConnector();
+        final SolrConnector sc = this.getDefaultConnector();
         if (sc == null) return 0;
         final long size = sc.getSize();
         this.collectionSizeLastAccess = t;
@@ -326,8 +325,8 @@ public final class Fulltext {
         final long t = System.currentTimeMillis();
         if (this.lastCommit + 10000 > t) return;
         this.lastCommit = t;
-        getDefaultConnector().commit(softCommit);
-        if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
+        this.getDefaultConnector().commit(softCommit);
+        if (this.writeWebgraph) this.getWebgraphConnector().commit(softCommit);
     }
 
     /**
@@ -346,13 +345,13 @@ public final class Fulltext {
         final WordReferenceVars wre = element.getElement();
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
         final long score = element.getWeight();
-        final URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
+        final URIMetadataNode node = this.getMetadata(wre.urlhash(), wre, score);
         return node;
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
-        return getMetadata(urlHash, null, 0L);
+        return this.getMetadata(urlHash, null, 0L);
     }
 
     private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
@@ -383,7 +382,7 @@ public final class Fulltext {
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        if (MemoryControl.shortStatus()) clearCaches();
+        if (MemoryControl.shortStatus()) this.clearCaches();
     }
 
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
@@ -394,7 +393,7 @@ public final class Fulltext {
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        if (MemoryControl.shortStatus()) clearCaches();
+        if (MemoryControl.shortStatus()) this.clearCaches();
     }
 
     /**
@@ -408,19 +407,19 @@ public final class Fulltext {
             final SolrDocument doc = this.getDefaultConnector().getDocumentById(id, CollectionSchema.collection_sxt.getSolrFieldName());
             if (doc == null || !doc.containsKey(CollectionSchema.collection_sxt.getSolrFieldName())) {
                 // document does not exist
-                putDocument(getDefaultConfiguration().metadata2solr(entry));
+                this.putDocument(this.getDefaultConfiguration().metadata2solr(entry));
             } else {
                 final Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
                 // collection dht is used to identify metadata from full crawled documents (if "dht" exists don't overwrite rich crawldata with metadata
                 if (!collections.contains("dht")) return;
 
                 // passed all checks, overwrite document
-                putDocument(getDefaultConfiguration().metadata2solr(entry));
+                this.putDocument(this.getDefaultConfiguration().metadata2solr(entry));
             }
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        if (MemoryControl.shortStatus()) clearCaches();
+        if (MemoryControl.shortStatus()) this.clearCaches();
     }
 
     /**
@@ -517,7 +516,7 @@ public final class Fulltext {
                     count.incrementAndGet();
                 }
             }
-            remove(deleteIDs);
+            this.remove(deleteIDs);
             if (count.get() > 0) Fulltext.this.commit(true);
         } catch (final InterruptedException e) {}
         return count.get();
@@ -670,8 +669,8 @@ public final class Fulltext {
      */
     public void optimize(final int size) {
         if (size < 1) return;
-        getDefaultConnector().optimize(size);
-        if (this.writeWebgraph) getWebgraphConnector().optimize(size);
+        this.getDefaultConnector().optimize(size);
+        if (this.writeWebgraph) this.getWebgraphConnector().optimize(size);
     }
 
     /**
@@ -695,88 +694,10 @@ public final class Fulltext {
     }
 
     public static enum ExportFormat {
-        text("txt"), html("html"), rss("rss"), solr("xml"), elasticsearch("flatjson");
+        text("txt"), html("html"), rss("rss"), solr("xml"), elasticsearch("jsonl");
         private final String ext;
         private ExportFormat(final String ext) {this.ext = ext;}
         public String getExt() {return this.ext;}
-    }
-
-    public final static String yacy_dump_prefix = "yacy_dump_";
-    public Export export(
-            final Fulltext.ExportFormat format, final String filter, String query,
-            final int maxseconds, final File path, final boolean dom, final boolean text,
-            final long maxChunkSize, final boolean minified) throws IOException {
-
-        // modify query according to maxseconds
-        final long now = System.currentTimeMillis();
-        if (maxseconds > 0) {
-            final long from = now - maxseconds * 1000L;
-            final String nowstr = new Date(now).toInstant().toString();
-            final String fromstr = new Date(from).toInstant().toString();
-            final String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
-            query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq;
-        } else {
-            query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
-        }
-
-        // check the oldest and latest entry in the index for this query
-        SolrDocumentList firstdoclist, lastdoclist;
-        Object firstdateobject, lastdateobject;
-        firstdoclist = this.getDefaultConnector().getDocumentListByQuery(
-                query, CollectionSchema.load_date_dt.getSolrFieldName() + " asc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
-        lastdoclist = this.getDefaultConnector().getDocumentListByQuery(
-                query, CollectionSchema.load_date_dt.getSolrFieldName() + " desc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
-
-        final long doccount;
-        final Date firstdate, lastdate;
-        if (firstdoclist.size() == 0 || lastdoclist.size() == 0) {
-            /* Now check again the number of documents without sorting, for compatibility with old fields indexed without DocValues fields (prior to YaCy 1.90)
-             * When the local Solr index contains such old documents, requests with sort query return nothing and trace in logs
-             * "java.lang.IllegalStateException: unexpected docvalues type NONE for field..." */
-            doccount = this.getDefaultConnector().getCountByQuery(query);
-            if(doccount == 0) {
-                /* Finally no document to export was found */
-                throw new IOException("number of exported documents == 0");
-            }
-            /* we use default date values just to generate a proper dump file path */
-            firstdate = new Date(0);
-            lastdate = new Date(0);
-
-        } else {
-            doccount = firstdoclist.getNumFound();
-
-            // create the export name
-            final SolrDocument firstdoc = firstdoclist.get(0);
-            final SolrDocument lastdoc = lastdoclist.get(0);
-            firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-            lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-
-            /* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path
-             * This should not happen because load_date_dt field is mandatory in the main Solr schema,
-             * but for some reason some documents might end up here with an empty load_date_dt field value */
-            if(firstdateobject instanceof Date) {
-                firstdate = (Date) firstdateobject;
-            } else {
-                ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
-                        + firstdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                firstdate = new Date(0);
-            }
-            if(lastdateobject instanceof Date) {
-                lastdate = (Date) lastdateobject;
-            } else {
-                ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
-                        + lastdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                lastdate = new Date(0);
-            }
-        }
-
-        final String filename = yacy_dump_prefix +
-                "f" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate) + "_" +
-                "l" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(lastdate) + "_" +
-                "n" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(new Date(now)) + "_" +
-                "c" + String.format("%1$012d", doccount)+ "_tc"; // the name ends with the transaction token ('c' = 'created')
-
-        return export(path, filename, format.getExt(), filter, query, format, dom, text, maxChunkSize, minified);
     }
 
     // export methods
@@ -905,8 +826,8 @@ public final class Fulltext {
                 this.docCount = 0;
                 this.chunkSize = 0;
                 this.chunkCount = 0;
-                PrintWriter pw = getWriter();
-                printHead(pw);
+                PrintWriter pw = this.getWriter();
+                this.printHead(pw);
                 if (this.dom) {
                     final Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
                     final ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
@@ -921,7 +842,7 @@ public final class Fulltext {
                         final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
                         SolrDocument doc;
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                            final String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            final String url = this.getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
                             if (this.minified) {
                                 final Iterator<Entry<String, Object>> i = doc.iterator();
@@ -938,12 +859,12 @@ public final class Fulltext {
                             final String d = sw.toString();
                             pw.println(d);
                             this.docCount++; this.chunkSize++;
-                            if (this.chunkSize >= this.maxChunkSize) {
-                                printTail(pw);
+                            if (this.maxChunkSize > 0 && this.chunkSize >= this.maxChunkSize) {
+                                this.printTail(pw);
                                 pw.close();
                                 this.chunkCount++;
-                                pw = getWriter();
-                                printHead(pw);
+                                pw = this.getWriter();
+                                this.printHead(pw);
                                 this.chunkSize = 0;
                             }
                         }
@@ -956,11 +877,11 @@ public final class Fulltext {
                         Integer size;
                         Date date;
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                            hash = getStringFrom(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                            url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
-                            title = getStringFrom(doc.getFieldValue(CollectionSchema.title.getSolrFieldName()));
-                            author = getStringFrom(doc.getFieldValue(CollectionSchema.author.getSolrFieldName()));
-                            description = getStringFrom(doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
+                            hash = this.getStringFrom(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                            url = this.getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            title = this.getStringFrom(doc.getFieldValue(CollectionSchema.title.getSolrFieldName()));
+                            author = this.getStringFrom(doc.getFieldValue(CollectionSchema.author.getSolrFieldName()));
+                            description = this.getStringFrom(doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
                             size = (Integer) doc.getFieldValue(CollectionSchema.size_i.getSolrFieldName());
                             date = (Date) doc.getFieldValue(CollectionSchema.last_modified.getSolrFieldName());
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
@@ -982,18 +903,18 @@ public final class Fulltext {
                                 pw.println("</item>");
                             }
                             this.docCount++; this.chunkSize++;
-                            if (this.chunkSize >= this.maxChunkSize) {
-                                printTail(pw);
+                            if (this.maxChunkSize > 0 && this.chunkSize >= this.maxChunkSize) {
+                                this.printTail(pw);
                                 pw.close();
                                 this.chunkCount++;
-                                pw = getWriter();
-                                printHead(pw);
+                                pw = this.getWriter();
+                                this.printHead(pw);
                                 this.chunkSize = 0;
                             }
                         }
                     }
                 }
-                printTail(pw);
+                this.printTail(pw);
                 pw.close();
             } catch (final Exception e) {
                 /* Catch but log any IO exception that can occur on copy, automatic closing or streams creation */
@@ -1004,12 +925,17 @@ public final class Fulltext {
         }
 
         public File file() {
-            final File f = new File(this.path, this.filename + "_" + chunkcount(this.chunkCount) + "." + this.fileext);
+            if (this.maxChunkSize <= 0 || this.maxChunkSize == Long.MAX_VALUE) {
+                // no chunking, just one file
+                final File f = new File(this.path, this.filename + "." + this.fileext);
+                return f;
+            }
+            final File f = new File(this.path, this.filename + "_" + this.chunkcount(this.chunkCount) + "." + this.fileext);
             return f;
         }
 
         private PrintWriter getWriter() throws IOException {
-            final File f = file();
+            final File f = this.file();
             final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(f.getAbsolutePath() + ".gz") : f);
             final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os));
             return pw;

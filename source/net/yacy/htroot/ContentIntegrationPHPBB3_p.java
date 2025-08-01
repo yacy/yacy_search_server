@@ -108,7 +108,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbpw
                                             );
 
-                    final int files = db.writeSurrogates(db.query(0, -1, 100), sb.surrogatesInPath, "fullexport-" + GenericFormatter.SHORT_SECOND_FORMATTER.format(), ppf);
+                    final int files = db.writePacks(db.query(0, -1, 100), sb.packsLoadPath, "fullexport-" + GenericFormatter.SHORT_SECOND_FORMATTER.format(), ppf);
                     prop.put("export", 1);
                     prop.put("export_files", files);
                     db.close();

@@ -150,7 +150,6 @@ tt, *.tt {
 }
 
 .info {
-  font-weight:bold;
   color:olive;
 }
 
@@ -1064,8 +1063,9 @@ div#info:hover span {
   display: block;
   position: absolute;
   font-size:1em;
-  width: 200px;
+  width: 600px;
   padding: 3px;
+  margin-right: 10px;
   color: #000000;
   background: #DDDDDD;
   text-align: center;
@@ -1086,8 +1086,9 @@ div#tagcloud {
   display: block;
   position: absolute;
   font-size:1em;
-  width: 200px;
+  width: 600px;
   padding: 3px;
+  margin-right: 10px;
   color: #000000;
   background: #DDDDDD;
   text-align: left;

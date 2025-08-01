@@ -173,7 +173,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.content.DCEntry;
-import net.yacy.document.content.SurrogateReader;
+import net.yacy.document.content.XMLPackReader;
 import net.yacy.document.importer.JsonListImporter;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.WarcImporter;
@@ -268,8 +268,7 @@ public final class Switchboard extends serverSwitch {
     public File releasePath;
     public File networkRoot;
     public File queuesRoot;
-    public File surrogatesInPath;
-    public File surrogatesOutPath;
+    public File packsHoldPath, packsLivePath, packsLoadPath, packsLoadedPath, packsUnloadPath;
     public Segment index;
     public LoaderDispatcher loader;
     public CrawlSwitchboard crawler;
@@ -548,11 +547,11 @@ public final class Switchboard extends serverSwitch {
 
         // define load limitation according to current number of cpu cores
         if (this.firstInit) {
-            float numberOfCores2 = 2.0f * (float) Runtime.getRuntime().availableProcessors();
+            float numberOfCores2 = 2.0f * Runtime.getRuntime().availableProcessors();
             sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_LOADPREREQ, numberOfCores2);
-            sb.setConfig(SwitchboardConstants.SURROGATES_LOADPREREQ, numberOfCores2);
+            sb.setConfig(SwitchboardConstants.PACKS_LOADPREREQ, numberOfCores2);
         }
-        
+
         // define boosts
         Ranking.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
         Ranking.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
@@ -791,19 +790,22 @@ public final class Switchboard extends serverSwitch {
         Transactions.init(transactiondir, this.getConfigLong(SwitchboardConstants.SNAPSHOTS_WKHTMLTOPDF_TIMEOUT,
                 SwitchboardConstants.SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT));
 
-        // create the surrogates directories
-        this.surrogatesInPath =
-                this.getDataPath(
-                        SwitchboardConstants.SURROGATES_IN_PATH,
-                        SwitchboardConstants.SURROGATES_IN_PATH_DEFAULT);
-        this.log.info("surrogates.in Path = " + this.surrogatesInPath.getAbsolutePath());
-        this.surrogatesInPath.mkdirs();
-        this.surrogatesOutPath =
-                this.getDataPath(
-                        SwitchboardConstants.SURROGATES_OUT_PATH,
-                        SwitchboardConstants.SURROGATES_OUT_PATH_DEFAULT);
-        this.log.info("surrogates.out Path = " + this.surrogatesOutPath.getAbsolutePath());
-        this.surrogatesOutPath.mkdirs();
+        // create the packs directories
+        this.packsHoldPath = this.getDataPath(SwitchboardConstants.PACKS_HOLD_PATH, SwitchboardConstants.PACKS_HOLD_PATH_DEFAULT);
+        this.packsHoldPath.mkdirs();
+        this.log.info("packs.hold Path = " + this.packsHoldPath.getAbsolutePath());
+        this.packsLivePath = this.getDataPath(SwitchboardConstants.PACKS_LIVE_PATH, SwitchboardConstants.PACKS_LIVE_PATH_DEFAULT);
+        this.packsLivePath.mkdirs();
+        this.log.info("packs.live Path = " + this.packsLivePath.getAbsolutePath());
+        this.packsLoadPath = this.getDataPath(SwitchboardConstants.PACKS_LOAD_PATH, SwitchboardConstants.PACKS_LOAD_PATH_DEFAULT);
+        this.packsLoadPath.mkdirs();
+        this.log.info("packs.load Path = " + this.packsLoadPath.getAbsolutePath());
+        this.packsLoadedPath = this.getDataPath(SwitchboardConstants.PACKS_LOADED_PATH, SwitchboardConstants.PACKS_LOADED_PATH_DEFAULT);
+        this.packsLoadedPath.mkdirs();
+        this.log.info("packs.loaded Path = " + this.packsLoadedPath.getAbsolutePath());
+        this.packsUnloadPath = this.getDataPath(SwitchboardConstants.PACKS_UNLOAD_PATH, SwitchboardConstants.PACKS_UNLOAD_PATH_DEFAULT);
+        this.packsUnloadPath.mkdirs();
+        this.log.info("packs.unload Path = " + this.packsUnloadPath.getAbsolutePath());
 
         // copy opensearch heuristic config (if not exist)
         final File osdConfig = new File(this.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
@@ -926,8 +928,8 @@ public final class Switchboard extends serverSwitch {
             public void run() {
                 final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
                 try {
-                    final Response documentResponse = Switchboard.this.loader.load(Switchboard.this.loader.request(new DigestURL(getConfig("donation.iframesource", "")), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-                    if (documentResponse != null) FileUtils.copy(documentResponse.getContent(), new File(Switchboard.this.htDocsPath, getConfig("donation.iframetarget", "")));
+                    final Response documentResponse = Switchboard.this.loader.load(Switchboard.this.loader.request(new DigestURL(Switchboard.this.getConfig("donation.iframesource", "")), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
+                    if (documentResponse != null) FileUtils.copy(documentResponse.getContent(), new File(Switchboard.this.htDocsPath, Switchboard.this.getConfig("donation.iframetarget", "")));
                 } catch (final Exception e) {}
             }
         }.start();
@@ -1068,7 +1070,7 @@ public final class Switchboard extends serverSwitch {
                         new String[] {
                                 "storeDocumentIndex"
                         },
-                        in -> Switchboard.this.webStructureAnalysis(in),
+                        Switchboard.this::webStructureAnalysis,
                         WorkflowProcessor.availableCPU + 1,
                         this.indexingStorageProcessor,
                         WorkflowProcessor.availableCPU);
@@ -1079,7 +1081,7 @@ public final class Switchboard extends serverSwitch {
                         new String[] {
                                 "webStructureAnalysis"
                         },
-                        in -> Switchboard.this.condenseDocument(in),
+                        Switchboard.this::condenseDocument,
                         WorkflowProcessor.availableCPU + 1,
                         this.indexingAnalysisProcessor,
                         WorkflowProcessor.availableCPU);
@@ -1090,7 +1092,7 @@ public final class Switchboard extends serverSwitch {
                         new String[] {
                                 "condenseDocument", "CrawlStacker"
                         },
-                        in -> Switchboard.this.parseDocument(in),
+                        Switchboard.this::parseDocument,
                         Math.max(20, WorkflowProcessor.availableCPU * 2), // it may happen that this is filled with new files from the search process. That means there should be enough place for two result pages
                         this.indexingCondensementProcessor,
                         WorkflowProcessor.availableCPU);
@@ -1146,24 +1148,24 @@ public final class Switchboard extends serverSwitch {
                 60000); // all 10 minutes, wait 1 minute until first run
 
         this.deployThread(
-                SwitchboardConstants.SURROGATES,
-                "Surrogates",
-                "A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.",
+                SwitchboardConstants.PACKS,
+                "Packs",
+                "A thread that polls the PACKS path and puts all Documents in one surroagte file into the indexing queue.",
                 null,
-                new InstantBusyThread("Switchboard.surrogateProcess", 20000, 0) {
+                new InstantBusyThread("Switchboard.packProcess", 20000, 0) {
                     @Override
                     public boolean jobImpl() throws Exception {
-                        return Switchboard.this.surrogateProcess();
+                        return Switchboard.this.packProcess();
                     }
 
                     @Override
                     public int getJobCount() {
-                        return Switchboard.this.surrogateQueueSize();
+                        return Switchboard.this.packsInLoad().size();
                     }
 
                     @Override
                     public void freememImpl() {
-                        Switchboard.this.surrogateFreeMem();
+                        // do nothing
                     }
                 },
                 10000);
@@ -2116,12 +2118,12 @@ public final class Switchboard extends serverSwitch {
         return null;
     }
 
-    public boolean processSurrogate(final String s) {
-        final File infile = new File(this.surrogatesInPath, s);
+    public boolean processPack(final String s) {
+        final File infile = new File(this.packsLoadPath, s);
         if ( !infile.exists() || !infile.canWrite() || !infile.canRead() ) {
             return false;
         }
-        final File outfile = new File(this.surrogatesOutPath, s);
+        final File outfile = new File(this.packsLoadedPath, s);
         //if (outfile.exists()) return false;
         boolean moved = false;
         if ( s.endsWith("xml.zip") ) {
@@ -2139,7 +2141,7 @@ public final class Switchboard extends serverSwitch {
                         baos.write(buffer, 0, size);
                     }
                     baos.flush();
-                    this.processSurrogateXML(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                    this.processXMLPack(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                     baos.close();
                     if (this.shallTerminate()) break;
                 }
@@ -2184,13 +2186,13 @@ public final class Switchboard extends serverSwitch {
                 s.endsWith(".jsonl") || s.endsWith(".jsonl.gz") ||
                 s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") ||
                 s.endsWith(".flatjson") || s.endsWith(".flatjson.gz")) {
-            return this.processSurrogateJson(infile, outfile);
+            return this.processPackJson(infile, outfile);
         }
         InputStream is = null;
         try {
             is = new BufferedInputStream(new FileInputStream(infile));
             if (s.endsWith(".gz")) is = new GZIPInputStream(is, 65535);
-            this.processSurrogateXML(is, infile.getName());
+            this.processXMLPack(is, infile.getName());
         } catch (final IOException e ) {
             ConcurrentLog.logException(e);
         } finally {
@@ -2217,7 +2219,7 @@ public final class Switchboard extends serverSwitch {
                             ConcurrentLog.logException(e);
                         }
                     }
-                    this.log.info("processed surrogate " + infile);
+                    this.log.info("processed pack " + infile);
                 }
             }
             if (is != null) try {is.close();} catch (final IOException e) {
@@ -2227,10 +2229,10 @@ public final class Switchboard extends serverSwitch {
         return moved;
     }
 
-    private boolean processSurrogateJson(final File infile, final File outfile) {
+    private boolean processPackJson(final File infile, final File outfile) {
         // parse a file that can be generated with yacy_grid_parser
         // see https://github.com/yacy/yacy_grid_parser/blob/master/README.md
-        this.log.info("processing json surrogate " + infile);
+        this.log.info("processing json pack " + infile);
         try {
             final JsonListImporter importer = new JsonListImporter(infile, false, false);
             importer.run();
@@ -2242,11 +2244,11 @@ public final class Switchboard extends serverSwitch {
         return moved;
     }
 
-    private void processSurrogateXML(final InputStream is, final String name) throws IOException {
+    private void processXMLPack(final InputStream is, final String name) throws IOException {
         final int concurrency = Runtime.getRuntime().availableProcessors();
 
         // start reader thread
-        final SurrogateReader reader = new SurrogateReader(is, 100, this.crawlStacker, this.index.fulltext().getDefaultConfiguration(), concurrency);
+        final XMLPackReader reader = new XMLPackReader(is, 100, this.crawlStacker, this.index.fulltext().getDefaultConfiguration(), concurrency);
         final Thread readerThread = new Thread(reader, name);
         readerThread.setPriority(Thread.MAX_PRIORITY); // we must have maximum prio here because this thread feeds the other threads. It must always be ahead of them.
         readerThread.start();
@@ -2255,27 +2257,27 @@ public final class Switchboard extends serverSwitch {
         assert this.crawlStacker != null;
         final Thread[] indexer = new Thread[concurrency];
         for (int t = 0; t < concurrency; t++) {
-            indexer[t] = new Thread("Switchboard.processSurrogateXML-" + t) {
+            indexer[t] = new Thread("Switchboard.processXMLPack-" + t) {
                 @Override
                 public void run() {
                     final VocabularyScraper scraper = new VocabularyScraper();
-                    Object surrogateObj;
-                    while ((surrogateObj = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
-                        assert surrogateObj != null;
-                        /* When parsing a full-text Solr xml data dump Surrogate reader produces SolrInputDocument instances */
-                        if(surrogateObj instanceof SolrInputDocument) {
-                            final SolrInputDocument surrogate = (SolrInputDocument)surrogateObj;
+                    Object xmlPackObj;
+                    while ((xmlPackObj = reader.take()) != XMLPackReader.POISON_DOCUMENT ) {
+                        assert xmlPackObj != null;
+                        /* When parsing a full-text Solr xml data dump Pack reader produces SolrInputDocument instances */
+                        if(xmlPackObj instanceof SolrInputDocument) {
+                            final SolrInputDocument pack = (SolrInputDocument)xmlPackObj;
                             try {
-                                // enrich the surrogate
-                                final String id = (String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                                final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                                final DigestURL rootURL = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
+                                // enrich the pack
+                                final String id = (String) pack.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                                final String text = (String) pack.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                                final DigestURL rootURL = new DigestURL((String) pack.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
                                 if (text != null && text.length() > 0 && id != null ) {
                                     // run the tokenizer on the text to get vocabularies and synonyms
                                     final Tokenizer tokenizer = new Tokenizer(rootURL, text, LibraryProvider.dymLib, true, scraper);
                                     final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
                                     // overwrite the given vocabularies and synonyms with new computed ones
-                                    Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
+                                    Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(pack, tokenizer.synonyms(), facets);
                                 }
 
                                 /* Update the ResultURLS stack for monitoring */
@@ -2285,16 +2287,16 @@ public final class Switchboard extends serverSwitch {
                                         rootURL.getHost(),
                                         myPeerHash,
                                         myPeerHash,
-                                        EventOrigin.SURROGATES);
+                                        EventOrigin.PACKS);
                             } catch (final MalformedURLException e) {
                                 ConcurrentLog.logException(e);
                             }
-                            // write the surrogate into the index
-                            Switchboard.this.index.putDocument(surrogate);
-                        } else if(surrogateObj instanceof DCEntry) {
-                            /* When parsing a MediaWiki dump Surrogate reader produces DCEntry instances */
+                            // write the pack into the index
+                            Switchboard.this.index.putDocument(pack);
+                        } else if(xmlPackObj instanceof DCEntry) {
+                            /* When parsing a MediaWiki dump pack reader produces DCEntry instances */
                             // create a queue entry
-                            final DCEntry entry = (DCEntry)surrogateObj;
+                            final DCEntry entry = (DCEntry)xmlPackObj;
                             final Document document = entry.document();
                             final Request request =
                                     new Request(
@@ -2303,10 +2305,10 @@ public final class Switchboard extends serverSwitch {
                                             null,
                                             "",
                                             entry.getDate(),
-                                            Switchboard.this.crawler.defaultSurrogateProfile.handle(),
+                                            Switchboard.this.crawler.defaultPackProfile.handle(),
                                             0,
-                                            Switchboard.this.crawler.defaultSurrogateProfile.timezoneOffset());
-                            final Response response = new Response(request, null, null, Switchboard.this.crawler.defaultSurrogateProfile, false, null);
+                                            Switchboard.this.crawler.defaultPackProfile.timezoneOffset());
+                            final Response response = new Response(request, null, null, Switchboard.this.crawler.defaultPackProfile, false, null);
                             final IndexingQueueEntry queueEntry =
                                     new IndexingQueueEntry(response, new Document[] {document}, null);
 
@@ -2326,38 +2328,56 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
-    public int surrogateQueueSize() {
-        // count surrogates
-        final String[] surrogatelist = this.surrogatesInPath.list();
-        if ( surrogatelist.length > 100 ) {
-            return 100;
-        }
-        int count = 0;
-        for ( final String s : surrogatelist ) {
-            if ( s.endsWith(".xml")
-                    || s.endsWith(".xml.gz")
-                    || s.endsWith(".xml.zip")
-                    || s.endsWith(".warc")
-                    || s.endsWith(".warc.gz")
-                    || s.endsWith(".jsonl")
-                    || s.endsWith(".jsonl.gz")
-                    || s.endsWith(".jsonlist")
-                    || s.endsWith(".jsonlist.gz")
-                    || s.endsWith(".flatjson") ) {
-                count++;
-            }
-            if ( count >= 100 ) {
-                break;
-            }
-        }
-        return count;
+    public boolean isPackFile(String s) {
+        return s.endsWith(".xml")
+                || s.endsWith(".xml.gz")
+                || s.endsWith(".xml.zip")
+                || s.endsWith(".warc")
+                || s.endsWith(".warc.gz")
+                || s.endsWith(".jsonl")
+                || s.endsWith(".jsonl.gz")
+                || s.endsWith(".jsonlist")
+                || s.endsWith(".jsonlist.gz")
+                || s.endsWith(".flatjson")
+                || s.endsWith(".flatjson.gz");
     }
 
-    public void surrogateFreeMem() {
-        // do nothing
+    public List<String> packsInHold() {
+        final String[] packlist = this.packsHoldPath.list();
+        ArrayList<String> list = new ArrayList<>();
+        for (final String s: packlist) if (this.isPackFile(s)) list.add(s);
+        return list;
     }
 
-    public boolean surrogateProcess() {
+    public List<String> packsInLive() {
+        final String[] packlist = this.packsLivePath.list();
+        ArrayList<String> list = new ArrayList<>();
+        for (final String s: packlist) if (this.isPackFile(s)) list.add(s);
+        return list;
+    }
+
+    public List<String> packsInLoad() {
+        final String[] packlist = this.packsLoadPath.list();
+        ArrayList<String> list = new ArrayList<>();
+        for (final String s: packlist) if (this.isPackFile(s)) list.add(s);
+        return list;
+    }
+
+    public List<String> packsInLoaded() {
+        final String[] packlist = this.packsLoadedPath.list();
+        ArrayList<String> list = new ArrayList<>();
+        for (final String s: packlist) if (this.isPackFile(s)) list.add(s);
+        return list;
+    }
+
+    public List<String> packsInUnload() {
+        final String[] packlist = this.packsUnloadPath.list();
+        ArrayList<String> list = new ArrayList<>();
+        for (final String s: packlist) if (this.isPackFile(s)) list.add(s);
+        return list;
+    }
+
+    public boolean packProcess() {
         // work off fresh entries from the proxy or from the crawler
         final String cautionCause = this.onlineCaution();
         if ( cautionCause != null ) {
@@ -2370,27 +2390,18 @@ public final class Switchboard extends serverSwitch {
         }
 
         try {
-            // check surrogates
-            final String[] surrogatelist = this.surrogatesInPath.list();
-            if ( surrogatelist != null && surrogatelist.length > 0 ) {
+            // check packs
+            final String[] packlist = this.packsLoadPath.list();
+            if ( packlist != null && packlist.length > 0 ) {
                 // look if the is any xml inside
-                for ( final String surrogate : surrogatelist ) {
+                for ( final String pack : packlist ) {
 
                     // check for interruption
                     this.checkInterruption();
 
-                    if ( surrogate.endsWith(".xml")
-                            || surrogate.endsWith(".xml.gz")
-                            || surrogate.endsWith(".xml.zip")
-                            || surrogate.endsWith(".zim")
-                            || surrogate.endsWith(".warc")
-                            || surrogate.endsWith(".warc.gz")
-                            || surrogate.endsWith(".jsonlist")
-                            || surrogate.endsWith(".jsonlist.gz")
-                            || surrogate.endsWith(".flatjson")
-                            || surrogate.endsWith(".flatjson.gz") ) {
-                        // read the surrogate file and store entry in index
-                        if ( this.processSurrogate(surrogate) ) {
+                    if (this.isPackFile(pack)) {
+                        // read the pack file and store entry in index
+                        if ( this.processPack(pack) ) {
                             return true;
                         }
                     }
@@ -2589,8 +2600,8 @@ public final class Switchboard extends serverSwitch {
                         selentry.put(CrawlProfile.CrawlAttribute.RECRAWL_IF_OLDER.key, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE).getTime()));
                         insert = true;
                     }
-                    if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ) {
-                        selentry.put(CrawlProfile.CrawlAttribute.RECRAWL_IF_OLDER.key, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE).getTime()));
+                    if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PACKS) ) {
+                        selentry.put(CrawlProfile.CrawlAttribute.RECRAWL_IF_OLDER.key, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PACK_RECRAWL_CYCLE).getTime()));
                         insert = true;
                     }
                     if ( insert ) {
@@ -3368,8 +3379,8 @@ public final class Switchboard extends serverSwitch {
 
         /* This entry may have been locally created by the MediaWiki dump reader :
          * we can distinguish the case here from a regular local crawl with the crawl profile used */
-        if(this.crawler != null && queueEntry.profile() == this.crawler.defaultSurrogateProfile) {
-            processCase = EventOrigin.SURROGATES;
+        if(this.crawler != null && queueEntry.profile() == this.crawler.defaultPackProfile) {
+            processCase = EventOrigin.PACKS;
         }
         final CrawlProfile profile = queueEntry.profile();
 

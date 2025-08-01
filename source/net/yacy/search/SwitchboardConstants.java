@@ -145,16 +145,16 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL                  = "62_remotetriggeredcrawl";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
- // 70_surrogates
+    // 70_packs
     /**
-     * <p><code>public static final String <strong>SURROGATES</strong> = "70_surrogates"</code></p>
-     * <p>A thread that polls the SURROGATES path and puts all Documents in one surrogate file into the indexing queue.</p>
+     * <p><code>public static final String <strong>PACKS</strong> = "70_packs"</code></p>
+     * <p>A thread that polls the PACKS path and puts all Documents in one pack file into the indexing queue.</p>
      */
-    public static final String SURROGATES                      = "70_surrogates";
-    public static final String SURROGATES_MEMPREREQ            = "70_surrogates_memprereq";
-    public static final String SURROGATES_LOADPREREQ           = "70_surrogates_loadprereq";
-    public static final String SURROGATES_IDLESLEEP            = "70_surrogates_idlesleep";
-    public static final String SURROGATES_BUSYSLEEP            = "70_surrogates_busysleep";
+    public static final String PACKS                        = "70_packs";
+    public static final String PACKS_MEMPREREQ              = "70_packs_memprereq";
+    public static final String PACKS_LOADPREREQ             = "70_packs_loadprereq";
+    public static final String PACKS_IDLESLEEP              = "70_packs_idlesleep";
+    public static final String PACKS_BUSYSLEEP              = "70_packs_busysleep";
     // 85_scheduler
     /**
      * <p><code>public static final String <strong>SCHEDULER</strong> = "85_scheduler"</code></p>
@@ -434,10 +434,16 @@ public final class SwitchboardConstants {
     public static final String RELEASE_PATH             = "releases";
     public static final String RELEASE_PATH_DEFAULT     = "DATA/RELEASE";
 
-    public static final String SURROGATES_IN_PATH          = "surrogates.in";
-    public static final String SURROGATES_IN_PATH_DEFAULT  = "DATA/SURROGATES/in";
-    public static final String SURROGATES_OUT_PATH         = "surrogates.out";
-    public static final String SURROGATES_OUT_PATH_DEFAULT = "DATA/SURROGATES/out";
+    public static final String PACKS_HOLD_PATH         = "packs.hold";
+    public static final String PACKS_HOLD_PATH_DEFAULT = "DATA/PACKS/hold";
+    public static final String PACKS_LIVE_PATH         = "packs.live";
+    public static final String PACKS_LIVE_PATH_DEFAULT = "DATA/PACKS/live";
+    public static final String PACKS_LOAD_PATH          = "packs.load";
+    public static final String PACKS_LOAD_PATH_DEFAULT  = "DATA/PACKS/load";
+    public static final String PACKS_LOADED_PATH         = "packs.loaded";
+    public static final String PACKS_LOADED_PATH_DEFAULT = "DATA/PACKS/loaded";
+    public static final String PACKS_UNLOAD_PATH         = "packs.unload";
+    public static final String PACKS_UNLOAD_PATH_DEFAULT = "DATA/PACKS/unload";
 
     public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
     public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";
@@ -572,6 +578,7 @@ public final class SwitchboardConstants {
      * Some constants
      */
     public static final String STR_REMOTECRAWLTRIGGER = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
+    public final static String YACY_PACK_PREFIX = "YaCy-Pack_";
 
     /**
      * network properties

@@ -52,6 +52,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -67,11 +69,9 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
-import net.yacy.document.content.SurrogateReader;
+import net.yacy.document.content.XMLPackReader;
 import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
-
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 
 /*
@@ -138,7 +138,7 @@ public class MediawikiImporter extends Thread implements Importer {
     @Override
     public int speed() {
         if (this.count == 0) return 0;
-        return (int) (this.count / Math.max(1L, runningTime() ));
+        return (int) (this.count / Math.max(1L, this.runningTime() ));
     }
 
     /**
@@ -146,7 +146,7 @@ public class MediawikiImporter extends Thread implements Importer {
      */
     @Override
     public long remainingTime() {
-        return Math.max(0, this.approxdocs - this.count) / Math.max(1, speed() );
+        return Math.max(0, this.approxdocs - this.count) / Math.max(1, this.speed() );
     }
 
     @Override
@@ -161,8 +161,8 @@ public class MediawikiImporter extends Thread implements Importer {
         final int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
         // out keeps a outputfile open until poisened, to make sure underlaying thread gets the end condition
         // regardless of any exception (e.g. eof memory) a add(poison) is added to the most outer final block
-        final BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-        final wikiparserrecord poison = newRecord();
+        final BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<>(threads * 10);
+        final wikiparserrecord poison = this.newRecord();
         BufferedReader reader = null;
         try {
             String targetstub = this.sourcefile.getFileName();
@@ -179,7 +179,7 @@ public class MediawikiImporter extends Thread implements Importer {
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
             String title = null;
-            final BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
+            final BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<>(threads * 10);
             final ExecutorService service = Executors.newCachedThreadPool(
                     new NamePrefixThreadFactory(MediawikiImporter.class.getSimpleName() + ".convertConsumer"));
             final convertConsumer[] consumers = new convertConsumer[threads];
@@ -222,7 +222,7 @@ public class MediawikiImporter extends Thread implements Importer {
                                 ConcurrentLog.info("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                                 continue;
                             }
-                            record = newRecord(this.hostport, this.urlStub, title, sb);
+                            record = this.newRecord(this.hostport, this.urlStub, title, sb);
                             try {
                                 in.put(record);
                                 this.count++;
@@ -243,7 +243,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         ConcurrentLog.info("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                         continue;
                     }
-                    record = newRecord(this.hostport, this.urlStub, title, sb);
+                    record = this.newRecord(this.hostport, this.urlStub, title, sb);
                     try {
                         in.put(record);
                         this.count++;
@@ -309,7 +309,7 @@ public class MediawikiImporter extends Thread implements Importer {
     public static class indexMaker extends Thread {
 
         File mediawikixml;
-        
+
         public indexMaker(final File mediawikixml) {
             super("MediawikiImporter.indexMaker " + mediawikixml != null ? mediawikixml.getName() : "");
             this.mediawikixml = mediawikixml;
@@ -380,7 +380,7 @@ public class MediawikiImporter extends Thread implements Importer {
         int count;
 
         public indexProducer(final int bufferCount, final File indexFile) throws IOException {
-            this.entries = new ArrayBlockingQueue<wikisourcerecord>(bufferCount);
+            this.entries = new ArrayBlockingQueue<>(bufferCount);
             this.out = new PrintWriter(new BufferedWriter(new FileWriter(indexFile)));
             this.count = 0;
             this.out.println("<index>");
@@ -430,7 +430,7 @@ public class MediawikiImporter extends Thread implements Importer {
         private   int count;
 
         public wikiConsumer(final int bufferCount, final indexProducer producer) {
-            this.entries = new ArrayBlockingQueue<wikiraw>(bufferCount);
+            this.entries = new ArrayBlockingQueue<>(bufferCount);
             this.producer = producer;
             this.count = 0;
         }
@@ -537,7 +537,7 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
                 this.url = new AnchorURL(this.urlStub + this.title);
-                final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(), TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
+                final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(), TagValency.EVAL, new HashSet<>(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
                 this.document = Document.mergeDocuments(this.url, "text/html", parsed);
                 // the wiki parser is not able to find the proper title in the source text, so it must be set here
                 this.document.setTitle(this.title);
@@ -730,13 +730,13 @@ public class MediawikiImporter extends Thread implements Importer {
                         // start writing a new file
                         this.outputfilename = this.targetstub + "." + this.fc + ".xml.prt";
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), StandardCharsets.UTF_8);
-                        this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
+                        this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + XMLPackReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                     ConcurrentLog.info("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
                     record.document.writeXML(this.osw);
                     this.rc++;
                     if (this.rc >= 10000) {
-                        this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
+                        this.osw.write(XMLPackReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
                         this.osw.close();
                         final String finalfilename = this.targetstub + "." + this.fc + ".xml";
                         new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
@@ -744,7 +744,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         this.fc++;
                         this.outputfilename = this.targetstub + "." + this.fc + ".xml.prt";
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), StandardCharsets.UTF_8);
-                        this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
+                        this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + XMLPackReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                 }
             } catch (final InterruptedException e) {
@@ -757,8 +757,8 @@ public class MediawikiImporter extends Thread implements Importer {
                 ConcurrentLog.logException(e);
             } finally {
                 try {
-                    if (osw != null) { // maybe null on poison (immediately)
-                        this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
+                    if (this.osw != null) { // maybe null on poison (immediately)
+                        this.osw.write(XMLPackReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
                         this.osw.close();
                         final String finalfilename = this.targetstub + "." + this.fc + ".xml";
                         new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
@@ -789,7 +789,7 @@ public class MediawikiImporter extends Thread implements Importer {
             // java -Xmx2000m -cp classes:lib/bzip2.jar
             // de.anomic.tools.mediawikiIndex -convert
             // DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2
-            // DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
+            // DATA/PACKS/load/ http://de.wikipedia.org/wiki/
 
             if (s[0].equals("-convert")) {
                 if(s.length < 3) {

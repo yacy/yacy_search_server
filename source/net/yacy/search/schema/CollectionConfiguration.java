@@ -893,7 +893,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
 
         if (scraper instanceof DCEntry) {
-            // the document was created with a surrogate parsing; overwrite all md: -entries to Solr
+            // the document was created with a pack parsing; overwrite all md: -entries to Solr
             final DCEntry dcentry = (DCEntry) scraper;
             for (final Map.Entry<String, String[]> entry: dcentry.getMap().entrySet()) {
                 final String tag = entry.getKey();

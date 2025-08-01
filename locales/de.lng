@@ -1092,7 +1092,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==also müssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
 Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enthält ausserdem einen Index Resulate Monitor, ist aber nicht privat,
 since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
-Case (7) occurs if surrogate files are imported==Fall (7) tritt ein wenn Surrogat Dateien importiert werden.
+Case (7) occurs if pack files are imported==Fall (7) tritt ein wenn Pack-Dateien importiert werden.
 The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung über das Internet entsteht.
 Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizität der Index Verteilungs Struktur zu erklären.
 (1) Results of Remote Crawl Receipts==(1) Ergebnisse der Remote Crawl Rückmeldungen
@@ -1128,9 +1128,9 @@ This is the 'mirror'-case of process (1).==Dies ist der 'Gegensatz' Prozess zu (
 <em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere Remote Crawl Anfragen' auf der '<a href="RemoteCrawl_p.html">Remote Crawling</a>' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
 Statistics about #[domains]# domains in this stack:==Statistiken über #[domains]# Domains in diesem Bereich:
-(7) Results from surrogates import==(7) Ergebnisse aus dem Surrogat Import
-These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
+(7) Results from pack import==(7) Ergebnisse aus dem Pack Import
+These records had been imported from pack files in DATA/PACKS/load==Diese Datensätze wurden aus Pack Dateien in DATA/PACKS/load importiert
+<em>Use Case:</em> place files with dublin core metadata content into DATA/PACKS/load or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/PACKS/load kopieren oder eine der Index Import Funktionen nutzen
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)==(z.B. <a href="IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH Import</a>)
 #Domain==Domain
 #URLs=URLs
@@ -1752,7 +1752,7 @@ Export File==Export-Datei
 #>query<
 #Export Format
 Full Data Records:==Komplette Datensätze
-(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)==(vollständige Solr Daten, ein Dokument pro Zeile in einer grossen xml Datei, kann mit Kommandozeilentools bearbeitet werden, kann aus DATA/SURROGATE/in/ importiert werden)
+(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/PACKS/load/)==(vollständige Solr Daten, ein Dokument pro Zeile in einer grossen xml Datei, kann mit Kommandozeilentools bearbeitet werden, kann aus DATA/PACKS/load/ importiert werden)
 #> XML (RSS)<
 Full URL List:==Liste mit vollständiger URL:
 Plain Text List (URLs only)==Einfache Text Liste (nur URLs)
@@ -1765,7 +1765,7 @@ Fulltext of Search Index Text==Voller Text der Indexdokumente
 #"Export"
 Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# Dokumente bisher
 Finished export of #[urlcount]# Documents to file==Export beendet und #[urlcount]# Dokumente gespeichert in Datei
-Import this file by moving it to DATA/SURROGATES/in==Verschiebe diese Datei nach DATA/SURROGATES/in um sie zu importieren
+Import this file by moving it to DATA/PACKS/load==Verschiebe diese Datei nach DATA/PACKS/load um sie zu importieren
 Export to file #[exportfile]# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
 Dump and Restore of Solr Index==Dump und Wiederherstellen des Solr Index
 "Create Dump"=="Erstelle Dump"
@@ -1784,8 +1784,8 @@ If you read from an imported database, here are some hints to get around problem
 before importing large database dumps, set==Bevor große Datenbankdumps importiert werden die folgende Zeile
 in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB)==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen (Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen)
 deselect the partial import flag==Den teilweisen Import Flag abschalten
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
+When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/PACKS/load erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
+All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/PACKS/loaded verschoben und können recycelt werden wenn ein Index gelöscht wird.
 The URL stub==Der Teil der URL
 like https://community.searchlab.eu==wie z.B. https://community.searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==dies muss den kompletten Pfad vor '/viewtopic.php?' enthalten
@@ -1805,16 +1805,16 @@ that can access the database==mit Zugriff auf die Datenbank
 Password==Passwort
 for the account of that user given above==für den Zugang des oben angegebenen Benutzers
 Posts per file==Beiträge pro Datei
-in exported surrogates==in der exportierten Hilfsdatei
+in exported packs==in der exportierten Pack-Datei
 Check database connection==Datenbankverbindung überprüfen
-Export Content to Surrogates==Exportiere Inhalt in Hilfsdateien
+Export Content to Packs==Exportiere Inhalt in Pack-Dateien
 Import a database dump==Importieren eines Datenbankauszugs
 Import Dump==Datenbankdump importieren
 Posts in database==Beiträge in Datenbank
 first entry==Erster Eintrag
 last entry==Letzter Eintrag
 Info failed:==Info Fehlgeschlagen:
-Export successful! Wrote #[files]# files in DATA/SURROGATES/in==Export erfolgreich! #[files]# Dateien in DATA/SURROGATES/in geschrieben
+Export successful! Wrote #[files]# files in DATA/PACKS/load==Export erfolgreich! #[files]# Dateien in DATA/PACKS/load geschrieben
 Export failed:==Export fehlgeschlagen:
 Import successful!==Import erfolgreich!
 Import failed:==Import fehlgeschlagen:
@@ -1986,11 +1986,11 @@ Dumps must be in XML format and may be compressed in gz or bz2. Place the file i
 "Import MediaWiki Dump"=="Importiere MediaWiki Dump"
 When the import is started, the following happens:==Wenn der Import gestartet wird passiert Folgendes:
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Der Dump wird zur Laufzeit extrahiert und die Wiki Einträge werden in das Dublin Core Datenformat übersetzt. Die Ausgabe schaut wie folgt aus:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Je 10000 Wiki Einträge werden zusammen in eine Ausgabedatei geschrieben und in /DATA/SURROGATES/in temporär gespeichert.
+Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.==Je 10000 Wiki Einträge werden zusammen in eine Ausgabedatei geschrieben und in /DATA/PACKS/load temporär gespeichert.
 When each of the generated output file is finished, it is renamed to a .xml file==Wenn jede der generierten Ausgabedateien abgearbeitet wurde wird diese in eine .xml Datei umbenannt.
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Immer wenn eine xml Surrogat Datei in /DATA/SURROGATES/in erscheint, holt der YaCy Indexer diese Datei und indexiert die enthaltenen Datensätze.
-When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==Wenn eine Surrogat Datei vollständig indexiert wurde, wird sie nach /DATA/SURROGATES/out verschoben
-You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Sie können schon abgearbeitete Surrogat Dateien durch Verschieben von /DATA/SURROGATES/out nach /DATA/SURROGATES/in recyclen.
+Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.==Immer wenn eine xml Pack Datei in /DATA/PACKS/load erscheint, holt der YaCy Indexer diese Datei und indexiert die enthaltenen Datensätze.
+When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded==Wenn eine Pack-Datei vollständig indexiert wurde, wird sie nach /DATA/PACKS/loaded verschoben
+You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load==Sie können schon abgearbeitete Pack-Dateien durch Verschieben von /DATA/PACKS/loaded nach /DATA/PACKS/load recyclen.
 Import Process==Import Prozess
 #Thread:==Thread:
 #Dump:==Dump:
@@ -2009,7 +2009,7 @@ Remaining Time:==Verbleibende Zeit:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 #OAI-PMH Import==OAI-PMH Import
-Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates==Ergebnisse aus dem Import finden Sie auf der Seite <a href="CrawlResults.html?process=7">Ergebnisse aus dem Surrogat Import
+Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for packs==Ergebnisse aus dem Import finden Sie auf der Seite <a href="CrawlResults.html?process=7">Ergebnisse aus dem Pack-Datei Import
 Single request import==Einfacher Anfrage Import
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==Mit dieser Methode wird nur eine einzelne Abfrage an einen OAI-PMH Server geschickt und die Datensätze in den Index aufgenommen
 "Import OAI-PMH source"=="Importiere OAI-PMH Quelle"
@@ -3878,7 +3878,7 @@ DHT Transfer==DHT-Verteilung
 Proxy Use==Proxy Benutzung
 Local Crawling</a>==Lokales Crawlen</a>
 Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import==Surrogat Import
+Pack Import==Pack Import
 Processing Monitor==Prozess Monitor
 Loader<==Lade Puffer<
 Rejected URLs==Abgelehnte URLs

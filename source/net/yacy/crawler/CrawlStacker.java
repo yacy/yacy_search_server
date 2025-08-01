@@ -327,7 +327,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
      * @return null if successfull, a reason string if not successful
      */
     public String stackSimpleCrawl(final DigestURL url) {
-        final CrawlProfile pe = this.crawler.defaultSurrogateProfile;
+        final CrawlProfile pe = this.crawler.defaultPackProfile;
         return this.stackCrawl(new Request(
                 this.peers.mySeed().hash.getBytes(),
                 url,

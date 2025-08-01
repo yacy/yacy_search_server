@@ -66,10 +66,10 @@ import net.yacy.server.http.ChunkedInputStream;
  * wget "https://yacy.net" --mirror --warc-file=yacy.net
  *
  * The result is a compressed warc file named "yacy.net.warc.gz".
- * To index the content, it can be copied to the surrogate input path:
- * cp yacy.net.warc.gz DATA/SURROGATES/in/
+ * To index the content, it can be copied to the pack input path:
+ * cp yacy.net.warc.gz DATA/PACKS/load/
  *
- * after processing, that warc file is moved to DATA/SURROGATES/out/
+ * after processing, that warc file is moved to DATA/PACKS/loaded/
  */
 public class WarcImporter extends Thread implements Importer {
 
@@ -165,15 +165,15 @@ public class WarcImporter extends Thread implements Importer {
                                     requestHeader.referer() == null ? null : requestHeader.referer().hash(),
                                     "warc",
                                     responseHeader.lastModified(),
-                                    Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.handle(),
+                                    Switchboard.getSwitchboard().crawler.defaultPackProfile.handle(),
                                     0,
-                                    Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.timezoneOffset());
+                                    Switchboard.getSwitchboard().crawler.defaultPackProfile.timezoneOffset());
 
                             final Response response = new Response(
                                     request,
                                     requestHeader,
                                     responseHeader,
-                                    Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
+                                    Switchboard.getSwitchboard().crawler.defaultPackProfile,
                                     false,
                                     content
                             );
@@ -239,7 +239,7 @@ public class WarcImporter extends Thread implements Importer {
     @Override
     public int speed() {
         if (this.recordCnt == 0) return 0;
-        return (int) (this.recordCnt / Math.max(0L, runningTime() ));
+        return (int) (this.recordCnt / Math.max(0L, this.runningTime() ));
     }
 
     /**
@@ -261,7 +261,7 @@ public class WarcImporter extends Thread implements Importer {
         if (this.consumed == 0) {
             return 0;
         }
-        long speed = this.consumed / runningTime();
+        long speed = this.consumed / this.runningTime();
         return (this.sourceSize - this.consumed) / speed;
     }
 

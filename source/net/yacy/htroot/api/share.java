@@ -31,7 +31,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.index.Fulltext;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -77,8 +77,8 @@ public class share {
             prop.put("mode_success_message", "file name is empty");
             return prop;
         }
-        if (!filename.startsWith(Fulltext.yacy_dump_prefix) || !filename.endsWith(".xml.gz")) {
-            prop.put("mode_success_message", "no index dump file (" + Fulltext.yacy_dump_prefix + "*.xml.gz)");
+        if (!filename.startsWith(SwitchboardConstants.YACY_PACK_PREFIX) || !filename.endsWith(".xml.gz")) {
+            prop.put("mode_success_message", "no index dump file (" + SwitchboardConstants.YACY_PACK_PREFIX + "*.xml.gz)");
             return prop;
         }
 

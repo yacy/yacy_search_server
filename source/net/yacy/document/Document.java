@@ -87,10 +87,10 @@ public class Document {
     // text in image tags.
     private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
-    
+
     /** links to icons that belongs to the document (mapped by absolute URL) */
     private Map<DigestURL, IconEntry> icons;
-    
+
     /**
      * URLs of linked data item types/classes referenced by the document (for example in
      * HTML with standard annotations such as RDFa, microdata, microformats or
@@ -107,7 +107,7 @@ public class Document {
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date lastModified; // creation or last modification date of the source document
     private int crawldepth;
-    
+
     /** True when this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit */
     private boolean partiallyParsed;
 
@@ -129,17 +129,17 @@ public class Document {
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
         this.parserObject = parserObject;
-        this.keywords = new LinkedHashSet<String>();
+        this.keywords = new LinkedHashSet<>();
         if (keywords != null) {
            Collections.addAll(this.keywords, keywords);
         }
-        this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
+        this.titles = (titles == null) ? new ArrayList<>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
-        this.sections =  new LinkedList<String>() ;
+        this.sections =  new LinkedList<>() ;
         if (sections != null) {
            Collections.addAll(this.sections, sections);
         }
-        this.descriptions = (abstrcts == null) ? new ArrayList<String>() : abstrcts;
+        this.descriptions = (abstrcts == null) ? new ArrayList<>() : abstrcts;
         if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
             this.lon = lon;
             this.lat = lat;
@@ -148,9 +148,9 @@ public class Document {
             this.lon = 0.0d;
             this.lat = 0.0d;
         }
-        this.anchors = (anchors == null) ? new ArrayList<AnchorURL>(0) : anchors;
-        this.rss = (rss == null) ? new LinkedHashMap<DigestURL, String>(0) : rss;
-        this.images = (images == null) ? new LinkedHashMap<DigestURL, ImageEntry>() : images;
+        this.anchors = (anchors == null) ? new ArrayList<>(0) : anchors;
+        this.rss = (rss == null) ? new LinkedHashMap<>(0) : rss;
+        this.images = (images == null) ? new LinkedHashMap<>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -164,7 +164,7 @@ public class Document {
         this.languages = languages;
         this.indexingDenied = indexingDenied;
         this.text = text == null ? "" : text;
-        this.generic_facets = new HashMap<String, Set<String>>();
+        this.generic_facets = new HashMap<>();
         this.lastModified = lastModified == null ? new Date() : lastModified;
         this.crawldepth = 999; // unknown yet
         this.scraperObject = null; // will be set by setScraperObject()
@@ -177,7 +177,7 @@ public class Document {
      * @return the content domain which classifies the content type
      */
     public ContentDomain getContentDomain() {
-        ContentDomain contentDomain = Classification.getContentDomainFromMime(this.mimeType);
+        final ContentDomain contentDomain = Classification.getContentDomainFromMime(this.mimeType);
         if (contentDomain != ContentDomain.ALL) return contentDomain;
         return this.dc_source().getContentDomainFromExt();
     }
@@ -202,9 +202,9 @@ public class Document {
     /**
      * Remember the scraper object used, to be able to access used scraper by
      * getScraperObject().
-     * This is used for surrogate parsers to set a other source/scraper then ContentScraper
+     * This is used for pack parsers to set a other source/scraper then ContentScraper
      * used e.g. by htmlParser.
-     * @param scraper 
+     * @param scraper
      */
     public void setScraperObject(Object scraper) {
         if (this.scraperObject != null) {
@@ -216,12 +216,12 @@ public class Document {
         }
         this.scraperObject = scraper;
     }
-    
+
     public AnchorURL getCanonical() {
         final Object scraper = this.getScraperObject();
         if (!(scraper instanceof ContentScraper)) return null;
         final ContentScraper html = (ContentScraper) scraper;
-        AnchorURL canonical = html.getCanonical();
+        final AnchorURL canonical = html.getCanonical();
         return canonical;
     }
 
@@ -236,21 +236,21 @@ public class Document {
     public Map<String, Set<String>> getGenericFacets() {
         return this.generic_facets;
     }
-    
+
     /**
      * @return true when this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit
      */
     public boolean isPartiallyParsed() {
         return this.partiallyParsed;
     }
-    
+
     /**
      * @param partiallyParsed set to true to indicates this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit
      */
     public void setPartiallyParsed(final boolean partiallyParsed) {
         this.partiallyParsed = partiallyParsed;
     }
-    
+
     /**
      * compute a set of languages that this document contains
      * the language is not computed using a statistical analysis of the content, only from given metadata that came with the document
@@ -305,11 +305,11 @@ dc_rights
      * @param title
      */
     public void setTitle(final String title) {
-        this.titles = new ArrayList<String>();
+        this.titles = new ArrayList<>();
         if (title != null) this.titles.add(title);
     }
 
-    
+
 
     public String dc_creator() {
         return (this.creator == null) ? "" : this.creator.toString();
@@ -321,7 +321,7 @@ dc_rights
      * @param tags
      */
     public void addTags(Set<String> tags) {
-        for (String s: tags) {
+        for (final String s: tags) {
             if (s != null && !s.isEmpty()) this.keywords.add(s);
         }
     }
@@ -341,12 +341,12 @@ dc_rights
      * @return a map where the key is the navigator name and the value is the set of attributes names
      */
     public static Map<String, Set<String>> computeGenericFacets(Map<String, Set<Tagging.Metatag>> tags) {
-        Map<String, Set<String>> gf = new HashMap<String, Set<String>>();
-        for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
-            Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
+        final Map<String, Set<String>> gf = new HashMap<>();
+        for (final Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
+            final Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
             if (vocabulary == null) continue;
-            Set<String> objects = new HashSet<String>();
-            for (Tagging.Metatag s: e.getValue()) {
+            final Set<String> objects = new HashSet<>();
+            for (final Tagging.Metatag s: e.getValue()) {
                 objects.add(s.getObject());
             }
             gf.put(vocabulary.getName(), objects);
@@ -378,7 +378,7 @@ dc_rights
     }
 
     public String[] dc_description() {
-        if (descriptions == null) return new String[0];
+        if (this.descriptions == null) return new String[0];
         return this.descriptions.toArray(new String[this.descriptions.size()]);
     }
 
@@ -408,13 +408,13 @@ dc_rights
      */
     public void rewrite_dc_source(Pattern pattern, String replacement) {
         String u = this.source.toNormalform(false);
-        Matcher m = pattern.matcher(u);
+        final Matcher m = pattern.matcher(u);
         if (m.matches()) {
             u = m.replaceAll(replacement);
             try {
-                DigestURL du = new DigestURL(u);
+                final DigestURL du = new DigestURL(u);
                 this.source = du;
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
             }
         }
     }
@@ -428,7 +428,7 @@ dc_rights
 
     public String[] getSectionTitles() {
         if (this.sections == null) {
-            return new String[] { dc_title() };
+            return new String[] { this.dc_title() };
         }
         return this.sections.toArray(new String[this.sections.size()]);
     }
@@ -500,8 +500,8 @@ dc_rights
     }
 
     public List<StringBuilder> getSentences(final boolean pre) {
-        final SentenceReader sr = new SentenceReader(getTextString(), pre);
-        List<StringBuilder> sentences = new ArrayList<StringBuilder>();
+        final SentenceReader sr = new SentenceReader(this.getTextString(), pre);
+        final List<StringBuilder> sentences = new ArrayList<>();
         while (sr.hasNext()) {
             sentences.add(sr.next());
         }
@@ -535,29 +535,29 @@ dc_rights
      */
     public Map<AnchorURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
-        if (!this.resorted) resortLinks();
+        if (!this.resorted) this.resortLinks();
         return this.hyperlinks;
     }
 
     public Map<AnchorURL, String> getAudiolinks() {
-        if (!this.resorted) resortLinks();
+        if (!this.resorted) this.resortLinks();
         return this.audiolinks;
     }
 
     public Map<AnchorURL, String> getVideolinks() {
-        if (!this.resorted) resortLinks();
+        if (!this.resorted) this.resortLinks();
         return this.videolinks;
     }
 
     public LinkedHashMap<DigestURL, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
-        if (!this.resorted) resortLinks();
+        if (!this.resorted) this.resortLinks();
         return this.images;
     }
 
     public Map<AnchorURL, String> getApplinks() {
-        if (!this.resorted) resortLinks();
+        if (!this.resorted) this.resortLinks();
         return this.applinks;
     }
 
@@ -589,13 +589,13 @@ dc_rights
             int extpos, qpos;
             String ext = null;
             final String thishost = this.source.getHost();
-            this.inboundlinks = new LinkedHashMap<DigestURL, String>();
-            this.outboundlinks = new LinkedHashMap<DigestURL, String>();
-            this.hyperlinks = new LinkedHashMap<AnchorURL, String>();
-            this.videolinks = new LinkedHashMap<AnchorURL, String>();
-            this.audiolinks = new LinkedHashMap<AnchorURL, String>();
-            this.applinks   = new LinkedHashMap<AnchorURL, String>();
-            final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+            this.inboundlinks = new LinkedHashMap<>();
+            this.outboundlinks = new LinkedHashMap<>();
+            this.hyperlinks = new LinkedHashMap<>();
+            this.videolinks = new LinkedHashMap<>();
+            this.audiolinks = new LinkedHashMap<>();
+            this.applinks   = new LinkedHashMap<>();
+            final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<>(); // this is a set that is collected now and joined later to the imagelinks
             for (final Map.Entry<DigestURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
@@ -644,7 +644,7 @@ dc_rights
             // expand the hyperlinks:
             // we add artificial hyperlinks to the hyperlink set
             // that can be calculated from given hyperlinks and imagelinks
-            
+
             /*
              * Should we also include icons ? with
              * this.hyperlinks.putAll(allReflinks(this.icons.keySet())); It is
@@ -672,7 +672,7 @@ dc_rights
     public static Map<MultiProtocolURL, String> allSubpaths(final Collection<?> links) {
         // links is either a Set of Strings (urls) or a Set of
         // htmlFilterImageEntries
-        final Set<String> h = new HashSet<String>();
+        final Set<String> h = new HashSet<>();
         Iterator<?> i = links.iterator();
         Object o;
         MultiProtocolURL url;
@@ -704,7 +704,7 @@ dc_rights
             } catch (final MalformedURLException e) { }
         // now convert the strings to yacyURLs
         i = h.iterator();
-        final Map<MultiProtocolURL, String> v = new HashMap<MultiProtocolURL, String>();
+        final Map<MultiProtocolURL, String> v = new HashMap<>();
         while (i.hasNext()) {
             u = (String) i.next();
             try {
@@ -723,7 +723,7 @@ dc_rights
      * @return map with contained urls as key and "ref" as value
      */
     private static Map<AnchorURL, String> allReflinks(final Collection<?> links) {
-        final Map<AnchorURL, String> v = new HashMap<AnchorURL, String>();
+        final Map<AnchorURL, String> v = new HashMap<>();
         final Iterator<?> i = links.iterator();
         Object o;
         AnchorURL url = null;
@@ -770,14 +770,14 @@ dc_rights
                         v.put(url, "ref");
                     continue loop;
                 }
-                
+
                 if ((pos = u.toLowerCase(Locale.ROOT).indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
                     i.remove();
                     u = url.getProtocol()+":/" + u.substring(pos);
                     while ((pos = u.toLowerCase(Locale.ROOT).indexOf("/www.", 11)) > 0)
                         u = url.getProtocol()+":/" + u.substring(pos);
 
-                    AnchorURL addurl = new AnchorURL(u);
+                    final AnchorURL addurl = new AnchorURL(u);
                     if (!(v.containsKey(addurl)))
                         v.put(addurl, "ref");
                     continue loop;
@@ -805,12 +805,12 @@ dc_rights
             this.sections.addAll(doc.sections);
             this.titles.addAll(doc.titles());
             this.keywords.addAll(doc.dc_subject());
-            for (String d: doc.dc_description()) this.descriptions.add(d);
+            for (final String d: doc.dc_description()) this.descriptions.add(d);
 
             if (!(this.text instanceof ByteArrayOutputStream)) {
                 this.text = new ByteArrayOutputStream();
             }
-            InputStream textStream = doc.getTextStream();
+            final InputStream textStream = doc.getTextStream();
             try {
                FileUtils.copy(textStream, (ByteArrayOutputStream) this.text);
             } finally {
@@ -819,7 +819,7 @@ dc_rights
                        /* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
                        textStream.close();
                    }
-               } catch(IOException e) {
+               } catch(final IOException e) {
                    ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
                }
             }
@@ -829,14 +829,14 @@ dc_rights
             this.images.putAll(doc.getImages());
         }
     }
-    
+
     /**
      * @return links to icons that belongs to the document (mapped by absolute URL)
      */
     public Map<DigestURL, IconEntry> getIcons() {
-        return icons;
+        return this.icons;
     }
-    
+
     /**
      * Set links to icons that belongs to the document (mapped by absolute URL)
      * @param icons
@@ -844,12 +844,12 @@ dc_rights
     public void setIcons(final Map<DigestURL, IconEntry> icons) {
        /* Better to ensure now icons property will not be null */
        if(icons != null) {
-           this.icons = icons;    
+           this.icons = icons;
        } else {
            this.icons = new HashMap<>();
        }
     }
-    
+
     /**
      * @return URLs of linked data item types/classes referenced by the document (for example in
      * HTML with standard annotations such as RDFa, microdata, microformats or
@@ -858,7 +858,7 @@ dc_rights
     public Set<DigestURL> getLinkedDataTypes() {
         return this.linkedDataTypes;
     }
-    
+
     /**
      * @return URLs of linked data item types/classes referenced by the document
      */
@@ -870,10 +870,10 @@ dc_rights
            this.linkedDataTypes.clear();
        }
     }
-    
+
 
     public int inboundLinkNofollowCount() {
-        if (this.inboundlinks == null) resortLinks();
+        if (this.inboundlinks == null) this.resortLinks();
         if (this.inboundlinks == null) return 0;
         int c = 0;
         for (final String tag: this.inboundlinks.values()) {
@@ -883,7 +883,7 @@ dc_rights
     }
 
     public int outboundLinkNofollowCount() {
-        if (this.outboundlinks == null) resortLinks();
+        if (this.outboundlinks == null) this.resortLinks();
         if (this.outboundlinks == null) return 0;
         int c = 0;
         for (final String tag: this.outboundlinks.values()) {
@@ -893,12 +893,12 @@ dc_rights
     }
 
     public LinkedHashMap<DigestURL, String> inboundLinks() {
-        if (this.inboundlinks == null) resortLinks();
+        if (this.inboundlinks == null) this.resortLinks();
         return (this.inboundlinks == null) ? null : this.inboundlinks;
     }
 
     public LinkedHashMap<DigestURL, String> outboundLinks() {
-        if (this.outboundlinks == null) resortLinks();
+        if (this.outboundlinks == null) this.resortLinks();
         return (this.outboundlinks == null) ? null : this.outboundlinks;
     }
 
@@ -913,30 +913,30 @@ dc_rights
     public void setDepth(int depth) {
         this.crawldepth = depth;
     }
-    
+
     public int getDepth() {
         return this.crawldepth;
     }
-    
+
     public void writeXML(final Writer os) throws IOException {
         os.write("<record>\n");
-        final String title = dc_title();
+        final String title = this.dc_title();
         if (title != null && title.length() > 0) os.write("<dc:title><![CDATA[" + title + "]]></dc:title>\n");
-        os.write("<dc:identifier>" + dc_identifier() + "</dc:identifier>\n");
-        final String creator = dc_creator();
+        os.write("<dc:identifier>" + this.dc_identifier() + "</dc:identifier>\n");
+        final String creator = this.dc_creator();
         if (creator != null && creator.length() > 0) os.write("<dc:creator><![CDATA[" + creator + "]]></dc:creator>\n");
-        final String publisher = dc_publisher();
+        final String publisher = this.dc_publisher();
         if (publisher != null && publisher.length() > 0) os.write("<dc:publisher><![CDATA[" + publisher + "]]></dc:publisher>\n");
         final String subject = this.dc_subject(';');
         if (subject != null && subject.length() > 0) os.write("<dc:subject><![CDATA[" + subject + "]]></dc:subject>\n");
         if (this.text != null) {
             os.write("<dc:description><![CDATA[");
-            os.write(getTextString());
+            os.write(this.getTextString());
             os.write("]]></dc:description>\n");
         }
-        final String language = dc_language();
-        if (language != null && language.length() > 0) os.write("<dc:language>" + dc_language() + "</dc:language>\n");
-        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(getLastModified()) + "</dc:date>\n");
+        final String language = this.dc_language();
+        if (language != null && language.length() > 0) os.write("<dc:language>" + this.dc_language() + "</dc:language>\n");
+        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(this.getLastModified()) + "</dc:date>\n");
         if (this.lon != 0.0 && this.lat != 0.0) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
@@ -946,7 +946,7 @@ dc_rights
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             final Writer osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
-            writeXML(osw);
+            this.writeXML(osw);
             osw.close();
             return UTF8.String(baos.toByteArray());
         } catch (final UnsupportedEncodingException e1) {
@@ -976,7 +976,7 @@ dc_rights
 
     /**
      * merge documents: a helper method for all parsers that return multiple documents.
-     * Note : when docs contains more than one item, eventual icons in each docs are not merged in result doc, 
+     * Note : when docs contains more than one item, eventual icons in each docs are not merged in result doc,
      * as their scope is limited to only one document.
      * @param location url of merged document
      * @param globalMime Mime type of merged document
@@ -1036,7 +1036,7 @@ dc_rights
 
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');
-                InputStream textStream = doc.getTextStream();
+                final InputStream textStream = doc.getTextStream();
                 try {
                     docTextLength += FileUtils.copy(textStream, content);
                 } catch (final IOException e) {
@@ -1047,7 +1047,7 @@ dc_rights
                            /* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
                            textStream.close();
                        }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
                     }
                 }
@@ -1057,17 +1057,17 @@ dc_rights
             images.putAll(doc.getImages());
             if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
             if (date == null || doc.lastModified.after(date)) date = doc.lastModified; // set youngest lastModified date from doc collection
-            
+
             if (doc.getDepth() < mindepth) mindepth = doc.getDepth();
             if (doc.dc_language() != null) languages.add(doc.dc_language());
-            
+
             indexingDenied |= doc.indexingDenied;
             partiallyParsed |= doc.isPartiallyParsed();
         }
 
         // clean up parser data
         for (final Document doc: docs) {
-            Object scraper = doc.getScraperObject();
+            final Object scraper = doc.getScraperObject();
             if (scraper instanceof ContentScraper) {
                 final ContentScraper html = (ContentScraper) scraper;
                 html.close();
@@ -1076,9 +1076,8 @@ dc_rights
         }
 
         // return consolidation
-        ArrayList<String> titlesa = new ArrayList<String>();
-        titlesa.addAll(titles);
-        Document newDoc = new Document(
+        final ArrayList<String> titlesa = new ArrayList<>(titles);
+        final Document newDoc = new Document(
                 location,
                 globalMime,
                 charset,
@@ -1113,29 +1112,29 @@ dc_rights
             if (includeNofollow) {
                 result.putAll(d.getHyperlinks());
             } else {
-                for (Map.Entry<AnchorURL, String> entry: d.getHyperlinks().entrySet()) {
+                for (final Map.Entry<AnchorURL, String> entry: d.getHyperlinks().entrySet()) {
                     if (!entry.getKey().attachedNofollow()) result.put(entry.getKey(), entry.getValue());
                 }
             }
             final Object scraper = d.getScraperObject();
             if (scraper instanceof ContentScraper) {
                 final ContentScraper html = (ContentScraper) scraper;
-                String refresh = html.getRefreshPath();
+                final String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) try {result.put(new AnchorURL(refresh), "refresh");} catch (final MalformedURLException e) {}
-                AnchorURL canonical = html.getCanonical();
+                final AnchorURL canonical = html.getCanonical();
                 if (canonical != null) {
                     result.put(canonical, CANONICAL_MARKER);
                 }
-                for (AnchorURL u: html.getFrames()) result.put(u, FRAME_MARKER);
-                for (AnchorURL u: html.getIFrames()) result.put(u, IFRAME_MARKER);
-                for (AnchorURL u: html.getEmbeds().keySet()) result.put(u, EMBED_MARKER);
+                for (final AnchorURL u: html.getFrames()) result.put(u, FRAME_MARKER);
+                for (final AnchorURL u: html.getIFrames()) result.put(u, IFRAME_MARKER);
+                for (final AnchorURL u: html.getEmbeds().keySet()) result.put(u, EMBED_MARKER);
             }
         }
         return result;
     }
 
     public static Map<DigestURL, String> getImagelinks(final Document[] documents) {
-        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
+        final Map<DigestURL, String> result = new HashMap<>();
         for (final Document d: documents) {
             for (final ImageEntry imageReference : d.getImages().values()) {
                 // construct a image name which contains the document title to enhance the search process for images
@@ -1146,9 +1145,9 @@ dc_rights
     }
 
     public static Map<DigestURL, String> getAudiolinks(final Document[] documents) {
-        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
+        final Map<DigestURL, String> result = new HashMap<>();
         for (final Document d: documents) {
-            for (Map.Entry<AnchorURL, String> e: d.audiolinks.entrySet()) {
+            for (final Map.Entry<AnchorURL, String> e: d.audiolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
@@ -1156,9 +1155,9 @@ dc_rights
     }
 
     public static Map<DigestURL, String> getVideolinks(final Document[] documents) {
-        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
+        final Map<DigestURL, String> result = new HashMap<>();
         for (final Document d: documents) {
-            for (Map.Entry<AnchorURL, String> e: d.videolinks.entrySet()) {
+            for (final Map.Entry<AnchorURL, String> e: d.videolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
@@ -1166,9 +1165,9 @@ dc_rights
     }
 
     public static Map<DigestURL, String> getApplinks(final Document[] documents) {
-        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
+        final Map<DigestURL, String> result = new HashMap<>();
         for (final Document d: documents) {
-            for (Map.Entry<AnchorURL, String> e: d.applinks.entrySet()) {
+            for (final Map.Entry<AnchorURL, String> e: d.applinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
@@ -1179,7 +1178,7 @@ dc_rights
         if (tagname == null || tagname.isEmpty()) {
             tagname = d.source.toTokens();
         }
-        StringBuilder sb = new StringBuilder(60);
+        final StringBuilder sb = new StringBuilder(60);
         sb.append(d.dc_title());
         if (d.dc_description().length > 0) {
             if (!d.dc_description()[0].equals(d.dc_title()) && sb.length() < Request.descrLength - tagname.length()) {

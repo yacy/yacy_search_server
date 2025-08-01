@@ -103,7 +103,7 @@ public class yacydoc {
 
         prop.putXML("dc_title", entry.dc_title());
         prop.putXML("dc_creator", entry.dc_creator());
-        prop.putXML("dc_description", ""); // this is the fulltext part in the surrogate
+        prop.putXML("dc_description", ""); // this is the fulltext part in the pack
         prop.putXML("dc_subject", entry.dc_subject());
         prop.putXML("dc_publisher", entry.dc_publisher());
         prop.putXML("dc_contributor", "");

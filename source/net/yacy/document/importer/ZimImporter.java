@@ -144,15 +144,15 @@ public class ZimImporter extends Thread implements Importer {
                             null, // referrerhash the hash of the referrer URL
                             de.title, // name the name of the document to crawl
                             null, // appdate the time when the url was first time appeared
-                            sb.crawler.defaultSurrogateProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
+                            sb.crawler.defaultPackProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
                             0,    // depth the crawling depth of the entry
-                            sb.crawler.defaultSurrogateProfile.timezoneOffset() // timezone offset
+                            sb.crawler.defaultPackProfile.timezoneOffset() // timezone offset
                     );
                     final Response response = new Response(
                             request,
                             requestHeader,
                             responseHeader,
-                            Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
+                            Switchboard.getSwitchboard().crawler.defaultPackProfile,
                             false,
                             b
                     );

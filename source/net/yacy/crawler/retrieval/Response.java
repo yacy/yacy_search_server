@@ -1,5 +1,5 @@
 // Response.java
-// SPDX-FileCopyrightText: 2008 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-FileCopyrightText: 2008 Michael Peter Christen <mc@yacy.net)>
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Frankfurt a. M., Germany
 // first published 19.08.2008 on http://yacy.net
@@ -74,7 +74,7 @@ public class Response {
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
     private final  boolean            fromCache;
-    
+
     /** Maximum file size to put in cache for crawler */
     public static final long CRAWLER_MAX_SIZE_TO_CACHE = 10 * 1024L * 1024L;
 
@@ -119,14 +119,14 @@ public class Response {
         if (ext.equals("asf"))  return DT_FLASH;
         return DT_UNKNOWN;
     }
-    
+
     /**
      * doctype calculation based on file extensions; this is the url wrapper
      * @param url
      * @return a character denoting the file type
      */
     public static char docType(final MultiProtocolURL url) {
-        String ext = MultiProtocolURL.getFileExtension(url.getFileName());
+        final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (ext == null) return DT_UNKNOWN;
         return docTypeExt(ext);
     }
@@ -171,8 +171,8 @@ public class Response {
         if (doctype == DT_FLASH) return new String[]{"application/x-shockwave-flash"};
         if (doctype == DT_SHARE) return new String[]{"text/plain"};
         if (doctype == DT_BINARY) return new String[]{"application/octet-stream"};
-        String mime = Classification.ext2mime(ext);
-        int p = mime.indexOf('/');
+        final String mime = Classification.ext2mime(ext);
+        final int p = mime.indexOf('/');
         if (p < 0) return new String[]{mime};
         if (doctype == DT_TEXT) return new String[]{"text" + mime.substring(p)};
         if (doctype == DT_IMAGE) return new String[]{"image" + mime.substring(p)};
@@ -196,7 +196,7 @@ public class Response {
             final boolean fromCache,
             final byte[] content) {
         this.request = request;
-        // request and response headers may be zero in case that we process surrogates
+        // request and response headers may be zero in case that we process packs
         this.requestHeader = requestHeader;
         this.responseHeader = responseHeader;
         this.profile = profile;
@@ -204,7 +204,7 @@ public class Response {
         this.content = content;
         this.fromCache = fromCache;
         if (this.responseHeader != null && content != null && Integer.parseInt(this.responseHeader.get(HeaderFramework.CONTENT_LENGTH, "0")) <= content.length) {
-            this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(content.length)); // repair length 
+            this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(content.length)); // repair length
         }
     }
 
@@ -216,7 +216,7 @@ public class Response {
      */
     public Response(final Request request, final CrawlProfile profile) {
         this.request = request;
-        // request and response headers may be zero in case that we process surrogates
+        // request and response headers may be zero in case that we process packs
         this.requestHeader = null;
         this.responseHeader = new ResponseHeader(200);
         this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURL.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
@@ -226,22 +226,22 @@ public class Response {
         this.fromCache = true;
         if (this.responseHeader != null) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0"); // 'virtual' length, shows that the resource was not loaded
     }
-    
+
     public void updateStatus(final int newStatus) {
         this.status = newStatus;
     }
-    
+
     /**
      * @return the original request that produced this response
      */
     public Request getRequest() {
-        return request;
+        return this.request;
     }
 
     public ResponseHeader getResponseHeader() {
         return this.responseHeader;
     }
-    
+
     public RequestHeader getRequestHeader() {
         return this.requestHeader;
     }
@@ -270,8 +270,8 @@ public class Response {
     }
 
     public char docType() {
-        char doctype = docType(getMimeType());
-        if (doctype == DT_UNKNOWN) doctype = docType(url());
+        char doctype = docType(this.getMimeType());
+        if (doctype == DT_UNKNOWN) doctype = docType(this.url());
         return doctype;
     }
 
@@ -301,7 +301,7 @@ public class Response {
     }
 
     public boolean proxy() {
-        return initiator() == null;
+        return this.initiator() == null;
     }
 
     public long size() {
@@ -320,8 +320,8 @@ public class Response {
 
     public void setContent(final byte[] data) {
         this.content = data;
-        if (this.responseHeader != null && this.content != null && Integer.parseInt(this.responseHeader.get(HeaderFramework.CONTENT_LENGTH, "0")) <= content.length) {
-            this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(content.length)); // repair length 
+        if (this.responseHeader != null && this.content != null && Integer.parseInt(this.responseHeader.get(HeaderFramework.CONTENT_LENGTH, "0")) <= this.content.length) {
+            this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(this.content.length)); // repair length
         }
     }
 
@@ -338,7 +338,7 @@ public class Response {
      */
     public String shallStoreCacheForProxy() {
 
-        final String crawlerReason = shallStoreCacheForCrawler();
+        final String crawlerReason = this.shallStoreCacheForCrawler();
         if (crawlerReason != null) return crawlerReason;
 
         // check profile (disabled: we will check this in the plasmaSwitchboard)
@@ -351,15 +351,15 @@ public class Response {
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (url().isPOST() && this.profile != null && !this.profile.crawlingQ()) {
+        if (this.url().isPOST() && this.profile != null && !this.profile.crawlingQ()) {
             return "dynamic_post";
         }
 
-        if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) {
+        if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(this.url().getFileName()))) {
             return "dynamic_cgi";
         }
 
-        if (url().isLocal()) {
+        if (this.url().isLocal()) {
             return "local_URL_no_cache_needed";
         }
 
@@ -415,10 +415,10 @@ public class Response {
     public String shallStoreCacheForCrawler() {
         // check storage size: all files will be handled in RAM before storage, so they must not exceed
         // a given size, which we consider as 1MB
-        if (size() > CRAWLER_MAX_SIZE_TO_CACHE) return "too_large_for_caching_" + size();
+        if (this.size() > CRAWLER_MAX_SIZE_TO_CACHE) return "too_large_for_caching_" + this.size();
 
         // check status code
-        if (!validResponseStatus()) {
+        if (!this.validResponseStatus()) {
             return "bad_status_" + this.responseHeader.getStatusCode();
         }
 
@@ -449,14 +449,14 @@ public class Response {
     public boolean isFreshForProxy() {
 
         if (Switchboard.getSwitchboard().getConfigBool("proxyAlwaysFresh", false)) return true;
-        
+
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (url().isPOST()) {
+        if (this.url().isPOST()) {
             return false;
         }
-        if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) {
+        if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(this.url().getFileName()))) {
             return false;
         }
 
@@ -494,7 +494,7 @@ public class Response {
                 if (d2.after(d1)) { return false; }
             }
 
-            final String mimeType = getMimeType();
+            final String mimeType = this.getMimeType();
             if (!Classification.isPictureMime(mimeType)) {
                 // -cookies in request
                 // unfortunately, we should reload in case of a cookie
@@ -593,22 +593,22 @@ public class Response {
      * This function is used by plasmaSwitchboard#processResourceStack
      */
     public final String shallIndexCacheForProxy() {
-        if (profile() == null) {
+        if (this.profile() == null) {
             return "shallIndexCacheForProxy: profile() is null !";
         }
 
         // check profile
-        if (!profile().indexText() && !profile().indexMedia()) {
+        if (!this.profile().indexText() && !this.profile().indexMedia()) {
             return "indexing not allowed - indexText and indexMedia not set (for proxy = " + this.profile.collectionName()+ ")";
         }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
-        if (!profile().crawlingQ()) {
-            if (url().isPOST()) {
+        if (!this.profile().crawlingQ()) {
+            if (this.url().isPOST()) {
                 return "Dynamic_(POST)";
             }
-            if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) {
+            if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(this.url().getFileName()))) {
                 return "Dynamic_(CGI)";
             }
         }
@@ -622,7 +622,7 @@ public class Response {
         // -cookies in request
         // unfortunately, we cannot index pages which have been requested with a cookie
         // because the returned content may be special for the client
-        if (requestWithCookie()) {
+        if (this.requestWithCookie()) {
 //          System.out.println("***not indexed because cookie");
             return "Dynamic_(Requested_With_Cookie)";
         }
@@ -723,20 +723,20 @@ public class Response {
      * This function is used by plasmaSwitchboard#processResourceStack
      */
     public final String shallIndexCacheForCrawler() {
-        if (profile() == null) {
+        if (this.profile() == null) {
             return "shallIndexCacheForCrawler: profile() is null !";
         }
 
         // check profile
-        if (!profile().indexText() && !profile().indexMedia()) {
+        if (!this.profile().indexText() && !this.profile().indexMedia()) {
             return "indexing not allowed - indexText and indexMedia not set (for crawler = " + this.profile.collectionName() + ")";
         }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
-        if (!profile().crawlingQ()) {
-            if (url().isPOST()) { return "Dynamic_(POST)"; }
-            if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) { return "Dynamic_(CGI)"; }
+        if (!this.profile().crawlingQ()) {
+            if (this.url().isPOST()) { return "Dynamic_(POST)"; }
+            if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(this.url().getFileName()))) { return "Dynamic_(CGI)"; }
         }
 
         // -authorization cases in request
@@ -750,10 +750,10 @@ public class Response {
          * profile, the indexingDocumentProcessor can eventually index only URL metadata
          * using the generic parser for unsupported media types
          */
-        if (this.responseHeader != null && !profile().isIndexNonParseableUrls()) {
+        if (this.responseHeader != null && !this.profile().isIndexNonParseableUrls()) {
             final String mimeType = this.responseHeader.getContentType();
             final String parserError = TextParser.supportsMime(mimeType);
-            if (parserError != null && TextParser.supportsExtension(url()) != null)  return "no parser available: " + parserError;
+            if (parserError != null && TextParser.supportsExtension(this.url()) != null)  return "no parser available: " + parserError;
         }
 
         // -if-modified-since in request
@@ -827,7 +827,7 @@ public class Response {
     }
 
     public boolean validResponseStatus() {
-        int status = this.responseHeader.getStatusCode();
+        final int status = this.responseHeader.getStatusCode();
         return status == 200 || status == 203;
     }
 
@@ -854,13 +854,13 @@ public class Response {
         // 4) proxy-load (initiator is "------------")
         // 5) local prefetch/crawling (initiator is own seedHash)
         // 6) local fetching for global crawling (other known or unknown initiator)
-        // 7) local surrogates processing (can not be known here : crawl profile is required)
+        // 7) local packs processing (can not be known here : crawl profile is required)
         EventOrigin processCase = EventOrigin.UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
-        if (initiator() == null || initiator().length == 0 || ASCII.String(initiator()).equals("------------")) {
+        if (this.initiator() == null || this.initiator().length == 0 || ASCII.String(this.initiator()).equals("------------")) {
             // proxy-load
             processCase = EventOrigin.PROXY_LOAD;
-        } else if (UTF8.String(initiator()).equals(mySeedHash)) {
+        } else if (UTF8.String(this.initiator()).equals(mySeedHash)) {
             // normal crawling
             processCase = EventOrigin.LOCAL_CRAWLING;
         } else {
@@ -871,15 +871,15 @@ public class Response {
     }
 
     public Document[] parse() throws Parser.Failure {
-        final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.getContentType());
-        if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
+        final String supportError = TextParser.supports(this.url(), this.responseHeader == null ? null : this.responseHeader.getContentType());
+        if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, this.url());
         try {
             return TextParser.parseSource(
-                    url(), this.responseHeader == null ? null : this.responseHeader.getContentType(),
+                    this.url(), this.responseHeader == null ? null : this.responseHeader.getContentType(),
                     this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(),
-                    TagValency.EVAL, new HashSet<String>(),
+                    TagValency.EVAL, new HashSet<>(),
                     new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
-        } catch(Parser.Failure e) {
+        } catch(final Parser.Failure e) {
             throw e;
         } catch (final Exception e) {
             return null;

@@ -101,7 +101,7 @@ public class CrawlResults {
             tabletype == EventOrigin.LOCAL_CRAWLING &&
             ResultURLs.getStackSize(EventOrigin.LOCAL_CRAWLING) == 0) {
             // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
-            tabletype = (ResultURLs.getStackSize(EventOrigin.SURROGATES) == 0) ? EventOrigin.UNKNOWN : EventOrigin.SURROGATES;
+            tabletype = (ResultURLs.getStackSize(EventOrigin.PACKS) == 0) ? EventOrigin.UNKNOWN : EventOrigin.PACKS;
         }
 
         // check if authorization is needed and/or given
@@ -144,7 +144,7 @@ public class CrawlResults {
                 final String domain = post.get("domain", null);
                 if (domain != null) {
                     selectedblacklist = post.get("blacklistname");
-                    final Set<String> hostnames = new HashSet<String>();
+                    final Set<String> hostnames = new HashSet<>();
                     hostnames.add(domain);
                     sb.index.fulltext().deleteStaleDomainNames(hostnames, null);
                     ResultURLs.deleteDomain(tabletype, domain);

@@ -952,7 +952,7 @@ DHT Transfer==DHT-Розподіл
 Proxy Use==Використання проксі
 Local Crawling</a>==Місцеве сканування</a>
 Global Crawling</a>==Загальне сканування</a>
-Surrogate Import</a>==Імпорт "Заміщень"</a>
+Pack Import</a>==Імпорт "Заміщень"</a>
 >Crawl Results Overview<==>Огляд результатів сканування<
 These are monitoring pages for the different indexing queues.==Ці сторінки для спостереження за різними чергами індексації.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy знає 5 різних способів упорядкування індексу. Деталі цих процесів (1-5) описані в меню вище.
@@ -960,7 +960,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==тому вам необхідно увійти в систему з паролем адміністратора для його перегляду.
 Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==В (6) знаходиться спостереження за місцевим генератором прийому на відміну від (1). Він також містить спостереження за результатами індексування, але не є приватним,
 since it shows crawl requests from other peers.==тому-що показує запити сканування від інших вузлів.
-Case (7) occurs if surrogate files are imported==Вибір (7) використовується при імпортуванні файлів заміщень.
+Case (7) occurs if pack files are imported==Вибір (7) використовується при імпортуванні файлів заміщень.
 The image above illustrates the data flow initiated by web index acquisition.==На малюнку вище показаний потік даних, розпочатих придбанням індексу з інтернет.
 Some processes occur double to document the complex index migration structure.==Поява деяких процесів двічі пояснюється складністю структури розподілу індексу.
 (1) Results of Remote Crawl Receipts==(1) Результати надходжень віддаленого сканування
@@ -1003,9 +1003,9 @@ This is the 'mirror'-case of process (1).==Це в "дзеркальний" пр
 <em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>Використання:</em> Цей список заповнюється, якщо ви ввімкнули "Приймати запити на сканування" на сторінці '<a href="RemoteCrawl_p.html">Віддалений сканування</a>'.
 The stack is empty.==Список порожній.
 Statistics about #[domains]# domains in this stack:==Статистика щодо #[domains]# доменів в цій черзі:
-(7) Results from surrogates import==(7) Результати з імпорту "заміщень"
-These records had been imported from surrogate files in DATA/SURROGATES/in==Ці записи було імпортовано з сурогатних файлів з DATA/SURROGATES/in
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Використання:</em> Розмістіть файли з вмістом dublin core metadata в DATA/SURROGATES/in або використайте в функцію імпорту індексу
+(7) Results from pack import==(7) Результати з імпорту "заміщень"
+These records had been imported from pack files in DATA/PACKS/load==Ці записи було імпортовано з сурогатних файлів з DATA/PACKS/load
+<em>Use Case:</em> place files with dublin core metadata content into DATA/PACKS/load or use an index import method==<em>Використання:</em> Розмістіть файли з вмістом dublin core metadata в DATA/PACKS/load або використайте в функцію імпорту індексу
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)==(Наприклад, <a href="IndexImportMediawiki_p.html">Імпорт Dump'у MediaWiki</a>, <a href="IndexImportOAIPMH_p.html">Імпорт OAI-PMH</a>)
 Domain==Домен
 URLs=URL
@@ -1556,8 +1556,8 @@ If you read from an imported database, here are some hints to get around problem
 before importing large database dumps, set the following Line==Перед імпортуванням великих dump'ів бази даних впишіть наступний рядок
 in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB)==в phpmyadmin/config.inc.php і збережіть файл бази даних в /tmp (в іншому випадку неможливо завантажити файл розміром більше 2 Мб)
 deselect the partial import flag==Зніміть прапорець часткового імпорту
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==При запуску експорту в DATA/SURROGATE/in створюються допоміжні файли, які автоматично вилучаються та опрацьовуються потоком індексувача.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Всі проіндексовані допоміжні файли потім переміщуються в DATA/SURROGATE/out, і можуть бути знову оброблені, якщо індекс буде видалено.
+When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.==При запуску експорту в DATA/PACKS/load створюються допоміжні файли, які автоматично вилучаються та опрацьовуються потоком індексувача.
+All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.==Всі проіндексовані допоміжні файли потім переміщуються в DATA/PACKS/loaded, і можуть бути знову оброблені, якщо індекс буде видалено.
 <b>The URL stub</b>,<br />like https://community.searchlab.eu==<b>Частина URL, як наприклад,</b><br />https://community.searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==повний шлях перед "/viewtopic.php?"
 Type==Тип
@@ -1574,16 +1574,16 @@ that can access the database==з доступом до БД
 Password==Пароль
 for the account of that user given above==для доступу вищезазначеним користувачем
 Posts per file==Повідомлень на файл
-in exported surrogates==в експортованому допоміжному файлі
+in exported packs==в експортованому допоміжному файлі
 Check database connection==Перевірити підключення до бази даних
-Export Content to Surrogates==Експортувати вміст до допоміжних файлів
+Export Content to Packs==Експортувати вміст до допоміжних файлів
 Import a database dump==Імпорт виписок бази даних
 Import Dump==Імпортувати dump бази даних
 Posts in database==Повідомлень у базі даних
 first entry==перший запис
 last entry==останній запис
 Info failed:==Інформаційна помилка:
-Export successful! Wrote #[files]# files in DATA/SURROGATES/in==Експортування завершилось успіхом! #[files]# файлів записано в DATA/SURROGATES/in
+Export successful! Wrote #[files]# files in DATA/PACKS/load==Експортування завершилось успіхом! #[files]# файлів записано в DATA/PACKS/load
 Export failed:==Збій при експорті:
 Import successful!==Імпорт завершився успіхом!
 Import failed:==Не вдалося імпортувати:
@@ -1769,11 +1769,11 @@ Dumps must be in XML format and may be compressed in gz or bz2. Place the file i
 "Import MediaWiki Dump"=="Імпортувати Dump MediaWiki"
 When the import is started, the following happens:==Коли імпортування запущене, відбувається наступне:
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Dump видобувається під час виконання і wiki-записи переводяться у формат Dublin Core. Результат виглядає наступним чином:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Кожні 10000 записів wiki пишуться разом в один вихідний файл і тимчасово зберігаються в /DATA/SURROGATES/in.
+Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.==Кожні 10000 записів wiki пишуться разом в один вихідний файл і тимчасово зберігаються в /DATA/PACKS/load.
 When each of the generated output file is finished, it is renamed to a .xml file==Коли кожен із створених вихідних файлів було оброблено, вони перейменовуються в файл .xml.
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Кожного разу, коли сурогатний XML-файл з’являється в /DATA/SURROGATES/in, індексувач YaCy розбирає цей файл і індексує записи, що там містяться.
-When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==Коли сурогатний файл повністю проіндексований, він переноситься в /DATA/SURROGATES/out
-You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Ви можете переобробити вже оброблені сурогатні файли, перемістивши їх з /DATA/SURROGATES/out в /DATA/SURROGATES/in.
+Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.==Кожного разу, коли сурогатний XML-файл з’являється в /DATA/PACKS/load, індексувач YaCy розбирає цей файл і індексує записи, що там містяться.
+When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded==Коли сурогатний файл повністю проіндексований, він переноситься в /DATA/PACKS/loaded
+You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load==Ви можете переобробити вже оброблені сурогатні файли, перемістивши їх з /DATA/PACKS/loaded в /DATA/PACKS/load.
 Import Process==Процес імпорту
 Thread:==Потік:
 #Dump:==Dump:
@@ -1792,7 +1792,7 @@ Remaining Time:==Залишилось часу:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 OAI-PMH Import==Імпорт OAI-PMH
-Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates==Наслідки імпортування знаходяться на сторінці <a href="CrawlResults.html?process=7">наслідків імпорту "заміщень"
+Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for packs==Наслідки імпортування знаходяться на сторінці <a href="CrawlResults.html?process=7">наслідків імпорту "заміщень"
 Single request import==Імпортування одиночним запитом
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==При цьому способі тільки один запит відправляється до OAI-PMH сервера і отримані записи додаються в індекс
 "Import OAI-PMH source"=="Імпортувати джерело OAI-PMH"
@@ -2342,7 +2342,7 @@ milliseconds==мілісекунд
 > kbytes<==> кбайтів<
 
 #Сурогати->Заміщення
-</body>==<script>window.onload = function () {$("td:contains('unlimited')").text('необмежений'); $("td:contains('HTTPD Server/Proxy')").text('HTTPD сервер/проксі'); $("td:contains('DHT Distribution')").text('DHT розподіл'); $("td:contains('YaCy Core')").text('Ядро YaCy'); $("td:contains('Seed-List Upload')").text('Вивантаження списку насіння'); $("a:contains('Local Crawl')").text('Місцеве сканування'); $("td:contains('Remote Crawl URL Loader')").text('URL завантажувач віддаленого сканування'); $("a:contains('Remote Crawl Job')").text('Завдання віддаленого сканування'); $("td:contains('Surrogates')").text('Заміщення'); $("td:contains('Cleanup')").text('Очищення'); $("td:contains('Crawler Pool')").text('Басейн сканувача'); $("td:contains('httpd Session Pool')").text('Басейн HTTPD сесії'); $("td:contains('the HTTPD, used as web server and proxy')").text('HTTPD, використовується як веб-сервер і проксі'); $("td:contains('selection, transfer and deletion of index entries that are not searched on your peer, but on others')").text('відбір, передача та видалення записів індексу, які шукались не на вашому вузлі, а на інших'); $("td:contains('this is the p2p-control and peer-ping task')").text('це завдання p2p-керування та пінгу вузла'); $("td:contains('task that a principal peer performes to generate and upload a seed-list to a ftp account')").text('завдання, яке головний вузол здійснює для створення і завантаження списку насіння для облікового запису ftp'); $("td:contains('thread that performes a single crawl step from the local crawl queue')").text('потік, який виконує один крок сканування з місцевої черги сканування'); $("td:contains('thread that loads remote crawl lists from other peers')").text('потік, який завантажує списки віддалених сканувань від інших вузлів'); $("td:contains('thread that performes a single crawl/indexing step triggered by a remote peer')").text('потік, який проводить одиночний крок сканування/індексації, викликаний віддаленим вузлом'); $("td:contains('A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.')").text('потік, що опитує шлях сурогатів і розміщує всі документи в один surroagte файл в черзі індексації.'); $("td:contains('simple cleaning process for monitoring information')").text('простий процес очищення інформації моніторингу');}</script></body>
+</body>==<script>window.onload = function () {$("td:contains('unlimited')").text('необмежений'); $("td:contains('HTTPD Server/Proxy')").text('HTTPD сервер/проксі'); $("td:contains('DHT Distribution')").text('DHT розподіл'); $("td:contains('YaCy Core')").text('Ядро YaCy'); $("td:contains('Seed-List Upload')").text('Вивантаження списку насіння'); $("a:contains('Local Crawl')").text('Місцеве сканування'); $("td:contains('Remote Crawl URL Loader')").text('URL завантажувач віддаленого сканування'); $("a:contains('Remote Crawl Job')").text('Завдання віддаленого сканування'); $("td:contains('Packs')").text('Заміщення'); $("td:contains('Cleanup')").text('Очищення'); $("td:contains('Crawler Pool')").text('Басейн сканувача'); $("td:contains('httpd Session Pool')").text('Басейн HTTPD сесії'); $("td:contains('the HTTPD, used as web server and proxy')").text('HTTPD, використовується як веб-сервер і проксі'); $("td:contains('selection, transfer and deletion of index entries that are not searched on your peer, but on others')").text('відбір, передача та видалення записів індексу, які шукались не на вашому вузлі, а на інших'); $("td:contains('this is the p2p-control and peer-ping task')").text('це завдання p2p-керування та пінгу вузла'); $("td:contains('task that a principal peer performes to generate and upload a seed-list to a ftp account')").text('завдання, яке головний вузол здійснює для створення і завантаження списку насіння для облікового запису ftp'); $("td:contains('thread that performes a single crawl step from the local crawl queue')").text('потік, який виконує один крок сканування з місцевої черги сканування'); $("td:contains('thread that loads remote crawl lists from other peers')").text('потік, який завантажує списки віддалених сканувань від інших вузлів'); $("td:contains('thread that performes a single crawl/indexing step triggered by a remote peer')").text('потік, який проводить одиночний крок сканування/індексації, викликаний віддаленим вузлом'); $("td:contains('A thread that polls the PACKS path and puts all Documents in one surroagte file into the indexing queue.')").text('потік, що опитує шлях сурогатів і розміщує всі документи в один surroagte файл в черзі індексації.'); $("td:contains('simple cleaning process for monitoring information')").text('простий процес очищення інформації моніторингу');}</script></body>
 #-----------------------------
 
 #File: PerformanceConcurrency_p.html
@@ -3597,7 +3597,7 @@ DHT Transfer==DHT-Передача
 Proxy Use==Проксі
 Local Crawling==Місцеві
 Global Crawling==Глобальні
-Surrogate Import==Імпорт "Заміщень"
+Pack Import==Імпорт "Заміщень"
 #-----------------------------
 
 #File: env/templates/submenuDesign.template

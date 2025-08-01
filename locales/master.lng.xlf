@@ -2453,10 +2453,10 @@
        <source>deselect the partial import flag</source>
     </trans-unit>
     <trans-unit id="e5986233" xml:space="preserve" approved="no" translate="yes">
-       <source>When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.</source>
+       <source>When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.</source>
     </trans-unit>
     <trans-unit id="7f68bfb2" xml:space="preserve" approved="no" translate="yes">
-       <source>All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.</source>
+       <source>All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.</source>
     </trans-unit>
     <trans-unit id="dfe68bce" xml:space="preserve" approved="no" translate="yes">
        <source>The URL stub</source>
@@ -2495,13 +2495,13 @@
        <source>&lt;b&gt;Password&lt;/b&gt; for the account of that user given above</source>
     </trans-unit>
     <trans-unit id="777c2e3" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;b&gt;Posts per file&lt;/b&gt;&lt;br /&gt;in exported surrogates</source>
+       <source>&lt;b&gt;Posts per file&lt;/b&gt;&lt;br /&gt;in exported packs</source>
     </trans-unit>
     <trans-unit id="eb1fd76b" xml:space="preserve" approved="no" translate="yes">
        <source>Check database connection</source>
     </trans-unit>
     <trans-unit id="febcecad" xml:space="preserve" approved="no" translate="yes">
-       <source>Export Content to Surrogates</source>
+       <source>Export Content to Packs</source>
     </trans-unit>
     <trans-unit id="7a28359f" xml:space="preserve" approved="no" translate="yes">
        <source>Import a database dump</source>
@@ -2522,7 +2522,7 @@
        <source>Info failed:</source>
     </trans-unit>
     <trans-unit id="62f6028b" xml:space="preserve" approved="no" translate="yes">
-       <source>Export successful! Wrote #[files]# files in DATA/SURROGATES/in</source>
+       <source>Export successful! Wrote #[files]# files in DATA/PACKS/load</source>
     </trans-unit>
     <trans-unit id="4e2c7b51" xml:space="preserve" approved="no" translate="yes">
        <source>Export failed:</source>
@@ -2579,7 +2579,7 @@
        <source>Posts per file</source>
     </trans-unit>
     <trans-unit id="142e0c0d" xml:space="preserve" approved="no" translate="yes">
-       <source>in exported surrogates</source>
+       <source>in exported packs</source>
     </trans-unit>
   </body>
 </file>
@@ -2846,7 +2846,7 @@
        <source>since it shows crawl requests from other peers.</source>
     </trans-unit>
     <trans-unit id="51121b61" xml:space="preserve" approved="no" translate="yes">
-       <source>Case (7) occurs if surrogate files are imported</source>
+       <source>Case (7) occurs if pack files are imported</source>
     </trans-unit>
     <trans-unit id="3953b093" xml:space="preserve" approved="no" translate="yes">
        <source>The image above illustrates the data flow initiated by web index acquisition.</source>
@@ -2951,13 +2951,13 @@
        <source>Statistics about #[domains]# domains in this stack:</source>
     </trans-unit>
     <trans-unit id="e2b69744" xml:space="preserve" approved="no" translate="yes">
-       <source>(7) Results from surrogates import</source>
+       <source>(7) Results from pack import</source>
     </trans-unit>
     <trans-unit id="742eeb80" xml:space="preserve" approved="no" translate="yes">
-       <source>These records had been imported from surrogate files in DATA/SURROGATES/in</source>
+       <source>These records had been imported from pack files in DATA/PACKS/load</source>
     </trans-unit>
     <trans-unit id="dc86ab52" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;em&gt;Use Case:&lt;/em&gt; place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method</source>
+       <source>&lt;em&gt;Use Case:&lt;/em&gt; place files with dublin core metadata content into DATA/PACKS/load or use an index import method</source>
     </trans-unit>
     <trans-unit id="3f1a6e99" xml:space="preserve" approved="no" translate="yes">
        <source>(i.e. &lt;a href="IndexImportMediawiki_p.html"&gt;MediaWiki import&lt;/a&gt;, &lt;a href="IndexImportOAIPMH_p.html"&gt;OAI-PMH retrieval&lt;/a&gt;)</source>
@@ -4751,7 +4751,7 @@
        <source>Full Data Records:</source>
     </trans-unit>
     <trans-unit id="aa903601" xml:space="preserve" approved="no" translate="yes">
-       <source>(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)</source>
+       <source>(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/PACKS/load/)</source>
     </trans-unit>
     <trans-unit id="Line0038" xml:space="preserve" approved="no" translate="yes">
        <source>(Rich and full-text Elasticsearch data, one document per line in one flat JSON file, can be bulk-imported to elasticsearch with the command "curl -XPOST localhost:9200/collection1/yacy/_bulk --data-binary @yacy_dump_XXX.flatjson")</source>
@@ -4787,7 +4787,7 @@
        <source>Finished export of #[urlcount]# Documents to file</source>
     </trans-unit>
     <trans-unit id="1bfecfea" xml:space="preserve" approved="no" translate="yes">
-       <source>Import this file by moving it to DATA/SURROGATES/in</source>
+       <source>Import this file by moving it to DATA/PACKS/load</source>
     </trans-unit>
     <trans-unit id="64110976" xml:space="preserve" approved="no" translate="yes">
        <source>Export to file #[exportfile]# failed:</source>
@@ -4947,19 +4947,19 @@
        <source>The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:</source>
     </trans-unit>
     <trans-unit id="d504cb55" xml:space="preserve" approved="no" translate="yes">
-       <source>Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.</source>
+       <source>Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.</source>
     </trans-unit>
     <trans-unit id="b61c5bd1" xml:space="preserve" approved="no" translate="yes">
        <source>When each of the generated output file is finished, it is renamed to a .xml file</source>
     </trans-unit>
     <trans-unit id="4508732e" xml:space="preserve" approved="no" translate="yes">
-       <source>Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.</source>
+       <source>Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.</source>
     </trans-unit>
     <trans-unit id="e0a572b8" xml:space="preserve" approved="no" translate="yes">
-       <source>When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out</source>
+       <source>When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded</source>
     </trans-unit>
     <trans-unit id="b60d0ab2" xml:space="preserve" approved="no" translate="yes">
-       <source>You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in</source>
+       <source>You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load</source>
     </trans-unit>
     <trans-unit id="278c1cf4" xml:space="preserve" approved="no" translate="yes">
        <source>Import Process</source>
@@ -5038,7 +5038,7 @@
        <source>OAI-PMH Import</source>
     </trans-unit>
     <trans-unit id="55381611" xml:space="preserve" approved="no" translate="yes">
-       <source>Results from the import can be monitored in the &lt;a href="CrawlResults.html?process=7"&gt;indexing results for surrogates</source>
+       <source>Results from the import can be monitored in the &lt;a href="CrawlResults.html?process=7"&gt;indexing results for packs</source>
     </trans-unit>
     <trans-unit id="52d1b50e" xml:space="preserve" approved="no" translate="yes">
        <source>Single request import</source>
@@ -10238,7 +10238,7 @@
        <source>Global Crawling&lt;/a&gt;</source>
     </trans-unit>
     <trans-unit id="16f4722d" xml:space="preserve" approved="no" translate="yes">
-       <source>Surrogate Import</source>
+       <source>Pack Import</source>
     </trans-unit>
     <trans-unit id="ffd9ecbd" xml:space="preserve" approved="no" translate="yes">
        <source>Crawl Results</source>

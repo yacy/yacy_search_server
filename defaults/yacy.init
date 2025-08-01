@@ -304,11 +304,12 @@ proxyCache.sync.lockTimeout = 2000
 # you can use the proxy with fresh/stale rules or in a always-fresh mode
 proxyAlwaysFresh = false
 
-# a path to the surrogate input directory
-surrogates.in = DATA/SURROGATES/in
-
-# a path to the surrogate output directory
-surrogates.out = DATA/SURROGATES/out
+# paths to the packs directories
+packs.hold = DATA/PACKS/hold
+packs.live = DATA/PACKS/live
+packs.load = DATA/PACKS/load
+packs.loaded = DATA/PACKS/loaded
+packs.unload = DATA/PACKS/unload
 
 # a path to the dictionaries directory
 # this directory also contains subdirectories for input sources, the did-you-mean function and other
@@ -726,10 +727,10 @@ recrawlindex_memprereq=1048576
 62_remotetriggeredcrawl_memprereq=12582912
 62_remotetriggeredcrawl_loadprereq=8.0
 62_remotetriggeredcrawl_isPaused=false
-70_surrogates_idlesleep=10000
-70_surrogates_busysleep=0
-70_surrogates_memprereq=12582912
-70_surrogates_loadprereq=8.0
+70_packs_idlesleep=10000
+70_packs_busysleep=0
+70_packs_memprereq=12582912
+70_packs_loadprereq=8.0
 720_ccimport_idlesleep=100
 720_ccimport_busysleep=1000
 720_ccimport_memprereq=1048576
