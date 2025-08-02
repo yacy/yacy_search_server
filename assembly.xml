@@ -1,0 +1,104 @@
+<assembly
+  xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
+
+  <id>bin</id>
+
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+
+  <baseDirectory>yacy</baseDirectory>
+
+  <fileSets>
+    <fileSet>
+      <directory>addon</directory>
+      <outputDirectory>addon</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>*.sh</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+    <fileSet>
+      <directory>defaults</directory>
+      <outputDirectory>defaults</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>htroot</directory>
+      <outputDirectory>htroot</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>langdetect</directory>
+      <outputDirectory>langdetect</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>locales</directory>
+      <outputDirectory>locales</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>skins</directory>
+      <outputDirectory>skins</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>source</directory>
+      <excludes>
+        <exclude>**/.gitignore</exclude>
+      </excludes>
+      <outputDirectory>source</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}</directory>
+      <includes>
+        <include>*.bat</include>
+        <!--include>*.sh</include--><!-- move to extra fileset to set filemode -->
+        <include>yacy.*</include>
+        <include>build.xml</include>
+        <include>build.properties</include>
+        <include>readme.txt</include>
+        <include>gpl.txt</include>
+        <include>lgpl21.txt</include>
+        <include>AUTHORS</include>
+        <include>COPYRIGHT</include>
+        <include>NOTICE</include>
+      </includes>
+      <outputDirectory>.</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}</directory>
+      <includes>
+        <include>*.sh</include>
+      </includes>
+      <excludes>
+        <exclude>fixMacBuild.sh</exclude>
+      </excludes>
+      <fileMode>0755</fileMode>
+      <outputDirectory>.</outputDirectory>
+    </fileSet>
+  </fileSets>
+
+  <dependencySets>
+    <dependencySet>
+      <!-- adds the main yacycore.jar to the lib directory of zip package with defined name (yacycore.jar)
+           hint: the standard Maven output name (yacycore-version.jar) can not be used as the std. startup script uses a classpath lib\yacycore.jar -->
+      <useProjectArtifact>true</useProjectArtifact>
+      <includes>
+        <include>net.yacy:yacycore</include>
+      </includes>
+      <scope>runtime</scope>
+      <outputDirectory>lib</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+    </dependencySet>
+
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+      <scope>runtime</scope>
+      <outputDirectory>lib</outputDirectory>
+    </dependencySet>
+  </dependencySets>
+</assembly>
