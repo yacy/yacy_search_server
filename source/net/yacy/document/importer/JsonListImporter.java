@@ -211,7 +211,7 @@ public class JsonListImporter extends Thread implements Importer {
                     ctype.add(pack, list);
                 } else {
                     // first handle exceptional keys / maybe patch for other systems + other names
-                    if (key.equals("url_s") || key.equals("sku")) {
+                    if (key.equals("url") || key.equals("url_s") || key.equals("sku")) {
                         // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
                         final DigestURL durl = new DigestURL(o.toString());
                         final String id = ASCII.String(durl.hash());

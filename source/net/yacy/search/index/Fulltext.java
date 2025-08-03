@@ -727,13 +727,14 @@ public final class Fulltext {
     private final static Set<String> minified_keys = new HashSet<>();
     static {
         //minified_keys.add(CollectionSchema.id.getSolrFieldName());
-        minified_keys.add(CollectionSchema.sku.getSolrFieldName());
-        minified_keys.add(CollectionSchema.title.getSolrFieldName());
-        //minified_keys.add(CollectionSchema.author.getSolrFieldName());
+        minified_keys.add(CollectionSchema.sku.getSolrFieldName());            // required but should be renamed to url
+        minified_keys.add(CollectionSchema.title.getSolrFieldName());          // required
+        //minified_keys.add(CollectionSchema.author.getSolrFieldName());       // would be nice to have, but from web crawls this usually contains nonsense (i.e SEO spam)
         minified_keys.add(CollectionSchema.description_txt.getSolrFieldName());
-        //minified_keys.add(CollectionSchema.size_i.getSolrFieldName());
-        minified_keys.add(CollectionSchema.last_modified.getSolrFieldName());
-        minified_keys.add(CollectionSchema.text_t.getSolrFieldName());
+        //minified_keys.add(CollectionSchema.size_i.getSolrFieldName());       // nice but rarely of actual use
+        minified_keys.add(CollectionSchema.last_modified.getSolrFieldName());  // often wrong (latest date from CMS sytems) however useful if right
+        minified_keys.add(CollectionSchema.text_t.getSolrFieldName());         // required, should contain markdown
+        minified_keys.add(CollectionSchema.collection_sxt.getSolrFieldName()); // needed to support the pack concept
     }
 
     public class Export extends Thread {
@@ -844,12 +845,28 @@ public final class Fulltext {
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                             final String url = this.getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
+
+                            // exclude non-minified keys if minified export is requested
                             if (this.minified) {
                                 final Iterator<Entry<String, Object>> i = doc.iterator();
                                 while (i.hasNext()) {
                                     if (!minified_keys.contains(i.next().getKey())) i.remove();
                                 }
                             }
+
+                            // rename sku to url_s
+                            final Iterator<Entry<String, Object>> i = doc.iterator();
+                            while (i.hasNext()) {
+                                Entry<String, Object> entry = i.next();
+                                if (entry.getKey().equals(CollectionSchema.sku.getSolrFieldName())) {
+                                    String sku = (String) entry.getValue();
+                                    i.remove();
+                                    doc.setField("url_s", sku);
+                                    break;
+                                }
+                            }
+
+                            // write the document in requested format
                             final CRIgnoreWriter sw = new CRIgnoreWriter();
                             if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
                             if (this.format == ExportFormat.solr) EnhancedXMLResponseWriter.writeDoc(sw, doc);
