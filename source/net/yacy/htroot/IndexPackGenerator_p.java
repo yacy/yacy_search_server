@@ -195,7 +195,7 @@ public class IndexPackGenerator_p {
                         GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(now));
                 // file name schema: YaCyPack_<category>-<tier>-<origin>_<slug>_<YYMMDD>.jsonlist
                 // possible storage paths are: hold, load, loaded, unload, live; we use hold here, loaded would also be correct
-                export = sb.index.fulltext().export(new File(sb.getDataPath() + "/DATA/PACKS/hold/"), filename, format.getExt(), filter, query, format, dom, text, -1, false);
+                export = sb.index.fulltext().export(new File(sb.getDataPath() + "/DATA/PACKS/hold/"), filename, format.getExt(), filter, query, format, dom, text, -1, true);
             } catch (final IOException e) {
                 prop.put("lurlexporterror", 1);
                 prop.put("lurlexporterror_exportfile", "-no export-");
