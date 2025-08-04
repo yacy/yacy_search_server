@@ -6,6 +6,7 @@
     <h3>Index Packs</h3>
     <ul class="SubMenu">
       <li><a href="IndexPackGenerator_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Pack Generator</a></li>
+      <li><a href="IndexPackManager_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Pack Manager</a></li>
     </ul>
   </div>
   <div class="SubMenugroup">
