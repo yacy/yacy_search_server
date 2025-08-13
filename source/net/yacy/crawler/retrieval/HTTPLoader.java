@@ -82,7 +82,7 @@ public final class HTTPLoader {
         // load fulltext of html page
         Latency.updateBeforeLoad(entry.url());
         final long start = System.currentTimeMillis();
-        final Response doc = load(entry, profile, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, agent);
+        final Response doc = this.load(entry, profile, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, agent);
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
@@ -137,7 +137,7 @@ public final class HTTPLoader {
         }
 
         // create a request header
-        final RequestHeader requestHeader = createRequestheader(request, agent);
+        final RequestHeader requestHeader = this.createRequestheader(request, agent);
 
         // HTTP-Client
         try (final HTTPClient client = new HTTPClient(agent)) {
@@ -158,7 +158,7 @@ public final class HTTPLoader {
             if (statusCode > 299 && statusCode < 310) {
                 // client.close(); // explicit close caused: warning: [try] explicit call to close() on an auto-closeable resource
 
-                final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, statusline, responseHeader, requestURLString);
+                final DigestURL redirectionUrl = this.extractRedirectURL(request, profile, url, statusline, responseHeader, requestURLString);
 
                 if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
                     // we have two use cases here: loading from a crawl or just
@@ -204,7 +204,7 @@ public final class HTTPLoader {
 
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return openInputStream(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
+                    return this.openInputStream(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
                 }
                 // we don't want to follow redirects
                 this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
@@ -310,19 +310,16 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
         if (request.referrerhash() != null) {
-                    String refererURL = this.sb.getURL(request.referrerhash());
-                    if (refererURL != null) {
-                        requestHeader.put(RequestHeader.REFERER, refererURL);
-                    }
+            String refererURL = this.sb.getURL(request.referrerhash());
+            if (refererURL != null) {
+                requestHeader.put(RequestHeader.REFERER, refererURL);
+            }
         }
 
         requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
-        requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE,
-                this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
-        requestHeader.put(HeaderFramework.ACCEPT_CHARSET,
-                this.sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
-        requestHeader.put(HeaderFramework.ACCEPT_ENCODING,
-                this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
+        requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
+        requestHeader.put(HeaderFramework.ACCEPT_CHARSET, this.sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
+        requestHeader.put(HeaderFramework.ACCEPT_ENCODING, this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
         return requestHeader;
     }
 
@@ -362,7 +359,7 @@ public final class HTTPLoader {
         Response response = null;
 
         // create a request header
-        final RequestHeader requestHeader = createRequestheader(request, agent);
+        final RequestHeader requestHeader = this.createRequestheader(request, agent);
 
         // HTTP-Client
         try (final HTTPClient client = new HTTPClient(agent)) {
@@ -379,7 +376,7 @@ public final class HTTPLoader {
             // check redirection
             if (statusCode > 299 && statusCode < 310) {
 
-                final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client.getHttpResponse().getStatusLine(),
+                final DigestURL redirectionUrl = this.extractRedirectURL(request, profile, url, client.getHttpResponse().getStatusLine(),
                         responseHeader, requestURLString);
 
                 if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
@@ -412,7 +409,7 @@ public final class HTTPLoader {
 
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return load(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
+                    return this.load(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
                 }
                 // we don't want to follow redirects
                 this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
@@ -483,7 +480,6 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, DEFAULT_LANGUAGE);
-        requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
 
         try (final HTTPClient client = new HTTPClient(agent)) {
