@@ -294,7 +294,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, "3")),
                 true,
                 CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
@@ -329,7 +329,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_DEPTH, "1")),
                 true,
                 CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
@@ -364,7 +364,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 Integer.parseInt(sb.getConfig(SwitchboardConstants.PROXY_PREFETCH_DEPTH, "0")),
                 true,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
@@ -398,7 +398,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 null,
@@ -432,7 +432,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE),
@@ -466,7 +466,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE),
@@ -508,7 +508,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_GREEDY_LEARNING_TEXT_RECRAWL_CYCLE),
@@ -542,7 +542,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE),
@@ -576,7 +576,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE),
@@ -610,7 +610,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PACK_RECRAWL_CYCLE),
@@ -647,7 +647,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                true, //noindexWhenCanonicalUnequalURL
+                false, //noindexWhenCanonicalUnequalURL
                 0,
                 false,
                 null,

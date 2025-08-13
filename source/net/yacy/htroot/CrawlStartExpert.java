@@ -371,7 +371,7 @@ public class CrawlStartExpert {
 
         // Check Canonical?
         if (post == null) {
-            prop.put("noindexWhenCanonicalUnequalURLChecked", 1);
+            prop.put("noindexWhenCanonicalUnequalURLChecked", 0);
         } else {
             prop.put("noindexWhenCanonicalUnequalURLChecked",
                     post.getBoolean("noindexWhenCanonicalUnequalURL") ? 1 : 0);
@@ -571,7 +571,7 @@ public class CrawlStartExpert {
         }
 
         // ---------- Agent name
-        final List<String> agentNames = new ArrayList<String>();
+        final List<String> agentNames = new ArrayList<>();
         if (sb.isIntranetMode()) {
             agentNames.add(ClientIdentification.yacyIntranetCrawlerAgentName);
         }
