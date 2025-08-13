@@ -41,7 +41,7 @@
       <dependency org="org.apache.calcite" name="calcite-core" rev="1.18.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.18.0" conf="compile->master"/>
       <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" />
-      <dependency org="org.apache.commons" name="commons-lang3" rev="3.16.0" />
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.14"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.14"/>
       <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
