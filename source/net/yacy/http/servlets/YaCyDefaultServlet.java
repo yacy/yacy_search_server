@@ -147,7 +147,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         this._htDocsPath = sb.htDocsPath;
         this._htLocalePath = sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
 
-        this._servletContext = getServletContext();
+        this._servletContext = this.getServletContext();
 
         this._mimeTypes = new MimeTypes();
         final String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
@@ -156,12 +156,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
         } else {
             this._welcomes = new String[]{tmpstr,"index.html"};
         }
-        this._acceptRanges = getInitBoolean("acceptRanges", this._acceptRanges);
-        this._dirAllowed = getInitBoolean("dirAllowed", this._dirAllowed);
+        this._acceptRanges = this.getInitBoolean("acceptRanges", this._acceptRanges);
+        this._dirAllowed = this.getInitBoolean("dirAllowed", this._dirAllowed);
 
         Resource.setDefaultUseCaches(false); // caching is handled internally (prevent double caching)
 
-        final String rb = getInitParameter("resourceBase");
+        final String rb = this.getInitParameter("resourceBase");
         try {
             if (rb != null) {
                 this._resourceBase = Resource.newResource(rb);
@@ -176,12 +176,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
         if (ConcurrentLog.isFine("FILEHANDLER")) {
             ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + this._resourceBase);
         }
-        this.templateMethodCache = new ConcurrentHashMap<String, Method>();
+        this.templateMethodCache = new ConcurrentHashMap<>();
     }
 
     /* ------------------------------------------------------------ */
     protected boolean getInitBoolean(final String name, final boolean dft) {
-        final String value = getInitParameter(name);
+        final String value = this.getInitParameter(name);
         if (value == null || value.length() == 0) {
             return dft;
         }
@@ -243,7 +243,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             // Is this a Range request?
             reqRanges = request.getHeaders(HeaderFramework.RANGE);
-            if (!hasDefinedRange(reqRanges)) {
+            if (!this.hasDefinedRange(reqRanges)) {
                 reqRanges = null;
             }
         }
@@ -261,7 +261,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (reqRanges == null && !endsWithSlash) {
                 final int p = pathInContext.lastIndexOf('.');
                 if (p >= 0) {
-                    final Method rewriteMethod = rewriteMethod(pathInContext);
+                    final Method rewriteMethod = this.rewriteMethod(pathInContext);
                     if (rewriteMethod != null) {
                         hasClass = true;
                     } else {
@@ -276,7 +276,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             // find resource
-            resource = getResource(pathInContext);
+            resource = this.getResource(pathInContext);
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
@@ -304,10 +304,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(this._servletContext.getContextPath(), pathInContext)));
                 } else {
                     if (hasClass) { // this is a YaCy servlet, handle the template
-                        handleTemplate(pathInfo, request, response);
+                        this.handleTemplate(pathInfo, request, response);
                     } else {
-                        if (included || passConditionalHeaders(request, response, resource)) {
-                            sendData(request, response, included, resource, reqRanges);
+                        if (included || this.passConditionalHeaders(request, response, resource)) {
+                            this.sendData(request, response, included, resource, reqRanges);
                         }
                     }
                 }
@@ -332,7 +332,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         response.sendRedirect(response.encodeRedirectURL(buf.toString()));
                     }
                 } // else look for a welcome file
-                else if (null != (welcome = getWelcomeFile(pathInContext))) {
+                else if (null != (welcome = this.getWelcomeFile(pathInContext))) {
                     ConcurrentLog.fine("FILEHANDLER","welcome={}" + welcome);
 
                     // Forward to the index
@@ -345,8 +345,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         }
                     }
                 } else {
-                    if (included || passConditionalHeaders(request, response, resource)) {
-                        sendDirectory(request, response, resource, pathInContext);
+                    if (included || this.passConditionalHeaders(request, response, resource)) {
+                        this.sendDirectory(request, response, resource, pathInContext);
                     }
                 }
             }
@@ -366,7 +366,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        this.doGet(request, response);
     }
 
     /* ------------------------------------------------------------ */
@@ -399,7 +399,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         for (final String _welcome : this._welcomes) {
             final String welcome_in_context = URIUtil.addPaths(pathInContext, _welcome);
-            final Resource welcome = getResource(welcome_in_context);
+            final Resource welcome = this.getResource(welcome_in_context);
             if (welcome != null && welcome.exists()) {
                 return _welcome;
             }
@@ -524,7 +524,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (include) {
                 resource.writeTo(out, 0, content_length);
             } else {
-                writeHeaders(response, resource, content_length);
+                this.writeHeaders(response, resource, content_length);
                 resource.writeTo(out, 0, content_length);
             }
         } else {
@@ -533,7 +533,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             //  if there are no satisfiable ranges, send 416 response
             if (ranges == null || ranges.isEmpty()) {
-                writeHeaders(response, resource, content_length);
+                this.writeHeaders(response, resource, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                 response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         InclusiveByteRange.to416HeaderRangeString(content_length));
@@ -547,7 +547,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (ranges.size() == 1) {
                 final InclusiveByteRange singleSatisfiableRange = ranges.iterator().next();
                 final long singleLength = singleSatisfiableRange.getSize();
-                writeHeaders(response, resource, singleLength);
+                this.writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         singleSatisfiableRange.toHeaderRangeString(content_length));
@@ -560,7 +560,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             //  216 response which does not require an overall
             //  content-length header
             //
-            writeHeaders(response, resource, -1);
+            this.writeHeaders(response, resource, -1);
             final String mimetype = response.getContentType();
             if (mimetype == null) {
                 ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: Unknown mimetype for " + request.getRequestURI());
@@ -660,7 +660,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     protected Object invokeServlet(final Method targetMethod, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return targetMethod.invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
+        return targetMethod.invoke(null, request, args, Switchboard.getSwitchboard()); // add switchboard
     }
 
     /**
@@ -813,8 +813,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 localeSelection = lng;
             }
         }
-        final File targetLocalizedFile = getLocalizedFile(target, localeSelection);
-        final Method targetMethod = rewriteMethod(target);
+        final File targetLocalizedFile = this.getLocalizedFile(target, localeSelection);
+        final Method targetMethod = this.rewriteMethod(target);
         final String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
         final long now = System.currentTimeMillis();
@@ -844,19 +844,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 // standard attributes are just pushed as string
                 args.put(argName, request.getParameter(argName));
             }
-            final RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
+            final RequestHeader legacyRequestHeader = this.generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
             if (ServletFileUpload.isMultipartContent(request)) {
-                parseMultipart(request, args);
+                this.parseMultipart(request, args);
             }
             // eof modification to read attribute
             Object tmp;
             try {
                 if (args.isEmpty()) {
                     // yacy servlets typically test for args != null (but not for args .isEmpty())
-                    tmp = invokeServlet(targetMethod, legacyRequestHeader, null);
+                    tmp = this.invokeServlet(targetMethod, legacyRequestHeader, null);
                 } else {
-                    tmp = invokeServlet(targetMethod, legacyRequestHeader, args);
+                    tmp = this.invokeServlet(targetMethod, legacyRequestHeader, args);
                 }
             } catch(final InvocationTargetException e) {
                 if(e.getCause() instanceof InvalidURLLicenceException) {
@@ -929,7 +929,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
-                updateRespHeadersForImages(target, response);
+                this.updateRespHeadersForImages(target, response);
                 final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
@@ -942,9 +942,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (tmp instanceof InputStream) {
                 /* Images and favicons can also be written directly from an inputStream */
-                updateRespHeadersForImages(target, response);
+                this.updateRespHeadersForImages(target, response);
 
-                writeInputStream(response, targetExt, (InputStream)tmp);
+                this.writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
 
@@ -1007,9 +1007,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (targetLocalizedFile.exists() && targetLocalizedFile.isFile() && targetLocalizedFile.canRead()) {
 
-                sb.setConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, appendPath(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, ""), target));
+                sb.setConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, this.appendPath(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, ""), target));
                 if (args != null && !args.isEmpty()) {
-                    sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), target));
+                    sb.setConfig("server.servlets.submitted", this.appendPath(sb.getConfig("server.servlets.submitted", ""), target));
                 }
 
                 // add the application version, the uptime and the client name to every rewrite table
@@ -1071,7 +1071,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     TemplateEngine.writeTemplate(targetLocalizedFile.getName(), fis, bas, templatePatterns);
 
                     // handle SSI
-                    parseSSI (bas.toByteArray(),request,response);
+                    this.parseSSI (bas.toByteArray(),request,response);
                 } finally {
                     try {
                         fis.close();
@@ -1258,7 +1258,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     InputStream filecontent = null;
                     try {
                         filecontent = item.getInputStream();
-                        files.put(new AbstractMap.SimpleEntry<String, byte[]>(item.getFieldName(), FileUtils.read(filecontent)));
+                        files.put(new AbstractMap.SimpleEntry<>(item.getFieldName(), FileUtils.read(filecontent)));
                     } catch (final IOException e) {
                         ConcurrentLog.info("FILEHANDLER", e.getMessage());
                     } finally {
@@ -1271,7 +1271,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     final String n = job.getKey();
                     final byte[] v = job.getValue();
                     final String filename = args.get(n);
-                    if (filename != null && filename.endsWith(".gz")) {
+                    if (filename != null && (filename.endsWith(".gz") || filename.endsWith(".zip") || filename.endsWith(".warc") || filename.endsWith(".zim"))) {
                         // transform this value into base64
                         final String b64 = Base64Order.standardCoder.encode(v);
                         args.put(n + "$file", b64);

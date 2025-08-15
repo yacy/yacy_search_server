@@ -2118,15 +2118,15 @@ public final class Switchboard extends serverSwitch {
         return null;
     }
 
-    public boolean processPack(final String s) {
-        final File infile = new File(this.packsLoadPath, s);
+    public boolean processPack(final String inFileName, String collectionName) {
+        final File infile = new File(this.packsLoadPath, inFileName);
         if ( !infile.exists() || !infile.canWrite() || !infile.canRead() ) {
             return false;
         }
-        final File outfile = new File(this.packsLoadedPath, s);
+        final File outfile = new File(this.packsLoadedPath, inFileName);
         //if (outfile.exists()) return false;
         boolean moved = false;
-        if ( s.endsWith("xml.zip") ) {
+        if ( inFileName.endsWith("xml.zip") ) {
             // open the zip file with all the xml files in it
             ZipInputStream zis = null;
             try {
@@ -2141,7 +2141,7 @@ public final class Switchboard extends serverSwitch {
                         baos.write(buffer, 0, size);
                     }
                     baos.flush();
-                    this.processXMLPack(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                    this.processXMLPack(new ByteArrayInputStream(baos.toByteArray()), entry.getName(), collectionName);
                     baos.close();
                     if (this.shallTerminate()) break;
                 }
@@ -2154,9 +2154,9 @@ public final class Switchboard extends serverSwitch {
                 }
             }
             return moved;
-        } else if (s.endsWith(".warc") || s.endsWith(".warc.gz")) {
+        } else if (inFileName.endsWith(".warc") || inFileName.endsWith(".warc.gz")) {
             try {
-                final WarcImporter wri = new WarcImporter(infile);
+                final WarcImporter wri = new WarcImporter(infile, null, collectionName);
                 wri.start();
                 try {
                     wri.join();
@@ -2168,9 +2168,9 @@ public final class Switchboard extends serverSwitch {
                 this.log.warn("IO Error processing warc file " + infile);
             }
             return moved;
-        } else if (s.endsWith(".zim")) {
+        } else if (inFileName.endsWith(".zim")) {
             try {
-                final ZimImporter wri = new ZimImporter(infile.getAbsolutePath());
+                final ZimImporter wri = new ZimImporter(infile.getAbsolutePath(), null, collectionName);
                 wri.start();
                 try {
                     wri.join();
@@ -2183,16 +2183,16 @@ public final class Switchboard extends serverSwitch {
             }
             return moved;
         } else if (
-                s.endsWith(".jsonl") || s.endsWith(".jsonl.gz") ||
-                s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") ||
-                s.endsWith(".flatjson") || s.endsWith(".flatjson.gz")) {
+                inFileName.endsWith(".jsonl") || inFileName.endsWith(".jsonl.gz") ||
+                inFileName.endsWith(".jsonlist") || inFileName.endsWith(".jsonlist.gz") ||
+                inFileName.endsWith(".flatjson") || inFileName.endsWith(".flatjson.gz")) {
             return this.processPackJson(infile, outfile);
         }
         InputStream is = null;
         try {
             is = new BufferedInputStream(new FileInputStream(infile));
-            if (s.endsWith(".gz")) is = new GZIPInputStream(is, 65535);
-            this.processXMLPack(is, infile.getName());
+            if (inFileName.endsWith(".gz")) is = new GZIPInputStream(is, 65535);
+            this.processXMLPack(is, infile.getName(), collectionName);
         } catch (final IOException e ) {
             ConcurrentLog.logException(e);
         } finally {
@@ -2244,8 +2244,12 @@ public final class Switchboard extends serverSwitch {
         return moved;
     }
 
-    private void processXMLPack(final InputStream is, final String name) throws IOException {
+    private void processXMLPack(final InputStream is, final String name, String collection) throws IOException {
         final int concurrency = Runtime.getRuntime().availableProcessors();
+
+        final CrawlProfile xmlProfile = (CrawlProfile) Switchboard.getSwitchboard().crawler.defaultPackProfile.clone();
+        xmlProfile.setCollections(collection);
+        xmlProfile.setHandle();
 
         // start reader thread
         final XMLPackReader reader = new XMLPackReader(is, 100, this.crawlStacker, this.index.fulltext().getDefaultConfiguration(), concurrency);
@@ -2305,10 +2309,10 @@ public final class Switchboard extends serverSwitch {
                                             null,
                                             "",
                                             entry.getDate(),
-                                            Switchboard.this.crawler.defaultPackProfile.handle(),
+                                            xmlProfile.handle(),
                                             0,
-                                            Switchboard.this.crawler.defaultPackProfile.timezoneOffset());
-                            final Response response = new Response(request, null, null, Switchboard.this.crawler.defaultPackProfile, false, null);
+                                            xmlProfile.timezoneOffset());
+                            final Response response = new Response(request, null, null, xmlProfile, false, null);
                             final IndexingQueueEntry queueEntry =
                                     new IndexingQueueEntry(response, new Document[] {document}, null);
 
@@ -2401,7 +2405,7 @@ public final class Switchboard extends serverSwitch {
 
                     if (this.isPackFile(pack)) {
                         // read the pack file and store entry in index
-                        if ( this.processPack(pack) ) {
+                        if ( this.processPack(pack, "user") ) {
                             return true;
                         }
                     }

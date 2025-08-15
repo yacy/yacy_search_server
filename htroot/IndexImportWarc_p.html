@@ -14,7 +14,7 @@
     
     #(import)#
     <p>No import thread is running, you can start a new thread here</p>
-    <form action="IndexImportWarc_p.html" method="get" accept-charset="UTF-8">
+    <form action="IndexImportWarc_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <!-- no post method here, we don't want to transmit the whole file, only the path-->
       <fieldset>
         <legend>Warc File Selection: select an warc file (which may be gz compressed)</legend>
@@ -30,6 +30,8 @@
           <dt class="TableCellDark"><label for="url">Url:</label></dt>
           <dd><input name="url" id="url" value="" size="75"/></dd>
           <dt></dt>
+          <dt class="TableCellDark"><label for="collection">Collection:</label></dt>
+          <dd><input name="collection" id="collection" type="text" value="user" size="75" /></dd>
           <dd><input name="submit" class="btn btn-primary" type="submit" value="Import Warc File" /></dd>
         </dl>
       </fieldset>

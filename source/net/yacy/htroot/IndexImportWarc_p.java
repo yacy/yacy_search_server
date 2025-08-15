@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.WarcImporter;
 import net.yacy.server.serverObjects;
@@ -52,11 +53,14 @@ public class IndexImportWarc_p {
             if (post != null) {
                 if (post.containsKey("file") || post.containsKey("url")) {
                     final String filename = post.get("file");
+                    final String collection = post.get("collection", "user");
+                    final String data64 = post.get("file$file", null); // file uploads are all base64-encoded in YaCyDefaultServlet.parseMultipart
+                    final byte[] data = data64 == null ? null : Base64Order.standardCoder.decode(data64);
                     if (filename != null && filename.length() > 0) {
                         final File sourcefile = new File(filename);
-                        if (sourcefile.exists()) {
+                        if (sourcefile.exists() || data != null) {
                             try {
-                                final WarcImporter wi = new WarcImporter(sourcefile);
+                                final WarcImporter wi = new WarcImporter(sourcefile, data, collection);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final IOException ex) {
@@ -73,7 +77,7 @@ public class IndexImportWarc_p {
                         if (urlstr != null && urlstr.length() > 0) {
                             try {
                                 final MultiProtocolURL url = new MultiProtocolURL(urlstr);
-                                final WarcImporter wi = new WarcImporter(url);
+                                final WarcImporter wi = new WarcImporter(url, collection);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final MalformedURLException ex) {

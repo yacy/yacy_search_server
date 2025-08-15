@@ -37,6 +37,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FileUtils;
+import org.openzim.ZIMFile;
+import org.openzim.ZIMReader;
+import org.openzim.ZIMReader.ArticleEntry;
+import org.openzim.ZIMReader.DirectoryEntry;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -44,15 +50,11 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.TextParser;
 import net.yacy.search.Switchboard;
-
-import org.openzim.ZIMFile;
-import org.openzim.ZIMReader;
-import org.openzim.ZIMReader.ArticleEntry;
-import org.openzim.ZIMReader.DirectoryEntry;
 
 /**
  * ZIM importer
@@ -69,10 +71,12 @@ public class ZimImporter extends Thread implements Importer {
 
     static public ZimImporter job;
 
-    private ZIMFile file;
+    private final ZIMFile file;
     private ZIMReader reader;
-    private String path; 
+    private final String path;
     private String guessedSource;
+    private final byte[] data;
+    private final String collection;
 
     private int recordCnt;
     private long startTime;
@@ -80,62 +84,75 @@ public class ZimImporter extends Thread implements Importer {
     private long consumed;
     private boolean abort = false;
 
-    public ZimImporter(String path) throws IOException {
+    public ZimImporter(String path, byte[] data, String collection) throws IOException {
        super("ZimImporter - from file " + path);
        this.path = path;
-       this.file = new ZIMFile(this.path); // this will read already some of the metadata and could consume some time
-       this.sourceSize = this.file.length();
+       this.data = data;
+       File zimFilePath = new File(path);
+       if (!zimFilePath.exists() && this.data != null) {
+           File tempFile = File.createTempFile(zimFilePath.getName().substring(0, zimFilePath.getName().length() - 4), "zim");
+           FileUtils.writeByteArrayToFile(tempFile, data);
+           this.file = new ZIMFile(tempFile.getPath());
+       } else {
+           this.file = new ZIMFile(this.path); // this will read already some of the metadata and could consume some time
+       }
+       this.sourceSize = data == null ? this.file.length() : data.length;
+       this.collection = collection;
     }
 
     @Override
     public void run() {
         job = this;
         this.startTime = System.currentTimeMillis();
-        Switchboard sb = Switchboard.getSwitchboard();
+        final Switchboard sb = Switchboard.getSwitchboard();
         try {
             this.reader = new ZIMReader(this.file);
-            this.guessedSource = getSource(this.reader);
-            Date guessedDate = getDate(this.reader);
-            String dates = HeaderFramework.newRfc1123Format().format(guessedDate);
+            this.guessedSource = getSource(this.reader, this.file.getName());
+            final Date guessedDate = getDate(this.reader);
+            final String dates = HeaderFramework.newRfc1123Format().format(guessedDate);
 
             // verify the source
-            DirectoryEntry mainEntry = this.reader.getMainDirectoryEntry();
-            DigestURL mainURL = guessURL(this.guessedSource, mainEntry);
-            if (!mainURL.exists(ClientIdentification.browserAgent)) {
-                sb.log.info("zim importer: file " + this.file.getName() + " failed main url existence test: " + mainURL);
-                return; 
-            }
+            final DirectoryEntry mainEntry = this.reader.getMainDirectoryEntry();
+            final DigestURL mainURL = guessURL(this.guessedSource, mainEntry);
+            //if (!mainURL.exists(ClientIdentification.browserAgent)) {
+            //    sb.log.info("zim importer: file " + this.file.getName() + " failed main url existence test: " + mainURL);
+            //    return;
+            //}
+
+            final CrawlProfile zimProfile = (CrawlProfile) Switchboard.getSwitchboard().crawler.defaultPackProfile.clone();
+            zimProfile.setCollections(this.collection);
+            zimProfile.setHandle();
 
             // read all documents
             for (int i = 0; i < this.file.header_entryCount; i++) {
                 try {
                     if (this.abort) break;
-                    DirectoryEntry de = this.reader.getDirectoryInfo(i);
+                    final DirectoryEntry de = this.reader.getDirectoryInfo(i);
                     if (!(de instanceof ZIMReader.ArticleEntry)) continue;
-                    ArticleEntry ae = (ArticleEntry) de;
+                    final ArticleEntry ae = (ArticleEntry) de;
                     if (ae.namespace != 'C' && ae.namespace != 'A') continue;
-    
+
                     // check url
-                    DigestURL guessedUrl = guessURL(this.guessedSource, de);
-                    if (recordCnt < 10) {
+                    final DigestURL guessedUrl = guessURL(this.guessedSource, de);
+                    //if (this.recordCnt < 10) {
                         // critical test for the first 10 urls
-                        if (!guessedUrl.exists(ClientIdentification.browserAgent)) {
-                            sb.log.info("zim importer: file " + this.file.getName() + " failed url " + recordCnt + " existence test: " + guessedUrl);
-                            return; 
-                        }
-                    }
-    
+                    //    if (!guessedUrl.exists(ClientIdentification.browserAgent)) {
+                    //        sb.log.info("zim importer: file " + this.file.getName() + " failed url " + this.recordCnt + " existence test: " + guessedUrl);
+                    //        return;
+                    //    }
+                    //}
+
                     // check availability of text parser
-                    String mimeType = ae.getMimeType();
+                    final String mimeType = ae.getMimeType();
                     if (!mimeType.startsWith("text/") && !mimeType.equals("application/epub+zip")) continue; // in this import we want only text, not everything that is possible
                     if (TextParser.supportsMime(mimeType) != null) continue;
-    
+
                     // read the content
-                    byte[] b = this.reader.getArticleData(ae);
-    
+                    final byte[] b = this.reader.getArticleData(ae);
+
                     // create artificial request and response headers for the indexer
-                    RequestHeader requestHeader = new RequestHeader();
-                    ResponseHeader responseHeader = new ResponseHeader(200);
+                    final RequestHeader requestHeader = new RequestHeader();
+                    final ResponseHeader responseHeader = new ResponseHeader(200);
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, de.getMimeType()); // very important to tell parser which kind of content
                     responseHeader.put(HeaderFramework.LAST_MODIFIED, dates); // put in the guessd date to have something that is not the current date
                     final Request request = new Request(
@@ -144,29 +161,29 @@ public class ZimImporter extends Thread implements Importer {
                             null, // referrerhash the hash of the referrer URL
                             de.title, // name the name of the document to crawl
                             null, // appdate the time when the url was first time appeared
-                            sb.crawler.defaultPackProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
+                            zimProfile.handle(),        // profileHandle the name of the prefetch profile. This must not be null!
                             0,    // depth the crawling depth of the entry
-                            sb.crawler.defaultPackProfile.timezoneOffset() // timezone offset
+                            zimProfile.timezoneOffset() // timezone offset
                     );
                     final Response response = new Response(
                             request,
                             requestHeader,
                             responseHeader,
-                            Switchboard.getSwitchboard().crawler.defaultPackProfile,
+                            zimProfile,
                             false,
                             b
                     );
-    
+
                     // throw this to the indexer
-                    String error = sb.toIndexer(response);
+                    final String error = sb.toIndexer(response);
                     if (error != null) ConcurrentLog.info("ZimImporter", "error parsing: " + error);
                     this.recordCnt++;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // catch any error that could stop the importer
                     ConcurrentLog.info("ZimImporter", "error loading: " + e.getMessage());
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.info("ZimImporter", "error reading: " + e.getMessage());
         }
         ConcurrentLog.info("ZimImporter", "Indexed " + this.recordCnt + " documents");
@@ -190,7 +207,7 @@ public class ZimImporter extends Thread implements Importer {
     @Override
     public int speed() {
         if (this.recordCnt == 0) return 0;
-        return (int) (this.recordCnt / Math.max(0L, runningTime() ));
+        return (int) (this.recordCnt / Math.max(0L, this.runningTime() ));
     }
 
     @Override
@@ -203,7 +220,7 @@ public class ZimImporter extends Thread implements Importer {
         if (this.consumed == 0) {
             return 0;
         }
-        long speed = this.consumed / runningTime();
+        final long speed = this.consumed / this.runningTime();
         return (this.sourceSize - this.consumed) / speed;
     }
 
@@ -217,11 +234,11 @@ public class ZimImporter extends Thread implements Importer {
             return null; // Handle null or empty input
         }
 
-        String[] parts = fileName.split("_");
+        final String[] parts = fileName.split("_");
         if (parts.length == 0) {
             return null;
         }
-        String firstPart = parts[0];
+        final String firstPart = parts[0];
 
         // Handling special cases where the domain name might not be obvious
         // These are based on your provided list and can be expanded as needed
@@ -293,8 +310,8 @@ public class ZimImporter extends Thread implements Importer {
         // Handling domain patterns
         if (firstPart.contains(".stackexchange.com")) {
             return firstPart;
-        } else if (firstPart.endsWith(".com") || firstPart.endsWith(".org") || firstPart.endsWith(".de") || 
-                   firstPart.endsWith(".fr") || firstPart.endsWith(".pt") || firstPart.endsWith(".it") || 
+        } else if (firstPart.endsWith(".com") || firstPart.endsWith(".org") || firstPart.endsWith(".de") ||
+                   firstPart.endsWith(".fr") || firstPart.endsWith(".pt") || firstPart.endsWith(".it") ||
                    firstPart.endsWith(".ja") || firstPart.endsWith(".es") || firstPart.endsWith(".eo")) {
             return firstPart;
         } else if (firstPart.contains("-")) {
@@ -303,7 +320,7 @@ public class ZimImporter extends Thread implements Importer {
 
         // Additional general domain extraction logic
         if (firstPart.contains(".")) {
-            int lastDotIndex = firstPart.lastIndexOf('.');
+            final int lastDotIndex = firstPart.lastIndexOf('.');
             if (lastDotIndex > 0 && lastDotIndex < firstPart.length() - 1) {
                 // Extract up to the next character beyond the TLD, to support TLDs of variable length
                 int endIndex = firstPart.indexOf('.', lastDotIndex + 1);
@@ -318,19 +335,20 @@ public class ZimImporter extends Thread implements Importer {
         return null;
     }
 
-    public static String getSource(ZIMReader r) throws IOException {
+    public static String getSource(ZIMReader r, String fileName) throws IOException {
         String source = r.getMetadata("Source");
         if (source != null) return source;
-        source = "https://" + guessDomainName(r.getZIMFile().getName()) + "/";
+        if (fileName == null || fileName.length() == 0) fileName = r.getZIMFile().getName();
+        source = "https://" + guessDomainName(fileName) + "/";
         return source;
     }
 
     public static Date getDate(ZIMReader r) throws IOException {
-        String date = r.getMetadata("Date");
+        final String date = r.getMetadata("Date");
         if (date != null) try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             return format.parse(date);
-        } catch (ParseException e) {}
+        } catch (final ParseException e) {}
         // failover situation: use file date
         return new Date(r.getZIMFile().lastModified());
     }
@@ -491,47 +509,47 @@ public class ZimImporter extends Thread implements Importer {
     };
 
     public static void main(String[] args) {
-        Set<String> skip = new HashSet<>();
-        for (String s: skip_files) skip.add(s);
+        final Set<String> skip = new HashSet<>();
+        for (final String s: skip_files) skip.add(s);
         // zim file import test
         // will test mostly if domain names are included in zim file urls
-        String zimFilesPath = args[0];
-        File zimFiles = new File(zimFilesPath);
+        final String zimFilesPath = args[0];
+        final File zimFiles = new File(zimFilesPath);
 
         // make ordered file list; order by file size (start with smallest)
-        String[] filelist = zimFiles.list();
-        Map<Long, File> orderedFileMap = new TreeMap<>();
+        final String[] filelist = zimFiles.list();
+        final Map<Long, File> orderedFileMap = new TreeMap<>();
         for (int i = 0; i < filelist.length; i++) {
             if (!filelist[i].endsWith(".zim")) continue;
-            File f = new File(zimFiles, filelist[i]);
+            final File f = new File(zimFiles, filelist[i]);
             orderedFileMap.put(f.length() * 1000 + i, f);
         }
 
-        Collection<File> orderedFiles = orderedFileMap.values();
-        Set<String> files_ok = new LinkedHashSet<>();
-        Set<String> files_nok = new LinkedHashSet<>();
-        for (File f: orderedFiles) {
+        final Collection<File> orderedFiles = orderedFileMap.values();
+        final Set<String> files_ok = new LinkedHashSet<>();
+        final Set<String> files_nok = new LinkedHashSet<>();
+        for (final File f: orderedFiles) {
             if (skip.contains(f.getName())) continue;
             try {
-                ZIMFile z = new ZIMFile(f.getAbsolutePath());
-                ZIMReader r = new ZIMReader(z);
-                DirectoryEntry de = r.getMainDirectoryEntry();
+                final ZIMFile z = new ZIMFile(f.getAbsolutePath());
+                final ZIMReader r = new ZIMReader(z);
+                final DirectoryEntry de = r.getMainDirectoryEntry();
                 System.out.println("ZIM file:  " + f.getAbsolutePath());
-                for (String key: ZIMReader.METADATA_KEYS) {String s = r.getMetadata(key); if (s != null) System.out.println("Metadata " + key + ": " + s);};
+                for (final String key: ZIMReader.METADATA_KEYS) {final String s = r.getMetadata(key); if (s != null) System.out.println("Metadata " + key + ": " + s);}
                 System.out.println("Namespace: " + de.namespace);
                 System.out.println("Title:     " + de.title);
                 System.out.println("URL:       " + de.url);
                 System.out.println("Mime Type  " + de.getMimeType());
                 System.out.println("guessed domain: " + guessDomainName(f.getName())); // uses a table and rules that deduces a source from the file name
-                String source = getSource(r);
+                final String source = getSource(r, null);
                 System.out.println("guessed Source: " + source); // this uses metadata stored in the zim file
-                DigestURL mainURL = guessURL(source, de);
+                final DigestURL mainURL = guessURL(source, de);
                 System.out.println("guessed main article: " + mainURL);
-                boolean ok = mainURL.exists(ClientIdentification.browserAgent);
+                final boolean ok = mainURL.exists(ClientIdentification.browserAgent);
                 System.out.println("main article exists: " + ok);
                 if (ok) files_ok.add(f.getName()); else files_nok.add(f.getName());
                 System.out.println();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
