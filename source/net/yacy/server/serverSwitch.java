@@ -690,7 +690,7 @@ public class serverSwitch {
                 netdef = netdef.trim();
                 try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
                     final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
+                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent());
                     client.setHeader(reqHeader.entrySet());
                     final byte[] data = client.GETbytes(uri,
                                     this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),

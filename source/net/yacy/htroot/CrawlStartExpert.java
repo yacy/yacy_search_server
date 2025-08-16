@@ -572,17 +572,15 @@ public class CrawlStartExpert {
 
         // ---------- Agent name
         final List<String> agentNames = new ArrayList<>();
+        agentNames.add(ClientIdentification.browserAgentName); // see https://github.com/yacy/yacy_search_server/issues/727
+        agentNames.add(ClientIdentification.googleAgentName); // see https://github.com/yacy/yacy_search_server/issues/727
         if (sb.isIntranetMode()) {
             agentNames.add(ClientIdentification.yacyIntranetCrawlerAgentName);
         }
         if (sb.isGlobalMode()) {
             agentNames.add(ClientIdentification.yacyInternetCrawlerAgentName);
         }
-        agentNames.add(ClientIdentification.googleAgentName);
-        if (sb.isAllIPMode()) {
-            agentNames.add(ClientIdentification.browserAgentName);
-            if (ClientIdentification.getAgent(ClientIdentification.customAgentName) != null) agentNames.add(ClientIdentification.customAgentName);
-        }
+        if (ClientIdentification.getAgent(ClientIdentification.customAgentName) != null) agentNames.add(ClientIdentification.customAgentName);
         String defaultAgentName = agentNames.get(0);
         if (post != null && post.containsKey("agentName")) {
             final String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);

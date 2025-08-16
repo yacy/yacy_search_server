@@ -67,7 +67,7 @@ public class HostBalancer implements Balancer {
 
     private final static ConcurrentLog log = new ConcurrentLog("HostBalancer");
     public final static HandleMap depthCache = new RowHandleMap(Word.commonHashLength, Word.commonHashOrder, 2, 8 * 1024 * 1024, "HostBalancer.DepthCache");
-
+    public final static ClientIdentification.Agent unknwonAgentDefault = ClientIdentification.browserAgent;
     private final File hostsPath;
     private final boolean exceed134217727;
     private final ConcurrentHashMap<String, HostQueue> queues;
@@ -347,7 +347,8 @@ public class HostBalancer implements Balancer {
                         final String hosthash = i.next();
                         final HostQueue hq = this.queues.get(hosthash);
                         if (hq == null) {removehosts.add(hosthash); i.remove(); continue smallstacks;}
-                        final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
+
+                        final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hosthash, robots, unknwonAgentDefault);
                         if (delta == Integer.MIN_VALUE) {
                             // never-crawled hosts; we do not want to have too many of them in here. Loading new hosts means: waiting for robots.txt to load
                             freshhosts.add(hosthash);
@@ -404,7 +405,7 @@ public class HostBalancer implements Balancer {
                     mixedstrategy: for (final String h: this.roundRobinHostHashes) {
                         final HostQueue hq = this.queues.get(h);
                         if (hq != null) {
-                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), h, robots, ClientIdentification.yacyInternetCrawlerAgent) / 200;
+                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), h, robots, unknwonAgentDefault) / 200;
                             if (delta < 0) delta = 0;
                             List<String> queueHashes = fastTree.get(delta);
                             if (queueHashes == null) {
@@ -499,7 +500,7 @@ public class HostBalancer implements Balancer {
                         final String s = i.next();
                         final HostQueue hq = this.queues.get(s);
                         if (hq == null) {i.remove(); continue protectcheck;}
-                        final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                        final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), s, robots, unknwonAgentDefault);
                         if (delta >= 0) {i.remove();}
                     }
                 }
@@ -529,7 +530,7 @@ public class HostBalancer implements Balancer {
         @SuppressWarnings("unchecked")
         final Iterator<Request>[] hostIterator = (Iterator<Request>[]) Array.newInstance(Iterator.class, 1);
         hostIterator[0] = null;
-        return new Iterator<Request>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return hostsIterator.hasNext() || (hostIterator[0] != null && hostIterator[0].hasNext());
@@ -560,7 +561,7 @@ public class HostBalancer implements Balancer {
     public Map<String, Integer[]> getDomainStackHosts(final RobotsTxt robots) {
         final Map<String, Integer[]> map = new TreeMap<>(); // we use a tree map to get a stable ordering
         for (final HostQueue hq: this.queues.values()) {
-            final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, ClientIdentification.yacyInternetCrawlerAgent);
+            final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, unknwonAgentDefault);
             map.put(hq.getHost() + ":" + hq.getPort(), new Integer[]{hq.size(), delta});
         }
         return map;

@@ -181,18 +181,18 @@ public class HTTPClient implements Closeable {
 
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
-        this.timeout = agent.clientTimeout;
+        this.timeout = agent.clientTimeout();
         this.clientBuilder = initClientBuilder();
-        this.clientBuilder.setUserAgent(agent.userAgent);
+        this.clientBuilder.setUserAgent(agent.userAgent());
         this.reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
-        this.setTimout(agent.clientTimeout);
+        this.setTimout(agent.clientTimeout());
     }
 
     public HTTPClient(final ClientIdentification.Agent agent, final int timeout) {
         super();
         this.timeout = timeout;
         this.clientBuilder = initClientBuilder();
-        this.clientBuilder.setUserAgent(agent.userAgent);
+        this.clientBuilder.setUserAgent(agent.userAgent());
         this.reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
         this.setTimout(timeout);
     }
@@ -222,7 +222,7 @@ public class HTTPClient implements Closeable {
         builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
 
         // UserAgent
-        builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
+        builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent());
 
         // remove retries; we expect connections to fail; therefore we should not retry
         //builder.disableAutomaticRetries();
@@ -360,7 +360,7 @@ public class HTTPClient implements Closeable {
      * @param userAgent
      */
     public void setUserAgent(final ClientIdentification.Agent agent) {
-        this.clientBuilder.setUserAgent(agent.userAgent);
+        this.clientBuilder.setUserAgent(agent.userAgent());
     }
 
     /**

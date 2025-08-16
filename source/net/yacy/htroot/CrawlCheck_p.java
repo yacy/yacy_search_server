@@ -47,7 +47,7 @@ public class CrawlCheck_p {
         if (post.containsKey("crawlcheck")) {
 
             // get the list of rootURls for this crawl start
-            final Set<DigestURL> rootURLs = new LinkedHashSet<DigestURL>();
+            final Set<DigestURL> rootURLs = new LinkedHashSet<>();
             final String crawlingStart0 = post.get("crawlingURLs","").trim();
             final String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
             for (String crawlingStart: rootURLs0) {
@@ -89,12 +89,12 @@ public class CrawlCheck_p {
                     boolean robotsAllowed = true;
                     if (entry.robotsTxtEntry == null) {
                         prop.put("table_list_" + row + "_robots", "no robots");
-                        prop.put("table_list_" + row + "_crawldelay", agent.minimumDelta + " ms");
+                        prop.put("table_list_" + row + "_crawldelay", agent.minimumDelta() + " ms");
                         prop.put("table_list_" + row + "_sitemap", "");
                     } else {
                         robotsAllowed = !entry.robotsTxtEntry.isDisallowed(entry.digestURL);
                         prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
-                        prop.put("table_list_" + row + "_crawldelay", Math.max(agent.minimumDelta, entry.robotsTxtEntry.getCrawlDelayMillis()) + " ms");
+                        prop.put("table_list_" + row + "_crawldelay", Math.max(agent.minimumDelta(), entry.robotsTxtEntry.getCrawlDelayMillis()) + " ms");
                         prop.put("table_list_" + row + "_sitemap", entry.robotsTxtEntry.getSitemaps().toString());
                     }
 

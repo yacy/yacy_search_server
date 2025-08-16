@@ -55,7 +55,7 @@ public class latency_p {
             prop.put("domains_" + c + "_count", host.count());
             prop.put("domains_" + c + "_average", host.average());
             prop.put("domains_" + c + "_robots", host.robotsDelay());
-            prop.put("domains_" + c + "_flux", host.flux(agent.minimumDelta));
+            prop.put("domains_" + c + "_flux", host.flux(agent.minimumDelta()));
             c++;
         }
         prop.put("domains", c);

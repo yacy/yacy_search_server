@@ -87,7 +87,7 @@ public class RobotsTxt {
     public RobotsTxt(final WorkTables worktables, LoaderDispatcher loader, final int maxActiveTheads) {
         this.threadPool = new ThreadPoolExecutor(maxActiveTheads, maxActiveTheads,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
+                new LinkedBlockingQueue<>(),
                 new NamePrefixThreadFactory(RobotsTxt.class.getSimpleName()));
         this.syncObjects = new ConcurrentHashMap<>();
         this.tables = worktables;
@@ -199,7 +199,7 @@ public class RobotsTxt {
                 if (response == null) {
                     this.processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
                 } else {
-                    robotsTxt4Host = this.processNewEntry(robotsURL, response, agent.robotIDs);
+                    robotsTxt4Host = this.processNewEntry(robotsURL, response, agent.robotIDs());
                 }
             }
         }
@@ -225,6 +225,7 @@ public class RobotsTxt {
     }
 
     public void ensureExist(final MultiProtocolURL theURL, final ClientIdentification.Agent agent, boolean concurrent) {
+        if (!agent.isRobot()) return;
         if (theURL.isLocal()) return;
         final String urlHostPort = getHostPort(theURL);
         if (urlHostPort == null) return;
@@ -266,7 +267,7 @@ public class RobotsTxt {
                     if (response == null) {
                         RobotsTxt.this.processOldEntry(null, robotsURL, robotsTable);
                     } else {
-                        RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs);
+                        RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs());
                     }
                 }
             }
@@ -292,8 +293,8 @@ public class RobotsTxt {
             // generate artificial entry
             robotsTxt4Host = new RobotsTxtEntry(
                     robotsURL,
-                    new ArrayList<String>(),
-                    new ArrayList<String>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
                     new Date(),
                     new Date(),
                     null,

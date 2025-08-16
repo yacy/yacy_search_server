@@ -308,7 +308,7 @@ public final class HTTPLoader {
     private RequestHeader createRequestheader(final Request request, final ClientIdentification.Agent agent)
             throws IOException {
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent());
         if (request.referrerhash() != null) {
             String refererURL = this.sb.getURL(request.referrerhash());
             if (refererURL != null) {
@@ -478,7 +478,7 @@ public final class HTTPLoader {
 
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent());
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, DEFAULT_LANGUAGE);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
 
