@@ -107,8 +107,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
     @Deprecated /** use getScheme() (header not used in any request, 2017-02-22) */
     public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme";
-    
-    /** Added to responses embedding a hidden HTML field containing a transaction token, 
+
+    /** Added to responses embedding a hidden HTML field containing a transaction token,
      * to allow easier retrieval (without HTML parsing) of the token value by external tools such as bash scripts */
     public static final String X_YACY_TRANSACTION_TOKEN = "X-YaCy-Transaction-Token";
 
@@ -120,6 +120,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     public static final String RESPONSE_TIME_MILLIS = "ResponseTimeMillis";
 
+    public static final String SEC_FETCH_MODE = "Sec-Fetch-Mode";
 
     /* =============================================================
      * Constants for content-encodings
@@ -142,7 +143,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /* =============================================================
      * defining default http status messages
      * ============================================================= */
-    public static final Map<String, String> http1_0 = new ConcurrentHashMap<String, String>();
+    public static final Map<String, String> http1_0 = new ConcurrentHashMap<>();
     static {
         http1_0.put("200","OK");
         http1_0.put("201","Created");
@@ -161,7 +162,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         http1_0.put("502","Bad Gateway");
         http1_0.put("503","Service Unavailable");
     }
-    public static final Map<String, String> http1_1 = new ConcurrentHashMap<String, String>();
+    public static final Map<String, String> http1_1 = new ConcurrentHashMap<>();
     static {
         http1_1.putAll(http1_0);
         http1_1.put("100","Continue");
@@ -228,7 +229,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         super(ASCII.insensitiveASCIIComparator);
 
         // load with data
-        if (othermap != null) putAll(othermap);
+        if (othermap != null) this.putAll(othermap);
     }
 
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
@@ -237,7 +238,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     private static final SimpleDateFormat FORMAT_RFC1123 = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
-    
+
 	/**
 	 * A thread-safe date formatter using the
 	 * {@link HeaderFramework#PATTERN_RFC1123} pattern with the US locale on the UTC
@@ -245,7 +246,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 	 */
 	public static final DateTimeFormatter RFC1123_FORMATTER = DateTimeFormatter
 			.ofPattern(PATTERN_RFC1123.replace("yyyy", "uuuu")).withLocale(Locale.US).withZone(ZoneOffset.UTC);
-    
+
 	/**
 	 * @return a new SimpleDateFormat instance using the
 	 *         {@link HeaderFramework#PATTERN_RFC1123} pattern with the US locale.
@@ -292,7 +293,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             return s;
         }
     }
-    
+
 	/**
 	 * @param epochMilli
 	 *            a time value as the number of milliseconds from Epoch
@@ -312,7 +313,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 			return formatRFC1123(new Date(epochMilli));
 		}
 	}
-	
+
 	/**
 	 * @return the current time formatted using the
 	 *         {@link HeaderFramework#PATTERN_RFC1123} pattern.
@@ -332,7 +333,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             format.setTimeZone(TZ_GMT);
             format.set2DigitYearStart(CAL_GMT.getTime());
         }
-        
+
         FORMAT_RFC1123.setTimeZone(TZ_GMT);
         FORMAT_RFC1123.set2DigitYearStart(CAL_GMT.getTime());
     }
@@ -353,9 +354,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     // to make the occurrence of multiple keys possible, we add them using a counter
     public String add(final String key, final String value) {
-        final int c = keyCount(key);
-        if (c == 0) return put(key, value);
-        return put("*" + key + "-" + Integer.toString(c), value);
+        final int c = this.keyCount(key);
+        if (c == 0) return this.put(key, value);
+        return this.put("*" + key + "-" + Integer.toString(c), value);
     }
 
     /**
@@ -365,16 +366,16 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @return number of headers with same name
      */
     public int keyCount(final String key) {
-        if (!(containsKey(key))) return 0;
+        if (!(this.containsKey(key))) return 0;
         int c = 1;
         final String h = "*" + key + "-";
-        while (containsKey(h + Integer.toString(c))) c++;
+        while (this.containsKey(h + Integer.toString(c))) c++;
         return c;
     }
 
     // a convenience method to access the map with fail-over defaults
     public String get(final String key, final String dflt) {
-        final String result = get(key);
+        final String result = this.get(key);
         if (result == null) return dflt;
         return result;
     }
@@ -387,8 +388,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @return value of header with number=count
      */
     public String getSingle(final String key, final int count) {
-        if (count == 0) return get(key); // first look for just the key
-        return get("*" + key + "-" + count); // now for the numbered header names
+        if (count == 0) return this.get(key); // first look for just the key
+        return this.get("*" + key + "-" + count); // now for the numbered header names
     }
 
     /**
@@ -398,9 +399,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @return header values
      */
     public String[] getMultiple(final String key) {
-        final int count = keyCount(key);
+        final int count = this.keyCount(key);
         final String[] result = new String[count];
-        for (int i = 0; i < count; i++) result[i] = getSingle(key, i);
+        for (int i = 0; i < count; i++) result[i] = this.getSingle(key, i);
         return result;
     }
 
@@ -409,7 +410,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(f);
-            for (final java.util.Map.Entry<String, String> entry: entrySet()) {
+            for (final java.util.Map.Entry<String, String> entry: this.entrySet()) {
                 fos.write(UTF8.getBytes(entry.getKey() + "=" + entry.getValue() + "\r\n"));
             }
             fos.flush();
@@ -458,9 +459,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
      */
     public String getCharacterEncoding() {
-        return getCharacterEncoding(getContentType());
+        return getCharacterEncoding(this.getContentType());
     }
-    
+
     /**
      * References : RFC 7231 on HTTP/1.1 and RFC 2045 on Multipurpose Internet Mail Extensions (MIME)
      * @param contentType a Content-Type header value
@@ -493,11 +494,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @see org.apache.commons.fileupload.RequestContext#getContentLength()
      */
     public int getContentLength() {
-        if (containsKey(CONTENT_LENGTH)) {
+        if (this.containsKey(CONTENT_LENGTH)) {
             try {
-                return (int) Long.parseLong(get(CONTENT_LENGTH));
+                return (int) Long.parseLong(this.get(CONTENT_LENGTH));
             } catch (final NumberFormatException e) {
-                ConcurrentLog.warn("HeaderFramework", "content-length cannot be parsed: " + get(CONTENT_LENGTH));
+                ConcurrentLog.warn("HeaderFramework", "content-length cannot be parsed: " + this.get(CONTENT_LENGTH));
                 return -1;
             }
         }
@@ -511,9 +512,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @see org.apache.commons.fileupload.RequestContext#getContentLength()
      */
     public long getContentLengthLong() {
-        if (containsKey(CONTENT_LENGTH)) {
+        if (this.containsKey(CONTENT_LENGTH)) {
             try {
-                return Long.parseLong(get(CONTENT_LENGTH));
+                return Long.parseLong(this.get(CONTENT_LENGTH));
             } catch (final NumberFormatException e) {
                 return -1;
             }
@@ -532,8 +533,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     }
 
     protected Date headerDate(final String kind) {
-        if (containsKey(kind)) {
-            Date parsedDate = parseHTTPDate(get(kind));
+        if (this.containsKey(kind)) {
+            final Date parsedDate = parseHTTPDate(this.get(kind));
             if (parsedDate == null) return null;
             return parsedDate;
         }
@@ -581,7 +582,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
                  .append(httpStatusText).append("\r\n");
 
         // write header
-        final Iterator<String> i = keySet().iterator();
+        final Iterator<String> i = this.keySet().iterator();
         String key;
         char tag;
         int count;
@@ -589,9 +590,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             key = i.next();
             tag = key.charAt(0);
             if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
-                count = keyCount(key);
+                count = this.keyCount(key);
                 for (int j = 0; j < count; j++) {
-                    theHeader.append(key).append(": ").append(getSingle(key, j)).append("\r\n");
+                    theHeader.append(key).append(": ").append(this.getSingle(key, j)).append("\r\n");
                 }
             }
         }
@@ -613,7 +614,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             if (line.isEmpty()) break;
             if ((p = line.indexOf(':')) >= 0) {
                 // store a property
-                add(line.substring(0, p).trim(), line.substring(p + 1).trim());
+                this.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
             }
         }
     }
