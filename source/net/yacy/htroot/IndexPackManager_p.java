@@ -39,6 +39,7 @@ public class IndexPackManager_p {
         if (post != null) {
             final String mvfrom = post.get("mvfrom", "");
             final String mvto = post.get("mvto", "");
+            final String delete = post.get("delete", "0");
             final String file = post.get("file", "");
 
             if (!mvfrom.isEmpty() && !mvto.isEmpty() && !file.isEmpty()) {
@@ -49,6 +50,10 @@ public class IndexPackManager_p {
                 if ("hold".equals(mvfrom) && "load".equals(mvto)) {
                     new File(sb.packsHoldPath, file).renameTo(new File(sb.packsLoadPath, file));
                 }
+            }
+            if (delete.equals("1") && !file.isEmpty()) {
+                // delete as requested, files to delete can only be in hold
+                new File(sb.packsHoldPath, file).delete();
             }
         }
 
@@ -61,7 +66,10 @@ public class IndexPackManager_p {
         for (final String file: sb.packsInHold()) {
             prop.put("packs-hold_" + i + "_file", file);
             prop.put("packs-hold_" + i + "_size", new File(sb.packsHoldPath, file).length() / 1024);
-            prop.put("packs-hold_" + i + "_process", "<a class=\"btn btn-primary\" href=\"IndexPackManager_p.html?mvfrom=hold&mvto=load&file=" + file + "\" role=\"button\">load</a>");
+            prop.put("packs-hold_" + i + "_process",
+                "<a class=\"btn btn-primary\" href=\"IndexPackManager_p.html?mvfrom=hold&mvto=load&file=" + file + "\" role=\"button\">load</a>&nbsp;" +
+                "<a class=\"btn btn-primary\" href=\"IndexPackManager_p.html?delete=1&file=" + file + "\" role=\"button\">delete</a>"
+            );
             prop.put("packs_hold" + i + "_dark", dark ? "1" : "0");
             i++;
             dark = !dark;
