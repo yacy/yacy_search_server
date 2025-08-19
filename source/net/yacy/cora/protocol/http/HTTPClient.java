@@ -85,6 +85,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.auth.BasicSchemeFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
@@ -218,17 +219,9 @@ public class HTTPClient implements Closeable {
 
         builder.setConnectionManager(CONNECTION_MANAGER);
         builder.setConnectionManagerShared(true);
-
         builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
-
-        // UserAgent
         builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent());
-
-        // remove retries; we expect connections to fail; therefore we should not retry
-        //builder.disableAutomaticRetries();
-        // disable the cookiestore, cause this may cause segfaults and is not needed
-        builder.setDefaultCookieStore(null);
-        builder.disableCookieManagement();
+        builder.setDefaultCookieStore(new BasicCookieStore());
 
         // add custom keep alive strategy
         builder.setKeepAliveStrategy(customKeepAliveStrategy());
@@ -1095,7 +1088,6 @@ public class HTTPClient implements Closeable {
                 this.currentRequest.setHeader(entry.getKey(),entry.getValue());
             }
         }
-        if (this.host != null) this.currentRequest.setHeader(HttpHeaders.HOST, this.host);
 
         this.currentRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
