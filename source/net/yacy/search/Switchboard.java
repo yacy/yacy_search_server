@@ -2381,6 +2381,16 @@ public final class Switchboard extends serverSwitch {
         return list;
     }
 
+    public Map<String, String> packsMap() {
+        Map<String, String> map = new LinkedHashMap<>();
+        for (String pack: this.packsInHold()) map.put(pack, "hold");
+        for (String pack: this.packsInLive()) map.put(pack, "live");
+        for (String pack: this.packsInLoad()) map.put(pack, "load");
+        for (String pack: this.packsInLoaded()) map.put(pack, "loaded");
+        for (String pack: this.packsInUnload()) map.put(pack, "unload");
+        return map;
+    }
+
     public boolean packProcess() {
         // work off fresh entries from the proxy or from the crawler
         final String cautionCause = this.onlineCaution();
