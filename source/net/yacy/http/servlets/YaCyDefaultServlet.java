@@ -460,9 +460,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             return;
         }
 
-        final String base = URIUtil.addPaths(request.getRequestURI(), URIUtil.SLASH);
+        final String base = URIUtil.addEncodedPaths(request.getRequestURI(), URIUtil.SLASH);
 
-        final String dir = resource.getListHTML(base, pathInContext.length() > 1, null);
+        final String dir = resource.getListHTML(base, pathInContext.length() > 1, request.getQueryString());
         if (dir == null) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "No directory");
             return;
