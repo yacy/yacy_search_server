@@ -127,7 +127,7 @@ public class bzipParser extends AbstractParser implements Parser {
             // creating a new parser class to parse the unzipped content
             final String contentfilename = BZip2Utils.getUncompressedFileName(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
-            final Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tempFile);
+            final Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tempFile, null);
             if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
@@ -206,7 +206,7 @@ public class bzipParser extends AbstractParser implements Parser {
             final DigestURL contentLocation = new DigestURL(location.getProtocol(), location.getHost(), location.getPort(), contentPath);
 
             /* Rely on the supporting parsers to respect the maxLinks and maxBytes limits on compressed content */
-            return TextParser.parseWithLimits(contentLocation, mime, charset, timezoneOffset, depth, -1, compressedInStream, maxLinks, maxBytes);
+            return TextParser.parseWithLimits(contentLocation, mime, charset, timezoneOffset, depth, -1, compressedInStream, maxLinks, maxBytes, null);
         } catch (MalformedURLException e) {
             throw new Parser.Failure("Unexpected error while parsing gzip file. " + e.getMessage(), location);
         }
@@ -215,7 +215,7 @@ public class bzipParser extends AbstractParser implements Parser {
     @SuppressWarnings("resource")
     @Override
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
-            final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
+            final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes, final Date lastModified)
             throws Parser.Failure {
         Document maindoc = null;
         BZip2CompressorInputStream zippedContent = null;

@@ -878,7 +878,7 @@ public class Response {
                     this.url(), this.responseHeader == null ? null : this.responseHeader.getContentType(),
                     this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(),
                     TagValency.EVAL, new HashSet<>(),
-                    new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
+                    new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content, null);
         } catch(final Parser.Failure e) {
             throw e;
         } catch (final Exception e) {

@@ -2,19 +2,19 @@
  *  MediawikiImporter
  *  Copyright 2008 by Michael Peter Christen
  *  First released 20.11.2008 at https://yacy.net
- *
+ * <p>
  *  This is a part of YaCy, a peer-to-peer based web search engine
- *
+ * <p>
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *
+ * <p>
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -537,7 +537,8 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
                 this.url = new AnchorURL(this.urlStub + this.title);
-                final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(), TagValency.EVAL, new HashSet<>(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
+                final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(),
+                        TagValency.EVAL, new HashSet<>(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html), null);
                 this.document = Document.mergeDocuments(this.url, "text/html", parsed);
                 // the wiki parser is not able to find the proper title in the source text, so it must be set here
                 this.document.setTitle(this.title);

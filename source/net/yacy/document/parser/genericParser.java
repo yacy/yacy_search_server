@@ -2,21 +2,21 @@
  *  genericParser
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 30.11.2010 at https://yacy.net
- *
+ * <p>
  * $LastChangedDate$
  * $LastChangedRevision$
  * $LastChangedBy$
- *
+ * <p>
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *
+ * <p>
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -25,6 +25,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -54,7 +55,7 @@ public class genericParser extends AbstractParser implements Parser {
             final InputStream source)
             throws Parser.Failure, InterruptedException {
     	/* Exactly the same implementation when applying limits as only tokens in the location URL are parsed */
-        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE);
+        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE, null);
     }
     
     @Override
@@ -64,8 +65,9 @@ public class genericParser extends AbstractParser implements Parser {
     
 	@Override
 	public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset,
-			final VocabularyScraper scraper, final int timezoneOffset, final InputStream source, final int maxLinks,
-			final long maxBytes) throws Failure, InterruptedException, UnsupportedOperationException {
+                                      final VocabularyScraper scraper, final int timezoneOffset, final InputStream source, final int maxLinks,
+                                      final long maxBytes, final Date lastModified)
+            throws Failure, InterruptedException, UnsupportedOperationException {
         String filename = location.getFileName();
         final Document[] docs = new Document[]{new Document(
                 location,
@@ -85,7 +87,7 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 false,
-                null)};
+                lastModified)};
         return docs;
     }
 }

@@ -267,7 +267,7 @@ public class htmlParserTest extends TestCase {
 
             try (final FileInputStream inStream = new FileInputStream(file);) {
             	
-                final Document[] docs = parser.parseWithLimits(url, mimetype, null, new VocabularyScraper(), 0, inStream, 1000, 10000);
+                final Document[] docs = parser.parseWithLimits(url, mimetype, null, new VocabularyScraper(), 0, inStream, 1000, 10000, null);
                 final Document doc = docs[0];
                 assertNotNull("Parser result must not be null for file " + fileName, docs);
                 final String parsedText = doc.getTextString();
@@ -305,7 +305,7 @@ public class htmlParserTest extends TestCase {
 			try (InputStream sourceStream = new ByteArrayInputStream(
 					testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
 				final Document[] docs = parser.parseWithLimits(url, mimetype, charset, new VocabularyScraper(), 0,
-						sourceStream, maxLinks, Long.MAX_VALUE);
+						sourceStream, maxLinks, Long.MAX_VALUE, null);
 				final Document doc = docs[0];
 				assertEquals(maxLinks, doc.getAnchors().size());
 				assertEquals("The parsed document should be marked as partially parsed only when the limit is exceeded",
@@ -344,7 +344,7 @@ public class htmlParserTest extends TestCase {
 			try (InputStream sourceStream = new ByteArrayInputStream(
 					testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
 				final Document[] docs = parser.parseWithLimits(url, mimetype, charset, new VocabularyScraper(), 0,
-						sourceStream, maxLinks, Long.MAX_VALUE);
+						sourceStream, maxLinks, Long.MAX_VALUE, null);
 				final Document doc = docs[0];
 				assertEquals(maxLinks, doc.getRSS().size());
 				assertEquals("The parsed document should be marked as partially parsed only when the limit is exceeded",

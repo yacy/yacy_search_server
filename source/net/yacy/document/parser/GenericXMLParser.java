@@ -154,7 +154,7 @@ public class GenericXMLParser extends AbstractParser implements Parser {
      */
     @Override
     public Document[] parseWithLimits(DigestURL location, String mimeType, String charsetName, VocabularyScraper scraper,
-    		int timezoneOffset, InputStream source, int maxLinks, long maxBytes)
+    		int timezoneOffset, InputStream source, int maxLinks, long maxBytes, Date lastModified)
     		throws Failure, InterruptedException, UnsupportedOperationException {
     	/* Limit the size of the in-memory buffer to at most 25% of the available memory :
     	 * because some room is needed, and before being garbage collected the buffer will be converted to a String, then to a byte array. 
