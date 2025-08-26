@@ -24,9 +24,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -75,9 +73,7 @@ public class push_p {
                 final String collection = post.get("collection-" + i, "");
                 final String lastModified = post.get("lastModified-" + i, ""); // must be in RFC1123 format
                 final String contentType = post.get("contentType-" + i, "");
-                final String data64 = post.get("data-" + i + "$file", ""); // multi-file uploads are all base64-encoded in YaCyDefaultServlet.parseMultipart
-                byte[] data = Base64Order.standardCoder.decode(data64);
-                if ((data == null || data.length == 0) && data64.length() > 0) data = UTF8.getBytes(data64); // for test cases
+                final byte[] data = post.getBytes("data-" + i + "$file");
 
                 // create response header
                 final ResponseHeader responseHeader = new ResponseHeader(200);

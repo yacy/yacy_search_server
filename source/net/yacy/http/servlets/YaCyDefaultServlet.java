@@ -34,15 +34,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -70,12 +66,12 @@ import com.google.common.net.HttpHeaders;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ChunkedBytes;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BadTransactionException;
 import net.yacy.data.InvalidURLLicenceException;
@@ -1227,20 +1223,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected void parseMultipart(final HttpServletRequest request, final serverObjects args) throws IOException {
 
         // reject too large uploads
-        if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
+        //if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
 
         // check if we have enough memory
         if (!MemoryControl.request(request.getContentLength() * 3, false)) {
             throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
         }
         final ServletFileUpload upload = new ServletFileUpload(DISK_FILE_ITEM_FACTORY);
-        upload.setFileSizeMax(SIZE_FILE_THRESHOLD);
+        upload.setFileSizeMax(-1);
         try {
             // Parse the request to get form field items
             final List<FileItem> fileItems = upload.parseRequest(request);
             // Process the uploaded file items
             final Iterator<FileItem> i = fileItems.iterator();
-            final BlockingQueue<Map.Entry<String, byte[]>> files = new LinkedBlockingQueue<>();
             while (i.hasNext()) {
                 final FileItem item = i.next();
                 if (item.isFormField()) {
@@ -1258,7 +1253,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     InputStream filecontent = null;
                     try {
                         filecontent = item.getInputStream();
-                        files.put(new AbstractMap.SimpleEntry<>(item.getFieldName(), FileUtils.read(filecontent)));
+                        String filename = item.getFieldName() + "$file";
+                        args.put(filename, new ChunkedBytes(filecontent));
                     } catch (final IOException e) {
                         ConcurrentLog.info("FILEHANDLER", e.getMessage());
                     } finally {
@@ -1266,49 +1262,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 }
             }
-            if (files.size() <= 1) { // TODO: should include additonal checks to limit parameter.size below rel. large SIZE_FILE_THRESHOLD
-                for (final Map.Entry<String, byte[]> job: files) { // add the file content to parameter fieldname$file
-                    final String n = job.getKey();
-                    final byte[] v = job.getValue();
-                    final String filename = args.get(n);
-                    if (filename != null && (filename.endsWith(".gz") || filename.endsWith(".zip") || filename.endsWith(".warc") || filename.endsWith(".zim"))) {
-                        // transform this value into base64
-                        final String b64 = Base64Order.standardCoder.encode(v);
-                        args.put(n + "$file", b64);
-                        args.remove(n);
-                        args.put(n, filename + ".base64");
-                    } else {
-                        args.put(n + "$file", v); // the byte[] is transformed into UTF8. You cannot push binaries here
-                    }
-                }
-            } else {
-                // do this concurrently (this would all be superfluous if serverObjects could store byte[] instead only String)
-                final int t = Math.min(files.size(), Runtime.getRuntime().availableProcessors());
-                final Map.Entry<String, byte[]> POISON = new AbstractMap.SimpleEntry<>(null, null);
-                final Thread[] p = new Thread[t];
-                for (int j = 0; j < t; j++) {
-                    files.put(POISON);
-                    p[j] = new Thread("YaCyDefaultServlet.parseMultipart-" + j) {
-                        @Override
-                        public void run() {
-                            Map.Entry<String, byte[]> job;
-                            try {while ((job = files.take()) != POISON) {
-                                final String n = job.getKey();
-                                final byte[] v = job.getValue();
-                                final String filename = args.get(n);
-                                final String b64 = Base64Order.standardCoder.encode(v);
-                                synchronized (args) {
-                                    args.put(n + "$file", b64);
-                                    args.remove(n);
-                                    args.put(n, filename + ".base64");
-                                }
-                            }} catch (final InterruptedException e) {}
-                        }
-                    };
-                    p[j].start();
-                }
-                for (int j = 0; j < t; j++) p[j].join();
-            }
+
         } catch (final Exception ex) {
             ConcurrentLog.info("FILEHANDLER", ex.getMessage());
         }

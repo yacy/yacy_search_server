@@ -81,27 +81,27 @@ public class Surftips {
 
             // read voting
             String hash;
-            if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
+            if ((post != null) && ((hash = post.get("voteNegative", "")).length() > 0)) {
                 if (!sb.verifyAuthentication(header)) {
                     prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
                 if (sb.isRobinsonMode()) {
-                    final HashMap<String, String> map = new HashMap<String, String>();
+                    final HashMap<String, String> map = new HashMap<>();
                     map.put("urlhash", hash);
                     map.put("vote", "negative");
                     map.put("refid", post.get("refid", ""));
                     sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
                 }
             }
-            if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
+            if ((post != null) && ((hash = post.get("votePositive", "")).length() > 0)) {
                 if (!sb.verifyAuthentication(header)) {
                     prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
-                final HashMap<String, String> map = new HashMap<String, String>();
+                final HashMap<String, String> map = new HashMap<>();
                 map.put("urlhash", hash);
                 map.put("url", crypt.simpleDecode(post.get("url", "")));
                 map.put("title", crypt.simpleDecode(post.get("title", "")));
@@ -113,14 +113,14 @@ public class Surftips {
             }
 
             // create surftips
-            final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
-            final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+            final HashMap<String, Integer> negativeHashes = new HashMap<>(); // a mapping from an url hash to Integer (count of votes)
+            final HashMap<String, Integer> positiveHashes = new HashMap<>(); // a mapping from an url hash to Integer (count of votes)
             accumulateVotes(sb , negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            final ScoreMap<String> ranking = new ConcurrentScoreMap<String>(); // score cluster for url hashes
+            final ScoreMap<String> ranking = new ConcurrentScoreMap<>(); // score cluster for url hashes
             final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (GenericFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder);
-            final HashMap<String, Entry> surftips = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+            final HashMap<String, Entry> surftips = new HashMap<>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSurftips(sb, surftips, ranking, rowdef, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);

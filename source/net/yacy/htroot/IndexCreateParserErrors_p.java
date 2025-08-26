@@ -89,6 +89,8 @@ public class IndexCreateParserErrors_p {
                 if (cause == null) {
                     // well that should not really happen but occurs in a specific combination of running crawls for same domains with different url filters
                     prop.put("rejected_list_"+j+"_failreason", "no fail reason given");
+                } else if (cause.contains(CrawlStacker.ERROR_REDIRECT)) {
+                    continue; // do not show redirects in this list
                 } else if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
                     prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
                             "&regex=" + cause.substring(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER.length()) + "\">test</a>) " + cause);

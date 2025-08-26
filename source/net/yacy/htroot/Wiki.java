@@ -117,7 +117,7 @@ public class Wiki {
             final WikiBoard.Entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             sb.wikiDB.write(newEntry);
             // create a news message
-            final Map<String, String> map = new HashMap<String, String>();
+            final Map<String, String> map = new HashMap<>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !Arrays.equals(page.page(), content)) {
@@ -192,11 +192,11 @@ public class Wiki {
                     entry = sb.wikiDB.readBkp(UTF8.String(it.next()));
                     prop.put("mode_error_versions_" + count + "_date", WikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
-                    if (WikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
+                    if (WikiBoard.dateString(entry.date()).equals(post.get("old", ""))) {
                         prop.put("mode_error_versions_" + count + "_oldselected", "1");
                         oentry = entry;
                         oldselected = true;
-                    } else if (WikiBoard.dateString(entry.date()).equals(post.get("new", null))) {
+                    } else if (WikiBoard.dateString(entry.date()).equals(post.get("new", ""))) {
                         prop.put("mode_error_versions_" + count + "_newselected", "1");
                         nentry = entry;
                         newselected = true;

@@ -84,9 +84,9 @@ public class QuickCrawlLink_p {
         }
 
         // get the URL
-        String crawlingStart = post.get("url",null);
+        String crawlingStart = post.get("url", "");
 
-        if (crawlingStart != null) {
+        if (crawlingStart.length() == 0) {
             prop.put("mode", "1");
             crawlingStart = UTF8.decodeURL(crawlingStart);
 
@@ -94,8 +94,9 @@ public class QuickCrawlLink_p {
             final Segment indexSegment = sb.index;
 
             // get the browser title
-            String title = post.get("title", null);
-            if(title != null) {
+            String title = post.get("title", "");
+            if (title.length() == 0) {
+                title = crawlingStart;
             	/* Decode eventual special(non ASCII) characters in title */
             	title = UTF8.decodeURL(title);
             }
@@ -175,7 +176,7 @@ public class QuickCrawlLink_p {
             }
 
             // stack URL
-            String reasonString = null;
+            String reasonString;
             reasonString = sb.crawlStacker.stackCrawl(new Request(
                     sb.peers.mySeed().hash.getBytes(),
                     crawlingStartURL,

@@ -133,16 +133,16 @@ public class CrawlResults {
             if (post.containsKey("clearlist")) ResultURLs.clearStack(tabletype);
 
             if (post.containsKey("deleteentry")) {
-                final String hash = post.get("hash", null);
+                final byte[] hash = post.getBytes("hash");
                 if (hash != null) {
                     // delete from database
-                    sb.index.fulltext().remove(hash.getBytes());
+                    sb.index.fulltext().remove(hash);
                 }
             }
 
             if (post.containsKey("deletedomain") || post.containsKey("delandaddtoblacklist")) {
-                final String domain = post.get("domain", null);
-                if (domain != null) {
+                final String domain = post.get("domain", "");
+                if (domain != null && domain.length() > 0) {
                     selectedblacklist = post.get("blacklistname");
                     final Set<String> hostnames = new HashSet<>();
                     hostnames.add(domain);

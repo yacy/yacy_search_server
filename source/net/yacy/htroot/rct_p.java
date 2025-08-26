@@ -53,8 +53,8 @@ public class rct_p {
 
         if (post != null) {
             if (post.containsKey("retrieve")) {
-                final String peerhash = post.get("peer", null);
-                final Seed seed = (peerhash == null) ? null : sb.peers.getConnected(peerhash);
+                final String peerhash = post.get("peer", "");
+                final Seed seed = (peerhash.length() == 0) ? null : sb.peers.getConnected(peerhash);
         		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
         				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
                 final RSSFeed feed = (seed == null) ? null : Protocol.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000, preferHttps);

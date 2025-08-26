@@ -111,6 +111,20 @@ public class WarcImporter extends Thread implements Importer {
        this.collection = collection;
    }
 
+    public WarcImporter(File f, InputStream is, String collection) throws IOException {
+        super("WarcImporter - from file " + f.getName());
+        this.name = f.getName();
+        if (!f.exists() && is != null) {
+            this.sourceSize = is.available();
+            this.source = is;
+        } else {
+            this.sourceSize = f.length();
+            this.source = new FileInputStream(f);
+            if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
+        }
+        this.collection = collection;
+    }
+
     /**
      * Reads a Warc file and adds all contained responses to the index.
      * The reader automatically handles plain or gzip'd warc files

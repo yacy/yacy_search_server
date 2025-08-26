@@ -27,8 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import net.yacy.yacy;
-import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.SwitchboardConstants;
@@ -83,15 +81,7 @@ public class share {
         }
 
         // check data
-        final String dataString = post.get("data$file", "");
-        if (dataString.length() == 0) return prop;
-        byte[] data;
-        if (filename.endsWith(".base64")) {
-            data = Base64Order.standardCoder.decode(dataString);
-            filename = filename.substring(0, filename.length() - 7);
-        } else {
-            data = UTF8.getBytes(dataString);
-        }
+        final byte[] data = post.getBytes("data$file");
         if (data == null || data.length == 0) return prop;
 
         // modify the file name; ignore and replace the used transaction token

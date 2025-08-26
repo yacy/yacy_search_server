@@ -211,7 +211,7 @@ public class ViewFile {
             return prop;
         }
 
-        final String[] wordArray = wordArray(post.get("words", null));
+        final String[] wordArray = wordArray(post.get("words", ""));
         if (viewMode.equals("iframeWeb")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_WEB);
             prop.put("viewMode_url", url.toNormalform(true));

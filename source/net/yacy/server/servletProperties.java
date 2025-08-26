@@ -77,11 +77,6 @@ public class servletProperties extends serverObjects {
     }
 
     @Override
-    public Object get(final String key, final Object dflt) {
-        return super.get(this.prefix+key, dflt);
-    }
-
-    @Override
     public String get(final String key, final String dflt) {
         return super.get(this.prefix+key, dflt);
     }

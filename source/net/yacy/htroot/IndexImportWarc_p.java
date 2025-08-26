@@ -20,10 +20,10 @@ package net.yacy.htroot;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.WarcImporter;
 import net.yacy.server.serverObjects;
@@ -54,13 +54,12 @@ public class IndexImportWarc_p {
                 if (post.containsKey("file") || post.containsKey("url")) {
                     final String filename = post.get("file");
                     final String collection = post.get("collection", "user");
-                    final String data64 = post.get("file$file", null); // file uploads are all base64-encoded in YaCyDefaultServlet.parseMultipart
-                    final byte[] data = data64 == null ? null : Base64Order.standardCoder.decode(data64);
+                    final InputStream is = post.getInputStream("file$file");
                     if (filename != null && filename.length() > 0) {
                         final File sourcefile = new File(filename);
-                        if (sourcefile.exists() || data != null) {
+                        if (sourcefile.exists() || is != null) {
                             try {
-                                final WarcImporter wi = new WarcImporter(sourcefile, data, collection);
+                                final WarcImporter wi = new WarcImporter(sourcefile, is, collection);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final IOException ex) {

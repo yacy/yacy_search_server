@@ -332,11 +332,11 @@ public class Network {
                     final long onlySizeLessDocs = post == null ? Long.MAX_VALUE : post.getLong("onlysizelessdocs", Long.MAX_VALUE);
                     Iterator<Seed> e = null;
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
-                    final String sort = (post == null ? null : post.get("sort", null));
+                    final String sort = (post == null ? null : post.get("sort", ""));
                     switch (page) {
-                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort == null ? Seed.LCOUNT : sort)); break;
-                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort == null ? Seed.LASTSEEN : sort)); break;
-                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort == null ? Seed.LASTSEEN : sort)); break;
+                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort.length() == 0 ? Seed.LCOUNT : sort)); break;
+                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort.length() == 0 ? Seed.LASTSEEN : sort)); break;
+                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort.length() == 0 ? Seed.LASTSEEN : sort)); break;
                         default: break;
                     }
                     String startURL;

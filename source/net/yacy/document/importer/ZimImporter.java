@@ -25,6 +25,7 @@ package net.yacy.document.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -75,7 +76,6 @@ public class ZimImporter extends Thread implements Importer {
     private ZIMReader reader;
     private final String path;
     private String guessedSource;
-    private final byte[] data;
     private final String collection;
 
     private int recordCnt;
@@ -87,17 +87,33 @@ public class ZimImporter extends Thread implements Importer {
     public ZimImporter(String path, byte[] data, String collection) throws IOException {
        super("ZimImporter - from file " + path);
        this.path = path;
-       this.data = data;
        File zimFilePath = new File(path);
-       if (!zimFilePath.exists() && this.data != null) {
+       if (!zimFilePath.exists() && data != null) {
            File tempFile = File.createTempFile(zimFilePath.getName().substring(0, zimFilePath.getName().length() - 4), "zim");
            FileUtils.writeByteArrayToFile(tempFile, data);
+           tempFile.deleteOnExit();
            this.file = new ZIMFile(tempFile.getPath());
        } else {
            this.file = new ZIMFile(this.path); // this will read already some of the metadata and could consume some time
        }
        this.sourceSize = data == null ? this.file.length() : data.length;
        this.collection = collection;
+    }
+
+    public ZimImporter(String path, InputStream is, String collection) throws IOException {
+        super("ZimImporter - from file " + path);
+        this.path = path;
+        File zimFilePath = new File(path);
+        if (!zimFilePath.exists() && is != null) {
+            File tempFile = File.createTempFile(zimFilePath.getName().substring(0, zimFilePath.getName().length() - 4), "zim");
+            FileUtils.copyInputStreamToFile(is, tempFile);
+            tempFile.deleteOnExit();
+            this.file = new ZIMFile(tempFile.getPath());
+        } else {
+            this.file = new ZIMFile(this.path); // this will read already some of the metadata and could consume some time
+        }
+        this.sourceSize = this.file.length();
+        this.collection = collection;
     }
 
     @Override

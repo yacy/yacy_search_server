@@ -208,7 +208,7 @@ public class YaCyHttpServer {
         context.setServer(this.server);
         context.setContextPath("/");
         context.setHandler(handlers);
-        context.setMaxFormContentSize(1024 * 1024 * 10); // allow 10MB, large forms may be required during crawl starts with long lists
+        context.setMaxFormContentSize(-1);
         final org.eclipse.jetty.util.log.Logger log = Log.getRootLogger();
         context.setLogger(log);
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")

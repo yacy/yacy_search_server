@@ -31,6 +31,7 @@ package net.yacy.data;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,6 +48,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
@@ -57,11 +63,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.util.kelondroException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 public class BlogBoard {
@@ -138,7 +139,7 @@ public class BlogBoard {
     }
 
     public BlogEntry readBlogEntry(final String key) {
-        return readBlogEntry(key, this.database);
+        return this.readBlogEntry(key, this.database);
     }
 
     private BlogEntry readBlogEntry(final String key, final MapHeap base) {
@@ -154,7 +155,7 @@ public class BlogBoard {
             record = null;
         }
         return (record == null) ?
-            newEntry(key, new byte[0], UTF8.getBytes("anonymous"), Domains.LOCALHOST, new Date(), new byte[0], null, null) :
+            this.newEntry(key, new byte[0], UTF8.getBytes("anonymous"), Domains.LOCALHOST, new Date(), new byte[0], null, null) :
             new BlogEntry(key, record);
     }
 
@@ -163,7 +164,7 @@ public class BlogBoard {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             try {
                 final DocumentBuilder builder = factory.newDocumentBuilder();
-                return parseXMLimport(builder.parse(new ByteArrayInputStream(UTF8.getBytes(input))));
+                return this.parseXMLimport(builder.parse(new ByteArrayInputStream(UTF8.getBytes(input))));
             } catch (final ParserConfigurationException ex) {
                 ConcurrentLog.logException(ex);
             } catch (final SAXException ex) {
@@ -173,6 +174,23 @@ public class BlogBoard {
             }
         }
     	return false;
+    }
+
+    public boolean importXML(final InputStream is) {
+        if (is != null) {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            try {
+                final DocumentBuilder builder = factory.newDocumentBuilder();
+                return this.parseXMLimport(builder.parse(is));
+            } catch (final ParserConfigurationException ex) {
+                ConcurrentLog.logException(ex);
+            } catch (final SAXException ex) {
+                ConcurrentLog.logException(ex);
+            } catch (final IOException ex) {
+                ConcurrentLog.logException(ex);
+            }
+        }
+        return false;
     }
 
     private boolean parseXMLimport(final Document doc) {
@@ -224,7 +242,7 @@ public class BlogBoard {
             subject = UTF8.getBytes(StrSubject);
             author = UTF8.getBytes(StrAuthor);
             page = UTF8.getBytes(StrPage);
-            writeBlogEntry (newEntry(key, subject, author, ip, date, page, null, null));
+            this.writeBlogEntry (this.newEntry(key, subject, author, ip, date, page, null, null));
     	}
     	return true;
     }
@@ -255,8 +273,8 @@ public class BlogBoard {
 
         @Override
         public int compare(final String obj1, final String obj2) {
-            final BlogEntry blogEntry1 = readBlogEntry(obj1);
-            final BlogEntry blogEntry2 = readBlogEntry(obj2);
+            final BlogEntry blogEntry1 = BlogBoard.this.readBlogEntry(obj1);
+            final BlogEntry blogEntry2 = BlogBoard.this.readBlogEntry(obj2);
             if (blogEntry1 == null || blogEntry2 == null)
                 return 0;
             if (this.newestFirst) {
@@ -273,8 +291,8 @@ public class BlogBoard {
     }
 
     public Iterator<String> getBlogIterator(final boolean priv){
-        final Set<String> set = new TreeSet<String>(new BlogComparator(true));
-        final Iterator<BlogEntry> iterator = blogIterator(true);
+        final Set<String> set = new TreeSet<>(new BlogComparator(true));
+        final Iterator<BlogEntry> iterator = this.blogIterator(true);
         BlogEntry blogEntry;
         while (iterator.hasNext()) {
             blogEntry = iterator.next();
@@ -317,7 +335,7 @@ public class BlogBoard {
         @Override
         public BlogEntry next() {
             try {
-                return readBlogEntry(UTF8.String(this.blogIter.next()));
+                return BlogBoard.this.readBlogEntry(UTF8.String(this.blogIter.next()));
             } catch (final kelondroException e) {
                 //resetDatabase();
                 return null;
@@ -344,15 +362,15 @@ public class BlogBoard {
         Map<String, String> record;
 
         public BlogEntry(final String nkey, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page, final List<String> comments, final String commentMode) {
-            this.record = new HashMap<String, String>();
-            setKey(nkey);
-            setDate(date);
-            setSubject(subject);
-            setAuthor(author);
-            setIp(ip);
-            setPage(page);
-            setComments(comments);
-            setCommentMode(commentMode);
+            this.record = new HashMap<>();
+            this.setKey(nkey);
+            this.setDate(date);
+            this.setSubject(subject);
+            this.setAuthor(author);
+            this.setIp(ip);
+            this.setPage(page);
+            this.setComments(comments);
+            this.setCommentMode(commentMode);
 
             // TODO: implement this function
             this.record.put("privacy", "public");
@@ -364,7 +382,7 @@ public class BlogBoard {
             this.key = key;
             this.record = record;
             if (this.record.get("comments") == null) {
-                this.record.put("comments", ListManager.collection2string(new ArrayList<String>()));
+                this.record.put("comments", ListManager.collection2string(new ArrayList<>()));
             }
             if (this.record.get("commentMode") == null || this.record.get("commentMode").length() < 1) {
                 this.record.put("commentMode", "2");
@@ -450,7 +468,7 @@ public class BlogBoard {
             // This ist a Bugfix for Version older than 4443.
             if (this.record.get("comments").startsWith(",")) {
                     this.record.put("comments", this.record.get("comments").substring(1));
-                    writeBlogEntry(this);
+                    BlogBoard.this.writeBlogEntry(this);
             }
             final List<String> commentsize = ListManager.string2arraylist(this.record.get("comments"));
             return commentsize.size();
@@ -462,7 +480,7 @@ public class BlogBoard {
 
         private void setComments(final List<String> comments) {
             if (comments == null) {
-                this.record.put("comments", ListManager.collection2string(new ArrayList<String>()));
+                this.record.put("comments", ListManager.collection2string(new ArrayList<>()));
             } else {
                 this.record.put("comments", ListManager.collection2string(comments));
             }
