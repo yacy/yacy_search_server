@@ -84,19 +84,11 @@ public class ZimImporter extends Thread implements Importer {
     private long consumed;
     private boolean abort = false;
 
-    public ZimImporter(String path, byte[] data, String collection) throws IOException {
+    public ZimImporter(String path, String collection) throws IOException {
        super("ZimImporter - from file " + path);
        this.path = path;
-       File zimFilePath = new File(path);
-       if (!zimFilePath.exists() && data != null) {
-           File tempFile = File.createTempFile(zimFilePath.getName().substring(0, zimFilePath.getName().length() - 4), "zim");
-           FileUtils.writeByteArrayToFile(tempFile, data);
-           tempFile.deleteOnExit();
-           this.file = new ZIMFile(tempFile.getPath());
-       } else {
-           this.file = new ZIMFile(this.path); // this will read already some of the metadata and could consume some time
-       }
-       this.sourceSize = data == null ? this.file.length() : data.length;
+       this.file = new ZIMFile(this.path); // this will read already some of the metadata and could consume some time
+       this.sourceSize = this.file.length();
        this.collection = collection;
     }
 

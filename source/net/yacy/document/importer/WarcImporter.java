@@ -22,7 +22,6 @@
  */
 package net.yacy.document.importer;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -97,17 +96,12 @@ public class WarcImporter extends Thread implements Importer {
         this.collection = collection;
     }
 
-    public WarcImporter(File f, byte[] data, String collection) throws IOException {
+    public WarcImporter(File f, String collection) throws IOException {
        super("WarcImporter - from file " + f.getName());
        this.name = f.getName();
-       if (!f.exists() && data != null) {
-           this.sourceSize = data.length;
-           this.source = new ByteArrayInputStream(data);
-       } else {
-           this.sourceSize = f.length();
-           this.source = new FileInputStream(f);
-           if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
-       }
+       this.sourceSize = f.length();
+       this.source = new FileInputStream(f);
+       if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
        this.collection = collection;
    }
 

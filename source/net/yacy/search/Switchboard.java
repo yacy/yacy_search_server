@@ -2156,7 +2156,7 @@ public final class Switchboard extends serverSwitch {
             return moved;
         } else if (inFileName.endsWith(".warc") || inFileName.endsWith(".warc.gz")) {
             try {
-                final WarcImporter wri = new WarcImporter(infile, null, collectionName);
+                final WarcImporter wri = new WarcImporter(infile, collectionName);
                 wri.start();
                 try {
                     wri.join();
@@ -2170,7 +2170,7 @@ public final class Switchboard extends serverSwitch {
             return moved;
         } else if (inFileName.endsWith(".zim")) {
             try {
-                final ZimImporter wri = new ZimImporter(infile.getAbsolutePath(), null, collectionName);
+                final ZimImporter wri = new ZimImporter(infile.getAbsolutePath(), collectionName);
                 wri.start();
                 try {
                     wri.join();
