@@ -146,7 +146,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         @Override public int read(long p, byte[] dst, int off, int len) {
             if (p >= this.len) return -1;
             final int take = Math.min(len, this.len - (int)p);
-            final MappedByteBuffer dup = this.map().duplicate();
+            final ByteBuffer dup = this.map().duplicate();
             dup.position((int)p).limit((int)p + take);
             dup.get(dst, off, take);
             return take;
@@ -155,7 +155,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
             if (!this.writable) throw new RuntimeException("FileChunk is read-only");
             if (p >= this.len) return -1;
             final int take = Math.min(len, this.len - (int)p);
-            final MappedByteBuffer dup = this.map().duplicate();
+            final ByteBuffer dup = this.map().duplicate();
             dup.position((int)p).limit((int)p + take);
             dup.put(src, off, take);
             return take;

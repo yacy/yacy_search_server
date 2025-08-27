@@ -84,8 +84,8 @@ public class HFClient {
         return ids;
     }
 
-    public static List<String> listFiles(String repoId, boolean only_jsonl) throws IOException, InterruptedException {
-        List<String>  files = listFiles(repoId, RepoType.DATASET);
+    public static ArrayList<String> listFiles(String repoId, boolean only_jsonl) throws IOException, InterruptedException {
+        ArrayList<String>  files = listFiles(repoId, RepoType.DATASET);
         if (!only_jsonl) return files;
         for (int i = files.size() - 1; i >= 0; i--) {
             String file = files.get(i);
@@ -96,7 +96,7 @@ public class HFClient {
         return files;
     }
 
-    public static List<String> listFiles(String repoId, RepoType type) throws IOException, InterruptedException {
+    public static ArrayList<String> listFiles(String repoId, RepoType type) throws IOException, InterruptedException {
         String url = BASE + "/api/" + type.segment() + "/" + repoId;
         HTTPClient hc = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         byte[] body = hc.GETbytes(url, null, null, false);
@@ -107,7 +107,7 @@ public class HFClient {
         JsonNode filesArray = root.get("siblings");
         if (filesArray == null) filesArray = root.get("files");
 
-        List<String> out = new ArrayList<>();
+        ArrayList<String> out = new ArrayList<>();
         if (filesArray != null && filesArray.isArray()) {
             for (JsonNode f : filesArray) {
                 // models/datasets commonly expose "rfilename"
@@ -160,8 +160,8 @@ public class HFClient {
         List<String> repos = listYaCyPacks();
         System.out.println("Repos: " + repos);
         String test_repo_id = repos.isEmpty() ? null : repos.get(0);
-        List<String> all_files = test_repo_id == null ? new ArrayList(0) : listFiles(test_repo_id, false);
-        List<String> jsonl_files = test_repo_id == null ? new ArrayList(0) : listFiles(test_repo_id, true);
+        ArrayList<String> all_files = test_repo_id == null ? new ArrayList<>(0) : listFiles(test_repo_id, false);
+        ArrayList<String> jsonl_files = test_repo_id == null ? new ArrayList<>(0) : listFiles(test_repo_id, true);
         System.out.println("all   files in " + test_repo_id + ": " + all_files);
         System.out.println("jsonl files in " + test_repo_id + ": " + jsonl_files);
         if (!jsonl_files.isEmpty()) {
