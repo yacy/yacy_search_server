@@ -23,24 +23,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-/*
-  Why do we need this Class?
-  The purpose of this class is to provide a hashtable object to the server
-  and implementing interfaces. Values to and from cgi pages are encapsulated in
-  this object. The server shall be executable in a Java 1.0 environment,
-  so the following other options did not comply:
-
-  Properties - setProperty would be needed, but only available in 1.2
-  HashMap, TreeMap - only in 1.2
-  Hashtable - available in 1.0, but 'put' does not accept null values
-//FIXME: it's 2012, do we still need support for Java 1.0?!
-
-  So this class was created as a convenience.
-  It will also contain special methods that read data from internet-resources
-  in the background, while data can already be read out of the object.
-  This shall speed up usage when a slow internet connection is used (dial-up)
- */
-
 package net.yacy.server;
 
 import java.io.BufferedOutputStream;
@@ -49,21 +31,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.FacetParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.json.JSONObject;
 
@@ -86,10 +68,7 @@ public class serverObjects implements Serializable, Cloneable {
     /** Key for an URL redirection : should be associated with the redirected location.
      * The main servlet handles this to produce an HTTP 302 status. */
     public static final String ACTION_LOCATION = "LOCATION";
-
 	public final static String ADMIN_AUTHENTICATE_MSG = "admin log-in. If you don't know the password, set it with {yacyhome}/bin/passwd.sh {newpassword}";
-
-    private final static Pattern patternNewline = Pattern.compile("\n");
 
     private boolean localized = true;
 
@@ -98,17 +77,18 @@ public class serverObjects implements Serializable, Cloneable {
 
     public serverObjects() {
         super();
-        this.map = new HashMap<>();
+        this.map = new ConcurrentHashMap<>();
     }
 
     protected serverObjects(serverObjects o) {
         super();
-        this.map = o.map;
+        this.map = new ConcurrentHashMap<>(o.map);
+        this.localized = o.localized;
     }
 
     protected serverObjects(final Map<String, ChunkedBytes[]> input) {
         super();
-        this.map = new HashMap<>(input);
+        this.map = new ConcurrentHashMap<>(input);
     }
 
     public void authenticationRequired() {
@@ -134,63 +114,49 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     public boolean containsKey(String key) {
-        return this.map.containsKey(key);
+    	return key != null && this.map.containsKey(key);
     }
-
+    
     public MultiMapSolrParams getSolrParams() {
-        MultiMapSolrParams emap = new MultiMapSolrParams(new HashMap<>());
-        for (String key: this.keySet()) {
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        for (String key : this.keySet()) {
             ChunkedBytes[] cbs = this.map.get(key);
-            String[] values = new String[cbs.length];
-            for (int i = 0; i < cbs.length; i++) {
-                values[i] = UTF8.String(cbs[i].toByteArray());
-            }
-            emap.getMap().put(key, values);
+            if (cbs == null) continue;
+            for (ChunkedBytes cb : cbs) params.add(key, UTF8.String(cb.toByteArray()));
         }
-        return emap;
+        return new MultiMapSolrParams(params.getMap());
     }
 
     public List<Map.Entry<String, String>> entrySet() {
         List<Map.Entry<String, String>> set = new ArrayList<>(this.map.size() * 2);
         for (Map.Entry<String, ChunkedBytes[]> entry: this.map.entrySet()) {
             ChunkedBytes[] vlist = entry.getValue();
-            for (ChunkedBytes v: vlist) set.add(new AbstractMap.SimpleEntry<>(entry.getKey(), v.toString()));
+            for (ChunkedBytes v: vlist) set.add(new AbstractMap.SimpleEntry<>(entry.getKey(), removeByteOrderMark(UTF8.String(v.toByteArray()))));
         }
         return set;
     }
 
-    public Set<String> values() {
-        Set<String> set = new HashSet<>(this.map.size() * 2);
+    public List<String> values() {
+    	List<String> list = new ArrayList<>(this.map.size() * 2);
         for (Map.Entry<String, ChunkedBytes[]> entry: this.map.entrySet()) {
-            for (ChunkedBytes v: entry.getValue()) set.add(v.toString());
+            for (ChunkedBytes v: entry.getValue()) list.add(removeByteOrderMark(UTF8.String(v.toByteArray())));
         }
-        return set;
+        return list;
     }
 
     public Set<String> keySet() {
-        return this.map.keySet();
+        return new HashSet<>(this.map.keySet());
     }
 
     public String[] remove(String key) {
         ChunkedBytes[] cbs = this.map.remove(key);
         String[] arr = new String[cbs == null ? 0 : cbs.length];
         if (cbs != null) {
-            for (int i = 0; i < arr.length; i++) arr[i] = cbs[i].toString();
+            for (int i = 0; i < arr.length; i++) arr[i] = UTF8.String(cbs[i].toByteArray());
         }
         return arr;
     }
-
-    public int remove(String key, int dflt) {
-        final String result = removeByteOrderMark(this.get(key));
-        this.map.remove(key);
-        if (result == null) return dflt;
-        try {
-            return Integer.parseInt(result);
-        } catch (final NumberFormatException e) {
-            return dflt;
-        }
-    }
-
+    
     public void putAll(Map<String, String> m) {
         for (Map.Entry<String, String> e: m.entrySet()) {
             this.put(e.getKey(), e.getValue());
@@ -205,12 +171,13 @@ public class serverObjects implements Serializable, Cloneable {
             this.map.put(key, new ChunkedBytes[]{new ChunkedBytes(value)});
             return;
         }
-        for (int i = 0; i < a.length; i++) {
-            if (a[i].equals(value)) return; // double-check
+        ChunkedBytes nv = new ChunkedBytes(value);
+        for (ChunkedBytes cb : a) {
+            if (cb.equals(nv)) return;
         }
         ChunkedBytes[] aa = new ChunkedBytes[a.length + 1];
         System.arraycopy(a, 0, aa, 0, a.length);
-        aa[a.length] = new ChunkedBytes(value);
+        aa[a.length] = nv;
         this.map.put(key, aa);
         return;
     }
@@ -275,7 +242,7 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     public void put(final String key, final InetAddress value) {
-        this.put(key, value.toString());
+        this.put(key, value == null ? "" : value.getHostAddress());
     }
 
     /**
@@ -284,17 +251,18 @@ public class serverObjects implements Serializable, Cloneable {
      * @param value a String that will be reencoded for JSON output.
      */
     public void putJSON(final String key, String value) {
+        if (value == null) { this.put(key, ""); return; }
         value = JSONObject.quote(value);
         value = value.substring(1, value.length() - 1);
         this.put(key, value);
     }
-
+    
     /**
      * Add a String to the map. The content of the string is first decoded to removed any URL encoding (application/x-www-form-urlencoded).
      * Then the content of the String is escaped to be usable in HTML output.
      * @param key   key name as String.
      * @param value a String that will be reencoded for HTML output.
-     * @see CharacterCoding#encodeUnicode2html(String, boolean)
+     * @see CharacterCoding#unicode2html(String, boolean)
      */
     public void putHTML(final String key, final String value) {
         this.put(key, value == null ? "" : CharacterCoding.unicode2html(UTF8.decodeURL(value), true));
@@ -305,10 +273,10 @@ public class serverObjects implements Serializable, Cloneable {
      * Then the content of the String is escaped to be usable in HTML output.
      * @param key   key name as String.
      * @param value the UTF-8 encoded byte array of a String that will be reencoded for HTML output.
-     * @see CharacterCoding#encodeUnicode2html(String, boolean)
+     * @see CharacterCoding#unicode2html(String, boolean)
      */
     public void putHTML(final String key, final byte[] value) {
-        this.putHTML(key, value == null ? "" : UTF8.String(value));
+        this.putHTML(key, value == null ? "" : CharacterCoding.unicode2html(UTF8.decodeURL(UTF8.String(value)), true));
     }
 
 	/**
@@ -318,7 +286,7 @@ public class serverObjects implements Serializable, Cloneable {
 	 *
 	 * @param key   key name as String.
 	 * @param value a String that will be reencoded for HTML output.
-	 * @see CharacterCoding#encodeUnicode2html(String, boolean)
+	 * @see CharacterCoding#unicode2html(String, boolean)
 	 */
     public void putUrlEncodedHTML(final String key, final String value) {
         this.put(key, value == null ? "" : CharacterCoding.unicode2html(value, true));
@@ -349,7 +317,6 @@ public class serverObjects implements Serializable, Cloneable {
 	/**
 	 * Put the key/value pair, escaping characters depending on the target fileType.
 	 * The eventual URL encoding (application/x-www-form-urlencoded) is retained.
-	 *
 	 * @param fileType the response target file type
 	 * @param key
 	 * @param value
@@ -421,7 +388,7 @@ public class serverObjects implements Serializable, Cloneable {
     public void putWiki(final String hostport, final String key, final byte[] wikiCode) {
         try {
             this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final Exception e) {
             this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
@@ -448,7 +415,9 @@ public class serverObjects implements Serializable, Cloneable {
         ChunkedBytes[] cbs = this.map.get(name);
         String[] s = new String[cbs == null ? 0 : cbs.length];
         if (cbs != null) {
-            for (int i = 0; i < s.length; i++) s[i] = cbs[i].toString();
+            for (int i = 0; i < s.length; i++) {
+            	s[i] = removeByteOrderMark(cbs[i] == null ? null : UTF8.String(cbs[i].toByteArray()));
+            }
         }
         return s;
     }
@@ -462,8 +431,10 @@ public class serverObjects implements Serializable, Cloneable {
      */
     public String get(String key) {
         ChunkedBytes[] cbs = this.map.get(key);
-        return cbs == null || cbs.length == 0 ? null : cbs[0].toString();
+        String s = (cbs == null || cbs.length == 0) ? null : UTF8.String(cbs[0].toByteArray());
+        return removeByteOrderMark(s);
     }
+
 
     /**
      * Get the content of a post field as a byte array
@@ -490,17 +461,17 @@ public class serverObjects implements Serializable, Cloneable {
 
     // string variant
     public String get(final String key, final String dflt) {
-        final String result = removeByteOrderMark(this.get(key));
+        final String result = this.get(key);
         return (result == null) ? dflt : result;
     }
 
     public ChunkedBytes get(final String key, final ChunkedBytes dflt) {
         ChunkedBytes[] cbs = this.map.get(key);
-        return cbs == null || cbs.length == 0 ? null : cbs[0];
+        return cbs == null || cbs.length == 0 ? dflt : cbs[0];
     }
 
     public int getInt(final String key, final int dflt) {
-        final String s = removeByteOrderMark(this.get(key));
+        final String s = this.get(key);
         if (s == null) return dflt;
         try {
             return Integer.parseInt(s);
@@ -510,7 +481,7 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     public long getLong(final String key, final long dflt) {
-        final String s = removeByteOrderMark(this.get(key));
+        final String s = this.get(key);
         if (s == null) return dflt;
         try {
             return Long.parseLong(s);
@@ -520,7 +491,7 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     public float getFloat(final String key, final float dflt) {
-        final String s = removeByteOrderMark(this.get(key));
+        final String s = this.get(key);
         if (s == null) return dflt;
         try {
             return Float.parseFloat(s);
@@ -530,7 +501,7 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     public double getDouble(final String key, final double dflt) {
-        final String s = removeByteOrderMark(this.get(key));
+        final String s = this.get(key);
         if (s == null) return dflt;
         try {
             return Double.parseDouble(s);
@@ -549,7 +520,7 @@ public class serverObjects implements Serializable, Cloneable {
      * @return the boolean value of a field or false, if the field does not appear.
      */
     public boolean getBoolean(final String key) {
-        String s = removeByteOrderMark(this.get(key));
+        String s = this.get(key);
         if (s == null) return false;
         s = s.toLowerCase(Locale.ROOT);
         return s.equals("true") || s.equals("on") || s.equals("1");
@@ -583,7 +554,7 @@ public class serverObjects implements Serializable, Cloneable {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
     	final Pattern keyPattern = Pattern.compile(keyMapper);
-        final Map<String, String> map = new HashMap<>();
+        final Map<String, String> map = new ConcurrentHashMap<>();
         for (final Map.Entry<String, String> entry: this.entrySet()) {
             if (keyPattern.matcher(entry.getKey()).matches()) {
             	map.put(entry.getKey(), entry.getValue());
@@ -602,26 +573,17 @@ public class serverObjects implements Serializable, Cloneable {
 
     // convenience methods for storing and loading to a file system
     public void store(final File f) throws IOException {
-        BufferedOutputStream fos = null;
-        try {
-            fos = new BufferedOutputStream(new FileOutputStream(f));
-            final StringBuilder line = new StringBuilder(64);
-            for (final Map.Entry<String, String> entry : this.entrySet()) {
-                line.delete(0, line.length());
-                line.append(entry.getKey());
-                line.append("=");
-                line.append(patternNewline.matcher(entry.getValue()).replaceAll("\\\\n"));
-                line.append("\r\n");
-
-                fos.write(UTF8.getBytes(line.toString()));
+        try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(f))) {
+            for (Map.Entry<String, String> e : this.entrySet()) {
+                String v = e.getValue()
+                    .replace("\\", "\\\\")
+                    .replace("\r", "\\r")
+                    .replace("\n", "\\n")
+                    .replace("=", "\\=");
+                String line = e.getKey() + "=" + v + "\r\n";
+                fos.write(UTF8.getBytes(line));
             }
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.flush();
-                    fos.close();
-                } catch (final Exception e){}
-            }
+            fos.flush();
         }
     }
 
@@ -637,10 +599,18 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     @Override
-    public Object clone() {
-        return new serverObjects(this.map);
+    public serverObjects clone() {
+        ConcurrentHashMap<String, ChunkedBytes[]> copy = new ConcurrentHashMap<>();
+        this.map.forEach((k, arr) -> {
+            ChunkedBytes[] arrCopy = new ChunkedBytes[arr.length];
+            for (int i = 0; i < arr.length; i++) arrCopy[i] = (ChunkedBytes) arr[i].clone();
+            copy.put(k, arrCopy);
+        });
+        serverObjects c = new serverObjects(copy);
+        c.localized = this.localized;
+        return c;
     }
-
+    
     /**
      * output the objects in a HTTP GET syntax
      */
@@ -654,15 +624,14 @@ public class serverObjects implements Serializable, Cloneable {
                 .append(MultiProtocolURL.escape(entry.getValue()))
                 .append('&');
         }
-        param.setLength(param.length() - 1);
         return param.toString();
     }
 
     public MultiMapSolrParams toSolrParams(CollectionSchema[] facets) {
         // check if all required post fields are there
-        if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, CollectionSchema.text_t.getSolrFieldName()); // set default field to the text field
-        if (!this.containsKey(CommonParams.START)) this.put(CommonParams.START, "0"); // set default start item
-        if (!this.containsKey(CommonParams.ROWS)) this.put(CommonParams.ROWS, "10"); // set default number of search results
+        this.map.putIfAbsent(CommonParams.DF, new ChunkedBytes[] {new ChunkedBytes(CollectionSchema.text_t.getSolrFieldName())}); // set default field to the text field
+        this.map.putIfAbsent(CommonParams.START, new ChunkedBytes[] {new ChunkedBytes("0")}); // set default start item
+        this.map.putIfAbsent(CommonParams.ROWS, new ChunkedBytes[] {new ChunkedBytes("10")}); // set default number of search results
 
         if (facets != null && facets.length > 0) {
             this.remove("facet");

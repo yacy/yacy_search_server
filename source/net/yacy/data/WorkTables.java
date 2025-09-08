@@ -196,7 +196,7 @@ public class WorkTables extends Tables {
         // remove the apicall attributes from the post object
         String[] pks = post.remove(TABLE_API_COL_APICALL_PK);
 
-        byte[] pk = pks == null ? null : UTF8.getBytes(pks[0]);
+        byte[] pk = pks == null || pks.length == 0 ? null : UTF8.getBytes(pks[0]);
 
         // generate the apicall url - without the apicall attributes
         final String apiurl = generateRecordedURL(post, servletName);

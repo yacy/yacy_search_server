@@ -42,7 +42,7 @@ import net.yacy.cora.document.encoding.UTF8;
  * written into an arbitrary-length store which is composed of
  * RAM chunks and/or file-mapped chunks.
  */
-public final class ChunkedBytes extends OutputStream implements Comparable<Object>, Closeable {
+public final class ChunkedBytes extends OutputStream implements Comparable<Object>, Closeable, Cloneable {
 
     /** Keep mapped/heap chunks well under Integer.MAX_VALUE; 64 MiB is a good default. */
     public static final int CHUNK_SIZE = 64 * 1024 * 1024;
@@ -69,30 +69,39 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         this();
         this.append(UTF8.getBytes(initialData));
     }
+    
+	private ChunkedBytes(List<Segment> segments, long size) {
+		this.segments = new ArrayList<>(segments);
+		this.size = size;
+	}
 
     /** Represents one contiguous region in the logical address space. */
-    private static final class Segment implements Closeable {
+    private static final class Segment implements Closeable, Cloneable {
         final Chunk chunk;
         final long start;    // global start offset
         final int length;    // length within this segment (<= CHUNK_SIZE)
         Segment(Chunk chunk, long start, int length) {
             this.chunk = chunk; this.start = start; this.length = length;
         }
+        @Override public Object clone() {
+			return new Segment((Chunk) this.chunk.clone(), this.start, this.length);
+		}
         @Override public void close() throws IOException { this.chunk.close(); }
     }
 
     /** Common interface for heap/file-backed chunks. */
-    private interface Chunk extends Closeable {
+    private interface Chunk extends Closeable, Cloneable {
         int read(long relPos, byte[] dst, int off, int len);
         int write(long relPos, byte[] src, int off, int len);
         byte get(long relPos);
         void set(long relPos, byte b);
         int length();
+        Object clone();
         @Override default void close() { /* no-op by default */ }
     }
 
     /** On-heap chunk. */
-    private static final class HeapChunk implements Chunk {
+    private static final class HeapChunk implements Chunk, Cloneable {
         final byte[] buf;
         HeapChunk(int cap) {
             assert cap > 0 && cap <= CHUNK_SIZE : "Invalid HeapChunk capacity: " + cap;
@@ -113,10 +122,15 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         @Override public byte get(long p) { return this.buf[(int)p]; }
         @Override public void set(long p, byte b) { this.buf[(int)p] = b; }
         @Override public int length() { return this.buf.length; }
+        @Override public Object clone() {
+        	HeapChunk hc = new HeapChunk(this.buf.length);
+        	System.arraycopy(this.buf, 0, hc.buf, 0, this.buf.length);
+        	return hc;
+        }
     }
 
     /** File-backed chunk using MappedByteBuffer (lazy mapped). */
-    private static final class FileChunk implements Chunk {
+    private static final class FileChunk implements Chunk, Cloneable {
         final FileChannel ch;
         final long fileOffset;       // offset in the file where this chunk starts
         final int len;
@@ -168,6 +182,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
             this.map().put((int)p, b);
         }
         @Override public int length() { return this.len; }
+        @Override public Object clone() { return new FileChunk(this.ch, this.fileOffset, this.len, this.writable); }
         @Override public void close() {
             // Best-effort explicit unmap to release file handles promptly.
             final MappedByteBuffer local = this.mm;
@@ -428,6 +443,14 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         return s.chunk.get(rel);
     }
 
+    @Override
+    public Object clone() {
+		List<Segment> list = new ArrayList<>(this.segments.size());
+		for (Segment s: this.segments) list.add((Segment) s.clone());
+		final ChunkedBytes cb = new ChunkedBytes(list, this.size);
+		return cb;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
