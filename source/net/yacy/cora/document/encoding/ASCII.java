@@ -115,7 +115,7 @@ public class ASCII implements Comparator<String> {
         final int l = Math.min(length, bytes.length - offset);
         final char[] c = new char[l];
         for (int i = 0; i < l; ++ i) {
-            if (bytes[i + offset] < 0) throw new IllegalArgumentException();
+            if (bytes[i + offset] < 0) throw new IllegalArgumentException("non-ASCII character detected");
             c[i] = (char) bytes[i + offset];
         }
         return new String(c);

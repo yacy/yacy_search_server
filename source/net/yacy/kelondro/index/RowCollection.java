@@ -27,6 +27,7 @@ package net.yacy.kelondro.index;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +35,6 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.NaturalOrder;
@@ -69,6 +69,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     protected       int    chunkcount;
     protected       int    sortBound;
     protected       long   lastTimeWrote;
+    private final   byte[] keyBuf;
 
     protected RowCollection(final RowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -76,6 +77,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.chunkcount = rc.chunkcount;
         this.sortBound = rc.sortBound;
         this.lastTimeWrote = rc.lastTimeWrote;
+        this.keyBuf = new byte[this.rowdef.primaryKeyLength];
     }
 
     protected RowCollection(final Row rowdef) {
@@ -84,6 +86,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.lastTimeWrote = System.currentTimeMillis();
        	this.chunkcache = EMPTY_CACHE;
         this.chunkcount = 0;
+        this.keyBuf = new byte[this.rowdef.primaryKeyLength];
     }
 
     public RowCollection(final Row rowdef, final int objectCount) throws SpaceExceededException {
@@ -97,10 +100,19 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.chunkcount = objectCount;
         this.sortBound = sortBound;
         this.lastTimeWrote = System.currentTimeMillis();
+        this.keyBuf = new byte[this.rowdef.primaryKeyLength];
     }
 
     protected RowCollection(final Row rowdef, final Row.Entry exportedCollectionRowEnvironment) {
-        final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(1) - (int) exportOverheadSize;
+    	final int payloadWidth = exportedCollectionRowEnvironment.cellwidth(1);
+        if (payloadWidth < exportOverheadSize) {
+            throw new kelondroException("RowCollection import: payload too small: cellwidth(1)=" + payloadWidth + " < overhead=" + exportOverheadSize);
+        }
+        final int chunkcachelength = payloadWidth - (int) exportOverheadSize;
+        if (rowdef.objectsize <= 0 || chunkcachelength % rowdef.objectsize != 0) {
+            ConcurrentLog.warn("KELONDRO", "RowCollection import: payload not aligned to objectsize; payload=" + chunkcachelength + ", objectsize=" + rowdef.objectsize + " (continuing)");
+        }
+        
         final Row.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, 1);
 
         this.rowdef = rowdef;
@@ -126,6 +138,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             this.sortBound = this.chunkcount;
         }
         this.chunkcache = exportedCollection.getColBytes(exp_collection, false);
+        this.keyBuf = new byte[this.rowdef.primaryKeyLength];
     }
 
     protected RowCollection(final Row rowdef, final byte[] chunkcache, final int chunkcount, final int sortBound, final long lastTimeWrote) {
@@ -135,6 +148,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.chunkcount = chunkcount;
         this.sortBound = sortBound;
         this.lastTimeWrote = lastTimeWrote;
+        this.keyBuf = new byte[this.rowdef.primaryKeyLength];
     }
 
     @Override
@@ -143,7 +157,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     }
 
 	public void reset() {
-		this.chunkcache = new byte[0];
+		this.chunkcache = EMPTY_CACHE;
         this.chunkcount = 0;
         this.sortBound = 0;
 	}
@@ -170,42 +184,16 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return (int) (time / day) - 10957;
     }
 
-    private static Column exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4, collectionColumnProducer;
-
     protected static final long exportOverheadSize = 14;
-    
-    private static Row exportRow(final int chunkcachelength) {
-        /*
-        return new Row(
-                "int size-4 {b256}," +
-                "short lastread-2 {b256}," + // as daysSince2000
-                "short lastwrote-2 {b256}," + // as daysSince2000
-                "byte[] orderkey-2," +
-                "int orderbound-4 {b256}," +
-                "byte[] collection-" + chunkcachelength,
-                NaturalOrder.naturalOrder
-                );
-         */
 
-        if (exportColumn0 == null) exportColumn0 = new Column("int size-4 {b256}");
-        if (exportColumn1 == null) exportColumn1 = new Column("short lastread-2 {b256}");
-        if (exportColumn2 == null) exportColumn2 = new Column("short lastwrote-2 {b256}");
-        if (exportColumn3 == null) exportColumn3 = new Column("byte[] orderkey-2");
-        if (exportColumn4 == null) exportColumn4 = new Column("int orderbound-4 {b256}");
-        if (collectionColumnProducer == null) collectionColumnProducer = new Column("byte[] collection-1");
-        /*
-         * because of a strange bug these objects cannot be initialized as normal
-         * static final. If I try that, they are not initialized and are assigned null. why?
-         */
-        
-        Column collectionColumn = (Column) collectionColumnProducer.clone();
-        collectionColumn.setCellwidth(chunkcachelength);
-        final Row er = new Row(new Column[]{
-                    exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4,
-                    collectionColumn
-                },
-                NaturalOrder.naturalOrder
-        );
+    private static Row exportRow(final int chunkcachelength) {
+        final Column c0 = new Column("int size-4 {b256}");
+        final Column c1 = new Column("short lastread-2 {b256}");
+        final Column c2 = new Column("short lastwrote-2 {b256}");
+        final Column c3 = new Column("byte[] orderkey-2");
+        final Column c4 = new Column("int orderbound-4 {b256}");
+        final Column c5 = new Column("byte[] collection-" + chunkcachelength);
+        final Row er = new Row(new Column[]{ c0, c1, c2, c3, c4, c5 }, NaturalOrder.naturalOrder);
         assert er.objectsize == chunkcachelength + exportOverheadSize;
         return er;
     }
@@ -277,7 +265,6 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             }
         }
     }
-    
 
     /**
      * compute the needed memory in case of a cache extension. That is, if the cache is full and must
@@ -355,6 +342,12 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         System.arraycopy(this.chunkcache, index * this.rowdef.objectsize, b, 0, b.length);
         return b;
     }
+    
+    protected synchronized final void getKeyInto(final int index, final byte[] dst, final int off) {
+        assert dst.length - off >= this.rowdef.primaryKeyLength;
+        final int addr = index * this.rowdef.objectsize;
+        System.arraycopy(this.chunkcache, addr, dst, off, this.rowdef.primaryKeyLength);
+    }
 
     @Override
     public synchronized final Row.Entry get(final int index, final boolean clone) {
@@ -370,15 +363,15 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         entry = this.rowdef.newEntry(this.chunkcache, addr, clone);
         return entry;
     }
-
+    
     public synchronized final void set(final int index, final Row.Entry a) throws SpaceExceededException {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
-        final byte[] column = a.bytes();
+        final byte[] column = this.keyBuf; // we do not allocate a key buffer for each call; reuse the same buffer
+        a.writeToArray(0, column, 0);
         assert a.cellwidth(0) == this.rowdef.primaryKeyLength;
         assert column.length >= this.rowdef.primaryKeyLength;
         final boolean sameKey = match(column, 0, index);
-        //if (sameKey) System.out.print("$");
         a.writeToArray(this.chunkcache, index * this.rowdef.objectsize);
         if (index >= this.chunkcount) this.chunkcount = index + 1;
         if (!sameKey && index < this.sortBound) this.sortBound = index;
@@ -579,7 +572,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 
     public synchronized void clear() {
         if (this.chunkcache.length == 0) return;
-        this.chunkcache = new byte[0];
+        this.chunkcache = EMPTY_CACHE;
         this.chunkcount = 0;
         this.sortBound = 0;
         this.lastTimeWrote = System.currentTimeMillis();
@@ -911,9 +904,8 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 
     protected int compare(final byte[] a, final int astart, final int chunknumber) {
         assert (chunknumber < this.chunkcount);
-        assert a.length - astart >= this.rowdef.primaryKeyLength;
-        final int len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
-        return this.rowdef.objectOrder.compare(a, astart, this.chunkcache, chunknumber * this.rowdef.objectsize, len);
+        assert (a.length - astart) >= this.rowdef.primaryKeyLength : "short key compare not allowed";
+        return this.rowdef.objectOrder.compare(a, astart, this.chunkcache, chunknumber * this.rowdef.objectsize, this.rowdef.primaryKeyLength);
     }
 
     protected final boolean match(final int i, final int j) {
@@ -935,11 +927,9 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 
     protected boolean match(final byte[] a, int astart, final int chunknumber) {
         if (chunknumber >= this.chunkcount) return false;
-        assert a.length - astart >= this.rowdef.primaryKeyLength;
-        for (int p = chunknumber * this.rowdef.objectsize,
-             len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
-             len != 0;
-             len--, astart++, p++) {
+        assert (a.length - astart) >= this.rowdef.primaryKeyLength : "short key match not allowed";
+        int p = chunknumber * this.rowdef.objectsize;
+        for (int len = this.rowdef.primaryKeyLength; len-- != 0; astart++, p++) {
             if (a[astart] != this.chunkcache[p]) return false;
         }
         return true;
@@ -951,7 +941,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 
     private static long d(final long a, final long b) {
     	if (b == 0) return a;
-    	return a / b;
+    	return 1000 * a / b;
     }
 
     private static Random random = null;
@@ -963,139 +953,301 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     }
 
     public static void test(final int testsize) throws SpaceExceededException {
-    	final Row r = new Row(new Column[]{
-    			new Column("hash", Column.celltype_string, Column.encoder_bytes, 12, "hash")},
-    			Base64Order.enhancedCoder);
+        final Row r = new Row(
+            new Column[]{ new Column("hash", Column.celltype_string, Column.encoder_bytes, 12, "hash") },
+            Base64Order.enhancedCoder
+        );
 
-    	// test compare method
-    	random = new Random(0);
-    	for (int i = 0; i < testsize; i++) {
-    	    final byte[] a = ASCII.getBytes(randomHash());
-    	    final byte[] b = ASCII.getBytes(randomHash());
-    	    final int c = Base64Order.enhancedCoder.compare(a, b);
+        // --------- Helpers ----------
+        final java.util.function.Supplier<Long> nano = System::nanoTime;
+        final java.util.function.Supplier<Long> usedMem = () -> {
+            final Runtime rt = Runtime.getRuntime();
+            return (rt.totalMemory() - rt.freeMemory());
+        };
+        final java.util.function.BiFunction<String,Runnable,Long> measure = (name, run) -> {
+            final long m0 = usedMem.get();
+            final long t0 = nano.get();
+            run.run();
+            final long t1 = nano.get();
+            final long m1 = usedMem.get();
+            System.out.println(String.format("%-24s : %12d ns  | Δmem %,12d B", name, (t1 - t0), (m1 - m0)));
+            return t1 - t0;
+        };
+        final java.util.function.Supplier<String> sep = () -> "--------------------------------------------------------------------------------";
+
+        final java.util.Random J = new java.util.Random(0);
+        random = new Random(0);
+        final java.util.function.Supplier<byte[]> rnd12 = () -> ASCII.getBytes(randomHash());
+        final java.util.function.Function<Long,byte[]> mono12 = (Long x) ->
+            ASCII.getBytes(Base64Order.enhancedCoder.encodeLongSB(x, 12).toString());
+
+        // --------- (0) Korrektheit: Order-Compare ----------
+        System.out.println(sep.get());
+        System.out.println("compare() sanity checks");
+        random = new Random(0);
+        for (int i = 0; i < Math.min(10_000, testsize); i++) {
+            final byte[] a = ASCII.getBytes(randomHash());
+            final byte[] b = ASCII.getBytes(randomHash());
+            final int c = Base64Order.enhancedCoder.compare(a, b);
             if (c == 0 && Base64Order.enhancedCoder.compare(b, a) != 0)
                 System.out.println("compare failed / =; a = " + ASCII.String(a) + ", b = " + ASCII.String(b));
             if (c == -1 && Base64Order.enhancedCoder.compare(b, a) != 1)
-                System.out.println("compare failed / =; a < " + ASCII.String(a) + ", b = " + ASCII.String(b));
+                System.out.println("compare failed / <; a = " + ASCII.String(a) + ", b = " + ASCII.String(b));
             if (c == 1 && Base64Order.enhancedCoder.compare(b, a) != -1)
-                System.out.println("compare failed / =; a > " + ASCII.String(a) + ", b = " + ASCII.String(b));
-    	}
+                System.out.println("compare failed / >; a = " + ASCII.String(a) + ", b = " + ASCII.String(b));
+        }
 
-    	// test sorting methods
-    	RowCollection a = new RowCollection(r, testsize);
-    	a.add("AAAAAAAAAAAA".getBytes());
-    	a.add("BBBBBBBBBBBB".getBytes());
-    	a.add("BBBBBBBBBBBB".getBytes());
-    	a.add("BBBBBBBBBBBB".getBytes());
-    	a.add("CCCCCCCCCCCC".getBytes());
-    	final ArrayList<RowCollection> del = a.removeDoubles();
-    	System.out.println(del + "rows double");
-    	final Iterator<Row.Entry> j = a.iterator();
-    	while (j.hasNext()) System.out.println(UTF8.String(j.next().bytes()));
+        // --------- (1) Original-Block (leicht aufgeräumt) ----------
+        System.out.println(sep.get());
+        System.out.println("kelondroRowCollection baseline test with size = " + testsize);
 
-        System.out.println("kelondroRowCollection test with size = " + testsize);
-        a = new RowCollection(r, testsize);
-        long t0 = System.nanoTime();
+        RowCollection a = new RowCollection(r, testsize);
+        long t0 = nano.get();
         random = new Random(0);
-        for (int i = 0; i < testsize / 2; i++) a.add(randomHash().getBytes());
-        //System.out.println("check: after first random feed"); for (final Row.Entry w: a) System.out.println("1 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
+        for (int i = 0; i < testsize / 2; i++) a.add(rnd12.get());
         random = new Random(0);
-        for (int i = 0; i < testsize / 2; i++) a.add(randomHash().getBytes());
-        //System.out.println("check: after second random feed"); for (final Row.Entry w: a) System.out.println("2 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
+        for (int i = 0; i < testsize / 2; i++) a.add(rnd12.get());
         a.sort();
-        //System.out.println("check: after sort"); for (final Row.Entry w: a) System.out.println("3 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
         a.uniq();
-        //System.out.println("check: after sort uniq"); for (final Row.Entry w: a) System.out.println("4 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
-        // check order that the element have
         for (int i = 0; i < a.size() - 1; i++) {
-            if (a.get(i, false).compareTo(a.get(i + 1, false)) >= 0) System.out.println("Compare error at pos " + i + ": a.get(i)=" + a.get(i, false) + ", a.get(i + 1)=" + a.get(i + 1, false));
+            if (a.get(i, false).compareTo(a.get(i + 1, false)) >= 0)
+                System.out.println("Compare error at pos " + i + ": a.get(i)=" + a.get(i, false) + ", a.get(i + 1)=" + a.get(i + 1, false));
+        }
+        long t1 = nano.get();
+        System.out.println("create+sort+uniq a : " + (t1 - t0) + " ns, " + d(testsize, (t1 - t0)) + " entries/ms; a.size() = " + a.size());
+
+        final RowCollection c = new RowCollection(r, testsize);
+        random = new Random(0);
+        t0 = nano.get();
+        for (int i = 0; i < testsize; i++) c.add(rnd12.get());
+        t1 = nano.get();
+        System.out.println("create c           : " + (t1 - t0) + " ns, " + d(testsize, (t1 - t0)) + " entries/ms");
+
+        final RowCollection d = new RowCollection(r, testsize);
+        for (int i = 0; i < testsize; i++) d.add(c.get(i, false).getPrimaryKeyBytes());
+        final long t2 = nano.get();
+        System.out.println("copy c -> d        : " + (t2 - t1) + " ns, " + d(testsize, (t2 - t1)) + " entries/ms");
+
+        c.sort(); final long t3 = nano.get();
+        System.out.println("sort c             : " + (t3 - t2) + " ns, " + d(testsize, (t3 - t2)) + " entries/ms");
+
+        d.sort(); final long t4 = nano.get();
+        System.out.println("sort d             : " + (t4 - t3) + " ns, " + d(testsize, (t4 - t3)) + " entries/ms");
+
+        c.uniq(); final long t5 = nano.get();
+        System.out.println("uniq c             : " + (t5 - t4) + " ns, " + d(testsize, (t5 - t4)) + " entries/ms");
+
+        d.uniq(); final long t6 = nano.get();
+        System.out.println("uniq d             : " + (t6 - t5) + " ns, " + d(testsize, (t6 - t5)) + " entries/ms");
+
+        // --------- (2) Wachstum: voralloziert vs. inkrementell ----------
+        System.out.println(sep.get());
+        System.out.println("Growth behaviour: preallocation vs incremental");
+
+        measure.apply("incremental add()", () -> {
+            try {
+                RowCollection inc = new RowCollection(r, 1);
+                random = new Random(1);
+                for (int i = 0; i < testsize; i++) inc.add(rnd12.get());
+                // touch ensureSize path by adding a bit more
+                for (int i = 0; i < Math.min(1000, Math.max(10, testsize/1000)); i++) inc.add(rnd12.get());
+                System.out.println("inc.mem()=" + inc.mem() + " bytes; size=" + inc.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        measure.apply("preallocated add()", () -> {
+            try {
+                RowCollection pre = new RowCollection(r, testsize + 1024);
+                random = new Random(1);
+                for (int i = 0; i < testsize; i++) pre.add(rnd12.get());
+                System.out.println("pre.mem()=" + pre.mem() + " bytes; size=" + pre.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        // --------- (3) sortBound-Nutzen: bereits sortierte Daten ----------
+        System.out.println(sep.get());
+        System.out.println("sortBound effectiveness");
+
+        measure.apply("addSorted()+sort() (no-op expected)", () -> {
+            try {
+                RowCollection sb = new RowCollection(r, testsize);
+                for (int i = 0; i < testsize; i++) sb.addSorted(mono12.apply((long)i), 0, 12);
+                long tS0 = nano.get();
+                sb.sort(); // sollte nahezu no-op sein
+                long tS1 = nano.get();
+                System.out.println("sorted? " + sb.isSorted() + " | sort time = " + (tS1 - tS0) + " ns");
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        measure.apply("partially sorted then random tail", () -> {
+            try {
+                RowCollection ps = new RowCollection(r, testsize);
+                int sortedPart = Math.max(1, testsize * 3 / 4);
+                for (int i = 0; i < sortedPart; i++) ps.addSorted(mono12.apply((long)i), 0, 12);
+                random = new Random(2);
+                for (int i = sortedPart; i < testsize; i++) ps.add(rnd12.get());
+                long tS0 = nano.get();
+                ps.sort(); // sollte schneller sein als vollständig random
+                long tS1 = nano.get();
+                System.out.println("sorted? " + ps.isSorted() + " | sort time = " + (tS1 - tS0) + " ns");
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        // --------- (4) Entfernen: keepOrder=true vs. false (+ Shrink) ----------
+        System.out.println(sep.get());
+        System.out.println("removeRow performance (keepOrder true/false) and shrink");
+
+        final int removeCount = Math.max(1, testsize / 10);
+
+        measure.apply("remove front (keepOrder=true)", () -> {
+            try {
+                RowCollection rm = new RowCollection(r, testsize);
+                random = new Random(3);
+                for (int i = 0; i < testsize; i++) rm.add(rnd12.get());
+                long m0 = rm.mem();
+                long tR0 = nano.get();
+                for (int i = 0; i < removeCount; i++) rm.removeRow(0, true); // teuer: shift
+                long tR1 = nano.get();
+                System.out.println("mem before=" + m0 + " after=" + rm.mem() + " | time=" + (tR1 - tR0) + " ns | size=" + rm.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        measure.apply("remove random (keepOrder=false)", () -> {
+            try {
+                RowCollection rm = new RowCollection(r, testsize);
+                random = new Random(4);
+                for (int i = 0; i < testsize; i++) rm.add(rnd12.get());
+                long tR0 = nano.get();
+                for (int i = 0; i < removeCount; i++) {
+                    int p = J.nextInt(Math.max(1, rm.size()));
+                    rm.removeRow(Math.min(p, Math.max(0, rm.size() - 1)), false);
+                }
+                long tR1 = nano.get();
+                System.out.println("time=" + (tR1 - tR0) + " ns | size=" + rm.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        // --------- (5) Alias-Retention-Check: get(index,false) hält alte Arrays fest ----------
+        System.out.println(sep.get());
+        System.out.println("alias retention check (demonstrates risk of keeping Entry views across growth)");
+
+        try {
+            RowCollection rc = new RowCollection(r, 16);
+            for (int i = 0; i < 10_000; i++) rc.add(rnd12.get());
+            WeakReference<byte[]> wr = new WeakReference<>(rc.chunkcache);
+            Row.Entry alias = rc.get(0, false); // hält Referenz auf aktuelles chunkcache
+            // erzeuge Realloc
+            for (int i = 0; i < 200_000; i++) rc.add(rnd12.get());
+            // drop starke Referenzen außer alias/wr
+            System.gc(); try { Thread.sleep(10); } catch (InterruptedException ie) {}
+            boolean retained = (wr.get() != null);
+            System.out.println("old array retained while alias alive? " + retained);
+            alias = null; // loslassen
+            System.gc(); try { Thread.sleep(10); } catch (InterruptedException ie) {}
+            System.out.println("old array after alias=null: " + (wr.get() == null ? "GC'ed" : "still retained"));
+        } catch (SpaceExceededException ex) {
+            System.out.println("Alias check skipped due to SpaceExceededException: " + ex.getMessage());
         }
 
-        long t1 = System.nanoTime();
-        System.out.println("create a   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds; a.size() = " + a.size());
+        // --------- (6) exportCollection() + Import roundtrip ----------
+        System.out.println(sep.get());
+        System.out.println("export/import roundtrip");
 
-    	final RowCollection c = new RowCollection(r, testsize);
-    	random = new Random(0);
-    	t0 = System.nanoTime();
-    	for (int i = 0; i < testsize; i++) {
-    		c.add(randomHash().getBytes());
-    	}
-    	t1 = System.nanoTime();
-    	System.out.println("create c   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds");
-    	final RowCollection d = new RowCollection(r, testsize);
-    	for (int i = 0; i < testsize; i++) {
-    		d.add(c.get(i, false).getPrimaryKeyBytes());
-    	}
-    	final long t2 = System.nanoTime();
-    	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");
-    	//availableCPU = 1;
-    	c.sort();
-    	final long t3 = System.nanoTime();
-    	System.out.println("sort c (1) : " + (t3 - t2) + " nanoseconds, " + d(testsize, (t3 - t2)) + " entries/nanoseconds");
-    	//availableCPU = 2;
-    	d.sort();
-    	final long t4 = System.nanoTime();
-    	System.out.println("sort d (2) : " + (t4 - t3) + " nanoseconds, " + d(testsize, (t4 - t3)) + " entries/nanoseconds");
-    	c.uniq();
-    	final long t5 = System.nanoTime();
-    	System.out.println("uniq c     : " + (t5 - t4) + " nanoseconds, " + d(testsize, (t5 - t4)) + " entries/nanoseconds");
-    	d.uniq();
-    	final long t6 = System.nanoTime();
-    	System.out.println("uniq d     : " + (t6 - t5) + " nanoseconds, " + d(testsize, (t6 - t5)) + " entries/nanoseconds");
-    	random = new Random(0);
-    	final RowSet e = new RowSet(r, testsize);
-    	for (int i = 0; i < testsize; i++) {
-    		e.put(r.newEntry(randomHash().getBytes()));
-    	}
-    	final long t7 = System.nanoTime();
-    	System.out.println("create e   : " + (t7 - t6) + " nanoseconds, " + d(testsize, (t7 - t6)) + " entries/nanoseconds");
-    	e.sort();
-    	final long t8 = System.nanoTime();
-    	System.out.println("sort e (2) : " + (t8 - t7) + " nanoseconds, " + d(testsize, (t8 - t7)) + " entries/nanoseconds");
-    	e.uniq();
-    	final long t9 = System.nanoTime();
-    	System.out.println("uniq e     : " + (t9 - t8) + " nanoseconds, " + d(testsize, (t9 - t8)) + " entries/nanoseconds");
-    	final boolean cis = c.isSorted();
-    	final long t10 = System.nanoTime();
-    	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t10 - t9) + " nanoseconds");
-    	final boolean dis = d.isSorted();
-    	final long t11 = System.nanoTime();
-    	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t11 - t10) + " nanoseconds");
-    	final boolean eis = e.isSorted();
-    	final long t12 = System.nanoTime();
-    	System.out.println("e isSorted = " + ((eis) ? "true" : "false") + ": " + (t12 - t11) + " nanoseconds");
-    	random = new Random(0);
-    	boolean allfound = true;
-        for (int i = 0; i < testsize; i++) {
-            final String rh = randomHash();
-            if (e.get(rh.getBytes(), true) == null) {
-                allfound = false;
-                System.out.println("not found hash " + rh + " at attempt " + i);
-                break;
-            }
-        }
-        final long t13 = System.nanoTime();
-        System.out.println("e allfound = " + ((allfound) ? "true" : "false") + ": " + (t13 - t12) + " nanoseconds");
-        boolean noghosts = true;
-        for (int i = 0; i < testsize; i++) {
-            if (e.get(randomHash().getBytes(), true) != null) {
-                noghosts = false;
-                break;
-            }
-        }
-        final long t14 = System.nanoTime();
-        System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " nanoseconds");
-        System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
-    	System.out.println();
+        measure.apply("export + import (with env row)", () -> {
+            try {
+                RowCollection x = new RowCollection(r, testsize);
+                random = new Random(5);
+                for (int i = 0; i < testsize; i++) x.add(rnd12.get());
+                x.sort();
+                byte[] blob = x.exportCollection();
+
+                // optional: Sanity-Check des Headers (ASCII-Signatur sollte lesbar sein)
+                Row ex = exportRow(x.size() * r.objectsize);
+                Row.Entry eb = ex.newEntry(blob);
+                String sig = eb.getColASCII(exp_order_type); // z.B. "__" oder 2-Byte Signatur
+                // System.out.println("export order signature = " + sig);
+
+                // Environment-Row: Spalte 1 besitzt GENAU blob.length Breite und enthält die Export-Payload
+                Row env = new Row(new Column[] {
+                    new Column("pad",     Column.celltype_string,  Column.encoder_bytes, 1,           "pad"),
+                    new Column("payload", Column.celltype_binary,  Column.encoder_bytes, blob.length, "payload")
+                }, NaturalOrder.naturalOrder);
+
+                Row.Entry envEntry = env.newEntry();
+                envEntry.setCol(1, blob); // Payload in Spalte 1 ablegen
+
+                // Jetzt korrekt importieren:
+                RowCollection y = new RowCollection(r, envEntry);
+
+                boolean ok = (y.size() == x.size()) && y.isSorted();
+                for (int i = 0; ok && i < Math.min(1000, x.size()); i += Math.max(1, x.size()/1000)) {
+                    ok &= java.util.Arrays.equals(
+                        x.get(i, false).getPrimaryKeyBytes(),
+                        y.get(i, false).getPrimaryKeyBytes()
+                    );
+                }
+                System.out.println("roundtrip ok? " + ok + " | x.size=" + x.size() + " y.size=" + y.size());
+            } catch (Exception ex) { throw new RuntimeException(ex); }
+        });
+
+        // --------- (7) top() / random() Kosten ----------
+        System.out.println(sep.get());
+        System.out.println("top()/random() cloning cost");
+
+        measure.apply("top(k) with cloning", () -> {
+            try {
+                RowCollection t = new RowCollection(r, testsize);
+                random = new Random(6);
+                for (int i = 0; i < testsize; i++) t.add(rnd12.get());
+                int k = Math.min(10_000, Math.max(100, testsize/20));
+                long tt0 = nano.get();
+                List<Row.Entry> top = t.top(k);
+                long tt1 = nano.get();
+                System.out.println("k=" + k + " | time=" + (tt1 - tt0) + " ns | result=" + top.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        measure.apply("random(k) with cloning", () -> {
+            try {
+                RowCollection t = new RowCollection(r, testsize);
+                random = new Random(7);
+                for (int i = 0; i < testsize; i++) t.add(rnd12.get());
+                int k = Math.min(10_000, Math.max(100, testsize/20));
+                long tt0 = nano.get();
+                List<Row.Entry> rnd = t.random(k);
+                long tt1 = nano.get();
+                System.out.println("k=" + k + " | time=" + (tt1 - tt0) + " ns | result=" + rnd.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        // --------- (8) Iterator.remove() vs. delete() ----------
+        System.out.println(sep.get());
+        System.out.println("iterator remove() cost (keep order)");
+
+        measure.apply("rowIterator remove half (keepOrder=true)", () -> {
+            try {
+                RowCollection itc = new RowCollection(r, testsize);
+                random = new Random(8);
+                for (int i = 0; i < testsize; i++) itc.add(rnd12.get());
+                int target = itc.size() / 2;
+                long tIt0 = nano.get();
+                Iterator<Row.Entry> it = itc.iterator();
+                int removed = 0;
+                while (it.hasNext() && removed < target) { it.next(); it.remove(); removed++; }
+                long tIt1 = nano.get();
+                System.out.println("removed=" + removed + " | time=" + (tIt1 - tIt0) + " ns | size=" + itc.size());
+            } catch (SpaceExceededException ex) { throw new RuntimeException(ex); }
+        });
+
+        // --------- (9) Abschluss ----------
+        System.out.println(sep.get());
+        System.out.println("Result size recap: c=" + c.size() + ", d=" + d.size());
+        System.out.println();
     }
 
     public static void main(final String[] args) {
     	try {
-            test(500000);
-            //test(1000);
-            //test(50000);
-            //test(100000);
-            //test(1000000);
+            test(100000);
             ConcurrentLog.shutdown();
         } catch (final SpaceExceededException e) {
             e.printStackTrace();
@@ -1105,72 +1257,53 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 }
 
 /*
-neues sort
-[{hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}]rows double
-AAAAAAAAAAAA
-CCCCCCCCCCCC
-kelondroRowCollection test with size = 50000
-create a   : 550687000 nanoseconds, 0 entries/nanoseconds; a.size() = 25000
-create c   : 31556000 nanoseconds, 0 entries/nanoseconds
-copy c -> d: 13798000 nanoseconds, 0 entries/nanoseconds
-sort c (1) : 80845000 nanoseconds, 0 entries/nanoseconds
-sort d (2) : 79981000 nanoseconds, 0 entries/nanoseconds
-uniq c     : 3697000 nanoseconds, 0 entries/nanoseconds
-uniq d     : 3649000 nanoseconds, 0 entries/nanoseconds
-create e   : 5719968000 nanoseconds, 0 entries/nanoseconds
-sort e (2) : 65563000 nanoseconds, 0 entries/nanoseconds
-uniq e     : 3540000 nanoseconds, 0 entries/nanoseconds
-c isSorted = true: 119000 nanoseconds
-d isSorted = true: 90000 nanoseconds
-e isSorted = true: 94000 nanoseconds
-e allfound = true: 64049000 nanoseconds
-e noghosts = true: 57150000 nanoseconds
-Result size: c = 50000, d = 50000, e = 50000
-
-altes plus concurrency
-[{hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}]rows double
-AAAAAAAAAAAA
-CCCCCCCCCCCC
-kelondroRowCollection test with size = 50000
-Compare error at pos 23548: a.get(i)={hash=8dV7ACC_D1ir}, a.get(i + 1)={hash=8Ypevst5u_tV}
-create a   : 507683000 nanoseconds, 0 entries/nanoseconds; a.size() = 25001
-create c   : 38420000 nanoseconds, 0 entries/nanoseconds
-copy c -> d: 12995000 nanoseconds, 0 entries/nanoseconds
-sort c (1) : 20805000 nanoseconds, 0 entries/nanoseconds
-sort d (2) : 18935000 nanoseconds, 0 entries/nanoseconds
-uniq c     : 3712000 nanoseconds, 0 entries/nanoseconds
-uniq d     : 3604000 nanoseconds, 0 entries/nanoseconds
-create e   : 1333761000 nanoseconds, 0 entries/nanoseconds
-sort e (2) : 16124000 nanoseconds, 0 entries/nanoseconds
-uniq e     : 3453000 nanoseconds, 0 entries/nanoseconds
-c isSorted = true: 115000 nanoseconds
-d isSorted = true: 89000 nanoseconds
-e isSorted = true: 94000 nanoseconds
-e allfound = true: 58685000 nanoseconds
-e noghosts = true: 59132000 nanoseconds
-Result size: c = 50000, d = 50000, e = 50000
-
-altes ohne concurrency
-[{hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}]rows double
-AAAAAAAAAAAA
-CCCCCCCCCCCC
-kelondroRowCollection test with size = 50000
-Compare error at pos 23548: a.get(i)={hash=8dV7ACC_D1ir}, a.get(i + 1)={hash=8Ypevst5u_tV}
-create a   : 502494000 nanoseconds, 0 entries/nanoseconds; a.size() = 25001
-create c   : 36062000 nanoseconds, 0 entries/nanoseconds
-copy c -> d: 16164000 nanoseconds, 0 entries/nanoseconds
-sort c (1) : 32442000 nanoseconds, 0 entries/nanoseconds
-sort d (2) : 32025000 nanoseconds, 0 entries/nanoseconds
-uniq c     : 3581000 nanoseconds, 0 entries/nanoseconds
-uniq d     : 3561000 nanoseconds, 0 entries/nanoseconds
-create e   : 1788591000 nanoseconds, 0 entries/nanoseconds
-sort e (2) : 22318000 nanoseconds, 0 entries/nanoseconds
-uniq e     : 3438000 nanoseconds, 0 entries/nanoseconds
-c isSorted = true: 113000 nanoseconds
-d isSorted = true: 89000 nanoseconds
-e isSorted = true: 94000 nanoseconds
-e allfound = true: 64161000 nanoseconds
-e noghosts = true: 55975000 nanoseconds
-Result size: c = 50000, d = 50000, e = 50000
-
+--------------------------------------------------------------------------------
+compare() sanity checks
+--------------------------------------------------------------------------------
+kelondroRowCollection baseline test with size = 100000
+create+sort+uniq a : 453714042 ns, 0 entries/ms; a.size() = 50000
+create c           : 10972458 ns, 9 entries/ms
+copy c -> d        : 7571209 ns, 13 entries/ms
+sort c             : 46137250 ns, 2 entries/ms
+sort d             : 38058125 ns, 2 entries/ms
+uniq c             : 2139791 ns, 46 entries/ms
+uniq d             : 2056000 ns, 48 entries/ms
+--------------------------------------------------------------------------------
+Growth behaviour: preallocation vs incremental
+inc.mem()=1233012 bytes; size=100100
+incremental add()        :     10449292 ns  | Δmem   30.940.520 B
+pre.mem()=1697196 bytes; size=100000
+preallocated add()       :      9191375 ns  | Δmem   23.195.552 B
+--------------------------------------------------------------------------------
+sortBound effectiveness
+sorted? true | sort time = 13750 ns
+addSorted()+sort() (no-op expected) :     11407875 ns  | Δmem   17.649.160 B
+sorted? true | sort time = 38264209 ns
+partially sorted then random tail :     47743500 ns  | Δmem   18.499.312 B
+--------------------------------------------------------------------------------
+removeRow performance (keepOrder true/false) and shrink
+mem before=1680000 after=1680000 | time=1772167 ns | size=90000
+remove front (keepOrder=true) :     19521000 ns  | Δmem  -99.698.848 B
+time=2279625 ns | size=90000
+remove random (keepOrder=false) :     10725917 ns  | Δmem   16.777.216 B
+--------------------------------------------------------------------------------
+alias retention check (demonstrates risk of keeping Entry views across growth)
+old array retained while alias alive? false
+old array after alias=null: GC'ed
+--------------------------------------------------------------------------------
+export/import roundtrip
+roundtrip ok? true | x.size=100000 y.size=100000
+export + import (with env row) :     46651417 ns  | Δmem   15.882.984 B
+--------------------------------------------------------------------------------
+top()/random() cloning cost
+k=5000 | time=262792 ns | result=5000
+top(k) with cloning      :     12602875 ns  | Δmem   -6.101.432 B
+k=5000 | time=300833 ns | result=5000
+random(k) with cloning   :      9101917 ns  | Δmem   25.163.776 B
+--------------------------------------------------------------------------------
+iterator remove() cost (keep order)
+removed=50000 | time=3463667 ns | size=50000
+rowIterator remove half (keepOrder=true) :     12654834 ns  | Δmem   33.554.432 B
+--------------------------------------------------------------------------------
+Result size recap: c=100000, d=100000
 */

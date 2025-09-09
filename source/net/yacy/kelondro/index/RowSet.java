@@ -133,6 +133,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     @Override
     public final synchronized boolean has(final byte[] key) {
         assert key.length == this.rowdef.primaryKeyLength;
+        if (key == null || key.length != this.rowdef.primaryKeyLength) throw new IllegalArgumentException("key length " + (key == null ? 0 : key.length) + " != primaryKeyLength " + this.rowdef.primaryKeyLength);
         final int index = this.find(key, 0);
         return index >= 0;
     }
@@ -140,6 +141,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     @Override
     public final synchronized Row.Entry get(final byte[] key, final boolean forcecopy) {
         assert key.length == this.rowdef.primaryKeyLength;
+        if (key == null || key.length != this.rowdef.primaryKeyLength) throw new IllegalArgumentException("key length " + (key == null ? 0 : key.length) + " != primaryKeyLength " + this.rowdef.primaryKeyLength);
         final int index = this.find(key, 0);
         if (index < 0) return null;
         return this.get(index, forcecopy);
@@ -255,6 +257,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         boolean exists = false;
         int index;
         assert a.length == this.rowdef.primaryKeyLength;
+        if (a == null || a.length != this.rowdef.primaryKeyLength) throw new IllegalArgumentException("key length " + (a == null ? 0 : a.length) + " != primaryKeyLength " + this.rowdef.primaryKeyLength);
         while (true) {
             index = this.find(a, 0);
             if (index < 0) {
@@ -615,7 +618,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
                 e.printStackTrace();
             }
         d.sort();
-        d.delete("fuenf".getBytes());
+        d.delete("fuenf.....".getBytes()); 
         final Iterator<Row.Entry> ii = d.iterator();
         String s;
         System.out.print("INPUT-ITERATOR: ");
@@ -642,7 +645,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         long start = System.currentTimeMillis();
         long t;
         String w;
-        for (long k = 1; k <= 60000; k++) {
+        for (long k = 1; k <= 200000; k++) {
             t = System.currentTimeMillis();
             w = "a" + Long.toString(rand.nextLong());
             try {
@@ -653,7 +656,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             }
             if (k % 10000 == 0)
                 System.out.println("added " + k + " entries in " +
-                    ((t - start) / 1000) + " seconds, " +
+                    (t - start) + " milliseconds, " +
                     (((t - start) > 1000) ? (k / ((t - start) / 1000)) : k) +
                     " entries/second, size = " + c.size());
         }
@@ -726,4 +729,37 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         // do nothing, there is no file
     }
 
+/*
+INPUT-ITERATOR: acht......, acht......, drei......, drei......, eins......, eins......, neun......, neun......, sechs....., sechs....., sieben...., sieben...., vier......, vier......, zehn......, zehn......, zwei......, zwei......, 
+INPUT-TOSTRING: {key=acht......,x=xxxx}, {key=acht......,x=xxxx}, {key=drei......,x=xxxx}, {key=drei......,x=xxxx}, {key=eins......,x=xxxx}, {key=eins......,x=xxxx}, {key=neun......,x=xxxx}, {key=neun......,x=xxxx}, {key=sechs.....,x=xxxx}, {key=sechs.....,x=xxxx}, {key=sieben....,x=xxxx}, {key=sieben....,x=xxxx}, {key=vier......,x=xxxx}, {key=vier......,x=xxxx}, {key=zehn......,x=xxxx}, {key=zehn......,x=xxxx}, {key=zwei......,x=xxxx}, {key=zwei......,x=xxxx}
+SORTED        : {key=acht......,x=xxxx}, {key=acht......,x=xxxx}, {key=drei......,x=xxxx}, {key=drei......,x=xxxx}, {key=eins......,x=xxxx}, {key=eins......,x=xxxx}, {key=neun......,x=xxxx}, {key=neun......,x=xxxx}, {key=sechs.....,x=xxxx}, {key=sechs.....,x=xxxx}, {key=sieben....,x=xxxx}, {key=sieben....,x=xxxx}, {key=vier......,x=xxxx}, {key=vier......,x=xxxx}, {key=zehn......,x=xxxx}, {key=zehn......,x=xxxx}, {key=zwei......,x=xxxx}, {key=zwei......,x=xxxx}
+UNIQ          : {key=acht......,x=xxxx}, {key=drei......,x=xxxx}, {key=eins......,x=xxxx}, {key=neun......,x=xxxx}, {key=sechs.....,x=xxxx}, {key=sieben....,x=xxxx}, {key=vier......,x=xxxx}, {key=zehn......,x=xxxx}, {key=zwei......,x=xxxx}
+TRIM          : {key=acht......,x=xxxx}, {key=drei......,x=xxxx}, {key=eins......,x=xxxx}, {key=neun......,x=xxxx}, {key=sechs.....,x=xxxx}, {key=sieben....,x=xxxx}, {key=vier......,x=xxxx}, {key=zehn......,x=xxxx}, {key=zwei......,x=xxxx}
+added 10000 entries in 54 milliseconds, 10000 entries/second, size = 10000
+added 20000 entries in 149 milliseconds, 20000 entries/second, size = 19998
+added 30000 entries in 220 milliseconds, 30000 entries/second, size = 29997
+added 40000 entries in 304 milliseconds, 40000 entries/second, size = 39996
+added 50000 entries in 409 milliseconds, 50000 entries/second, size = 49994
+added 60000 entries in 501 milliseconds, 60000 entries/second, size = 59993
+added 70000 entries in 611 milliseconds, 70000 entries/second, size = 69992
+added 80000 entries in 755 milliseconds, 80000 entries/second, size = 79991
+added 90000 entries in 872 milliseconds, 90000 entries/second, size = 89991
+added 100000 entries in 1008 milliseconds, 100000 entries/second, size = 99991
+added 110000 entries in 1196 milliseconds, 110000 entries/second, size = 109986
+added 120000 entries in 1349 milliseconds, 120000 entries/second, size = 119984
+added 130000 entries in 1519 milliseconds, 130000 entries/second, size = 129983
+added 140000 entries in 1743 milliseconds, 140000 entries/second, size = 139976
+added 150000 entries in 1933 milliseconds, 150000 entries/second, size = 149969
+added 160000 entries in 2131 milliseconds, 80000 entries/second, size = 159964
+added 170000 entries in 2378 milliseconds, 85000 entries/second, size = 169961
+added 180000 entries in 2583 milliseconds, 90000 entries/second, size = 179957
+added 190000 entries in 2803 milliseconds, 95000 entries/second, size = 189953
+added 200000 entries in 3040 milliseconds, 66666 entries/second, size = 199949
+bevore sort: 3040 milliseconds, size: 199949
+after sort: 3104 milliseconds, size: 199949
+after uniq: 3114 milliseconds, size: 199949
+
+RESULT SIZE: 4000
+Time: 0 seconds
+ */
 }
