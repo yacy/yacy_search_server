@@ -2,21 +2,21 @@
  *  zipParser
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 29.6.2010 at https://yacy.net
- *
+ * <p>
  * $LastChangedDate$
  * $LastChangedRevision$
  * $LastChangedBy$
- *
+ * <p>
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *
+ * <p>
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -123,7 +123,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final DigestURL virtualURL = DigestURL.newURL(location, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tmp);
+                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tmp, null);
                     if (docs == null) continue;
                     maindoc.addSubDocuments(docs);
                 } catch (final Parser.Failure e) {

@@ -196,7 +196,7 @@ public final class LoaderDispatcher {
     /**
      * load a resource from the web, from ftp, from smb or a file
      * @param request the request essentials
-     * @param cacheStratgy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
+     * @param cacheStrategy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
      * @return the loaded entity in a Response object
      * @throws IOException
      */
@@ -351,7 +351,7 @@ public final class LoaderDispatcher {
     /**
      * Open an InputStream on a resource from the web, from ftp, from smb or a file
      * @param request the request essentials
-     * @param cacheStratgy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
+     * @param cacheStrategy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
      * @return an open ImageInputStream. Don't forget to close it once used!
      * @throws IOException when url is malformed, blacklisted, or CacheStrategy is CACHEONLY and content is unavailable
      */
@@ -468,7 +468,8 @@ public final class LoaderDispatcher {
      * load the url as byte[] content from the web or the cache
      * @param request
      * @param cacheStrategy
-     * @param timeout
+     * @param blacklistType
+     * @param agent
      * @return the content as {@link byte[]}
      * @throws IOException
      */
@@ -672,7 +673,7 @@ public final class LoaderDispatcher {
 
         // parse resource
         try {
-            final Document[] documents = streamResponse.parseWithLimits(maxLinks, maxBytes);
+            final Document[] documents = streamResponse.parseWithLimits(maxLinks, maxBytes, response.lastModified());
             final Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
 
             final String x_robots_tag = response.getResponseHeader().getXRobotsTag();
@@ -718,7 +719,8 @@ public final class LoaderDispatcher {
                     response.profile().scraper(),
                     timezoneOffset,
                     response.depth(),
-                    response.getContent());
+                    response.getContent(),
+                    null);
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

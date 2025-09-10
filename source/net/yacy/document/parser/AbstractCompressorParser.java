@@ -85,7 +85,7 @@ public abstract class AbstractCompressorParser extends AbstractParser implements
             final InputStream source) throws Parser.Failure, InterruptedException {
 
         return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE,
-                Long.MAX_VALUE);
+                Long.MAX_VALUE, null);
     }
 
     @Override
@@ -99,7 +99,8 @@ public abstract class AbstractCompressorParser extends AbstractParser implements
             final int timezoneOffset,
             final InputStream source,
             final int maxLinks,
-            final long maxBytes) throws Parser.Failure {
+            final long maxBytes,
+            final Date lastModified) throws Parser.Failure {
         Document maindoc;
         final CompressorInputStream compressedInStream;
         try {
@@ -152,17 +153,17 @@ public abstract class AbstractCompressorParser extends AbstractParser implements
      * Parse content in an open stream uncompressing on the fly a compressed
      * resource.
      *
-     * @param location           the URL of the compressed resource
-     * @param charset            the charset name if known
-     * @param ignoreClassNames   an eventual set of CSS class names whose matching
-     *                           html elements content should be ignored
-     * @param timezoneOffset     the local time zone offset
-     * @param compressedInStream an open stream uncompressing on the fly the
-     *                           compressed content
-     * @param maxLinks           the maximum total number of links to parse and add
-     *                           to the result documents
-     * @param maxBytes           the maximum number of content bytes to process
-     * @return a list of documents that result from parsing the source, with empty
+     * @param location              the URL of the compressed resource
+     * @param charset               the charset name if known
+     * @param defaultValency        the valency default; should be TagValency.EVAL by default
+     * @param valencySwitchTagNames the valency switch tag names
+     * @param timezoneOffset        the local time zone offset
+     * @param compressedInStream    an open stream uncompressing on the fly the
+     *                              compressed content
+     * @param maxLinks              the maximum total number of links to parse and add
+     *                              to the result documents
+     * @param maxBytes              the maximum number of content bytes to process
+     * @return an array of documents that result from parsing the source, with empty
      *         or null text.
      * @throws Parser.Failure when the parser processing failed
      */
@@ -195,7 +196,7 @@ public abstract class AbstractCompressorParser extends AbstractParser implements
              */
             return TextParser.parseWithLimits(
                     contentLocation, mime, charset, defaultValency, valencySwitchTagNames, timezoneOffset, depth,
-                    -1, compressedInStream, maxLinks, maxBytes);
+                    -1, compressedInStream, maxLinks, maxBytes, null);
         } catch (final MalformedURLException e) {
             throw new Parser.Failure("Unexpected error while parsing compressed file. " + e.getMessage(), location);
         }

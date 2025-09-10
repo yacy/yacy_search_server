@@ -2,21 +2,21 @@
  *  htmlParser.java
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 09.07.2009 at https://yacy.net
- *
+ * <p>
  * $LastChangedDate$
  * $LastChangedRevision$
  * $LastChangedBy$
- *
+ * <p>
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *
+ * <p>
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -36,10 +36,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 
@@ -119,7 +116,8 @@ public class htmlParser extends AbstractParser implements Parser {
                 sourceStream,
                 Integer.MAX_VALUE,
                 DEFAULT_MAX_LINKS,
-                Long.MAX_VALUE);
+                Long.MAX_VALUE,
+                null);
     }
 
     @Override
@@ -143,7 +141,8 @@ public class htmlParser extends AbstractParser implements Parser {
                 sourceStream,
                 Integer.MAX_VALUE,
                 DEFAULT_MAX_LINKS,
-                Long.MAX_VALUE);
+                Long.MAX_VALUE,
+                null);
     }
 
     @Override
@@ -162,7 +161,8 @@ public class htmlParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream sourceStream,
             final int maxLinks,
-            final long maxBytes)
+            final long maxBytes,
+            final Date lastModified)
             throws Failure {
         return this.parseWithLimits(
                 location,
@@ -175,7 +175,8 @@ public class htmlParser extends AbstractParser implements Parser {
                 sourceStream,
                 maxLinks,
                 maxLinks,
-                maxBytes);
+                maxBytes,
+                lastModified);
     }
 
     private Document[] parseWithLimits(
@@ -189,14 +190,15 @@ public class htmlParser extends AbstractParser implements Parser {
             final InputStream sourceStream,
             final int maxAnchors,
             final int maxLinks,
-            final long maxBytes)
+            final long maxBytes,
+            final Date lastModified)
             throws Failure {
         try {
             // first get a document from the parsed html
             Charset[] detectedcharsetcontainer = new Charset[]{null};
             ContentScraper scraper = parseToScraper(location, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxAnchors, maxLinks, maxBytes);
             // parseToScraper also detects/corrects/sets charset from html content tag
-            final Document document = this.transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
+            final Document document = this.transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper, lastModified);
             Document documentSnapshot = null;
             try {
                 // check for ajax crawling scheme (https://developers.google.com/webmasters/ajax-crawling/docs/specification)
@@ -227,9 +229,11 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param mimeType
      * @param charSet
      * @param scraper
+     * @param lastModified
      * @return a Document instance
      */
-    private Document transformScraper(final DigestURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
+    private Document transformScraper(final DigestURL location, final String mimeType, final String charSet,
+                                      final ContentScraper scraper, final Date lastModified) throws IOException {
         final String[] sections = new String[
                  scraper.getHeadlines(1).length +
                  scraper.getHeadlines(2).length +
@@ -263,7 +267,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getRSS(),
                 noDoubleImages,
                 scraper.indexingDenied(),
-                scraper.getDate());
+                scraper.getDate(lastModified));
         ppd.setScraperObject(scraper);
         ppd.setIcons(scraper.getIcons());
         ppd.setLinkedDataTypes(scraper.getLinkedDataTypes());
@@ -539,7 +543,7 @@ public class htmlParser extends AbstractParser implements Parser {
             try {
                 snapshotStream = locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
                 ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, detectedcharsetcontainer, timezoneOffset, snapshotStream, maxAnchors, maxLinks, maxBytes);
-                documentSnapshot = this.transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
+                documentSnapshot = this.transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot, null);
             } finally {
                 if(snapshotStream != null) {
                     try {

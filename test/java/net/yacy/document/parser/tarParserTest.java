@@ -126,7 +126,7 @@ public class tarParserTest {
 			/* Content within limits */
 			try {
 				Document[] documents = this.parser.parseWithLimits(location, "application/tar", null,
-						new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE);
+						new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE, null);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 
 				final String parsedText = documents[0].getTextString();
@@ -169,7 +169,7 @@ public class tarParserTest {
 			/* Links limit exceeded from the third included file */
 			try {
 				Document[] documents = this.parser.parseWithLimits(location, "application/tar", null,
-						new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE);
+						new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE, null);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 
 				final String parsedText = documents[0].getTextString();
@@ -224,7 +224,7 @@ public class tarParserTest {
 			}
 			try {
 				Document[] documents = this.parser.parseWithLimits(location, "application/tar", null,
-						new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes);
+						new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes, null);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 
 				final String parsedText = documents[0].getTextString();

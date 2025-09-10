@@ -239,7 +239,10 @@ import net.yacy.utils.crypt;
 import net.yacy.utils.upnp.UPnP;
 import net.yacy.visualization.CircleTool;
 
-
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.zip.*;
 
 public final class Switchboard extends serverSwitch {
 
@@ -3005,7 +3008,8 @@ public final class Switchboard extends serverSwitch {
                             response.profile().scraper(),
                             response.profile().timezoneOffset(),
                             response.depth(),
-                            response.getContent());
+                            response.getContent(),
+                            response.lastModified());
                 } else {
                     this.log.warn("Resource '" + response.url().toNormalform(true) + "' is not supported. " + supportError);
                     // create a new errorURL DB entry
@@ -3024,7 +3028,8 @@ public final class Switchboard extends serverSwitch {
                                 response.profile().scraper(),
                                 response.profile().timezoneOffset(),
                                 response.depth(),
-                                response.getContent());
+                                response.getContent(),
+                                response.lastModified());
             }
             if ( documents == null ) {
                 throw new Parser.Failure("Parser returned null.", response.url());
