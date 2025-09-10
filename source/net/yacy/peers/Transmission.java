@@ -115,13 +115,16 @@ public class Transmission {
          * @return
          */
         private ReferenceContainer<WordReference> trimContainer(final ReferenceContainer<WordReference> container, final int max) throws SpaceExceededException {
-            final ReferenceContainer<WordReference> c = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), max);
-            final int part = container.size() / max + 1;
+            final int minRWIs = 800; // Add this to enforce the minimum RWIs
+            final int effectiveMax = Math.max(max, minRWIs); // Ensure at least 800 RWIs 
+      
+            final ReferenceContainer<WordReference> c = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), effectiveMax);
+            final int part = container.size() / effectiveMax + 1;
             final Random r = new Random();
             WordReference w;
             final List<byte[]> selected = new ArrayList<byte[]>();
             final Iterator<WordReference>  i = container.entries();
-            while ((i.hasNext()) && (c.size() < max)) {
+            while ((i.hasNext()) && (c.size() < effectiveMax)) {
                 w = i.next();
                 if (r.nextInt(part) == 0) {
                     c.add(w);
