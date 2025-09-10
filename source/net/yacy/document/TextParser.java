@@ -75,8 +75,6 @@ import net.yacy.document.parser.images.svgParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
-import java.util.*;
-
 public final class TextParser {
 
     private static final Object v = new Object();
@@ -190,8 +188,7 @@ public final class TextParser {
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
-            final File sourceFile,
-            final Date lastModified
+            final File sourceFile
             ) throws InterruptedException, Parser.Failure {
 
         BufferedInputStream sourceStream = null;
@@ -204,7 +201,7 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            docs = parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream, lastModified);
+            docs = parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -226,8 +223,7 @@ public final class TextParser {
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
-            final byte[] content,
-            final Date lastModified
+            final byte[] content
             ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from byte-array");
         mimeType = normalizeMimeType(mimeType);
@@ -241,7 +237,7 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        final Document[] docs = parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE, lastModified);
+        final Document[] docs = parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
 
         return docs;
     }
@@ -258,8 +254,7 @@ public final class TextParser {
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
-            final byte[] content,
-            final Date lastModified
+            final byte[] content
             ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) {
             AbstractParser.log.fine("Parsing '" + location + "' from byte-array, applying only the generic parser");
@@ -268,7 +263,7 @@ public final class TextParser {
         final Set<Parser> idioms = new HashSet<>();
         idioms.add(TextParser.genericIdiom);
 
-        return parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE, lastModified);
+        return parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
     }
 
     private static Document[] parseSource(
@@ -283,8 +278,7 @@ public final class TextParser {
             final long contentLength,
             final InputStream sourceStream,
             final int maxLinks,
-            final long maxBytes,
-            final Date lastModified
+            final long maxBytes
             ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
         mimeType = normalizeMimeType(mimeType);
@@ -340,7 +334,7 @@ public final class TextParser {
 
                     try {
                         return parseSource(location, mimeType, parser, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset,
-                                nonCloseInputStream, maxLinks, maxBytes, lastModified);
+                                nonCloseInputStream, maxLinks, maxBytes);
                     } catch (final Parser.Failure e) {
                         /* Try to reset the marked stream. If the failed parser has consumed too many bytes :
                          * too bad, the marks is invalid and process fails now with an IOException */
@@ -401,7 +395,7 @@ public final class TextParser {
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        final Document[] docs = parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, b, maxLinks, maxBytes, lastModified);
+        final Document[] docs = parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, b, maxLinks, maxBytes);
 
         return docs;
     }
@@ -416,10 +410,9 @@ public final class TextParser {
             final int timezoneOffset,
             final int depth,
             final long contentLength,
-            final InputStream sourceStream,
-            final Date lastModified) throws Parser.Failure {
+            final InputStream sourceStream) throws Parser.Failure {
         return parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, contentLength, sourceStream,
-                Integer.MAX_VALUE, Long.MAX_VALUE, lastModified);
+                Integer.MAX_VALUE, Long.MAX_VALUE);
     }
 
     /**
@@ -431,15 +424,14 @@ public final class TextParser {
      * @param location the URL of the source
      * @param mimeType the mime type of the source, if known
      * @param charset the charset name of the source, if known
-     * @param defaultValency the valency default; should be TagValency.EVAL by default
-     * @param valencySwitchTagNames the valency switch tag names
+     * @param ignoreClassNames an eventual set of CSS class names whose matching html elements content should be ignored
      * @param timezoneOffset the local time zone offset
      * @param depth the current depth of the crawl
      * @param contentLength the length of the source, if known (else -1 should be used)
      * @param sourceStream a input stream
      * @param maxLinks the maximum total number of links to parse and add to the result documents
      * @param maxBytes the maximum number of content bytes to process
-     * @return an array of documents that result from parsing the source, with empty or null text.
+     * @return a list of documents that result from parsing the source, with empty or null text.
      * @throws Parser.Failure when the parser processing failed
      */
     public static Document[] parseWithLimits(
@@ -453,10 +445,9 @@ public final class TextParser {
             final long contentLength,
             final InputStream sourceStream,
             final int maxLinks,
-            final long maxBytes,
-            final Date lastModified) throws Parser.Failure{
+            final long maxBytes) throws Parser.Failure{
         return parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, new VocabularyScraper(), timezoneOffset, depth, contentLength,
-                sourceStream, maxLinks, maxBytes, lastModified);
+                sourceStream, maxLinks, maxBytes);
     }
 
     /**
@@ -480,9 +471,9 @@ public final class TextParser {
     public static Document[] parseWithLimits(
             final DigestURL location, final String mimeType, final String charset,
             final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, final int maxLinks,
-            final long maxBytes, final Date lastModified) throws Parser.Failure {
-        return parseSource(location, mimeType, charset, TagValency.EVAL, new HashSet<>(), new VocabularyScraper(), timezoneOffset, depth, contentLength,
-                sourceStream, maxLinks, maxBytes, lastModified);
+            final long maxBytes) throws Parser.Failure{
+        return parseSource(location, mimeType, charset, TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, depth, contentLength,
+                sourceStream, maxLinks, maxBytes);
     }
 
     /**
@@ -510,8 +501,7 @@ public final class TextParser {
             final int timezoneOffset,
             final InputStream sourceStream,
             final int maxLinks,
-            final long maxBytes,
-            final Date lastModified
+            final long maxBytes
             ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
         final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
@@ -522,7 +512,7 @@ public final class TextParser {
         try {
             final Document[] docs;
             if(parser.isParseWithLimitsSupported()) {
-                docs = parser.parseWithLimits(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes, lastModified);
+                docs = parser.parseWithLimits(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
             } else {
                 /* Parser do not support partial parsing within limits : let's control it here*/
                 final InputStream limitedSource = new StrictLimitInputStream(sourceStream, maxBytes);
@@ -547,7 +537,7 @@ public final class TextParser {
      * @param sourceArray the resource content bytes
      * @param maxLinks the maximum total number of links to parse and add to the result documents
      * @param maxBytes the maximum number of content bytes to process
-     * @return an array of documents that result from parsing the source
+     * @return a list of documents that result from parsing the source
      * @throws Parser.Failure when the source could not be parsed
      */
     private static Document[] parseSource(
@@ -562,8 +552,7 @@ public final class TextParser {
             final int depth,
             final byte[] sourceArray,
             final int maxLinks,
-            final long maxBytes,
-            final Date lastModified
+            final long maxBytes
             ) throws Parser.Failure {
         final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "' from byte[]");
@@ -585,7 +574,7 @@ public final class TextParser {
                 }
                 try {
                     if(parser.isParseWithLimitsSupported()) {
-                        docs = parser.parseWithLimits(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, bis, maxLinks, maxBytes, lastModified);
+                        docs = parser.parseWithLimits(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, bis, maxLinks, maxBytes);
                     } else {
                         /* Partial parsing is not supported by this parser : check content length now */
                         if(sourceArray.length > maxBytes) {

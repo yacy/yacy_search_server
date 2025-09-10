@@ -27,7 +27,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
@@ -99,7 +98,7 @@ public class StreamResponse implements Closeable {
 	 *             when no parser support the content
 	 */
 	public Document[] parse() throws Parser.Failure {
-		return parseWithLimits(Integer.MAX_VALUE, Long.MAX_VALUE, response.lastModified() == null ? null : response.lastModified());
+		return parseWithLimits(Integer.MAX_VALUE, Long.MAX_VALUE);
 	}
 	
 	/**
@@ -123,7 +122,7 @@ public class StreamResponse implements Closeable {
 	 * @throws Parser.Failure
 	 *             when no parser support the content, or an error occurred while parsing
 	 */
-	public Document[] parseWithLimits(final int maxLinks, final long maxBytes, Date lastModified) throws Parser.Failure {
+	public Document[] parseWithLimits(final int maxLinks, final long maxBytes) throws Parser.Failure {
 		final String supportError = TextParser.supports(this.response.url(),
 				this.response.getResponseHeader() == null ? null : this.response.getResponseHeader().getContentType());
 		if (supportError != null) {
@@ -137,7 +136,7 @@ public class StreamResponse implements Closeable {
 			
 			return TextParser.parseWithLimits(this.response.url(), mimeType, charsetName,
 						this.response.getRequest().timezoneOffset(), this.response.getRequest().depth(),
-						this.response.size(), this.contentStream, maxLinks, maxBytes, lastModified);
+						this.response.size(), this.contentStream, maxLinks, maxBytes);
 		} catch(Parser.Failure e) {
 			throw e;
 		}catch (final Exception e) {

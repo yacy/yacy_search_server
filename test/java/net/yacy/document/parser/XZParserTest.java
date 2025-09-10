@@ -141,7 +141,7 @@ public class XZParserTest {
 			final DigestURL location = new DigestURL("http://localhost/" + fileName);
 			try (final FileInputStream inStream = new FileInputStream(new File(TEST_FOLER, fileName));) {
 				final Document[] documents = parser.parseWithLimits(location, "application/x-xz",
-						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 10000, 10000, null);
+						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 10000, 10000);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 				assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 				assertTrue("Parsed text must contain test word with umlaut char" + fileName,
@@ -175,7 +175,7 @@ public class XZParserTest {
 			final DigestURL location = new DigestURL("http://localhost/" + fileName);
 			try (final FileInputStream inStream = new FileInputStream(new File(TEST_FOLER, fileName));) {
 				final Document[] documents = parser.parseWithLimits(location, "application/x-xz",
-						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 0, Long.MAX_VALUE, null);
+						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 0, Long.MAX_VALUE);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 				assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 				assertTrue("Parsed text must contain test word with umlaut char" + fileName,
@@ -211,7 +211,7 @@ public class XZParserTest {
 			 */
 			final long maxBytes = 258;
 			final Document[] documents = parser.parseWithLimits(location, "application/x-xz",
-					StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes, null);
+					StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes);
 			assertNotNull("Parser result must not be null for file " + fileName, documents);
 			assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 			assertTrue("Parsed text must contain test word with umlaut char" + fileName,
@@ -231,7 +231,7 @@ public class XZParserTest {
 			 */
 			final long maxBytes = 65;
 			final Document[] documents = parser.parseWithLimits(location, "application/x-xz",
-					StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes, null);
+					StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes);
 			assertNotNull("Parser result must not be null for file " + fileName, documents);
 			assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 			assertTrue("Parsed text must contain test word with umlaut char" + fileName,

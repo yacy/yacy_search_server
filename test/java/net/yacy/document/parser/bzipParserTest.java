@@ -149,7 +149,7 @@ public class bzipParserTest {
 			try (final FileInputStream inStream = new FileInputStream(new File(TEST_FOLER, fileName));) {
 				final Document[] documents = parser.parseWithLimits(location, "application/x-bzip2",
 						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 10000,
-						10000, null);
+						10000);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 				assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 				assertTrue("Parsed text must contain test word with umlaut char" + fileName,
@@ -185,7 +185,7 @@ public class bzipParserTest {
 			final DigestURL location = new DigestURL("http://localhost/" + fileName);
 			try (final FileInputStream inStream = new FileInputStream(new File(TEST_FOLER, fileName));) {
 				final Document[] documents = parser.parseWithLimits(location, "application/x-bzip2",
-						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 0, Long.MAX_VALUE, null);
+						StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream, 0, Long.MAX_VALUE);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 				assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 				assertTrue("Parsed text must contain test word with umlaut char" + fileName,
@@ -220,7 +220,7 @@ public class bzipParserTest {
 			/* The bytes limit is set to let parsing the beginning text part, but stop before reaching the <a> tag */
 			final long maxBytes = 258;
 			final Document[] documents = parser.parseWithLimits(location, "application/x-bzip2", StandardCharsets.UTF_8.name(),
-					new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes, null);
+					new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes);
 			assertNotNull("Parser result must not be null for file " + fileName, documents);
 			assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 			assertTrue("Parsed text must contain test word with umlaut char" + fileName,
@@ -237,7 +237,7 @@ public class bzipParserTest {
 			/* The bytes limit is set to let parsing the beginning of the text, but stop before reaching the URL */
 			final long maxBytes = 65;
 			final Document[] documents = parser.parseWithLimits(location, "application/x-bzip2", StandardCharsets.UTF_8.name(),
-					new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes, null);
+					new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, maxBytes);
 			assertNotNull("Parser result must not be null for file " + fileName, documents);
 			assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
 			assertTrue("Parsed text must contain test word with umlaut char" + fileName,

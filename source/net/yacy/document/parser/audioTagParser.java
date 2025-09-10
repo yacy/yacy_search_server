@@ -250,12 +250,12 @@ public class audioTagParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream source)
             throws Parser.Failure, InterruptedException {
-    	return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE, null);
+    	return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE);
     }
     
     @Override
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
-    		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes, Date lastModified)
+    		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
     		throws Failure, InterruptedException {
         String filename = location.getFileName();
         String fileExt = MultiProtocolURL.getFileExtension(filename);

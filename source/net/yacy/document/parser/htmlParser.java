@@ -2,21 +2,21 @@
  *  htmlParser.java
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 09.07.2009 at https://yacy.net
- * <p>
+ *
  * $LastChangedDate$
  * $LastChangedRevision$
  * $LastChangedBy$
- * <p>
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- * <p>
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- * <p>
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -36,7 +36,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 
@@ -110,14 +113,13 @@ public class htmlParser extends AbstractParser implements Parser {
                 mimeType,
                 documentCharset,
                 TagValency.EVAL,
-                new HashSet<>(),
+                new HashSet<String>(),
                 vocscraper,
                 timezoneOffset,
                 sourceStream,
                 Integer.MAX_VALUE,
                 DEFAULT_MAX_LINKS,
-                Long.MAX_VALUE,
-                null);
+                Long.MAX_VALUE);
     }
 
     @Override
@@ -141,8 +143,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 sourceStream,
                 Integer.MAX_VALUE,
                 DEFAULT_MAX_LINKS,
-                Long.MAX_VALUE,
-                null);
+                Long.MAX_VALUE);
     }
     
     @Override
@@ -161,8 +162,7 @@ public class htmlParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream sourceStream,
             final int maxLinks,
-            final long maxBytes,
-            final Date lastModified)
+            final long maxBytes)
             throws Failure {
         return parseWithLimits(
                 location,
@@ -175,8 +175,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 sourceStream,
                 maxLinks,
                 maxLinks,
-                maxBytes,
-                lastModified);
+                maxBytes);
     }
     
     private Document[] parseWithLimits(
@@ -190,15 +189,14 @@ public class htmlParser extends AbstractParser implements Parser {
             final InputStream sourceStream,
             final int maxAnchors,
             final int maxLinks,
-            final long maxBytes,
-            final Date lastModified)
+            final long maxBytes)
             throws Failure {
         try {
             // first get a document from the parsed html
             Charset[] detectedcharsetcontainer = new Charset[]{null};
             ContentScraper scraper = parseToScraper(location, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxAnchors, maxLinks, maxBytes);
             // parseToScraper also detects/corrects/sets charset from html content tag
-            final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper, lastModified);
+            final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
             Document documentSnapshot = null;
             try {
                 // check for ajax crawling scheme (https://developers.google.com/webmasters/ajax-crawling/docs/specification)
@@ -229,11 +227,9 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param mimeType
      * @param charSet
      * @param scraper
-     * @param lastModified
      * @return a Document instance
      */
-    private Document transformScraper(final DigestURL location, final String mimeType, final String charSet,
-                                      final ContentScraper scraper, final Date lastModified) throws IOException {
+    private Document transformScraper(final DigestURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[
                  scraper.getHeadlines(1).length +
                  scraper.getHeadlines(2).length +
@@ -267,7 +263,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getRSS(),
                 noDoubleImages,
                 scraper.indexingDenied(),
-                scraper.getDate(lastModified));
+                scraper.getDate());
         ppd.setScraperObject(scraper);
         ppd.setIcons(scraper.getIcons());
         ppd.setLinkedDataTypes(scraper.getLinkedDataTypes());
@@ -544,7 +540,7 @@ public class htmlParser extends AbstractParser implements Parser {
             try {
                 snapshotStream = locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
                 ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, defaultValency, valencySwitchTagNames, vocscraper, detectedcharsetcontainer, timezoneOffset, snapshotStream, maxAnchors, maxLinks, maxBytes);
-                documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot, null);
+                documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
             } finally {
                 if(snapshotStream != null) {
                     try {

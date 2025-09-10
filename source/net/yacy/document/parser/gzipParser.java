@@ -130,7 +130,7 @@ public class gzipParser extends AbstractParser implements Parser {
             // creating a new parser class to parse the unzipped content
             final String contentfilename = GzipUtils.getUncompressedFileName(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
-            Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, DEFAULT_DEPTH, tempFile, null);
+            Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, DEFAULT_DEPTH, tempFile);
             if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
@@ -148,7 +148,7 @@ public class gzipParser extends AbstractParser implements Parser {
      * @param location the parsed resource URL
      * @param mimeType the media type of the resource
      * @param charset the charset name if known
-     * @param parser an instance of gzipParser that is registered as the parser origin of the document
+     * @param an instance of gzipParser that is registered as the parser origin of the document
      * @return a Document instance
      */
     public static Document createMainDocument(final DigestURL location, final String mimeType, final String charset, final gzipParser parser) {
@@ -204,7 +204,7 @@ public class gzipParser extends AbstractParser implements Parser {
             final DigestURL contentLocation = new DigestURL(location.getProtocol(), location.getHost(), location.getPort(), contentPath);
 
             /* Rely on the supporting parsers to respect the maxLinks and maxBytes limits on compressed content */
-            return TextParser.parseWithLimits(contentLocation, mime, charset, timezoneOffset, depth, -1, compressedInStream, maxLinks, maxBytes, null);
+            return TextParser.parseWithLimits(contentLocation, mime, charset, timezoneOffset, depth, -1, compressedInStream, maxLinks, maxBytes);
         } catch (MalformedURLException e) {
             throw new Parser.Failure("Unexpected error while parsing gzip file. " + e.getMessage(), location);
         }
@@ -217,7 +217,7 @@ public class gzipParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
-            final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes, final Date lastModified)
+            final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
             throws Parser.Failure {
         Document maindoc = null;
         GZIPInputStream zippedContent = null;

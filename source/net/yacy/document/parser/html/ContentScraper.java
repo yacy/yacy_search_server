@@ -18,6 +18,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+
 package net.yacy.document.parser.html;
 
 import java.awt.Dimension;
@@ -86,6 +87,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private static final Set<String> linkTags1 = new HashSet<>(15,0.99f);
 
     private static final Pattern LB = Pattern.compile("\n");
+
+    private static final Pattern URL_DATE_REGEX = Pattern.compile("([./\\-_]?(19|20)\\d{2})[./\\-_]?(([0-3]?[0-9][./\\-_])|(\\w{3,5}[./\\-_]))([0-3]?[0-9][./\\-]?)?");
 
     public enum TagType {
         /** Tag with no end tag (see https://www.w3.org/TR/html51/syntax.html#void-elements),
@@ -261,7 +264,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param root the document root url
      * @param maxAnchors the maximum number of URLs to process and store in the anchors property.
      * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store
-     * @param valencySwitchTagNames the default switch tag names
+     * @param valencySwitchTagNames an eventual set of CSS class names whose matching div elements content should be ignored
      * @param defaultValency the valency default; should be TagValency.EVAL by default
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
@@ -655,14 +658,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     case "startDate": // <meta itemprop="startDate" content="2016-04-21T20:00">
                         try {
                             // parse ISO 8601 date
-                            final Date startDate = CustomISO8601Formatter.CUSTOM_FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            final Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
                             this.startDates.add(startDate);
                         } catch (final ParseException e) {}
                         break;
                     case "endDate":
                         try {
                             // parse ISO 8601 date
-                            final Date endDate = CustomISO8601Formatter.CUSTOM_FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            final Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
                             this.endDates.add(endDate);
                         } catch (final ParseException e) {}
                         break;
@@ -1006,7 +1009,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = tag.opts.getProperty("datetime"); // TODO: checkOpts() also parses datetime property if in combination with schema.org itemprop=startDate/endDate
             if (h != null) { // datetime property is optional
                 try {
-                    final Date startDate = CustomISO8601Formatter.CUSTOM_FORMATTER.parse(h, this.timezoneOffset).getTime();
+                    final Date startDate = ISO8601Formatter.FORMATTER.parse(h, this.timezoneOffset).getTime();
                     this.startDates.add(startDate);
                 } catch (final ParseException ex) { }
             }
@@ -1432,6 +1435,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     public Date getDate(Date lastModified) {
         return ContentScraperDateUtil.getDate(root, metas, timezoneOffset, startDates, lastModified);
 =======
@@ -1463,7 +1467,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
 
         return new Date();
->>>>>>> parent of 398203565 (First draft for heuristics to store published date into last_modified)
     }
 
     // parse location
@@ -1628,7 +1631,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     /**
      * Fire addAnchor event to any listener implemening {@link ContentScraperListener} interface
-     * @param anchorURL anchor url
+     * @param url anchor url
      */
     private void fireAddAnchor(final String anchorURL) {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();

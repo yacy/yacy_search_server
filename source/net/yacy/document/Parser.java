@@ -24,7 +24,6 @@
 package net.yacy.document;
 
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -37,13 +36,13 @@ public interface Parser {
      * each parser must define a set of supported mime types
      * @return a set of mime type strings that are supported
      */
-    Set<String> supportedMimeTypes();
+    public Set<String> supportedMimeTypes();
 
     /**
      * each parser must define a set of supported file extensions
      * @return a set of file name extensions that are supported
      */
-    Set<String> supportedExtensions();
+    public Set<String> supportedExtensions();
 
     /**
      * parse an input stream
@@ -53,11 +52,11 @@ public interface Parser {
      * @param scraper an entity scraper to detect facets from text annotation context
      * @param timezoneOffset the local time zone offset
      * @param source a input stream
-     * @return an array of documents that result from parsing the source
+     * @return a list of documents that result from parsing the source
      * @throws Parser.Failure when the parser processing failed
      * @throws InterruptedException when the processing was interrupted before termination
      */
-    Document[] parse(
+    public Document[] parse(
             DigestURL url,
             String mimeType,
             String charset,
@@ -66,7 +65,7 @@ public interface Parser {
             InputStream source
             ) throws Parser.Failure, InterruptedException;
 
-    Document[] parse(
+    public Document[] parse(
             DigestURL url,
             String mimeType,
             String charset,
@@ -106,7 +105,7 @@ public interface Parser {
     *            result documents
     * @param maxBytes
     *            the maximum number of content bytes to process
-    * @return an array of documents that result from parsing the source, with
+    * @return a list of documents that result from parsing the source, with
     *         empty or null text.
     * @throws Parser.Failure
     *             when the parser processing failed
@@ -116,7 +115,7 @@ public interface Parser {
     *             when the parser implementation doesn't support parsing within
     *             limits
     */
-    Document[] parseWithLimits(
+    public Document[] parseWithLimits(
             DigestURL url,
             String mimeType,
             String charset,
@@ -124,27 +123,28 @@ public interface Parser {
             int timezoneOffset,
             InputStream source,
             int maxLinks,
-            long maxBytes,
-            Date lastModified) throws Parser.Failure, InterruptedException, UnsupportedOperationException;
+            long maxBytes)
+                    throws Parser.Failure, InterruptedException, UnsupportedOperationException;
 
-    Document[] parseWithLimits(
-            DigestURL location,
-            String mimeType,
-            String documentCharset,
-            TagValency defaultValency,
-            Set<String> valencySwitchTagNames,
-            VocabularyScraper vocscraper,
-            int timezoneOffset,
-            InputStream sourceStream,
-            int maxLinks,
-            long maxBytes,
-            Date lastModified) throws Parser.Failure, InterruptedException, UnsupportedOperationException;
+
+    public Document[] parseWithLimits(
+            final DigestURL location,
+            final String mimeType,
+            final String documentCharset,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
+            final VocabularyScraper vocscraper,
+            final int timezoneOffset,
+            final InputStream sourceStream,
+            final int maxLinks,
+            final long maxBytes)
+                    throws Parser.Failure, InterruptedException, UnsupportedOperationException;
 
     /**
     * @return true when the parser implementation supports the
     *         parseWithLimits() operation.
     */
-    boolean isParseWithLimitsSupported();
+    public boolean isParseWithLimitsSupported();
 
     // methods to that shall make it possible to put Parser objects into a hashtable
 
@@ -152,27 +152,27 @@ public interface Parser {
      * get the name of the parser
      * @return the name of the parser
      */
-    String getName();
+    public String getName();
 
     /**
      * check equivalence of parsers; this simply tests equality of parser names
      * @return true when this parser is equivalent to o
      */
     @Override
-    boolean equals(Object o);
+    public boolean equals(Object o);
 
     /**
      * the hash code of a parser
      * @return the hash code of the parser name string
      */
     @Override
-    int hashCode();
+    public int hashCode();
 
     /**
      * a parser warning
      * thrown as an exception
      */
-    class Failure extends Exception {
+    public class Failure extends Exception {
 
         private static final long serialVersionUID = 2278214953869122883L;
         private MultiProtocolURL url = null;

@@ -26,7 +26,10 @@ package net.yacy.cora.date;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.StringTokenizer;
 
 public class ISO8601Formatter extends AbstractFormatter implements DateFormatter {
 
@@ -109,7 +112,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
             }
             // The standard says:
             // if there is an hour there has to be a minute and a timezone token, too.
-            if (getTimeSeparator().contains(t.nextToken())) {
+            if (t.nextToken().equals("T")) {
                 final int hour = Integer.parseInt(t.nextToken());
                 // no error, got hours
                 int min = 0;
@@ -145,7 +148,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
                             // no legal TZ offset found
                             return cal;
                         }
-                        offset = getOffset(t, sign);
+                        offset = sign * Integer.parseInt(t.nextToken()) * 10 * 3600;
                     }
                     cal.set(Calendar.ZONE_OFFSET, offset);
                 }
@@ -165,14 +168,6 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
         return cal;
     }
 
-    public int getOffset(StringTokenizer t, int sign) {
-        String offset = t.nextToken();
-        return sign * Integer.parseInt(offset) * 10 * 3600;
-    }
-
-    public Collection<String> getTimeSeparator() {
-        return Set.of("T");
-    }
 
     /**
      * Creates a String representation of a Date using the format defined

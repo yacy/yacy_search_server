@@ -28,9 +28,12 @@ package net.yacy.document.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
-import jdk.jfr.DataAmount;
 import org.apache.commons.lang.StringUtils;
 
 import net.yacy.cora.document.feed.Hit;
@@ -160,7 +163,7 @@ public class rssParser extends AbstractParser implements Parser {
     
     @Override
     public Document[] parseWithLimits(final DigestURL url, final String mimeType, final String charset, final VocabularyScraper scraper,
-									  final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes, final Date lastModified)
+    		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
     		throws Failure, InterruptedException, UnsupportedOperationException {
         RSSReader rssReader;
         try {

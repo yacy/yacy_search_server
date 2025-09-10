@@ -386,8 +386,7 @@ public class GenericXMLParserTest {
 		final String charsetFromHttpHeader = HeaderFramework.getCharacterEncoding(contentTypeHeader);
 		final DigestURL location = new DigestURL("http://localhost/testfile.xml");
 		try {
-			final Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader,
-					new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE, null);
+			final Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE);
 			assertEquals(1, documents.length);
 			assertFalse(documents[0].isPartiallyParsed());
 
@@ -408,7 +407,7 @@ public class GenericXMLParserTest {
 		inStream = new ByteArrayInputStream(xhtml.getBytes(StandardCharsets.UTF_8.name()));
 		try {
 			final Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader,
-					new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE, null);
+					new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE);
 			assertEquals(1, documents.length);
 			assertTrue(documents[0].isPartiallyParsed());
 
@@ -448,8 +447,7 @@ public class GenericXMLParserTest {
 			.append("</body></html>");
 		inStream = new ByteArrayInputStream(xhtmlBuilder.toString().getBytes(StandardCharsets.UTF_8.name()));
 		try {
-			final Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader,
-					new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, firstBytes, null);
+			final Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, firstBytes);
 			assertEquals(1, documents.length);
 			assertTrue(documents[0].isPartiallyParsed());
 

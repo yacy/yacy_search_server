@@ -25,7 +25,6 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import java.util.Date;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -55,7 +54,7 @@ public class genericParser extends AbstractParser implements Parser {
             final InputStream source)
             throws Parser.Failure, InterruptedException {
     	/* Exactly the same implementation when applying limits as only tokens in the location URL are parsed */
-        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE, null);
+        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE);
     }
     
     @Override
@@ -65,9 +64,8 @@ public class genericParser extends AbstractParser implements Parser {
     
 	@Override
 	public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset,
-                                      final VocabularyScraper scraper, final int timezoneOffset, final InputStream source, final int maxLinks,
-                                      final long maxBytes, final Date lastModified)
-            throws Failure, InterruptedException, UnsupportedOperationException {
+			final VocabularyScraper scraper, final int timezoneOffset, final InputStream source, final int maxLinks,
+			final long maxBytes) throws Failure, InterruptedException, UnsupportedOperationException {
         String filename = location.getFileName();
         final Document[] docs = new Document[]{new Document(
                 location,
@@ -87,7 +85,7 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 false,
-                lastModified)};
+                null)};
         return docs;
     }
 }
