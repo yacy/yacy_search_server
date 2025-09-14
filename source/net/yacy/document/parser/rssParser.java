@@ -30,8 +30,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.*;
 
-import jdk.jfr.DataAmount;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;

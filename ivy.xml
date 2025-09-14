@@ -8,7 +8,7 @@
   </configurations>
     <dependencies defaultconf="compile->default">
       <dependency org="commons-fileupload" name="commons-fileupload" rev="1.6.0" conf="compile->master" />
-      <dependency org="commons-lang" name="commons-lang" rev="2.6">
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0">
         <exclude module="junit"/>
       </dependency>
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
