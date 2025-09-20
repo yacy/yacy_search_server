@@ -110,6 +110,7 @@ public class NetworkPicture {
         if ( maxCount > 10000 ) {
             maxCount = 10000;
         }
+
         NetworkGraph.buffer =
             new EncodedImage(NetworkGraph.getNetworkPicture(
                 sb.peers,
@@ -124,6 +125,23 @@ public class NetworkPicture {
                 env.getConfig("network.unit.description", "unspecified"),
                 Long.parseLong(bgcolor, 16),
                 cyc), "png", false);
+
+        /*
+        NetworkGraph.buffer =
+            new EncodedImage(NetworkSkylineGraph.getNetworkSkylinePicture(
+                sb.peers,
+                width,
+                height,
+                passiveLimit,
+                potentialLimit,
+                maxCount,
+                coronaangle,
+                communicationTimeout,
+                env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
+                env.getConfig("network.unit.description", "unspecified"),
+                Long.parseLong(bgcolor, 16),
+                cyc), "png", false);
+         */
         lastAccessSeconds = System.currentTimeMillis() / 1000;
 
         sync.release();

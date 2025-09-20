@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.CRC32;
@@ -160,37 +161,111 @@ public class RasterPlotter {
         }
     }
 
+    /**
+     * Set the default drawing mode for all following draw operations.
+     * @param drawMode the drawing mode
+     */
     public void setDrawMode(final DrawMode drawMode) {
         this.defaultMode = drawMode;
     }
 
+    /**
+     * Get the current drawing mode
+     * @return the drawing mode
+     */
     public BufferedImage getImage() {
         return this.image;
     }
 
+    /**
+     * get the cwidth of the image
+     * @return the width
+     */
     public int getWidth() {
         return this.width;
     }
 
+    /**
+     * get the height of the image
+     * @return the height
+     */
     public int getHeight() {
         return this.height;
     }
 
+    /**
+     * test if a color is dark or bright
+     * @param s
+     * @return true if the color is dark, false if it is bright (threshold is 384) 
+     */
     public static boolean darkColor(final String s) {
         return darkColor(Long.parseLong(s, 16));
     }
 
+    /**
+     * test if a color is dark or bright
+     * @param c
+     * @return true if the color is dark, false if it is bright (threshold is 384) 
+     */
     public static boolean darkColor(final long c) {
         final int r = (int) (c >> 16);
         final int g = (int) ((c >> 8) & 0xff);
         final int b = (int) (c & 0xff);
         return r + g + b < 384;
     }
+
+    /**
+     * lighten a color by a factor
+     * @param color the color to be lightened
+     * @param factor the factor to lighten (1.0 = no change, 2.0 = double bright, 0.5 = half bright)
+     * @return the lightened color
+     */
+    public static long lighten(final long color, final double factor) {
+        final int r = clampColor((int) Math.round(((color >> 16) & 0xff) * factor));
+        final int g = clampColor((int) Math.round(((color >> 8) & 0xff) * factor));
+        final int b = clampColor((int) Math.round((color & 0xff) * factor));
+        return ((long) r << 16) | ((long) g << 8) | (long) b;
+    }
+
+    /**
+     * darken a color by a factor
+     * @param color the color to be darkened
+     * @param factor the factor to darken (1.0 = no change, 2.0 = double dark, 0.5 = half dark)
+     * @return the darkened color
+     */
+    public static long darken(final long color, final double factor) {
+        final int r = clampColor((int) Math.round(((color >> 16) & 0xff) * factor));
+        final int g = clampColor((int) Math.round(((color >> 8) & 0xff) * factor));
+        final int b = clampColor((int) Math.round((color & 0xff) * factor));
+        return ((long) r << 16) | ((long) g << 8) | (long) b;
+    }
+
+    /**
+     * clamp a color value to the range 0..255
+     * @param value the color value
+     * @return the clamped color value
+     */
+    public static int clampColor(final int value) {
+        return (value < 0) ? 0 : (value > 255) ? 255 : value;
+    }
     
+    /**
+     * get the RGB values of a pixel
+     * @param x the x coordinate of the pixel
+     * @param y the y coordinate of the pixel
+     * @return an array of three integers containing the RGB values of the pixel
+     */
     public int[] getPixel(final int x, final int y) {
         return getPixel(x, y, new int[3]);
     }
 
+    /**
+     * get the RGB values of a pixel
+     * @param x the x coordinate of the pixel
+     * @param y the y coordinate of the pixel
+     * @param c an array of three integers to store the RGB values of the pixel
+     * @return the array c containing the RGB values of the pixel
+     */
     public int[] getPixel(final int x, final int y, int[] c) {
         if (this.frame == null) return this.grid.getPixel(x, y, c);
         int cell = (this.width * y + x) * 3;
@@ -200,6 +275,12 @@ public class RasterPlotter {
         return c;
     }
     
+    /**
+     * set the RGB values of a pixel
+     * @param x the x coordinate of the pixel
+     * @param y the y coordinate of the pixel
+     * @param c an array of three integers containing the RGB values to set the pixel to
+     */
     public void setPixel(final int x, final int y, int[] c) {
         if (this.frame == null) {
             this.grid.setPixel(x, y, c);
@@ -211,6 +292,14 @@ public class RasterPlotter {
         this.frame[cell++] = (byte) c[2];
     }
 
+    /**
+     * set the RGB values of a pixel
+     * @param x the x coordinate of the pixel
+     * @param y the y coordinate of the pixel
+     * @param r the red value to set the pixel to
+     * @param g the green value to set the pixel to
+     * @param b the blue value to set the pixel to
+     */
     public void setColor(final long c) {
         if (this.defaultMode == DrawMode.MODE_SUB) {
             final int r = (int) (c >> 16);
@@ -226,10 +315,21 @@ public class RasterPlotter {
         }
     }
 
+    /**
+     * set the RGB values of a pixel
+     * @param x the x coordinate of the pixel
+     * @param y the y coordinate of the pixel
+     */
     public void plot(final int x, final int y) {
         plot(x, y, 100);
     }
 
+    /**
+     * set the RGB values of a pixel
+     * @param x the x coordinate of the pixel
+     * @param y the y coordinate of the pixel
+     * @param intensity the intensity of the color to set the pixel to (0..100)
+     */
     public void plot(final int x, final int y, final int intensity) {
         if ((x < 0) || (x >= this.width)) return;
         if ((y < 0) || (y >= this.height)) return;
@@ -289,6 +389,15 @@ public class RasterPlotter {
         } // may appear when pixel coordinate is out of bounds
     }
 
+    /**
+     * draw a line using Bresenham's line drawing algorithm.
+     * The line will be plotted without dots on it.
+     * @param Ax
+     * @param Ay
+     * @param Bx
+     * @param By
+     * @param intensity
+     */
     public void line(final int Ax, final int Ay, final int Bx, final int By, final int intensity) {
         line(Ax, Ay, Bx, By, null, intensity, null, -1, -1, -1, -1, false);
     }
@@ -437,6 +546,14 @@ public class RasterPlotter {
         line(x3, y3, xt, yt, 100); // right line
     }
 
+    /**
+     * draw a dot (circle) at position x,y with radius
+     * @param x x position of center
+     * @param y y position of center
+     * @param radius radius of dot
+     * @param filled if true: filled circle, else only border
+     * @param intensity the intensity of the color (0..100)
+     */
     public void dot(final int x, final int y, final int radius, final boolean filled, final int intensity) {
         if (filled) {
             for (int r = radius; r >= 0; r--) {
@@ -447,12 +564,29 @@ public class RasterPlotter {
         }
     }
 
+    /**
+     * draw a ring (portion of a circle) at position x,y with inner and outer radius
+     * @param x x position of center
+     * @param y y position of center
+     * @param innerRadius inner radius of ring
+     * @param outerRadius outer radius of ring
+     * @param intensity the intensity of the color (0..100)
+     */
     public void arc(final int x, final int y, final int innerRadius, final int outerRadius, final int intensity) {
         for (int r = innerRadius; r <= outerRadius; r++) {
             CircleTool.circle(this, x, y, r, intensity);
         }
     }
 
+    /**
+     * draw a portion of a ring (portion of a circle) at position x,y with inner and outer radius
+     * @param x x position of center
+     * @param y y position of center
+     * @param innerRadius inner radius of ring
+     * @param outerRadius outer radius of ring
+     * @param fromArc start angle of arc (0..360)
+     * @param toArc end angle of arc (0..360)
+     */
     public void arc(final int x, final int y, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
         for (int r = innerRadius; r <= outerRadius; r++) {
             CircleTool.circle(this, x, y, r, fromArc, toArc);
@@ -556,6 +690,16 @@ public class RasterPlotter {
         }
     }
 
+    /**
+     * draw an arc on a circle
+     * @param cx center of circle, x
+     * @param cy center of circle, y
+     * @param arcRadius radius of circle
+     * @param angle position of arc on circle
+     * @param innerRadius inner radius of arc
+     * @param outerRadius outer radius of arc
+     * @param intensity intensity of arc
+     */
     public void arcArc(final int cx, final int cy, final int arcRadius, final double angle,
             final int innerRadius, final int outerRadius, final int intensity) {
         final double a = PI180 * angle;
@@ -564,6 +708,17 @@ public class RasterPlotter {
         arc(x, y, innerRadius, outerRadius, intensity);
     }
 
+    /**
+     * draw an arc on a circle
+     * @param cx center of circle, x
+     * @param cy center of circle, y
+     * @param arcRadius radius of circle
+     * @param angle position of arc on circle
+     * @param innerRadius inner radius of arc
+     * @param outerRadius outer radius of arc
+     * @param fromArc start angle of arc
+     * @param toArc end angle of arc
+     */
     public void arcArc(final int cx, final int cy, final int arcRadius, final double angle,
             final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
         final double a = PI180 * angle;
@@ -572,6 +727,63 @@ public class RasterPlotter {
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);
     }
 
+    /**
+     * fills a polygon defined by arrays of x- and y-coordinates
+     * @param xs array of x-coordinates of polygon vertices
+     * @param ys array of y-coordinates of polygon vertices
+     * @param color color of the polygon
+     * @param intensity intensity of the polygon
+     */
+    public void fillPolygon(final int[] xs, final int[] ys, final long color, final int intensity) {
+        if (xs == null || ys == null) return;
+        final int vertexCount = Math.min(xs.length, ys.length);
+        if (vertexCount < 3) return;
+
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for (int i = 0; i < vertexCount; i++) {
+            final int y = ys[i];
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+        minY = Math.max(0, minY);
+        maxY = Math.min(getHeight() - 1, maxY);
+        if (minY >= maxY) return;
+
+        setColor(color);
+        final double[] intersections = new double[vertexCount];
+        for (int y = minY; y <= maxY; y++) {
+            int points = 0;
+            for (int i = 0; i < vertexCount; i++) {
+                final int x1 = xs[i];
+                final int y1 = ys[i];
+                final int nextIndex = (i + 1) % vertexCount;
+                final int x2 = xs[nextIndex];
+                final int y2 = ys[nextIndex];
+                if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y)) {
+                    final double ratio = (double) (y - y1) / (double) (y2 - y1);
+                    intersections[points++] = x1 + ratio * (x2 - x1);
+                }
+            }
+            if (points < 2) continue;
+            Arrays.sort(intersections, 0, points);
+            for (int i = 0; i < points - 1; i += 2) {
+                int x0 = (int) Math.round(intersections[i]);
+                int x1 = (int) Math.round(intersections[i + 1]);
+                if (x1 < x0) {
+                    final int tmp = x0;
+                    x0 = x1;
+                    x1 = tmp;
+                }
+                if (x0 == x1) {
+                    plot(x0, y, intensity);
+                } else {
+                    line(x0, y, x1, y, intensity);
+                }
+            }
+        }
+    }
+    
     /**
      * inserts image
      * @param bitmap bitmap to be inserted
