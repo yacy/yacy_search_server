@@ -59,8 +59,8 @@ public class WebStructurePicture_p {
         String color_line    = "222222";
         String color_lineend = "333333";
 
-        int width = 1024;
-        int height = 576;
+        int width = 1280;
+        int height = 720;
         int depth = 3;
         int nodes = 300; // maximum number of host nodes that are painted
         int bf = 12;    // maximum number of branches around nodes; less nodes makes the graphic look more structured
@@ -69,10 +69,10 @@ public class WebStructurePicture_p {
         int cyc = 0;
 
         if (post != null) {
-            width         = post.getInt("width", 1024);
+            width         = post.getInt("width", 1280);
             if (width < 32 ) width = 32;
             if (width > 10000) width = 10000;
-            height        = post.getInt("height", 576);
+            height        = post.getInt("height", 720);
             if (height < 24) height = 24;
             if (height > 10000) height = 10000;
             depth         = post.getInt("depth", 3);
@@ -104,8 +104,8 @@ public class WebStructurePicture_p {
             // probably no information available
             final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
             graphPicture = new RasterPlotter(width, height, drawMode, color_back);
-            PrintTool.print5(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0, 100);
-            PrintTool.print5(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0, 100);
+            PrintTool.print7(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0, 100);
+            PrintTool.print7(graphPicture, width / 2, height / 2 + 20, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0, 100);
         } else {
             // recursively find domains, up to a specific depth
             GraphPlotter graph = new GraphPlotter();
@@ -134,9 +134,9 @@ public class WebStructurePicture_p {
         }
         // print headline
         graphPicture.setColor(Long.parseLong(color_text, 16));
-        PrintTool.print5(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1, 100);
-        if (hosts != null) PrintTool.print5(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1, 80);
-        PrintTool.print5(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
+        PrintTool.print7(graphPicture, 2, 10, 0, "YACY WEB-STRUCTURE ANALYSIS", -1, 100);
+        if (hosts != null) PrintTool.print7(graphPicture, 2, 20, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1, 80);
+        PrintTool.print7(graphPicture, width - 2, 10, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
 
         return graphPicture;
     }
