@@ -531,9 +531,9 @@ public class FontGenerator5Pixel {
         for (int i = 0; i < font.length; i++) {
             letter = font[i];
             b = 0;
-            for (int j = 0; j < 5; j++) {
-                b = b << 10;
-                v = 1 << 9;
+            for (int j = 0; j < 5; j++) { // 5 rows
+                b = b << 10; // 10 bits per row
+                v = 1 << 9; // value to set
                 for (int col = 0; col < 5; col++) {
                     if (letter[j].charAt(col) == '+')  b += v;
                     if (letter[j].charAt(col) == 'X')  b += v + (v / 2);
