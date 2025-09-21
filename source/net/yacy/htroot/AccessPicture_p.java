@@ -55,13 +55,13 @@ public class AccessPicture_p {
 
         int width = 1024;
         int height = 576;
-        int cellsize = 18;
+        int cellsize = 24;
         boolean corona = false;
         int coronaangle = 0;
 
         if (post != null) {
-            width         = post.getInt("width", 1024);
-            height        = post.getInt("height", 576);
+            width         = post.getInt("width", 1280);
+            height        = post.getInt("height", 720);
             cellsize      = post.getInt("cellsize", cellsize);
             color_text    = post.get("colortext",   color_text);
             color_back    = post.get("colorback",   color_back);
@@ -194,8 +194,8 @@ public class AccessPicture_p {
 
         // print headline
         picture.setColor(color_text_l);
-        PrintTool.print5(picture, 2, 6, 0, "YACY NODE ACCESS GRID", -1, 100);
-        PrintTool.print5(picture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
+        PrintTool.print7(picture, 4, 10, 0, "YACY NODE ACCESS GRID", -1, 100);
+        PrintTool.print7(picture, width - 4, 10, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
 
         // print legend
         picture.setColor(color_grid_l);
