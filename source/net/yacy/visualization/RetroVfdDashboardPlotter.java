@@ -75,30 +75,30 @@ public class RetroVfdDashboardPlotter extends RasterPlotter {
                 final int tx = cx + (int) (Math.cos(Math.toRadians(angle)) * (inner - 20));
                 final int ty = cy - (int) (Math.sin(Math.toRadians(angle)) * (inner - 20));
                 setColor(color);
-                PrintTool.print(this, tx, ty, 0, Integer.toString(tick), -1, intensity);
+                PrintTool.print5(this, tx, ty, 0, Integer.toString(tick), -1, intensity);
             }
         }
         setColor(color);
         final int needleAngle = start + sweep;
         arcLine(cx, cy, 0, inner, needleAngle, true, null, null, -1, -1, -1, false);
         dot(cx, cy, 6, true, 80);
-        PrintTool.print(this, cx, (int) (cy + labelOffset * radius), 0, label, 0, 75);
+        PrintTool.print5(this, cx, (int) (cy + labelOffset * radius), 0, label, 0, 75);
     }
 
     private void drawCounters(final double fraction) {
         final long color = 0x00FFD8;
         setColor(color);
         final int baseY = centerY + 150;
-        PrintTool.print(this, centerX - 150, baseY, 0, "REQ/S", -1, 70);
-        PrintTool.print(this, centerX + 150, baseY, 0, "ERROR%", -1, 70);
+        PrintTool.print5(this, centerX - 150, baseY, 0, "REQ/S", -1, 70);
+        PrintTool.print5(this, centerX + 150, baseY, 0, "ERROR%", -1, 70);
         setColor(0x003030);
         fillRectangle(centerX - 200, baseY - 4, centerX - 40, baseY + 20);
         fillRectangle(centerX + 40, baseY - 4, centerX + 200, baseY + 20);
         final String left = sevenSegmentNumber(4300 + (int) (fraction * 1200));
         final String right = sevenSegmentNumber((int) (fraction * 240));
         setColor(color);
-        PrintTool.print(this, centerX - 40, baseY + 8, 0, left, -1, 100);
-        PrintTool.print(this, centerX + 200, baseY + 8, 0, right, -1, 100);
+        PrintTool.print5(this, centerX - 40, baseY + 8, 0, left, -1, 100);
+        PrintTool.print5(this, centerX + 200, baseY + 8, 0, right, -1, 100);
     }
 
     private void fillRectangle(final int x1, final int y1, final int x2, final int y2) {
@@ -116,7 +116,7 @@ public class RetroVfdDashboardPlotter extends RasterPlotter {
             dot(x, top, 12, true, intensity);
             dot(x, top, 6, true, intensity + 10);
             setColor(colors[i]);
-            PrintTool.print(this, x, top - 20, 0, labels[i], 0, 60);
+            PrintTool.print5(this, x, top - 20, 0, labels[i], 0, 60);
         }
     }
 

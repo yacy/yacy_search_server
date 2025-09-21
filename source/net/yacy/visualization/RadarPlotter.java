@@ -103,11 +103,11 @@ public class RadarPlotter extends RasterPlotter {
 
     private void drawOverlay() {
         setColor(0x006699);
-        PrintTool.print(this, 4, 12, 0, "NEON VECTOR RADAR", -1, 80);
+        PrintTool.print5(this, 4, 12, 0, "NEON VECTOR RADAR", -1, 80);
         setColor(0x00FFFF);
-        PrintTool.print(this, 4, 24, 0, "SCAN ACTIVE", -1, 70);
+        PrintTool.print5(this, 4, 24, 0, "SCAN ACTIVE", -1, 70);
         setColor(0x004466);
-        PrintTool.print(this, getWidth() - 4, 12, 0, "RANGE:" + outerRadius + "px", 1, 70);
+        PrintTool.print5(this, getWidth() - 4, 12, 0, "RANGE:" + outerRadius + "px", 1, 70);
     }
 
     public static void main(final String[] args) {

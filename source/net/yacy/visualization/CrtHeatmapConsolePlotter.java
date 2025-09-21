@@ -79,10 +79,10 @@ public class CrtHeatmapConsolePlotter extends RasterPlotter {
         // labels
         setColor(0x00FFDD);
         for (int r = 0; r < rowLabels.length; r++) {
-            PrintTool.print(this, padding - 8, padding + r * cellHeight + cellHeight / 2, 0, rowLabels[r], 1, 65);
+            PrintTool.print5(this, padding - 8, padding + r * cellHeight + cellHeight / 2, 0, rowLabels[r], 1, 65);
         }
         for (int c = 0; c < colLabels.length; c++) {
-            PrintTool.print(this, padding + c * cellWidth + cellWidth / 2, padding - 12, 0, colLabels[c], 0, 65);
+            PrintTool.print5(this, padding + c * cellWidth + cellWidth / 2, padding - 12, 0, colLabels[c], 0, 65);
         }
     }
 
@@ -107,21 +107,21 @@ public class CrtHeatmapConsolePlotter extends RasterPlotter {
         line(x, y, x, y + height, 40);
         line(x + width, y, x + width, y + height, 40);
         setColor(0x001010);
-        PrintTool.print(this, x + width / 2, y + height / 2, 0, String.format("%3.0f", value * 100), 0, 55);
+        PrintTool.print5(this, x + width / 2, y + height / 2, 0, String.format("%3.0f", value * 100), 0, 55);
     }
 
     private void drawLegend() {
         final int x = getWidth() - 60;
         final int y = 50;
         setColor(0x00FFCC);
-        PrintTool.print(this, x, y - 16, 90, "TEMP", -1, 70);
+        PrintTool.print5(this, x, y - 16, 90, "TEMP", -1, 70);
         for (int i = 0; i <= 8; i++) {
             final double v = i / 8.0;
             final long color = colorForValue(v);
             setColor(color);
             line(x - 12, y + i * 12, x, y + i * 12, 40);
             setColor(0x00EEFF);
-            PrintTool.print(this, x - 16, y + i * 12, 0, String.format("%2d", (int) (v * 100)), 1, 50);
+            PrintTool.print5(this, x - 16, y + i * 12, 0, String.format("%2d", (int) (v * 100)), 1, 50);
         }
     }
 

@@ -128,11 +128,11 @@ public class IsometricPlotter extends RasterPlotter {
 
     private void drawForeground() {
         setColor(0x00AAFF);
-        PrintTool.print(this, 6, 12, 0, "ISOMETRIC CITYSCAPE", -1, 90);
+        PrintTool.print5(this, 6, 12, 0, "ISOMETRIC CITYSCAPE", -1, 90);
         setColor(0x66FFFF);
-        PrintTool.print(this, 6, 24, 0, "GRID SECTOR 7B", -1, 70);
+        PrintTool.print5(this, 6, 24, 0, "GRID SECTOR 7B", -1, 70);
         setColor(0x00CCAA);
-        PrintTool.print(this, getWidth() - 6, getHeight() - 8, 0, "POPULATION: 1.2M", 1, 60);
+        PrintTool.print5(this, getWidth() - 6, getHeight() - 8, 0, "POPULATION: 1.2M", 1, 60);
     }
 
     public static void main(final String[] args) {

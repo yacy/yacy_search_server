@@ -111,11 +111,11 @@ public class StarTunnelPlotter extends RasterPlotter {
 
     private void drawOverlay() {
         setColor(0x00FFCC);
-        PrintTool.print(this, 4, 12, 0, "STAR TUNNEL", -1, 90);
+        PrintTool.print5(this, 4, 12, 0, "STAR TUNNEL", -1, 90);
         setColor(0x66FFFF);
-        PrintTool.print(this, 4, 22, 0, "HYPERSPACE VECTOR", -1, 70);
+        PrintTool.print5(this, 4, 22, 0, "HYPERSPACE VECTOR", -1, 70);
         setColor(0x00AACC);
-        PrintTool.print(this, getWidth() - 4, getHeight() - 6, 0, "SPEED:" + (int) speed * stars.length, 1, 70);
+        PrintTool.print5(this, getWidth() - 4, getHeight() - 6, 0, "SPEED:" + (int) speed * stars.length, 1, 70);
     }
 
     public static void main(final String[] args) {

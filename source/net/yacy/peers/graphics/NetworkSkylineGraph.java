@@ -195,11 +195,11 @@ public final class NetworkSkylineGraph {
         skyline.setColor(headlineColor);
         final String name = networkName == null ? "UNSPECIFIED" : networkName.toUpperCase();
         final String title = networkTitle == null ? "" : networkTitle.toUpperCase();
-        PrintTool.print(skyline, 2, 6, 0, "YACY SKYLINE '" + name + "'", -1, 100);
-        PrintTool.print(skyline, 2, 14, 0, title, -1, 80);
-        PrintTool.print(skyline, width - 2, 6, 0,
+        PrintTool.print5(skyline, 2, 6, 0, "YACY SKYLINE '" + name + "'", -1, 100);
+        PrintTool.print5(skyline, 2, 14, 0, title, -1, 80);
+        PrintTool.print5(skyline, width - 2, 6, 0,
                 "SNAPSHOT " + new Date().toString().toUpperCase(), 1, 80);
-        PrintTool.print(skyline, width - 2, 14, 0,
+        PrintTool.print5(skyline, width - 2, 14, 0,
                 "RENDERED " + totalCount + " PEERS", 1, 80);
 
         return skyline;

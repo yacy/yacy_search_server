@@ -85,11 +85,11 @@ public class DataSpindleCarouselPlotter extends RasterPlotter {
 
     private void drawOverlay(final int frame) {
         setColor(0x66FFFF);
-        PrintTool.print(this, 6, 12, 0, "DATA SPINDLE", -1, 80);
+        PrintTool.print5(this, 6, 12, 0, "DATA SPINDLE", -1, 80);
         setColor(0x00FFAA);
-        PrintTool.print(this, 6, 24, 0, String.format("IDX:%02d", frame % 32), -1, 70);
+        PrintTool.print5(this, 6, 24, 0, String.format("IDX:%02d", frame % 32), -1, 70);
         setColor(0x00CCFF);
-        PrintTool.print(this, getWidth() - 6, 12, 0, "RPM" + (frame * 37 % 1000), 1, 70);
+        PrintTool.print5(this, getWidth() - 6, 12, 0, "RPM" + (frame * 37 % 1000), 1, 70);
     }
 
     public static void main(final String[] args) {

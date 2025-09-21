@@ -99,7 +99,7 @@ public class PixelTrendMatrixPlotter extends RasterPlotter {
             dot(x, y, 2, true, 80);
         }
         setColor(0x66FFDD);
-        PrintTool.print(this, x0 + width / 2, y0 + 10, 0, labelForCell(values), 0, 70);
+        PrintTool.print5(this, x0 + width / 2, y0 + 10, 0, labelForCell(values), 0, 70);
     }
 
     private String labelForCell(final double[] values) {

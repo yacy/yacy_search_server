@@ -90,18 +90,18 @@ public class TelemetryOrbitalSweepPlotter extends RasterPlotter {
 
     private void drawOverlay(final int frame) {
         setColor(0x66FFFF);
-        PrintTool.print(this, 6, 12, 0, "ORBITAL TELEMETRY", -1, 80);
-        PrintTool.print(this, 6, 22, 0, String.format("SWEEP:%03d", (frame * 45) % 360), -1, 70);
+        PrintTool.print5(this, 6, 12, 0, "ORBITAL TELEMETRY", -1, 80);
+        PrintTool.print5(this, 6, 22, 0, String.format("SWEEP:%03d", (frame * 45) % 360), -1, 70);
         setColor(0x00CCFF);
-        PrintTool.print(this, getWidth() - 6, 12, 0, "ALT/KM", 1, 70);
-        PrintTool.print(this, getWidth() - 6, 22, 0, "VEL/MPS", 1, 70);
+        PrintTool.print5(this, getWidth() - 6, 12, 0, "ALT/KM", 1, 70);
+        PrintTool.print5(this, getWidth() - 6, 22, 0, "VEL/MPS", 1, 70);
         final int statusY = getHeight() - 18;
         setColor(0x00FFAA);
-        PrintTool.print(this, 6, statusY, 0, "LOCK", -1, 70);
+        PrintTool.print5(this, 6, statusY, 0, "LOCK", -1, 70);
         setColor(0xFF66CC);
-        PrintTool.print(this, 70, statusY, 0, "TRACK", -1, 60);
+        PrintTool.print5(this, 70, statusY, 0, "TRACK", -1, 60);
         setColor(0x00DDFF);
-        PrintTool.print(this, getWidth() - 6, statusY, 0, "SIG" + (frame % 8), 1, 60);
+        PrintTool.print5(this, getWidth() - 6, statusY, 0, "SIG" + (frame % 8), 1, 60);
     }
 
     public static void main(final String[] args) {

@@ -667,7 +667,7 @@ public class SkylinePlotter extends RasterPlotter {
         setColor(labelColor);
         final int targetX = reference.x + object.labelOffsetX;
         final int targetY = reference.y + object.labelOffsetY;
-        PrintTool.print(this, targetX, targetY, 0, object.label, -1, clampIntensity(object.labelIntensity));
+        PrintTool.print5(this, targetX, targetY, 0, object.label, -1, clampIntensity(object.labelIntensity));
     }
 
     private void drawLineWithPattern(final int patternModulo, final double patternPhase, final Projection start, final Projection end, final int intensity, final double animationAngle) {

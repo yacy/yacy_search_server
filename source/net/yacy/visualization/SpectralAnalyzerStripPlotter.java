@@ -99,11 +99,11 @@ public class SpectralAnalyzerStripPlotter extends RasterPlotter {
 
     private void drawOverlay() {
         setColor(0x66FFFF);
-        PrintTool.print(this, 6, 12, 0, "SPECTRAL ANALYZER", -1, 80);
+        PrintTool.print5(this, 6, 12, 0, "SPECTRAL ANALYZER", -1, 80);
         setColor(0x00FFAA);
-        PrintTool.print(this, 6, getHeight() - 10, 0, "HZ" + random.nextInt(8000), -1, 60);
+        PrintTool.print5(this, 6, getHeight() - 10, 0, "HZ" + random.nextInt(8000), -1, 60);
         setColor(0x00BBFF);
-        PrintTool.print(this, getWidth() - 6, 12, 0, "GAIN" + random.nextInt(30), 1, 70);
+        PrintTool.print5(this, getWidth() - 6, 12, 0, "GAIN" + random.nextInt(30), 1, 70);
     }
 
     public static void main(final String[] args) {

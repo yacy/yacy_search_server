@@ -99,9 +99,9 @@ public class SignalCascadeMatrixPlotter extends RasterPlotter {
 
     private void drawOverlay() {
         setColor(0x66FFFF);
-        PrintTool.print(this, 6, 14, 0, "SIGNAL CASCADE", -1, 80);
+        PrintTool.print5(this, 6, 14, 0, "SIGNAL CASCADE", -1, 80);
         setColor(0x00FFAA);
-        PrintTool.print(this, getWidth() - 6, 14, 0, "CHANNELS:" + columns, 1, 70);
+        PrintTool.print5(this, getWidth() - 6, 14, 0, "CHANNELS:" + columns, 1, 70);
     }
 
     public static void main(final String[] args) {

@@ -101,12 +101,12 @@ public class HexGridPlotter extends RasterPlotter {
     }
 
     public void gridPrint(final int x, final int y, final int radius, final String messageHigh, final String messageLow, final int align, int intensity) {
-        if (messageHigh != null && messageHigh.length() > 0) PrintTool.print(this, projectionX(x, y) - align * radius, projectionY(y) - (cellwidth2 >> 2) - ((align == 0) ? radius : 0), 0, messageHigh, align, intensity);
-        if (messageLow != null && messageLow.length() > 0) PrintTool.print(this, projectionX(x, y) - align * radius, projectionY(y) + (cellwidth2 >> 2) + 4 + ((align == 0) ? radius : 0), 0, messageLow, align, intensity);
+        if (messageHigh != null && messageHigh.length() > 0) PrintTool.print5(this, projectionX(x, y) - align * radius, projectionY(y) - (cellwidth2 >> 2) - ((align == 0) ? radius : 0), 0, messageHigh, align, intensity);
+        if (messageLow != null && messageLow.length() > 0) PrintTool.print5(this, projectionX(x, y) - align * radius, projectionY(y) + (cellwidth2 >> 2) + 4 + ((align == 0) ? radius : 0), 0, messageLow, align, intensity);
     }
     
     public void gridPrint315(final int x, final int y, final int radius, final String message315, int intensity) {
-        if (message315 != null && message315.length() > 0) PrintTool.print(this, projectionX(x, y) + (radius >> 1), projectionY(y) + (cellwidth2 >> 2) + 4, 315, message315, -1, intensity);
+        if (message315 != null && message315.length() > 0) PrintTool.print5(this, projectionX(x, y) + (radius >> 1), projectionY(y) + (cellwidth2 >> 2) + 4, 315, message315, -1, intensity);
     }
     
     public void gridLine(

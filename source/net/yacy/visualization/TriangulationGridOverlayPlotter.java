@@ -100,12 +100,12 @@ public class TriangulationGridOverlayPlotter extends RasterPlotter {
         final int left = 20;
         final int top = 20;
         setColor(0x66FFFF);
-        PrintTool.print(this, left, top, 0, "TRIANGULATION", -1, 80);
+        PrintTool.print5(this, left, top, 0, "TRIANGULATION", -1, 80);
         setColor(0x00FFAA);
-        PrintTool.print(this, left, top + 12, 0, String.format("Bearing:%03d", (frame * 6) % 360), -1, 70);
-        PrintTool.print(this, left, top + 24, 0, String.format("Phase:%02d", frame % 8), -1, 60);
+        PrintTool.print5(this, left, top + 12, 0, String.format("Bearing:%03d", (frame * 6) % 360), -1, 70);
+        PrintTool.print5(this, left, top + 24, 0, String.format("Phase:%02d", frame % 8), -1, 60);
         setColor(0x00BBFF);
-        PrintTool.print(this, getWidth() - 6, getHeight() - 10, 0, "COORD" + (frame % 5), 1, 60);
+        PrintTool.print5(this, getWidth() - 6, getHeight() - 10, 0, "COORD" + (frame % 5), 1, 60);
     }
 
     public static void main(final String[] args) {

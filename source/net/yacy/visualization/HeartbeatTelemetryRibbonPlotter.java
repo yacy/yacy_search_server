@@ -82,14 +82,14 @@ public class HeartbeatTelemetryRibbonPlotter extends RasterPlotter {
             line(x, baseline - ribbonHeight / 2, x, baseline + ribbonHeight / 2, 20);
         }
         setColor(0x66FFFF);
-        PrintTool.print(this, 20, baseline - ribbonHeight / 2 - 12, 0, "SYNC", -1, 70);
+        PrintTool.print5(this, 20, baseline - ribbonHeight / 2 - 12, 0, "SYNC", -1, 70);
     }
 
     private void drawOverlay(final int frame) {
         setColor(0x66FFEE);
-        PrintTool.print(this, 6, 12, 0, "CARDIAC TELEMETRY", -1, 80);
+        PrintTool.print5(this, 6, 12, 0, "CARDIAC TELEMETRY", -1, 80);
         setColor(0x00FFAA);
-        PrintTool.print(this, getWidth() - 6, 12, 0, "BPM" + (frame * 3 % 90 + 60), 1, 70);
+        PrintTool.print5(this, getWidth() - 6, 12, 0, "BPM" + (frame * 3 % 90 + 60), 1, 70);
     }
 
     public static void main(final String[] args) {

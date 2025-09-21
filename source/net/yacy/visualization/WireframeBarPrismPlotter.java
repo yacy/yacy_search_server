@@ -64,7 +64,7 @@ public class WireframeBarPrismPlotter extends RasterPlotter {
         for (int i = 0; i <= 5; i++) {
             int y = originY - i * 40;
             line(originX, y, getWidth() - 60, y - depth * 2, 20);
-            PrintTool.print(this, originX - 70, y, 0, String.format("%3d", i * 20), -1, 60);
+            PrintTool.print5(this, originX - 70, y, 0, String.format("%3d", i * 20), -1, 60);
         }
     }
 
@@ -114,7 +114,7 @@ public class WireframeBarPrismPlotter extends RasterPlotter {
         // label
         setColor(lighten(baseColor, 1.3d));
         final String label = String.format("S%d-%d", series + 1, index + 1);
-        PrintTool.print(this, frontLeftX + barWidth / 2, originY + 14 + series * 12, 0, label, 0, 60);
+        PrintTool.print5(this, frontLeftX + barWidth / 2, originY + 14 + series * 12, 0, label, 0, 60);
     }
 
     private void drawLegend() {
@@ -123,10 +123,10 @@ public class WireframeBarPrismPlotter extends RasterPlotter {
         for (int i = 0; i < colors.length; i++) {
             setColor(colors[i]);
             dot(x, y + i * 18, 6, true, 90);
-            PrintTool.print(this, x + 10, y + i * 18 + 4, 0, "SERIES " + (i + 1), -1, 70);
+            PrintTool.print5(this, x + 10, y + i * 18 + 4, 0, "SERIES " + (i + 1), -1, 70);
         }
         setColor(0x00EEFF);
-        PrintTool.print(this, x, y - 16, 0, "DATASET", -1, 80);
+        PrintTool.print5(this, x, y - 16, 0, "DATASET", -1, 80);
     }
 
     public static void main(final String[] args) {

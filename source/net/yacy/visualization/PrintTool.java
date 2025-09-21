@@ -24,7 +24,7 @@ package net.yacy.visualization;
 public class PrintTool {
 
 
-    private static long[] font = new long[]{
+    private static long[] font5 = new long[]{
     	0x00000000000000L,0x00300C03000030L,0x00CC3300000000L,0x00CCFFCCCFFCCCL,0x02FFCC2FE0CFFEL,0x00C3CF0FC3CF0CL,0x02FCE02ECCE2ECL,0x00300C00000000L,
     	0x00030380C03803L,0x0300B00C0B0000L,0x0000332BA03000L,0x00000C0FC0C000L,0x0000000302C0C0L,0x0000000FC00000L,0x00000000000030L,0x00030383838380L,
     	0x00FCE3F33F2CFCL,0x00303C0300C0FCL,0x00FCE2CBEB83FFL,0x00FCE2C0EE2CFCL,0x00BCBB3FF0300CL,0x03FFC03FC02FFCL,0x00FCE03FEE2CFCL,0x03FF0B8380C030L,
@@ -38,11 +38,26 @@ public class PrintTool {
     	0x0000FF30BFF300L,0x00003FF833FC03L,0x00000B0380C030L,0x0000000BCBAFACL,0x00303F0300C030L,0x000000303E2CFCL,0x00000038BBB8B8L,0x000000333EECECL,
     	0x0000000EC2E0ECL,0x0000000EC2E030L,0x0000000FF2E3FCL,0x000F0B8B80B80FL,0x00300C0300C030L,0x03C0B80B8B83C0L,0x0000B83BB0B800L,0x03FFC0F03C0FFFL
     };
+    
+    private static long[] font8 = new long[] {
+        0x00000000,0x02000200,0x00000000,0x1F050500,0x031F0200,0x04081000,0x12110E00,0x00000000,
+        0x04020100,0x00010200,0x07090200,0x02020000,0x00030301,0x00000000,0x00030300,0x04081000,
+        0x14180F00,0x02020F00,0x02040F00,0x00080700,0x0F000000,0x00000F00,0x08080700,0x02020200,
+        0x08080700,0x00080700,0x00030300,0x00030301,0x0C030000,0x07000000,0x01061800,0x02000200,
+        0x11100F00,0x10101000,0x10101F00,0x10080700,0x10101F00,0x10101F00,0x10101000,0x10100F00,
+        0x10101000,0x02020700,0x01110E00,0x13111000,0x10101F00,0x10101000,0x11101000,0x10100F00,
+        0x10101000,0x10110F00,0x11101000,0x00100F00,0x02020200,0x10100F00,0x08050200,0x12150800,
+        0x05081000,0x02020200,0x04081F00,0x04040700,0x01000000,0x00000700,0x00000000,0x00001F00,
+        0x00000000,0x0F100F00,0x10101F00,0x10100F00,0x10100F00,0x1F100F00,0x04040400,0x100F000F,
+        0x10101000,0x02020700,0x01010106,0x1C131000,0x02020700,0x12121200,0x10101000,0x10100F00,
+        0x101F1010,0x100F0000,0x10101000,0x0F000F00,0x02020100,0x10100F00,0x08050200,0x12150800,
+        0x020D1000,0x100F000F,0x020C1F00,0x04040300,0x02020202,0x00000300,0x00000000,0x10101F00,
+    };
 
-    private static void print(final RasterPlotter matrix, int x, int y, final int angle, final char letter, int intensity) {
+    private static void print5(final RasterPlotter matrix, int x, int y, final int angle, final char letter, int intensity) {
         final int index = letter - 0x20;
-        if (index >= font.length) return;
-        long character = font[index];
+        if (index >= font5.length) return;
+        long character = font5[index];
         long row;
         long c;
         int i2 = intensity / 2;
@@ -82,7 +97,7 @@ public class PrintTool {
         }
     }
 
-    public static void print(final RasterPlotter matrix, final int x, final int y, final int angle, final String message, final int align, int intensity) {
+    public static void print5(final RasterPlotter matrix, final int x, final int y, final int angle, final String message, final int align, int intensity) {
         // align = -1 : left
         // align =  1 : right
         // align =  0 : center
@@ -98,7 +113,7 @@ public class PrintTool {
             yy = (align == -1) ? y : (align == 1) ? y - 6 * message.length() : y - 3 * message.length();
         }
         for (int i = 0; i < message.length(); i++) {
-            print(matrix, xx, yy, angle, message.charAt(i), intensity);
+            print5(matrix, xx, yy, angle, message.charAt(i), intensity);
             if (angle == 0) xx += 6;
             else if (angle == 90) yy -= 6;
             else if (angle == 315) {xx += 6; yy += 6;}
@@ -116,7 +131,7 @@ public class PrintTool {
      * @param angle angle == position of text on a circle in distance of radius
      * @param message the message to be printed
      */
-    public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final double angle, final String message, final int intensity) {
+    public static void arcPrint5(final RasterPlotter matrix, final int cx, final int cy, final int radius, final double angle, final String message, final int intensity) {
         final int x = cx + (int) ((radius + 1) * Math.cos(RasterPlotter.PI180 * angle));
         final int y = cy - (int) ((radius + 1) * Math.sin(RasterPlotter.PI180 * angle));
         int yp = y + 3;
@@ -127,7 +142,7 @@ public class PrintTool {
         int xp = x - 3 * message.length();
         if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 6 * message.length();
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
-        print(matrix, xp, yp, 0, message, -1, intensity);
+        print5(matrix, xp, yp, 0, message, -1, intensity);
     }
 
 

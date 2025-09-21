@@ -194,8 +194,8 @@ public class AccessPicture_p {
 
         // print headline
         picture.setColor(color_text_l);
-        PrintTool.print(picture, 2, 6, 0, "YACY NODE ACCESS GRID", -1, 100);
-        PrintTool.print(picture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
+        PrintTool.print5(picture, 2, 6, 0, "YACY NODE ACCESS GRID", -1, 100);
+        PrintTool.print5(picture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
 
         // print legend
         picture.setColor(color_grid_l);

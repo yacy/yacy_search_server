@@ -96,8 +96,8 @@ public class DotMatrixWaterfallPlotter extends RasterPlotter {
 
     private void drawStepLabel(final int left, final int baseline, final String label, final double value, final long color) {
         setColor(color);
-        PrintTool.print(this, left + 2, baseline + 14, 0, label, -1, 70);
-        PrintTool.print(this, left + 2, baseline + 24, 0, String.format("%+.1f", value), -1, 60);
+        PrintTool.print5(this, left + 2, baseline + 14, 0, label, -1, 70);
+        PrintTool.print5(this, left + 2, baseline + 24, 0, String.format("%+.1f", value), -1, 60);
     }
 
     private void drawAxes() {
@@ -108,10 +108,10 @@ public class DotMatrixWaterfallPlotter extends RasterPlotter {
         for (int i = 0; i <= 6; i++) {
             int y = baseline - i * 30;
             line(60, y, getWidth() - 20, y, 20);
-            PrintTool.print(this, 42, y, 0, String.format("%+d", i * 10), -1, 50);
+            PrintTool.print5(this, 42, y, 0, String.format("%+d", i * 10), -1, 50);
         }
         setColor(0x00FFFF);
-        PrintTool.print(this, getWidth() / 2, 30, 0, "WATERFALL LEDGER", 0, 85);
+        PrintTool.print5(this, getWidth() / 2, 30, 0, "WATERFALL LEDGER", 0, 85);
     }
 
     public static void main(final String[] args) {
