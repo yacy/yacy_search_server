@@ -64,7 +64,7 @@ public class NetworkGraph {
     private static final long COL_HEADLINE       = 0xFFFFFF;
     private static final long COL_ACTIVE_DOT     = 0x000040;
     private static final long COL_ACTIVE_LINE    = 0x113322;
-    private static final long COL_ACTIVE_TEXT    = 0x226644;
+    private static final long COL_ACTIVE_TEXT    = 0x33BB88;
     private static final long COL_PASSIVE_DOT    = 0x201010;
     private static final long COL_PASSIVE_LINE   = 0x443333;
     private static final long COL_PASSIVE_TEXT   = 0x663333;
@@ -289,10 +289,10 @@ public class NetworkGraph {
 
         // draw description
         networkPicture.setColor(COL_HEADLINE);
-        PrintTool.print5(networkPicture, 2, 6, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1, 100);
-        PrintTool.print5(networkPicture, 2, 14, 0, networkTitle.toUpperCase(), -1, 80);
-        PrintTool.print5(networkPicture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
-        PrintTool.print5(networkPicture, width - 2, 14, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1, 80);
+        PrintTool.print7(networkPicture, 2, 10, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1, 100);
+        PrintTool.print7(networkPicture, 2, 20, 0, networkTitle.toUpperCase(), -1, 80);
+        PrintTool.print7(networkPicture, width - 2, 10, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
+        PrintTool.print7(networkPicture, width - 2, 20, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1, 80);
 
         // wait for draw termination
         //for (final Thread t: drawThreads) try { t.join(); } catch (final InterruptedException ee) {}
@@ -357,7 +357,7 @@ public class NetworkGraph {
             this.img.arcLine(this.centerX, this.centerY, this.innerradius + 18, this.innerradius + linelength, angle, true, this.colorLine, 0x444444l, 12, this.coronaangle / 30, 0, true);
             // draw text
             this.img.setColor(this.colorText);
-            PrintTool.arcPrint5(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name, 100);
+            PrintTool.arcPrint7(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name, 100);
 
             // draw corona around dot for crawling activity
             final int ppmx = Math.min(this.seed.getPPM() / 20, 10);

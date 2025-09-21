@@ -218,6 +218,20 @@ public class PrintTool {
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
         print5(matrix, xp, yp, 0, message, -1, intensity);
     }
+    
+    public static void arcPrint7(final RasterPlotter matrix, final int cx, final int cy, final int radius, final double angle, final String message, final int intensity) {
+        final int x = cx + (int) ((radius + 1) * Math.cos(RasterPlotter.PI180 * angle));
+        final int y = cy - (int) ((radius + 1) * Math.sin(RasterPlotter.PI180 * angle));
+        int yp = y + 4;
+        if ((angle > arcDist) && (angle < 180 - arcDist)) yp = y;
+        if ((angle > 180 + arcDist) && (angle < 360 - arcDist)) yp = y + 8;
+        if ((angle > ( 90 - arcDist)) && (angle < ( 90 + arcDist))) yp -= 8;
+        if ((angle > (270 - arcDist)) && (angle < (270 + arcDist))) yp += 8;
+        int xp = x - 4 * message.length();
+        if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 8 * message.length();
+        if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
+        print7(matrix, xp, yp, 0, message, -1, intensity);
+    }
 
 
     public static void main(final String[] args) {
