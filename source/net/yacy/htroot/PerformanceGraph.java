@@ -45,8 +45,8 @@ public class PerformanceGraph {
 
         if (post == null) post = new serverObjects();
 
-        final int width = post.getInt("width", 660);
-        final int height = post.getInt("height", 240);
+        final int width = post.getInt("width", 825);
+        final int height = post.getInt("height", 300);
         final boolean showMemory = !post.containsKey("nomem");
         final boolean showPeers = !post.containsKey("nopeers");
 
