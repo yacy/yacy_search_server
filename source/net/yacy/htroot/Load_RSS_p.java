@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -99,7 +99,7 @@ public class Load_RSS_p {
             final Iterator<Row> plainIterator = sb.tables.iterator("rss");
             Row row;
             String messageurl;
-            final List<byte[]> d = new ArrayList<byte[]>();
+            final List<byte[]> d = new ArrayList<>();
             while (plainIterator.hasNext()) {
                 row = plainIterator.next();
                 if (row == null) continue;
@@ -141,7 +141,7 @@ public class Load_RSS_p {
             final Iterator<Row> plainIterator = sb.tables.iterator("rss");
             Row row;
             String messageurl;
-            final List<byte[]> d = new ArrayList<byte[]>();
+            final List<byte[]> d = new ArrayList<>();
             while (plainIterator.hasNext()) {
                 row = plainIterator.next();
                 if (row == null) continue;
@@ -295,7 +295,7 @@ public class Load_RSS_p {
         // index all selected items: description only
         if (rss != null && post.containsKey("indexSelectedItemContent")) {
             final RSSFeed feed = rss.getFeed();
-            final Map<String, DigestURL> hash2UrlMap = new HashMap<String, DigestURL>();
+            final Map<String, DigestURL> hash2UrlMap = new HashMap<>();
             loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith(CHECKBOX_ITEM_PREFIX)) {
                 	/* Process selected item links */
@@ -336,7 +336,7 @@ public class Load_RSS_p {
                 }
             }
 
-            final List<DigestURL> urlsToIndex = new ArrayList<DigestURL>();
+            final List<DigestURL> urlsToIndex = new ArrayList<>();
             loop: for (final Map.Entry<String, DigestURL> entry: hash2UrlMap.entrySet()) {
                 final DigestURL messageUrl = entry.getValue();
                 final HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(messageUrl.hash()));
@@ -358,7 +358,7 @@ public class Load_RSS_p {
 
         if (record_api && rss != null && rss.getFeed() != null && rss.getFeed().getChannel() != null) {
             // record API action
-            RSSLoader.recordAPI(sb, post.get(WorkTables.TABLE_API_COL_APICALL_PK, null), url, rss.getFeed(), repeat_time, repeat_unit);
+            RSSLoader.recordAPI(sb, post.get(WorkTables.TABLE_API_COL_APICALL_PK, ""), url, rss.getFeed(), repeat_time, repeat_unit);
         }
 
         // show items from rss

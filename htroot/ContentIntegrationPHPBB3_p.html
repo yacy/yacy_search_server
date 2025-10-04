@@ -22,8 +22,8 @@
 		<li>deselect the partial import flag</li>
     </ul>
     <p>
-      When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.
-      All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.
+      When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.
+      All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.
     </p>
         
     <form action="ContentIntegrationPHPBB3_p.html" accept-charset="UTF-8">
@@ -53,7 +53,7 @@
           <dt><b>Password</b> for the account of that user given above</dt>
           <dd><input type="text" name="content.phpbb3.dbpw" value="#[content.phpbb3.dbpw]#" size="20" /></dd>
           
-          <dt><b>Posts per file</b><br />in exported surrogates</dt>
+          <dt><b>Posts per file</b><br />in exported packs</dt>
           <dd><input type="text" name="content.phpbb3.ppf" value="#[content.phpbb3.ppf]#" size="20" /></dd>
           
           <dt>&nbsp;</dt>
@@ -62,7 +62,7 @@
           </dd>
           <dt>&nbsp;</dt>
           <dd>
-            <input type="submit" name="export" value="Export Content to Surrogates" class="btn btn-primary" style="width:240px"/>
+            <input type="submit" name="export" value="Export Content to Packs" class="btn btn-primary" style="width:240px"/>
           </dd>
         </dl>
       </fieldset>
@@ -98,7 +98,7 @@
     #(/check)#
     
     #(export)#::
-    <p>Export successful! Wrote #[files]# files in DATA/SURROGATES/in</p>::
+    <p>Export successful! Wrote #[files]# files in DATA/PACKS/load</p>::
     <p>Export failed: #[error]#</p>
     #(/export)#
     

@@ -274,9 +274,80 @@
           </dl>
         </fieldset>
         <fieldset>
+          <legend>Index Attributes</legend>
+          <dl>
+
+          <dt><label for="collection">Add Crawl result to collection<br>(important for Index Pack generation)</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A crawl result can be tagged with names which are candidates for a collection request.
+            These tags can be selected with the <a href="gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator.
+            To use this option, the 'collection_sxt'-field must be switched on in the <a href="IndexFederated_p.html">Solr Schema</a>
+            </span></span>
+            <input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# /><br>Do not use underline '_' in collection name, use '-' instead. When useful, add a language code to the collection name, e.g. 'top-100-en'.
+          </dd>
+
+          <dt><label for="collection">Time Zone Offset</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The time zone is required when the parser detects a date in the crawled web page. Content can be searched with the on: - modifier which
+            requires also a time zone when a query is made. To normalize all given dates, the date is stored in UTC time zone. To get the right offset
+            from dates without time zones to UTC, this offset must be given here.  The offset is given in minutes;
+            Time zone offsets for locations east of UTC must be negative; offsets for zones west of UTC must be positve.
+            </span></span>
+            <input id="timezoneOffset" type="text" size="4" maxlength="4" name="timezoneOffset" value=""><script>document.getElementById("timezoneOffset").value = new Date().getTimezoneOffset();</script>
+          </dd>
+
+          </dl>
+        </fieldset>
+        <fieldset>
           <legend>Crawler Filter</legend>
           <p>These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.</p>
+
           <dl>
+          <dt>Indexing</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
+            Document Cache without indexing.
+            </span></span>
+            <label for="indexText">index text</label>:
+            <input type="checkbox" name="indexText" id="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
+            <label for="indexMedia">index media</label>:
+            <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
+          </dd>
+          #(remoteindexing)#::
+          <dt><label for="crawlOrder">Do Remote Indexing</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
+            If you need your crawling results locally, you should switch this off.
+            Only senior and principal peers can initiate or receive remote crawls.
+            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
+            so they can omit starting a crawl with the same start point.
+            </span></span>
+            <table style="border-width: 0px">
+              #(remoteCrawlerDisabled)#::
+              <tr #(crawlOrderChecked)#class="hidden"::#(/crawlOrderChecked)# id="remoteCrawlerDisabledInfo">
+                  <td colspan="2"><div class="info"><p>Remote crawl results won't be added to the local index as the remote crawler is disabled on this peer.</p>
+                            <p>You can activate it in the <a href="RemoteCrawl_p.html">Remote Crawl Configuration</a> page.</p></div>
+                </td>
+              </tr>
+              #(/remoteCrawlerDisabled)#
+              <tr>
+                <td>
+                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)#/>
+                </td>
+                <td>
+                  <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
+                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="#[intention]#" /><br />
+                  This message will appear in the 'Other Peer Crawl Start' table of other peers.
+                </td>
+              </tr>
+            </table>
+          </dd>
+          #(/remoteindexing)#
+
           <dt>Crawling Depth</dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
@@ -668,75 +739,6 @@
             <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage"#(snapshotsLoadImageChecked)#:: checked="checked"#(/snapshotsLoadImageChecked)#/>
           </dd>
           #(/snapshotEnableImages)#
-          </dl>
-        </fieldset>
-        <fieldset>
-          <legend>Index Attributes</legend>
-          <dl>
-          <dt>Indexing</dt>
-          <dd>
-            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
-            Document Cache without indexing.
-            </span></span>
-            <label for="indexText">index text</label>:
-            <input type="checkbox" name="indexText" id="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
-            <label for="indexMedia">index media</label>:
-            <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
-          </dd>
-          #(remoteindexing)#::
-          <dt><label for="crawlOrder">Do Remote Indexing</label></dt>
-          <dd>
-            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
-            If you need your crawling results locally, you should switch this off.
-            Only senior and principal peers can initiate or receive remote crawls.
-            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
-            so they can omit starting a crawl with the same start point.
-            </span></span>
-            <table style="border-width: 0px">
-              #(remoteCrawlerDisabled)#::
-              <tr #(crawlOrderChecked)#class="hidden"::#(/crawlOrderChecked)# id="remoteCrawlerDisabledInfo">
-                  <td colspan="2"><div class="info"><p>Remote crawl results won't be added to the local index as the remote crawler is disabled on this peer.</p>
-                            <p>You can activate it in the <a href="RemoteCrawl_p.html">Remote Crawl Configuration</a> page.</p></div>
-                </td>
-              </tr>
-              #(/remoteCrawlerDisabled)#
-              <tr>
-                <td>
-                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)#/>
-                </td>
-                <td>
-                  <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
-                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="#[intention]#" /><br />
-                  This message will appear in the 'Other Peer Crawl Start' table of other peers.
-                </td>
-              </tr>
-            </table>
-          </dd>
-          #(/remoteindexing)#
-
-          <dt><label for="collection">Add Crawl result to collection(s)</label></dt>
-          <dd>
-            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            A crawl result can be tagged with names which are candidates for a collection request.
-            These tags can be selected with the <a href="gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator.
-            To use this option, the 'collection_sxt'-field must be switched on in the <a href="IndexFederated_p.html">Solr Schema</a>
-            </span></span>
-            <input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
-          </dd>
-
-          <dt><label for="collection">Time Zone Offset</label></dt>
-          <dd>
-            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            The time zone is required when the parser detects a date in the crawled web page. Content can be searched with the on: - modifier which
-            requires also a time zone when a query is made. To normalize all given dates, the date is stored in UTC time zone. To get the right offset
-            from dates without time zones to UTC, this offset must be given here.  The offset is given in minutes;
-            Time zone offsets for locations east of UTC must be negative; offsets for zones west of UTC must be positve.
-            </span></span>
-            <input id="timezoneOffset" type="text" size="4" maxlength="4" name="timezoneOffset" value=""><script>document.getElementById("timezoneOffset").value = new Date().getTimezoneOffset();</script>
-          </dd>
-
           </dl>
         </fieldset>
 

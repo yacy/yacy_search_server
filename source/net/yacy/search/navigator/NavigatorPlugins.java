@@ -188,7 +188,7 @@ public class NavigatorPlugins {
                 tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
                 tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
                 tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_PACKS);
                 navigatorPlugins.put("collections", tmpnav);
             } else if ("filetype".equals(navName)) {
 				navigatorPlugins.put("filetype", new FileTypeNavigator("Filetype", CollectionSchema.url_file_ext_s,

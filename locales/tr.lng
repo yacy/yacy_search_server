@@ -1104,7 +1104,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==Bu tablolardaki bilgiler özel kabul edildiği için yönetim şifrenizle giriş yapmanız gerekiyor.
 Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==Durum (6), yerel alım üreticisinin bir izleyicisidir, (1) durumunun zıttı. Ayrıca bir indeksleme sonuç izleyici içerir, ancak özel kabul edilmez,
 since it shows crawl requests from other peers.==çünkü başka eşlerden gelen tarama isteklerini gösterir.
-Case (7) occurs if surrogate files are imported==Durum (7) ortaya çıkar eğer surrogat dosyaları içe aktarılıyorsa.
+Case (7) occurs if pack files are imported==Durum (7) ortaya çıkar eğer pack dosyaları içe aktarılıyorsa.
 The image above illustrates the data flow initiated by web index acquisition.==Yukarıdaki resim, web indeksi edinimi tarafından başlatılan veri akışını göstermektedir.
 Some processes occur double to document the complex index migration structure.==Bazı süreçler karmaşık indeks göç yapısını belgelemek için çift gerçekleşir.
 (1) Results of Remote Crawl Receipts==(1) Uzaktan Tarama Alındı Sonuçları
@@ -1139,9 +1139,9 @@ This is the 'mirror'-case of process (1). == Bu, işlem (1)'in 'ayna' durumudur.
 <em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page == <em>Kullanım Durumu:</em> Bu liste, '<a href="RemoteCrawl_p.html">Uzaktan Tarama</a>' sayfasındaki 'Uzaktan Tarama İsteklerini Kabul Et' bayrağını işaretlerseniz dolabilir.
 The stack is empty. == Yığın boş.
 Statistics about #[domains]# domains in this stack: == Bu yığındaki #[domains]# alanlarıyla ilgili istatistikler:
-(7) Results from surrogates import == (7) Surrogat İçe Aktarma Sonuçları
-These records had been imported from surrogate files in DATA/SURROGATES/in == Bu kayıtlar, DATA/SURROGATES/in klasöründeki surrogat dosyalarından içe aktarılmıştır.
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method == <em>Kullanım Durumu:</em> Dublin Core meta veri içeriğine sahip dosyaları DATA/SURROGATES/in klasörüne yerleştirin veya bir indeks içe aktarma yöntemi kullanın
+(7) Results from pack import == (7) Packs İçe Aktarma Sonuçları
+These records had been imported from pack files in DATA/PACKS/load == Bu kayıtlar, DATA/PACKS/load klasöründeki pack dosyalarından içe aktarılmıştır.
+<em>Use Case:</em> place files with dublin core metadata content into DATA/PACKS/load or use an index import method == <em>Kullanım Durumu:</em> Dublin Core meta veri içeriğine sahip dosyaları DATA/PACKS/load klasörüne yerleştirin veya bir indeks içe aktarma yöntemi kullanın
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>) == (örneğin, <a href="IndexImportMediawiki_p.html">MediaWiki İçe Aktarma</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH İndirme</a>)
 #Domain == Alan
 #URLs == URL'ler
@@ -1761,7 +1761,7 @@ Export File==Dışa Aktarma Dosyası
 #>query<
 #Export Format
 Full Data Records:==Tam Veri Kayıtları
-(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)==(Zengin ve tam metin Solr verileri, bir belge satırı başına bir büyük xml dosyasında, kabuk araçları ile işlenebilir, DATA/SURROGATE/in/ ile içe aktarılabilir)
+(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/PACKS/load/)==(Zengin ve tam metin Solr verileri, bir belge satırı başına bir büyük xml dosyasında, kabuk araçları ile işlenebilir, DATA/PACKS/load/ ile içe aktarılabilir)
 #> XML (RSS)<
 Full URL List:==Tam URL Listesi:
 Plain Text List (URLs only)==Düz Metin Listesi (Yalnızca URL'ler)
@@ -1774,7 +1774,7 @@ Fulltext of Search Index Text==Arama İndeksi Metni'nin Tamamı
 #"Export"
 Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far==Dosyaya #[exportfile]# dışa aktarılıyor ..  Şu ana kadar #[urlcount]# Belge
 Finished export of #[urlcount]# Documents to file==Dosyaya #[urlcount]# belgenin dışa aktarımı tamamlandı
-Import this file by moving it to DATA/SURROGATES/in==Bu dosyayı DATA/SURROGATES/in dizinine taşıyarak içe aktarın
+Import this file by moving it to DATA/PACKS/load==Bu dosyayı DATA/PACKS/load dizinine taşıyarak içe aktarın
 Export to file #[exportfile]# failed:==Dosyaya #[exportfile]# dışa aktarım başarısız oldu:
 Dump and Restore of Solr Index==Solr İndeksinin Dökümü ve Geri Yüklenmesi
 "Create Dump"=="Döküm Oluştur"
@@ -1793,8 +1793,8 @@ If you read from an imported database, here are some hints to get around problem
 before importing large database dumps, set==Büyük veritabanı dökümlerini içe aktarmadan önce, şu satırı ayarlayın
 in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB)==phpmyadmin/config.inc.php dosyasına ve döküm dosyanızı /tmp dizinine yerleştirin (Aksi takdirde 2 MB'den büyük dosyalar yüklenemez)
 deselect the partial import flag==Kısmi içe aktarma bayrağını kaldırın
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Bir dışa aktarma başlatıldığında, yedek dosyalar DATA/SURROGATE/in dizinine oluşturulur ve otomatik olarak bir dizin thread tarafından alınır.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Tüm dizinlenmiş yedek dosyalar daha sonra DATA/SURROGATE/out'a taşınır ve bir dizin silindiğinde yeniden döngüye alınabilir.
+When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.==Bir dışa aktarma başlatıldığında, yedek dosyalar DATA/PACKS/load dizinine oluşturulur ve otomatik olarak bir dizin thread tarafından alınır.
+All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.==Tüm dizinlenmiş yedek dosyalar daha sonra DATA/PACKS/loaded'a taşınır ve bir dizin silindiğinde yeniden döngüye alınabilir.
 The URL stub==URL parçası
 like https://community.searchlab.eu==örneğin https://community.searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==bu, '/viewtopic.php?' hemen önündeki yol olmalıdır
@@ -1814,16 +1814,16 @@ that can access the database==veritabanına erişebilen
 Password==Parola
 for the account of that user given above==yukarıda belirtilen kullanıcının hesabı için
 Posts per file==Dosya başına gönderiler
-in exported surrogates==dışa aktarılan yedek dosyalarda
+in exported packs==dışa aktarılan yedek dosyalarda
 Check database connection==Veritabanı bağlantısını kontrol et
-Export Content to Surrogates==İçeriği Yedek Dosyalara Aktar
+Export Content to Packs==İçeriği Yedek Dosyalara Aktar
 Import a database dump==Bir veritabanı dökümü içe aktar
 Import Dump==Dökümü İçe Aktar
 Posts in database==Veritabanındaki Gönderiler
 first entry==ilk giriş
 last entry==son giriş
 Info failed:==Bilgi başarısız oldu:
-Export successful! Wrote #[files]# files in DATA/SURROGATES/in==Dışa aktarma başarılı! DATA/SURROGATES/in dizininde #[files]# dosya yazıldı
+Export successful! Wrote #[files]# files in DATA/PACKS/load==Dışa aktarma başarılı! DATA/PACKS/load dizininde #[files]# dosya yazıldı
 Export failed:==Dışa aktarma başarısız oldu:
 Import successful!==İçe aktarma başarılı!
 Import failed:==İçe aktarma başarısız oldu:
@@ -1994,11 +1994,11 @@ Dumps must be in XML format and may be compressed in gz or bz2. Place the file i
 "Import MediaWiki Dump"=="MediaWiki Dökümü İçe Aktar"
 When the import is started, the following happens:==İçe aktarma başladığında şu işlemler gerçekleşir:
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Döküm uçarken çıkarılır ve wiki girişleri Dublin Core veri formatına çevrilir. Çıktı şu şekildedir:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Her 10000 wiki kaydı, geçici bir dosyaya /DATA/SURROGATES/in yazılan bir çıkış dosyasında birleştirilir.
+Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.==Her 10000 wiki kaydı, geçici bir dosyaya /DATA/PACKS/load yazılan bir çıkış dosyasında birleştirilir.
 When each of the generated output file is finished, it is renamed to a .xml file==Her bir oluşturulan çıkış dosyası tamamlandığında, .xml dosyasına yeniden adlandırılır.
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Her bir xml yedek dosyası /DATA/SURROGATES/in içinde göründüğünde, YaCy dizini dosyayı alır ve kayıt girişlerini indeksler.
-When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==Bir yedek dosya indeksleme ile tamamlandığında, /DATA/SURROGATES/out dizinine taşınır
-You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==İşlenmiş yedek dosyaları /DATA/SURROGATES/out'dan /DATA/SURROGATES/in'a taşıyarak geri dönüştürebilirsiniz.
+Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.==Her bir xml yedek dosyası /DATA/PACKS/load içinde göründüğünde, YaCy dizini dosyayı alır ve kayıt girişlerini indeksler.
+When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded==Bir yedek dosya indeksleme ile tamamlandığında, /DATA/PACKS/loaded dizinine taşınır
+You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load==İşlenmiş yedek dosyaları /DATA/PACKS/loaded'dan /DATA/PACKS/load'a taşıyarak geri dönüştürebilirsiniz.
 Import Process==İçe Aktarma Süreci
 #Thread:==#İş Parçacığı:
 #Dump:==#Döküm:
@@ -2017,7 +2017,7 @@ Remaining Time:==Kalan Zaman:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 #OAI-PMH Import==OAI-PMH İçe Aktarma
-Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates==İçe aktarmadan gelen sonuçlar, <a href="CrawlResults.html?process=7">yedekler için dizinleme sonuçları
+Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for packs==İçe aktarmadan gelen sonuçlar, <a href="CrawlResults.html?process=7">yedekler için dizinleme sonuçları
 Single request import==Tek bir istek içe aktarım
 This will submit only a single request as given here to an OAI-PMH server and imports records into the index==Bu, yalnızca burada verilen şekilde tek bir isteği bir OAI-PMH sunucusuna gönderecek ve kayıtları dizine aktaracaktır
 "Import OAI-PMH source"=="OAI-PMH Kaynağı İçe Aktar"
@@ -3890,7 +3890,7 @@ DHT Transfer==DHT Transferi
 Proxy Use==Proxy Kullanımı
 Local Crawling</a>==Yerel Tarama</a>
 Global Crawling</a>==Genel Tarama</a>
-Surrogate Import==Yedek İçe Aktarma
+Pack Import==Yedek İçe Aktarma
 Processing Monitor==İşlem Monitörü
 Loader<==Yükleyici<
 Rejected URLs==Reddedilen URL'lar

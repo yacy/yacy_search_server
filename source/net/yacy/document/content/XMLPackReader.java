@@ -1,4 +1,4 @@
-// SurrogateReader.java
+// XMLPackReader.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 15.04.2009 on http://yacy.net
 //
@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -59,7 +59,7 @@ import net.yacy.crawler.CrawlStacker;
 import net.yacy.search.schema.CollectionConfiguration;
 
 
-public class SurrogateReader extends DefaultHandler implements Runnable {
+public class XMLPackReader extends DefaultHandler implements Runnable {
 
     // definition of the surrogate main element
     public final static String SURROGATES_MAIN_ELEMENT_NAME =
@@ -72,7 +72,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public final static String SURROGATES_MAIN_ELEMENT_CLOSE =
         "</" + SURROGATES_MAIN_ELEMENT_NAME + ">";
     public final static SolrInputDocument POISON_DOCUMENT = new SolrInputDocument();
-    
+
     /** Maximum bytes number that can be unread on the underlying input stream */
     private static final int PUSHBACK_SIZE = 1024;
 
@@ -89,7 +89,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private final CollectionConfiguration configuration;
     private final int concurrency;
 
-    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<>();
     private static SAXParser getParser() throws SAXException {
     	SAXParser parser = tlSax.get();
     	if (parser == null) {
@@ -103,11 +103,11 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     	return parser;
     }
 
-    public SurrogateReader(final InputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
+    public XMLPackReader(final InputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
         this(new PushbackInputStream(stream, PUSHBACK_SIZE), queueSize, crawlStacker, configuration, concurrency);
     }
-    
-    public SurrogateReader(final PushbackInputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
+
+    public XMLPackReader(final PushbackInputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
         this.crawlStacker = crawlStacker;
         this.configuration = configuration;
         this.concurrency = concurrency;
@@ -117,7 +117,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.elementName = null;
         this.surrogates = new ArrayBlockingQueue<>(queueSize);
         this.inputStream = stream;
-        
+
         try {
             this.saxParser = getParser();
         } catch (final SAXException e) {
@@ -125,18 +125,18 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             throw new IOException(e.getMessage());
         }
     }
-    
+
     @Override
     public void run() {
         // test the syntax of the stream by reading parts of the beginning
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, StandardCharsets.UTF_8));
-            if (isSolrDump()) {
+            if (this.isSolrDump()) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("<doc>")) continue;
                     try {
-                        NamedList<Object> nl = new XMLResponseParser().processResponse(new StringReader("<result>" + line + "</result>")); // 
+                        NamedList<Object> nl = new XMLResponseParser().processResponse(new StringReader("<result>" + line + "</result>")); //
                         SolrDocument doc = (SolrDocument) nl.iterator().next().getValue();
 
                         // check if url is in accepted domain
@@ -182,7 +182,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             }
         }
     }
-    
+
     /**
      * Check for format string in responseHeader "yacy.index.export.solr.xml"
      * (introduced v1.92/9188 2017-04-30) or guess format by existing "<response>"
@@ -217,7 +217,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 		}
 		return res;
 	}
-    
+
     @Override
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
         if (tag == null) return;
@@ -260,21 +260,21 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             this.buffer.setLength(0);
             this.parsingValue = false;
         } else if ("str".equals(tag) || "int".equals(tag) || "bool".equals(tag) || "long".equals(tag)){
-            final String value = buffer.toString().trim();
+            final String value = this.buffer.toString().trim();
             if (this.elementName != null) {
                 this.dcEntry.getMap().put(this.elementName, new String[]{value});
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
         } else if ("value".equals(tag)) {
-            final String value = buffer.toString().trim();
+            final String value = this.buffer.toString().trim();
             if (this.elementName != null) {
                 this.dcEntry.getMap().put(this.elementName, new String[]{value});
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
         } else if (tag.startsWith("dc:") || tag.startsWith("geo:") || tag.startsWith("md:")) {
-            final String value = buffer.toString().trim();
+            final String value = this.buffer.toString().trim();
             if (this.elementName != null && tag.equals(this.elementName)) {
                 Map<String,String[]> map = this.dcEntry.getMap();
                 String[] oldcontent = map.get(this.elementName);
@@ -294,8 +294,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 
     @Override
     public void characters(final char ch[], final int start, final int length) {
-        if (parsingValue) {
-            buffer.append(ch, start, length);
+        if (this.parsingValue) {
+            this.buffer.append(ch, start, length);
         }
     }
 

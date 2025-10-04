@@ -84,8 +84,8 @@ public class table_p {
         final String selectKey = post.containsKey("selectKey") ? post.get("selectKey") : null;
         final String selectValue = (selectKey != null && post.containsKey("selectValue")) ? post.get("selectValue") : null;
 
-        final String counts = post.get("count", null);
-        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
+        final String counts = post.get("count", "");
+        int maxcount = (counts == null || counts.length() == 0 || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
         final String pattern = post.get("search", "");
         final Pattern matcher = (pattern.isEmpty() || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
 
@@ -102,7 +102,7 @@ public class table_p {
 
         if (post.containsKey("commitrow")) {
             final String pk = post.get("pk");
-            final Map<String, byte[]> map = new HashMap<String, byte[]>();
+            final Map<String, byte[]> map = new HashMap<>();
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("col_")) {
                     map.put(entry.getKey().substring(4), entry.getValue().getBytes());
@@ -131,7 +131,7 @@ public class table_p {
             columns = sb.tables.columns(table);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-            columns = new ArrayList<String>();
+            columns = new ArrayList<>();
         }
 
         // if a row attribute is given

@@ -1043,8 +1043,8 @@ If you read from an imported database, here are some hints to get around problem
 before importing large database dumps, set==在导入尺寸较大的数据库时,
 in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB)==设置phpmyadmin/config.inc.php的内容, 并将你的数据库文件放到 /tmp 目录下(否则不能上传大于2MB的文件)
 deselect the partial import flag==取消部分导入
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==导出过程开始时, 在 DATA/SURROGATE/in 目录下自动生成备份文件, 并且会被索引器自动爬取.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==所有被索引的备份文件都在 DATA/SURROGATE/out 目录下, 并被索引器循环利用.
+When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.==导出过程开始时, 在 DATA/PACKS/load 目录下自动生成备份文件, 并且会被索引器自动爬取.
+All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.==所有被索引的备份文件都在 DATA/PACKS/loaded 目录下, 并被索引器循环利用.
 The URL stub==URL根域名
 like https://searchlab.eu==比如链接 https://searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==必须在'/viewtopic.php?'前面
@@ -1064,16 +1064,16 @@ that can access the database==用户名
 Password==给定用户名的
 for the account of that user given above==访问密码
 Posts per file==导出备份中
-in exported surrogates==每个文件拥有的最多帖子数
+in exported packs==每个文件拥有的最多帖子数
 Check database connection==检查数据库连接
-Export Content to Surrogates==导出到备份
+Export Content to Packs==导出到备份
 Import a database dump==导入数据库
 Import Dump==导入
 Posts in database==数据库中帖子
 first entry==第一个
 last entry==最后一个
 Info failed:==错误信息:
-Export successful! Wrote #[files]# files in DATA/SURROGATES/in==导出成功! #[files]# 已写入到 DATA/SURROGATES/in 目录
+Export successful! Wrote #[files]# files in DATA/PACKS/load==导出成功! #[files]# 已写入到 DATA/PACKS/load 目录
 Export failed:==导出失败:
 Import successful!==导入成功!
 Import failed:==导入失败:
@@ -1275,7 +1275,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==所以你需要以管理员账户来查看.
 Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==事件(6)是本地回执生成器的监控器, (1)的相反事件. 它也包含一个索引结果监控器, 但不是私有的. 
 since it shows crawl requests from other peers.==因为它显示了来自其他节点的爬取请求.
-Case (7) occurs if surrogate files are imported==事件(7)发生在导入备份文件时
+Case (7) occurs if pack files are imported==事件(7)发生在导入备份文件时
 The image above illustrates the data flow initiated by web index acquisition.==上图解释了由网页索引查询发起的数据流.
 Some processes occur double to document the complex index migration structure.==某些进程发生了两次以记录复杂的索引迁移结构.
 (1) Results of Remote Crawl Receipts==(1) 远端爬取回执的结果 
@@ -1311,9 +1311,9 @@ This is the 'mirror'-case of process (1).==这是进程(1)的'镜像'事件.
 <em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>用法:</em> 如果你在 '<a href="RemoteCrawl_p.html">远端爬取</a>' 页面勾选'接受远端爬取请求'-标记，此列表会填写
 The stack is empty.==此栈为空.
 Statistics about #[domains]# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
-(7) Results from surrogates import==(7) 备份导入结果
-These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的备份文件中导入
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
+(7) Results from pack import==(7) 备份导入结果
+These records had been imported from pack files in DATA/PACKS/load==这些记录从 DATA/PACKS/load 中的备份文件中导入
+<em>Use Case:</em> place files with dublin core metadata content into DATA/PACKS/load or use an index import method==将包含Dublin核心元数据的文件放在 DATA/PACKS/load 中, 或者使用索引导入方式
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)==(例如 <a href="IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH 导入</a>)
 >Domain==>域名
 "delete all"=="全部删除"
@@ -2065,11 +2065,11 @@ Dumps must be in XML format and may be compressed in gz or bz2. Place the file i
 "Import MediaWiki Dump"=="导入MediaWiki备份"
 When the import is started, the following happens:==:开始导入时, 会进行以下工作
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==备份文件即时被解压, 并被译为Dublin核心元数据格式:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==每个输出文件都含有10000个百科记录, 并都被保存在 /DATA/SURROGATES/in 的临时目录中.
+Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.==每个输出文件都含有10000个百科记录, 并都被保存在 /DATA/PACKS/load 的临时目录中.
 When each of the generated output file is finished, it is renamed to a .xml file==生成的输出文件都以 .xml结尾
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==只要 /DATA/SURROGATES/in 中含有 xml文件, YaCy索引器就会读取它们并为其中的词条制作索引.
-When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==当索引完成时, xml文件会被移动到 /DATA/SURROGATES/out
-You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==你可以将文件从/DATA/SURROGATES/out 移动到 /DATA/SURROGATES/in 以重复索引.
+Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.==只要 /DATA/PACKS/load 中含有 xml文件, YaCy索引器就会读取它们并为其中的词条制作索引.
+When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded==当索引完成时, xml文件会被移动到 /DATA/PACKS/loaded
+You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load==你可以将文件从/DATA/PACKS/loaded 移动到 /DATA/PACKS/load 以重复索引.
 Import Process==导入进程
 Thread:==线程:
 Processed:==已完成:
@@ -2085,7 +2085,7 @@ Remaining Time:==剩余时间:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 OAI-PMH Import==OAI-PMH导入
-Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates==导入结果<a href="CrawlResults.html?process=7">监控
+Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for packs==导入结果<a href="CrawlResults.html?process=7">监控
 Single request import==单个导入请求
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==向OAI-PMH服务器提交如下导入请求, 并将返回记录导入索引
 "Import OAI-PMH source"=="导入OAI-PMH源"
@@ -4279,7 +4279,7 @@ DHT Transfer==DHT 传输
 Proxy Use==代理使用
 Local Crawling</a>==本地爬取</a>
 Global Crawling</a>==全球爬取</a>
-Surrogate Import==代理导入
+Pack Import==代理导入
 Crawl Results==爬取结果
 Crawler<==爬虫<
 Global==全球

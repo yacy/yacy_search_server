@@ -1,7 +1,7 @@
 // ResultURLs.java
 // -----------------------
 // part of YaCy
-// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)>
 // SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://yacy.net
 // Frankfurt, Germany, 2004
@@ -55,11 +55,11 @@ public final class ResultURLs {
         PROXY_LOAD(4),
         LOCAL_CRAWLING(5),
         GLOBAL_CRAWLING(6),
-        SURROGATES(7);
+        PACKS(7);
 
         protected int code;
         private static final EventOrigin[] list = {
-            UNKNOWN, REMOTE_RECEIPTS, QUERIES, DHT_TRANSFER, PROXY_LOAD, LOCAL_CRAWLING, GLOBAL_CRAWLING, SURROGATES};
+            UNKNOWN, REMOTE_RECEIPTS, QUERIES, DHT_TRANSFER, PROXY_LOAD, LOCAL_CRAWLING, GLOBAL_CRAWLING, PACKS};
         private EventOrigin(final int code) {
             this.code = code;
         }
@@ -71,13 +71,13 @@ public final class ResultURLs {
         }
     }
 
-    private final static Map<EventOrigin, Map<String, InitExecEntry>> resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(); // a mapping from urlHash to Entries
-    private final static Map<EventOrigin, ScoreMap<String>> resultDomains = new ConcurrentHashMap<EventOrigin, ScoreMap<String>>();
+    private final static Map<EventOrigin, Map<String, InitExecEntry>> resultStacks = new ConcurrentHashMap<>(); // a mapping from urlHash to Entries
+    private final static Map<EventOrigin, ScoreMap<String>> resultDomains = new ConcurrentHashMap<>();
 
     static {
         for (final EventOrigin origin: EventOrigin.values()) {
-            resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
-            resultDomains.put(origin, new ClusteredScoreMap<String>(true));
+            resultStacks.put(origin, new LinkedHashMap<>());
+            resultDomains.put(origin, new ClusteredScoreMap<>(true));
         }
     }
 
@@ -133,7 +133,7 @@ public final class ResultURLs {
     public static Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return new LinkedHashMap<String, InitExecEntry>().entrySet().iterator();
-        return new ReverseMapIterator<String, InitExecEntry>(resultStack);
+        return new ReverseMapIterator<>(resultStack);
     }
 
     /**

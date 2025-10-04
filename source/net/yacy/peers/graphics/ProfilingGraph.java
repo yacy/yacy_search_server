@@ -75,10 +75,10 @@ public class ProfilingGraph {
         final int maxmbytes = (int)(maxbytes / 1024 / 1024);
 
         // declare graph and set dimensions
-        final int leftborder = 30;
-        final int rightborder = 30;
-        final int topborder = 20;
-        final int bottomborder = 20;
+        final int leftborder = 64;
+        final int rightborder = 48;
+        final int topborder = 24;
+        final int bottomborder = 24;
         final int leftscale = (maxwords > 150000) ? maxwords / 150000 * 20000 : 10000;
         final int rightscale = showMemory ? ((maxmbytes > 1500) ? maxmbytes / 1500 * 200 : 100) : Math.max(100, maxppm / 100 * 100);
         final int anotscale = 1000;

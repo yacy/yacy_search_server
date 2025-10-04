@@ -20,6 +20,7 @@ package net.yacy.htroot;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -52,11 +53,13 @@ public class IndexImportWarc_p {
             if (post != null) {
                 if (post.containsKey("file") || post.containsKey("url")) {
                     final String filename = post.get("file");
+                    final String collection = post.get("collection", "user");
+                    final InputStream is = post.getInputStream("file$file");
                     if (filename != null && filename.length() > 0) {
                         final File sourcefile = new File(filename);
-                        if (sourcefile.exists()) {
+                        if (sourcefile.exists() || is != null) {
                             try {
-                                final WarcImporter wi = new WarcImporter(sourcefile);
+                                final WarcImporter wi = new WarcImporter(sourcefile, is, collection);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final IOException ex) {
@@ -73,7 +76,7 @@ public class IndexImportWarc_p {
                         if (urlstr != null && urlstr.length() > 0) {
                             try {
                                 final MultiProtocolURL url = new MultiProtocolURL(urlstr);
-                                final WarcImporter wi = new WarcImporter(url);
+                                final WarcImporter wi = new WarcImporter(url, collection);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final MalformedURLException ex) {

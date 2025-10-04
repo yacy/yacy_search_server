@@ -80,11 +80,11 @@
 &lt;/surrogates&gt;
     </pre>
     </li>
-    <li>Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.</li>
+    <li>Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.</li>
     <li>When each of the generated output file is finished, it is renamed to a .xml file</li>
-    <li>Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.</li>
-    <li>When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out</li>
-    <li>You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in</li>
+    <li>Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.</li>
+    <li>When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded</li>
+    <li>You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load</li>
     </ul>
     <br />
     ::

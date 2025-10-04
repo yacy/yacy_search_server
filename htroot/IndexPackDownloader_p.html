@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+#(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexPackDownloader_p.html">#(/reload)#
+  <head>
+    <title>YaCy '#[clientname]#': Index Pack Downloader</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+
+    <h2>YaCy Pack Downloader</h2>
+
+
+    <fieldset><legend>Available Packs</legend>
+        <table class="table table-striped" summary="Packs: Download Sources">
+            <thead class="thead-dark">
+            <tr class="TableHeader"><th width="120">Source</th><th width="360">Repo ID</th><th width="720">File</th><th width="360">Process</th></tr>
+            </thead>
+            <tbody>
+        #{packs-source}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[source]#</td><td><a href="#[repourl]#" target="_blank">#[repoid]#</a></td><td>#[file]#</td><td>#[process]#</td></tr>
+        #{/packs-source}#
+            </tbody>
+        </table>
+    </fieldset>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

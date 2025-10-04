@@ -217,9 +217,11 @@ public final class Column implements Cloneable, Serializable {
      * @param cellwidth
      */
     public void setCellwidth(int cellwidth) {
-    	assert this.celltype == celltype_string || this.celltype == celltype_binary;
-    	this.cellwidth = cellwidth;
+        assert this.celltype == celltype_string || this.celltype == celltype_binary;
+        assert cellwidth > 0;
+        this.cellwidth = cellwidth;
     }
+
 
     @Override
     public final String toString() {
@@ -280,6 +282,12 @@ public final class Column implements Cloneable, Serializable {
                 s.append(" {b256}");
                 break;
         }
+        
+		if (this.description != null && !this.description.isEmpty()) {
+			s.append(" \"");
+			s.append(this.description.replace("\"", "'"));
+			s.append('"');
+		}
         return s.toString();
     }
 
@@ -314,6 +322,76 @@ public final class Column implements Cloneable, Serializable {
 			if (other.nickname != null) return false;
 		} else if (!this.nickname.equals(other.nickname)) return false;
 		return true;
+	}
+
+	public static void main(String[] args) {
+	    java.util.function.BiConsumer<Boolean,String> check = (ok,msg) -> {
+	        if (!ok) { System.err.println("FAIL: " + msg); }
+	    };
+
+	    try {
+	        // 1) Parsing mit Typen/Encoder/Description
+	        Column c1 = new Column("String pk-12 {bytes} \"primary key\"");
+	        check.accept(c1.celltype == Column.celltype_string && c1.cellwidth == 12 && c1.encoder == Column.encoder_bytes, "c1 parse");
+	        String c1s = c1.toString();
+	        check.accept("primary key".equals(c1s.contains("primary key") ? "primary key" : ""), "c1 description in toString");
+
+	        Column c2 = new Column("Cardinal cnt-4 {b256} \"counter\"");
+	        check.accept(c2.celltype == Column.celltype_cardinal && c2.encoder == Column.encoder_b256 && c2.cellwidth == 4, "c2 parse b256");
+
+	        Column c3 = new Column("Cardinal cnt2-8 {b64e}");
+	        check.accept(c3.celltype == Column.celltype_cardinal && c3.encoder == Column.encoder_b64e && c3.cellwidth == 8, "c3 parse b64e");
+
+	        Column c4 = new Column("byte[] bin-16 {bytes}");
+	        check.accept(c4.celltype == Column.celltype_binary && c4.encoder == Column.encoder_bytes && c4.cellwidth == 16, "c4 binary");
+
+	        Column c5 = new Column("boolean flg-1");
+	        check.accept(c5.celltype == Column.celltype_boolean && c5.cellwidth == 1, "c5 boolean");
+
+	        Column c6 = new Column("Bitfield bits-3");
+	        check.accept(c6.celltype == Column.celltype_bitfield && c6.cellwidth == 3, "c6 bitfield");
+
+	        Column c7 = new Column("short s-2 {b256}");
+	        check.accept(c7.celltype == Column.celltype_cardinal && c7.encoder == Column.encoder_b256 && c7.cellwidth == 2, "c7 short b256");
+
+	        // 2) Fehlende Encoder für Cardinal -> Exception
+	        boolean missingEncoderFails = false;
+	        try {
+	            new Column("Cardinal bad-3"); // sollte Exception werfen
+	        } catch (net.yacy.kelondro.util.kelondroException ex) {
+	            missingEncoderFails = true;
+	        }
+	        check.accept(missingEncoderFails, "Cardinal without encoder must fail");
+
+	        // 3) setCellwidth für String/Binary erlaubt
+	        Column s = new Column("String name-8 {bytes}");
+	        s.setCellwidth(20);
+	        check.accept(s.cellwidth == 20, "setCellwidth on String");
+
+	        Column b = new Column("byte[] blob-8 {bytes}");
+	        b.setCellwidth(32);
+	        check.accept(b.cellwidth == 32, "setCellwidth on binary");
+
+	        // 4) clone() Gleichheit
+	        Column c1clone = (Column) c1.clone();
+	        check.accept(c1.equals(c1clone) && c1.hashCode() == c1clone.hashCode(), "clone equals/hash");
+
+	        // 5) toString enthält Encoder-Angabe
+	        String ts = c3.toString();
+	        check.accept(ts.contains("{b64e}") && ts.contains("cnt2-8"), "toString encoders");
+
+	        // 6) Breiten-Constraints: boolean > 1 => Exception
+	        boolean widthConstraintOk = false;
+	        try {
+	            new Column("boolean bad-2"); // sollte Exception
+	        } catch (net.yacy.kelondro.util.kelondroException ex) {
+	            widthConstraintOk = true;
+	        }
+	        check.accept(widthConstraintOk, "boolean width > 1 must fail");
+
+	    } catch (Throwable t) {
+	        t.printStackTrace(System.err);
+	    }
 	}
 
 }

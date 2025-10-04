@@ -1178,7 +1178,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==то потребуется ввести пароль администратора.
 Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==Монитор (6) показывает локальный приём индекса, в отличие от монитора (1). Здесь также показываются результаты индексирования не содержащие личные данные,
 since it shows crawl requests from other peers.==а только запросы индексаторов от других узлов.
-Case (7) occurs if surrogate files are imported==Монитор (7) показывает замещающий импорт файлов
+Case (7) occurs if pack files are imported==Монитор (7) показывает замещающий импорт файлов
 The image above illustrates the data flow initiated by web index acquisition.==На изображении выше показан поток данных, инициированный вэб-индексом.
 Some processes occur double to document the complex index migration structure.==Некоторые процессы повторяются дважды.
 (1) Results of Remote Crawl Receipts==(1) Получение результатов удалённого индексирования
@@ -1214,9 +1214,9 @@ This is the 'mirror'-case of process (1).==Это противоположнос
 <em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==Этот список будет пополняться, если вы включите "Удалённое индексирование" на странице '<a href="RemoteCrawl_p.html">Удалённое индексирование</a>'.
 The stack is empty.==Список пуст.
 Statistics about #[domains]# domains in this stack:==В этой таблице данные о #[domains]# доменах:
-(7) Results from surrogates import==(7) Результаты замещающего импорта
-These records had been imported from surrogate files in DATA/SURROGATES/in==Эти данные импортированы из замещающих файлов в DATA/SURROGATES/in
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==Поместите файлы с метаданными контента стандарта дублинского ядра в DATA/SURROGATES/in или используйте способ импортирования индекса
+(7) Results from pack import==(7) Результаты замещающего импорта
+These records had been imported from pack files in DATA/PACKS/load==Эти данные импортированы из замещающих файлов в DATA/PACKS/load
+<em>Use Case:</em> place files with dublin core metadata content into DATA/PACKS/load or use an index import method==Поместите файлы с метаданными контента стандарта дублинского ядра в DATA/PACKS/load или используйте способ импортирования индекса
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)==(например, <a href="IndexImportMediawiki_p.html">импорт MediaWiki дампов</a>, <a href="IndexImportOAIPMH_p.html">импорт OAI-PMH</a>)
 >Domain==>Домен
 #>URLs==>Ссылки
@@ -1911,8 +1911,8 @@ If you read from an imported database, here are some hints to get around problem
 before importing large database dumps, set==перед импортированием большого дампа базы данных, установите
 the following Line in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB)==указанную ниже строку в phpmyadmin/config.inc.php и разместите ваш файл дампа в директории /tmp (иначе будет невозможна загрузка файлов размером больше 2МБайт)
 deselect the partial import flag==снимите флаг частичного импорта
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==После начала экспорта, замещающие файлы создаются в DATA/SURROGATE/in и автоматически добавляются в индексатор.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Все проиндексированные замещающие файлы перемещаются в DATA/SURROGATE/out и могут быть использованы повторно в случае удаления индекса.
+When an export is started, pack files are generated into DATA/PACKS/load which are automatically fetched by an indexer thread.==После начала экспорта, замещающие файлы создаются в DATA/PACKS/load и автоматически добавляются в индексатор.
+All indexed pack files are then moved to DATA/PACKS/loaded and can be re-cycled when an index is deleted.==Все проиндексированные замещающие файлы перемещаются в DATA/PACKS/loaded и могут быть использованы повторно в случае удаления индекса.
 The URL stub==Часть ссылки
 like https://community.searchlab.eu==например, https://community.searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==(путь до '/viewtopic.php?')
@@ -1925,16 +1925,16 @@ use either 'mysql' or 'pgsql'==используйте 'mysql' или 'pgsql'
 <b>Table prefix string</b> for table names==Префикс для таблицы имён
 <b>User</b> that can access the database==Пользователь базы данных
 <b>Password</b> for the account of that user given above==Пароль от учётной записи пользователя
-<b>Posts per file</b><br />in exported surrogates==Постов на файл в экспортированных замещающих файлах
+<b>Posts per file</b><br />in exported packs==Постов на файл в экспортированных замещающих файлах
 Check database connection==Проверить соединение
-Export Content to Surrogates==Экспортировать содержимое
+Export Content to Packs==Экспортировать содержимое
 <b>Import a database dump</b>,<br />==Импортировать дамп базы данных
 Import Dump==Импортировать
 Posts in database==Постов в базе данных
 first entry==первая запись
 last entry==последняя запись
 Info failed:==Получение информации неудачно:
-Export successful! Wrote #[files]# files in DATA/SURROGATES/in==Экспорт успешно выполнен! #[files]# файлов записано в DATA/SURROGATES/in
+Export successful! Wrote #[files]# files in DATA/PACKS/load==Экспорт успешно выполнен! #[files]# файлов записано в DATA/PACKS/load
 Export failed:==Экспорт не был выполнен:
 Import successful!==Импорт успешно выполнен!
 Import failed:==Импорт не был выполнен:
@@ -2092,11 +2092,11 @@ Dumps must be in XML format and may be compressed in gz or bz2. Place the file i
 "Import MediaWiki Dump"=="Импортировать дамп MediaWiki"
 When the import is started, the following happens:==После начала импорта произойдет следующее:
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Дамп извлекается "на лету" и значения wiki переводятся в формат дублинского ядра. Результат выглядит примерно так:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Каждые 10000 записей Wiki формируются в один временный файл, который размещается в /DATA/SURROGATES/in.
+Each 10000 wiki records are combined in one output file which is written to /DATA/PACKS/load into a temporary file.==Каждые 10000 записей Wiki формируются в один временный файл, который размещается в /DATA/PACKS/load.
 When each of the generated output file is finished, it is renamed to a .xml file==После завершения импортирования полученный файл переименовывается в .xml.
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Каждый раз xml-файл появляется в /DATA/SURROGATES/in, а YaCy индексирует полученный файл.
-When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==После завершения индексирования файл перемещается в /DATA/SURROGATES/out.
-You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Вы можете повторно использовать замещающие файлы для индексирования, переместив их из /DATA/SURROGATES/out в /DATA/SURROGATES/in.
+Each time a xml pack file appears in /DATA/PACKS/load, the YaCy indexer fetches the file and indexes the record entries.==Каждый раз xml-файл появляется в /DATA/PACKS/load, а YaCy индексирует полученный файл.
+When a pack file is finished with indexing, it is moved to /DATA/PACKS/loaded==После завершения индексирования файл перемещается в /DATA/PACKS/loaded.
+You can recycle processed pack files by moving them from /DATA/PACKS/loaded to /DATA/PACKS/load==Вы можете повторно использовать замещающие файлы для индексирования, переместив их из /DATA/PACKS/loaded в /DATA/PACKS/load.
 Import Process==Выполнение импорта
 Thread:==Поток:
 Dump:==Дамп:
@@ -2115,7 +2115,7 @@ Remaining Time:==Осталось времени:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 OAI-PMH Import==Импорт OAI-PMH
-Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates==Результаты импорта можно увидеть на странице <a href="CrawlResults.html?process=7">результатов индексации замещающего импорта.
+Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for packs==Результаты импорта можно увидеть на странице <a href="CrawlResults.html?process=7">результатов индексации замещающего импорта.
 Single request import==Один запрос импорта
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==Это позволит отправить только один запрос на сервер OAI-PMH и импортировать записи в индекс
 "Import OAI-PMH source"=="Импортировать источник OAI-PMH"
@@ -4249,7 +4249,7 @@ DHT Transfer==DHT-передача
 Proxy Use==Использование прокси
 Local Crawling</a>==Локальное индексирование</a>
 Global Crawling</a>==Глобальное индексирование</a>
-Surrogate Import</a>==Замещающий импорт</a>
+Pack Import</a>==Замещающий импорт</a>
 Crawl Results==Результаты индексирования
 Processing Monitor==Монитор процессов
 Crawler Queues==Очереди индексирования

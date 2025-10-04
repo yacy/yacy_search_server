@@ -89,7 +89,7 @@ public interface Dao {
     
     // export methods
     
-    public int writeSurrogates(
+    public int writePacks(
                             BlockingQueue<DCEntry> queue,
                             File targetdir,
                             String versioninfo,

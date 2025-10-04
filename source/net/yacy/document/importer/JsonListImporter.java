@@ -55,7 +55,7 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.VocabularyScraper;
-import net.yacy.document.content.SurrogateReader;
+import net.yacy.document.content.XMLPackReader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -89,13 +89,13 @@ public class JsonListImporter extends Thread implements Importer {
     @Override
     public void run() {
         try {
-            this.processSurrogateJson();
+            this.proceessPackJson();
         } catch (final IOException e) {
             log.warn(e);
         }
     }
 
-    public void processSurrogateJson() throws IOException {
+    public void proceessPackJson() throws IOException {
         this.startTime = System.currentTimeMillis();
         job = this;
 
@@ -104,14 +104,14 @@ public class JsonListImporter extends Thread implements Importer {
         final BlockingQueue<SolrInputDocument> sidQueue = new ArrayBlockingQueue<>(concurrency * 2);
         final Thread[] indexer = new Thread[concurrency];
         for (int t = 0; t < indexer.length; t++) {
-            indexer[t] = new Thread("Switchboard.processSurrogateJson-" + t) {
+            indexer[t] = new Thread("Switchboard.processPackJson-" + t) {
                 @Override
                 public void run() {
                     final VocabularyScraper scraper = new VocabularyScraper();
                     SolrInputDocument sid;
                     try {
-                        while ((sid = sidQueue.take()) != SurrogateReader.POISON_DOCUMENT ) {
-                            // enrich the surrogate
+                        while ((sid = sidQueue.take()) != XMLPackReader.POISON_DOCUMENT ) {
+                            // enrich the pack
                             final String id = (String) sid.getFieldValue(CollectionSchema.id.getSolrFieldName());
                             final String text = (String) sid.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
                             DigestURL rootURL;
@@ -147,10 +147,10 @@ public class JsonListImporter extends Thread implements Importer {
                 throw new IOException(e1.getMessage());
             }
             if ((json.opt("index") != null && json.length() == 1) || json.length() == 0) continue;
-            final SolrInputDocument surrogate = new SolrInputDocument();
+            final SolrInputDocument pack = new SolrInputDocument();
 
             // set default values which act as constraints for a proper search
-            CollectionSchema.httpstatus_i.add(surrogate, 200);
+            CollectionSchema.httpstatus_i.add(pack, 200);
 
             // get fields for json object
             jsonreader: for (final String key: json.keySet()) {
@@ -169,8 +169,8 @@ public class JsonListImporter extends Thread implements Importer {
                             urlstub.add(b.urlstub(true, true));
                             protocol.add(b.getProtocol());
                         }
-                        CollectionSchema.inboundlinks_urlstub_sxt.add(surrogate, urlstub);
-                        CollectionSchema.inboundlinks_protocol_sxt.add(surrogate, protocol);
+                        CollectionSchema.inboundlinks_urlstub_sxt.add(pack, urlstub);
+                        CollectionSchema.inboundlinks_protocol_sxt.add(pack, protocol);
                         continue jsonreader;
                     }
                     if (key.equals("outboundlinks_sxt")) {
@@ -182,8 +182,8 @@ public class JsonListImporter extends Thread implements Importer {
                             urlstub.add(b.urlstub(true, true));
                             protocol.add(b.getProtocol());
                         }
-                        CollectionSchema.outboundlinks_urlstub_sxt.add(surrogate, urlstub);
-                        CollectionSchema.outboundlinks_protocol_sxt.add(surrogate, protocol);
+                        CollectionSchema.outboundlinks_urlstub_sxt.add(pack, urlstub);
+                        CollectionSchema.outboundlinks_protocol_sxt.add(pack, protocol);
                         continue jsonreader;
                     }
                     if (key.equals("images_sxt")) {
@@ -195,8 +195,8 @@ public class JsonListImporter extends Thread implements Importer {
                             urlstub.add(b.urlstub(true, true));
                             protocol.add(b.getProtocol());
                         }
-                        CollectionSchema.images_urlstub_sxt.add(surrogate, urlstub);
-                        CollectionSchema.images_protocol_sxt.add(surrogate, protocol);
+                        CollectionSchema.images_urlstub_sxt.add(pack, urlstub);
+                        CollectionSchema.images_protocol_sxt.add(pack, protocol);
                         continue jsonreader;
                     }
 
@@ -208,31 +208,31 @@ public class JsonListImporter extends Thread implements Importer {
                     }
                     final List<Object> list = new ArrayList<>();
                     for (int i = 0; i < a.length(); i++) list.add(a.opt(i));
-                    ctype.add(surrogate, list);
+                    ctype.add(pack, list);
                 } else {
                     // first handle exceptional keys / maybe patch for other systems + other names
-                    if (key.equals("url_s") || key.equals("sku")) {
+                    if (key.equals("url") || key.equals("url_s") || key.equals("sku")) {
                         // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
                         final DigestURL durl = new DigestURL(o.toString());
                         final String id = ASCII.String(durl.hash());
-                        surrogate.setField(CollectionSchema.sku.getSolrFieldName(), durl.toNormalform(true));
-                        surrogate.setField(CollectionSchema.id.getSolrFieldName(), id);
-                        surrogate.setField(CollectionSchema.host_s.getSolrFieldName(), durl.getHost());
-                        surrogate.setField(CollectionSchema.host_id_s.getSolrFieldName(), id.substring(6));
+                        pack.setField(CollectionSchema.sku.getSolrFieldName(), durl.toNormalform(true));
+                        pack.setField(CollectionSchema.id.getSolrFieldName(), id);
+                        pack.setField(CollectionSchema.host_s.getSolrFieldName(), durl.getHost());
+                        pack.setField(CollectionSchema.host_id_s.getSolrFieldName(), id.substring(6));
                         continue jsonreader;
                     }
                     if (key.equals("description")) {
                         // in YaCy descriptions are full-text indexed and also multi-value fields
                         final List<Object> descriptions = new ArrayList<>();
                         descriptions.add(o.toString());
-                        CollectionSchema.description_txt.add(surrogate, descriptions);
+                        CollectionSchema.description_txt.add(pack, descriptions);
                         continue jsonreader;
                     }
                     if (key.equals("referrer_url_s")) {
                         // same patch as for urls which require re-calculation of id's; in this case we store the id only!
                         final DigestURL durl = new DigestURL(o.toString());
                         final String id = ASCII.String(durl.hash());
-                        surrogate.setField(CollectionSchema.referrer_id_s.getSolrFieldName(), id);
+                        pack.setField(CollectionSchema.referrer_id_s.getSolrFieldName(), id);
                         continue jsonreader;
                     }
 
@@ -246,26 +246,26 @@ public class JsonListImporter extends Thread implements Importer {
                         // patch date into something that Solr can understand
                         final String d = o.toString(); // i.e. Wed Apr 01 02:00:00 CEST 2020
                         final Date dd = d == null || d.length() == 0 ? null : AbstractFormatter.parseAny(d);
-                        if (dd != null) surrogate.setField(ctype.getSolrFieldName(), ISO8601Formatter.FORMATTER.format(dd)); // solr dateTime is ISO8601 format
+                        if (dd != null) pack.setField(ctype.getSolrFieldName(), ISO8601Formatter.FORMATTER.format(dd)); // solr dateTime is ISO8601 format
                         continue jsonreader;
                     }
 
                     // check if required fields are still missing and compute them
-                    if (!surrogate.containsKey(CollectionSchema.host_s.getSolrFieldName())) {
-                        final String durls = (String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                    if (!pack.containsKey(CollectionSchema.host_s.getSolrFieldName())) {
+                        final String durls = (String) pack.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                         if (durls != null) {
                             final DigestURL durl = new DigestURL(durls);
-                            surrogate.setField(CollectionSchema.host_s.getSolrFieldName(), durl.getHost());
+                            pack.setField(CollectionSchema.host_s.getSolrFieldName(), durl.getHost());
                         }
                     }
 
                     // regular situation, just read content of field
-                    surrogate.setField(key, o.toString());
+                    pack.setField(key, o.toString());
                 }
             }
 
             try {
-                sidQueue.put(surrogate);
+                sidQueue.put(pack);
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
@@ -277,7 +277,7 @@ public class JsonListImporter extends Thread implements Importer {
 
         // finish indexing threads by giving them poison
         for (int t = 0; t < indexer.length; t++) {
-            try {sidQueue.put(SurrogateReader.POISON_DOCUMENT);} catch (final InterruptedException e) {}
+            try {sidQueue.put(XMLPackReader.POISON_DOCUMENT);} catch (final InterruptedException e) {}
         }
         // wait until indexer threads are finished
         for (int t = 0; t < indexer.length; t++) {
@@ -286,7 +286,7 @@ public class JsonListImporter extends Thread implements Importer {
 
         if (this.deletewhendone) this.inputFile.delete();
 
-        log.info("finished processing json surrogate: " + ((System.currentTimeMillis() - this.startTime) / 1000) + " seconds");
+        log.info("finished processing json pack: " + ((System.currentTimeMillis() - this.startTime) / 1000) + " seconds");
     }
 
     public void quit() {

@@ -51,8 +51,8 @@ public class Tables_p {
         prop.put("showedit", 0);
         prop.put("showselection", 0);
 
-        String table = (post == null) ? null : post.get("table", null);
-        if (table != null && !sb.tables.hasHeap(table)) table = null;
+        String table = (post == null) ? null : post.get("table", "");
+        if (table != null && table.length() > 0 && !sb.tables.hasHeap(table)) table = null;
 
         // show table selection
         int count = 0;
@@ -62,7 +62,7 @@ public class Tables_p {
         while (ti.hasNext()) {
             tablename = ti.next();
             prop.put("showselection_tables_" + count + "_name", tablename);
-            prop.put("showselection_tables_" + count + "_selected", (table != null && table.equals(tablename)) ? 1 : 0);
+            prop.put("showselection_tables_" + count + "_selected", (table != null && table.length() > 0 && table.equals(tablename)) ? 1 : 0);
             count++;
         }
         prop.put("showselection_tables", count);
@@ -71,8 +71,8 @@ public class Tables_p {
 
         if (post == null) return prop; // return rewrite properties
 
-        final String counts = post.get("count", null);
-        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
+        final String counts = post.get("count", "");
+        int maxcount = (counts == null || counts.length() == 0 || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
         final boolean reverse = post.containsKey("reverse") ? post.getBoolean("reverse") : false;
         prop.put("showselection_reverse", reverse ? 1 : 0);
         final String pattern = post.get("search", "");
@@ -95,7 +95,7 @@ public class Tables_p {
 
         if (post.get("commitrow", "").length() > 0) {
             final String pk = post.get("pk");
-            final Map<String, byte[]> map = new HashMap<String, byte[]>();
+            final Map<String, byte[]> map = new HashMap<>();
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("col_")) {
                     map.put(entry.getKey().substring(4), entry.getValue().getBytes());
@@ -120,7 +120,7 @@ public class Tables_p {
                 columns = sb.tables.columns(table);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
-                columns = new ArrayList<String>();
+                columns = new ArrayList<>();
             }
 
             if (post.containsKey("editrow")) {

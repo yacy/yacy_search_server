@@ -30,7 +30,7 @@ import net.yacy.cora.util.ConcurrentLog;
 public class ChartPlotter extends RasterPlotter {
 
     public static final int DIMENSION_RIGHT  = 0;
-    public static final int DIMENSION_TOP    = 1;
+    //public static final int DIMENSION_TOP    = 1;
     public static final int DIMENSION_LEFT   = 2;
     public static final int DIMENSION_BOTTOM = 3;
     public static final int DIMENSION_ANOT0  = 4;
@@ -62,11 +62,11 @@ public class ChartPlotter extends RasterPlotter {
         //this.foregroundColor = foregroundColor;
         if (name != null) {
             if (foregroundColor != null) this.setColor(foregroundColor);
-            PrintTool.print(this, width / 2 - name.length() * 3, 6, 0, name, -1, 100);
+            PrintTool.print6(this, (width - name.length() * 7) / 2, 10, 0, name, -1, 100, true, false);
         }
         if (subline != null) {
             if (lightColor != null) this.setColor(lightColor);
-            PrintTool.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1, 100);
+            PrintTool.print6(this, (width - subline.length() * 7) / 2, 20, 0, subline, -1, 100, false, false);
         }
     }
 
@@ -88,10 +88,10 @@ public class ChartPlotter extends RasterPlotter {
         this.colscale[dimensionType] = colorScale;
         this.tablenames[dimensionType] = name;
         if ((dimensionType == DIMENSION_LEFT) || (dimensionType == DIMENSION_RIGHT)) {
-            drawVerticalScale((dimensionType == DIMENSION_LEFT), scale, pixelperscale, offset, colorNaming, colorScale, name);
+            drawVerticalScale(scale, pixelperscale, offset, colorNaming, colorScale, name, (dimensionType == DIMENSION_LEFT));
         }
-        if ((dimensionType == DIMENSION_TOP) || (dimensionType == DIMENSION_BOTTOM)) {
-            drawHorizontalScale((dimensionType == DIMENSION_TOP), scale, pixelperscale, offset, colorNaming, colorScale, name);
+        if (/*(dimensionType == DIMENSION_TOP) ||*/ (dimensionType == DIMENSION_BOTTOM)) {
+            drawHorizontalScale(scale, pixelperscale, offset, colorNaming, colorScale, name);
         }
     }
 
@@ -101,7 +101,7 @@ public class ChartPlotter extends RasterPlotter {
         final int y = (int)((long)(coord_y - this.offsets[dimension_y]) * (long)(this.pixels[dimension_y]) / (this.scales[dimension_y]));
         if (dotsize == 1) plot(this.leftborder + x, this.height - this.bottomborder - y, 100);
                       else dot(this.leftborder + x, this.height - this.bottomborder - y, dotsize, true, 100);
-        if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0), 100);
+        if (anot != null) PrintTool.print6(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0), 100, false, false);
     }
 
     public void chartLine(final int dimension_x, final int dimension_y, final float coord_x1, final int coord_y1, final float coord_x2, final int coord_y2) {
@@ -122,8 +122,8 @@ public class ChartPlotter extends RasterPlotter {
      * @param colorScale the colour of the line drawing for the vertical scale
      * @param name printed on the vertical bar
      */
-    private void drawHorizontalScale(final boolean top, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
-        final int y = (top) ? this.topborder : this.height - this.bottomborder;
+    private void drawHorizontalScale(final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
+        final int y = this.height - this.bottomborder;
         int x = this.leftborder;
         int s = offset;
         while (x < this.width - this.rightborder) {
@@ -133,12 +133,12 @@ public class ChartPlotter extends RasterPlotter {
             }
             setColor(colorNaming);
             line(x, y - 3, x, y + 3, 100);
-            PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1, 80);
+            PrintTool.print6(this, x, y + 10, 0, Integer.toString(s), -1, 80, false, false);
             x += pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        PrintTool.print(this, this.width - this.rightborder, (top) ? y - 9 : y + 15, 0, name, 1, 80);
+        PrintTool.print6(this, this.width - this.rightborder, y + 20, 0, name, 1, 80, false, false);
         line(this.leftborder - 4, y, this.width - this.rightborder + 4, y, 100);
     }
 
@@ -152,7 +152,7 @@ public class ChartPlotter extends RasterPlotter {
      * @param colorScale the colour of the line drawing for the vertical scale
      * @param name printed on the vertical bar
      */
-    private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
+    private void drawVerticalScale(final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name, final boolean left) {
         assert pixelperscale > 0;
         assert scale > 0;
         if (pixelperscale <= 0) return; // this would not meet the termination condition in the while loop
@@ -170,12 +170,12 @@ public class ChartPlotter extends RasterPlotter {
             line(x - 3, y, x + 3, y, 100);
             s1 = (s >= 1000000 && s % 1000000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
-            PrintTool.print(this, (left) ? this.leftborder - 4 : this.width - this.rightborder + 4, y, 0, s1, (left) ? 1 : -1, 80);
+            PrintTool.print6(this, (left) ? this.leftborder - 4 : this.width - this.rightborder + 4, y, 0, s1, (left) ? 1 : -1, 80, false, false);
             y -= pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        PrintTool.print(this, (left) ? Math.max(6, x - s1max * 6 - 6) : x + s1max * 6 + 9, this.height - this.bottomborder, 90, name, -1, 80);
+        PrintTool.print6(this, (left) ? Math.max(8, x - s1max * 8 - 12) : x + s1max * 8 + 12, this.height - this.bottomborder, 90, name, -1, 80, false, false);
         line(x, this.topborder - 4, x, this.height - this.bottomborder + 4, 100);
     }
 

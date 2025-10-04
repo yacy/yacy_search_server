@@ -47,9 +47,9 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     private static int importerCounter = Integer.MAX_VALUE;
     private static final Object N = new Object();
 
-    public static ConcurrentHashMap<OAIPMHImporter, Object> startedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
-    public static ConcurrentHashMap<OAIPMHImporter, Object> runningJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
-    public static ConcurrentHashMap<OAIPMHImporter, Object> finishedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
+    public static ConcurrentHashMap<OAIPMHImporter, Object> startedJobs = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<OAIPMHImporter, Object> runningJobs = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<OAIPMHImporter, Object> finishedJobs = new ConcurrentHashMap<>();
 
     private final LoaderDispatcher loader;
     private DigestURL source;
@@ -124,7 +124,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
 
     @Override
     public int speed() {
-        return (int) (1000L * (count()) / runningTime());
+        return (int) (1000L * (this.count()) / this.runningTime());
     }
 
     @Override
@@ -137,7 +137,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         this.message = "loading first part of records";
         while (true) {
             try {
-                OAIPMHLoader oailoader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, this.agent);
+                final OAIPMHLoader oailoader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().packsLoadPath, this.agent);
                 this.completeListSize = Math.max(this.completeListSize, oailoader.getResumptionToken().getCompleteListSize());
                 this.chunkCount++;
                 this.recordsCount += oailoader.getResumptionToken().getRecordCounter();
@@ -170,7 +170,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof OAIPMHImporter)) return false;
-        OAIPMHImporter other = (OAIPMHImporter) obj;
+        final OAIPMHImporter other = (OAIPMHImporter) obj;
         return this.compareTo(other) == 0;
     }
 
@@ -184,26 +184,26 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
 
     /**
      * get a map for already loaded oai-pmh servers and their latest access date
-     * @param surrogatesIn
-     * @param surrogatesOut
+     * @param packsLoad
+     * @param packsLoaded
      * @return a map where the key is the hostID of the servers and the value is the last access date
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Date> getLoadedOAIServer(File surrogatesIn, File surrogatesOut) {
-        Map<String, Date> map = getLoadedOAIServer(surrogatesOut);
-        map.putAll((Map<? extends String, ? extends Date>) getLoadedOAIServer(surrogatesIn).entrySet());
+    public static Map<String, Date> getLoadedOAIServer(File packsLoad, File packsLoaded) {
+        final Map<String, Date> map = getLoadedOAIServer(packsLoaded);
+        map.putAll((Map<? extends String, ? extends Date>) getLoadedOAIServer(packsLoad).entrySet());
         return map;
     }
 
-    private static Map<String, Date> getLoadedOAIServer(File surrogates) {
-        HashMap<String, Date> map = new HashMap<String, Date>();
+    private static Map<String, Date> getLoadedOAIServer(File packs) {
+        final HashMap<String, Date> map = new HashMap<>();
         //oaipmh_opus.bsz-bw.de_20091102113118728.xml
-        for (String s: surrogates.list()) {
+        for (final String s: packs.list()) {
             if (s.startsWith(filenamePrefix) && s.endsWith(".xml") && s.charAt(s.length() - 22) == filenameSeparationChar) {
                 try {
-                    Date fd = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(s.substring(s.length() - 21, s.length() - 4), 0).getTime();
-                    String hostID = s.substring(7, s.length() - 22);
-                    Date md = map.get(hostID);
+                    final Date fd = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(s.substring(s.length() - 21, s.length() - 4), 0).getTime();
+                    final String hostID = s.substring(7, s.length() - 22);
+                    final Date md = map.get(hostID);
                     if (md == null || fd.after(md)) map.put(hostID, fd);
                 } catch (final ParseException e) {
                     ConcurrentLog.logException(e);

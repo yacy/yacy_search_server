@@ -222,7 +222,7 @@ public class Network {
                     return prop;
                 }
 
-                final ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
+                final ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
                 final String challengeIP = post.get("peerIP");
                 final String challengePort = post.get("peerPort");
                 map.put(Seed.IP, challengeIP);
@@ -302,10 +302,10 @@ public class Network {
                     }
 
                     // find updated Information using YaCyNews
-                    final HashSet<String> updatedProfile = new HashSet<String>();
-                    final HashMap<String, Map<String, String>> updatedWiki = new HashMap<String, Map<String, String>>();
-                    final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
-                    final HashMap<String, String> isCrawling = new HashMap<String, String>();
+                    final HashSet<String> updatedProfile = new HashSet<>();
+                    final HashMap<String, Map<String, String>> updatedWiki = new HashMap<>();
+                    final HashMap<String, Map<String, String>> updatedBlog = new HashMap<>();
+                    final HashMap<String, String> isCrawling = new HashMap<>();
                     NewsDB.Record record;
                     final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
                     while (recordIterator.hasNext()) {
@@ -332,11 +332,11 @@ public class Network {
                     final long onlySizeLessDocs = post == null ? Long.MAX_VALUE : post.getLong("onlysizelessdocs", Long.MAX_VALUE);
                     Iterator<Seed> e = null;
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
-                    final String sort = (post == null ? null : post.get("sort", null));
+                    final String sort = (post == null ? null : post.get("sort", ""));
                     switch (page) {
-                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort == null ? Seed.LCOUNT : sort)); break;
-                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort == null ? Seed.LASTSEEN : sort)); break;
-                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort == null ? Seed.LASTSEEN : sort)); break;
+                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort.length() == 0 ? Seed.LCOUNT : sort)); break;
+                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort.length() == 0 ? Seed.LASTSEEN : sort)); break;
+                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort.length() == 0 ? Seed.LASTSEEN : sort)); break;
                         default: break;
                     }
                     String startURL;
@@ -430,7 +430,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_ssl_portssl", seed.get(Seed.PORTSSL,"8443"));
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
-                                userAgent = ClientIdentification.yacyInternetCrawlerAgent.userAgent;
+                                userAgent = ClientIdentification.yacyInternetCrawlerAgent.userAgent();
                                 location = ClientIdentification.generateLocation();
                             } else {
                                 userAgent = sb.peers.peerActions.getUserAgent(ip);

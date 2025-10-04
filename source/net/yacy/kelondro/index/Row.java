@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -60,7 +59,7 @@ public final class Row implements Serializable {
     public final ByteOrder          objectOrder;
     public final int                objectsize;
     public final int                primaryKeyLength;
-    protected Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
+    protected transient Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
 
     public Row(final Column[] row, final ByteOrder objectOrder) {
         assert objectOrder != null;
@@ -237,7 +236,19 @@ public final class Row implements Serializable {
         }
 
     }
-
+    
+    private static String unquote(String s) {
+        if (s == null) return null;
+        s = s.trim();
+        if (s.length() >= 2) {
+            char a = s.charAt(0), b = s.charAt(s.length() - 1);
+            if ((a == '"' && b == '"') || (a == '\'' && b == '\'')) {
+                s = s.substring(1, s.length() - 1);
+            }
+        }
+        return s;
+    }
+    
     public class Entry implements Comparable<Entry>, Comparator<Entry>, Cloneable, Serializable {
 
         private static final long serialVersionUID=-2576312347345553495L;
@@ -282,51 +293,54 @@ public final class Row implements Serializable {
                 }
             }
         }
-
+        
         public Entry(String external, final boolean decimalCardinal) {
-            // parse external form
             if (!external.isEmpty() && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
-            //final String[] elts = commaPattern.split(external);
             final StringTokenizer st = new StringTokenizer(external, ",");
             if (Row.this.nickref == null) genNickRef();
-            String nick;
-            int p;
             this.rowinstance = new byte[Row.this.objectsize];
             this.offset = 0;
-            String token;
             while (st.hasMoreTokens()) {
-                token = st.nextToken();
-                p = token.indexOf('=');
+                String token = st.nextToken();
+                int p = token.indexOf('=');
                 if (p < 0) p = token.indexOf(':');
-                if (p > 0) {
-                    nick = token.substring(0, p).trim();
-                    if (nick.charAt(0) == '"' && nick.charAt(nick.length() - 1) == '"') nick = nick.substring(1, nick.length() - 1);
-                    final Object[] ref = Row.this.nickref.get(nick);
-                    final Column col = (Column) ref[0];
-                    final int clstrt = ((Integer) ref[1]).intValue();
-                    if (p + 1 == token.length()) {
-                        setCol(clstrt, col.cellwidth, null);
+                if (p <= 0) continue;
+                String nick = unquote(token.substring(0, p).trim());
+                final Object[] ref = Row.this.nickref.get(nick);
+                if (ref == null) {
+                    ConcurrentLog.warn("KELONDRO", "Unknown column nickname: " + nick);
+                    continue;
+                }
+                final Column col = (Column) ref[0];
+                final int clstrt = ((Integer) ref[1]).intValue();
+                if (p + 1 == token.length()) {
+                    setCol(clstrt, col.cellwidth, null);
+                    continue;
+                }
+                String val = unquote(token.substring(p + 1).trim());
+                if (val.isEmpty()) {
+                    setCol(clstrt, col.cellwidth, null);
+                    continue;
+                }
+                try {
+                    if (decimalCardinal && col.celltype == Column.celltype_cardinal) {
+                        setCol(col.encoder, this.offset + clstrt, col.cellwidth, NumberTools.parseLongDecSubstring(val, 0));
+                    } else if (decimalCardinal && col.celltype == Column.celltype_binary) {
+                        assert col.cellwidth == 1;
+                        setCol(clstrt, col.cellwidth, new byte[]{ (byte) NumberTools.parseIntDecSubstring(val, 0) });
+                    } else if (decimalCardinal && col.celltype == Column.celltype_bitfield) {
+                        setCol(clstrt, col.cellwidth, (new Bitfield(col.cellwidth, val)).bytes());
                     } else {
-                        if ((decimalCardinal) && (col.celltype == Column.celltype_cardinal)) {
-                            try {
-                                setCol(col.encoder, this.offset + clstrt, col.cellwidth, NumberTools.parseLongDecSubstring(token, p + 1));
-                            } catch (final NumberFormatException e) {
-                                ConcurrentLog.severe("KELONDRO", "kelondroRow: NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
-                                setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0);
-                            }
-                        } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
-                            assert col.cellwidth == 1;
-                            try {
-                                setCol(clstrt, col.cellwidth, new byte[]{(byte) NumberTools.parseIntDecSubstring(token, p + 1)});
-                            } catch (final NumberFormatException e) {
-                                ConcurrentLog.severe("KELONDRO", "kelondroRow: NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
-                                setCol(clstrt, col.cellwidth, new byte[]{0});
-                            }
-                        } else if ((decimalCardinal) && (col.celltype == Column.celltype_bitfield)) {
-                            setCol(clstrt, col.cellwidth, (new Bitfield(col.cellwidth, token.substring(p + 1).trim())).bytes());
-                        } else {
-                            setCol(clstrt, col.cellwidth, UTF8.getBytes(token.substring(p + 1).trim()));
-                        }
+                        setCol(clstrt, col.cellwidth, UTF8.getBytes(val));
+                    }
+                } catch (final NumberFormatException e) {
+                    ConcurrentLog.severe("KELONDRO", "kelondroRow: NumberFormatException for cell '" + nick + "', celltype=" + col.celltype + ", encoder=" + col.encoder + ", value='" + val + "'");
+                    if (col.celltype == Column.celltype_binary && col.cellwidth == 1) {
+                        setCol(clstrt, col.cellwidth, new byte[]{0});
+                    } else if (col.celltype == Column.celltype_cardinal) {
+                        setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0L);
+                    } else {
+                        setCol(clstrt, col.cellwidth, null);
                     }
                 }
             }
@@ -345,7 +359,8 @@ public final class Row implements Serializable {
             // compares only the content of the primary key
             if (Row.this.objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
             assert Row.this.primaryKeyLength == o.getPrimaryKeyLength();
-            return Row.this.objectOrder.compare(bytes(), o.bytes(), Row.this.primaryKeyLength);
+            //return Row.this.objectOrder.compare(bytes(), o.bytes(), Row.this.primaryKeyLength);
+            return Row.this.objectOrder.compare(this.rowinstance, this.offset, o.rowinstance, o.offset, Row.this.primaryKeyLength);
         }
 
         @Override
@@ -360,21 +375,20 @@ public final class Row implements Serializable {
             if (obj == null) return false;
             if (!(obj instanceof Entry)) return false;
             final Entry other = (Entry) obj;
-            final byte[] t = bytes();
-            final byte[] o = other.bytes();
-            for (int i = 0; i < Row.this.primaryKeyLength; i++) {
-                if (t[i] != o[i]) return false;
-            }
-            return true;
+            return Row.this.objectOrder.compare(
+                this.rowinstance, this.offset,
+                other.rowinstance, other.offset,
+                Row.this.primaryKeyLength
+            ) == 0;
         }
 
         @Override
         public int hashCode() {
-            final byte[] b = getPrimaryKeyBytes();
-            final int len = b.length;
+            final int base = this.offset;
+            final int len  = Row.this.primaryKeyLength;
             int h = 1;
             for (int i = 0; i < len; i++) {
-                h = 31 * h + b[i];
+                h = 31 * h + this.rowinstance[base + i];
             }
             return h;
         }
@@ -409,11 +423,13 @@ public final class Row implements Serializable {
         public final void setCol(final int column, final byte[] cell) {
             setCol(Row.this.colstart[column], Row.this.row[column].cellwidth, cell);
         }
-
+        
         public final void setCol(final int column, final char[] cell) {
             final int clstrt = Row.this.colstart[column];
-            for (int i = 0; i < cell.length; i++) this.rowinstance[this.offset + clstrt + i] = (byte) cell[i];
-            for (int i = cell.length; i < Row.this.row[column].cellwidth; i++) this.rowinstance[this.offset + clstrt + i] = 0;
+            final int cw = Row.this.row[column].cellwidth;
+            final int ll = Math.min(cell.length, cw);
+            for (int i = 0; i < ll; i++) this.rowinstance[this.offset + clstrt + i] = (byte) cell[i];
+            for (int i = ll; i < cw; i++) this.rowinstance[this.offset + clstrt + i] = 0;
         }
 
         private final void setCol(final int clstrt, int length, final byte[] cell) {
@@ -597,7 +613,8 @@ public final class Row implements Serializable {
         }
 
         public final String toPropertyForm(final char propertySymbol, final boolean includeBraces, final boolean decimalCardinal, final boolean longname, final boolean quotes) {
-            final ByteBuffer bb = new ByteBuffer(objectsize() * 2);
+        	final int est = Math.min(4096, objectsize() * 2);
+        	final ByteBuffer bb = new ByteBuffer(est);
             if (includeBraces) bb.append('{');
             for (int i = 0; i < Row.this.row.length; i++) {
                 if (quotes) bb.append('"');
@@ -670,9 +687,10 @@ public final class Row implements Serializable {
         }
 
         public Entry get(final byte[] key) {
-            for (final Entry e: this.queue) {
+            for (final Entry e : this.queue) {
                 assert key.length == e.getPrimaryKeyLength();
-                if (Row.this.objectOrder.compare(key, 0, e.bytes(), 0, key.length) == 0) {
+                if (key.length == e.getPrimaryKeyLength()
+                    && Row.this.objectOrder.compare(key, 0, e.rowinstance, e.offset, key.length) == 0) {
                     return e;
                 }
             }
@@ -680,14 +698,13 @@ public final class Row implements Serializable {
         }
 
         public Entry delete(final byte[] key) {
-            final Iterator<Entry> i = this.queue.iterator();
-            Entry e;
-            while (i.hasNext()) {
-                e = i.next();
+            for (final Entry e : this.queue) {
                 assert key.length == e.getPrimaryKeyLength();
-                if (Row.this.objectOrder.compare(key, 0, e.bytes(), 0, key.length) == 0) {
-                    i.remove();
-                    return e;
+                if (key.length == e.getPrimaryKeyLength()
+                    && Row.this.objectOrder.compare(key, 0, e.rowinstance, e.offset, key.length) == 0) {
+                    // statt iterator.remove():
+                    if (this.queue.remove(e)) return e;
+                    return null;
                 }
             }
             return null;
@@ -738,6 +755,135 @@ public final class Row implements Serializable {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+    
+
+    public static void main(final String[] args) {
+		java.util.function.BiConsumer<Boolean, String> check = (ok, msg) -> {
+			if (!ok) System.out.println("RowTest failed: " + msg);
+        };
+        java.util.function.Consumer<String> info = (s) -> System.out.println("[RowTest] " + s);
+
+        try {
+            // 1) Test-Row definieren
+            Column pk    = new Column("pk",      Column.celltype_string,   Column.encoder_bytes, 12, "primary key");
+            Column i256  = new Column("i256",    Column.celltype_cardinal, Column.encoder_b256,   4, "cardinal b256");
+            Column i64e  = new Column("i64e",    Column.celltype_cardinal, Column.encoder_b64e,   8, "cardinal b64e");
+            Column name  = new Column("name",    Column.celltype_string,   Column.encoder_bytes,  8, "name");
+            Column flag  = new Column("flag",    Column.celltype_binary,   Column.encoder_bytes,  1, "flag");
+            Column bits  = new Column("bits",    Column.celltype_bitfield, Column.encoder_bytes,  3, "bits");
+
+            Row r = new Row(new Column[]{ pk, i256, i64e, name, flag, bits }, net.yacy.cora.order.Base64Order.enhancedCoder);
+            info.accept("objectsize=" + r.objectsize + ", pkLen=" + r.primaryKeyLength);
+
+            // 2) newEntry()/Set/Get/Encodings
+            Bitfield bf = new net.yacy.kelondro.util.Bitfield(3);
+            bf.set(0, true);
+            Row.Entry e1 = r.newEntry();
+            e1.setCol(0, "AAAAAAAAAAAA");
+            e1.setCol(1, 123456789L);           // b256
+            e1.setCol(2, 9876543210123L);       // b64e
+            e1.setCol(3, "ALPHA");
+            e1.setCol(4, (byte)1);
+            e1.setCol(5, bf.bytes());
+
+            check.accept("AAAAAAAAAAAA".equals(e1.getPrimaryKeyASCII()), "primary key ascii mismatch");
+            check.accept(e1.getColLong(1) == 123456789L, "b256 long mismatch");
+            check.accept(e1.getColLong(2) == 9876543210123L, "b64e long mismatch");
+            check.accept("ALPHA".equals(e1.getColASCII(3)), "name get ascii mismatch");
+            check.accept(e1.getColByte(4) == (byte)1, "flag byte mismatch");
+            check.accept(e1.getColBytes(5, true) != null, "bits nullIfEmpty");
+
+            long before = e1.getColLong(1);
+            long after  = e1.incCol(1, 5);
+            check.accept(after == before + 5, "incCol b256");
+
+            // 3) bytes()/writeToArray (Offset-Variante ohne Kopie)
+            byte[] big = new byte[r.objectsize + 13];
+            int off = 7;
+            System.arraycopy(e1.bytes(), 0, big, off, r.objectsize);
+            Row.Entry e2 = r.newEntry(big, off, false);
+            check.accept(e2.compareTo(e1) == 0, "compareTo equality with offset");
+            byte[] dst = new byte[r.objectsize];
+            e2.writeToArray(dst, 0);
+            check.accept(java.util.Arrays.equals(dst, e1.bytes()), "writeToArray content mismatch");
+
+            // 4) equals()/hashCode() Konsistenz (ohne Kopien)
+            Row.Entry e3 = r.newEntry(e1.bytes());
+            check.accept(e1.equals(e3), "equals should be true");
+            check.accept(e1.hashCode() == e3.hashCode(), "hashCode consistent with equals");
+
+            // 5) EntryComparator.cardinal() ohne Kopie (Korrektheit)
+            EntryComparator cmp = new EntryComparator(r.objectOrder);
+            long c1 = cmp.cardinal(e1);
+            long c2 = r.objectOrder.cardinal(e1.bytes(), 0, r.primaryKeyLength);
+            check.accept(c1 == c2, "EntryComparator.cardinal differs from base");
+
+            // 6) Queue get()/delete() – delete muss ohne Iterator.remove() funktionieren
+            Row.Queue q = r.newQueue(8);
+            q.put(e1);
+            q.put(e2);
+            Row.Entry ge = q.get(e1.getPrimaryKeyBytes());
+            check.accept(ge != null && ge.equals(e1), "Queue.get failed");
+            boolean deleteWorked = true;
+            try {
+                Row.Entry del = q.delete(e1.getPrimaryKeyBytes());
+                deleteWorked = (del != null && del.equals(e1));
+            } catch (UnsupportedOperationException uoe) {
+                deleteWorked = false; // alter Code nutzte iterator.remove()
+            }
+            check.accept(deleteWorked, "Queue.delete should remove by value, not iterator.remove()");
+
+            // 7) getColBytes(nullIfEmpty)
+            Row.Entry eEmpty = r.newEntry();
+            eEmpty.setCol(0, "BBBBBBBBBBBB");
+            byte[] maybeNull = eEmpty.getColBytes(3, true); // name leer -> null
+            check.accept(maybeNull == null, "nullIfEmpty expected null");
+
+            // 8) char[]-Clamping (sollte NICHT AIOOBE werfen; alter Code tut es)
+            boolean clampedOk = true;
+            try {
+                e1.setCol(3, "ABCDEFGHIJKL".toCharArray()); // name width=8
+                String got = e1.getColASCII(3);
+                clampedOk = got != null && got.startsWith("ABCDEFGH");
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                clampedOk = false;
+            }
+            check.accept(clampedOk, "setCol(char[]) should clamp to cellwidth (no AIOOBE)");
+
+            // 9) toPropertyForm + Parser-Roundtrip
+            String prop = e1.toPropertyForm('=', true, true, false, true);
+            Row.Entry fromProp = r.newEntry(prop, true);
+            check.accept(fromProp != null && fromProp.getPrimaryKeyASCII().equals(e1.getPrimaryKeyASCII()), "property roundtrip pk");
+            check.accept(fromProp.getColLong(1) == e1.getColLong(1), "property roundtrip b256");
+            check.accept(fromProp.getColLong(2) == e1.getColLong(2), "property roundtrip b64e");
+
+            // 10) long2bytes / bytes2long roundtrip
+            byte[] lb = new byte[8];
+            long L = 0x0123456789ABCDEFL;
+            Row.long2bytes(L, lb, 0, 8);
+            long L2 = Row.bytes2long(lb, 0, 8);
+            check.accept(L == L2, "long2bytes/bytes2long roundtrip");
+
+            // 11) subsumes / equals(Row)
+            Row r2 = new Row(new Column[]{ pk, i256, i64e }, r.objectOrder);
+            check.accept(r.subsumes(r2), "r should subsume r2");
+            check.accept(!r2.subsumes(r), "r2 must not subsume r");
+
+            Row r3 = new Row(new Column[]{ pk, i256, i64e, name, flag, bits }, r.objectOrder);
+            check.accept(r.equals(r3), "Row.equals structural equality");
+            check.accept(r.hashCode() == r3.hashCode(), "Row.hashCode equality");
+
+            // 12) getPrimaryKeyUTF8/ASCII zero-trim
+            Row.Entry eTrim = r.newEntry();
+            eTrim.setCol(0, "XYZ");
+            check.accept("XYZ".equals(eTrim.getPrimaryKeyASCII().trim()), "pk ascii trim");
+            check.accept("XYZ".equals(eTrim.getPrimaryKeyUTF8().trim()), "pk utf8 trim");
+
+        } catch (Throwable t) {
+            t.printStackTrace(System.err);
+        }
+
     }
 
 }

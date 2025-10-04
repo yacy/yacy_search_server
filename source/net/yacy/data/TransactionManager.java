@@ -96,7 +96,7 @@ public class TransactionManager {
     /**
      * Get a transaction token to be used later on a protected HTTP post method
      * call on the same path with the currently authenticated user.
-     * 
+     *
      * @param header
      *            current request header
      * @return a transaction token
@@ -114,7 +114,7 @@ public class TransactionManager {
     /**
      * Get a transaction token to be used later on a protected HTTP post method
      * call on the specified path with the currently authenticated user.
-     * 
+     *
      * @param header
      *            current request header
      * @param path the relative path for which the token will be valid
@@ -133,10 +133,10 @@ public class TransactionManager {
             throw new IllegalArgumentException("User is not authenticated");
         }
 
-        /* Produce a token by signing a message with the server secret key : 
-         * The token is not unique per request and thus keeps the service stateless 
+        /* Produce a token by signing a message with the server secret key :
+         * The token is not unique per request and thus keeps the service stateless
          * (no need to store tokens until they are consumed).
-         * On the other hand, it is supposed to remain hard enough to forge because the secret key and token seed 
+         * On the other hand, it is supposed to remain hard enough to forge because the secret key and token seed
          * are initialized with a random value at each server startup */
         final String token = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, SIGNING_KEY)
                         .hmacHex(TOKEN_SEED + userName + path);
@@ -145,7 +145,7 @@ public class TransactionManager {
     }
 
     /**
-     * Check the current request is a valid HTTP POST transaction : the current user is authenticated, 
+     * Check the current request is a valid HTTP POST transaction : the current user is authenticated,
      * and the request post parameters contain a valid transaction token.
      * @param header current request header
      * @param post request parameters
@@ -170,14 +170,14 @@ public class TransactionManager {
         if (userName == null)
                 throw new BadTransactionException("User is not authenticated.");
 
-        final String transactionToken = post.get(TRANSACTION_TOKEN_PARAM);
+        final String transactionToken = post.get(TRANSACTION_TOKEN_PARAM, "");
         if (transactionToken == null)
                 throw new TemplateMissingParameterException("Missing transaction token.");
 
         final String token = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, SIGNING_KEY)
                         .hmacHex(TOKEN_SEED + userName + header.getPathInfo());
 
-        /* Compare the server generated token with the one received in the post parameters, 
+        /* Compare the server generated token with the one received in the post parameters,
          * using a time constant function */
         if(!MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8), transactionToken.getBytes(StandardCharsets.UTF_8))) {
                 throw new BadTransactionException("Invalid transaction token.");

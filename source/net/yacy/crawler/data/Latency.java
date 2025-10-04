@@ -122,6 +122,7 @@ public class Latency {
      * @return the waiting time in milliseconds; 0 if not known; -1 if host gives us special rights
      */
     public static int waitingRobots(final MultiProtocolURL url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
+        if (!agent.isRobot()) return agent.minimumDelta();
         int robotsDelay;
         final RobotsTxtEntry robotsEntry = robots.getEntry(url, agent);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
@@ -130,6 +131,7 @@ public class Latency {
     }
 
     private static int waitingRobots(final String hostport, final RobotsTxt robots, final ClientIdentification.Agent agent, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
+        if (!agent.isRobot()) return agent.minimumDelta();
         int robotsDelay;
         final RobotsTxtEntry robotsEntry = robots.getEntry(hostport, agent, fetchOnlineIfNotAvailableOrNotFresh);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
@@ -154,7 +156,7 @@ public class Latency {
         if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
-        int waiting = agent.minimumDelta;
+        int waiting = agent.minimumDelta();
 
         // if we have accessed the domain many times, get slower (the flux factor)
         waiting += host.flux(waiting);
@@ -199,7 +201,7 @@ public class Latency {
 
         // find the minimum waiting time based on the network domain (local or global)
         final boolean local = url.isLocal();
-        int waiting = agent.minimumDelta;
+        int waiting = agent.minimumDelta();
 
         // if we have accessed the domain many times, get slower (the flux factor)
         if (!local) waiting += host.flux(waiting);
@@ -232,7 +234,7 @@ public class Latency {
         final StringBuilder s = new StringBuilder(50);
 
         // find the minimum waiting time based on the network domain (local or global)
-        int waiting = agent.minimumDelta;
+        int waiting = agent.minimumDelta();
         s.append("minimumDelta = ").append(waiting);
 
         // if we have accessed the domain many times, get slower (the flux factor)

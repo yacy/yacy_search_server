@@ -166,7 +166,7 @@ public class IndexImportMediawiki_p {
 							sb.tables.recordAPICall(post, "IndexImportMediawiki_p.html", WorkTables.TABLE_API_TYPE_DUMP, "MediaWiki Dump Import for " + sourceURL);
 						}
 
-						MediawikiImporter.job = new MediawikiImporter(sourceURL, sb.surrogatesInPath);
+						MediawikiImporter.job = new MediawikiImporter(sourceURL, sb.packsLoadPath);
 						MediawikiImporter.job.start();
 						prop.put("import_dump", MediawikiImporter.job.source());
 						prop.put("import_thread", 1);

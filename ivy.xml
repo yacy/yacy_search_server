@@ -8,7 +8,7 @@
   </configurations>
     <dependencies defaultconf="compile->default">
       <dependency org="commons-fileupload" name="commons-fileupload" rev="1.6.0" conf="compile->master" />
-      <dependency org="commons-lang" name="commons-lang" rev="2.6">
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0">
         <exclude module="junit"/>
       </dependency>
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
@@ -23,7 +23,7 @@
       <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.12.0" />
       <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.12.0"/>
       <dependency org="commons-codec" name="commons-codec" rev="1.17.1" />
-      <dependency org="commons-io" name="commons-io" rev="2.17.0" />
+      <dependency org="commons-io" name="commons-io" rev="2.19.0" />
       <dependency org="commons-logging" name="commons-logging" rev="1.3.3" />
       <dependency org="io.dropwizard.metrics" name="metrics-core" rev="4.1.5"/>
       <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.1.5" conf="compile->master"/>
@@ -41,7 +41,7 @@
       <dependency org="org.apache.calcite" name="calcite-core" rev="1.18.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.18.0" conf="compile->master"/>
       <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" />
-      <dependency org="org.apache.commons" name="commons-lang3" rev="3.16.0" />
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.14"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.14"/>
       <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
@@ -68,7 +68,7 @@
       <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
       <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.7.0" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
-      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.79" />
+      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.81" />
       <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="6.2.8" />
       <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.57.v20241219" />
       <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.57.v20241219" conf="compile->master" />

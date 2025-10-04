@@ -53,10 +53,10 @@ public class goto_p {
 
         String hash = null;
         if (post != null) {
-            hash = post.get("hash", null); // get peers hash
+            hash = post.get("hash", ""); // get peers hash
         }
 
-        if (hash != null) {
+        if (hash != null && hash.length() > 0) {
             final Seed seed = sb.peers.getConnected(hash);
 
             if (seed != null) {

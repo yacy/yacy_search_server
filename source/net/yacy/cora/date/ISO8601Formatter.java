@@ -2,21 +2,21 @@
  *  ISO8601
  *  Copyright 2011 by Michael Peter Christen
  *  First released 2.1.2011 at https://yacy.net
- *
+ * <p>
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
- *
+ * <p>
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *
+ * <p>
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -26,10 +26,7 @@ package net.yacy.cora.date;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class ISO8601Formatter extends AbstractFormatter implements DateFormatter {
 
@@ -112,7 +109,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
             }
             // The standard says:
             // if there is an hour there has to be a minute and a timezone token, too.
-            if (t.nextToken().equals("T")) {
+            if (getTimeSeparator().contains(t.nextToken())) {
                 final int hour = Integer.parseInt(t.nextToken());
                 // no error, got hours
                 int min = 0;
@@ -148,7 +145,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
                             // no legal TZ offset found
                             return cal;
                         }
-                        offset = sign * Integer.parseInt(t.nextToken()) * 10 * 3600;
+                        offset = getOffset(t, sign);
                     }
                     cal.set(Calendar.ZONE_OFFSET, offset);
                 }
@@ -168,6 +165,14 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
         return cal;
     }
 
+    public int getOffset(StringTokenizer t, int sign) {
+        String offset = t.nextToken();
+        return sign * Integer.parseInt(offset) * 10 * 3600;
+    }
+
+    public Collection<String> getTimeSeparator() {
+        return Set.of("T");
+    }
 
     /**
      * Creates a String representation of a Date using the format defined

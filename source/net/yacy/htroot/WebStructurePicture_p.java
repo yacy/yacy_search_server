@@ -59,8 +59,8 @@ public class WebStructurePicture_p {
         String color_line    = "222222";
         String color_lineend = "333333";
 
-        int width = 1024;
-        int height = 576;
+        int width = 1280;
+        int height = 720;
         int depth = 3;
         int nodes = 300; // maximum number of host nodes that are painted
         int bf = 12;    // maximum number of branches around nodes; less nodes makes the graphic look more structured
@@ -69,10 +69,10 @@ public class WebStructurePicture_p {
         int cyc = 0;
 
         if (post != null) {
-            width         = post.getInt("width", 1024);
+            width         = post.getInt("width", 1280);
             if (width < 32 ) width = 32;
             if (width > 10000) width = 10000;
-            height        = post.getInt("height", 576);
+            height        = post.getInt("height", 720);
             if (height < 24) height = 24;
             if (height > 10000) height = 10000;
             depth         = post.getInt("depth", 3);
@@ -81,7 +81,7 @@ public class WebStructurePicture_p {
             nodes         = post.getInt("nodes", width * height * 100 / 1024 / 576);
             bf            = post.getInt("bf", depth <= 0 ? -1 : (int) Math.round(2.0d * Math.pow(nodes, 1.0d / depth)));
             time          = post.getInt("time", -1);
-            hosts         = post.get("host", null);
+            hosts         = post.get("host", "");
             color_text    = post.get("colortext",    color_text);
             color_back    = post.get("colorback",    color_back);
             color_dot0    = post.get("colordot0",    color_dot0);
@@ -100,12 +100,12 @@ public class WebStructurePicture_p {
             hosts = sb.webStructure.hostWithMaxReferences();
         }
         final RasterPlotter graphPicture;
-        if (hosts == null) {
+        if (hosts == null || hosts.isEmpty()) {
             // probably no information available
             final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
             graphPicture = new RasterPlotter(width, height, drawMode, color_back);
-            PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0, 100);
-            PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0, 100);
+            PrintTool.print6(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0, 100, true, true);
+            PrintTool.print6(graphPicture, width / 2, height / 2 + 20, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0, 100, true, false);
         } else {
             // recursively find domains, up to a specific depth
             GraphPlotter graph = new GraphPlotter();
@@ -134,9 +134,9 @@ public class WebStructurePicture_p {
         }
         // print headline
         graphPicture.setColor(Long.parseLong(color_text, 16));
-        PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1, 100);
-        if (hosts != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1, 80);
-        PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
+        PrintTool.print6(graphPicture, 2, 10, 0, "YACY WEB-STRUCTURE ANALYSIS", -1, 100, true, false);
+        if (hosts != null) PrintTool.print6(graphPicture, 2, 20, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1, 80, true, false);
+        PrintTool.print6(graphPicture, width - 2, 10, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80, true, false);
 
         return graphPicture;
     }
@@ -150,10 +150,10 @@ public class WebStructurePicture_p {
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
         final Map<String, Integer> next = structure.outgoingReferencesByHostName(hostName);
-        final ClusteredScoreMap<String> next0 = new ClusteredScoreMap<String>(false);
+        final ClusteredScoreMap<String> next0 = new ClusteredScoreMap<>(false);
         for (final Map.Entry<String, Integer> entry: next.entrySet()) next0.set(entry.getKey(), entry.getValue());
         // first set points to next hosts
-        final Set<String> targetHostNames = new HashSet<String>();
+        final Set<String> targetHostNames = new HashSet<>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;

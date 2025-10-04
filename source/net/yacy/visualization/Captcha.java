@@ -53,7 +53,7 @@ public class Captcha extends RasterPlotter {
         for(int i=0;i<chars;i++){
             y = random.nextInt(height/2) + (height/4);
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
-            PrintTool.print(this, widthPerChar*i+random.nextInt(widthPerChar/2) , y , 0, code.substring(i,i+1), -1, 100);
+            PrintTool.print5(this, widthPerChar*i+random.nextInt(widthPerChar/2) , y , 0, code.substring(i,i+1), -1, 100);
         }
 
         //adding some noise

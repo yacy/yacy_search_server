@@ -106,7 +106,7 @@ public class TransNews_p {
                             }
                         }
                         if (sendit) {
-                            final HashMap<String, String> map = new HashMap<String, String>();
+                            final HashMap<String, String> map = new HashMap<>();
                             map.put("language", currentlang);
                             map.put("file", file);
                             map.put("source", sourcetxt);
@@ -119,11 +119,11 @@ public class TransNews_p {
             }
         }
         String refid;
-        if ((post != null) && ((refid = post.get("voteNegative", null)) != null)) {
+        if ((post != null) && ((refid = post.get("voteNegative", "")).length() > 0)) {
 
             // make new news message with voting
             if (!sb.isRobinsonMode()) {
-                final HashMap<String, String> map = new HashMap<String, String>();
+                final HashMap<String, String> map = new HashMap<>();
                 map.put("language", currentlang);
                 map.put("file", crypt.simpleDecode(post.get("filename", "")));
                 map.put("source", crypt.simpleDecode(post.get("source", "")));
@@ -138,7 +138,7 @@ public class TransNews_p {
             }
         }
 
-        if ((post != null) && ((refid = post.get("votePositive", null)) != null)) {
+        if ((post != null) && ((refid = post.get("votePositive", "")).length() > 0)) {
 
             final String filename = post.get("filename");
 
@@ -152,7 +152,7 @@ public class TransNews_p {
             } // TODO: shall we post voting if translation is not new ?
 
             // make new news message with voting
-            final HashMap<String, String> map = new HashMap<String, String>();
+            final HashMap<String, String> map = new HashMap<>();
             map.put("language", currentlang);
             map.put("file", crypt.simpleDecode(filename));
             map.put("source", crypt.simpleDecode(post.get("source", "")));
@@ -168,11 +168,11 @@ public class TransNews_p {
         }
 
         // create Translation voting list
-        final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
-        final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+        final HashMap<String, Integer> negativeHashes = new HashMap<>(); // a mapping from an url hash to Integer (count of votes)
+        final HashMap<String, Integer> positiveHashes = new HashMap<>(); // a mapping from an url hash to Integer (count of votes)
         accumulateVotes(sb, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
-        final ScoreMap<String> ranking = new ConcurrentScoreMap<String>(); // score cluster for url hashes
-        final HashMap<String, NewsDB.Record> translation = new HashMap<String, NewsDB.Record>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+        final ScoreMap<String> ranking = new ConcurrentScoreMap<>(); // score cluster for url hashes
+        final HashMap<String, NewsDB.Record> translation = new HashMap<>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
         accumulateTranslations(sb, translation, ranking, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
 
         // read out translation-news array and create property entries

@@ -43,7 +43,7 @@ import java.util.concurrent.BlockingQueue;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.content.DCEntry;
-import net.yacy.document.content.SurrogateReader;
+import net.yacy.document.content.XMLPackReader;
 
 
 public class PhpBB3Dao implements Dao {
@@ -258,7 +258,7 @@ public class PhpBB3Dao implements Dao {
     }
 
     @Override
-    public int writeSurrogates(
+    public int writePacks(
         BlockingQueue<DCEntry> queue,
         File targetdir,
         String versioninfo,
@@ -283,7 +283,7 @@ public class PhpBB3Dao implements Dao {
                     if (outputfile.exists()) outputfile.delete();
                     outStream = new FileOutputStream(outputfiletmp);
                     osw = new OutputStreamWriter(new BufferedOutputStream(outStream), StandardCharsets.UTF_8);
-                    osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
+                    osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + XMLPackReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                 }
                 e.writeXML(osw);
                 c++;
@@ -298,7 +298,7 @@ public class PhpBB3Dao implements Dao {
                     fc++;
                 }
             }
-            osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
+            osw.write(XMLPackReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
             osw.close();
             outStream.close();
             osw = null;
@@ -353,7 +353,7 @@ public class PhpBB3Dao implements Dao {
             System.out.println("First entry       : " + db.first());
             System.out.println("Last entry        : " + db.latest());
             File targetdir = new File("x").getParentFile();
-            db.writeSurrogates(db.query(0, -1, 100), targetdir, "id0-current", 3000);
+            db.writePacks(db.query(0, -1, 100), targetdir, "id0-current", 3000);
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
         }

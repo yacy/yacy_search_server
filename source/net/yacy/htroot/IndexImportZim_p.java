@@ -20,6 +20,7 @@ package net.yacy.htroot;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.ZimImporter;
@@ -29,16 +30,16 @@ import net.yacy.server.serverSwitch;
 public class IndexImportZim_p {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader request, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
-    
+
         // read multipart data from post request
-        
+
         final serverObjects prop = new serverObjects();
-    
+
         if (ZimImporter.job != null && ZimImporter.job.isAlive()) {
             // one import is running, no option to insert anything
             prop.put("import", 1);
             prop.put("import_thread", "running");
-            prop.put("import_warcfile", ZimImporter.job.source());
+            prop.put("import_zimfile", ZimImporter.job.source());
             prop.put("import_count", ZimImporter.job.count());
             prop.put("import_speed", ZimImporter.job.speed());
             prop.put("import_runningHours", (ZimImporter.job.runningTime() / 60) / 60);
@@ -51,13 +52,16 @@ public class IndexImportZim_p {
         } else {
             prop.put("import", 0);
             if (post != null) {
+                //for (final String s: post.keySet()) System.out.println("key: " + s); // print all post key attributes
                 if (post.containsKey("file")) {
                     final String filename = post.get("file");
+                    final String collection = post.get("collection", "user");
+                    final InputStream is = post.getInputStream("file$file");
                     if (filename != null && filename.length() > 0) {
                         final File sourcefile = new File(filename);
-                        if (sourcefile.exists()) {
+                        if (is != null || sourcefile.exists()) {
                             try {
-                                final ZimImporter zi = new ZimImporter(sourcefile.getAbsolutePath());
+                                final ZimImporter zi = new ZimImporter(sourcefile.getAbsolutePath(), is, collection);
                                 zi.start();
                                 prop.put("import_thread", "started");
                             } catch (final IOException ex) {
@@ -70,7 +74,7 @@ public class IndexImportZim_p {
                             prop.put("import_thread", "Error: file not found [" + filename + "]");
                         }
                     }
-        
+
                     prop.put("import_count", 0);
                     prop.put("import_speed", 0);
                     prop.put("import_runningHours", 0);

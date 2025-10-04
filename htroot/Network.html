@@ -44,7 +44,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
     <h2>YaCy Search Network '#[networkName]#'</h2>
   <script type="text/javascript">
   <!--
-    imagestub = "NetworkPicture.png?width=1024&height=720&bgcolor=FFFFFF&ct=15000&coronaangle=";
+    imagestub = "NetworkPicture.png?width=1280&height=900&bgcolor=FFFFFF&ct=15000&coronaangle=";
     imageanimindex = 0;
     imageloadindex = 0;
     imagecycles = 0;
@@ -56,7 +56,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
       for (j = 0; j < 6; j++) initanimationphase(j, handle);
     }
     function initanimationphase(phase, handle) {
-      imagearray[phase] = new Image(1024, 720);
+      imagearray[phase] = new Image(1280, 900);
       angle = phase * 60;
       imagearray[phase].src = imagestub + angle + "&handle=" + handle;
     }
@@ -172,7 +172,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
     </p>
     ::
     <div class="left">
-    <table border="0" width="1024">
+    <table border="0" width="1280">
       <tr class="TableHeader">
         <td rowspan="5" class="TableHeader" width="10%">Network</td>
         <td colspan="#(active-switch)#2::3::4::5::6#(/active-switch)#" width="22%">Online Peers</td>
@@ -223,7 +223,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
 
     <div class="left">
       <p>
-        <a href="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="720" /></a>
+        <a href="NetworkPicture.png?width=1280&amp;height=900&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1280&amp;height=900&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1280" height="900" /></a>
       </p>
     </div>
     <div class="left">

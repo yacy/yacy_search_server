@@ -114,13 +114,13 @@ public class webstructure {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        final String about = post == null ? null : post.get("about", null); // may be a URL, a URL hash or a domain hash
+        final String about = post == null ? null : post.get("about", ""); // may be a URL, a URL hash or a domain hash
         prop.put("out", 0);
         prop.put("in", 0);
         prop.put("references", 0);
         prop.put("citations", 0);
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        if (about != null) {
+        if (about != null && about.length() > 0) {
             DigestURL url = null;
             byte[] urlhash = null;
             final Set<String> hostHashes = new HashSet<>();

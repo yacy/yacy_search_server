@@ -83,9 +83,9 @@ public class Vocabulary_p {
 
         final Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
 
-        String vocabularyName = (post == null) ? null : post.get("vocabulary", null);
-        final String discovername = (post == null) ? null : post.get("discovername", null);
-        Tagging vocabulary = vocabularyName == null ? null : LibraryProvider.autotagging.getVocabulary(vocabularyName);
+        String vocabularyName = (post == null) ? null : post.get("vocabulary", "");
+        final String discovername = (post == null) ? null : post.get("discovername", "");
+        Tagging vocabulary = vocabularyName == null || vocabularyName.length() == 0 ? null : LibraryProvider.autotagging.getVocabulary(vocabularyName);
         if (vocabulary == null) {
         	vocabularyName = null;
         }
@@ -100,7 +100,7 @@ public class Vocabulary_p {
                     MultiProtocolURL discoveruri = null;
                     if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURL(discoverobjectspace);} catch (final MalformedURLException e) {}
                     if (discoveruri == null) discoverobjectspace = "";
-                    final Map<String, Tagging.SOTuple> table = new LinkedHashMap<String, Tagging.SOTuple>();
+                    final Map<String, Tagging.SOTuple> table = new LinkedHashMap<>();
                     final File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
                     final boolean discoverNot = post.get("discovermethod", "").equals("none");
                     final boolean discoverFromPath = post.get("discovermethod", "").equals("path");

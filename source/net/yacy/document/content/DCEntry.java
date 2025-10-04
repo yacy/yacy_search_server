@@ -25,8 +25,6 @@
 
 package net.yacy.document.content;
 
-import com.ibm.icu.util.ULocale;
-
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
@@ -41,6 +39,8 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import org.apache.solr.common.params.MultiMapSolrParams;
+
+import com.ibm.icu.util.ULocale;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.DigestURL;
@@ -65,7 +65,7 @@ public class DCEntry extends MultiMapSolrParams {
     public  static final DCEntry poison = new DCEntry();
 
     public DCEntry() {
-        super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
+        super(new TreeMap<>((Collator) insensitiveCollator.clone()));
     }
 
     public DCEntry(
@@ -77,7 +77,7 @@ public class DCEntry extends MultiMapSolrParams {
             double lat,
             double lon
             ) {
-        super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
+        super(new TreeMap<>((Collator) insensitiveCollator.clone()));
         this.getMap().put(DublinCore.Identifier.getURIref(), new String[]{url.toNormalform(true)});
         this.getMap().put(DublinCore.Date.getURIref(), new String[]{ISO8601Formatter.FORMATTER.format(date)});
         this.getMap().put(DublinCore.Title.getURIref(), new String[]{title});
@@ -124,7 +124,7 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     /**
-     * get Identifier (url) (so far only used for surrogate processing)
+     * get Identifier (url) (so far only used for pack processing)
      * @param useRelationAsAlternative true = take relation if no identifier resolves to url
      * @return this entry identifier url
      */
@@ -135,15 +135,15 @@ public class DCEntry extends MultiMapSolrParams {
         // <dc:identifier>10.1051/0004-6361/201117940</dc:identifier>
         String u = this.get("url");
         if (u == null) u = this.get("sku");
-        
+
         if (u == null) {
             final String[] urls = this.getParams(DublinCore.Identifier.getURIref());
             if (urls == null) {
-                return useRelationAsAlternative ? getRelation() : null;
+                return useRelationAsAlternative ? this.getRelation() : null;
             }
             if (urls.length > 0) { // check best also with 1 in case it's not http urn
                 // select one that fits
-                u = bestU(urls);
+                u = this.bestU(urls);
             }
         }
 
@@ -166,7 +166,7 @@ public class DCEntry extends MultiMapSolrParams {
         String[] urls = CommonPattern.SEMICOLON.split(u);
         if (urls.length > 1) {
             // select one that fits
-            u = bestU(urls);
+            u = this.bestU(urls);
         }
         try {
             return new DigestURL(u);
@@ -240,7 +240,7 @@ public class DCEntry extends MultiMapSolrParams {
             }
             return l;
         }
-        if (l == null) l = getIdentifier(true).language(); // determine from identifier-url.TLD
+        if (l == null) l = this.getIdentifier(true).language(); // determine from identifier-url.TLD
         if (l == null) return this.get("language");//from TLD
         return l;
     }
@@ -294,7 +294,7 @@ public class DCEntry extends MultiMapSolrParams {
 
     public List<String> getDescriptions() {
         String[] t = this.getParams(DublinCore.Description.getURIref());
-        List<String> descriptions = new ArrayList<String>();
+        List<String> descriptions = new ArrayList<>();
         if (t == null) return descriptions;
         for (String s: t) descriptions.add(stripCDATA(s));
         return descriptions;
@@ -312,7 +312,7 @@ public class DCEntry extends MultiMapSolrParams {
             return CommonPattern.SEMICOLON.split(t);
         }
         tx = this.getParams(DublinCore.Subject.getURIref());
-        
+
         if (tx != null) {
             for (int i = 0; i < tx.length; i++) {
                 tx[i] = stripCDATA(tx[i]);
@@ -345,39 +345,39 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     public Document document() {
-        HashSet<String> languages = new HashSet<String>();
-        languages.add(getLanguage());
-        List<String> t = new ArrayList<String>(1);
-        t.add(getTitle());
-        
+        HashSet<String> languages = new HashSet<>();
+        languages.add(this.getLanguage());
+        List<String> t = new ArrayList<>(1);
+        t.add(this.getTitle());
+
         // for processing during indexing, embed entry as source scraperObject in a standard parserobj object
         genericParser parserobj = new genericParser(); // init the simplest parser with DCEntry as source/scraperObject used during indexing
 
         Document document = new Document(
-            getIdentifier(true),
+            this.getIdentifier(true),
             "text/html",
             StandardCharsets.UTF_8.name(),
             parserobj,
             languages,
-            getSubject(), // might be null
+            this.getSubject(), // might be null
             t,
-            getCreator(),
-            getPublisher(),
+            this.getCreator(),
+            this.getPublisher(),
             null,
-            getDescriptions(),
-            getLon(), getLat(),
-            get(CollectionSchema.text_t.name(), ""),
+            this.getDescriptions(),
+            this.getLon(), this.getLat(),
+            this.get(CollectionSchema.text_t.name(), ""),
             null,
             null,
             null,
             false,
-            getDate());
-        document.setScraperObject(this); // TODO: used during indexing to access some possible but special YaCy meta tags in surrogate source ( <md:solrfilename>value ) -> optimize/find alternative
+            this.getDate());
+        document.setScraperObject(this); // TODO: used during indexing to access some possible but special YaCy meta tags in pack source ( <md:solrfilename>value ) -> optimize/find alternative
         return document;
     }
 
     public void writeXML(OutputStreamWriter os) throws IOException {
-        Document doc = document();
+        Document doc = this.document();
         if (doc != null) {
             doc.writeXML(os);
         }

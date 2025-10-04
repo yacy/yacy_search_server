@@ -65,6 +65,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
     public static String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
     public static String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
+    public static String ERROR_REDIRECT = "Redirect of ";
 
     /** Crawl reject reason prefix having specific processing */
     public static final String CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX = "double in";
@@ -124,11 +125,11 @@ public final class CrawlStacker implements WorkflowTask<Request>{
     public synchronized void close() {
         CrawlStacker.log.info("Shutdown. waiting for remaining " + this.size() + " crawl stacker job entries. please wait.");
         this.requestQueue.shutdown();
-        
+
         // busy waiting for the queue to empty
         for (int i = 0; i < 10; i++) {
         	if (this.size() <= 0) break;
-        	try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        	try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         }
 
         CrawlStacker.log.info("Shutdown. Closing stackCrawl queue.");
@@ -327,7 +328,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
      * @return null if successfull, a reason string if not successful
      */
     public String stackSimpleCrawl(final DigestURL url) {
-        final CrawlProfile pe = this.crawler.defaultSurrogateProfile;
+        final CrawlProfile pe = this.crawler.defaultPackProfile;
         return this.stackCrawl(new Request(
                 this.peers.mySeed().hash.getBytes(),
                 url,

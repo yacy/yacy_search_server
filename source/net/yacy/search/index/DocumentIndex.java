@@ -164,7 +164,7 @@ public class DocumentIndex extends Segment {
         InputStream sourceStream = null;
         try {
             sourceStream = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-            documents = TextParser.parseSource(url, null, null, TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, 0, length, sourceStream);
+            documents = TextParser.parseSource(url, null, null, TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, 0, length, sourceStream, null);
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
         } finally {

@@ -1460,34 +1460,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return EMPTY_STRING;
     }
 
-    public Date getDate() {
-        String content;
-
-        // <meta name="date" content="YYYY-MM-DD..." />
-        content = this.metas.get("date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
-
-        // <meta name="DC.date.modified" content="YYYY-MM-DD" />
-        content = this.metas.get("dc.date.modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
-
-        // <meta name="DC.date.created" content="YYYY-MM-DD" />
-        content = this.metas.get("dc.date.created");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
-
-        // <meta name="DC.date" content="YYYY-MM-DD" />
-        content = this.metas.get("dc.date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
-
-        // <meta name="DC:date" content="YYYY-MM-DD" />
-        content = this.metas.get("dc:date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
-
-        // <meta http-equiv="last-modified" content="YYYY-MM-DD" />
-        content = this.metas.get("last-modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
-
-        return new Date();
+    public Date getDate(Date lastModified) {
+        return ContentScraperDateUtil.getDate(root, metas, timezoneOffset, startDates, lastModified);
     }
 
     // parse location

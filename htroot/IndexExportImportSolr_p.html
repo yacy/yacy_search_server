@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': URL Database Administration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+
+    <h2>Solr Index Export/Import</h2>
+    <p>The local index currently contains #[ucount]# documents (including non-http-200 error pages).</p>
+
+    #(dumprestore)#::
+    <form action="IndexExportImportSolr_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Dump and Restore of Solr Index</legend>
+      #(dumpRestoreEnabled)#<div class="alert alert-info">This feature is available only when a local embedded Solr is active.</div>::#(/dumpRestoreEnabled)#
+      <dl>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="indexdump" value="Create Dump" class="btn btn-primary" style="width:240px;" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/><br/>
+            (This may take several minutes. Please be patient and wait until the page reloads.)</dd>
+        </dd>
+      </dl>
+      <dl>
+        <dt class="TableCellDark">Dump File (full path)</dt>
+        <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
+        </dd>
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="btn btn-primary" style="width:240px;" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    #(/dumprestore)#
+
+    #(indexdump)#::
+    <div class="alert alert-success" role="alert">Stored a solr dump to file #[dumpfile]#</div>::
+    <div class="alert alert-danger" role="alert">Could not create the Solr dump : no embedded Solr is available.</div>::
+    <div class="alert alert-danger" role="alert">An error occurred while trying to create the Solr dump.</div>
+    #(/indexdump)#
+
+    #(indexRestore)#::
+    <div class="alert alert-success" role="alert">Successfully restored Solr index from dump file!</div>::
+    <div class="alert alert-danger" role="alert">Could not restore the Solr dump : no embedded Solr is available.</div>::
+    <div class="alert alert-danger" role="alert">An error occurred while trying to restore the Solr dump.</div>
+    #(/indexRestore)#
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

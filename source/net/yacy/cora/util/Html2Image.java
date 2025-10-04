@@ -26,8 +26,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -463,10 +461,7 @@ public class Html2Image {
         };
         htmlPane.setEditorKitForContentType("text/html", kit);
         htmlPane.setContentType("text/html");
-        htmlPane.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(final PropertyChangeEvent evt) {
-            }
+        htmlPane.addPropertyChangeListener(evt -> {
         });
 
         // load the page
@@ -524,7 +519,7 @@ public class Html2Image {
                         exitStatus = 1;
                         return;
                     }
-                    if(Html2Image.writeWkhtmltopdf(args[0], null, ClientIdentification.yacyInternetCrawlerAgent.userAgent,
+                    if(Html2Image.writeWkhtmltopdf(args[0], null, ClientIdentification.yacyInternetCrawlerAgent.userAgent(),
                             "en-us,en;q=0.5", targetPdfFile, 30)) {
                         if(targetPath.endsWith(".jpg") || targetPath.endsWith(".png")) {
                             if(Html2Image.pdf2image(targetPdfFile, new File(targetPath), 1024, 1024, 300, 75)) {

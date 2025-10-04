@@ -107,30 +107,30 @@ public class WorkTables extends Tables {
          * but prevents revealing it in the URL displayed in the process scheduler and prevents storing an outdated value */
         final String transactionToken;
         if(post != null) {
-        	transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM);
+            transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
         } else {
-        	transactionToken = null;
+            transactionToken = null;
         }
         if(transactionToken != null && post != null) {
-        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
+            post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
         }
 
         // generate the apicall url - without the apicall attributes
-        String apiurl = "/" + servletName;
+        StringBuilder apiurl = new StringBuilder("/").append(servletName);
         if(post != null) {
-        	apiurl += "?" + post.toString();
+            apiurl.append("?").append(post.toString());
         }
 
         /* Now restore the eventual transaction token to prevent side effects on the post object eventually still used by the caller */
         if(post != null) {
-        	if(transactionToken != null) {
-        		post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
-        	} else {
-        		post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
-        	}
+            if(transactionToken != null) {
+                post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
+            } else {
+                post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
+            }
         }
 
-        return apiurl;
+        return apiurl.toString();
     }
 
     /**
@@ -139,51 +139,50 @@ public class WorkTables extends Tables {
      * @param sb the {@link Switchboard} instance. Must not be null.
      * @return the most recently recorded call to the given API with the same parameters, or null when no one was found or data is not accessible
      */
-	public static Row selectLastExecutedApiCall(final String servletName, final serverObjects post, final Switchboard sb) {
-		Row lastRecordedCall = null;
-		if (servletName != null && sb != null && sb.tables != null) {
-			try {
-				if (post != null && post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
-					/*
-					 * Search the table on the primary key when when present (re-execution of a
-					 * recorded call)
-					 */
-					lastRecordedCall = sb.tables.select(WorkTables.TABLE_API_NAME,
-							UTF8.getBytes(post.get(WorkTables.TABLE_API_COL_APICALL_PK)));
-				} else {
-					/* Else search the table on the API URL as recorded (including parameters) */
-					final String apiURL = WorkTables.generateRecordedURL(post, servletName);
-					final Iterator<Row> rowsIt = sb.tables.iterator(WorkTables.TABLE_API_NAME,
-							WorkTables.TABLE_API_COL_URL, UTF8.getBytes(apiURL));
-					while (rowsIt.hasNext()) {
-						final Row currentRow = rowsIt.next();
-						if (currentRow != null) {
-							final Date currentLastExec = currentRow.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC,
-									(Date) null);
-							if (currentLastExec != null) {
-								if (lastRecordedCall == null) {
-									/*
-									 * Do not break now the loop : we are looking for the most recent API call on
-									 * the same URL
-									 */
-									lastRecordedCall = currentRow;
-								} else if (lastRecordedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null)
-										.before(currentLastExec)) {
-									lastRecordedCall = currentRow;
-								}
-							}
-						}
-					}
-				}
+    public static Row selectLastExecutedApiCall(final String servletName, final serverObjects post, final Switchboard sb) {
+        Row lastRecordedCall = null;
+        if (servletName != null && sb != null && sb.tables != null) {
+            try {
+                if (post != null && post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+                    /*
+                     * Search the table on the primary key when when present (re-execution of a
+                     * recorded call)
+                     */
+                    lastRecordedCall = sb.tables.select(WorkTables.TABLE_API_NAME, post.getBytes(WorkTables.TABLE_API_COL_APICALL_PK));
+                } else {
+                    /* Else search the table on the API URL as recorded (including parameters) */
+                    final String apiURL = WorkTables.generateRecordedURL(post, servletName);
+                    final Iterator<Row> rowsIt = sb.tables.iterator(WorkTables.TABLE_API_NAME,
+                            WorkTables.TABLE_API_COL_URL, UTF8.getBytes(apiURL));
+                    while (rowsIt.hasNext()) {
+                        final Row currentRow = rowsIt.next();
+                        if (currentRow != null) {
+                            final Date currentLastExec = currentRow.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC,
+                                    (Date) null);
+                            if (currentLastExec != null) {
+                                if (lastRecordedCall == null) {
+                                    /*
+                                     * Do not break now the loop : we are looking for the most recent API call on
+                                     * the same URL
+                                     */
+                                    lastRecordedCall = currentRow;
+                                } else if (lastRecordedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null)
+                                        .before(currentLastExec)) {
+                                    lastRecordedCall = currentRow;
+                                }
+                            }
+                        }
+                    }
+                }
 
-			} catch (final IOException e) {
-				ConcurrentLog.logException(e);
-			} catch (final SpaceExceededException e) {
-				ConcurrentLog.logException(e);
-			}
-		}
-		return lastRecordedCall;
-	}
+            } catch (final IOException e) {
+                ConcurrentLog.logException(e);
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.logException(e);
+            }
+        }
+        return lastRecordedCall;
+    }
 
     /**
      * recording of a api call. stores the call parameters into the API database table
@@ -197,7 +196,7 @@ public class WorkTables extends Tables {
         // remove the apicall attributes from the post object
         String[] pks = post.remove(TABLE_API_COL_APICALL_PK);
 
-        byte[] pk = pks == null ? null : UTF8.getBytes(pks[0]);
+        byte[] pk = pks == null || pks.length == 0 ? null : UTF8.getBytes(pks[0]);
 
         // generate the apicall url - without the apicall attributes
         final String apiurl = generateRecordedURL(post, servletName);
@@ -264,7 +263,7 @@ public class WorkTables extends Tables {
     public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment, int time, String unit) {
         if (post.containsKey(TABLE_API_COL_APICALL_PK)) {
             // this api call has already been stored somewhere.
-            return recordAPICall(post, servletName, type, comment);
+            return this.recordAPICall(post, servletName, type, comment);
         }
         if (time < 0 || unit == null || unit.isEmpty() || "minutes,hours,days".indexOf(unit) < 0) {
             time = 0; unit = "";
@@ -276,9 +275,9 @@ public class WorkTables extends Tables {
         /* Before API URL serialization, we set any eventual transaction token value to empty :
          * this will later help identify a new valid transaction token will be necessary,
          * but without revealing it in the URL displayed in the process scheduler and storing an invalid value */
-        final String transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        final String transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
         if(transactionToken != null) {
-        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
+            post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
         }
 
         // generate the apicall url - without the apicall attributes
@@ -286,9 +285,9 @@ public class WorkTables extends Tables {
 
         /* Now restore the eventual transaction token to prevent side effects on the post object eventually still used by the caller */
         if(transactionToken != null) {
-        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
+            post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
         } else {
-        	post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
+            post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
         }
 
         byte[] pk = null;
@@ -327,7 +326,7 @@ public class WorkTables extends Tables {
      * @return a map of the called urls and the http status code of the api call or -1 if any other IOException occurred
      */
     public Map<String, Integer> execAPICalls(String host, int port, Collection<String> pks, final String username, final String pass) {
-        LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String, Integer> l = new LinkedHashMap<>();
         // now call the api URLs and store the result status
         try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
             client.setTimout(120000);
@@ -335,7 +334,7 @@ public class WorkTables extends Tables {
             for (final String pk: pks) {
                 row = null;
                 try {
-                    row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
+                    row = this.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 } catch (final SpaceExceededException e) {
@@ -350,18 +349,18 @@ public class WorkTables extends Tables {
                     // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
                     if (theapicall.length() > 1000 || isTokenProtectedAPI) {
                         // use a POST to execute the call
-                        execPostAPICall(host, port, username, pass, client, l, url, isTokenProtectedAPI);
+                        this.execPostAPICall(host, port, username, pass, client, l, url, isTokenProtectedAPI);
                     } else {
                         // use a GET to execute the call
                         ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
                         try {
                             client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
                             if(client.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED) {
-                            	/* GET method not allowed (HTTP 450 status) : this may be an old API entry,
-                            	 * now restricted to HTTP POST and requiring a transaction token. We try now with POST. */
-                            	execPostAPICall(host, port, username, pass, client, l, url, true);
+                                /* GET method not allowed (HTTP 450 status) : this may be an old API entry,
+                                 * now restricted to HTTP POST and requiring a transaction token. We try now with POST. */
+                                this.execPostAPICall(host, port, username, pass, client, l, url, true);
                             } else {
-                            	l.put(url.toNormalform(true), client.getStatusCode());
+                                l.put(url.toNormalform(true), client.getStatusCode());
                             }
                         } catch (final IOException e) {
                             ConcurrentLog.logException(e);
@@ -390,71 +389,71 @@ public class WorkTables extends Tables {
      * @param isTokenProtectedAPI set to true when the API is protected by a transaction token
      * @throws MalformedURLException when the HTTP POST url could not be derived from apiURL
      */
-	private void execPostAPICall(String host, int port, final String username, final String pass,
-			final HTTPClient client, final LinkedHashMap<String, Integer> results,
-			final MultiProtocolURL apiURL, final boolean isTokenProtectedAPI) throws MalformedURLException {
-		Map<String, ContentBody> post = new HashMap<>();
-		for (Map.Entry<String, String> a: apiURL.getAttributes().entrySet()) {
-		    post.put(a.getKey(), UTF8.StringBody(a.getValue()));
-		}
+    private void execPostAPICall(String host, int port, final String username, final String pass,
+            final HTTPClient client, final LinkedHashMap<String, Integer> results,
+            final MultiProtocolURL apiURL, final boolean isTokenProtectedAPI) throws MalformedURLException {
+        Map<String, ContentBody> post = new HashMap<>();
+        for (Map.Entry<String, String> a: apiURL.getAttributes().entrySet()) {
+            post.put(a.getKey(), UTF8.StringBody(a.getValue()));
+        }
 
-		final MultiProtocolURL url = new MultiProtocolURL("http", host, port, apiURL.getPath());
+        final MultiProtocolURL url = new MultiProtocolURL("http", host, port, apiURL.getPath());
 
-		try {
-			if (isTokenProtectedAPI) {
-		        // Eventually acquire first a new valid transaction token before posting data
-				client.GETbytes(url, username, pass, false);
-				if (client.getStatusCode() != HttpStatus.SC_OK) {
-					/* Do not fail immediately, the token may be no more necessary on this API :
-					 * let's log a warning but try anyway the POST call that will eventually reject the request */
-					ConcurrentLog.warn("APICALL", "Could not retrieve a transaction token for " + apiURL.toNormalform(true));
-				} else {
+        try {
+            if (isTokenProtectedAPI) {
+                // Eventually acquire first a new valid transaction token before posting data
+                client.GETbytes(url, username, pass, false);
+                if (client.getStatusCode() != HttpStatus.SC_OK) {
+                    /* Do not fail immediately, the token may be no more necessary on this API :
+                     * let's log a warning but try anyway the POST call that will eventually reject the request */
+                    ConcurrentLog.warn("APICALL", "Could not retrieve a transaction token for " + apiURL.toNormalform(true));
+                } else {
 
-					final Header transactionTokenHeader = client.getHttpResponse()
-							.getFirstHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN);
-					if (transactionTokenHeader == null) {
-						/*
-						 * Do not fail immediately, the token may be no more
-						 * necessary on this API : let's log a warning but try
-						 * anyway the POST call that will eventually reject the
-						 * request
-						 */
-						ConcurrentLog.warn("APICALL",
-								"Could not retrieve a transaction token for " + apiURL.toNormalform(true));
-					} else {
-						post.put(TransactionManager.TRANSACTION_TOKEN_PARAM,
-								UTF8.StringBody(transactionTokenHeader.getValue()));
-					}
-				}
+                    final Header transactionTokenHeader = client.getHttpResponse()
+                            .getFirstHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN);
+                    if (transactionTokenHeader == null) {
+                        /*
+                         * Do not fail immediately, the token may be no more
+                         * necessary on this API : let's log a warning but try
+                         * anyway the POST call that will eventually reject the
+                         * request
+                         */
+                        ConcurrentLog.warn("APICALL",
+                                "Could not retrieve a transaction token for " + apiURL.toNormalform(true));
+                    } else {
+                        post.put(TransactionManager.TRANSACTION_TOKEN_PARAM,
+                                UTF8.StringBody(transactionTokenHeader.getValue()));
+                    }
+                }
 
-			}
+            }
 
-			client.POSTbytes(url, "localhost", post, username, pass, false, false);
+            client.POSTbytes(url, "localhost", post, username, pass, false, false);
 
-			results.put(apiURL.toNormalform(true), client.getStatusCode());
-		} catch (final IOException e) {
-			ConcurrentLog.logException(e);
-			results.put(apiURL.toNormalform(true), -1);
-		}
-	}
+            results.put(apiURL.toNormalform(true), client.getStatusCode());
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
+            results.put(apiURL.toNormalform(true), -1);
+        }
+    }
 
-	/**
-	 * Executes an HTTP GET API call
-	 * @param host target host name
-	 * @param port target port
-	 * @param path target path
-	 * @param pk the primary key of the api call
+    /**
+     * Executes an HTTP GET API call
+     * @param host target host name
+     * @param port target port
+     * @param path target path
+     * @param pk the primary key of the api call
      * @param username authentication user name
      * @param pass authentication encoded password
-	 * @return the API response HTTP status, or -1 when an error occured
-	 */
+     * @return the API response HTTP status, or -1 when an error occured
+     */
     public static int execGetAPICall(String host, int port, String path, byte[] pk, final String username, final String pass) {
         // now call the api URLs and store the result status
-        String url = "http://" + host + ":" + port + path;
-        if (pk != null) url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(pk);
+        StringBuilder url = new StringBuilder("http://").append(host).append(":").append(port).append(path);
+        if (pk != null) url.append("&").append(WorkTables.TABLE_API_COL_APICALL_PK).append("=").append(UTF8.String(pk));
         try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
             client.setTimout(120000);
-            client.GETbytes(url, username, pass, false);
+            client.GETbytes(url.toString(), username, pass, false);
             return client.getStatusCode();
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
@@ -470,9 +469,9 @@ public class WorkTables extends Tables {
      * @return the http status code of the api call or -1 if any other IOException occurred
      */
     public int execAPICall(String pk, String host, int port, final String username, final String pass) {
-        ArrayList<String> pks = new ArrayList<String>();
+        ArrayList<String> pks = new ArrayList<>();
         pks.add(pk);
-        Map<String, Integer> m = execAPICalls(host, port, pks, username, pass);
+        Map<String, Integer> m = this.execAPICalls(host, port, pks, username, pass);
         if (m.isEmpty()) return -1;
         return m.values().iterator().next().intValue();
     }
@@ -533,7 +532,7 @@ public class WorkTables extends Tables {
     }
 
     public static Map<byte[], String> commentCache(Switchboard sb) {
-        Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
+        Map<byte[], String> comments = new TreeMap<>(Base64Order.enhancedCoder);
         Iterator<Tables.Row> i;
         try {
             i = sb.tables.iterator(WorkTables.TABLE_API_NAME);

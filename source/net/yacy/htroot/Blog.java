@@ -163,7 +163,7 @@ public class Blog {
 
             // create a news message
             if (!sb.isRobinsonMode()) {
-                final Map<String, String> map = new HashMap<String, String>();
+                final Map<String, String> map = new HashMap<>();
                 map.put("page", pagename);
                 map.put("subject", StrSubject.replace(',', ' '));
                 map.put("author", strAuthor.replace(',', ' '));
@@ -217,7 +217,7 @@ public class Blog {
         }
         else if (post.containsKey("xmlfile")) {
             prop.put("mode", "5");
-            if(sb.blogDB.importXML(post.get("xmlfile$file"))) {
+            if (sb.blogDB.importXML(post.getInputStream("xmlfile$file"))) {
                 prop.put("mode_state", "1");
             }
             else {

@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+#(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexPackManager_p.html">#(/reload)#
+  <head>
+    <title>YaCy '#[clientname]#': Index Pack Manager</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+
+    <h2>YaCy Pack Manager</h2>
+
+
+    <fieldset><legend>Pack Folders</legend>
+        <table class="table table-striped" summary="Packs: Hold List">
+            <thead class="thead-dark">
+            <tr class="TableHeader"><th width="720">Packs: Hold List</th><th width="180">Size (KB)</th><th>Process</th></tr>
+            </thead>
+            <tbody>
+        #{packs-hold}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[file]#</td><td class="text-end">#[size]#</td><td>#[process]#</td></tr>
+        #{/packs-hold}#
+            </tbody>
+        </table>
+
+        <table class="table table-striped" summary="Packs: Load List">
+            <thead class="thead-dark">
+            <tr class="TableHeader"><th width="720">Packs: Load List</th><th width="180">Size (KB)</th><th>Process</th></tr>
+            </thead>
+            <tbody>
+        #{packs-load}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[file]#</td><td class="text-end">#[size]#</td><td>#[process]#</td></tr>
+        #{/packs-load}#
+            </tbody>
+
+        <table class="table table-striped" summary="Packs: Loaded List">
+            <thead class="thead-dark">
+            <tr class="TableHeader"><th width="720">Packs: Loaded List</th><th width="180">Size (KB)</th><th>Process</th></tr>
+            </thead>
+            <tbody>
+        #{packs-loaded}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[file]#</td><td class="text-end">#[size]#</td><td>#[process]#</td></tr>
+        #{/packs-loaded}#
+            </tbody>
+        </table>
+    </fieldset>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

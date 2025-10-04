@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+#(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexPackGenerator_p.html">#(/reload)#
+  <head>
+    <title>YaCy '#[clientname]#': Index Pack Generator</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+
+    <h2>YaCy Pack Generator</h2>
+    <p>The local index currently contains #[ucount]# documents, only #[ucount200]# exportable with status code 200 - the remaining are error documents.</p>
+
+    #(lurlexport)#::
+    <form action="IndexPackGenerator_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Index Pack Generator</legend>
+      <dl>
+        <dt class="TableCellDark">Set a Category (this goes into the filename)</dt>
+        <dd>
+            <select name="category" id="category" class="form-control">
+            <option value="mix" selected="selected">mix - a mix of document types, for content from wide web crawls</option>
+            <option value="core">core - technical documentation, operation systems, computer hardware, open source and free software, manuals, protocol standards</option>
+            <option value="scroll">scroll - non-technical documents: knowledge, encyclopedia, linguistic corpora, dictionaries, translation memories, texts, non-fiction books, historical books</option>
+            <option value="codex">codex - non-technical standards: industry standards, laws, rules, compliance</option>
+            <option value="gem">gem - research, papers, university publications, science</option>
+            <option value="fiction">fiction - fictional documents: movies, stories, series, books (fiction, science-fiction)</option>
+            <option value="map">map - geological data, geolocation-data, earth/world information</option>
+            <option value="echo">echo – micro-content (tweets, toots, short headlines, SMS corpora), podcasts, radio archives, audio lectures, spoken-word datasets, logs, incidents, telemetry</option>
+            <option value="spirit">spirit – related to non-textual data (possibly only metadata): art, music, game assets, creative-commons media (non-text culture loot)</option>
+            <option value="vault">vault - sensitive data: secrets, leaks, non-public documents, security advisories</option>
+            </select>
+        </dd>
+
+        <dt class="TableCellDark">Index Collection</dt>
+        <dd>
+            <select id="collection" name="collection" class="form-control">
+              #{collections}#
+                <option #(selected)#::selected="selected"#(/selected)#>#[collection]#</option>
+              #{/collections}#
+            </select>&nbsp; the collection name is used as part of the filename to describe the content. Exception: if the collection is "user", then you can name the content with a slug.
+        </dd>
+
+        <dt class="TableCellDark">Slug - describe the content<br>(only if collection is "user")</dt>
+        <dd><input type="text" name="slug" id="slug" value="export" size="20" maxlength="40" class="form-control"/>&nbsp;This will become a part of the filename, spaces will be replaced by "-"; must not be empty; should end with a language description, e.g. "-en"
+        </dd>
+
+
+        <script>
+            const collectionSelect = document.getElementById('collection');
+            const slugInput        = document.getElementById('slug');
+
+            function toggleSlug() {
+                const enable = collectionSelect.value === 'user';
+                slugInput.disabled = !enable;
+                slugInput.style.opacity = enable ? 1 : 0.5;    // optional visual hint
+            }
+
+            // run once on load
+            toggleSlug();
+
+            // keep it in sync
+            collectionSelect.addEventListener('change', toggleSlug);
+        </script>
+
+        <dt class="TableCellDark">URL Filter</dt>
+        <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" class="form-control"/>&nbsp;.*.* (default) is a catch-all; format: java regex
+        </dd>
+
+        <dt class="TableCellDark">Search Query - </dt>
+        <dd><input type="text" name="exportquery" value="*:*" size="20" maxlength="250"  class="form-control"/>&nbsp;*:* (default) is a catch-all; format: <field-name>:<solr-pattern>
+        </dd>
+        <dt class="TableCellDark">Export Format</dt>
+        <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This JSON is an elasticsearch index dump format and can be bulk-imported to elasticsearch. Here is an example for opensearch, using docker:<br />
+            Start docker container of opensearch:<br />
+            <code>docker run --name opensearch -p 9200:9200 -d -e OPENSEARCH_JAVA_OPTS="-Xms2G -Xmx2G" -e discovery.type=single-node -e DISABLE_SECURITY_PLUGIN=true -v $(pwd)/opensearch_data:/usr/share/opensearch/data opensearchproject/opensearch:latest</code><br />
+            Unblock index creation:<br />
+            <code>curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+            {
+              "persistent": {
+                "cluster.blocks.create_index": null
+              }
+            }'</code><br />
+            Create the search index:<br />
+            <code>curl -X PUT "http://localhost:9200/collection1/yacy"</code><br />
+            Bulk-upload the index file:<br />
+            <code>curl -XPOST "http://localhost:9200/collection1/yacy/_bulk?filter_path=took,errors" -H "Content-Type: application/x-ndjson" --data-binary @yacy_dump_XXX.flatjson</code><br />
+            Make a search, get 10 results, search in fields text_t, title, description with boosts:<br />
+            <code>curl -X POST "http://localhost:9200/collection1/yacy/_search" -H 'Content-Type: application/json' -d'
+            {"size": 10, "query": {"multi_match": {
+                "query": "one two three",
+                "fields": ["text_t", "title^10", "description^3"], "fuzziness": "AUTO"
+            }}}'</code>
+        </span></span>
+            <input type="radio" name="format" value="full-elasticsearch" checked="checked" />
+            JSON (Rich and full-text Elasticsearch data, one document per line in one flat JSON file)
+            <br />
+
+            <input type="radio" name="format" value="full-solr" />
+            XML (Rich and full-text Solr data, one document per line in one large xml file,
+            can be processed with shell tools, can be imported with DATA/PACKS/load/)
+            <br />
+            <input type="radio" name="format" value="full-rss" />
+            XML (RSS)
+        </dd>
+
+        <dt>&nbsp;</dt>
+        <dd><input type="submit" name="lurlexport" value="Generate Data Pack" class="btn btn-primary" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    <div class="alert alert-info" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far</div>::
+    #(/lurlexport)#
+
+    #(lurlexportfinished)#::
+    <div class="alert alert-success">Finished export of #[urlcount]# Documents to file <a href="file://#[exportfile]#" target="_">#[exportfile]#</a><br/>
+    <em>Import this file by moving it to DATA/PACKS/load</em></div>::
+    #(/lurlexportfinished)#
+
+    #(lurlexporterror)#::
+    <div class="alert alert-warning">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
+    #(/lurlexporterror)#
+
+    <fieldset><legend>Pack List</legend>
+        <table border="0" summary="Pack List Archive">
+            <tr class="TableHeader"><td>Pack</td><td>Process</td><td>Size (KB)</td></tr>
+        #{packs}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[file]#</td><td>#[type]#</td><td>#[size]#</td></tr>
+        #{/packs}#
+        </table>
+    </fieldset>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -27,11 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import net.yacy.yacy;
-import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.index.Fulltext;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -77,21 +75,13 @@ public class share {
             prop.put("mode_success_message", "file name is empty");
             return prop;
         }
-        if (!filename.startsWith(Fulltext.yacy_dump_prefix) || !filename.endsWith(".xml.gz")) {
-            prop.put("mode_success_message", "no index dump file (" + Fulltext.yacy_dump_prefix + "*.xml.gz)");
+        if (!filename.startsWith(SwitchboardConstants.YACY_PACK_PREFIX) || !filename.endsWith(".xml.gz")) {
+            prop.put("mode_success_message", "no index dump file (" + SwitchboardConstants.YACY_PACK_PREFIX + "*.xml.gz)");
             return prop;
         }
 
         // check data
-        final String dataString = post.get("data$file", "");
-        if (dataString.length() == 0) return prop;
-        byte[] data;
-        if (filename.endsWith(".base64")) {
-            data = Base64Order.standardCoder.decode(dataString);
-            filename = filename.substring(0, filename.length() - 7);
-        } else {
-            data = UTF8.getBytes(dataString);
-        }
+        final byte[] data = post.getBytes("data$file");
         if (data == null || data.length == 0) return prop;
 
         // modify the file name; ignore and replace the used transaction token

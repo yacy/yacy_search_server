@@ -1,6 +1,6 @@
 /**
  *  Transactions
- *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)>
  *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 08.12.2014 at https://yacy.net
  *
@@ -56,7 +56,7 @@ import net.yacy.search.schema.CollectionSchema;
  *
  */
 public class Transactions {
-    
+
     private final static String XML_PREFIX = "<response>\n<!--\n";
     private final static char[] WHITESPACE = new char[132];
     //private final static int WHITESPACE_START = XML_PREFIX.length();
@@ -65,14 +65,14 @@ public class Transactions {
     private static Snapshots inventory = null, archive = null;
     private static ExecutorService executor = Executors.newCachedThreadPool();
     private static AtomicInteger executorRunning = new AtomicInteger(0);
-    
+
     /** the maximum to wait for each wkhtmltopdf call when rendering PDF snapshots */
     private static long wkhtmltopdfTimeout = 30;
-    
+
     static {
         for (int i = 0; i < WHITESPACE.length; i++) WHITESPACE[i] = 32;
     }
-    
+
     public static enum State {
         INVENTORY("inventory"), ARCHIVE("archive"), ANY(null);
         public String dirname;
@@ -80,7 +80,7 @@ public class Transactions {
             this.dirname = dirname;
         }
     }
-    
+
     /**
      * @param dir the parent directory of inventory and archive snapshots.
      * @param wkhtmltopdfSecondsTimeout the maximum to wait for each wkhtmltopdf call when rendering PDF snapshots
@@ -94,7 +94,7 @@ public class Transactions {
         archive = new Snapshots(archiveDir);
         wkhtmltopdfTimeout = wkhtmltopdfSecondsTimeout;
     }
-    
+
     public static synchronized void migrateIPV6Snapshots() {
     	executor.shutdown();
     	try {
@@ -122,7 +122,7 @@ public class Transactions {
             default : Revisions a = inventory.getRevisions(urlhash); return a == null ? archive.getRevisions(urlhash) : a;
         }
     }
-    
+
     /**
      * get a list of <host>.<port> names in the snapshot directory
      * @return the list of the given state. if the state is ALL or unknown, all lists are combined
@@ -134,12 +134,12 @@ public class Transactions {
             default : Set<String> a = inventory.listHosts(); a.addAll(archive.listHosts()); return a;
         }
     }
-    
+
     /**
      * list the snapshots for a given host name
      * @param hostport the <host>.<port> identifier for the domain (with the same format as applied by the Snapshots.pathToHostPortDir() function).
      * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @return a map with a set for each depth in the domain of the host name
      */
     public static TreeMap<Integer, Collection<Revisions>> listIDs(final String hostport, final int depth, final State state) {
@@ -149,12 +149,12 @@ public class Transactions {
             default : TreeMap<Integer, Collection<Revisions>> a = inventory.listIDs(hostport, depth); a.putAll(archive.listIDs(hostport, depth)); return a;
         }
     }
-    
+
     /**
      * get the number of snapshots for the given host name
      * @param hostport the <host>.<port> identifier for the domain
      * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @return a count, the total number of documents for the domain and depth
      */
     public static int listIDsSize(final String hostport, final int depth, final State state) {
@@ -164,7 +164,7 @@ public class Transactions {
             default : return inventory.listIDsSize(hostport, depth) + archive.listIDsSize(hostport, depth);
         }
     }
-    
+
     public static boolean store(final SolrInputDocument doc, final boolean concurrency, final boolean loadImage, final boolean replaceOld, final String proxy, final String acceptLanguage) {
 
         // GET METADATA FROM DOC
@@ -180,7 +180,7 @@ public class Transactions {
             ConcurrentLog.logException(e);
             return false;
         }
-        
+
         boolean success = loadImage ? store(url, date, depth, concurrency, replaceOld, proxy, acceptLanguage) : true;
         if (success) {
             // STORE METADATA FOR THE IMAGE
@@ -203,15 +203,15 @@ public class Transactions {
             		success = false;
             	}
             	if(success) {
-            		Transactions.announceStorage(url, depth, date, State.INVENTORY);            		
+            		Transactions.announceStorage(url, depth, date, State.INVENTORY);
             	}
             }
-            
+
         }
-        
+
         return success;
     }
-    
+
 
     public static boolean store(final DigestURL url, final Date date, final int depth, final boolean concurrency, final boolean replaceOld, final String proxy, final String acceptLanguage) {
 
@@ -222,12 +222,12 @@ public class Transactions {
             	oldPath.delete();
             }
         }
-        
+
         // STORE METADATA FOR THE IMAGE
         File metadataPath = Transactions.definePath(url, depth, date, "xml", Transactions.State.INVENTORY);
         metadataPath.getParentFile().mkdirs();
         boolean success = true;
-        
+
         // STORE AN IMAGE
         final String urls = url.toNormalform(true);
         final File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
@@ -237,7 +237,7 @@ public class Transactions {
                 public void run() {
                     executorRunning.incrementAndGet();
                     try {
-                        Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath, wkhtmltopdfTimeout);
+                        Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent(), acceptLanguage, pdfPath, wkhtmltopdfTimeout);
                     } catch (Throwable e) {} finally {
                     executorRunning.decrementAndGet();
                     }
@@ -245,9 +245,9 @@ public class Transactions {
             };
             executor.execute(t);
         } else {
-            success = Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath, wkhtmltopdfTimeout);
+            success = Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent(), acceptLanguage, pdfPath, wkhtmltopdfTimeout);
         }
-        
+
         return success;
     }
 
@@ -270,7 +270,7 @@ public class Transactions {
     public static Revisions rollback(String urlhash) {
         return transact(urlhash, State.ARCHIVE, State.INVENTORY);
     }
-    
+
     private static Revisions transact(final String urlhash, final State from, final State to) {
         Revisions r = Transactions.getRevisions(from, urlhash);
         if (r == null) return null;
@@ -303,10 +303,10 @@ public class Transactions {
         } catch (MalformedURLException e) {
             ConcurrentLog.logException(e);
         }
-    
+
         return null;
     }
-    
+
     /**
      * select a set of urlhashes from the snapshot directory. The selection either ordered
      * by generation date (upwards == OLDESTFIRST or downwards == LATESTFIRST) or with any
@@ -315,7 +315,7 @@ public class Transactions {
      * @param depth selected depth or null for all depths
      * @param order Order.ANY, Order.OLDESTFIRST or Order.LATESTFIRST
      * @param maxcount the maximum number of hosthashes. If unlimited, submit Integer.MAX_VALUE
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @return a map of hosthashes with the associated creation date
      */
     public static LinkedHashMap<String, Revisions> select(String host, Integer depth, final Order order, int maxcount, State state) {
@@ -332,7 +332,7 @@ public class Transactions {
      * @param depth
      * @param date
      * @param ext
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @return a file to the snapshot
      */
     public static File definePath(final DigestURL url, final int depth, final Date date, final String ext, State state) {
@@ -345,25 +345,25 @@ public class Transactions {
     /**
      * Write information about the storage of a snapshot to the Snapshot-internal index.
      * The actual writing of files to the target directory must be done elsewehre, this method does not store the snapshot files.
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @param url
      * @param depth
      * @param date
      */
     public static void announceStorage(final DigestURL url, final int depth, final Date date, State state) {
-        if (state == State.INVENTORY || state == State.ANY) inventory.announceStorage(url, depth, date); 
+        if (state == State.INVENTORY || state == State.ANY) inventory.announceStorage(url, depth, date);
         if (state == State.ARCHIVE || state == State.ANY) archive.announceStorage(url, depth, date);
     }
 
     /**
      * Delete information about the storage of a snapshot to the Snapshot-internal index.
      * The actual deletion of files in the target directory must be done elsewehre, this method does not store the snapshot files.
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @param url
      * @param depth
      */
     public static void announceDeletion(final DigestURL url, final int depth, final State state) {
-        if (state == State.INVENTORY || state == State.ANY) inventory.announceDeletion(url, depth); 
+        if (state == State.INVENTORY || state == State.ANY) inventory.announceDeletion(url, depth);
         if (state == State.ARCHIVE || state == State.ANY) archive.announceDeletion(url, depth);
     }
 
@@ -374,7 +374,7 @@ public class Transactions {
      * findPaths/3 with a given depth.
      * @param url
      * @param ext required extension or null if the extension must not be checked
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @return a set of files for snapshots of the url
      */
     public static Collection<File> findPaths(final DigestURL url, final String ext, State state) {
@@ -383,14 +383,14 @@ public class Transactions {
         if (state == State.ARCHIVE || state == State.ANY) result.addAll(archive.findPaths(url, ext));
         return result;
     }
-    
+
     /**
      * for a given url, get all paths for storage locations.
      * The locations are all for the single url but may represent different storage times.
      * @param url
      * @param ext required extension or null if the extension must not be checked
      * @param depth
-     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY
      * @return a set of files for snapshots of the url
      */
     public static Collection<File> findPaths(final DigestURL url, final int depth, final String ext, State state) {
@@ -399,5 +399,5 @@ public class Transactions {
         if (state == State.ARCHIVE || state == State.ANY) result.addAll(archive.findPaths(url, depth, ext));
         return result;
     }
-    
+
 }

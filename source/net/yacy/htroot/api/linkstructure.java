@@ -56,9 +56,9 @@ public class linkstructure {
         final HyperlinkGraph hlg = new HyperlinkGraph();
         int maxdepth = 0;
 
-        if (post.get("about", null) != null) try {
+        if (post.get("about", "").length() > 0) try {
             // get link structure within a host
-            final String about = post.get("about", null); // may be a URL, a URL hash or a domain hash
+            final String about = post.get("about", ""); // may be a URL, a URL hash or a domain hash
             DigestURL url = null;
             String hostname = null;
             if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
@@ -79,10 +79,10 @@ public class linkstructure {
             hlg.fill(fulltext.getDefaultConnector(), hostname, null, maxtime, maxnodes);
             maxdepth = hlg.findLinkDepth();
         } catch (final MalformedURLException e) {}
-        else if (post.get("to", null) != null) try {
+        else if (post.get("to", "").length() > 0) try {
             // get link structure between two links
-            final DigestURL to = new DigestURL(post.get("to", null), null); // must be an url
-            final DigestURL from = post.get("from", null) == null ? null : new DigestURL(post.get("from", null)); // can be null or must be an url
+            final DigestURL to = new DigestURL(post.get("to", ""), null); // must be an url
+            final DigestURL from = post.get("from", "").length() == 0 ? null : new DigestURL(post.get("from", "")); // can be null or must be an url
             hlg.path(sb.index, from, to, maxtime, maxnodes);
         } catch (final MalformedURLException e) {}
 

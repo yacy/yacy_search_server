@@ -49,9 +49,9 @@ public class mediawiki_p {
             return post;
         }
 
-        final String dump = post.get("dump", null);
-        final String title = post.get("title", null);
-        if (dump == null || title == null) return post;
+        final String dump = post.get("dump", "");
+        final String title = post.get("title", "");
+        if (dump.length() == 0 || title.length() == 0) return post;
 
 
         final File dumpFile = new File(sb.getDataPath(), "DATA/HTCACHE/mediawiki/" + dump);

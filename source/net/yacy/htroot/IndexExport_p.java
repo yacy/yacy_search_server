@@ -25,12 +25,15 @@ package net.yacy.htroot;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Date;
 
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 
+import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -57,18 +60,8 @@ public class IndexExport_p {
         } catch (final IOException e1) {}
 
         // set default values
-        prop.put("otherHosts", "");
         prop.put("reload", 0);
-        prop.put("indexdump", 0);
-        prop.put("indexRestore", 0);
         prop.put("lurlexport", 0);
-        prop.put("reload", 0);
-        prop.put("dumprestore", 1);
-        prop.put("dumprestore_dumpRestoreEnabled", sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
-                SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT));
-        List<File> dumpFiles =  segment.fulltext().dumpFiles();
-        prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
-        prop.put("dumprestore_optimizemax", 10);
         prop.putNum("ucount", ucount);
         prop.putNum("ucount200", ucount200);
 
@@ -116,12 +109,9 @@ public class IndexExport_p {
             final boolean text = fname.startsWith("text");
             if (fname.endsWith("text")) format = Fulltext.ExportFormat.text;
             if (fname.endsWith("html")) format = Fulltext.ExportFormat.html;
-            if (fname.endsWith("rss")) format = Fulltext.ExportFormat.rss;
-            if (fname.endsWith("solr")) format = Fulltext.ExportFormat.solr;
-            if (fname.endsWith("elasticsearch")) format = Fulltext.ExportFormat.elasticsearch;
 
             final String filter = post.get("exportfilter", ".*");
-            final String query = post.get("exportquery", "*:*");
+            String query = post.get("exportquery", "*:*");
             final int maxseconds = post.getInt("exportmaxseconds", -1);
             long maxChunkSize = post.getLong("maxchunksize", Long.MAX_VALUE);
             if (maxChunkSize <= 0) maxChunkSize = Long.MAX_VALUE;
@@ -133,7 +123,79 @@ public class IndexExport_p {
 
             // start the export
             try {
-                export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text, maxChunkSize, minified);
+                File filepath = new File(path);
+
+                // modify query according to maxseconds
+                final long now = System.currentTimeMillis();
+                if (maxseconds > 0) {
+                    final long from = now - maxseconds * 1000L;
+                    final String nowstr = new Date(now).toInstant().toString();
+                    final String fromstr = new Date(from).toInstant().toString();
+                    final String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
+                    query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq;
+                } else {
+                    query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
+                }
+
+                // check the oldest and latest entry in the index for this query
+                SolrDocumentList firstdoclist, lastdoclist;
+                Object firstdateobject, lastdateobject;
+                firstdoclist = sb.index.fulltext().getDefaultConnector().getDocumentListByQuery(
+                        query, CollectionSchema.load_date_dt.getSolrFieldName() + " asc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
+                lastdoclist = sb.index.fulltext().getDefaultConnector().getDocumentListByQuery(
+                        query, CollectionSchema.load_date_dt.getSolrFieldName() + " desc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
+
+                final long doccount;
+                final Date firstdate, lastdate;
+                if (firstdoclist.size() == 0 || lastdoclist.size() == 0) {
+                    /* Now check again the number of documents without sorting, for compatibility with old fields indexed without DocValues fields (prior to YaCy 1.90)
+                     * When the local Solr index contains such old documents, requests with sort query return nothing and trace in logs
+                     * "java.lang.IllegalStateException: unexpected docvalues type NONE for field..." */
+                    doccount = sb.index.fulltext().getDefaultConnector().getCountByQuery(query);
+                    if(doccount == 0) {
+                        /* Finally no document to export was found */
+                        throw new IOException("number of exported documents == 0");
+                    }
+                    /* we use default date values just to generate a proper dump file path */
+                    firstdate = new Date(0);
+                    lastdate = new Date(0);
+
+                } else {
+                    doccount = firstdoclist.getNumFound();
+
+                    // create the export name
+                    final SolrDocument firstdoc = firstdoclist.get(0);
+                    final SolrDocument lastdoc = lastdoclist.get(0);
+                    firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+                    lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+
+                    /* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path
+                     * This should not happen because load_date_dt field is mandatory in the main Solr schema,
+                     * but for some reason some documents might end up here with an empty load_date_dt field value */
+                    if(firstdateobject instanceof Date) {
+                        firstdate = (Date) firstdateobject;
+                    } else {
+                        ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+                                + firstdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                        firstdate = new Date(0);
+                    }
+                    if(lastdateobject instanceof Date) {
+                        lastdate = (Date) lastdateobject;
+                    } else {
+                        ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+                                + lastdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                        lastdate = new Date(0);
+                    }
+                }
+
+                final String filename = SwitchboardConstants.YACY_PACK_PREFIX +
+                        "f" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate) + "_" +
+                        "l" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(lastdate) + "_" +
+                        "n" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(new Date(now)) + "_" +
+                        "c" + String.format("%1$012d", doccount)+ "_tc"; // the name ends with the transaction token ('c' = 'created')
+
+                export = sb.index.fulltext().export(filepath, filename, format.getExt(), filter, query, format, dom, text, maxChunkSize, minified);
+
             } catch (final IOException e) {
                 prop.put("lurlexporterror", 1);
                 prop.put("lurlexporterror_exportfile", "-no export-");
@@ -148,37 +210,6 @@ public class IndexExport_p {
                 prop.put("lurlexport", 2);
             }
             prop.put("reload", 1);
-        }
-
-        if (post.containsKey("indexdump")) {
-            try {
-                final File dump = segment.fulltext().dumpEmbeddedSolr();
-                prop.put("indexdump", 1);
-                prop.put("indexdump_dumpfile", dump.getAbsolutePath());
-                dumpFiles =  segment.fulltext().dumpFiles();
-                prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
-                // sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
-            } catch(final SolrException e) {
-                if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
-                    prop.put("indexdump", 2);
-                } else {
-                    prop.put("indexdump", 3);
-                }
-            }
-        }
-
-        if (post.containsKey("indexrestore")) {
-            try {
-                final File dump = new File(post.get("dumpfile", ""));
-                segment.fulltext().restoreEmbeddedSolr(dump);
-                prop.put("indexRestore", 1);
-            } catch(final SolrException e) {
-                if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
-                    prop.put("indexRestore", 2);
-                } else {
-                    prop.put("indexRestore", 3);
-                }
-            }
         }
 
         // insert constants
