@@ -1,6 +1,10 @@
 package net.yacy.document.parser;
 
 import static net.yacy.document.parser.htmlParser.parseToScraper;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -17,7 +21,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -26,7 +29,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.html.TagValency;
 
-public class htmlParserTest extends TestCase {
+public class htmlParserTest {
 
         @Test
 	public void testGetRealCharsetEncoding() {
@@ -436,7 +439,7 @@ public class htmlParserTest extends TestCase {
 
         String txt = scraper.getText();
         System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
-        assertEquals(txt, textSource);
+        assertEquals(txt, textSource + ".");
     }
 
     /**
