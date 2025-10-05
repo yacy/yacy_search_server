@@ -86,7 +86,7 @@ public class QuickCrawlLink_p {
         // get the URL
         String crawlingStart = post.get("url", "");
 
-        if (crawlingStart.length() == 0) {
+        if (crawlingStart.length() != 0) {
             prop.put("mode", "1");
             crawlingStart = UTF8.decodeURL(crawlingStart);
 
@@ -95,7 +95,7 @@ public class QuickCrawlLink_p {
 
             // get the browser title
             String title = post.get("title", "");
-            if (title.length() == 0) {
+            if (title.length() != 0) {
                 title = crawlingStart;
             	/* Decode eventual special(non ASCII) characters in title */
             	title = UTF8.decodeURL(title);
