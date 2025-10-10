@@ -28,8 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -49,6 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import net.yacy.ai.OpenAIClient;
+import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -141,18 +142,16 @@ public class RAGProxyServlet extends HttpServlet {
             String query = this.searchWordsForPrompt(LLM_QUERY_MODEL, user);
             out.print(responseLine("Searching for '" + query + "'\n\n").toString() + "\n");
             out.flush();
-            LinkedHashMap<String, String> searchResults = searchResults(query, 4);
-            out.print(responseLine("Using the following sources for RAG:\n\n").toString() + "\n");
-            out.flush();
-            for (String s : searchResults.keySet()) {
-                out.print(responseLine("- `" + s + "`\n").toString() + "\n");
-                out.flush();
-            }
+            JSONArray searchResults = searchResults(query, 4, true);
             out.print(responseLine("\n").toString());
             out.flush();
             system += LLM_SYSTEM_PREFIX;
             user += LLM_USER_PREFIX;
-            for (String s : searchResults.values()) user += s + "\n\n";
+            for (int i  = 0; i < searchResults.length(); i++) {
+                JSONObject r = searchResults.getJSONObject(i);
+                String snippet = r.optString("snippet", "");
+                user += snippet + "\n\n";
+            }
             systemObject.put("content", system);
             userObject.put("content", user);
 
@@ -200,9 +199,9 @@ public class RAGProxyServlet extends HttpServlet {
         }
     }
 
-    public static LinkedHashMap<String, String> searchResults(String query, int count) {
-        LinkedHashMap<String, String> a = new LinkedHashMap<>();
-        if (query == null || query.length() == 0 || count == 0) return a;
+    public static JSONArray searchResults(String query, int count, final boolean includeSnippet) {
+        final JSONArray results = new JSONArray();
+        if (query == null || query.length() == 0 || count == 0) return results;
         Switchboard sb = Switchboard.getSwitchboard();
         EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
         // construct query
@@ -213,7 +212,7 @@ public class RAGProxyServlet extends HttpServlet {
         params.setFacet(false);
         params.clearSorts();
         params.setFields(CollectionSchema.sku.getSolrFieldName(), CollectionSchema.text_t.getSolrFieldName());
-        params.setIncludeScore(false);
+        params.setIncludeScore(true);
         params.set("df", CollectionSchema.text_t.getSolrFieldName());
 
         // query the server
@@ -221,15 +220,37 @@ public class RAGProxyServlet extends HttpServlet {
             final SolrDocumentList sdl = connector.getDocumentListByParams(params);
             Iterator<SolrDocument> i = sdl.iterator();
             while (i.hasNext()) {
-                SolrDocument doc = i.next();
-                String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                a.put(url, text);
+                try {
+                    SolrDocument doc = i.next();
+                    final JSONObject result = new JSONObject(true);
+                    String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                    result.put("url", url);
+                    String title = getOneString(doc, CollectionSchema.title);
+                    result.put("title", title == null ? url : title);
+                    if (includeSnippet) {
+                        String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                        result.put("snippet", text == null ? "" : text);
+                    }
+                results.put(result);
+                } catch (JSONException e) {
+                    // skip this result
+                }
             }
-            return a;
+            return results;
         } catch (SolrException | IOException e) {
-            return new LinkedHashMap<>();
+            return results;
         }
+    }
+    
+    private static String getOneString(SolrDocument doc, CollectionSchema field) {
+        assert field.isMultiValued();
+        assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
+        Object r = doc.getFieldValue(field.getSolrFieldName());
+        if (r == null) return "";
+        if (r instanceof ArrayList) {
+            return ((ArrayList<String>) r).get(0);
+        }
+        return r.toString();
     }
 
     private String searchWordsForPrompt(String model, String prompt) {

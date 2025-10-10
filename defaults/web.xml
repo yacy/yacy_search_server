@@ -53,6 +53,11 @@
     <servlet>
         <servlet-name>RAGProxyServlet</servlet-name>
         <servlet-class>net.yacy.http.servlets.RAGProxyServlet</servlet-class>
+    </servlet>    
+    
+    <servlet>
+        <servlet-name>MCPSearchServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.MCPSearchServlet</servlet-class>
     </servlet>
     
     <!-- servlet to provide searchresults via proxy -->
@@ -92,6 +97,15 @@
         <servlet-name>RAGProxyServlet</servlet-name>
         <url-pattern>/v1/chat/completions</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>MCPSearchServlet</servlet-name>
+        <url-pattern>/tools</url-pattern>
+        <url-pattern>/tools/list</url-pattern>
+        <url-pattern>/tools/list_changed</url-pattern>
+        <url-pattern>/tools/call</url-pattern>
+    </servlet-mapping>
+
     <!-- eof hardcoded mappings --> 
             
     <!-- additional (optional) mappings --> 
