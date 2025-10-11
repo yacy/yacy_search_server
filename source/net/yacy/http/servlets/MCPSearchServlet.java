@@ -20,6 +20,9 @@
 
 package net.yacy.http.servlets;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -47,6 +50,7 @@ import org.json.JSONTokener;
 public class MCPSearchServlet extends HttpServlet {
 
     private static final long serialVersionUID = 433609077273989355L;
+    private static final ConcurrentLog log = new ConcurrentLog("MCPSearchServlet");
 
     private static final String JSONRPC_VERSION = "2.0";
     private static final String MCP_PROTOCOL_VERSION = "2024-11-05";
@@ -58,9 +62,10 @@ public class MCPSearchServlet extends HttpServlet {
     public void service(final ServletRequest request, final ServletResponse response) throws ServletException, IOException {
         final HttpServletRequest hrequest = (HttpServletRequest) request;
         final HttpServletResponse hresponse = (HttpServletResponse) response;
+        log.info("MCPSearchServlet: " + hrequest.getMethod() + " " + hrequest.getRequestURI());
 
         hresponse.setContentType("application/json;charset=utf-8");
-        hresponse.setHeader("Access-Control-Allow-Origin", "*");
+        hresponse.setHeader(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
         hresponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         hresponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
@@ -153,6 +158,7 @@ public class MCPSearchServlet extends HttpServlet {
     }
 
     private JSONObject handleInitialize(final Object id, final JSONObject params) {
+        try {log.info("MCPSearchServlet: initialize " + params == null ? "" : params.toString(0));} catch (JSONException e) {}
         final JSONObject result = new JSONObject(true);
         try {
             final JSONObject serverInfo = new JSONObject(true);
@@ -175,6 +181,7 @@ public class MCPSearchServlet extends HttpServlet {
     }
 
     private JSONObject handleToolsList(final Object id) {
+        log.info("MCPSearchServlet: list " + id == null ? "" : id.toString());
         try {
             final JSONObject tool = new JSONObject(true);
             tool.put("name", TOOL_NAME);
@@ -229,6 +236,7 @@ public class MCPSearchServlet extends HttpServlet {
     }
 
     private JSONObject handleToolsCall(final Object id, final JSONObject params) {
+        try {log.info("MCPSearchServlet: call " + (id == null ? "" : id.toString()) + " params: " + (params == null ? "" : params.toString(0)));} catch (JSONException e) {}
         if (params == null) {
             return errorResponse(id, -32602, "Missing params");
         }

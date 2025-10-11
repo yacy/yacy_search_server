@@ -101,6 +101,7 @@
     <servlet-mapping>
         <servlet-name>MCPSearchServlet</servlet-name>
         <url-pattern>/tools</url-pattern>
+        <url-pattern>/tools/initialize</url-pattern>
         <url-pattern>/tools/list</url-pattern>
         <url-pattern>/tools/list_changed</url-pattern>
         <url-pattern>/tools/call</url-pattern>
