@@ -148,8 +148,14 @@ public class MCPSearchServlet extends HttpServlet {
         switch (method) {
             case "initialize":
                 return handleInitialize(id, requestObject.optJSONObject("params"));
+            case "tools/initialize":
+                return handleInitialize(id, requestObject.optJSONObject("params"));
+            case "list":
+                return handleToolsList(id);
             case "tools/list":
                 return handleToolsList(id);
+            case "call":
+                return handleToolsCall(id, requestObject.optJSONObject("params"));
             case "tools/call":
                 return handleToolsCall(id, requestObject.optJSONObject("params"));
             default:
