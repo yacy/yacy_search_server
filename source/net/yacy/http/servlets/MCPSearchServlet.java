@@ -127,7 +127,7 @@ public class MCPSearchServlet extends HttpServlet {
     private JSONObject handleRequest(final JSONObject requestObject) {
         final Object id = requestObject.opt("id");
         final String jsonrpc = requestObject.optString("jsonrpc", JSONRPC_VERSION);
-        final String method = requestObject.optString("method", "");
+        String method = requestObject.optString("method", "");
 
         if (!JSONRPC_VERSION.equals(jsonrpc)) {
             return errorResponse(id, -32600, "Unsupported JSON-RPC version");
@@ -136,10 +136,19 @@ public class MCPSearchServlet extends HttpServlet {
         if (method == null || method.isEmpty()) {
             return errorResponse(id, -32600, "Missing method");
         }
+        
+        // because of unclear specification of the method tag, we skip everything before a slash or a dot
+        int slash = method.indexOf('/');
+        int dot = method.indexOf('.');
+        if (slash > 0) {
+            method = method.substring(slash + 1);
+        } else if (dot > 0) {
+            method = method.substring(dot + 1);
+        }
 
         if (id == JSONObject.NULL || id == null) {
             // Notification: acknowledge silently
-            if ("notifications/ping".equals(method)) {
+            if ("ping".equals(method)) {
                 return null;
             }
             // No response for other notifications either
@@ -149,15 +158,9 @@ public class MCPSearchServlet extends HttpServlet {
         switch (method) {
             case "initialize":
                 return handleInitialize(id, requestObject.optJSONObject("params"));
-            case "tools/initialize":
-                return handleInitialize(id, requestObject.optJSONObject("params"));
             case "list":
                 return handleToolsList(id);
-            case "tools/list":
-                return handleToolsList(id);
             case "call":
-                return handleToolsCall(id, requestObject.optJSONObject("params"));
-            case "tools/call":
                 return handleToolsCall(id, requestObject.optJSONObject("params"));
             default:
                 return errorResponse(id, -32601, "Unknown method: " + method);
