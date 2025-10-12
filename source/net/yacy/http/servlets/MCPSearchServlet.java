@@ -60,6 +60,7 @@ public class MCPSearchServlet extends HttpServlet {
 
     @Override
     public void service(final ServletRequest request, final ServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         final HttpServletRequest hrequest = (HttpServletRequest) request;
         final HttpServletResponse hresponse = (HttpServletResponse) response;
         log.info("MCPSearchServlet: " + hrequest.getMethod() + " " + hrequest.getRequestURI());
@@ -124,7 +125,7 @@ public class MCPSearchServlet extends HttpServlet {
     }
 
     private JSONObject handleRequest(final JSONObject requestObject) {
-        final Object id = requestObject.optString("id", "0");
+        final Object id = requestObject.opt("id");
         final String jsonrpc = requestObject.optString("jsonrpc", JSONRPC_VERSION);
         final String method = requestObject.optString("method", "");
 
@@ -164,7 +165,7 @@ public class MCPSearchServlet extends HttpServlet {
     }
 
     private JSONObject handleInitialize(final Object id, final JSONObject params) {
-        try {log.info("MCPSearchServlet: initialize " + params == null ? "" : params.toString(0));} catch (JSONException e) {}
+        try {log.info("MCPSearchServlet: initialize " + (params == null ? "" : params.toString(0)));} catch (JSONException e) {}
         final JSONObject result = new JSONObject(true);
         try {
             final JSONObject serverInfo = new JSONObject(true);
@@ -187,11 +188,11 @@ public class MCPSearchServlet extends HttpServlet {
     }
 
     private JSONObject handleToolsList(final Object id) {
-        log.info("MCPSearchServlet: list " + id == null ? "" : id.toString());
+        log.info("MCPSearchServlet: list " + (id == null ? "" : id.toString()));
         try {
             final JSONObject tool = new JSONObject(true);
             tool.put("name", TOOL_NAME);
-            tool.put("description", "Search the YaCy index and return the most relevant web results.");
+            tool.put("description", "Search the YaCy index and return the most relevant documents.");
 
             final JSONObject inputProperties = new JSONObject(true);
             final JSONObject querySchema = new JSONObject(true);
@@ -333,5 +334,6 @@ public class MCPSearchServlet extends HttpServlet {
         final String serialized = payload instanceof JSONObject ? ((JSONObject) payload).toString()
             : payload instanceof JSONArray ? ((JSONArray) payload).toString() : payload.toString();
         response.getWriter().write(serialized);
+        response.getWriter().flush();
     }
 }
