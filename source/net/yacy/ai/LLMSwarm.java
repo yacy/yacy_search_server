@@ -28,26 +28,22 @@ import java.util.Map;
 import java.util.Random;
 
 
-public class OllamaSwarm {
+public class LLMSwarm {
 	
 	Random random = new Random();
-	List<OllamaClient> swarm;;
+	List<LLM> swarm;;
 
-	public OllamaSwarm() {
+	public LLMSwarm() {
         this.swarm = new ArrayList<>();
 	}
 
-	public void addOllamaClient(final OllamaClient client) {
+	public void addOllamaClient(final LLM client) {
 		this.swarm.add(client);
-	}
-	
-	public void addOllamaClient(final String hoststub) {
-		this.swarm.add(new OllamaClient(hoststub));
 	}
 	
 	public List<String> getSwarm() {
 		List<String> hoststubs = new ArrayList<>();
-		for (OllamaClient client : this.swarm) {
+		for (LLM client : this.swarm) {
 			hoststubs.add(client.getHoststub());
 		}
 		return hoststubs;
@@ -59,7 +55,7 @@ public class OllamaSwarm {
 	 */
     public LinkedHashMap<String, Integer> listOllamaModels() {
     	final LinkedHashMap<String, Integer> modelCountMap = new LinkedHashMap<>();
-		for (OllamaClient client: this.swarm) {
+		for (LLM client: this.swarm) {
 			LinkedHashMap<String, Long> models = client.listOllamaModels();
 			for (Map.Entry<String, Long> entry : models.entrySet()) {
 				modelCountMap.merge(entry.getKey(), 1, Integer::sum);
@@ -74,7 +70,7 @@ public class OllamaSwarm {
      * @return true if at least one client has the model, false otherwise
      */
     public boolean ollamaModelExists(final String name) {
-    	for (OllamaClient client : this.swarm) {
+    	for (LLM client : this.swarm) {
 			if (client.ollamaModelExists(name)) {
 				return true;
 			}
@@ -91,7 +87,7 @@ public class OllamaSwarm {
     public boolean pullOllamaModel(final String name, boolean all) {
     	boolean pulled = false;
     	if (all) {
-			for (OllamaClient client: this.swarm) {
+			for (LLM client: this.swarm) {
 				if (client.pullOllamaModel(name)) {
 					pulled = true;
 				}
@@ -100,7 +96,7 @@ public class OllamaSwarm {
 			// we try several times in case one client is not available
 			for (int i = 0; i < this.swarm.size(); i++) {
 				int index = random.nextInt(this.swarm.size());
-				OllamaClient client = this.swarm.get(index);
+				LLM client = this.swarm.get(index);
 				pulled = client.pullOllamaModel(name);
 				if (pulled) return true;
 			}
@@ -113,9 +109,9 @@ public class OllamaSwarm {
      * @param name
      * @return a List of OllamaClient objects that have the specified model
      */
-    public List<OllamaClient> getSwarm(String name) {
-		List<OllamaClient> clientsWithModel = new ArrayList<>();
-		for (OllamaClient client : this.swarm) {
+    public List<LLM> getSwarm(String name) {
+		List<LLM> clientsWithModel = new ArrayList<>();
+		for (LLM client : this.swarm) {
 			if (client.ollamaModelExists(name)) {
 				clientsWithModel.add(client);
 			}
@@ -132,11 +128,11 @@ public class OllamaSwarm {
      * @throws IOException
      */
     public String getAnswer(String model, String systemPrompt, String userPrompt) throws IOException {
-		List<OllamaClient> clientsWithModel = getSwarm(model);
+		List<LLM> clientsWithModel = getSwarm(model);
 		if (clientsWithModel.isEmpty()) {
 			return "No client with model " + model + " found.";
 		}
-		OllamaClient client = clientsWithModel.get(random.nextInt(clientsWithModel.size()));
+		LLM client = clientsWithModel.get(random.nextInt(clientsWithModel.size()));
 		return client.chat(model, systemPrompt, userPrompt, 4096);
 	}
     

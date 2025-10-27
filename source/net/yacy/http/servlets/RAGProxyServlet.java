@@ -48,7 +48,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import net.yacy.ai.OpenAIClient;
+import net.yacy.ai.LLM;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.search.Switchboard;
@@ -257,10 +257,10 @@ public class RAGProxyServlet extends HttpServlet {
         StringBuilder query = new StringBuilder();
         String question = "Make a list of a maximum of four search words for the following question; use a JSON Array: " + prompt;
         try {
-            OpenAIClient oaic = new OpenAIClient(LLM_API_HOST);
-            OpenAIClient.Context context = new OpenAIClient.Context(LLM_SYSTEM_PREFIX);
+            LLM llm = new LLM(LLM_API_HOST, null, 4096, LLM.LLMType.OLLAMA);
+            LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX);
             context.addPrompt(question);
-            String[] a = OpenAIClient.stringsFromChat(oaic.chat(model, context, OpenAIClient.listSchema, 80));
+            String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 80));
             for (String s : a)
                 query.append(s).append(' ');
             return query.toString().trim();
