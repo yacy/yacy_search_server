@@ -1,0 +1,626 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>net.yacy</groupId>
+  <artifactId>yacycore</artifactId>
+  <version>1.940</version>
+  <description>YaCy - a Peer to Peer Web Search Engine</description>
+  <name>YaCy Search Server</name>
+  <url>http://www.yacy.net</url>
+  <issueManagement>
+    <system>YaCy Bugtracker</system>
+    <url>https://github.com/yacy/yacy_search_server/issues</url>
+  </issueManagement>
+  <scm>
+    <connection>scm:git:https://github.com/yacy/yacy_search_server.git</connection>
+    <url>https://github.com/yacy/yacy_search_server</url>
+  </scm>
+  <licenses>
+    <license>
+      <name>GNU General Public License</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Michael Peter Christen</name>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+
+    <!-- fallback values if git folder not exist -->
+    <yacy.git.commit.id>9000</yacy.git.commit.id>
+    <yacy.git.commit.time>2022-01-01T00:00:00</yacy.git.commit.time>
+
+    <!-- plugin versions -->
+    <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+    <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+    <dependency-check-maven.version>12.1.0</dependency-check-maven.version>
+    <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
+    <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
+    <gmavenplus-plugin.version>4.1.1</gmavenplus-plugin.version>
+    <groovy.version>4.0.26</groovy.version>
+
+    <!-- library versions -->
+    <bouncycastle.version>1.81</bouncycastle.version>
+    <caffeine.version>3.1.8</caffeine.version>
+    <commons-codec.version>1.17.1</commons-codec.version>
+    <commons-io.version>2.19.0</commons-io.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
+    <commons-logging.version>1.3.3</commons-logging.version>
+    <commons-compress.version>1.27.1</commons-compress.version>
+    <commons-fileupload.version>1.6.0</commons-fileupload.version>
+    <guava.version>33.4.8-jre</guava.version>
+    <jspecify.version>1.0.0</jspecify.version>
+    <httpcore.version>4.4.16</httpcore.version>
+    <httpclient.version>4.5.14</httpclient.version>
+    <httpmime.version>4.5.14</httpmime.version>
+    <icu4j.version>76.1</icu4j.version>
+    <imageio-bmp.version>3.12.0</imageio-bmp.version>
+    <inetaddresslocator.version>2.18</inetaddresslocator.version>
+    <jaudiotagger.version>2.2.5</jaudiotagger.version>
+    <jackson.version>2.18.2</jackson.version>
+    <jchardet.version>1.0</jchardet.version>
+    <jcifs.version>1.3.17</jcifs.version>
+    <jsch.version>0.2.21</jsch.version>
+    <jsonic.version>1.3.10</jsonic.version>
+    <jsoup.version>1.15.3</jsoup.version>
+    <jwat-warc.version>1.1.3</jwat-warc.version>
+    <langdetect.version>1.1-20120112</langdetect.version>
+    <log4j.version>2.23.1</log4j.version>
+    <metadata-extractor.version>2.19.0</metadata-extractor.version>
+    <pdfbox.version>3.0.3</pdfbox.version>
+    <poi.version>5.3.0</poi.version>
+    <slf4j.version>1.7.36</slf4j.version>
+    <weupnp.version>0.1.4</weupnp.version>
+    <xz.version>1.8</xz.version>
+    <zstd-jni.version>1.5.5-6</zstd-jni.version>
+
+    <jetty.version>9.4.57.v20241219</jetty.version>
+
+    <solr.version>9.0.0</solr.version>
+    <lucene.version>9.0.0</lucene.version>
+
+    <junit.version>4.13.2</junit.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- set dependency version or override transitive dependency version -->
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons-codec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commons-logging.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffeine.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-smile</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.arnx</groupId>
+        <artifactId>jsonic</artifactId>
+        <version>${jsonic.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpclient.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${httpcore.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>${httpmime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <!-- BOM -->
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-bom</artifactId>
+        <version>${jetty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${log4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcmail-jdk18on</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>${commons-compress.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>${commons-fileupload.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>${icu4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-bmp</artifactId>
+      <version>${imageio-bmp.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javainetlocator</groupId>
+      <artifactId>inetaddresslocator</artifactId>
+      <version>${inetaddresslocator.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.jthink</groupId>
+      <artifactId>jaudiotagger</artifactId>
+      <version>${jaudiotagger.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.jchardet</groupId>
+      <artifactId>jchardet</artifactId>
+      <version>${jchardet.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jcifs</groupId>
+      <artifactId>jcifs</artifactId>
+      <version>${jcifs.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-proxy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlets</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.mwiede</groupId>
+      <artifactId>jsch</artifactId>
+      <version>${jsch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jwat</groupId>
+      <artifactId>jwat-warc</artifactId>
+      <version>${jwat-warc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cybozu.labs</groupId>
+      <artifactId>langdetect</artifactId>
+      <version>${langdetect.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.drewnoakes</groupId>
+      <artifactId>metadata-extractor</artifactId>
+      <version>${metadata-extractor.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-scratchpad</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bitlet</groupId>
+      <artifactId>weupnp</artifactId>
+      <version>${weupnp.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tukaani</groupId>
+      <artifactId>xz</artifactId>
+      <version>${xz.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.luben</groupId>
+      <artifactId>zstd-jni</artifactId>
+      <version>${zstd-jni.version}</version>
+    </dependency>
+
+    <!-- solr/lucene -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
+      <version>${solr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-scripting</artifactId>
+      <version>${solr.version}</version>
+    </dependency>
+
+    <!-- test -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- change default source and test path -->
+    <sourceDirectory>./source</sourceDirectory>
+    <testSourceDirectory>./test/java</testSourceDirectory>
+
+    <plugins>
+      <!-- enforcer -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <dependencyConvergence/>
+                <requireUpperBoundDeps/>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- plugin for processing properties -->
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
+        <version>${gmavenplus-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>process-properties</id>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <scripts>
+            <script><![CDATA[
+              import java.text.SimpleDateFormat
+
+              // git commit id - only the first 9 chars
+              commitid = project.properties['yacy.git.commit.id']
+              if (project.properties['yacy.git.commit.id'].length() > 9) {
+                commitid = project.properties['yacy.git.commit.id'].substring(0, 9)
+              }
+              project.properties.setProperty('yacy.git.commit.id.yacy', commitid)
+
+              // git time -> timestamp, date, time
+              datetime = new SimpleDateFormat('yyyy-MM-dd\'T\'HH:mm:ss').parse(project.properties['yacy.git.commit.time'])
+              project.properties.setProperty('yacy.git.commit.datetime.yacy', new SimpleDateFormat('yyyyMMddHHmm').format(datetime))
+              project.properties.setProperty('yacy.git.commit.date.yacy', new SimpleDateFormat('yyyyMMdd').format(datetime))
+              project.properties.setProperty('yacy.git.commit.time.yacy', new SimpleDateFormat('HHmm').format(datetime))
+
+              // release file
+              release = 'yacy_v${project.version}_' + project.properties['yacy.git.commit.datetime.yacy'] + '_' + project.properties['yacy.git.commit.id.yacy']
+              project.properties.setProperty('yacy.release.file', release)
+            ]]></script>
+          </scripts>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-ant</artifactId>
+            <version>${groovy.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!-- plugin for generating yacyBuild.properties file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven-antrun-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>yacyBuild-properties</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <target>
+                <!-- YaCy release version number -->
+                <echo level="info" message="YaCy Version number: ${project.version}" />
+                <filter token="REPL_VERSION" value="${project.version}" />
+
+                <!-- GIT release revision number -->
+                <echo level="info" message="GIT Release Date: ${yacy.git.commit.date.yacy}" />
+                <echo level="info" message="GIT Release Time: ${yacy.git.commit.time.yacy}" />
+                <echo level="info" message="GIT Release Hash: ${yacy.git.commit.id.yacy}" />
+                <filter token="REPL_REPVERDATE" value="${yacy.git.commit.date.yacy}"/>
+                <filter token="REPL_REPVERTIME" value="${yacy.git.commit.time.yacy}"/>
+                <filter token="REPL_REPVERHASH" value="${yacy.git.commit.id.yacy}"/>
+                <filter token="REPL_RELEASESTUB" value="${yacy.release.file}"/>
+
+                <!-- set time stamp: DSTAMP should have the format yyyyMMdd, TSTAMP hhmm -->
+                <tstamp/>
+                <filter token="REPL_DSTAMP" value="${DSTAMP}"/>
+                <filter token="REPL_TSTAMP" value="${TSTAMP}"/>
+
+                <!-- apply replacments -->
+                <copy file="${project.basedir}/defaults/yacyBuild.properties.template" tofile="${project.basedir}/defaults/yacyBuild.properties" overwrite="true" filtering="true" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Use this plugin to check for dependency updates - mvn versions:display-dependency-updates -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${versions-maven-plugin.version}</version>
+        <configuration>
+          <ruleSet>
+            <ignoreVersions>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.*[-\.]alpha[-,0-9]+</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.*[-\.]rc[0-9]+</version>
+              </ignoreVersion>
+            </ignoreVersions>
+          </ruleSet>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- profiles -->
+  <profiles>
+    <profile>
+      <id>git-folder</id>
+      <!-- activate this profile if the .git folder exists -->
+      <activation>
+        <file>
+          <exists>.git</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <!-- plugin for retrieving Git information instead of using Git directly in Antrun plugin, no more local Git required -->
+          <plugin>
+            <groupId>io.github.git-commit-id</groupId>
+            <artifactId>git-commit-id-maven-plugin</artifactId>
+            <version>${git-commit-id-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>git-properties</id>
+                <goals>
+                  <goal>revision</goal>
+                </goals>
+                <phase>initialize</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <prefix>yacy.git</prefix>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!-- plugin for generation the release archive -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>${maven-assembly-plugin.version}</version>
+            <configuration>
+              <descriptors>
+                <descriptor>assembly.xml</descriptor>
+              </descriptors>
+              <finalName>yacy_v${project.version}_${yacy.git.commit.datetime.yacy}_${yacy.git.commit.id.yacy}</finalName>
+              <outputDirectory>RELEASE</outputDirectory>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>report</id>
+      <build>
+        <plugins>
+          <!-- plugin for checking security against CVE database-->
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <version>${dependency-check-maven.version}</version>
+            <executions>
+              <execution>
+                <id>dependency-check</id>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.cyclonedx</groupId>
+            <artifactId>cyclonedx-maven-plugin</artifactId>
+            <version>${cyclonedx-maven-plugin.version}</version>
+            <configuration>
+              <projectType>application</projectType>
+            </configuration>
+            <executions>
+              <execution>
+                <id>generate-sbom</id>
+                <goals>
+                  <goal>makeAggregateBom</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
