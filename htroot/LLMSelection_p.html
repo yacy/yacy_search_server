@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': LLM Selection</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexImport.template%#
+    <script>
+      function setHoststub() {
+        const provider = document.getElementById("provider").value;
+        const hoststubInput = document.getElementById("hoststub");
+
+        if (provider === "OLLAMA") {
+          hoststubInput.value = "http://localhost:11434";
+        } else if (provider === "LMSTUDIO") {
+          hoststubInput.value = "http://localhost:1234";
+        } else if (provider === "OPENAI") {
+          hoststubInput.value = "https://api.openai.com";
+        } else if (provider === "OPENROUTER") {
+          hoststubInput.value = "https://openrouter.ai/api";
+        } else {
+          hoststubInput.value = ""; // Clear the hoststub if another provider is selected
+        }
+      }
+      
+      async function loadModels() {
+        const provider = document.getElementById("provider").value;
+        const hoststub = document.getElementById("hoststub").value;
+        const apiUrl = `${hoststub}/api/tags`;
+
+        try {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+
+          const models = data.models;
+          const modelsContainer = document.getElementById("modelsContainer");
+
+          models.forEach(model => {
+            const radioBtn = document.createElement("input");
+            radioBtn.type = "radio";
+            radioBtn.name = "model";
+            radioBtn.value = model.model;
+            radioBtn.id = model.model;
+
+            const label = document.createElement("label");
+            label.htmlFor = model.model;
+            label.textContent = model.model;
+
+            const br = document.createElement("br");
+
+            modelsContainer.appendChild(radioBtn);
+            modelsContainer.appendChild(label);
+            modelsContainer.appendChild(br);
+          });
+
+
+        } catch (error) {
+          console.error("Error fetching models:", error);
+          alert("Failed to load models. Check the hoststub and console for errors.");
+        }
+      }
+    </script>
+
+    
+    <h2>LLM Selection</h2>
+
+    <form id="llmForm">
+    <fieldset><legend>Provider</legend>
+      <dl>
+        <dt class="TableCellDark">Select a LLM Provider</dt>
+        <dd>
+            <select name="provider" id="provider" class="form-control" onchange="setHoststub()">
+            <option value="OLLAMA" selected="selected">Ollama</option>
+            <option value="LMSTUDIO">LMStudio</option>
+            <option value="OPENAI">OpenAI</option>
+            <option value="OPENROUTER">Open Router</option>
+            </select>&nbsp; This makes a preset to the Hoststub value
+        </dd>
+
+        <dt class="TableCellDark">Hoststub</dt>
+        <dd><input type="text" name="hoststub" id="hoststub" value="http://localhost:11434" size="30" maxlength="60" class="form-control"/>&nbsp; you can probably leave this to the default value
+        </dd>
+
+        <dt class="TableCellDark">API Key</dt>
+        <dd><input type="text" name="apikey" id="apikey" value="" size="30" maxlength="60" class="form-control"/>&nbsp; (not required for Ollama or LMStudio)
+        </dd>
+        
+        <dt class="TableCellDark">Max Token</dt>
+        <dd>
+            <select id="maxtoken" name="maxtoken" class="form-control">
+                <option selected="selected">4096</option>
+                <option>8192</option>
+                <option>16384</option>
+                <option>32768</option>
+                <option>65536</option>
+                <option>131072</option>
+                <option>262.44</option>
+            </select>&nbsp; You must set the Context Length in the LLM provider to fit to your selected max token; in Ollama you find a Context Length slider in the settings
+        </dd>
+
+        <dt>&nbsp;</dt>
+        <dd><input name="llmselection" value="Load Model Name List" class="btn btn-primary" style="width:240px;" onclick="loadModels()"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+
+	<fieldset id="modelsContainer"><legend>Models</legend></fieldset>
+
+    <fieldset><legend>LLM List</legend>
+        <table border="0" summary="Pack List Archive">
+            <tr class="TableHeader"><td>Pack</td><td>Process</td><td>Size (KB)</td></tr>
+        #{packs}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[file]#</td><td>#[type]#</td><td>#[size]#</td></tr>
+        #{/packs}#
+        </table>
+    </fieldset>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>
