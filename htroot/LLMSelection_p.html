@@ -10,7 +10,6 @@
     #%env/templates/submenuIndexImport.template%#
     <script>
       let availableModels = [];
-      let model = null;
 
       const downloadActivities = new Map();
       let activeDownloadCount = 0;
@@ -53,6 +52,40 @@
 
       async function fetchOllamaModels(hoststub) {
         return fetchJsonOrThrow(`${hoststub}/api/tags`);
+      }
+
+      async function deleteOllamaModel(hoststub, modelName) {
+        const response = await fetch(`${hoststub}/api/delete`, {
+          method: "DELETE",
+          headers: {"Accept": "application/json", "Content-Type": "application/json"},
+          body: JSON.stringify({ model: modelName })
+        });
+        if (response.status !== 200) {
+          const error = new Error(`Failed to delete model ${modelName}`);
+          error.status = response.status;
+          throw error;
+        }
+      }
+
+      async function downloadOllamaModel(hoststub, modelName) {
+        const response = await fetch(`${hoststub}/api/pull`, {
+          method: "POST",
+          headers: {"Accept": "application/json", "Content-Type": "application/json"},
+          body: JSON.stringify({ model: modelName, stream: false })
+        });
+        if (response.status !== 200) {
+          const error = new Error(`Failed to download model ${modelName}`);
+          error.status = response.status;
+          throw error;
+        }
+        const payload = await response.json().catch(() => null);
+        if (payload && payload.error) {
+          const error = new Error(payload.error);
+          error.status = response.status;
+          error.payload = payload;
+          throw error;
+        }
+        return payload;
       }
 
       async function fetchOpenAICompatibleModels(hoststub) {
@@ -214,6 +247,42 @@
         }
       }
 
+      async function handleModelDelete(modelName, deleteButton) {
+        if (!modelName) return;
+        const hoststubInput = document.getElementById("hoststub");
+        const hoststub = hoststubInput ? hoststubInput.value.trim() : "";
+        if (!hoststub) {
+          alert("A hoststub is required to delete models.");
+          return;
+        }
+
+        if (deleteButton) {
+          deleteButton.disabled = true;
+        }
+
+        try {
+          await deleteOllamaModel(hoststub, modelName);
+        } catch (error) {
+          const status = error && typeof error.status === "number" ? error.status : null;
+          const message = status
+            ? `Failed to delete model ${modelName}. HTTP status: ${status}`
+            : `Error while deleting model ${modelName}. Check the console for details.`;
+          alert(message);
+          console.error("Model deletion failed:", error);
+          return;
+        } finally {
+          if (deleteButton) {
+            deleteButton.disabled = false;
+          }
+        }
+
+        try {
+          await loadModelList();
+        } catch (refreshError) {
+          console.error("Failed to refresh models after deletion:", refreshError);
+        }
+      }
+
       function renderAvailableModels(provider, payload) {
         // called when the model list was loaded
         const availableModelsContainer = document.getElementById("availableModelsContainer");
@@ -226,18 +295,58 @@
         const getId = provider === "OLLAMA" ? m => m.model : m => m.id;
         const frag = document.createDocumentFragment();
 
+        const table = document.createElement("table");
+        table.className = "table table-striped";
+
+        const thead = document.createElement("thead");
+        thead.className = "thead-dark";
+        const headerRow = document.createElement("tr");
+        ["Model", "Actions"].forEach(h => {
+          const th = document.createElement("th");
+          th.textContent = h;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
         models.forEach(m => {
           const id = getId(m);
           if (!id) return;
-          const radio = Object.assign(document.createElement("input"), { type: "radio", name: "model", value: id, id });
-          const label = Object.assign(document.createElement("label"), { htmlFor: id, textContent: id });
-          frag.appendChild(radio);
-          frag.appendChild(label);
-          frag.appendChild(document.createElement("br"));
           availableModels.push(id);
+
+          const tr = document.createElement("tr");
+
+          const tdMain = document.createElement("td");
+          tdMain.textContent = id;
+          tr.appendChild(tdMain);
+
+          const actionsTd = document.createElement("td");
+          const deleteBtn = document.createElement("button");
+          deleteBtn.type = "button";
+          deleteBtn.className = "btn btn-danger btn-sm";
+          deleteBtn.textContent = "Delete";
+          deleteBtn.style.padding = "2px 8px";
+          deleteBtn.style.lineHeight = "1.2";
+          if (provider === "OLLAMA") {
+            deleteBtn.addEventListener("click", () => handleModelDelete(id, deleteBtn));
+          } else {
+            deleteBtn.disabled = true;
+            deleteBtn.title = "Model management is only supported for Ollama.";
+          }
+          actionsTd.appendChild(deleteBtn);
+          tr.appendChild(actionsTd);
+
+          tbody.appendChild(tr);
         });
 
-        const hasModels = frag.hasChildNodes();
+        if (tbody.hasChildNodes()) {
+          table.appendChild(tbody);
+          frag.appendChild(table);
+        }
+
+        const hasModels = tbody.hasChildNodes();
         availableModelsContainer.appendChild(frag);
         availableModelsContainer.style.display = hasModels ? "block" : "none";
       }
@@ -259,7 +368,7 @@
         const thead = document.createElement("thead");
         thead.className = "thead-dark";
         const headerRow = document.createElement("tr");
-        ["Model", "Ranking", "Size", "Description", "Provider", "License"].forEach(h => {
+        ["Model", "Ranking", "Size", "Description", "Provider", "License", "Actions"].forEach(h => {
           const th = document.createElement("th");
           th.textContent = h;
           headerRow.appendChild(th);
@@ -273,12 +382,7 @@
           const tr = document.createElement("tr");
 
           const tdMain = document.createElement("td");
-          const radioId = `downloadable_${modelName.replace(/\s+/g, "_")}`;
-          const radio = Object.assign(document.createElement("input"), { type: "radio", name: "model", value: modelName, id: radioId });
-          const label = Object.assign(document.createElement("label"), { htmlFor: radioId, textContent: modelName });
-          tdMain.appendChild(radio);
-          tdMain.appendChild(document.createTextNode(" "));
-          tdMain.appendChild(label);
+          tdMain.textContent = modelName;
           tr.appendChild(tdMain);
 
           [m[1], m[2], m[3], m[4], m[5]].forEach(text => {
@@ -287,6 +391,39 @@
             tr.appendChild(td);
           });
 
+          const actionsTd = document.createElement("td");
+          const downloadBtn = document.createElement("button");
+          downloadBtn.type = "button";
+          downloadBtn.className = "btn btn-primary btn-sm";
+          downloadBtn.textContent = "Download";
+          downloadBtn.addEventListener("click", async () => {
+            const activityId = addDownloadActivity(modelName);
+            downloadBtn.disabled = true;
+            try {
+              await downloadOllamaModel(hoststub, modelName);
+              console.log(`Model ${modelName} is now available on server ${hoststub}.`);
+            } catch (err) {
+              const status = err && typeof err.status === "number" ? err.status : null;
+              const message = status
+                ? `Failed to download model ${modelName}. HTTP status: ${status}`
+                : `Error pulling model ${modelName} from server ${hoststub}. Check the console for details.`;
+              alert(message);
+              console.error("Error during model pull request:", err);
+            } finally {
+              downloadBtn.disabled = false;
+              if (activityId) {
+                removeDownloadActivity(activityId);
+              }
+              try {
+                await loadModelList();
+              } catch (refreshError) {
+                console.error("Failed to refresh models after download:", refreshError);
+              }
+            }
+          });
+          actionsTd.appendChild(downloadBtn);
+          tr.appendChild(actionsTd);
+
           frag.appendChild(tr);
         });
 
@@ -294,53 +431,7 @@
         tbody.appendChild(frag);
         table.appendChild(tbody);
 
-        const downloadModelBtn = document.createElement("button");
-        downloadModelBtn.type = "button";
-        downloadModelBtn.id = "downloadModelBtn";
-        downloadModelBtn.className = "btn btn-primary";
-        downloadModelBtn.textContent = "Download Model";
-        downloadModelBtn.addEventListener("click", async () => {
-          const sel = loadModelContainer.querySelector('input[type="radio"][name="model"]:checked');
-          model = sel ? sel.value : null;
-          if (!model) return alert("Please select a model to download.");
-          console.log("Download requested for model:", model);
-          const activityId = addDownloadActivity(model);
-          try {
-            const apiUrl = `${hoststub}/api/pull`;
-            const response = await fetch(apiUrl, {
-              method: "POST",
-              headers: {"Accept": "application/json", "Content-Type": "application/json"},
-              body: JSON.stringify({ model: model, stream: false })
-            });
-            if (response.status !== 200) {
-              alert(`Failed to download model. HTTP status: ${response.status}`);
-              console.error("Non-200 response", response);
-              return;
-            }
-            const responsej = await response.json().catch(() => null);
-            if (responsej && responsej.error) {
-              alert(`Error pulling model ${model} from server ${hoststub}: ${responsej.error}`);
-              console.error(`Error pulling model ${model} from server ${hoststub}.`, responsej);
-              return;
-            }
-            console.log(`Model ${model} is now available on server ${hoststub}.`);
-          } catch (err) {
-            alert("Error during model pull request. Check the console for details.");
-            console.error("Error during model pull request:", err);
-          } finally {
-            if (activityId) {
-              removeDownloadActivity(activityId);
-            }
-            try {
-              await loadModelList();
-            } catch (refreshError) {
-              console.error("Failed to refresh models after download:", refreshError);
-            }
-          }
-        });
-
         loadModelContainer.appendChild(table);
-        loadModelContainer.appendChild(downloadModelBtn);
         loadModelContainer.style.display = "block";
       }
 
