@@ -9,9 +9,188 @@
     #%env/templates/header.template%#
     #%env/templates/submenuIndexImport.template%#
     <script>
+      let availableModels = [];
+      let model = null;
+
+      const downloadActivities = new Map();
+      let activeDownloadCount = 0;
+      const beforeUnloadHandler = event => {
+        event.preventDefault();
+        event.returnValue = "Model downloads are still running. Please wait until they finish.";
+      };
+
+      const RECOMMENDED_MODELS = [
+        ["smollm2:360m-instruct-q4_K_M",                                                         "0.001", "0.5GB", "english-only minimalistic model for small devices", "Huggingface", "apache-2.0"],
+        ["hf.co/mradermacher/EuroLLM-1.7B-Instruct-GGUF:Q4_K_M",                                 "0.09", "1.5GB", "European Union - funded model, multilingual", "Various European Universities", "apache-2.0"],
+        ["llama3.2:1b-instruct-q4_K_M",                                                          "0.18", "1.5GB", "A good 1B model", "Meta", "llama3.2"],
+        ["llama3.2:3b-instruct-q4_K_M",                                                          "0.66", "3GB", "A good 3B model", "Meta", "llama3.2"],
+        ["qwen3:4b-instruct-2507-q4_K_M",                                                        "7.70", "3GB", "Exceptional good 4B model", "Alibaba", "apache-2.0"],
+        ["hf.co/mradermacher/Josiefied-Qwen3-4B-Instruct-2507-abliterated-v1-GGUF:Q4_K_M",       "7.70", "3GB", "uncensored version of qwen3:4b", "huggingface.co/Goekdeniz-Guelmez", "apache-2.0"],
+        ["hf.co/mradermacher/medgemma-4b-it-GGUF:Q4_K_M",                                        "0.84", "4GB", "Medical Knowledge and Vision", "Google", "health-ai-developer-foundations"],
+        ["hf.co/mradermacher/occiglot-7b-eu5-instruct-GGUF:Q4_K_M",                              "0.19", "5GB", "Support for top-5 EU languages (English, Spanish, French, German, and Italian)", "occiglot.eu", "apache-2.0"],
+        ["hf.co/allenai/OLMoE-1B-7B-0125-Instruct-GGUF:Q4_K_M",                                  "0.22", "5GB", "open and accessible training data, open-source training code, very fast", "allenai.org", "apache-2.0"],
+        ["hf.co/bartowski/AGI-0_Art-0-8B-GGUF:Q4_K_M",                                           "11.9", "6GB", "Exceptional good 8B model, ranking above ChatGPT-3.5", "AGI-0.com and Alibaba", "apache-2.0"],
+        ["phi4:14b-q4_K_M",                                                                      "5.24", "10GB", "Very strong, made with synthetic data", "Microsoft", "mit"],
+        ["hf.co/mistralai/Magistral-Small-2509-GGUF:Q4_K_M",                                     "5.18", "16GB", "European flagship model, strong multilangual, reasoning", "mistral.ai", "apache-2.0"],
+        ["hf.co/bartowski/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-GGUF:Q4_K_M", "", "16GB", "Uncensored multilingual european Mistral-24B for role playing", "mistral.ai and dphn.ai", "apache-2.0"],
+        ["qwen3-vl:30b-a3b-instruct-q4_K_M",                                                     "17.33", "22GB", "Very fast, exceptional good 30B model, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"]
+      ];
+
+      
+      /***
+       ***  API functions to access Ollama or OpenAI endpoints (list/load/delete models)
+       ***/
+
+      async function fetchJsonOrThrow(url, options = {}) {
+        const response = await fetch(url, options);
+        if (response.status !== 200) {
+          const error = new Error("Model fetch failed");
+          error.status = response.status;
+          throw error;
+        }
+        return response.json();
+      }
+
+      async function fetchOllamaModels(hoststub) {
+        return fetchJsonOrThrow(`${hoststub}/api/tags`);
+      }
+
+      async function fetchOpenAICompatibleModels(hoststub) {
+        return fetchJsonOrThrow(`${hoststub}/v1/models`);
+      }
+
+      async function requestModelsForProvider(provider, hoststub) {
+        return provider === "OLLAMA"
+          ? fetchOllamaModels(hoststub)
+          : fetchOpenAICompatibleModels(hoststub);
+      }
+
+      function handleModelLoadError(provider, error) {
+        console.error("Error fetching models:", error);
+        const status = error && typeof error.status === "number" ? error.status : null;
+        if (status) {
+          const apikeyEl = document.getElementById("apikey");
+          apiKeyValue = apikeyEl ? apikeyEl.value.trim() : "";
+          if (provider !== "OLLAMA" && provider !== "LMSTUDIO" && !apiKeyValue) {
+            alert("an api key is required for this provider");
+          } else {
+            alert(`Failed to load models. HTTP status: ${status}`);
+          }
+        } else {
+          alert("Failed to load models. Check the hoststub and console for errors.");
+        }
+      }
+
+      async function loadModelList() {
+        availableModels = [];
+        const provider = document.getElementById("provider").value;
+        const hoststub = document.getElementById("hoststub").value;
+
+        try {
+          const responsej = await requestModelsForProvider(provider, hoststub);
+          renderAvailableModels(provider, responsej);
+          if (provider === "OLLAMA") {
+            renderRecommendedModels(hoststub);
+          } else {
+            const loadModelContainer = document.getElementById("loadModelContainer");
+            if (!loadModelContainer) return;
+            loadModelContainer.innerHTML = "";
+            loadModelContainer.style.display = "none";
+          }
+        } catch (error) {
+          handleModelLoadError(provider, error);
+        }
+      }
+      
+      
+      /***
+       ***  Download Activity
+       ***/
+      
+      function updateBeforeUnloadGuard() {
+        if (activeDownloadCount > 0) {
+          window.addEventListener("beforeunload", beforeUnloadHandler);
+        } else {
+          window.removeEventListener("beforeunload", beforeUnloadHandler);
+        }
+      }
+
+      function getDownloadActivityElements() {
+        return {
+          container: document.getElementById("downloadActivityContainer"),
+          list: document.getElementById("downloadActivityList")
+        };
+      }
+
+      function addDownloadActivity(modelName) {
+        const { container, list } = getDownloadActivityElements();
+        if (!container || !list) return null;
+
+        const activityId = `download_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        const wrapper = document.createElement("div");
+        wrapper.className = "download-activity";
+        wrapper.dataset.activityId = activityId;
+        wrapper.style.marginBottom = "8px";
+        wrapper.style.padding = "8px";
+        wrapper.style.border = "1px solid #ddd";
+        wrapper.style.borderRadius = "4px";
+        wrapper.style.backgroundColor = "#f8f8f8";
+
+        const title = document.createElement("div");
+        title.className = "download-activity-title";
+        title.textContent = `Downloading ${modelName}`;
+        title.style.fontWeight = "bold";
+        title.style.marginBottom = "4px";
+        wrapper.appendChild(title);
+
+        const progress = document.createElement("progress");
+        progress.max = 100;
+        progress.style.width = "100%";
+        progress.removeAttribute("value"); // indeterminate
+        progress.setAttribute("aria-busy", "true");
+        wrapper.appendChild(progress);
+
+        const subtitle = document.createElement("div");
+        subtitle.className = "download-activity-subtitle";
+        subtitle.textContent = "Download in progress…";
+        subtitle.style.fontSize = "0.9em";
+        subtitle.style.marginTop = "4px";
+        wrapper.appendChild(subtitle);
+
+        list.appendChild(wrapper);
+        container.style.display = "block";
+
+        downloadActivities.set(activityId, wrapper);
+        activeDownloadCount = downloadActivities.size;
+        updateBeforeUnloadGuard();
+        return activityId;
+      }
+
+      function removeDownloadActivity(activityId) {
+        const wrapper = downloadActivities.get(activityId);
+        if (wrapper && wrapper.parentNode) {
+          wrapper.parentNode.removeChild(wrapper);
+        }
+        if (downloadActivities.has(activityId)) {
+          downloadActivities.delete(activityId);
+          activeDownloadCount = downloadActivities.size;
+        }
+        const { container, list } = getDownloadActivityElements();
+        if (container && list && !list.hasChildNodes()) {
+          container.style.display = "none";
+        }
+        updateBeforeUnloadGuard();
+      }
+
+      /***
+       ***  Rendering Functions
+       ***/
+
       function setHoststub() {
+        // this is called when the user changes the provider
         const provider = document.getElementById("provider").value;
         const hoststubInput = document.getElementById("hoststub");
+        const apikeyInput = document.getElementById("apikey");
 
         if (provider === "OLLAMA") {
           hoststubInput.value = "http://localhost:11434";
@@ -22,176 +201,149 @@
         } else if (provider === "OPENROUTER") {
           hoststubInput.value = "https://openrouter.ai/api";
         } else {
-          hoststubInput.value = ""; // Clear the hoststub if another provider is selected
+          hoststubInput.value = "";
         }
         
-        // Disable apikey for providers that don't require it
+        if (!apikeyInput) return;
+
         if (provider === "OLLAMA" || provider === "LMSTUDIO") {
-          apikey.disabled = true;
-          apikey.value = "";
+          apikeyInput.disabled = true;
+          apikeyInput.value = "";
         } else {
-          apikey.disabled = false;
+          apikeyInput.disabled = false;
         }
       }
-      
-      async function loadModels() {
-        availableModels = [];
-        const provider = document.getElementById("provider").value;
-        const hoststub = document.getElementById("hoststub").value;
-        const apiUrl = provider === "OLLAMA" ? `${hoststub}/api/tags` : `${hoststub}/v1/models`;
 
-        try {
-          const response = await fetch(apiUrl);
-          if (response.status !== 200) {
-            const apikeyEl = document.getElementById("apikey");
-            const apikey = apikeyEl ? apikeyEl.value.trim() : "";
+      function renderAvailableModels(provider, payload) {
+        // called when the model list was loaded
+        const availableModelsContainer = document.getElementById("availableModelsContainer");
+        if (!availableModelsContainer) return;
 
-            if (provider !== "OLLAMA" && provider !== "LMSTUDIO" && !apikey) {
-              alert("an api key is required for this provider");
-            } else {
-              alert(`Failed to load models. HTTP status: ${response.status}`);
-            }
-            console.error('Non-200 response', response);
-            return;
-          }
-          const responsej = await response.json();
+        availableModelsContainer.innerHTML = "<legend>Available Models</legend>";
+        availableModelsContainer.style.display = "none";
 
-          const availableModelsContainer = document.getElementById("availableModelsContainer");
-          availableModelsContainer.innerHTML = "<legend>Available Models</legend>";
-          availableModelsContainer.style.display = "none";
-          
-          const models = provider === "OLLAMA" ? (responsej.models || []) : (responsej.data || []);
-          const getId = provider === "OLLAMA" ? m => m.model : m => m.id;
-          
-          const frag = document.createDocumentFragment();
-          models.forEach(m => {
-            const id = getId(m);
-            const radio = Object.assign(document.createElement("input"), { type: "radio", name: "model", value: id, id });
-            const label = Object.assign(document.createElement("label"), { htmlFor: id, textContent: id });
-            frag.appendChild(radio); frag.appendChild(label); frag.appendChild(document.createElement("br"));
-            availableModels.push(id);
+        const models = provider === "OLLAMA" ? (payload.models || []) : (payload.data || []);
+        const getId = provider === "OLLAMA" ? m => m.model : m => m.id;
+        const frag = document.createDocumentFragment();
+
+        models.forEach(m => {
+          const id = getId(m);
+          if (!id) return;
+          const radio = Object.assign(document.createElement("input"), { type: "radio", name: "model", value: id, id });
+          const label = Object.assign(document.createElement("label"), { htmlFor: id, textContent: id });
+          frag.appendChild(radio);
+          frag.appendChild(label);
+          frag.appendChild(document.createElement("br"));
+          availableModels.push(id);
+        });
+
+        const hasModels = frag.hasChildNodes();
+        availableModelsContainer.appendChild(frag);
+        availableModelsContainer.style.display = hasModels ? "block" : "none";
+      }
+
+      function renderRecommendedModels(hoststub) {
+        // called when the model list was loaded and the diff to the recommended model list is displayed
+        const loadModelContainer = document.getElementById("loadModelContainer");
+        if (!loadModelContainer) return;
+
+        loadModelContainer.innerHTML = "<legend>Recommended Models</legend>";
+        loadModelContainer.style.display = "none";
+
+        const downloadableModels = RECOMMENDED_MODELS.filter(m => m && !availableModels.includes(m[0]));
+        if (!downloadableModels.length) return;
+
+        const table = document.createElement("table");
+        table.className = "table table-striped";
+
+        const thead = document.createElement("thead");
+        thead.className = "thead-dark";
+        const headerRow = document.createElement("tr");
+        ["Model", "Ranking", "Size", "Description", "Provider", "License"].forEach(h => {
+          const th = document.createElement("th");
+          th.textContent = h;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const frag = document.createDocumentFragment();
+        downloadableModels.forEach(m => {
+          const modelName = m[0];
+          const tr = document.createElement("tr");
+
+          const tdMain = document.createElement("td");
+          const radioId = `downloadable_${modelName.replace(/\s+/g, "_")}`;
+          const radio = Object.assign(document.createElement("input"), { type: "radio", name: "model", value: modelName, id: radioId });
+          const label = Object.assign(document.createElement("label"), { htmlFor: radioId, textContent: modelName });
+          tdMain.appendChild(radio);
+          tdMain.appendChild(document.createTextNode(" "));
+          tdMain.appendChild(label);
+          tr.appendChild(tdMain);
+
+          [m[1], m[2], m[3], m[4], m[5]].forEach(text => {
+            const td = document.createElement("td");
+            td.textContent = text;
+            tr.appendChild(td);
           });
-          availableModelsContainer.appendChild(frag);
-          availableModelsContainer.style.display = "block";
 
-          if (provider === "OLLAMA") {
-            // show load model container
+          frag.appendChild(tr);
+        });
 
-            const loadModelContainer = document.getElementById("loadModelContainer");
-            loadModelContainer.innerHTML = "<legend>Recommended Models</legend>";
-            loadModelContainer.style.display = "none";
-            recommendedModels = [
-              ["smollm2:360m-instruct-q4_K_M",                                                         "0.001", "0.5GB", "english-only minimalistic model for small devices", "Huggingface", "apache-2.0"],
-              ["hf.co/mradermacher/EuroLLM-1.7B-Instruct-GGUF:Q4_K_M",                                 "0.09", "1.5GB", "European Union - funded model, multilingual", "Various European Universities", "apache-2.0"],
-              ["llama3.2:1b-instruct-q4_K_M",                                                          "0.18", "1.5GB", "A good 1B model", "Meta", "llama3.2"],
-              ["llama3.2:3b-instruct-q4_K_M",                                                          "0.66", "3GB", "A good 3B model", "Meta", "llama3.2"],
-              ["qwen3:4b-instruct-2507-q4_K_M",                                                        "7.70", "3GB", "Exceptional good 4B model", "Alibaba", "apache-2.0"],
-              ["hf.co/mradermacher/Josiefied-Qwen3-4B-Instruct-2507-abliterated-v1-GGUF:Q4_K_M",       "7.70", "3GB", "uncensored version of qwen3:4b", "huggingface.co/Goekdeniz-Guelmez", "apache-2.0"],
-              ["hf.co/mradermacher/medgemma-4b-it-GGUF:Q4_K_M",                                        "0.84", "4GB", "Medical Knowledge and Vision", "Google", "health-ai-developer-foundations"],
-              ["hf.co/mradermacher/occiglot-7b-eu5-instruct-GGUF:Q4_K_M",                              "0.19", "5GB", "Support for top-5 EU languages (English, Spanish, French, German, and Italian)", "occiglot.eu", "apache-2.0"],
-              ["hf.co/allenai/OLMoE-1B-7B-0125-Instruct-GGUF:Q4_K_M",                                  "0.22", "5GB", "open and accessible training data, open-source training code, very fast", "allenai.org", "apache-2.0"],
-              ["hf.co/bartowski/AGI-0_Art-0-8B-GGUF:Q4_K_M",                                           "11.9", "6GB", "Exceptional good 8B model, ranking above ChatGPT-3.5", "AGI-0.com and Alibaba", "apache-2.0"],
-              ["phi4:14b-q4_K_M",                                                                      "5.24", "10GB", "Very strong, made with synthetic data", "Microsoft", "mit"],
-              ["hf.co/mistralai/Magistral-Small-2509-GGUF:Q4_K_M",                                     "5.18", "16GB", "European flagship model, strong multilangual, reasoning", "mistral.ai", "apache-2.0"],
-              ["hf.co/bartowski/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-GGUF:Q4_K_M", "", "16GB", "Uncensored multilingual european Mistral-24B for role playing", "mistral.ai and dphn.ai", "apache-2.0"]
-              ["qwen3-vl:30b-a3b-instruct-q4_K_M",                                                     "17.33", "22GB", "Very fast, exceptional good 30B model, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"]
-            ];
-            // subtract all models in availableModels from recommendedModels to get a list of downloadable models
-            const downloadableModels = recommendedModels.filter(m => m && !availableModels.includes(m[0]));
-            
-            // create table
-            const table = document.createElement("table"); table.className = "table table-striped";
-            
-            // header
-            const thead = document.createElement("thead"); thead.className = "thead-dark";
-            const headerRow = document.createElement("tr");            
-            ["Model", "Ranking", "Size", "Description", "Provider", "License"].forEach(h => {
-              const th = document.createElement("th");
-              th.textContent = h;
-              headerRow.appendChild(th);
+        const tbody = document.createElement("tbody");
+        tbody.appendChild(frag);
+        table.appendChild(tbody);
+
+        const downloadModelBtn = document.createElement("button");
+        downloadModelBtn.type = "button";
+        downloadModelBtn.id = "downloadModelBtn";
+        downloadModelBtn.className = "btn btn-primary";
+        downloadModelBtn.textContent = "Download Model";
+        downloadModelBtn.addEventListener("click", async () => {
+          const sel = loadModelContainer.querySelector('input[type="radio"][name="model"]:checked');
+          model = sel ? sel.value : null;
+          if (!model) return alert("Please select a model to download.");
+          console.log("Download requested for model:", model);
+          const activityId = addDownloadActivity(model);
+          try {
+            const apiUrl = `${hoststub}/api/pull`;
+            const response = await fetch(apiUrl, {
+              method: "POST",
+              headers: {"Accept": "application/json", "Content-Type": "application/json"},
+              body: JSON.stringify({ model: model, stream: false })
             });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            // attach rows
-            const frag = document.createDocumentFragment();
-            downloadableModels.forEach(m => {
-              const model = m[0];
-              const tr = document.createElement("tr");
-
-              // first column: radio button and model name
-              const tdMain = document.createElement("td");
-              const radioId = `downloadable_${model.replace(/\s+/g, "_")}`;
-              const radio = Object.assign(document.createElement("input"), { type: "radio", name: "model", value: model, id: radioId });
-              const label = Object.assign(document.createElement("label"), { htmlFor: radioId, textContent: model });
-              tdMain.appendChild(radio);
-              tdMain.appendChild(document.createTextNode(" "));
-              tdMain.appendChild(label);
-              tr.appendChild(tdMain);
-
-              // other columns
-              [m[1], m[2], m[3], m[4], m[5]].forEach(text => {
-                const td = document.createElement("td");
-                td.textContent = text;
-                tr.appendChild(td);
-              });
-
-              frag.appendChild(tr);
-            });
-
-            // download button
-            const downloadModelBtn = document.createElement("button");
-            downloadModelBtn.type = "button";
-            downloadModelBtn.id = "downloadModelBtn";
-            downloadModelBtn.className = "btn btn-primary";
-            downloadModelBtn.textContent = "Download Model";
-            downloadModelBtn.addEventListener("click", async () => {
-              const sel = loadModelContainer.querySelector('input[type="radio"][name="model"]:checked');
-              model = sel ? sel.value : null;
-              if (!model) return alert("Please select a model to download.");
-              console.log("Download requested for model:", model);
-              alert(`Downloading model: ${model}`);
-              try {
-                  const apiUrl = `${hoststub}/api/pull`;
-                  const response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: {"Accept": "application/json", "Content-Type": "application/json"},
-                    body: JSON.stringify({ model: model, stream: false })
-                  });
-                  if (response.status !== 200) {
-                    alert(`Failed to download model. HTTP status: ${response.status}`);
-                    console.error('Non-200 response', response);
-                    return;
-                  }
-                  const responsej = await response.json().catch(() => null);
-                  if (responsej && responsej.error) {
-                    console.error(`Error pulling model ${model} from server ${hoststub}.`, responsej);
-                    return;
-                  } else {
-                    console.log(`Model ${model} is now available on server ${hoststub}.`);
-                    return;
-                  }
-              } catch (err) {
-                console.error("Error during model pull request:", err);
-                return;
-              }
-            });
-            
-            const tbody = document.createElement("tbody");
-            tbody.appendChild(frag);
-            table.appendChild(tbody);
-
-            // attach table to loadModelContainer
-            loadModelContainer.appendChild(table);
-            loadModelContainer.style.display = "block";
-            loadModelContainer.appendChild(downloadModelBtn);
+            if (response.status !== 200) {
+              alert(`Failed to download model. HTTP status: ${response.status}`);
+              console.error("Non-200 response", response);
+              return;
+            }
+            const responsej = await response.json().catch(() => null);
+            if (responsej && responsej.error) {
+              alert(`Error pulling model ${model} from server ${hoststub}: ${responsej.error}`);
+              console.error(`Error pulling model ${model} from server ${hoststub}.`, responsej);
+              return;
+            }
+            console.log(`Model ${model} is now available on server ${hoststub}.`);
+          } catch (err) {
+            alert("Error during model pull request. Check the console for details.");
+            console.error("Error during model pull request:", err);
+          } finally {
+            if (activityId) {
+              removeDownloadActivity(activityId);
+            }
+            try {
+              await loadModelList();
+            } catch (refreshError) {
+              console.error("Failed to refresh models after download:", refreshError);
+            }
           }
-          
-        } catch (error) {
-          console.error("Error fetching models:", error);
-          alert("Failed to load models. Check the hoststub and console for errors.");
-        }
+        });
+
+        loadModelContainer.appendChild(table);
+        loadModelContainer.appendChild(downloadModelBtn);
+        loadModelContainer.style.display = "block";
       }
+
     </script>
 
     
@@ -232,7 +384,7 @@
         </dd>
 
         <dt>&nbsp;</dt>
-        <dd><input name="llmselection" value="Load Model Name List" class="btn btn-primary" style="width:240px;" onclick="loadModels()"/>
+        <dd><input name="llmselection" value="Load Model Name List" class="btn btn-primary" style="width:240px;" onclick="loadModelList()"/>
         </dd>
       </dl>
     </fieldset>
@@ -240,6 +392,10 @@
 
     <fieldset id="availableModelsContainer" style="display:none"></fieldset>
     <fieldset id="loadModelContainer" style="display:none"></fieldset>
+    <fieldset id="downloadActivityContainer" style="display:none">
+      <legend>Model Downloads</legend>
+      <div id="downloadActivityList"></div>
+    </fieldset>
 
     <fieldset><legend>LLM List</legend>
         <table border="0" summary="Pack List Archive">
