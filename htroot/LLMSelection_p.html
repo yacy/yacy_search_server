@@ -17,6 +17,26 @@
         event.preventDefault();
         event.returnValue = "Model downloads are still running. Please wait until they finish.";
       };
+      const PRODUCTION_MODEL_TOTAL_COLUMNS = 13;
+      const PRODUCTION_MODEL_MODEL_COLUMN_INDEX = 1;
+      const PRODUCTION_MODEL_FEATURE_COLUMN_START = 5;
+      const PRODUCTION_MODEL_FEATURE_COLUMN_END = 11;
+      const PRODUCTION_MODEL_ACTION_COLUMN_INDEX = PRODUCTION_MODEL_TOTAL_COLUMNS - 1;
+      const PRODUCTION_MODEL_COLUMN_NAMES = [
+        "Provider",
+        "Model",
+        "hoststub",
+        "API Key",
+        "Max Token",
+        "Answers",
+        "Chat",
+        "Translation",
+        "Q/A-Generation",
+        "Classification",
+        "Shortener",
+        "Vision"
+      ];
+      const PRODUCTION_MODEL_SUBMIT_URL = "LLMSelection_p.html";
 
       const RECOMMENDED_MODELS = [
         ["smollm2:360m-instruct-q4_K_M",                                                         "0.001", "0.5GB", "english-only minimalistic model for small devices", "Huggingface", "apache-2.0"],
@@ -24,14 +44,15 @@
         ["llama3.2:1b-instruct-q4_K_M",                                                          "0.18", "1.5GB", "A good 1B model", "Meta", "llama3.2"],
         ["llama3.2:3b-instruct-q4_K_M",                                                          "0.66", "3GB", "A good 3B model", "Meta", "llama3.2"],
         ["qwen3:4b-instruct-2507-q4_K_M",                                                        "7.70", "3GB", "Exceptional good 4B model", "Alibaba", "apache-2.0"],
-        ["hf.co/mradermacher/Josiefied-Qwen3-4B-Instruct-2507-abliterated-v1-GGUF:Q4_K_M",       "7.70", "3GB", "uncensored version of qwen3:4b", "huggingface.co/Goekdeniz-Guelmez", "apache-2.0"],
+        ["hf.co/mradermacher/Josiefied-Qwen3-4B-Instruct-2507-abliterated-v1-GGUF:Q4_K_M",       "4.41", "3GB", "Uncensored version of qwen3:4b", "huggingface.co/Goekdeniz-Guelmez", "apache-2.0"],
         ["hf.co/mradermacher/medgemma-4b-it-GGUF:Q4_K_M",                                        "0.84", "4GB", "Medical Knowledge and Vision", "Google", "health-ai-developer-foundations"],
         ["hf.co/mradermacher/occiglot-7b-eu5-instruct-GGUF:Q4_K_M",                              "0.19", "5GB", "Support for top-5 EU languages (English, Spanish, French, German, and Italian)", "occiglot.eu", "apache-2.0"],
         ["hf.co/allenai/OLMoE-1B-7B-0125-Instruct-GGUF:Q4_K_M",                                  "0.22", "5GB", "open and accessible training data, open-source training code, very fast", "allenai.org", "apache-2.0"],
         ["hf.co/bartowski/AGI-0_Art-0-8B-GGUF:Q4_K_M",                                           "11.9", "6GB", "Exceptional good 8B model, ranking above ChatGPT-3.5", "AGI-0.com and Alibaba", "apache-2.0"],
         ["phi4:14b-q4_K_M",                                                                      "5.24", "10GB", "Very strong, made with synthetic data", "Microsoft", "mit"],
         ["hf.co/mistralai/Magistral-Small-2509-GGUF:Q4_K_M",                                     "5.18", "16GB", "European flagship model, strong multilangual, reasoning", "mistral.ai", "apache-2.0"],
-        ["hf.co/bartowski/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-GGUF:Q4_K_M", "", "16GB", "Uncensored multilingual european Mistral-24B for role playing", "mistral.ai and dphn.ai", "apache-2.0"],
+        ["hf.co/bartowski/cognitivecomputations_Dolphin-Mistral-24B-Venice-Edition-GGUF:Q4_K_M", "3.43", "16GB", "Uncensored multilingual european Mistral-24B for role playing", "mistral.ai and dphn.ai", "apache-2.0"],
+        ["gemma3:27b-it-q4_K_M",                                                                 "4.81", "20GB", "Strong content safety, multilingual support in over 140 languages", "google.com", "gemma"],
         ["qwen3-vl:30b-a3b-instruct-q4_K_M",                                                     "17.33", "22GB", "Very fast, exceptional good 30B model, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"]
       ];
 
@@ -311,7 +332,7 @@
             description: info.description || "",
             provider: info.provider || "",
             license: info.license || "",
-            renderActions: () => createDeleteButton(provider, id)
+            renderActions: () => createAvailableModelActionButtons(provider, id)
           });
         });
 
@@ -383,6 +404,9 @@
           });
 
           const actionsTd = document.createElement("td");
+          actionsTd.style.display = "flex";
+          actionsTd.style.alignItems = "center";
+          actionsTd.style.gap = "6px";
           if (typeof row.renderActions === "function") {
             const actionContent = row.renderActions();
             if (Array.isArray(actionContent)) {
@@ -400,15 +424,34 @@
         container.style.display = "block";
       }
 
+      function createAvailableModelActionButtons(provider, modelId) {
+        return [createSelectButton(modelId), createDeleteButton(provider, modelId)];
+      }
+
+      function createSelectButton(modelId) {
+        const selectBtn = document.createElement("button");
+        selectBtn.type = "button";
+        selectBtn.className = "btn btn-info btn-sm";
+        selectBtn.textContent = "Deploy";
+        styleActionButton(selectBtn);
+        selectBtn.addEventListener("click", () => handleModelSelect(modelId));
+        return selectBtn;
+      }
+
       function createDeleteButton(provider, modelId) {
         const deleteBtn = document.createElement("button");
         deleteBtn.type = "button";
         deleteBtn.className = "btn btn-danger btn-sm";
         deleteBtn.textContent = "Delete";
-        deleteBtn.style.padding = "2px 8px";
-        deleteBtn.style.lineHeight = "1.2";
+        styleActionButton(deleteBtn);
         if (provider === "OLLAMA") {
-          deleteBtn.addEventListener("click", () => handleModelDelete(modelId, deleteBtn));
+          deleteBtn.addEventListener("click", () => {
+            const confirmed = window.confirm(`Do you really want to delete model "${modelId}"?`);
+            if (!confirmed) {
+              return;
+            }
+            handleModelDelete(modelId, deleteBtn);
+          });
         } else {
           deleteBtn.disabled = true;
           deleteBtn.title = "Model management is only supported for Ollama.";
@@ -416,11 +459,235 @@
         return deleteBtn;
       }
 
+      function styleActionButton(button) {
+        if (!button) return button;
+        button.style.padding = "2px 8px";
+        button.style.lineHeight = "1.2";
+        button.style.display = "inline-flex";
+        button.style.alignItems = "center";
+        return button;
+      }
+
+      function handleModelSelect(modelName) {
+        if (!modelName) return;
+        upsertProductionModel(modelName);
+      }
+
+      function upsertProductionModel(modelName) {
+        const tbody = getProductionTableBody();
+        if (!tbody) return;
+        const hadRowsBeforeInsert = tbody.querySelectorAll("tr").length > 0;
+
+        const providerField = document.getElementById("provider");
+        const hoststubField = document.getElementById("hoststub");
+        const apikeyField = document.getElementById("apikey");
+        const maxTokenField = document.getElementById("maxtoken");
+
+        const provider = providerField ? providerField.value : "";
+        const hoststub = hoststubField ? hoststubField.value.trim() : "";
+        const apikey = apikeyField ? apikeyField.value.trim() : "";
+        const maxToken = maxTokenField ? maxTokenField.value : "";
+
+        let targetRow = Array.from(tbody.querySelectorAll("tr")).find(row => {
+          const modelCell = row.cells && row.cells[PRODUCTION_MODEL_MODEL_COLUMN_INDEX];
+          return modelCell && modelCell.textContent.trim() === modelName;
+        });
+
+        if (!targetRow) {
+          targetRow = document.createElement("tr");
+          targetRow.className = "TableCellLight";
+          for (let i = 0; i < PRODUCTION_MODEL_TOTAL_COLUMNS; i += 1) {
+            targetRow.appendChild(document.createElement("td"));
+          }
+          tbody.appendChild(targetRow);
+        } else if (targetRow.cells.length < PRODUCTION_MODEL_TOTAL_COLUMNS) {
+          const missing = PRODUCTION_MODEL_TOTAL_COLUMNS - targetRow.cells.length;
+          for (let i = 0; i < missing; i += 1) {
+            targetRow.appendChild(document.createElement("td"));
+          }
+        }
+
+        const cells = targetRow.cells;
+        const values = [provider, modelName, hoststub, apikey, maxToken];
+        values.forEach((value, index) => {
+          if (cells[index]) {
+            cells[index].textContent = value || "";
+          }
+        });
+
+        const shouldEnableFeatures = !hadRowsBeforeInsert;
+        ensureProductionRowFeatureCells(targetRow, shouldEnableFeatures);
+        ensureProductionRowActionButton(targetRow);
+        persistProductionModels();
+      }
+
+      function getProductionTableBody() {
+        const table = document.getElementById("productionModelsTable");
+        return table ? table.querySelector("tbody") : null;
+      }
+
+      function normalizeProductionModelRows() {
+        const tbody = getProductionTableBody();
+        if (!tbody) return;
+        Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+          const missingCells = PRODUCTION_MODEL_TOTAL_COLUMNS - row.cells.length;
+          for (let i = 0; i < missingCells; i += 1) {
+            row.appendChild(document.createElement("td"));
+          }
+          ensureProductionRowFeatureCells(row, false);
+          ensureProductionRowActionButton(row);
+        });
+      }
+
+      function ensureProductionRowFeatureCells(row, defaultChecked) {
+        if (!row) return;
+        for (let col = PRODUCTION_MODEL_FEATURE_COLUMN_START; col <= PRODUCTION_MODEL_FEATURE_COLUMN_END; col += 1) {
+          const cell = row.cells[col];
+          if (!cell) continue;
+          let checkbox = cell.querySelector('input[type="checkbox"]');
+          if (!checkbox) {
+            checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.dataset.featureColumn = String(col);
+            checkbox.addEventListener("change", event => {
+              handleFeatureCheckboxToggle(col, event.currentTarget);
+            });
+            cell.textContent = "";
+            cell.appendChild(checkbox);
+            checkbox.checked = !!defaultChecked;
+          }
+        }
+        if (defaultChecked) {
+          enforceFeatureExclusivityForRow(row);
+        }
+        updateUndeployButtonState(row);
+      }
+
+      function handleFeatureCheckboxToggle(columnIndex, checkbox) {
+        if (!checkbox) return;
+        const tbody = getProductionTableBody();
+        if (!tbody) return;
+        const currentRow = checkbox.closest("tr");
+
+        if (checkbox.checked) {
+          Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+            const cell = row.cells[columnIndex];
+            if (!cell) return;
+            const otherCheckbox = cell.querySelector('input[type="checkbox"]');
+            if (!otherCheckbox || otherCheckbox === checkbox) return;
+            if (otherCheckbox.checked) {
+              otherCheckbox.checked = false;
+              updateUndeployButtonState(row);
+            }
+          });
+        }
+
+        if (currentRow) {
+          updateUndeployButtonState(currentRow);
+        }
+        persistProductionModels();
+      }
+
+      function enforceFeatureExclusivityForRow(row) {
+        if (!row) return;
+        for (let col = PRODUCTION_MODEL_FEATURE_COLUMN_START; col <= PRODUCTION_MODEL_FEATURE_COLUMN_END; col += 1) {
+          const cell = row.cells[col];
+          if (!cell) continue;
+          const checkbox = cell.querySelector('input[type="checkbox"]');
+          if (!checkbox || !checkbox.checked) continue;
+          handleFeatureCheckboxToggle(col, checkbox);
+        }
+      }
+
+      function ensureProductionRowActionButton(row) {
+        if (!row || row.cells.length < PRODUCTION_MODEL_TOTAL_COLUMNS) {
+          return;
+        }
+        const actionCell = row.cells[PRODUCTION_MODEL_ACTION_COLUMN_INDEX];
+        if (!actionCell) return;
+        actionCell.textContent = "";
+        const undeployBtn = document.createElement("button");
+        undeployBtn.type = "button";
+        undeployBtn.className = "btn btn-warning btn-sm";
+        undeployBtn.textContent = "Undeploy";
+        undeployBtn.dataset.action = "undeploy";
+        styleActionButton(undeployBtn);
+        undeployBtn.addEventListener("click", () => {
+          row.remove();
+          persistProductionModels();
+        });
+        actionCell.appendChild(undeployBtn);
+        updateUndeployButtonState(row);
+      }
+
+      function updateUndeployButtonState(row) {
+        if (!row) return;
+        const button = row.querySelector('button[data-action="undeploy"]');
+        if (!button) return;
+        const hasFeatureChecked = isAnyFeatureCheckboxChecked(row);
+        button.disabled = hasFeatureChecked;
+        button.title = hasFeatureChecked
+          ? "Disable the assigned features before undeploying."
+          : "";
+      }
+
+      function isAnyFeatureCheckboxChecked(row) {
+        for (let col = PRODUCTION_MODEL_FEATURE_COLUMN_START; col <= PRODUCTION_MODEL_FEATURE_COLUMN_END; col += 1) {
+          const cell = row.cells[col];
+          if (!cell) continue;
+          const checkbox = cell.querySelector('input[type="checkbox"]');
+          if (checkbox && checkbox.checked) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function collectProductionTablePayload() {
+        const tbody = getProductionTableBody();
+        if (!tbody) return [];
+        const rows = [];
+        Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+          if (!row.cells || row.cells.length < PRODUCTION_MODEL_TOTAL_COLUMNS) {
+            return;
+          }
+          const rowData = {};
+          PRODUCTION_MODEL_COLUMN_NAMES.forEach((columnName, index) => {
+            if (index >= PRODUCTION_MODEL_FEATURE_COLUMN_START && index <= PRODUCTION_MODEL_FEATURE_COLUMN_END) {
+              const checkbox = row.cells[index]
+                ? row.cells[index].querySelector('input[type="checkbox"]')
+                : null;
+              rowData[columnName] = checkbox ? checkbox.checked : false;
+            } else {
+              rowData[columnName] = row.cells[index] ? row.cells[index].textContent.trim() : "";
+            }
+          });
+          const hasContent = rowData.Provider || rowData.Model || rowData["hoststub"];
+          if (hasContent) {
+            rows.push(rowData);
+          }
+        });
+        return rows;
+      }
+
+      function persistProductionModels() {
+        const table = collectProductionTablePayload();
+        const payload = { table };
+        fetch(PRODUCTION_MODEL_SUBMIT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(err => {
+          console.error("Failed to persist production models", err);
+        });
+      }
+
       function createDownloadButton(hoststub, modelName) {
         const downloadBtn = document.createElement("button");
         downloadBtn.type = "button";
         downloadBtn.className = "btn btn-primary btn-sm";
         downloadBtn.textContent = "Download";
+        styleActionButton(downloadBtn);
         downloadBtn.addEventListener("click", async () => {
           const activityId = addDownloadActivity(modelName);
           downloadBtn.disabled = true;
@@ -449,11 +716,20 @@
         return downloadBtn;
       }
 
+      document.addEventListener("DOMContentLoaded", normalizeProductionModelRows);
+
     </script>
 
     
     <h2>LLM Selection</h2>
 
+    <p>
+        Here you can pick models from a LLM model provider to select them as production model.
+        In the "Production Models" - Matrix you can then assign each selected model a function inside YaCy
+    </p>
+    <p>
+        <b>Install your local LLM provider!</b> You need either a local <a href="https://ollama.com/">ollama</a> or <a href="https://lmstudio.ai/">LM Studio</a> instance running on your local host or inside the intranet.
+    </p>
     <form id="llmForm">
     <fieldset><legend>Provider</legend>
       <dl>
@@ -502,12 +778,16 @@
       <div id="downloadActivityList"></div>
     </fieldset>
 
-    <fieldset><legend>LLM List</legend>
-        <table border="0" summary="Pack List Archive">
-            <tr class="TableHeader"><td>Pack</td><td>Process</td><td>Size (KB)</td></tr>
-        #{packs}#
-            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[file]#</td><td>#[type]#</td><td>#[size]#</td></tr>
-        #{/packs}#
+    <fieldset id="productionModelsContainer" style="display: block;"><legend>Production Models</legend>
+        <table class="table table-striped" id="productionModelsTable">
+            <thead class="thead-dark">
+                <tr><td>Provider</td><td>Model</td><td>hoststub</td><td>API Key</td><td>Max Token</td><td>Answers</td><td>Chat</td><td>Translation</td><td>Q/A-Generation</td><td>Classification</td><td>Shortener</td><td>Vision</td><td>Actions</td></tr>
+            </thead>
+            <tbody>
+        #{productionmodels}#
+            <tr class="TableCell#(dark)#Light::Dark#(/dark)#"><td>#[model]#</td><td>#[type]#</td><td>#[size]#</td><td>#[apikey]#</td><td>#[max_token]#</td><td>#[answers]#</td><td>#[chat]#</td><td>#[translation]#</td><td>#[qageneration]#</td><td>#[classification]#</td><td>#[shortener]#</td><td>#[vision]#</td><td></td></tr>
+        #{/productionmodels}#
+            </tbody>
         </table>
     </fieldset>
 
