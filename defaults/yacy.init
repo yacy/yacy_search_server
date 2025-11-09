@@ -1422,3 +1422,5 @@ decoration.grafics.linkstructure = true
 decoration.hostanalysis = false
 decoration.simpleheadernavbar = navbar-default
 
+# ai settings
+ai.production_models = {}

@@ -23,18 +23,13 @@
 
 package net.yacy.htroot;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
-import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.Fulltext;
-import net.yacy.search.index.Segment;
-import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -45,115 +40,69 @@ public class LLMSelection_p {
         final Switchboard sb = (Switchboard) env;
 
         final serverObjects prop = new serverObjects();
-
-        final Segment segment = sb.index;
-        // we have two counts of document: total number and such that are exportable with status code 200
-        final long ucount = segment.fulltext().collectionSize();
-        long ucount200 = ucount;
+        String body = post == null ? "" : post.get("BODY", "");
+        JSONObject bodyj = new JSONObject();
+        if (body.length() > 0) {
+            try {
+                bodyj = new JSONObject(new JSONTokener(body));
+            } catch (JSONException e) {
+                // silently catch this
+            }
+        }
+        JSONArray production_models = bodyj.optJSONArray("production_models");
+        if (production_models != null) {
+            // simply store the model array
+            try {
+                sb.setConfig("ai.production_models", production_models.toString(0));
+            } catch (JSONException e) {
+                //e.printStackTrace();
+            }
+        }
+        /*
+        {"production_models":[{
+          "service":"OLLAMA",
+          "model":"hf.co\/janhq\/Jan-v1-edge-gguf:Q4_K_M",
+          "hoststub":"http:\/\/localhost:11434",
+          "api_key":"",
+          "max_tokens":"4096",
+          "answers":true,
+          "chat":true,
+          "translation":true,
+          "qa-generation":true,
+          "classification":true,
+          "tldr-shortener":true,
+          "vision":true
+        }]}
+        */
+        
+        // generate table for production_models
+        String pms = sb.getConfig("ai.production_models", "[]");
         try {
-            ucount200 = segment.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
-        } catch (final IOException e1) {}
-
-        // set default values
-        prop.put("reload", 0);
-        prop.put("lurlexport", 0);
-        prop.putNum("ucount", ucount);
-        prop.putNum("ucount200", ucount200);
-
-        // show Pack folder contents
-        int i = 0;
-        boolean dark = true;
-        for (final String file: sb.packsInHold()) {
-            prop.put("packs_" + i + "_file", file);
-            prop.put("packs_" + i + "_type", "hold");
-            prop.put("packs_" + i + "_size", new File(sb.packsHoldPath, file).length() / 1024);
-            prop.put("packs_" + i + "_dark", dark ? "1" : "0");
-            i++;
-            dark = !dark;
+            production_models = new JSONArray(new JSONTokener(pms));
+            for (int i = 0; i < production_models.length(); i++) {
+                JSONObject row = production_models.getJSONObject(i);
+                prop.put("productionmodels_" + i + "_service", row.optString("service", "OLLAMA"));
+                prop.put("productionmodels_" + i + "_model", row.optString("model", ""));
+                prop.put("productionmodels_" + i + "_hoststub", row.optString("hoststub", ""));
+                prop.put("productionmodels_" + i + "_api_key", row.optString("api_key", ""));
+                prop.put("productionmodels_" + i + "_max_tokens", row.optString("max_tokens", "4096"));
+                prop.put("productionmodels_" + i + "_answers", row.optBoolean("answers", false));
+                prop.put("productionmodels_" + i + "_chat", row.optBoolean("chat", false));
+                prop.put("productionmodels_" + i + "_translation", row.optBoolean("translation", false));
+                prop.put("productionmodels_" + i + "_qa-generation", row.optBoolean("qa-generation", false));
+                prop.put("productionmodels_" + i + "_classification", row.optBoolean("classification", false));
+                prop.put("productionmodels_" + i + "_tldr-shortener", row.optBoolean("tldr-shortener", false));
+                prop.put("productionmodels_" + i + "_vision", row.optBoolean("vision", false));
+            }
+            prop.put("productionmodels", production_models.length());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        for (final String file: sb.packsInLoaded()) {
-            prop.put("packs_" + i + "_file", file);
-            prop.put("packs_" + i + "_type", "loaded");
-            prop.put("packs_" + i + "_size", new File(sb.packsLoadedPath, file).length() / 1024);
-            prop.put("packs_" + i + "_dark", dark ? "1" : "0");
-            i++;
-            dark = !dark;
-        }
-        for (final String file: sb.packsInLive()) {
-            prop.put("packs_" + i + "_file", file);
-            prop.put("packs_" + i + "_type", "live");
-            prop.put("packs_" + i + "_size", new File(sb.packsLivePath, file).length() / 1024);
-            prop.put("packs_" + i + "_dark", dark ? "1" : "0");
-            i++;
-            dark = !dark;
-        }
-        prop.put("packs", i);
 
         if (post == null || env == null) {
             return prop; // nothing to do
         }
 
-        if (post.containsKey("lurlexport")) {
-            try {
-                // parse format
-                Fulltext.ExportFormat format = Fulltext.ExportFormat.elasticsearch;
-                final String fname = post.get("format", "full-elasticsearch");
-                final boolean dom = fname.startsWith("dom"); // if dom== false complete urls are exported, otherwise only the domain
-                final boolean text = fname.startsWith("text");
-                if (fname.endsWith("rss")) format = Fulltext.ExportFormat.rss;
-                if (fname.endsWith("solr")) format = Fulltext.ExportFormat.solr;
-                if (fname.endsWith("elasticsearch")) format = Fulltext.ExportFormat.elasticsearch;
-
-                final String filter = post.get("exportfilter", ".*");
-                String query = post.get("exportquery", "*:*");
-                final String collection = post.get("collection", "user");
-                query += " AND " + CollectionSchema.collection_sxt.getSolrFieldName() + ":\"" + collection + "\"";
-
-                // store this call as api call: we do this even if there is a chance that it fails because recurring calls may do not fail
-                sb.tables.recordAPICall(post, "IndexPackGenerator_p.html", WorkTables.TABLE_API_TYPE_DUMP, "PackGenerator, q=" + query);
-
-                // start the export
-                /*
-                    Tier Tags:
-                    | Tier      | Size      | Notes              |
-                    |-----------|-----------|--------------------|
-                    | common    | ≤ 1 GB    | IndexPackGenerator |
-                    | uncommon  | 1–5 GB    | large web crawls   |
-                    | rare      | 5–50 GB   | custom parser      |
-                    | epic      | 50–200 GB | special infra      |
-                    | legendary | any       | human curation     |
-                 */
-                final long now = System.currentTimeMillis();
-                final long doccount = sb.index.fulltext().getDefaultConnector().getCountByQuery(query);
-                if (doccount == 0) throw new IOException("number of exported documents == 0");
-                final String category = post.get("category", "scroll"); // core, scroll, codex, gem, fiction, map, echo, spirit, vault
-                final String tier = "common"; // common, uncommon, rare, epic, legendary, legendary
-                final String origin = "web"; // web, synth,
-                String slug = post.get("slug", "export").trim().replaceAll(" ", "-");
-                if (slug.isEmpty()) slug = "export";
-
-                // if collection is not user, the slug is the collection name
-                if (!"user".equals(collection)) {
-                    slug = collection.trim().replaceAll(" ", "-");
-                }
-                // we can not construct the file name
-                final String filename =
-                        SwitchboardConstants.YACY_PACK_PREFIX +
-                        category + "-" + tier + "-" + origin + "_" +
-                        slug + "_" +
-                        GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(now));
-                // file name schema: YaCyPack_<category>-<tier>-<origin>_<slug>_<YYMMDD>.jsonlist
-                // possible storage paths are: hold, load, loaded, unload, live; we use hold here, loaded would also be correct
-            } catch (final IOException e) {
-                prop.put("lurlexporterror", 1);
-                prop.put("lurlexporterror_exportfile", "-no export-");
-                prop.put("lurlexporterror_exportfailmsg", e.getMessage());
-                return prop;
-            }
-        }
-
-        // insert constants
-        prop.putNum("ucount", ucount);
         // return rewrite properties
         return prop;
     }
