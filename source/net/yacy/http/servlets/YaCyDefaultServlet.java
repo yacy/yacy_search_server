@@ -34,10 +34,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.RequestDispatcher;
@@ -47,6 +51,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
@@ -362,7 +367,104 @@ public class YaCyDefaultServlet extends HttpServlet  {
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        this.doGet(request, response);
+        HttpServletRequest requestForGet = request;
+        if (this.shouldWrapBody(request)) {
+            final String body = this.readRequestBody(request);
+            if (body != null && !body.isEmpty()) {
+                requestForGet = new BodyParameterRequestWrapper(request, body);
+            }
+        }
+        this.doGet(requestForGet, response);
+    }
+
+    private boolean shouldWrapBody(final HttpServletRequest request) {
+        final String method = request.getMethod();
+        if (method == null || !HttpMethod.POST.asString().equalsIgnoreCase(method)) {
+            return false;
+        }
+        final String contentType = request.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        final String normalizedType = contentType.toLowerCase(Locale.ROOT);
+        if (normalizedType.contains("multipart/form-data")) {
+            return false;
+        }
+        if (normalizedType.contains("application/x-www-form-urlencoded")) {
+            return false;
+        }
+        return request.getContentLengthLong() != 0 || request.getHeader("Transfer-Encoding") != null;
+    }
+
+    private String readRequestBody(final HttpServletRequest request) {
+        try (InputStream inputStream = request.getInputStream();
+             ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            final byte[] tmp = new byte[4096];
+            int read;
+            while ((read = inputStream.read(tmp)) != -1) {
+                buffer.write(tmp, 0, read);
+            }
+            return buffer.toString(StandardCharsets.UTF_8.name());
+        } catch (final IOException e) {
+            ConcurrentLog.warn("FILEHANDLER", "Failed to read POST body: " + e.getMessage());
+            return null;
+        }
+    }
+   
+    private static final class BodyParameterRequestWrapper extends HttpServletRequestWrapper {
+
+        private static final String BODY_PARAMETER_NAME = "BODY";
+        private final Map<String, String[]> additionalParameters = new HashMap<>();
+
+        BodyParameterRequestWrapper(final HttpServletRequest request, final String bodyContent) {
+            super(request);
+            this.additionalParameters.put(BODY_PARAMETER_NAME, new String[]{bodyContent});
+        }
+
+        @Override
+        public String getParameter(final String name) {
+            final String[] values = this.getParameterValues(name);
+            return values == null || values.length == 0 ? null : values[0];
+        }
+
+        @Override
+        public String[] getParameterValues(final String name) {
+            if (name == null) {
+                return null;
+            }
+            final String[] override = this.additionalParameters.get(name);
+            if (override != null) {
+                return override.clone();
+            }
+            final String[] base = super.getParameterValues(name);
+            return base == null ? null : base.clone();
+        }
+
+        @Override
+        public Enumeration<String> getParameterNames() {
+            final LinkedHashSet<String> names = new LinkedHashSet<>();
+            final Enumeration<String> upstream = super.getParameterNames();
+            while (upstream.hasMoreElements()) {
+                names.add(upstream.nextElement());
+            }
+            names.addAll(this.additionalParameters.keySet());
+            return Collections.enumeration(names);
+        }
+
+        @Override
+        public Map<String, String[]> getParameterMap() {
+            final Map<String, String[]> base = new HashMap<>();
+            final Map<String, String[]> upstream = super.getParameterMap();
+            if (upstream != null) {
+                for (final Map.Entry<String, String[]> entry : upstream.entrySet()) {
+                    base.put(entry.getKey(), entry.getValue() == null ? null : entry.getValue().clone());
+                }
+            }
+            for (final Map.Entry<String, String[]> entry : this.additionalParameters.entrySet()) {
+                base.put(entry.getKey(), entry.getValue().clone());
+            }
+            return base;
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -1267,4 +1369,5 @@ public class YaCyDefaultServlet extends HttpServlet  {
             ConcurrentLog.info("FILEHANDLER", ex.getMessage());
         }
     }
- }
+
+}
