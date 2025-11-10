@@ -278,6 +278,11 @@
 
       async function handleModelDelete(modelName, deleteButton) {
         if (!modelName) return;
+        if (isModelInProduction(modelName)) {
+          alert(`Model "${modelName}" is currently used in the production table and cannot be deleted.`);
+          updateAvailableModelButtons();
+          return;
+        }
         const hoststubInput = document.getElementById("hoststub");
         const hoststub = hoststubInput ? hoststubInput.value.trim() : "";
         if (!hoststub) {
@@ -287,6 +292,7 @@
 
         if (deleteButton) {
           deleteButton.disabled = true;
+          deleteButton.dataset.deleting = "true";
         }
 
         try {
@@ -302,6 +308,7 @@
         } finally {
           if (deleteButton) {
             deleteButton.disabled = false;
+            delete deleteButton.dataset.deleting;
           }
         }
 
@@ -337,6 +344,7 @@
         });
 
         renderModelTable(container, "Available Models", rows);
+        updateAvailableModelButtons();
       }
 
       function renderRecommendedModels(hoststub) {
@@ -424,6 +432,51 @@
         container.style.display = "block";
       }
 
+      function getProductionModelNames() {
+        const tbody = getProductionTableBody();
+        if (!tbody) return new Set();
+        const modelNames = new Set();
+        Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+          if (!row.cells || row.cells.length <= PRODUCTION_MODEL_MODEL_COLUMN_INDEX) {
+            return;
+          }
+          const cell = row.cells[PRODUCTION_MODEL_MODEL_COLUMN_INDEX];
+          if (!cell) return;
+          const modelName = cell.textContent.trim();
+          if (modelName) {
+            modelNames.add(modelName);
+          }
+        });
+        return modelNames;
+      }
+
+      function isModelInProduction(modelName) {
+        if (!modelName) return false;
+        return getProductionModelNames().has(modelName);
+      }
+
+      function updateAvailableModelButtons() {
+        const productionModels = getProductionModelNames();
+        document.querySelectorAll('button[data-action="delete-model"]').forEach(button => {
+          const modelId = button.dataset.modelId;
+          if (!modelId || button.dataset.deleting === "true") return;
+          const shouldDisable = productionModels.has(modelId);
+          button.disabled = shouldDisable;
+          button.title = shouldDisable
+            ? "Model is assigned as a production model and cannot be deleted."
+            : "";
+        });
+        document.querySelectorAll('button[data-action="deploy-model"]').forEach(button => {
+          const modelId = button.dataset.modelId;
+          if (!modelId) return;
+          const shouldDisable = productionModels.has(modelId);
+          button.disabled = shouldDisable;
+          button.title = shouldDisable
+            ? "Model is already listed in the production table."
+            : "";
+        });
+      }
+
       function createAvailableModelActionButtons(service, modelId) {
         return [createSelectButton(modelId), createDeleteButton(service, modelId)];
       }
@@ -433,6 +486,8 @@
         selectBtn.type = "button";
         selectBtn.className = "btn btn-info btn-sm";
         selectBtn.textContent = "Deploy";
+        selectBtn.dataset.action = "deploy-model";
+        selectBtn.dataset.modelId = modelId;
         styleActionButton(selectBtn);
         selectBtn.addEventListener("click", () => handleModelSelect(modelId));
         return selectBtn;
@@ -445,6 +500,8 @@
         deleteBtn.textContent = "Delete";
         styleActionButton(deleteBtn);
         if (service === "OLLAMA") {
+          deleteBtn.dataset.action = "delete-model";
+          deleteBtn.dataset.modelId = modelId;
           deleteBtn.addEventListener("click", () => {
             const confirmed = window.confirm(`Do you really want to delete model "${modelId}"?`);
             if (!confirmed) {
@@ -537,6 +594,7 @@
           ensureProductionRowFeatureCells(row, false);
           ensureProductionRowActionButton(row);
         });
+        updateAvailableModelButtons();
       }
 
       function ensureProductionRowFeatureCells(row, defaultChecked) {
@@ -685,6 +743,7 @@
         }).catch(err => {
           console.error("Failed to persist production models", err);
         });
+        updateAvailableModelButtons();
       }
 
       function createDownloadButton(hoststub, modelName) {
@@ -776,12 +835,12 @@
     </fieldset>
     </form>
 
-    <fieldset id="availableModelsContainer" style="display:none"></fieldset>
     <fieldset id="loadModelContainer" style="display:none"></fieldset>
     <fieldset id="downloadActivityContainer" style="display:none">
       <legend>Model Downloads</legend>
       <div id="downloadActivityList"></div>
     </fieldset>
+    <fieldset id="availableModelsContainer" style="display:none"></fieldset>
 
     <fieldset id="productionModelsContainer" style="display: block;"><legend>Production Models</legend>
         <table class="table table-striped" id="productionModelsTable">
