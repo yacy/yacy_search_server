@@ -548,19 +548,28 @@
           if (!checkbox) {
             checkbox = document.createElement("input");
             checkbox.type = "checkbox";
-            checkbox.dataset.featureColumn = String(col);
-            checkbox.addEventListener("change", event => {
-              handleFeatureCheckboxToggle(col, event.currentTarget);
-            });
             cell.textContent = "";
             cell.appendChild(checkbox);
             checkbox.checked = !!defaultChecked;
           }
+          initializeFeatureCheckbox(checkbox, col);
         }
         if (defaultChecked) {
           enforceFeatureExclusivityForRow(row);
         }
         updateUndeployButtonState(row);
+      }
+
+      function initializeFeatureCheckbox(checkbox, columnIndex) {
+        if (!checkbox) return;
+        checkbox.dataset.featureColumn = String(columnIndex);
+        if (checkbox.dataset.listenerAttached === "true") {
+          return;
+        }
+        checkbox.addEventListener("change", event => {
+          handleFeatureCheckboxToggle(columnIndex, event.currentTarget);
+        });
+        checkbox.dataset.listenerAttached = "true";
       }
 
       function handleFeatureCheckboxToggle(columnIndex, checkbox) {
@@ -788,9 +797,8 @@
                 <td><input type="checkbox" #(translation)#::checked=true#(/translation)#></td>
                 <td><input type="checkbox" #(qa-generation)#::checked=true#(/qa-generation)#></td>
                 <td><input type="checkbox" #(classification)#::checked=true#(/classification)#></td>
-                <td><input type="checkbox" #(shortener)#::checked=true#(/shortener)#></td>
+                <td><input type="checkbox" #(tldr-shortener)#::checked=true#(/tldr-shortener)#></td>
                 <td><input type="checkbox" #(vision)#::checked=true#(/vision)#></td>
-                <td><input type="checkbox" #(chat)#::checked=true#(/chat)#></td>
                 <td></td>
             </tr>
         #{/productionmodels}#
