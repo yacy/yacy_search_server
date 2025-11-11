@@ -71,6 +71,7 @@ public class LLMSelection_p {
           "qa-generation":true,
           "classification":true,
           "tldr-shortener":true,
+          "tooling":true,
           "vision":true
         }]}
         */
@@ -92,6 +93,7 @@ public class LLMSelection_p {
                 prop.put("productionmodels_" + i + "_qa-generation", row.optBoolean("qa-generation", false));
                 prop.put("productionmodels_" + i + "_classification", row.optBoolean("classification", false));
                 prop.put("productionmodels_" + i + "_tldr-shortener", row.optBoolean("tldr-shortener", false));
+                prop.put("productionmodels_" + i + "_tooling", row.optBoolean("tooling", false));
                 prop.put("productionmodels_" + i + "_vision", row.optBoolean("vision", false));
             }
             prop.put("productionmodels", production_models.length());
