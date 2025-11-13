@@ -17,12 +17,12 @@
         event.preventDefault();
         event.returnValue = "Model downloads are still running. Please wait until they finish.";
       };
-      const PRODUCTION_MODEL_TOTAL_COLUMNS = 14;
+      const PRODUCTION_MODEL_TOTAL_COLUMNS = 15;
       const PRODUCTION_MODEL_MODEL_COLUMN_INDEX = 1;
       const PRODUCTION_MODEL_USAGE_COLUMN_START = 5;
-      const PRODUCTION_MODEL_USAGE_COLUMN_END = 10; // including
-      const PRODUCTION_MODEL_FEATURE_COLUMN_START = 11;
-      const PRODUCTION_MODEL_FEATURE_COLUMN_END = 12; // including
+      const PRODUCTION_MODEL_USAGE_COLUMN_END = 11; // including
+      const PRODUCTION_MODEL_FEATURE_COLUMN_START = 12;
+      const PRODUCTION_MODEL_FEATURE_COLUMN_END = 13; // including
       const PRODUCTION_MODEL_ACTION_COLUMN_INDEX = PRODUCTION_MODEL_TOTAL_COLUMNS - 1;
       const PRODUCTION_MODEL_COLUMN_NAMES = [
         "service",
@@ -30,12 +30,15 @@
         "hoststub",
         "api_key",
         "max_tokens",
-        "answers",
+        
+        "search",
         "chat",
         "translation",
-        "qa-generation",
         "classification",
-        "tldr-shortener",
+        "query",
+        "qapairs",
+        "tldr",
+
         "tooling",
         "vision"
       ];
@@ -827,18 +830,43 @@
     <fieldset id="productionModelsContainer" style="display: block;"><legend>Production Models</legend>
         <table class="table table-striped" id="productionModelsTable">
             <thead class="thead-dark">
-                <tr><td>service</td><td>model</td><td>hoststub</td><td>api_key</td><td>max_tokens</td><td>answers</td><td>chat</td><td>translation</td><td>qa-generation</td><td>classification</td><td>shortener</td><td><i>tooling</i></td><td><i>vision</i></td><td>Actions</td></tr>
+                <tr>
+                    <td>service</td>
+                    <td>model</td>
+                    <td>hoststub</td>
+                    <td>api_key</td>
+                    <td>max_tokens</td>
+                    
+                    <td>search-answers&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model creates answers for search requests</span></span></td>
+                    <td>chat&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used in the chat interface and as default for the RAG proxy</span></span></td>
+                    <td>translation&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to make translations of the web UI</span></span></td>
+                    <td>classification&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to classify prompts to find out what they demand</span></span></td>
+                    <td>search-query&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model produces search queries to YaCy search from prompts in RAG or chat</span></span></td>
+                    <td>qa-pairs&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to produce query-answer pairs which enhance search from chat prompts</span></span></td>
+                    <td>tldr-shortener&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to make summaries from web content</span></span></td>
+                    
+                    <td><i>tooling</i></td>
+                    <td><i>vision</i></td>
+                    <td>Actions</td>
+                </tr>
             </thead>
             <tbody>
         #{productionmodels}#
             <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-                <td>#[service]#</td><td>#[model]#</td><td>#[hoststub]#</td><td>#[api_key]#</td><td>#[max_tokens]#</td>
-                <td><input type="checkbox" #(answers)#::checked=true#(/answers)#></td>
+                <td>#[service]#</td>
+                <td>#[model]#</td>
+                <td>#[hoststub]#</td>
+                <td>#[api_key]#</td>
+                <td>#[max_tokens]#</td>
+                
+                <td><input type="checkbox" #(search)#::checked=true#(/search)#></td>
                 <td><input type="checkbox" #(chat)#::checked=true#(/chat)#></td>
                 <td><input type="checkbox" #(translation)#::checked=true#(/translation)#></td>
-                <td><input type="checkbox" #(qa-generation)#::checked=true#(/qa-generation)#></td>
                 <td><input type="checkbox" #(classification)#::checked=true#(/classification)#></td>
-                <td><input type="checkbox" #(tldr-shortener)#::checked=true#(/tldr-shortener)#></td>
+                <td><input type="checkbox" #(query)#::checked=true#(/query)#></td>
+                <td><input type="checkbox" #(qapairs)#::checked=true#(/qapairs)#></td>
+                <td><input type="checkbox" #(tldr)#::checked=true#(/tldr)#></td>
+                
                 <td><input type="checkbox" #(tooling)#::checked=true#(/tooling)# disabled=true></td>
                 <td><input type="checkbox" #(vision)#::checked=true#(/vision)# disabled=true></td>
                 <td></td>

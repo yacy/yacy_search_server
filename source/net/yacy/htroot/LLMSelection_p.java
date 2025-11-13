@@ -87,12 +87,15 @@ public class LLMSelection_p {
                 prop.put("productionmodels_" + i + "_hoststub", row.optString("hoststub", ""));
                 prop.put("productionmodels_" + i + "_api_key", row.optString("api_key", ""));
                 prop.put("productionmodels_" + i + "_max_tokens", row.optString("max_tokens", "4096"));
-                prop.put("productionmodels_" + i + "_answers", row.optBoolean("answers", false));
+                
+                prop.put("productionmodels_" + i + "_search", row.optBoolean("search", false));
                 prop.put("productionmodels_" + i + "_chat", row.optBoolean("chat", false));
                 prop.put("productionmodels_" + i + "_translation", row.optBoolean("translation", false));
-                prop.put("productionmodels_" + i + "_qa-generation", row.optBoolean("qa-generation", false));
                 prop.put("productionmodels_" + i + "_classification", row.optBoolean("classification", false));
-                prop.put("productionmodels_" + i + "_tldr-shortener", row.optBoolean("tldr-shortener", false));
+                prop.put("productionmodels_" + i + "_query", row.optBoolean("query", false));
+                prop.put("productionmodels_" + i + "_qapairs", row.optBoolean("qapairs", false));
+                prop.put("productionmodels_" + i + "_tldr", row.optBoolean("tldr", false));
+                
                 prop.put("productionmodels_" + i + "_tooling", row.optBoolean("tooling", false));
                 prop.put("productionmodels_" + i + "_vision", row.optBoolean("vision", false));
             }
