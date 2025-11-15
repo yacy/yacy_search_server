@@ -24,6 +24,8 @@
       const PRODUCTION_MODEL_FEATURE_COLUMN_START = 12;
       const PRODUCTION_MODEL_FEATURE_COLUMN_END = 13; // including
       const PRODUCTION_MODEL_ACTION_COLUMN_INDEX = PRODUCTION_MODEL_TOTAL_COLUMNS - 1;
+      const PRODUCTION_MODEL_TOOLING_COLUMN_INDEX = PRODUCTION_MODEL_FEATURE_COLUMN_START;
+      const PRODUCTION_MODEL_VISION_COLUMN_INDEX = PRODUCTION_MODEL_FEATURE_COLUMN_START + 1;
       const PRODUCTION_MODEL_COLUMN_NAMES = [
         "service",
         "model",
@@ -43,6 +45,16 @@
         "vision"
       ];
       const PRODUCTION_MODEL_SUBMIT_URL = "LLMSelection_p.html";
+      const TOOLING_TEST_ENDPOINT_PATH = "/v1/chat/completions";
+      const TOOLING_EXPECTED_FUNCTION_NAME = "lightswitch";
+      const TOOLING_TEST_SYSTEM_MESSAGE = "You are a home assistant.";
+      const TOOLING_TEST_USER_MESSAGE = "Switch on the light";
+      const VISION_TEST_SYSTEM_MESSAGE = "you read out images";
+      const VISION_TEST_USER_MESSAGE = "what is in the image?";
+      const VISION_TEST_EXPECTED_TEXT = "42";
+      const VISION_TEST_IMAGE_PATH = "env/grafics/llmtest.png";
+      let cachedVisionTestImageBase64 = null;
+      let cachedVisionTestImagePromise = null;
 
       const RECOMMENDED_MODELS = [
         ["smollm2:360m-instruct-q4_K_M",                                                         "0.001", "0.5GB", "english-only minimalistic model for small devices", "Huggingface", "apache-2.0"],
@@ -540,6 +552,7 @@
           const modelCell = row.cells && row.cells[PRODUCTION_MODEL_MODEL_COLUMN_INDEX];
           return modelCell && modelCell.textContent.trim() === modelName;
         });
+        const isNewRow = !targetRow;
 
         if (!targetRow) {
           targetRow = document.createElement("tr");
@@ -566,6 +579,10 @@
         ensureProductionRowUsageCells(targetRow, !hadRowsBeforeInsert);
         ensureProductionRowActionButton(targetRow);
         persistProductionModels();
+        if (isNewRow) {
+          triggerToolingCapabilityVerification(targetRow, { hoststub, modelName, apikey });
+          triggerVisionCapabilityVerification(targetRow, { hoststub, modelName, apikey });
+        }
       }
 
       function getProductionTableBody() {
@@ -599,7 +616,7 @@
             checkbox.type = "checkbox";
             cell.textContent = "";
             cell.appendChild(checkbox);
-            checkbox.checked = !!defaultChecked;
+            checkbox.checked = !!defaultChecked && col <= PRODUCTION_MODEL_USAGE_COLUMN_END;
             if (col >= PRODUCTION_MODEL_FEATURE_COLUMN_START) {
                 // disable the checkbox
                 checkbox.disabled = true
@@ -729,6 +746,300 @@
           console.error("Failed to persist production models", err);
         });
         updateAvailableModelButtons();
+      }
+
+      /**
+       * Tooling capability check
+       */
+      function triggerToolingCapabilityVerification(row, { hoststub, modelName, apikey }) {
+        if (!row) return;
+        const normalizedHoststub = (hoststub || "").trim();
+        if (!normalizedHoststub || !modelName) {
+          return;
+        }
+        if (row.dataset.toolingTestInFlight === "true") {
+          return;
+        }
+        row.dataset.toolingTestInFlight = "true";
+        runToolingCapabilityTest(normalizedHoststub, modelName, apikey)
+          .then(success => {
+            const rowStillMounted = !!(document && document.body && document.body.contains(row));
+            if (!success || !rowStillMounted) {
+              return;
+            }
+            setToolingFlagForRow(row, true);
+            persistProductionModels();
+          })
+          .catch(error => {
+            console.warn(`Tooling capability check failed for model "${modelName}".`, error);
+          })
+          .finally(() => {
+            delete row.dataset.toolingTestInFlight;
+          });
+      }
+
+      async function runToolingCapabilityTest(hoststub, modelName, apikey) {
+        const endpointBase = hoststub.replace(/\/+$/, "");
+        if (!endpointBase) {
+          return false;
+        }
+        const targetUrl = `${endpointBase}${TOOLING_TEST_ENDPOINT_PATH}`;
+        const headers = { "Content-Type": "application/json" };
+        if (apikey) {
+          headers.Authorization = `Bearer ${apikey}`;
+        }
+        const payload = buildToolingTestPayload(modelName);
+        const response = await fetch(targetUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP status ${response.status}`);
+        }
+        const result = await response.json();
+        return toolingResponseIncludesExpectedToolCall(result);
+      }
+
+      function buildToolingTestPayload(modelName) {
+        return {
+          model: modelName,
+          temperature: 0.1,
+          max_tokens: 1024,
+          messages: [
+            { role: "system", content: TOOLING_TEST_SYSTEM_MESSAGE },
+            { role: "user", content: TOOLING_TEST_USER_MESSAGE }
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: TOOLING_EXPECTED_FUNCTION_NAME,
+              description: "With this tool you can switch on the light",
+              parameters: {
+                type: "object",
+                properties: {
+                  switch: {
+                    type: "boolean",
+                    description: "true for on, false for off"
+                  }
+                },
+                required: ["switch"],
+                additionalProperties: false
+              },
+              strict: true
+            }
+          }],
+          stream: false
+        };
+      }
+
+      function toolingResponseIncludesExpectedToolCall(response) {
+        if (!response || !Array.isArray(response.choices)) {
+          return false;
+        }
+        return response.choices.some(choice => {
+          const message = choice ? choice.message : null;
+          if (!message) {
+            return false;
+          }
+          const toolCalls = getToolCallsFromMessage(message);
+          if (!toolCalls.length) {
+            return false;
+          }
+          return toolCalls.some(call => {
+            const fn = call && call.function;
+            return fn && fn.name === TOOLING_EXPECTED_FUNCTION_NAME;
+          });
+        });
+      }
+
+      function getToolCallsFromMessage(message) {
+        if (!message) return [];
+        const candidates = message.tool_calls || message.tool_call || null;
+        if (!candidates) return [];
+        if (Array.isArray(candidates)) {
+          return candidates;
+        }
+        if (Array.isArray(candidates.data)) {
+          return candidates.data;
+        }
+        return [candidates];
+      }
+
+      function setToolingFlagForRow(row, enabled) {
+        if (!row || row.cells.length <= PRODUCTION_MODEL_TOOLING_COLUMN_INDEX) {
+          return;
+        }
+        const cell = row.cells[PRODUCTION_MODEL_TOOLING_COLUMN_INDEX];
+        if (!cell) return;
+        const checkbox = cell.querySelector('input[type="checkbox"]');
+        if (!checkbox) return;
+        checkbox.checked = !!enabled;
+      }
+
+      function triggerVisionCapabilityVerification(row, { hoststub, modelName, apikey }) {
+        if (!row) return;
+        const normalizedHoststub = (hoststub || "").trim();
+        if (!normalizedHoststub || !modelName) {
+          return;
+        }
+        if (row.dataset.visionTestInFlight === "true") {
+          return;
+        }
+        row.dataset.visionTestInFlight = "true";
+        runVisionCapabilityTest(normalizedHoststub, modelName, apikey)
+          .then(success => {
+            const rowStillMounted = !!(document && document.body && document.body.contains(row));
+            if (!success || !rowStillMounted) {
+              return;
+            }
+            setVisionFlagForRow(row, true);
+            persistProductionModels();
+          })
+          .catch(error => {
+            console.warn(`Vision capability check failed for model "${modelName}".`, error);
+          })
+          .finally(() => {
+            delete row.dataset.visionTestInFlight;
+          });
+      }
+
+      async function runVisionCapabilityTest(hoststub, modelName, apikey) {
+        const endpointBase = hoststub.replace(/\/+$/, "");
+        if (!endpointBase) {
+          return false;
+        }
+        const targetUrl = `${endpointBase}${TOOLING_TEST_ENDPOINT_PATH}`;
+        const headers = { "Content-Type": "application/json" };
+        if (apikey) {
+          headers.Authorization = `Bearer ${apikey}`;
+        }
+        const base64Image = await loadVisionTestImageBase64();
+        const payload = buildVisionTestPayload(modelName, base64Image);
+        const response = await fetch(targetUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP status ${response.status}`);
+        }
+        const result = await response.json();
+        return visionResponseContainsExpectedAnswer(result);
+      }
+
+      function buildVisionTestPayload(modelName, base64Image) {
+        return {
+          model: modelName,
+          temperature: 0.1,
+          max_tokens: 512,
+          messages: [
+            { role: "system", content: VISION_TEST_SYSTEM_MESSAGE },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: VISION_TEST_USER_MESSAGE },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/png;base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ]
+        };
+      }
+
+      function visionResponseContainsExpectedAnswer(response) {
+        if (!response || !Array.isArray(response.choices)) {
+          return false;
+        }
+        return response.choices.some(choice => {
+          const message = choice ? choice.message : null;
+          const normalizedText = normalizeMessageText(message);
+          if (!normalizedText) {
+            return false;
+          }
+          return normalizedText.indexOf(VISION_TEST_EXPECTED_TEXT) !== -1;
+        });
+      }
+
+      function normalizeMessageText(message) {
+        if (!message) return "";
+        const { content } = message;
+        if (typeof content === "string") {
+          return content.trim();
+        }
+        if (Array.isArray(content)) {
+          return content.map(extractTextFromContent).filter(Boolean).join(" ").trim();
+        }
+        if (content && typeof content.text === "string") {
+          return content.text.trim();
+        }
+        return "";
+      }
+
+      function extractTextFromContent(part) {
+        if (!part) return "";
+        if (typeof part === "string") return part;
+        if (typeof part.text === "string") return part.text;
+        if (typeof part.content === "string") return part.content;
+        return "";
+      }
+
+      async function loadVisionTestImageBase64() {
+        if (cachedVisionTestImageBase64) {
+          return cachedVisionTestImageBase64;
+        }
+        if (cachedVisionTestImagePromise) {
+          return cachedVisionTestImagePromise;
+        }
+        cachedVisionTestImagePromise = fetch(VISION_TEST_IMAGE_PATH)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load test image (${response.status})`);
+            }
+            return response.blob();
+          })
+          .then(blob => blobToBase64(blob))
+          .then(base64 => {
+            cachedVisionTestImageBase64 = base64;
+            return base64;
+          })
+          .catch(error => {
+            cachedVisionTestImagePromise = null;
+            throw error;
+          });
+        return cachedVisionTestImagePromise;
+      }
+
+      function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(reader.error || new Error("Failed to read blob"));
+          reader.onloadend = () => {
+            const result = reader.result;
+            if (typeof result !== "string") {
+              reject(new Error("Unexpected data when reading blob"));
+              return;
+            }
+            const commaIndex = result.indexOf(",");
+            resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
+          };
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      function setVisionFlagForRow(row, enabled) {
+        if (!row || row.cells.length <= PRODUCTION_MODEL_VISION_COLUMN_INDEX) {
+          return;
+        }
+        const cell = row.cells[PRODUCTION_MODEL_VISION_COLUMN_INDEX];
+        if (!cell) return;
+        const checkbox = cell.querySelector('input[type="checkbox"]');
+        if (!checkbox) return;
+        checkbox.checked = !!enabled;
       }
 
       function createDownloadButton(hoststub, modelName) {
