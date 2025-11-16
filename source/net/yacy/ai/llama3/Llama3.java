@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 import net.yacy.ai.llama3.Model.ModelLoader;
@@ -50,7 +51,7 @@ public class Llama3 {
         @SuppressWarnings("resource")
         Scanner in = new Scanner(System.in);
         while (true) {
-            System.out.print("> ");
+            System.out.print("\n> ");
             System.out.flush();
             String userText = in.nextLine();
             if (state == null) {
@@ -80,23 +81,23 @@ public class Llama3 {
         }
     }
 
-    public static List<Integer> runInstructOnce(Llama model, Sampler sampler, Context options, IntConsumer onTokenGenerated) {
+    public static List<Integer> runInstructOnce(Llama model, Sampler sampler, Context context, IntConsumer onTokenGenerated) {
         Llama.State state = model.createNewState(BATCH_SIZE);
         ChatFormat chatFormat = new ChatFormat(model.tokenizer());
 
         List<Integer> promptTokens = new ArrayList<>();
         promptTokens.add(chatFormat.beginOfText);
-        if (options.systemPrompt != null) {
-            promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.SYSTEM, options.systemPrompt)));
+        if (context.systemPrompt != null) {
+            promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.SYSTEM, context.systemPrompt)));
         }
         //System.out.println("Context after System Prompt: " + toString(model, promptTokens));
-        promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.USER, options.prompt)));
+        promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.USER, context.prompt)));
         //System.out.println("Context after User Prompt: " + toString(model, promptTokens));
         promptTokens.addAll(chatFormat.encodeHeader(new ChatFormat.Message(ChatFormat.Role.ASSISTANT, "")));
-        //System.out.println("Context after Assitant Prompt: " + toString(model, promptTokens));
+        //System.out.println("Context after Assistant Prompt: " + toString(model, promptTokens));
 
         Set<Integer> stopTokens = chatFormat.getStopTokens();
-        List<Integer> responseTokens = Llama.generateTokens(model, state, 0, promptTokens, stopTokens, options.maxTokens, sampler, onTokenGenerated);
+        List<Integer> responseTokens = Llama.generateTokens(model, state, 0, promptTokens, stopTokens, context.maxTokens, sampler, onTokenGenerated);
 
         // remove stop token at the end of the response, if present
         if (!responseTokens.isEmpty() && stopTokens.contains(responseTokens.get(responseTokens.size()-1))) {
@@ -104,6 +105,16 @@ public class Llama3 {
         }
         //System.out.println(model.tokenizer().decode(responseTokens));
         return responseTokens;
+    }
+    
+    public static List<String> runInstruct(Llama model, Sampler sampler, Context context, Consumer<String> onTokenGenerated) {
+        ArrayList <String> result = new ArrayList<>();
+        runInstructOnce(model, sampler, context, token -> {
+            String t = model.tokenizer().decode(List.of(token));
+            onTokenGenerated.accept(t);
+            result.add(t);
+        });
+        return result;
     }
     
     public static String toString(Llama model, List<Integer> tokens) {
@@ -128,18 +139,20 @@ public class Llama3 {
         //Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "Llama-3.2-3B-Instruct-Q8_0.gguf"); // 7.2 T/s/M4 jdk 24
         //Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "Meta-Llama-3-8B-Instruct-Q4_0.gguf"); // 3.6 T/s/M4 jdk 24;
         //Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "OLMo-2-0425-1B-Instruct-Q4_0.gguf");
-        Context options = new Context("Write a Java program which computes the first 42 prime numbers.", "Be a very good programmer.", 0.0f, 0.95f, 0, 1024);
+        Context context = new Context("Write a Java program which computes the first 42 prime numbers.", "Be a very good programmer.", 0.0f, 0.95f, 0, 1024);
         Llama model = ModelLoader.loadModel(modelPath, 1024, true);
         // get time
         long startTime = System.currentTimeMillis();
-        Sampler sampler = Sampler.selectSampler(model.configuration().vocabularySize, options.temp, options.topp, options.seed);
-        List<Integer> resultToken = runInstructOnce(model, sampler, options, token -> {
-            if (!model.tokenizer().isSpecialToken(token)) {
-                System.out.print(model.tokenizer().decode(List.of(token)));
-            }
+        Sampler sampler = Sampler.selectSampler(model.configuration().vocabularySize, context.temp, context.topp, context.seed);
+        
+        runInteractive(model, sampler, context);
+        /*
+        List<String> resultToken = runInstruct(model, sampler, context, token -> {
+            System.out.print(token);
         });
         long endTime = System.currentTimeMillis();
         System.out.println("\nToken: " + resultToken.size() + ", " + ((double) resultToken.size()) * 1000.0d / ((double) (endTime - startTime)) + " Tokens per second");
+        */
     }
 }
 
