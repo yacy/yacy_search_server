@@ -67,6 +67,15 @@ public class LLM {
         tldr
     }
     
+    public static class LLMModel {
+        public LLM llm;
+        public String model;
+        public LLMModel(LLM llm, String model) {
+            this.llm = llm;
+            this.model = model;
+        }
+    }
+    
     public final String hoststub;
     public final String api_key;
     public final int max_tokens; // the max_tokens as configured by the endpoint for all models
@@ -84,7 +93,7 @@ public class LLM {
      * @param llmUsage
      * @return
      */
-    public LLM llmFromUsage(LLMUsage llmUsage) {
+    public static LLMModel llmFromUsage(LLMUsage llmUsage) {
         Switchboard sb = Switchboard.getSwitchboard();
         String pms = sb.getConfig("ai.production_models", "[]");
         try {
@@ -100,7 +109,9 @@ public class LLM {
                     final int max_tokens = Integer.parseInt(row.optString("max_tokens", "4096"));
                     final String model = row.optString("model", "");
                     final LLMType type = LLMType.valueOf(row.optString("service", "OLLAMA"));
-                    return new LLM(hoststub, api_key, max_tokens, type);
+                    LLM llm = new LLM(hoststub, api_key, max_tokens, type);
+                    LLMModel llmmodel = new LLMModel(llm, model);
+                    return llmmodel;
                 }
             }
         } catch (JSONException | NumberFormatException e) {
