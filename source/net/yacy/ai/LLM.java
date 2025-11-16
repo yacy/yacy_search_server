@@ -37,6 +37,9 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import net.yacy.search.Switchboard;
 
 public class LLM {
 
@@ -54,17 +57,58 @@ public class LLM {
         }
     }
     
+    public static enum LLMUsage {
+        search,
+        chat,
+        translation,
+        classification,
+        query,
+        qapairs,
+        tldr
+    }
+    
     public final String hoststub;
-    public final String key; // the apikey
+    public final String api_key;
     public final int max_tokens; // the max_tokens as configured by the endpoint for all models
     public final LLMType type;
     
-    public LLM(final String hoststub, String key, final int max_tokens, final LLMType type) {
+    public LLM(final String hoststub, final String api_key, final int max_tokens, final LLMType type) {
         this.hoststub = hoststub.endsWith("/") ? hoststub.substring(0, hoststub.length() - 1) : hoststub;
-        this.key = key == null ? "" : key;
+        this.api_key = api_key == null ? "" : api_key;
         this.max_tokens = max_tokens <= 0 ? 4096 : max_tokens;
         this.type = type;
     }
+    
+    /**
+     * The following function picks up the right model that was configured in the LLMSelection.
+     * @param llmUsage
+     * @return
+     */
+    public LLM llmFromUsage(LLMUsage llmUsage) {
+        Switchboard sb = Switchboard.getSwitchboard();
+        String pms = sb.getConfig("ai.production_models", "[]");
+        try {
+            JSONArray production_models = new JSONArray(new JSONTokener(pms));
+            // got through all the selected models to find which one has the wanted usage flag switched on
+            for (int i = 0; i < production_models.length(); i++) {
+                JSONObject row = production_models.getJSONObject(i);
+                boolean switched_on = row.optBoolean(llmUsage.name(), false);
+                if (switched_on) {
+                    // found one that shall be used for this use case
+                    final String hoststub = row.optString("hoststub", "");
+                    final String api_key = row.optString("api_key", "");
+                    final int max_tokens = Integer.parseInt(row.optString("max_tokens", "4096"));
+                    final String model = row.optString("model", "");
+                    final LLMType type = LLMType.valueOf(row.optString("service", "OLLAMA"));
+                    return new LLM(hoststub, api_key, max_tokens, type);
+                }
+            }
+        } catch (JSONException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+        // so if we don't find a model for that specific usage, we purposely return null to show that there is a missing configuration
+        return null;
+    }    
     
     public String getHoststub() {
 		return this.hoststub;
@@ -73,7 +117,7 @@ public class LLM {
 
     // API Helper Methods
 
-    public static String sendPostRequest(final String urls, final JSONObject data) throws IOException, URISyntaxException {
+    private static String sendPostRequest(final String urls, final JSONObject data) throws IOException, URISyntaxException {
         final URL url = new URI(urls).toURL();
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -100,7 +144,7 @@ public class LLM {
         }
     }
 
-    public static String sendGetRequest(final String urls) throws IOException, URISyntaxException {
+    private static String sendGetRequest(final String urls) throws IOException, URISyntaxException {
         final URL url = new URI(urls).toURL();
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
