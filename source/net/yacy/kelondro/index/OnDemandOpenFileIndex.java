@@ -122,8 +122,8 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
         final Index index = this.getIndex();
         if (index == null) return;
         try {
-        index.clear();
-        this.sizecache = 0;
+            index.clear();
+            this.sizecache = 0;
         } catch (final IOException e) {
             throw e;
         } finally {
@@ -139,6 +139,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     @Override
     public synchronized void deleteOnExit() {
         final Index index = this.getIndex();
+        if (index == null) return;
         index.deleteOnExit();
         index.close();
     }

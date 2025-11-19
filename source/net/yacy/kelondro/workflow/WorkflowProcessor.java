@@ -180,7 +180,8 @@ public class WorkflowProcessor<J extends WorkflowJob> {
             return;
         }        
         // execute concurrent in thread
-        while (this.input != null) {
+        int failcount = 0; // to prevent endless loops
+        while (this.input != null && failcount < 10) {
             try {
                 this.input.put(in);
                 if (this.input.size() > this.executorRunning.get() && this.executorRunning.get() < this.maxpoolsize) synchronized (executor) {
@@ -191,6 +192,8 @@ public class WorkflowProcessor<J extends WorkflowJob> {
                 }
                 break;
             } catch (final Throwable e) {
+                failcount++;
+                ConcurrentLog.logException(e);
                 try {Thread.sleep(10);} catch (final InterruptedException ee) {}
             }
         }

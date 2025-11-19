@@ -321,6 +321,7 @@ public class BEncodedHeap implements MapStore {
             return null;
         }
         final Map<String, byte[]> map = b2m(b);
+        if (map == null) return null;
         return map.get(key);
     }
 

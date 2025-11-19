@@ -123,7 +123,7 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
     public static final SortedMap<String, Set<String>> decompressIndex(ByteBuffer ci, final String peerhash) {
         SortedMap<String, Set<String>> target = Collections.synchronizedSortedMap(new TreeMap<String, Set<String>>());
         // target is a mapping from url-hashes to a string of peer-hashes
-        if (ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
+        if (ci.isEmpty() || ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
         //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
         ci = ci.trim(1, ci.length() - 2);
         String dom, url;

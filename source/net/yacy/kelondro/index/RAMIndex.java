@@ -120,7 +120,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         final byte[] b0 = this.index0.smallestKey();
         if (b0 == null) return null;
         if (this.index1 == null) return b0;
-        final byte[] b1 = this.index0.smallestKey();
+        final byte[] b1 = this.index1.smallestKey();
         if (b1 == null || this.rowdef.objectOrder.compare(b1, b0) > 0) return b0;
         return b1;
     }
@@ -130,7 +130,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         final byte[] b0 = this.index0.largestKey();
         if (b0 == null) return null;
         if (this.index1 == null) return b0;
-        final byte[] b1 = this.index0.largestKey();
+        final byte[] b1 = this.index1.largestKey();
         if (b1 == null || this.rowdef.objectOrder.compare(b0, b1) > 0) return b0;
         return b1;
     }

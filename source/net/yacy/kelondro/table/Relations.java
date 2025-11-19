@@ -51,6 +51,7 @@ public class Relations {
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.baseDir = location;
+        this.relations = new HashMap<>();
         this.useTailCache = useTailCache;
         this.exceed134217727 = exceed134217727;
     }
@@ -86,7 +87,7 @@ public class Relations {
         final Index relation = this.relations.get(name);
         if (relation != null) return;
         // try to find the relation as stored on file
-        final String[] list = this.baseDir.list();
+        final String[] list = this.baseDir.exists() && this.baseDir.isDirectory() ? this.baseDir.list() : new String[0];
         final String targetfilename = filename(name, keysize, payloadsize);
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {

@@ -90,7 +90,7 @@ public class GuiHandler extends Handler {
     }
 
     @Override
-    public final void publish(final LogRecord record) {
+    public final synchronized void publish(final LogRecord record) {
         if (!this.isLoggable(record)) return;
         final int ix = (GuiHandler.start + GuiHandler.count) % GuiHandler.buffer.length;
         GuiHandler.buffer[ix] = this.getFormatter().format(record);
