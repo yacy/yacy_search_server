@@ -53,7 +53,17 @@
     <servlet>
         <servlet-name>RAGProxyServlet</servlet-name>
         <servlet-class>net.yacy.http.servlets.RAGProxyServlet</servlet-class>
-    </servlet>    
+    </servlet>
+    
+    <servlet>
+        <servlet-name>OllamaTagsServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.OllamaTagsServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>OpenAIModelsServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.OpenAIModelsServlet</servlet-class>
+    </servlet>
     
     <servlet>
         <servlet-name>MCPSearchServlet</servlet-name>
@@ -97,7 +107,17 @@
         <servlet-name>RAGProxyServlet</servlet-name>
         <url-pattern>/v1/chat/completions</url-pattern>
     </servlet-mapping>
-    
+
+    <servlet-mapping>
+        <servlet-name>OllamaTagsServlet</servlet-name>
+        <url-pattern>/api/tags</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OpenAIModelsServlet</servlet-name>
+        <url-pattern>/v1/models</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>MCPSearchServlet</servlet-name>
         <url-pattern>/tools</url-pattern>

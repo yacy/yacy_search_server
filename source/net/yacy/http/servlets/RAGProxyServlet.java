@@ -71,26 +71,11 @@ import net.yacy.search.schema.CollectionSchema;
  */
 public class RAGProxyServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 3411544789759603107L;
+    private static final long serialVersionUID = 3411544789759643137L;
 
-    // private static Boolean LLM_ENABLED = false;
-    // private static Boolean LLM_CONTROL_OLLAMA = true;
-    // private static Boolean LLM_ATTACH_QUERY = false; // instructs the proxy to
-    // attach the prompt generated to do the RAG search
-    // private static Boolean LLM_ATTACH_REFERENCES = false; // instructs the proxy
-    // to attach a list of sources that had been used in RAG
-    // private static String LLM_LANGUAGE = "en"; // used to select proper language
-    // in RAG augmentation
     private static String LLM_SYSTEM_PREFIX = "\n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.";
     private static String LLM_USER_PREFIX = "\n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n";
-    private static String LLM_API_HOST = "http://localhost:11434"; // Ollama port; install ollama from
-                                                                   // https://ollama.com/
-    private static String LLM_QUERY_MODEL = "llama3.2:1b";
-    private static String LLM_ANSWER_MODEL = "llama3.2:3b"; // or "phi3:3.8b" i.e. on a Raspberry Pi 5
-    private static Boolean LLM_API_MODEL_OVERWRITING = true; // if true, the value configured in YaCy overwrites the
-                                                             // client model
-    private static String LLM_API_KEY = ""; // not required; option to use this class to use a OpenAI API
-
+    
     @Override
     public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
         response.setContentType("application/json;charset=utf-8");
@@ -132,41 +117,57 @@ public class RAGProxyServlet extends HttpServlet {
         try {
             // get system message and user prompt
             bodyObject = new JSONObject(body);
+            // get chat functions
+            String model = bodyObject.optString("model", LLM.LLMUsage.chat.name());
+            //Double temperature = bodyObject.optDouble("temperature", 0.0);
+            //int max_tokens = bodyObject.optInt("max_tokens", 1024);
+            //boolean stream = bodyObject.optBoolean("stream", false);
+            boolean rag = bodyObject.optBoolean("rag", false);
+
+            // resolve true model name from configuration
+            LLM.LLMUsage usage = LLM.LLMUsage.chat;
+            try {usage = LLM.LLMUsage.valueOf(model);} catch (IllegalArgumentException e) {}
+            LLM.LLMModel llm4Chat = LLM.llmFromUsage(usage);
+            LLM.LLMModel llm4tldr = LLM.llmFromUsage(LLM.LLMUsage.tldr);
+            bodyObject.put("model", llm4Chat.model); // replace the model with the decoded model name
+            
+            // get messages
             JSONArray messages = bodyObject.optJSONArray("messages");
             JSONObject systemObject = messages.getJSONObject(0);
             String system = systemObject.optString("content", ""); // the system prompt
             JSONObject userObject = messages.getJSONObject(messages.length() - 1);
             String user = userObject.optString("content", ""); // this is the latest prompt
 
-            // modify system and user prompt here in bodyObject to enable RAG
-            String query = this.searchWordsForPrompt(LLM_QUERY_MODEL, user);
-            out.print(responseLine("Searching for '" + query + "'\n\n").toString() + "\n");
-            out.flush();
-            JSONArray searchResults = searchResults(query, 4, true);
-            out.print(responseLine("\n").toString());
-            out.flush();
-            system += LLM_SYSTEM_PREFIX;
-            user += LLM_USER_PREFIX;
-            for (int i  = 0; i < searchResults.length(); i++) {
-                JSONObject r = searchResults.getJSONObject(i);
-                String snippet = r.optString("snippet", "");
-                user += snippet + "\n\n";
+            // RAG
+            if (rag) {
+                // modify system and user prompt here in bodyObject to enable RAG
+                String query = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
+                out.print(responseLine("Searching for '" + query + "'\n\n").toString() + "\n");
+                out.flush();
+                JSONArray searchResults = searchResults(query, 4, true);
+                out.print(responseLine("\n").toString());
+                out.flush();
+                system += LLM_SYSTEM_PREFIX;
+                user += LLM_USER_PREFIX;
+                for (int i  = 0; i < searchResults.length(); i++) {
+                    JSONObject r = searchResults.getJSONObject(i);
+                    String snippet = r.optString("snippet", "");
+                    user += snippet + "\n\n";
+                }
+                systemObject.put("content", system);
+                userObject.put("content", user);
+    
+                // write back modified bodyMap to body
+                body = bodyObject.toString();
             }
-            systemObject.put("content", system);
-            userObject.put("content", user);
-
-            if (LLM_API_MODEL_OVERWRITING) bodyObject.put("model", LLM_ANSWER_MODEL);
-
-            // write back modified bodyMap to body
-            body = bodyObject.toString();
 
             // Open request to back-end service
-            URL url = new URI(LLM_API_HOST + "/v1/chat/completions").toURL();
+            URL url = new URI(llm4Chat.llm.hoststub + "/v1/chat/completions").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
-            if (!LLM_API_KEY.isEmpty()) {
-                conn.setRequestProperty("Authorization", "Bearer " + LLM_API_KEY);
+            if (!llm4Chat.llm.api_key.isEmpty()) {
+                conn.setRequestProperty("Authorization", "Bearer " + llm4Chat.llm.api_key);
             }
             conn.setDoOutput(true);
 
@@ -253,11 +254,10 @@ public class RAGProxyServlet extends HttpServlet {
         return r.toString();
     }
 
-    private String searchWordsForPrompt(String model, String prompt) {
+    private String searchWordsForPrompt(LLM llm, String model, String prompt) {
         StringBuilder query = new StringBuilder();
         String question = "Make a list of a maximum of four search words for the following question; use a JSON Array: " + prompt;
         try {
-            LLM llm = new LLM(LLM_API_HOST, null, 4096, LLM.LLMType.OLLAMA);
             LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX);
             context.addPrompt(question);
             String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 80));
