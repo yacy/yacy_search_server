@@ -30,7 +30,7 @@ import java.nio.FloatBuffer;
 
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public class DirectBufferFloatTensor extends FloatTensor {
+public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
 
     final FloatBuffer floatBuffer;
 
@@ -81,7 +81,7 @@ public class DirectBufferFloatTensor extends FloatTensor {
     }
 
     @Override
-    public final float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public final float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         float result = 0f;
         for (int j = 0; j < size; j++) {
             result += this.floatBuffer.get(thisOffset + j) * that.getFloat(thatOffset + j);

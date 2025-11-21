@@ -28,7 +28,7 @@ import java.lang.invoke.VarHandle;
 
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public final class Q4_0FloatTensor extends FloatTensor {
+public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
 
     private final int size;
     private final ByteBuffer buffer;
@@ -142,7 +142,7 @@ public final class Q4_0FloatTensor extends FloatTensor {
     public static final ThreadLocal<float[]> scratchBuffer = ThreadLocal.withInitial(() -> new float[GGMLType.Q4_0.blockSize]);
 
     @Override
-    public void copyTo(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public void copyTo(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         final float[] decoded = scratchBuffer.get();
         int remaining = size;
         int srcIndex = thisOffset;
@@ -172,7 +172,7 @@ public final class Q4_0FloatTensor extends FloatTensor {
      * dot product which has the getFloat method inlined in such a way that it processes full blocks at once.
      * This gains a > 2.5 times token/s performance increase compared to the generic dot-getFloat implementation.
      */
-    public final float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public final float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         float result = 0.0f;
         int index = 0;
         final int blockLimit = size - (size % GGMLType.Q4_0.blockSize);

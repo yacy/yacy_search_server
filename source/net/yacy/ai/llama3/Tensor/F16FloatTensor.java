@@ -28,7 +28,7 @@ import java.nio.ByteOrder;
 
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public final class F16FloatTensor extends FloatTensor {
+public final class F16FloatTensor extends FloatTensor implements Tensor {
 
     final int size;
     final ByteBuffer buffer;

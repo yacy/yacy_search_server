@@ -28,7 +28,7 @@ import java.lang.invoke.VarHandle;
 
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public final class ArrayFloatTensor extends FloatTensor {
+public final class ArrayFloatTensor extends FloatTensor implements Tensor {
 
     public final float[] values;
     private static final VarHandle FLOAT_ARRAY_HANDLE;
@@ -45,7 +45,7 @@ public final class ArrayFloatTensor extends FloatTensor {
         this.values = values;
     }
 
-    public static FloatTensor allocate(final int... dims) {
+    public static Tensor allocate(final int... dims) {
         int numberOfElements = FloatTensor.numberOfElements(dims);
         return new ArrayFloatTensor(new float[numberOfElements]);
     }
@@ -86,7 +86,7 @@ public final class ArrayFloatTensor extends FloatTensor {
     }
     
     @Override
-    public final void copyTo(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public final void copyTo(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
     	final int delta = thisOffset - thatOffset;
     	if (that instanceof ArrayFloatTensor) {
     		final ArrayFloatTensor aft = (ArrayFloatTensor) that;
@@ -103,7 +103,7 @@ public final class ArrayFloatTensor extends FloatTensor {
     }
     
     @Override
-    public final float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public final float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
     	float result = 0f;
     	if (that instanceof ArrayFloatTensor) {
     		final ArrayFloatTensor aft = (ArrayFloatTensor) that;
@@ -126,20 +126,20 @@ public final class ArrayFloatTensor extends FloatTensor {
     }
     
     @Override
-    public final void matmul(final FloatTensor that, final FloatTensor out, final int dim0, final int dim1) {
+    public final void matmul(final Tensor that, final Tensor out, final int dim0, final int dim1) {
     	if (that instanceof ArrayFloatTensor) {
-    		parallelFor(0, dim0, i -> ((ArrayFloatTensor) out).values[i] = this.dot(i * dim1, that, 0, dim1));
+    		Tensor.parallelFor(0, dim0, i -> ((ArrayFloatTensor) out).values[i] = this.dot(i * dim1, that, 0, dim1));
     	} else {
-    		parallelFor(0, dim0, i -> out.setFloat(i, this.dot(i * dim1, that, 0, dim1)));
+    		Tensor.parallelFor(0, dim0, i -> out.setFloat(i, this.dot(i * dim1, that, 0, dim1)));
     	}
     }
     
     @Override
-    public final void matmul(final int context, final FloatTensor[] that, final FloatTensor[] out, final int dim0, final int dim1) {
+    public final void matmul(final int context, final Tensor[] that, final Tensor[] out, final int dim0, final int dim1) {
         if (that.length != out.length) {
             throw new IllegalArgumentException(String.format("that.len=%d, out.len=%d", that.length, out.length));
         }
-        parallelForLong(0, dim0 * context, ti -> {
+        Tensor.parallelForLong(0, dim0 * context, ti -> {
             int idxArr = (int) (ti / dim0);
             int i = (int) (ti % dim0);
             out[idxArr].setFloat(i, this.dot(i * dim1, that[idxArr], 0, dim1));
@@ -147,7 +147,7 @@ public final class ArrayFloatTensor extends FloatTensor {
     }
 
     @Override
-    public final FloatTensor saxpyInPlace(final int thisOffset, final FloatTensor that, final int thatOffset, final int size, final float a) {
+    public final Tensor saxpyInPlace(final int thisOffset, final Tensor that, final int thatOffset, final int size, final float a) {
         if (that instanceof Q4_0FloatTensor) {
             Q4_0FloatTensor qft = (Q4_0FloatTensor) that;
             final float[] decodedBlock = Q4_0FloatTensor.scratchBuffer.get();

@@ -65,7 +65,7 @@ public final class Q8_0FloatTensor extends FloatTensor {
     }
 
     @Override
-    public float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         assert 0 <= thisOffset && thisOffset + size <= this.size;
         assert 0 <= thatOffset && thatOffset + size <= that.size();
 
@@ -113,7 +113,7 @@ public final class Q8_0FloatTensor extends FloatTensor {
     }
 
     @Override
-    public void copyTo(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
+    public void copyTo(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         assert 0 <= thisOffset && thisOffset + size <= this.size;
         assert 0 <= thatOffset && thatOffset + size <= that.size();
         
