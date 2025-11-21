@@ -38,84 +38,99 @@ public class Llama3 {
     // Batch-size used in prompt evaluation.
     private static final int BATCH_SIZE = Integer.getInteger("llama.BatchSize", 16);
 
-
-    static void runInteractive(Llama model, Sampler sampler, Context options) {
-        Llama.State state = null;
-        List<Integer> conversationTokens = new ArrayList<>();
-        ChatFormat chatFormat = new ChatFormat(model.tokenizer());
-        conversationTokens.add(chatFormat.beginOfText);
-        if (options.systemPrompt != null) {
-            conversationTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.SYSTEM, options.systemPrompt)));
+    Llama model;
+    
+    public Llama3(final Path modelPath, int contextLength) throws IOException {
+        this.model = ModelLoader.loadModel(modelPath, contextLength, true);
+    }
+    
+    public class TokenSampler {
+        Sampler sampler;
+        Context context;
+        
+        public TokenSampler(Context context) {
+            this.context = context;
+            sampler = Sampler.selectSampler(model.configuration().vocabularySize, context.temp, context.topp, context.seed);
         }
-        int startPosition = 0;
-        @SuppressWarnings("resource")
-        Scanner in = new Scanner(System.in);
-        while (true) {
-            System.out.print("\n> ");
-            System.out.flush();
-            String userText = in.nextLine();
-            if (state == null) {
-                state = model.createNewState(BATCH_SIZE);
+        
+
+        public void runInteractive() {
+            Llama.State state = null;
+            List<Integer> conversationTokens = new ArrayList<>();
+            ChatFormat chatFormat = new ChatFormat(model.tokenizer());
+            conversationTokens.add(chatFormat.beginOfText);
+            if (context.systemPrompt != null) {
+                conversationTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.SYSTEM, context.systemPrompt)));
             }
-            conversationTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.USER, userText)));
-            conversationTokens.addAll(chatFormat.encodeHeader(new ChatFormat.Message(ChatFormat.Role.ASSISTANT, "")));
-            Set<Integer> stopTokens = chatFormat.getStopTokens();
-            List<Integer> responseTokens = Llama.generateTokens(model, state, startPosition, conversationTokens.subList(startPosition, conversationTokens.size()), stopTokens, options.maxTokens, sampler, token -> {
-                if (!model.tokenizer().isSpecialToken(token)) {
-                    System.out.print(model.tokenizer().decode(List.of(token)));
+            int startPosition = 0;
+            @SuppressWarnings("resource")
+            Scanner in = new Scanner(System.in);
+            while (true) {
+                System.out.print("\n> ");
+                System.out.flush();
+                String userText = in.nextLine();
+                if (state == null) state = model.createNewState(BATCH_SIZE);
+                conversationTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.USER, userText)));
+                conversationTokens.addAll(chatFormat.encodeHeader(new ChatFormat.Message(ChatFormat.Role.ASSISTANT, "")));
+                Set<Integer> stopTokens = chatFormat.getStopTokens();
+                List<Integer> responseTokens = Llama.generateTokens(model, state, startPosition, conversationTokens.subList(startPosition, conversationTokens.size()), stopTokens, context.maxTokens, sampler, token -> {
+                    if (!model.tokenizer().isSpecialToken(token)) {
+                        System.out.print(model.tokenizer().decode(List.of(token)));
+                    }
+                });
+                // Include stop token in the prompt history, but not in the response displayed to the user.
+                conversationTokens.addAll(responseTokens);
+                startPosition = conversationTokens.size();
+                Integer stopToken = null;
+                if (!responseTokens.isEmpty() && stopTokens.contains(responseTokens.get(responseTokens.size()-1))) {
+                    stopToken = responseTokens.get(responseTokens.size()-1);
+                    responseTokens.remove(responseTokens.size()-1);
                 }
+                //System.out.println(model.tokenizer().decode(responseTokens));
+                if (stopToken == null) {
+                    System.out.println("Ran out of context length...");
+                    break;
+                }
+            }
+        }
+
+        public List<String> runInstruct(Consumer<String> onTokenGenerated) {
+            ArrayList <String> result = new ArrayList<>();
+            runInstructOnce(token -> {
+                String t = model.tokenizer().decode(List.of(token));
+                onTokenGenerated.accept(t);
+                result.add(t);
             });
-            // Include stop token in the prompt history, but not in the response displayed to the user.
-            conversationTokens.addAll(responseTokens);
-            startPosition = conversationTokens.size();
-            Integer stopToken = null;
+            return result;
+        }
+        
+        public List<Integer> runInstructOnce(IntConsumer onTokenGenerated) {
+            Llama.State state = model.createNewState(BATCH_SIZE);
+            ChatFormat chatFormat = new ChatFormat(model.tokenizer());
+
+            List<Integer> promptTokens = new ArrayList<>();
+            promptTokens.add(chatFormat.beginOfText);
+            if (context.systemPrompt != null) {
+                promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.SYSTEM, context.systemPrompt)));
+            }
+            //System.out.println("Context after System Prompt: " + toString(model, promptTokens));
+            promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.USER, context.prompt)));
+            //System.out.println("Context after User Prompt: " + toString(model, promptTokens));
+            promptTokens.addAll(chatFormat.encodeHeader(new ChatFormat.Message(ChatFormat.Role.ASSISTANT, "")));
+            //System.out.println("Context after Assistant Prompt: " + toString(model, promptTokens));
+
+            Set<Integer> stopTokens = chatFormat.getStopTokens();
+            List<Integer> responseTokens = Llama.generateTokens(model, state, 0, promptTokens, stopTokens, context.maxTokens, sampler, onTokenGenerated);
+
+            // remove stop token at the end of the response, if present
             if (!responseTokens.isEmpty() && stopTokens.contains(responseTokens.get(responseTokens.size()-1))) {
-                stopToken = responseTokens.get(responseTokens.size()-1);
                 responseTokens.remove(responseTokens.size()-1);
             }
             //System.out.println(model.tokenizer().decode(responseTokens));
-            if (stopToken == null) {
-                System.out.println("Ran out of context length...");
-                break;
-            }
+            return responseTokens;
         }
-    }
-
-    public static List<Integer> runInstructOnce(Llama model, Sampler sampler, Context context, IntConsumer onTokenGenerated) {
-        Llama.State state = model.createNewState(BATCH_SIZE);
-        ChatFormat chatFormat = new ChatFormat(model.tokenizer());
-
-        List<Integer> promptTokens = new ArrayList<>();
-        promptTokens.add(chatFormat.beginOfText);
-        if (context.systemPrompt != null) {
-            promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.SYSTEM, context.systemPrompt)));
-        }
-        //System.out.println("Context after System Prompt: " + toString(model, promptTokens));
-        promptTokens.addAll(chatFormat.encodeMessage(new ChatFormat.Message(ChatFormat.Role.USER, context.prompt)));
-        //System.out.println("Context after User Prompt: " + toString(model, promptTokens));
-        promptTokens.addAll(chatFormat.encodeHeader(new ChatFormat.Message(ChatFormat.Role.ASSISTANT, "")));
-        //System.out.println("Context after Assistant Prompt: " + toString(model, promptTokens));
-
-        Set<Integer> stopTokens = chatFormat.getStopTokens();
-        List<Integer> responseTokens = Llama.generateTokens(model, state, 0, promptTokens, stopTokens, context.maxTokens, sampler, onTokenGenerated);
-
-        // remove stop token at the end of the response, if present
-        if (!responseTokens.isEmpty() && stopTokens.contains(responseTokens.get(responseTokens.size()-1))) {
-            responseTokens.remove(responseTokens.size()-1);
-        }
-        //System.out.println(model.tokenizer().decode(responseTokens));
-        return responseTokens;
     }
     
-    public static List<String> runInstruct(Llama model, Sampler sampler, Context context, Consumer<String> onTokenGenerated) {
-        ArrayList <String> result = new ArrayList<>();
-        runInstructOnce(model, sampler, context, token -> {
-            String t = model.tokenizer().decode(List.of(token));
-            onTokenGenerated.accept(t);
-            result.add(t);
-        });
-        return result;
-    }
     
     public static String toString(Llama model, List<Integer> tokens) {
         return model.tokenizer().decode(tokens);
@@ -132,6 +147,11 @@ public class Llama3 {
     	// semeru 21 : 1.13 T/s
     	// GraalVM 21: 2.27 T/s
     	// openjdk 21: 3.02 T/s; 3.2 with VarHandle
+        
+        // performance on M4 Max:
+        // JVM version 21.0.5+11-LTS: 24.5 T/s
+        
+        System.out.println("JVM version " + Runtime.version());
 
         Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "Llama-3.2-1B-Instruct-Q4_0.gguf"); // 26.7 T/s/M4 orig jdk 21; 24.9 T/s/M4 Temurin 24; 25.8 T/s/M4 jdk 21; 22.2 T/s/M4 GraalVM21; 9.2 T/s/M4 Semeru 11; 9.2 T/s/M1 Ultra jdk 11
         //Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "Llama-3.2-1B-Instruct-Q8_0.gguf"); // 10.7 T/s/M4 orig jdk 21; 21.2 T/s/M4 Temurin 24; 22 T/s/M4 jdk 21; 18 T/s/M4 GraalVM21; 5.8 T/s/M4 Semeru 11; 6.7 T/s/M1 Ultra jdk 11
@@ -140,19 +160,20 @@ public class Llama3 {
         //Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "Meta-Llama-3-8B-Instruct-Q4_0.gguf"); // 3.6 T/s/M4 jdk 24;
         //Path modelPath = Path.of("/Users/admin/git/yacy_search_server", "DATA", "LLMS", "OLMo-2-0425-1B-Instruct-Q4_0.gguf");
         Context context = new Context("Write a Java program which computes the first 42 prime numbers.", "Be a very good programmer.", 0.0f, 0.95f, 0, 1024);
-        Llama model = ModelLoader.loadModel(modelPath, 1024, true);
+        Llama3 llama3 = new Llama3(modelPath, 1024);
         // get time
         long startTime = System.currentTimeMillis();
-        Sampler sampler = Sampler.selectSampler(model.configuration().vocabularySize, context.temp, context.topp, context.seed);
-        
-        runInteractive(model, sampler, context);
-        /*
-        List<String> resultToken = runInstruct(model, sampler, context, token -> {
+        Llama3.TokenSampler tokenSampler = llama3.new TokenSampler(context);
+
+        // run once
+        List<String> resultToken = tokenSampler.runInstruct(token -> {
             System.out.print(token);
         });
         long endTime = System.currentTimeMillis();
         System.out.println("\nToken: " + resultToken.size() + ", " + ((double) resultToken.size()) * 1000.0d / ((double) (endTime - startTime)) + " Tokens per second");
-        */
+        
+        // run interactive
+        //tokenSampler.runInteractive();
     }
 }
 
