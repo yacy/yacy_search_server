@@ -46,7 +46,7 @@ public final class ArrayFloatTensor extends FloatTensor implements Tensor {
     }
 
     public static Tensor allocate(final int... dims) {
-        int numberOfElements = FloatTensor.numberOfElements(dims);
+        int numberOfElements = Tensor.numberOfElements(dims);
         return new ArrayFloatTensor(new float[numberOfElements]);
     }
 

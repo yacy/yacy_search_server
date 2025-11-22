@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import net.yacy.ai.llama3.Model.Arch;
 import net.yacy.ai.llama3.Model.Tokenizer;
-import net.yacy.ai.llama3.Tensor.ArrayFloatTensor;
+import net.yacy.ai.llama3.Tensor.DirectBufferFloatTensor;
 import net.yacy.ai.llama3.Tensor.Tensor;
 
 public final class Llama {
@@ -196,16 +196,16 @@ public final class Llama {
             this.att = allocate(batchsize, config.numberOfHeads, config.contextLength);
             idxPrevBlock = -1;
 
-            this.logits = ArrayFloatTensor.allocate(config.vocabularySize);
+            this.logits = DirectBufferFloatTensor.allocate(config.vocabularySize);
             int kvDim = (config.dim * config.numberOfKeyValueHeads) / config.numberOfHeads;
-            this.keyCache = Stream.generate(() -> ArrayFloatTensor.allocate(config.contextLength, kvDim)).limit(config.numberOfLayers).toArray(Tensor[]::new);
-            this.valueCache = Stream.generate(() -> ArrayFloatTensor.allocate(config.contextLength, kvDim)).limit(config.numberOfLayers).toArray(Tensor[]::new);
+            this.keyCache = Stream.generate(() -> DirectBufferFloatTensor.allocate(config.contextLength, kvDim)).limit(config.numberOfLayers).toArray(Tensor[]::new);
+            this.valueCache = Stream.generate(() -> DirectBufferFloatTensor.allocate(config.contextLength, kvDim)).limit(config.numberOfLayers).toArray(Tensor[]::new);
         }
 
-        private static ArrayFloatTensor[] allocate(int numTokens, int... dims) {
+        private static Tensor[] allocate(int numTokens, int... dims) {
             return IntStream.range(0, numTokens)
-                    .mapToObj(i -> ArrayFloatTensor.allocate(dims))
-                    .toArray(ArrayFloatTensor[]::new);
+                    .mapToObj(i -> DirectBufferFloatTensor.allocate(dims))
+                    .toArray(Tensor[]::new);
         }
 
     }

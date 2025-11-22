@@ -32,29 +32,30 @@ import net.yacy.ai.llama3.Model.GGMLType;
 
 public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
 
+    final ByteBuffer byteBuffer; // must be direct
     final FloatBuffer floatBuffer;
 
-    public DirectBufferFloatTensor(ByteBuffer byteBuffer) {
-        if (byteBuffer.isDirect()) {
-            this.floatBuffer = byteBuffer.asFloatBuffer();
+    public DirectBufferFloatTensor(ByteBuffer bb) {
+        if (bb.isDirect()) {
+            this.byteBuffer = bb;
         } else {
-            int capacityBytes = byteBuffer.remaining();
-            ByteBuffer directByteBuffer = ByteBuffer.allocateDirect(capacityBytes).order(byteBuffer.order());
-            directByteBuffer.put(byteBuffer.duplicate());
-            directByteBuffer.flip();
-            this.floatBuffer = directByteBuffer.asFloatBuffer();
+            int capacityBytes = bb.remaining();
+            this.byteBuffer = ByteBuffer.allocateDirect(capacityBytes).order(bb.order());
+            this.byteBuffer.put(bb.duplicate());
+            this.byteBuffer.flip();
         }
+        this.floatBuffer = this.byteBuffer.asFloatBuffer();
     }
     
     public DirectBufferFloatTensor(final float[] values) {
         int capacityBytes = values.length * Float.BYTES;
-        ByteBuffer directByteBuffer = ByteBuffer.allocateDirect(capacityBytes).order(ByteOrder.nativeOrder());
-        this.floatBuffer = directByteBuffer.asFloatBuffer();
+        this.byteBuffer = ByteBuffer.allocateDirect(capacityBytes).order(ByteOrder.nativeOrder());
+        this.floatBuffer = this.byteBuffer.asFloatBuffer();
         this.floatBuffer.put(values);
     }
 
-    public static FloatTensor allocate(final int... dims) {
-        int numberOfElements = FloatTensor.numberOfElements(dims);
+    public static Tensor allocate(final int... dims) {
+        int numberOfElements = Tensor.numberOfElements(dims);
         int bytesNeeded = numberOfElements * Float.BYTES;
         ByteBuffer buffer = ByteBuffer.allocateDirect(bytesNeeded).order(ByteOrder.nativeOrder());
         return new DirectBufferFloatTensor(buffer);
@@ -74,12 +75,29 @@ public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
     public final void setFloat(final int index, final float value) {
         this.floatBuffer.put(index, value);
     }
-
+    
     @Override
     public final GGMLType type() {
         return GGMLType.F32;
     }
 
+    @Override
+    public int argmax() {
+        int size = this.size();
+        assert size > 0;
+        int maxIndex = 0;
+        float maxValue = this.floatBuffer.get(maxIndex);
+        int endIndex = size;
+        for (int i = 0; i < endIndex; ++i) {
+            float f = this.floatBuffer.get(i);
+            if (f > maxValue) {
+                maxValue = f;
+                maxIndex = i;
+            }
+        }
+        return maxIndex;
+    }
+    
     @Override
     public final float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         float result = 0f;
@@ -90,10 +108,19 @@ public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
     }
 
     @Override
+    public final Tensor mapWithIndexInPlace(final int thisOffset, final int size, final Tensor.MapWithIndexFunction mapWithIndexFunction) {
+        int endOffset = thisOffset + size;
+        for (int i = thisOffset; i < endOffset; ++i) {
+            this.floatBuffer.put(i, mapWithIndexFunction.apply(this.floatBuffer.get(i), i));
+        }
+        return this;
+    }
+    
+    @Override
     public final FloatTensor fillInPlace(final int thisOffset, final int size, final float value) {
         int end = thisOffset + size;
         for (int i = thisOffset; i < end; i++) {
-            floatBuffer.put(i, value);
+            this.floatBuffer.put(i, value);
         }
         return this;
     }
@@ -102,8 +129,17 @@ public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
     public final FloatTensor mapInPlace(final int thisOffset, final int size, MapFunction mapFunction) {
         int end = thisOffset + size;
         for (int i = thisOffset; i < end; i++) {
-            float current = floatBuffer.get(i);
-            floatBuffer.put(i, mapFunction.apply(current));
+            float current = this.floatBuffer.get(i);
+            this.floatBuffer.put(i, mapFunction.apply(current));
+        }
+        return this;
+    }
+
+    @Override
+    public Tensor saxpyInPlace(final int thisOffset, final Tensor that, final int thatOffset, final int size, final float a) {
+        // this[thatOffset ... thatOffset + size) = a * that[thatOffset ... thatOffset + size) + this[thisOffset ... thisOffset + size)
+        for (int i = 0; i < size; ++i) {
+            this.floatBuffer.put(thisOffset + i, a * that.getFloat(thatOffset + i) + this.floatBuffer.get(thisOffset + i));
         }
         return this;
     }

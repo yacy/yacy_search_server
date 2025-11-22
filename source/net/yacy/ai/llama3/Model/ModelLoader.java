@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import net.yacy.ai.llama3.Llama;
-import net.yacy.ai.llama3.Tensor.FloatTensor;
+import net.yacy.ai.llama3.Tensor.Tensor;
 
 public final class ModelLoader {
     private static final String TOKENIZER_LLAMA_3_MODEL = "gpt2";
@@ -169,7 +169,7 @@ public final class ModelLoader {
         float[] ropeFreqsImag = ropeFreqs.second();
     
     
-        FloatTensor tokenEmbeddingTable = tensorEntries.get("token_embd.weight").loadQuantized();
+        Tensor tokenEmbeddingTable = tensorEntries.get("token_embd.weight").loadQuantized();
         Llama.Weights qw = new Llama.Weights(
                 tokenEmbeddingTable,
                 loadArrayOfFloatBuffer(config.numberOfLayers, i -> tensorEntries.get("blk." + i + ".attn_norm.weight")),
@@ -256,8 +256,8 @@ public final class ModelLoader {
     }
     
 
-    private static FloatTensor[] loadArrayOfQuantized(int size, IntFunction<GGMLTensorEntry> getTensorEntry) {
-        FloatTensor[] array = new FloatTensor[size];
+    private static Tensor[] loadArrayOfQuantized(int size, IntFunction<GGMLTensorEntry> getTensorEntry) {
+        Tensor[] array = new Tensor[size];
         for (int i = 0; i < size; i++) {
             array[i] = getTensorEntry.apply(i).loadQuantized();
         }

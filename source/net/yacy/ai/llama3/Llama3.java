@@ -150,6 +150,7 @@ public class Llama3 {
         
         // performance on M4 Max:
         // JVM version 21.0.5+11-LTS: 24.5 T/s
+        // JVM version 21.0.7+6-LTS:  17.6 T/s
         
         System.out.println("JVM version " + Runtime.version());
 

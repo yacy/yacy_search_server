@@ -22,8 +22,6 @@
 
 package net.yacy.ai.llama3.Tensor;
 
-import java.util.Arrays;
-
 import net.yacy.ai.llama3.Model.GGMLType;
 
 /**
@@ -113,11 +111,6 @@ public abstract class FloatTensor implements Tensor {
     
     abstract GGMLType type();
 
-    public static int numberOfElements(final int... dimensions) {
-        assert Arrays.stream(dimensions).allMatch(i -> i > 0);
-        return Arrays.stream(dimensions).reduce(Math::multiplyExact).orElseThrow();
-    }
-
     public static float scalarDot(final FloatTensor thiz, final int thisOffset, final Tensor that, final int thatOffset, final int size) {
         float result = 0f;
         for (int j = 0; j < size; j++) {
@@ -173,12 +166,13 @@ public abstract class FloatTensor implements Tensor {
         }
     }
     
-    private int argmax(final int thisOffset, final int size) {
+    public int argmax() {
+        int size = this.size();
         assert size > 0;
-        int maxIndex = thisOffset;
+        int maxIndex = 0;
         float maxValue = this.getFloat(maxIndex);
-        int endIndex = thisOffset + size;
-        for (int i = thisOffset; i < endIndex; ++i) {
+        int endIndex = size;
+        for (int i = 0; i < endIndex; ++i) {
             float f = this.getFloat(i);
             if (f > maxValue) {
                 maxValue = f;
@@ -188,14 +182,10 @@ public abstract class FloatTensor implements Tensor {
         return maxIndex;
     }
 
-    public int argmax() {
-        return argmax(0, size());
-    }
-
     public Tensor mapInPlace(final int thisOffset, final int size, MapFunction mapFunction) {
         int endIndex = thisOffset + size;
         for (int i = thisOffset; i < endIndex; ++i) {
-            setFloat(i, mapFunction.apply(getFloat(i)));
+            this.setFloat(i, mapFunction.apply(this.getFloat(i)));
         }
         return this;
     }
@@ -204,10 +194,10 @@ public abstract class FloatTensor implements Tensor {
         return mapInPlace(0, size(), mapFunction);
     }
 
-    public final Tensor mapWithIndexInPlace(final int thisOffset, final int size, final Tensor.MapWithIndexFunction mapWithIndexFunction) {
+    public Tensor mapWithIndexInPlace(final int thisOffset, final int size, final Tensor.MapWithIndexFunction mapWithIndexFunction) {
         int endOffset = thisOffset + size;
         for (int i = thisOffset; i < endOffset; ++i) {
-            setFloat(i, mapWithIndexFunction.apply(getFloat(i), i));
+            this.setFloat(i, mapWithIndexFunction.apply(this.getFloat(i), i));
         }
         return this;
     }

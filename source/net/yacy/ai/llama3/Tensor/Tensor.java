@@ -23,6 +23,7 @@
 
 package net.yacy.ai.llama3.Tensor;
 
+import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 import java.util.stream.IntStream;
@@ -75,7 +76,12 @@ public interface Tensor {
     public Tensor softmaxInPlace(final int thisOffset, final int size);
     
     public Tensor saxpyInPlace(final int thisOffset, final Tensor that, final int thatOffset, final int size, final float a);
-    
+
+    public static int numberOfElements(final int... dimensions) {
+        assert Arrays.stream(dimensions).allMatch(i -> i > 0);
+        return Arrays.stream(dimensions).reduce(Math::multiplyExact).orElseThrow();
+    }
+
     public static void parallelFor(final int startInclusive, final int endExclusive, final IntConsumer action) {
         if (startInclusive == 0 && endExclusive == 1) {
             action.accept(0);

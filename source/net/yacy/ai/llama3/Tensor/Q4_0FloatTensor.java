@@ -189,6 +189,7 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
             final int quantOffset = thisBlockOffset + QUANT_FLOAT16_BYTES;
             float blockResult = 0.0f;
             final int thatIndex = thatOffset + index;
+            /*
             if (that instanceof ArrayFloatTensor) {
                 final ArrayFloatTensor thatArray = (ArrayFloatTensor) that;
                 final float[] b = thatArray.values;
@@ -198,12 +199,19 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
                     final float valB1 = (float) FLOAT_ARRAY_HANDLE.get(b, thatIndex + i + QUANT_HALF_BLOCK);
                     blockResult += ((packed & 0x0F) - 8) * valB0 + (((packed >>> 4) & 0x0F) - 8) * valB1;
                 }
-            } else {
+            } else if (that instanceof DirectBufferFloatTensor) {
+                final DirectBufferFloatTensor thatArray = (DirectBufferFloatTensor) that;
+                final FloatBuffer b = thatArray.floatBuffer;
+                for (int i = 0; i < QUANT_HALF_BLOCK; ++i) {
+                    final byte packed = buffer.get(quantOffset + i);
+                    blockResult += ((packed & 0x0F) - 8) * b.get(thatIndex + i) + (((packed >>> 4) & 0x0F) - 8) * b.get(thatIndex + i + QUANT_HALF_BLOCK);
+                }
+            } else {*/
                 for (int i = 0; i < QUANT_HALF_BLOCK; ++i) {
                     final byte packed = buffer.get(quantOffset + i);
                     blockResult += ((packed & 0x0F) - 8) * that.getFloat(thatIndex + i) + (((packed >>> 4) & 0x0F) - 8) * that.getFloat(thatIndex + i + QUANT_HALF_BLOCK);
                 }
-            }
+            //}
             result += blockResult * thisScale;
             index += GGMLType.Q4_0.blockSize;
         }
