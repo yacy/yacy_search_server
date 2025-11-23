@@ -3,6 +3,7 @@
   <head>
     <title>YaCy '#[clientname]#': Chat</title>
     #%env/templates/metas.template%#
+    <link rel="stylesheet" href="js/styles/a11y-dark.min.css" type="text/css" />
     <style type="text/css">
       /* 1. Global Container */
       .chat-panel {
@@ -76,7 +77,7 @@
         border-color: #bbccdd;
         color: #000;
       }
-    
+
       .chat-turn.assistant legend {
         background: #2c3e50; 
         color: #ffffff;
@@ -95,10 +96,60 @@
     
       /* 5. Typography - All Chat Content is MONOSPACE */
       .chat-body {
-        white-space: pre-wrap;
         line-height: 1.6;
         font-size: 1.2rem; /* Larger font size */
         font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+      }
+
+      .chat-body.plain-text {
+        white-space: pre-wrap;
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+      }
+
+      .chat-body.markdown {
+        white-space: normal;
+      }
+
+      .chat-body.markdown,
+      .chat-body.markdown * {
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace !important; /* Force markdown output and descendants to stay monospace, FTW! */
+      }
+
+      .chat-body.markdown.markdown-body {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .chat-body.markdown h1,
+      .chat-body.markdown h2,
+      .chat-body.markdown h3,
+      .chat-body.markdown h4,
+      .chat-body.markdown h5,
+      .chat-body.markdown h6,
+      .chat-body.markdown p,
+      .chat-body.markdown li,
+      .chat-body.markdown pre,
+      .chat-body.markdown code {
+        font-size: 1.2rem;
+        line-height: 1.6;
+      }
+
+      .chat-body pre {
+        background-color: #2c3e50;
+        border: 1px solid #dfe2e5;
+        border-radius: 4px;
+        padding: 2px;
+        overflow-x: auto;
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+        white-space: pre;
+      }
+
+      .chat-body code {
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+        font-size: 0.95rem;
+        background-color: rgba(27,31,35,0.05);
+        padding: 2px 4px;
+        border-radius: 4px;
       }
     
       /* 6. Composer Row (inside User fieldset) */
@@ -319,6 +370,9 @@
         </div>
       </div>
 
+    <script src="js/highlight.min.js"></script>
+    <script src="js/marked.umd.js"></script>
+    <script src="js/index.umd.min.js"></script>
     <script type="text/javascript">
     const SYSTEM_PROMPT = 'You are a smart and helpful chatbot. If possible, use friendly emojies.';
     const defaultApiHost = '';
@@ -356,6 +410,179 @@
         toggleSystemButton: document.getElementById('toggleSystemButton'),
         composerMain: document.getElementById('composerMain')
     };
+
+    if (typeof hljs !== 'undefined') {
+        hljs.configure({ ignoreUnescapedHTML: true });
+    }
+
+    const languageAlias = {
+        js: 'javascript',
+        jsx: 'javascript',
+        ts: 'typescript',
+        tsx: 'typescript',
+        sh: 'bash',
+        shell: 'bash',
+        bash: 'bash',
+        csharp: 'csharp',
+        'c#': 'csharp',
+        'c++': 'cpp',
+        py: 'python',
+        rb: 'ruby',
+        rs: 'rust',
+        md: 'markdown',
+        yml: 'yaml'
+    };
+
+    const languagePromises = {};
+
+    function normalizeLanguage(lang) {
+        if (!lang || typeof lang !== 'string') return '';
+        const key = lang.trim().toLowerCase();
+        return languageAlias[key] || key;
+    }
+
+    function ensureLanguage(lang) {
+        if (typeof hljs === 'undefined') return Promise.resolve(false);
+        const normalized = normalizeLanguage(lang);
+        if (!normalized) return Promise.resolve(false);
+        if (hljs.getLanguage(normalized)) return Promise.resolve(true);
+        if (languagePromises[normalized]) return languagePromises[normalized];
+        const loadScript = path => new Promise(resolve => {
+            const script = document.createElement('script');
+            script.src = path;
+            script.async = true;
+            script.onload = () => resolve(!!hljs.getLanguage(normalized));
+            script.onerror = () => {
+                console.warn('Failed to load highlight.js language file:', path);
+                resolve(false);
+            };
+            document.head.appendChild(script);
+        });
+        const base = (window.location && window.location.origin) ? window.location.origin : '';
+        const minSrc = `${base}/js/languages/${normalized}.min.js`;
+        const fullSrc = `${base}/js/languages/${normalized}.js`;
+        languagePromises[normalized] = loadScript(minSrc).then(success => {
+            if (success) return true;
+            return loadScript(fullSrc);
+        }).then(success => success || !!hljs.getLanguage(normalized));
+        return languagePromises[normalized];
+    }
+
+    function rehighlightCode(container) {
+        if (!container || typeof hljs === 'undefined') return;
+        const codeBlocks = Array.from(container.querySelectorAll('pre code'));
+        if (!codeBlocks.length) return;
+        const tasks = codeBlocks
+            .map(block => Array.from(block.classList).find(cls => cls.startsWith('language-')))
+            .map(match => match ? normalizeLanguage(match.replace(/^language-/, '')) : '')
+            .filter(Boolean)
+            .map(lang => ensureLanguage(lang));
+        Promise.all(tasks).then(() => {
+            codeBlocks.forEach(block => {
+                try {
+                    hljs.highlightElement(block);
+                } catch (err) {
+                    // ignore highlight failures
+                }
+            });
+        });
+    }
+
+    const markdownSupport = (() => {
+        if (typeof marked === 'undefined') {
+            return { enabled: false };
+        }
+        try {
+            if (window.markedHighlight && typeof window.markedHighlight.markedHighlight === 'function' && typeof hljs !== 'undefined') {
+                marked.use(window.markedHighlight.markedHighlight({
+                    langPrefix: 'hljs language-',
+                    highlight: (code, lang) => {
+                        const language = normalizeLanguage(lang);
+                        ensureLanguage(language);
+                        if (language && hljs.getLanguage(language)) {
+                            return hljs.highlight(code, { language }).value;
+                        }
+                        // kick off lazy load; will rehighlight after render
+                        return escapeHTML(code);
+                    }
+                }));
+            }
+        } catch (err) {
+            console.warn('Failed to initialize syntax highlighting', err);
+        }
+        marked.setOptions({
+            gfm: true,
+            breaks: true,
+            smartLists: true,
+            mangle: false,
+            headerIds: false
+        });
+        return { enabled: true };
+    })();
+
+    function escapeHTML(value) {
+        const div = document.createElement('div');
+        div.textContent = value || '';
+        return div.innerHTML;
+    }
+
+    function sanitizeHTML(html) {
+        if (!html) return '';
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        const blockedTags = new Set(['script', 'style', 'iframe', 'object', 'embed', 'link', 'meta']);
+        const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT, null);
+        const toRemove = [];
+        while (walker.nextNode()) {
+            const el = walker.currentNode;
+            if (!el || !el.tagName) continue;
+            const tag = el.tagName.toLowerCase();
+            if (blockedTags.has(tag)) {
+                toRemove.push(el);
+                continue;
+            }
+            for (const attr of Array.from(el.attributes)) {
+                const name = attr.name.toLowerCase();
+                const value = attr.value || '';
+                if (name.startsWith('on')) {
+                    el.removeAttribute(attr.name);
+                    continue;
+                }
+                if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
+                    el.removeAttribute(attr.name);
+                }
+            }
+        }
+        toRemove.forEach(node => node.remove());
+        return template.innerHTML;
+    }
+
+    function renderMarkdown(content) {
+        const source = typeof content === 'string' ? content : '';
+        if (!markdownSupport.enabled || typeof marked === 'undefined') {
+            return escapeHTML(source);
+        }
+        try {
+            return sanitizeHTML(marked.parse(source));
+        } catch (err) {
+            console.warn('Markdown rendering failed', err);
+            return escapeHTML(source);
+        }
+    }
+
+    function applyMessageContent(target, role, text) {
+        if (!target) return;
+        if (role === 'assistant') {
+            target.classList.add('markdown', 'markdown-body');
+            target.classList.remove('plain-text');
+            target.innerHTML = renderMarkdown(text);
+            rehighlightCode(target);
+        } else {
+            target.classList.add('plain-text');
+            target.classList.remove('markdown');
+            target.textContent = text || '';
+        }
+    }
 
     function scrollToBottom(smooth = true) {
         window.requestAnimationFrame(() => {
@@ -399,7 +626,7 @@
 
         const body = document.createElement('div');
         body.className = 'chat-body';
-        body.textContent = text;
+        applyMessageContent(body, role, text);
         entry.appendChild(body);
 
         dom.messages.appendChild(entry);
@@ -585,11 +812,11 @@
                     if (delta) {
                         if (!sawFirstToken && typeof onFirstToken === 'function') {
                             sawFirstToken = true;
-                            assistantNode.textContent = '';
+                            applyMessageContent(assistantNode, 'assistant', '');
                             onFirstToken();
                         }
                         assistantText += delta;
-                        assistantNode.textContent = assistantText;
+                        applyMessageContent(assistantNode, 'assistant', assistantText);
                         scrollToBottom(false);
                     }
                 } catch (err) {
