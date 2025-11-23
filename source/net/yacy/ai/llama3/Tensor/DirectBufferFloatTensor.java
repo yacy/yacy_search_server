@@ -31,7 +31,8 @@ import net.yacy.ai.llama3.Model.GGMLType;
 public class DirectBufferFloatTensor extends AbstractFloatTensor implements FloatTensor {
 
     final ByteBuffer byteBuffer; // must be direct
-
+    //private static final VarHandle VH = MethodHandles.byteBufferViewVarHandle(int[].class, ByteOrder.nativeOrder());
+    
     public DirectBufferFloatTensor(ByteBuffer bb) {
         if (bb.isDirect()) {
             this.byteBuffer = bb.slice().order(bb.order());
@@ -66,29 +67,77 @@ public class DirectBufferFloatTensor extends AbstractFloatTensor implements Floa
 
     @Override
     public final float getFloat(final int index) {
-        final int i = this.byteBuffer.getInt(index << 2);
-        //final int base = index << 2;
-        //int i = (this.byteBuffer.get(base) & 0xFF) | ((this.byteBuffer.get(base + 1) & 0xFF) << 8) | ((this.byteBuffer.get(base + 2) & 0xFF) << 16) | ((this.byteBuffer.get(base + 3) & 0xFF) << 24);
-        return Float.intBitsToFloat(i);
+        return this.byteBuffer.getFloat(index << 2);
+        //return Float.intBitsToFloat(this.byteBuffer.getInt(index << 2));
+        //return Float.intBitsToFloat((int) VH.get(this.byteBuffer, index << 2));
     }
 
     @Override
     public final void setFloat(final int index, final float value) {
-        final int i = Float.floatToRawIntBits(value);
-        this.byteBuffer.putInt(index << 2, i);
-        //int base = index << 2;
-        //this.byteBuffer.put(base++, (byte) ( i        & 0xFF)); // Little-endian:
-        //this.byteBuffer.put(base++, (byte) ((i >> 8)  & 0xFF));
-        //this.byteBuffer.put(base++, (byte) ((i >> 16) & 0xFF));
-        //this.byteBuffer.put(base, (byte) ((i >> 24) & 0xFF));
+        this.byteBuffer.putFloat(index << 2, value);
+        //VH.set(this.byteBuffer, index << 2, Float.floatToRawIntBits(value));
+        //this.byteBuffer.putInt(index << 2, Float.floatToRawIntBits(value));
     }
-    
+
     @Override
     public final GGMLType type() {
         return GGMLType.F32;
     }
+    
+    public float dot(final int thisOffset,
+            final FloatTensor that,
+            final int thatOffset,
+            final int size) {
+
+        float sum0 = 0f, sum1 = 0f, sum2 = 0f, sum3 = 0f;
+        final int limit = size & ~3;
+
+        if (that instanceof DirectBufferFloatTensor) {
+
+            DirectBufferFloatTensor thatb = (DirectBufferFloatTensor) that;
+            
+            int i = thisOffset << 2;
+            int k = thatOffset << 2;
+    
+            // Loop-Unrolling
+            for (int j = 0; j < limit; j += 4) {
+                sum0 += this.byteBuffer.getFloat(i     ) * thatb.byteBuffer.getFloat(k     );
+                sum1 += this.byteBuffer.getFloat(i +  4) * thatb.byteBuffer.getFloat(k +  4);
+                sum2 += this.byteBuffer.getFloat(i +  8) * thatb.byteBuffer.getFloat(k +  8);
+                sum3 += this.byteBuffer.getFloat(i + 12) * thatb.byteBuffer.getFloat(k + 12);
+                i += 16;
+                k += 16;
+            }
+            
+        } else {
+        
+            int i = thisOffset << 2;
+            int k = thatOffset;
+    
+            // Loop-Unrolling
+            for (int j = 0; j < limit; j += 4) {
+                sum0 += this.byteBuffer.getFloat(i     ) * that.getFloat(k    );
+                sum1 += this.byteBuffer.getFloat(i +  4) * that.getFloat(k + 1);
+                sum2 += this.byteBuffer.getFloat(i +  8) * that.getFloat(k + 2);
+                sum3 += this.byteBuffer.getFloat(i + 12) * that.getFloat(k + 3);
+                i += 16;
+                k += 4;
+            }
+    
+        }
+
+        float result = sum0 + sum1 + sum2 + sum3;
+
+        // remaining values
+        for (int j = limit; j < size; j++) {
+            result += this.byteBuffer.getFloat(j << 2) * that.getFloat(j);
+        }
+        
+        return result;
+    }
 
     /*
+    
     @Override
     public final FloatTensor fillInPlace(final int thisOffset, final int size, final float value) {
         int end = thisOffset + size;
