@@ -26,13 +26,12 @@ import java.util.Comparator;
 import java.util.Random;
 
 import net.yacy.ai.llama3.Tensor.FloatTensor;
-import net.yacy.ai.llama3.Tensor.Tensor;
 
 @FunctionalInterface
 interface Sampler {
-    int sampleToken(Tensor logits);
+    int sampleToken(FloatTensor logits);
 
-    Sampler ARGMAX = Tensor::argmax;
+    Sampler ARGMAX = FloatTensor::argmax;
     
     static Sampler selectSampler(int vocabularySize, float temperature, float topp, long rngSeed) {
         Sampler sampler;
@@ -71,7 +70,7 @@ interface Sampler {
         }
         
         @Override
-        public int sampleToken(Tensor logits) {
+        public int sampleToken(FloatTensor logits) {
             // sample index from probabilities (they must sum to 1!)
             float random0to1 = rng.nextFloat();
             float cdf = 0.0f;
@@ -120,7 +119,7 @@ interface Sampler {
         }
 
         @Override
-        public int sampleToken(Tensor logits) {
+        public int sampleToken(FloatTensor logits) {
             // top-p sampling (or "nucleus sampling") samples from the smallest set of
             // tokens that exceed probability topp. This way we never sample tokens that
             // have very low probabilities and are less likely to go "off the rails".

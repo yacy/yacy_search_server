@@ -31,7 +31,8 @@ import java.util.Objects;
 
 import net.yacy.ai.llama3.Tensor.Q4_0FloatTensor;
 import net.yacy.ai.llama3.Tensor.Q8_0FloatTensor;
-import net.yacy.ai.llama3.Tensor.Tensor;
+import net.yacy.ai.llama3.Tensor.AbstractFloatTensor;
+import net.yacy.ai.llama3.Tensor.FloatTensor;
 
 public final class GGMLTensorEntry {
 
@@ -73,12 +74,12 @@ public final class GGMLTensorEntry {
         }
     }
     
-    public Tensor loadQuantized() {
-        Tensor tensor = null;
+    public FloatTensor loadQuantized() {
+        FloatTensor tensor = null;
         switch (ggmlType) {
             //case F32: return new F32FloatTensor(FloatTensor.numberOfElements(entry.shape()), entry.memorySegment());
-            case Q8_0: tensor = new Q8_0FloatTensor(Tensor.numberOfElements(this.shape()), this.buffer); break;
-            case Q4_0: tensor = new Q4_0FloatTensor(Tensor.numberOfElements(this.shape()), this.buffer); break;
+            case Q8_0: tensor = new Q8_0FloatTensor(AbstractFloatTensor.numberOfElements(this.shape()), this.buffer); break;
+            case Q4_0: tensor = new Q4_0FloatTensor(AbstractFloatTensor.numberOfElements(this.shape()), this.buffer); break;
             default: throw new UnsupportedOperationException("Quantization format " + ggmlType);
         }
         return tensor;

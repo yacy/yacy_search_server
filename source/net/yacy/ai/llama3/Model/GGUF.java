@@ -38,7 +38,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import net.yacy.ai.llama3.Tensor.Tensor;
+import net.yacy.ai.llama3.Tensor.AbstractFloatTensor;
 
 /*
  * GGUF File Reader. For specification see https://github.com/ggml-org/ggml/blob/master/docs/gguf.md
@@ -203,7 +203,7 @@ public final class GGUF {
                 GGUFTensorInfo ti = entry.getValue();
                 long offset = ti.offset();
                 int sizeInBytes = Math.toIntExact(ti.ggmlType().byteSizeFor(
-                    Tensor.numberOfElements(ti.dimensions())));
+                        AbstractFloatTensor.numberOfElements(ti.dimensions())));
                 
                 MappedByteBuffer tensorBuffer = (MappedByteBuffer) fullBuffer.duplicate();
                 tensorBuffer.position((int)offset);
@@ -224,7 +224,7 @@ public final class GGUF {
         List<Long> boundaries = new ArrayList<>();
         for (GGUFTensorInfo ti : tensorInfos.values()) {
             long start = ti.offset();
-            long end = start + ti.ggmlType().byteSizeFor(Tensor.numberOfElements(ti.dimensions()));
+            long end = start + ti.ggmlType().byteSizeFor(AbstractFloatTensor.numberOfElements(ti.dimensions()));
             boundaries.add(start);
             boundaries.add(end);
         }
@@ -276,7 +276,7 @@ public final class GGUF {
             GGUFTensorInfo ti = entry.getValue();
             String name = ti.name();
             long tensorOffset = ti.offset() + tensorDataOffset;
-            long tensorSize = ti.ggmlType().byteSizeFor(Tensor.numberOfElements(ti.dimensions()));
+            long tensorSize = ti.ggmlType().byteSizeFor(AbstractFloatTensor.numberOfElements(ti.dimensions()));
             long tensorEnd = tensorOffset + tensorSize;
             
             // Find all segments that overlap with this tensor

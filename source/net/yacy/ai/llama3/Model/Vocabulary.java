@@ -27,13 +27,13 @@ import java.util.stream.*;
 
 public final class Vocabulary {
     private final String[] tokens;
-    private final float[] scores;
+    //private final float[] scores;
     private final Map<String, Integer> tokenToIndex;
 
     // Primary constructor
     public Vocabulary(String[] tokens, float[] scores, Map<String, Integer> tokenToIndex) {
         this.tokens = tokens == null ? null : Arrays.copyOf(tokens, tokens.length);
-        this.scores = scores == null ? null : Arrays.copyOf(scores, scores.length);
+        //this.scores = scores == null ? null : Arrays.copyOf(scores, scores.length);
         this.tokenToIndex = tokenToIndex == null ? null : new HashMap<>(tokenToIndex);
     }
 

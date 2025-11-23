@@ -28,7 +28,7 @@ import java.lang.invoke.VarHandle;
 
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
+public final class Q4_0FloatTensor extends AbstractFloatTensor implements FloatTensor {
 
     private final int size;
     private final ByteBuffer buffer;
@@ -74,7 +74,7 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
         int blockIndex = index >>> LOG2_QUANT_BLOCK_SIZE; // index / QUANT_BLOCK_SIZE;
         int blockOffset = blockIndex * GGMLType.Q4_0.typeSize;
         final long offset = blockOffset;
-        float scale = FloatTensor.float16ToFloat(buffer.getShort((int) offset));
+        float scale = AbstractFloatTensor.float16ToFloat(buffer.getShort((int) offset));
         final int modIndex = index & (GGMLType.Q4_0.blockSize - 1); //index % QUANT_BLOCK_SIZE;
         final boolean isLow = modIndex < QUANT_HALF_BLOCK;
         final int adjustedIndex = modIndex - (isLow ? 0 : QUANT_HALF_BLOCK);
@@ -93,7 +93,7 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
         while (inPos < end) {
             final int blockIndex = inPos >>> LOG2_QUANT_BLOCK_SIZE;
             final int blockOffset = blockIndex * GGMLType.Q4_0.typeSize;
-            float scale = FloatTensor.float16ToFloat(buffer.getShort((int) (long) blockOffset));
+            float scale = AbstractFloatTensor.float16ToFloat(buffer.getShort((int) (long) blockOffset));
 
             final int blockStart = blockIndex * GGMLType.Q4_0.blockSize;
             final int blockEnd = Math.min(blockStart + GGMLType.Q4_0.blockSize, end);
@@ -142,7 +142,7 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
     public static final ThreadLocal<float[]> scratchBuffer = ThreadLocal.withInitial(() -> new float[GGMLType.Q4_0.blockSize]);
 
     @Override
-    public void copyTo(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
+    public void copyTo(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
         final float[] decoded = scratchBuffer.get();
         int remaining = size;
         int srcIndex = thisOffset;
@@ -172,7 +172,7 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
      * dot product which has the getFloat method inlined in such a way that it processes full blocks at once.
      * This gains a > 2.5 times token/s performance increase compared to the generic dot-getFloat implementation.
      */
-    public final float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
+    public final float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
         float result = 0.0f;
         int index = 0;
         final int blockLimit = size - (size % GGMLType.Q4_0.blockSize);
@@ -183,7 +183,7 @@ public final class Q4_0FloatTensor extends FloatTensor implements Tensor {
             // Get this block
             final int thisBlockIndex = (thisOffset + index) >>> LOG2_QUANT_BLOCK_SIZE; // (thisOffset + index) / QUANT_BLOCK_SIZE;
             final int thisBlockOffset = thisBlockIndex * GGMLType.Q4_0.typeSize;
-            final float thisScale = FloatTensor.float16ToFloat(buffer.getShort((int) (long) thisBlockOffset));
+            final float thisScale = AbstractFloatTensor.float16ToFloat(buffer.getShort((int) (long) thisBlockOffset));
             
             // Process block: read all quantized values from this block at once
             final int quantOffset = thisBlockOffset + QUANT_FLOAT16_BYTES;

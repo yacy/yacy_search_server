@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public final class Q8_0FloatTensor extends FloatTensor {
+public final class Q8_0FloatTensor extends AbstractFloatTensor {
 
     final int size;
     final ByteBuffer buffer;
@@ -60,12 +60,12 @@ public final class Q8_0FloatTensor extends FloatTensor {
         int blockOffset = blockIndex * GGMLType.Q8_0.typeSize;
         byte quant = buffer.get((int) (long) (blockOffset + GGMLType.FLOAT16_BYTES + withinBlockIndex));
         final long offset = blockOffset;
-        float scale = FloatTensor.float16ToFloat(buffer.getShort((int) offset));
+        float scale = AbstractFloatTensor.float16ToFloat(buffer.getShort((int) offset));
         return quant * scale;
     }
 
     @Override
-    public float dot(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
+    public float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
         assert 0 <= thisOffset && thisOffset + size <= this.size;
         assert 0 <= thatOffset && thatOffset + size <= that.size();
 
@@ -86,7 +86,7 @@ public final class Q8_0FloatTensor extends FloatTensor {
             // Get common scale factor for this block
             int blockOffset = block * GGMLType.Q8_0.typeSize;
             final long offset = blockOffset;
-            float thisScale = FloatTensor.float16ToFloat(buffer.getShort((int) offset));
+            float thisScale = AbstractFloatTensor.float16ToFloat(buffer.getShort((int) offset));
             
             // Compute sum of products for this block
             float blockSum = 0f;
@@ -113,7 +113,7 @@ public final class Q8_0FloatTensor extends FloatTensor {
     }
 
     @Override
-    public void copyTo(final int thisOffset, final Tensor that, final int thatOffset, final int size) {
+    public void copyTo(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
         assert 0 <= thisOffset && thisOffset + size <= this.size;
         assert 0 <= thatOffset && thatOffset + size <= that.size();
         
@@ -127,7 +127,7 @@ public final class Q8_0FloatTensor extends FloatTensor {
             
             byte quant = buffer.get((int) (long) (blockOffset + GGMLType.FLOAT16_BYTES + withinBlockIndex));
             final long offset = blockOffset;
-            float scale = FloatTensor.float16ToFloat(buffer.getShort((int) offset));
+            float scale = AbstractFloatTensor.float16ToFloat(buffer.getShort((int) offset));
             that.setFloat(i, quant * scale);
         }
     }

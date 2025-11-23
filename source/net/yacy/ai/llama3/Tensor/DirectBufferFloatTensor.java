@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import net.yacy.ai.llama3.Model.GGMLType;
 
-public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
+public class DirectBufferFloatTensor extends AbstractFloatTensor implements FloatTensor {
 
     final ByteBuffer byteBuffer; // must be direct
 
@@ -52,8 +52,8 @@ public class DirectBufferFloatTensor extends FloatTensor implements Tensor {
         }
     }
 
-    public static Tensor allocate(final int... dims) {
-        int numberOfElements = Tensor.numberOfElements(dims);
+    public static FloatTensor allocate(final int... dims) {
+        int numberOfElements = AbstractFloatTensor.numberOfElements(dims);
         int bytesNeeded = numberOfElements * Float.BYTES;
         ByteBuffer buffer = ByteBuffer.allocateDirect(bytesNeeded).order(ByteOrder.nativeOrder());
         return new DirectBufferFloatTensor(buffer);
