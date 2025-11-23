@@ -147,10 +147,12 @@ public class Llama3 {
     	// semeru 21 : 1.13 T/s
     	// GraalVM 21: 2.27 T/s
     	// openjdk 21: 3.02 T/s; 3.2 with VarHandle
+
+        // performance on M1 Ultra:
+        // JVM version 21.0.7+6-LTS:  17.6 T/s
         
         // performance on M4 Max:
         // JVM version 21.0.5+11-LTS: 24.5 T/s
-        // JVM version 21.0.7+6-LTS:  17.6 T/s
         
         System.out.println("JVM version " + Runtime.version());
 
