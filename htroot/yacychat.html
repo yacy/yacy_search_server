@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Chat</title>
+    #%env/templates/metas.template%#
+    <style type="text/css">
+      /* 1. Global Container */
+      .chat-panel {
+        width: 100%;
+        color: #333333;
+        padding: 0; 
+      }
+    
+      /* 2. Layout Structure */
+      .chat-flow {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .chat-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+    
+      /* 3. The Message Blocks - Structural Look */
+      .chat-turn {
+        position: relative;
+        border: 1px solid #e0e0e0;
+        border-radius: 0px; 
+        padding-top: 2px;
+        padding-bottom: 12px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin: 0;
+        box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+      }
+      .chat-turn:hover {
+        box-shadow: 3px 3px 0px rgba(0,0,0,0.15); 
+      }
+    
+      /* 4. Labels (User/Assistant Headers) - Headline Font Consistency */
+      .chat-turn legend {
+        font-family: inherit; 
+        padding: 4px 10px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+        margin-bottom: 8px; /* Increased spacing */
+      }
+    
+      /* --- USER: Lighter Grey Input --- */
+      .chat-turn.user {
+        background-color: #ECF1F8;
+        border-left: 5px solid #2c3e50;
+        border-color: #d1d9e6;
+        color: #2c3e50;
+      }
+      
+      .chat-turn.user legend {
+        background: #5092CF; 
+        color: #ffffff;
+        border: 1px solid #5092CF;
+      }
+    
+      /* --- ASSISTANT: Darker Grey Output --- */
+      .chat-turn.assistant {
+        background-color: #DEE7F3;
+        border-left: 5px solid #0056b3;
+        border-color: #bbccdd;
+        color: #000;
+      }
+    
+      .chat-turn.assistant legend {
+        background: #2c3e50; 
+        color: #ffffff;
+        border: 1px solid #2c3e50;
+      }
+    
+      /* --- SYSTEM: Log Entry Style --- */
+      .chat-turn.system {
+        background: #fff3cd; 
+        border: 1px solid #ffeeba;
+        border-left: 5px solid #ffc107;
+        color: #856404;
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+        font-size: 1.2rem;
+      }
+    
+      /* 5. Typography - All Chat Content is MONOSPACE */
+      .chat-body {
+        white-space: pre-wrap;
+        line-height: 1.6;
+        font-size: 1.2rem; /* Larger font size */
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+      }
+    
+      /* 6. The Composer (Input Area) */
+      .composer {
+        display: flex;
+        gap: 0; 
+        align-items: stretch; 
+        border-top: none;
+      }
+    
+      .composer fieldset {
+        flex: 1;
+        margin: 0;
+        padding: 0;
+        border: 2px solid #555; 
+        background: #fff;
+        border-radius: 0px;
+        border-right: none; 
+      }
+      
+      .composer fieldset:focus-within {
+        background-color: #ECF1F8;
+        border-left: 5px solid #2c3e50;
+        border-color: #d1d9e6;
+        color: #2c3e50;
+      }
+    
+      .composer legend {
+        display: none;
+      }
+    
+      .composer textarea {
+        width: 100%;
+        resize: none;
+        border: none;
+        background: transparent;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin: 0;
+        outline: none;
+        font-family: 'Roboto Mono', 'Menlo', monospace; /* Monospace for coding */
+        color: #333;
+        font-size: 1.2rem; /* Larger font size */
+      }
+    
+      .composer textarea::placeholder {
+        color: #999;
+        font-style: normal;
+      }
+    
+      /* 7. The Button - Industrial Action */
+      .composer .btn {
+        align-self: stretch; 
+        padding: 0 30px;
+        min-height: 50px;
+        border: 2px solid #555; 
+        background: #333; 
+        color: #fff;
+        font-family: 'Roboto Mono', monospace;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+    
+      .composer .btn:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+      }
+      
+      .composer .btn:active {
+        background: #004494;
+      }
+    
+      @media (max-width: 900px) {
+        .composer {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .composer fieldset {
+          border-right: 2px solid #555;
+        }
+        .composer .btn {
+          width: 100%;
+          border: 2px solid #555;
+        }
+      }
+    </style>
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAI.template%#
+
+    <h2>YaCy Chat</h2>
+    <p>Chat with your configured LLM using the local YaCy settings. Requests are sent to the same host that served this page.</p>
+
+      <div class="chat-panel">
+        <div class="chat-flow">
+          <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          <form class="composer" id="chatForm">
+            <fieldset class="chat-turn user">
+              <legend>User</legend>
+              <textarea id="userInput" rows="3" placeholder="Ask me anything..." required="required"></textarea>
+            </fieldset>
+            <input type="submit" class="btn btn-primary" id="sendButton" value="Send"/>
+          </form>
+        </div>
+      </div>
+
+    <script type="text/javascript">
+    const SYSTEM_PROMPT = 'You are a smart and helpful chatbot. If possible, use friendly emojies.';
+    const defaultApiHost = '';
+
+    const state = {
+        messages: [],
+        config: {
+            apiHost: defaultApiHost,
+            model: 'chat',
+            systemPrompt: SYSTEM_PROMPT
+        },
+        busy: false
+    };
+
+    const dom = {
+        messages: document.getElementById('chatMessages'),
+        form: document.getElementById('chatForm'),
+        input: document.getElementById('userInput'),
+        sendButton: document.getElementById('sendButton')
+    };
+
+    function appendMessage(role, text) {
+        const entry = document.createElement('fieldset');
+        entry.className = `chat-turn ${role}`;
+        const legend = document.createElement('legend');
+        if (role === 'assistant') {
+            legend.textContent = 'Assistant';
+        } else if (role === 'user') {
+            legend.textContent = 'User';
+        } else {
+            legend.textContent = 'System';
+        }
+        entry.appendChild(legend);
+
+        const body = document.createElement('div');
+        body.className = 'chat-body';
+        body.textContent = text;
+        entry.appendChild(body);
+
+        dom.messages.appendChild(entry);
+        entry.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        if (dom.form) {
+            dom.form.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+        return body;
+    }
+
+    function ensureSystemMessage() {
+        if (!state.messages.length || state.messages[0].role !== 'system') {
+            state.messages.unshift({ role: 'system', content: state.config.systemPrompt });
+        }
+    }
+
+    async function streamChat(prompt) {
+        ensureSystemMessage();
+        const payload = {
+            model: state.config.model,
+            messages: [...state.messages, { role: 'user', content: prompt }],
+            stream: true
+        };
+        const headers = { 'Content-Type': 'application/json' };
+        const response = await fetch(state.config.apiHost.replace(/\/$/, '') + '/v1/chat/completions', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+        }
+        if (!response.body) {
+            throw new Error('Streaming not supported by this browser.');
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let assistantText = '';
+        const assistantNode = appendMessage('assistant', '...');
+        const parseChunk = chunk => {
+            const lines = chunk.split('\n').map(line => line.trim()).filter(Boolean);
+            for (const line of lines) {
+                if (line === 'data: [DONE]' || line === '[DONE]') {
+                    return true;
+                }
+                const clean = line.replace(/^data:\s*/i, '');
+                if (!clean) continue;
+                try {
+                    const parsed = JSON.parse(clean);
+                    const delta = parsed?.choices?.[0]?.delta?.content;
+                    if (delta) {
+                        assistantText += delta;
+                        assistantNode.textContent = assistantText;
+                        dom.form?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }
+                } catch (err) {
+                    console.warn('Failed to parse line', line, err);
+                }
+            }
+            return false;
+        };
+        let done = false;
+        while (!done) {
+            const { value, done: readerDone } = await reader.read();
+            if (readerDone) break;
+            const chunk = decoder.decode(value, { stream: true });
+            done = parseChunk(chunk);
+        }
+        state.messages.push({ role: 'user', content: prompt });
+        state.messages.push({ role: 'assistant', content: assistantText });
+    }
+
+    function resizeComposer() {
+        const minHeight = 44;
+        dom.input.style.height = 'auto';
+        const maxHeight = Math.max(window.innerHeight * 0.5, 220);
+        const measured = dom.input.scrollHeight || minHeight;
+        const newHeight = Math.max(minHeight, Math.min(measured, maxHeight));
+        dom.input.style.height = `${newHeight}px`;
+    }
+
+    dom.form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (state.busy) return;
+        const prompt = dom.input.value.trim();
+        if (!prompt) return;
+        state.busy = true;
+        dom.sendButton.disabled = true;
+        appendMessage('user', prompt);
+        dom.input.value = '';
+        resizeComposer();
+        try {
+            await streamChat(prompt);
+        } catch (err) {
+            appendMessage('system', `Error: ${err.message}`);
+        } finally {
+            state.busy = false;
+            dom.sendButton.disabled = false;
+        }
+    });
+
+    dom.input.addEventListener('input', resizeComposer);
+    dom.input.addEventListener('keydown', event => {
+        if (event.isComposing) return;
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            if (typeof dom.form.requestSubmit === 'function') {
+                dom.form.requestSubmit(dom.sendButton);
+            } else {
+                dom.form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            }
+        }
+    });
+    window.addEventListener('resize', resizeComposer);
+
+    resizeComposer();
+    </script>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

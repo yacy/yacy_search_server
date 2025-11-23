@@ -51,6 +51,7 @@ import org.json.JSONObject;
 import net.yacy.ai.LLM;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -88,6 +89,13 @@ public class RAGProxyServlet extends HttpServlet {
         hresponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         hresponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
+        final String clientIP = hrequest.getRemoteAddr();
+        final boolean localhostAccess = Domains.isLocalhost(clientIP);
+        if (!localhostAccess) {
+            // we will introduce a rate limit for non-localhost later, for now we just don't allow it
+            hresponse.sendError(HttpServletResponse.SC_FORBIDDEN);
+        }
+        
         final Method reqMethod = Method.getMethod(hrequest.getMethod());
         if (reqMethod == Method.OTHER) {
             // required to handle CORS
@@ -157,9 +165,10 @@ public class RAGProxyServlet extends HttpServlet {
                 systemObject.put("content", system);
                 userObject.put("content", user);
     
-                // write back modified bodyMap to body
-                body = bodyObject.toString();
             }
+            
+            // write back modified bodyMap to body
+            body = bodyObject.toString();
 
             // Open request to back-end service
             URL url = new URI(llm4Chat.llm.hoststub + "/v1/chat/completions").toURL();
