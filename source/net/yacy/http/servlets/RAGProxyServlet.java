@@ -29,7 +29,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -143,9 +145,10 @@ public class RAGProxyServlet extends HttpServlet {
             JSONArray messages = bodyObject.optJSONArray("messages");
             //JSONObject systemObject = messages.getJSONObject(0);
             //String system = systemObject.optString("content", ""); // the system prompt
-            JSONObject userObject = messages.getJSONObject(messages.length() - 1);
-            String user = userObject.optString("content", ""); // this is the latest prompt
-
+            UserObject userObject = new UserObject(messages.getJSONObject(messages.length() - 1));
+            String user = userObject.getContentText(); // this is the latest prompt
+            //List<DataURL> data_urls = userObject.getContentAttachments();
+            
             // RAG
             if (rag) {
                 // modify system and user prompt here in bodyObject to enable RAG
@@ -153,8 +156,7 @@ public class RAGProxyServlet extends HttpServlet {
                 String searchResultMarkdown = searchResultsAsMarkdown(query, 4);
                 user += LLM_USER_PREFIX;
                 user += searchResultMarkdown;
-                userObject.put("content", user);
-    
+                userObject.setContentText(user);
             }
             
             // write back modified bodyMap to body
@@ -197,7 +199,87 @@ public class RAGProxyServlet extends HttpServlet {
             throw new IOException(e.getMessage());
         }
     }
+    
+    public final static class DataURL {
+    	private String mimetype;
+    	private byte[] data;
+    	public DataURL(String data_url) {
+    		if (data_url == null || !data_url.startsWith("data:")) {
+                throw new IllegalArgumentException("data url not valid: it must start with 'data:'");
+            }
+    		int commaIndex = data_url.indexOf(',');
+            if (commaIndex == -1) {
+                throw new IllegalArgumentException("data url not valid: it must contain a comma");
+            }
+            String header = data_url.substring(5, commaIndex); // "image/jpeg;base64"
+            String base64Data = data_url.substring(commaIndex + 1); // "/9j/4AAQSkZJRgABAQEASAB..."
+            String[] headerParts = header.split(";");
+            this.mimetype = headerParts[0]; // i.e. "image/jpeg"
+            this.data = Base64.getDecoder().decode(base64Data);
+    	}
+    	public String getMimetype() {
+    		return this.mimetype;
+    	}
+    	public byte[] getData() {
+    		return this.data;
+    	}
+    }
 
+    public final static class UserObject {
+        private JSONObject userObject;
+        
+        public UserObject(JSONObject userObject) {
+            this.userObject = userObject;
+        }
+        
+        public String getContentText() {
+            Object content = this.userObject.opt("content");
+            if (content instanceof JSONArray) {
+                JSONArray array = (JSONArray) content;
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject j = array.optJSONObject(i);
+                    String ctype = j.optString("type");
+                    if (ctype != null && ctype.equals("text")) {
+                        String text = j.optString("text", "");
+                        return text;
+                    }
+                }
+                return "";
+            }
+            assert content instanceof String;
+            return (String) content;
+        }
+        
+        public List<DataURL> getContentAttachments() {
+        	ArrayList<DataURL> list = new ArrayList<>();
+            Object content = this.userObject.opt("content");
+            if (content instanceof JSONArray) {
+                JSONArray array = (JSONArray) content;
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject j = array.optJSONObject(i);
+                    String ctype = j.optString("type");
+                    if (ctype != null && ctype.equals("image_url")) {
+                        JSONObject image_url = j.optJSONObject("image_url");
+                        if (image_url != null) {
+                        	String data_url = image_url.optString("url", "");
+                        	if (data_url.length() > 0) {
+                        		DataURL dataurl = new DataURL(data_url);
+                        		list.add(dataurl);
+                        	}
+                        }
+                    }
+                }
+            }
+            return list;
+        }
+        
+        public void setContentText(String text) {
+            try {
+                this.userObject.put("content", text);
+            } catch (JSONException e) {}
+        }
+    }
+    
     public static JSONArray searchResults(String query, int count, final boolean includeSnippet) {
         final JSONArray results = new JSONArray();
         if (query == null || query.length() == 0 || count == 0) return results;
