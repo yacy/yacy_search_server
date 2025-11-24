@@ -56,7 +56,8 @@
       /* --- USER: Lighter Grey Input --- */
       .chat-turn.user {
         background-color: #ECF1F8;
-        border-left: 5px solid #2c3e50;
+        border-left-width: 5px;
+        border-left-style: solid;
         border-color: #d1d9e6;
         color: #2c3e50;
       }
@@ -70,7 +71,8 @@
       /* --- ASSISTANT: Darker Grey Output --- */
       .chat-turn.assistant {
         background-color: #DEE7F3;
-        border-left: 5px solid #0056b3;
+        border-left-width: 5px;
+        border-left-style: solid;
         border-color: #bbccdd;
         color: #000;
       }
@@ -99,69 +101,45 @@
         font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
       }
     
-      /* 6. The Composer (Input Area) */
+      /* 6. Composer Row (inside User fieldset) */
       .composer {
         display: flex;
-        gap: 0; 
-        align-items: stretch; 
-        border-top: none;
+        gap: 10px;
+        align-items: stretch;
       }
-    
-      .composer fieldset {
-        flex: 1;
-        margin: 0;
-        padding: 0;
-        border: 2px solid #555; 
-        background: #fff;
-        border-radius: 0px;
-        border-right: none; 
-      }
-      
-      .composer fieldset:focus-within {
+
+      .chat-turn.user:focus-within {
         background-color: #ECF1F8;
-        border-left: 5px solid #2c3e50;
+        border-left-width: 5px;
+        border-left-style: solid;
         border-color: #d1d9e6;
         color: #2c3e50;
       }
-    
-      .composer legend {
-        display: none;
-      }
-    
+
       .composer textarea {
-        width: 100%;
+        flex: 1;
         resize: none;
         border: none;
         background: transparent;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        padding-left: 20px;
-        padding-right: 20px;
+        padding: 0;
         margin: 0;
         outline: none;
-        font-family: 'Roboto Mono', 'Menlo', monospace; /* Monospace for coding */
-        color: #333;
-        font-size: 1.2rem; /* Larger font size */
-      }
-    
-      .composer textarea::placeholder {
-        color: #999;
-        font-style: normal;
       }
     
       /* 7. The Button - Industrial Action */
       .composer .btn {
         align-self: stretch; 
-        padding: 0 30px;
-        min-height: 50px;
+        padding: 0 24px;
         border: 2px solid #555; 
         background: #333; 
         color: #fff;
-        font-family: 'Roboto Mono', monospace;
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
         font-weight: bold;
         text-transform: uppercase;
         cursor: pointer;
         transition: all 0.2s;
+        display: flex;
+        align-items: center;
       }
     
       .composer .btn:hover {
@@ -176,10 +154,6 @@
       @media (max-width: 900px) {
         .composer {
           flex-direction: column;
-          gap: 10px;
-        }
-        .composer fieldset {
-          border-right: 2px solid #555;
         }
         .composer .btn {
           width: 100%;
@@ -198,12 +172,14 @@
       <div class="chat-panel">
         <div class="chat-flow">
           <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
-          <form class="composer" id="chatForm">
+          <form id="chatForm">
             <fieldset class="chat-turn user">
               <legend>User</legend>
-              <textarea id="userInput" rows="3" placeholder="Ask me anything..." required="required"></textarea>
+              <div class="composer">
+                <textarea class="chat-body" id="userInput" rows="3" placeholder="Ask me anything..." required="required"></textarea>
+                <input type="submit" class="btn btn-primary" id="sendButton" value="Send"/>
+              </div>
             </fieldset>
-            <input type="submit" class="btn btn-primary" id="sendButton" value="Send"/>
           </form>
         </div>
       </div>
@@ -318,7 +294,7 @@
     }
 
     function resizeComposer() {
-        const minHeight = 44;
+        const minHeight = 24;
         dom.input.style.height = 'auto';
         const maxHeight = Math.max(window.innerHeight * 0.5, 220);
         const measured = dom.input.scrollHeight || minHeight;
