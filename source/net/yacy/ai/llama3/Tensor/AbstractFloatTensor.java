@@ -138,6 +138,7 @@ public abstract class AbstractFloatTensor implements FloatTensor {
         LongStream.range(startInclusive, endExclusive).parallel().forEach(action);
     }
     
+    /*
     public float dot(final int thisOffset, final FloatTensor that, final int thatOffset, final int size) {
         float result = 0f;
         for (int j = 0; j < size; j++) {
@@ -145,6 +146,39 @@ public abstract class AbstractFloatTensor implements FloatTensor {
         }
         return result;
     }
+    */
+
+    public float dot(final int thisOffset,
+            final FloatTensor that,
+            final int thatOffset,
+            final int size) {
+
+        float sum0 = 0f, sum1 = 0f, sum2 = 0f, sum3 = 0f;
+
+        int i = thisOffset;
+        int k = thatOffset;
+
+        // Loop-Unrolling
+        final int limit = size & ~3;
+        for (int j = 0; j < limit; j += 4) {
+            sum0 += this.getFloat(i    ) * that.getFloat(k    );
+            sum1 += this.getFloat(i + 1) * that.getFloat(k + 1);
+            sum2 += this.getFloat(i + 2) * that.getFloat(k + 2);
+            sum3 += this.getFloat(i + 3) * that.getFloat(k + 3);
+            i += 4;
+            k += 4;
+        }
+
+        float result = sum0 + sum1 + sum2 + sum3;
+
+        // remaining values
+        for (int j = limit; j < size; j++) {
+            result += this.getFloat(j) * that.getFloat(j);
+        }
+
+        return result;
+    }
+
 
     public void matmul(final FloatTensor that, final FloatTensor out, final int dim0, final int dim1) {
         parallelFor(0, dim0, i -> out.setFloat(i, dot(i * dim1, that, 0, dim1)));

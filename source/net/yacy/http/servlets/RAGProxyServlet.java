@@ -141,8 +141,8 @@ public class RAGProxyServlet extends HttpServlet {
             
             // get messages
             JSONArray messages = bodyObject.optJSONArray("messages");
-            JSONObject systemObject = messages.getJSONObject(0);
-            String system = systemObject.optString("content", ""); // the system prompt
+            //JSONObject systemObject = messages.getJSONObject(0);
+            //String system = systemObject.optString("content", ""); // the system prompt
             JSONObject userObject = messages.getJSONObject(messages.length() - 1);
             String user = userObject.optString("content", ""); // this is the latest prompt
 
@@ -150,19 +150,9 @@ public class RAGProxyServlet extends HttpServlet {
             if (rag) {
                 // modify system and user prompt here in bodyObject to enable RAG
                 String query = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
-                out.print(responseLine("Searching for '" + query + "'\n\n").toString() + "\n");
-                out.flush();
-                JSONArray searchResults = searchResults(query, 4, true);
-                out.print(responseLine("\n").toString());
-                out.flush();
-                system += LLM_SYSTEM_PREFIX;
+                String searchResultMarkdown = searchResultsAsMarkdown(query, 4);
                 user += LLM_USER_PREFIX;
-                for (int i  = 0; i < searchResults.length(); i++) {
-                    JSONObject r = searchResults.getJSONObject(i);
-                    String snippet = r.optString("snippet", "");
-                    user += snippet + "\n\n";
-                }
-                systemObject.put("content", system);
+                user += searchResultMarkdown;
                 userObject.put("content", user);
     
             }
@@ -184,21 +174,20 @@ public class RAGProxyServlet extends HttpServlet {
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(body.getBytes());
                 os.flush();
-            }
+            } // here we wait for the response from upstream
 
             // write back response of the back-end service to the client; use status of
             // backend-response
-            int status = conn.getResponseCode();
+            final int status = conn.getResponseCode();
             // String rmessage = conn.getResponseMessage();
             hresponse.setStatus(status);
 
             if (status == 200) {
                 // read the response of the back-end line-by-line and write it to the client line-by-line
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                final BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    out.print(inputLine); // i.e. data:
-                                          // {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
+                    out.print(inputLine); // i.e. data: {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
                     out.flush();
                 }
                 in.close();
@@ -234,12 +223,12 @@ public class RAGProxyServlet extends HttpServlet {
                     SolrDocument doc = i.next();
                     final JSONObject result = new JSONObject(true);
                     String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                    result.put("url", url);
+                    result.put("url", url == null ? "" : url.trim());
                     String title = getOneString(doc, CollectionSchema.title);
-                    result.put("title", title == null ? url : title);
+                    result.put("title", title == null ? "" : title.trim());
                     if (includeSnippet) {
                         String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                        result.put("snippet", text == null ? "" : text);
+                        result.put("snippet", text == null ? "" : text.trim());
                     }
                 results.put(result);
                 } catch (JSONException e) {
@@ -250,6 +239,27 @@ public class RAGProxyServlet extends HttpServlet {
         } catch (SolrException | IOException e) {
             return results;
         }
+    }
+    
+    public static String searchResultsAsMarkdown(String query, int count) {
+        JSONArray searchResults = searchResults(query, count, true);
+        StringBuilder sb = new StringBuilder();
+        
+        for (int i  = 0; i < searchResults.length(); i++) {
+            try {
+                JSONObject r = searchResults.getJSONObject(i);
+                String title = r.optString("title", "");
+                String url = r.optString("url", "");
+                String snippet = r.optString("snippet", "");
+                if (title.length() > 0 && snippet.length() > 0) {
+                    sb.append("## ").append(title).append("\n");
+                    sb.append(snippet).append("\n");
+                    if (url.length() > 0) sb.append("Source: ").append(url).append("\n");
+                    sb.append("\n\n");
+                }
+            } catch (JSONException e) {}
+        }
+        return sb.toString();
     }
     
     private static String getOneString(SolrDocument doc, CollectionSchema field) {
