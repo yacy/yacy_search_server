@@ -149,7 +149,9 @@
         display: none;
       }
 
-      .attachment-button {
+      .attachment-button,
+      .copy-button,
+      .user-trim-button {
         width: 24px;
         height: 24px;
         border: none;
@@ -165,7 +167,9 @@
         transition: background 0.15s, border-color 0.15s;
       }
 
-      .attachment-button:hover {
+      .attachment-button:hover,
+      .copy-button:hover,
+      .user-trim-button:hover {
         background: #c3cbd9;
       }
 
@@ -195,6 +199,13 @@
 
       .attachment-clear:hover {
         background: #c3cbd9;
+      }
+
+      .copy-button,
+      .user-trim-button {
+        position: absolute;
+        top: -6px;
+        right: 8px;
       }
 
       .hidden-file-input {
@@ -269,7 +280,7 @@
             <fieldset class="chat-turn user">
               <legend>User</legend>
               <div class="composer">
-                <div class="composer-main">
+                <div class="composer-main" id="composerMain">
                   <textarea class="chat-body" id="userInput" rows="3" placeholder="Ask me anything..." required="required"></textarea>
                   <div class="attachment-row" id="attachmentRow">
                     <button type="button" class="attachment-button" id="addFileButton" aria-label="Attach an image">
@@ -279,7 +290,7 @@
                       <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                     </button>
                     <span class="attachment-filename" id="attachmentFilename">Attach a PNG or JPG</span>
-                    <input type="file" id="fileInput" class="hidden-file-input" accept="image/png,image/jpeg"/>
+                    <input type="file" id="fileInput" class="hidden-file-input" accept="image/*,text/plain,text/markdown"/>
                   </div>
                 </div>
                 <input type="submit" class="btn btn-primary" id="sendButton" value="Send"/>
@@ -342,7 +353,8 @@
         downloadChatButton: document.getElementById('downloadChatButton'),
         uploadChatButton: document.getElementById('uploadChatButton'),
         uploadChatInput: document.getElementById('uploadChatInput'),
-        toggleSystemButton: document.getElementById('toggleSystemButton')
+        toggleSystemButton: document.getElementById('toggleSystemButton'),
+        composerMain: document.getElementById('composerMain')
     };
 
     function scrollToBottom(smooth = true) {
@@ -372,6 +384,9 @@
         const { skipScroll = false, skipVisibilityUpdate = false } = opts;
         const entry = document.createElement('fieldset');
         entry.className = `chat-turn ${role}`;
+        if (role === 'assistant' || role === 'user') {
+            entry.style.position = 'relative';
+        }
         const legend = document.createElement('legend');
         if (role === 'assistant') {
             legend.textContent = 'Assistant';
@@ -388,6 +403,27 @@
         entry.appendChild(body);
 
         dom.messages.appendChild(entry);
+        if (typeof opts.messageIndex === 'number') {
+            entry.dataset.messageIndex = String(opts.messageIndex);
+        }
+        if (role === 'assistant') {
+            const copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
+            copyBtn.className = 'copy-button';
+            copyBtn.title = 'Copy answer';
+            copyBtn.innerHTML = '<span class="glyphicon glyphicon-copy" aria-hidden="true"></span>';
+            copyBtn.addEventListener('click', () => copyAssistant(body.textContent));
+            entry.appendChild(copyBtn);
+        }
+        if (role === 'user' && typeof opts.messageIndex === 'number') {
+            const trimBtn = document.createElement('button');
+            trimBtn.type = 'button';
+            trimBtn.className = 'user-trim-button';
+            trimBtn.title = 'Reuse from here';
+            trimBtn.innerHTML = '<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>';
+            trimBtn.addEventListener('click', () => trimConversationFromIndex(opts.messageIndex, body.textContent));
+            entry.appendChild(trimBtn);
+        }
         if (!skipScroll) {
             scrollToBottom();
         }
@@ -403,6 +439,38 @@
         dom.fileInput.value = '';
         dom.attachmentFilename.textContent = 'Attach a PNG or JPG';
         dom.attachmentRow.classList.remove('has-attachment');
+    }
+
+    async function copyAssistant(text) {
+        try {
+            await navigator.clipboard.writeText(text || '');
+        } catch (err) {
+            console.warn('Clipboard copy failed', err);
+        }
+    }
+
+    function trimConversationFromIndex(index, reuseText) {
+        if (typeof index !== 'number' || index < 0) return;
+        state.messages = state.messages.slice(0, index);
+        state.assistantSeen = state.messages.some(m => m.role === 'assistant');
+        state.showSystem = false;
+        renderConversation();
+        persistConversation();
+        updateClearChatVisibility();
+        updateSystemToggleButton();
+        clearAttachment();
+        dom.input.value = reuseText || '';
+        resizeComposer();
+        showComposer();
+    }
+
+    function hideComposer() {
+        if (dom.form) dom.form.style.display = 'none';
+    }
+
+    function showComposer() {
+        if (dom.form) dom.form.style.display = '';
+        if (dom.input) dom.input.focus();
     }
 
     function updateClearChatVisibility() {
@@ -475,7 +543,8 @@
         }
     }
 
-    async function streamChat(userMessage) {
+    async function streamChat(userMessage, assistantNode, options = {}) {
+        const { onFirstToken } = options;
         ensureSystemMessage();
         const payload = {
             model: state.config.model,
@@ -497,7 +566,7 @@
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
         let assistantText = '';
-        const assistantNode = appendMessage('assistant', '...');
+        let sawFirstToken = false;
         const parseChunk = chunk => {
             const segments = chunk
                 .split(/\n+/)
@@ -514,6 +583,11 @@
                     const parsed = JSON.parse(clean);
                     const delta = parsed?.choices?.[0]?.delta?.content;
                     if (delta) {
+                        if (!sawFirstToken && typeof onFirstToken === 'function') {
+                            sawFirstToken = true;
+                            assistantNode.textContent = '';
+                            onFirstToken();
+                        }
                         assistantText += delta;
                         assistantNode.textContent = assistantText;
                         scrollToBottom(false);
@@ -531,9 +605,13 @@
             const chunk = decoder.decode(value, { stream: true });
             done = parseChunk(chunk);
         }
+        if (!sawFirstToken && typeof onFirstToken === 'function') {
+            onFirstToken();
+        }
         state.messages.push(userMessage);
         state.messages.push({ role: 'assistant', content: assistantText });
         persistConversation();
+        renderConversation();
     }
 
     function resizeComposer() {
@@ -544,13 +622,16 @@
     }
 
     function buildUserMessage(promptText) {
-        if (state.attachment?.dataUrl) {
+        if (state.attachment) {
+            const parts = [{ type: 'text', text: promptText }];
+            if (state.attachment.kind === 'image' && state.attachment.dataUrl) {
+                parts.push({ type: 'image_url', image_url: { url: state.attachment.dataUrl } });
+            } else if (state.attachment.kind === 'text' && state.attachment.textContent) {
+                parts.push({ type: 'text', text: state.attachment.textContent });
+            }
             return {
                 role: 'user',
-                content: [
-                    { type: 'text', text: promptText },
-                    { type: 'image_url', image_url: { url: state.attachment.dataUrl } }
-                ]
+                content: parts
             };
         }
         return { role: 'user', content: promptText };
@@ -594,9 +675,10 @@
     function renderConversation() {
         dom.messages.innerHTML = '';
         state.assistantSeen = state.messages.some(m => m.role === 'assistant');
-        for (const msg of state.messages) {
+        for (let i = 0; i < state.messages.length; i++) {
+            const msg = state.messages[i];
             if (msg.role === 'system' && !state.showSystem) continue;
-            appendMessage(msg.role, messageText(msg.content), { skipScroll: true, skipVisibilityUpdate: true });
+            appendMessage(msg.role, messageText(msg.content), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i });
         }
         updateClearChatVisibility();
         updateSystemToggleButton();
@@ -634,26 +716,27 @@
 
     function formatUserPreview(promptText) {
         if (state.attachment?.name) {
-            return `${promptText}\n[Image attached: ${state.attachment.name}]`;
+            return `${promptText}\n[Attachment: ${state.attachment.name}]`;
         }
         return promptText;
     }
 
     async function handleFileChange(event) {
         const file = event.target.files && event.target.files[0];
+        dom.fileInput.value = '';
         if (!file) {
             clearAttachment();
             return;
         }
-        if (!file.type.startsWith('image/')) {
-            appendMessage('system', 'Please upload a PNG or JPG image.');
-            clearAttachment();
-            return;
-        }
         try {
-            const dataUrl = await readFileAsDataURL(file);
-            state.attachment = { name: file.name, dataUrl };
-            dom.attachmentFilename.textContent = file.name;
+            const attachment = await buildAttachment(file);
+            if (!attachment) {
+                appendMessage('system', 'Please upload an image, .txt, or .md file.');
+                clearAttachment();
+                return;
+            }
+            state.attachment = attachment;
+            dom.attachmentFilename.textContent = attachment.name;
             dom.attachmentRow.classList.add('has-attachment');
         } catch (err) {
             appendMessage('system', `Failed to read file: ${err.message}`);
@@ -670,6 +753,31 @@
         });
     }
 
+    function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsText(file);
+        });
+    }
+
+    async function buildAttachment(file) {
+        const name = file.name || 'attachment';
+        const mime = (file.type || '').toLowerCase();
+        const isImage = mime.startsWith('image/');
+        const isText = mime.startsWith('text/') || name.endsWith('.txt') || name.endsWith('.md');
+        if (isImage) {
+            const dataUrl = await readFileAsDataURL(file);
+            return { kind: 'image', name, dataUrl };
+        }
+        if (isText) {
+            const textContent = await readFileAsText(file);
+            return { kind: 'text', name, textContent };
+        }
+        return null;
+    }
+
     dom.form.addEventListener('submit', async event => {
         event.preventDefault();
         if (state.busy) return;
@@ -683,13 +791,17 @@
         dom.input.value = '';
         clearAttachment();
         resizeComposer();
+        const assistantNode = appendMessage('assistant', 'waiting for an answer...');
+        hideComposer();
         try {
-            await streamChat(userMessage);
+            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer });
         } catch (err) {
             appendMessage('system', `Error: ${err.message}`);
+            showComposer();
         } finally {
             state.busy = false;
             dom.sendButton.disabled = false;
+            showComposer();
         }
     });
 
@@ -717,6 +829,27 @@
             } else {
                 dom.form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
             }
+        }
+    });
+    dom.composerMain?.addEventListener('dragover', event => {
+        event.preventDefault();
+    });
+    dom.composerMain?.addEventListener('drop', async event => {
+        event.preventDefault();
+        const file = event.dataTransfer?.files && event.dataTransfer.files[0];
+        if (!file) return;
+        try {
+            const attachment = await buildAttachment(file);
+            if (!attachment) {
+                appendMessage('system', 'Please drop an image, .txt, or .md file.');
+                return;
+            }
+            state.attachment = attachment;
+            dom.attachmentFilename.textContent = attachment.name;
+            dom.attachmentRow.classList.add('has-attachment');
+        } catch (err) {
+            appendMessage('system', `Failed to read file: ${err.message}`);
+            clearAttachment();
         }
     });
     window.addEventListener('resize', resizeComposer);
