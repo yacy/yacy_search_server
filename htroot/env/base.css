@@ -33,8 +33,39 @@
 
 /* --------------- global elements -------------------------- */
 
+@font-face {
+  font-family: 'Roboto';
+  src: url('fonts/Roboto-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Bold';
+  src: url('fonts/Roboto-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Italic';
+  src: url('fonts/Roboto-Italic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('fonts/Roboto-Mono.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('fonts/Orbitron-VariableFont_wght.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Saira Extra Condensed';
+  src: url('fonts/SairaExtraCondensed-Medium.ttf') format('truetype');
+}
+
 * {
-  font-family:sans-serif;
+  font-style: normal;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* the following dl style is needed to patch a bug in Safari
@@ -46,10 +77,25 @@ dl {
 
 body, table, textarea {
   font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: always;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 {
-  font-style:normal;
+pre, code {
+  font-family: 'Roboto Mono', monospace;
+}
+
+.narrow {
+    font-family: 'Saira Extra Condensed', 'Arial Narrow', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 14px;
+}
+
+h1, h2, h3, h4, b, strong {
+  font-family: 'Roboto Bold', sans-serif;
 }
 
 h1 {
