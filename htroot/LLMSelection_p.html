@@ -416,6 +416,7 @@
           ];
           columnValues.forEach(value => {
             const td = document.createElement("td");
+            td.className = "narrow";
             td.textContent = value;
             tr.appendChild(td);
           });
@@ -1149,16 +1150,16 @@
                     <td>api_key</td>
                     <td>max_tokens</td>
                     
-                    <td>search-answers&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model creates answers for search requests</span></span></td>
-                    <td>chat&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used in the chat interface and as default for the RAG proxy</span></span></td>
-                    <td>translation&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to make translations of the web UI</span></span></td>
-                    <td>classification&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to classify prompts to find out what they demand</span></span></td>
-                    <td>search-query&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model produces search queries to YaCy search from prompts in RAG or chat</span></span></td>
-                    <td>qa-pairs&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to produce query-answer pairs which enhance search from chat prompts</span></span></td>
-                    <td>tldr-shortener&nbsp;<span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to make summaries from web content</span></span></td>
+                    <td class="narrow">search-answers<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model creates answers for search requests</span></span></td>
+                    <td class="narrow">chat<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used in the chat interface and as default for the RAG proxy</span></span></td>
+                    <td class="narrow">translation<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to make translations of the web UI</span></span></td>
+                    <td class="narrow">classification<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to classify prompts to find out what they demand</span></span></td>
+                    <td class="narrow">search-query<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model produces search queries to YaCy search from prompts in RAG or chat</span></span></td>
+                    <td class="narrow">qa-pairs<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to produce query-answer pairs which enhance search from chat prompts</span></span></td>
+                    <td class="narrow">tldr-shortener<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to make summaries from web content</span></span></td>
                     
-                    <td><i>tooling</i></td>
-                    <td><i>vision</i></td>
+                    <td>tooling</td>
+                    <td>vision</td>
                     <td>Actions</td>
                 </tr>
             </thead>
