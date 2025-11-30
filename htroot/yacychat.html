@@ -381,7 +381,7 @@
         padding: 8px;
         border-radius: 4px;
         font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
-        font-size: 0.95rem;
+        font-size: 1rem;
         white-space: pre-wrap;
       }
 
@@ -1113,11 +1113,38 @@
         let assistantText = '';
         let sawFirstDelta = false;
         let focusShown = false;
+        let searchApplied = false;
         if (typeof onFirstToken === 'function' && !focusShown) {
             focusShown = true;
             onFirstToken();
         }
         let autoScroll = true;
+        let pending = '';
+
+        const applySearchAttachment = parsed => {
+            if (searchApplied) return;
+            if (!parsed) return;
+            const searchName = parsed['search-filename'];
+            const searchBase64 = parsed['search-text-base64'];
+            if (!searchName || !searchBase64) return;
+            const dataUrl = `data:text/markdown;base64,${searchBase64}`;
+            const textContent = base64ToUtf8(searchBase64);
+            for (let i = state.messages.length - 1; i >= 0; i--) {
+                const msg = state.messages[i];
+                if (msg && msg.role === 'user' && msg.search) {
+                    msg.attachment = {
+                        kind: 'text',
+                        name: searchName,
+                        dataUrl,
+                        mime: 'text/markdown',
+                        textContent
+                    };
+                    delete msg.search;
+                    searchApplied = true;
+                    break;
+                }
+            }
+        };
 
         const performAutoScroll = () => {
             if (!autoScroll) return;
@@ -1129,37 +1156,40 @@
         };
 
         const parseChunk = chunk => {
-            const segments = chunk
-                .split(/\n+/)
-                .flatMap(line => line.split(/(?=data:)/))
-                .map(line => line.trim())
-                .filter(Boolean);
-            for (const line of segments) {
-                if (line === 'data: [DONE]' || line === '[DONE]') {
-                    return true;
-                }
-                const clean = line.replace(/^data:\s*/i, '');
-                if (!clean) continue;
-                try {
-                    const parsed = JSON.parse(clean);
-                    const delta = parsed?.choices?.[0]?.delta?.content;
-                    if (delta) {
-                        if (!sawFirstDelta) {
-                            sawFirstDelta = true;
-                            applyMessageContent(assistantNode, 'assistant', '');
-                            if (!focusShown && typeof onFirstToken === 'function') {
-                                focusShown = true;
-                                onFirstToken();
-                            }
-                        }
-                        assistantText += delta;
-                        applyMessageContent(assistantNode, 'assistant', assistantText);
-                        performAutoScroll();
+            pending += chunk;
+            const lines = pending.split(/\r?\n/);
+            pending = lines.pop() || '';
+            for (const raw of lines) {
+                const fragments = raw.split(/(?=data:\s*)/).map(f => f.trim()).filter(Boolean);
+                for (const line of fragments) {
+                    if (line === 'data: [DONE]' || line === '[DONE]') {
+                        return true;
                     }
+                    if (!line.startsWith('data:')) continue;
+                    const clean = line.replace(/^data:\s*/i, '');
+                    if (!clean) continue;
+                    try {
+                        const parsed = JSON.parse(clean);
+                        applySearchAttachment(parsed);
+                        const delta = parsed?.choices?.[0]?.delta?.content;
+                        if (delta) {
+                            if (!sawFirstDelta) {
+                                sawFirstDelta = true;
+                                applyMessageContent(assistantNode, 'assistant', '');
+                                if (!focusShown && typeof onFirstToken === 'function') {
+                                    focusShown = true;
+                                    onFirstToken();
+                                }
+                            }
+                            assistantText += delta;
+                            applyMessageContent(assistantNode, 'assistant', assistantText);
+                            performAutoScroll();
+                        }
                     } catch (err) {
                         console.warn('Failed to parse line', line, err);
                     }
                 }
+            }
             return false;
         };
         let done = false;
@@ -1173,6 +1203,9 @@
             }
             done = parseChunk(chunk);
         }
+        if (!done && pending.trim()) {
+            parseChunk('\n');
+        }
         if (!focusShown && typeof onFirstToken === 'function') {
             focusShown = true;
             onFirstToken();
@@ -1185,6 +1218,7 @@
         persistConversation();
         updateClearChatVisibility();
         updateSystemToggleButton();
+        renderConversation({ skipScroll: true });
     }
 
     function resizeComposer() {
@@ -1247,20 +1281,6 @@
         return '';
     }
 
-    function collectRecentPairs() {
-        const pairs = [];
-        let pendingUser = null;
-        for (const msg of state.messages) {
-            if (msg.role === 'user') {
-                pendingUser = messageText(msg.content);
-            } else if (msg.role === 'assistant' && pendingUser !== null) {
-                pairs.push({ user: pendingUser, assistant: messageText(msg.content) });
-                pendingUser = null;
-            }
-        }
-        return pairs.slice(-3);
-    }
-
     function renderConversation(options = {}) {
         const { skipScroll = false } = options;
         closeAttachmentPopover();
@@ -1280,8 +1300,11 @@
 
     function persistConversation() {
         try {
-            const pairs = collectRecentPairs();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(pairs));
+            const payload = {
+                model: state.config.model,
+                messages: state.messages
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
         } catch (err) {
             console.warn('Failed to persist conversation', err);
         }
@@ -1294,13 +1317,19 @@
         } catch (err) {
             console.warn('Failed to parse stored conversation', err);
         }
-        if (!Array.isArray(stored) || !stored.length) return;
-        for (const pair of stored) {
-            if (pair?.user) {
-                state.messages.push({ role: 'user', content: pair.user });
+        if (Array.isArray(stored) && stored.length) {
+            for (const pair of stored) {
+                if (pair?.user) {
+                    state.messages.push({ role: 'user', content: pair.user });
+                }
+                if (pair?.assistant) {
+                    state.messages.push({ role: 'assistant', content: pair.assistant });
+                }
             }
-            if (pair?.assistant) {
-                state.messages.push({ role: 'assistant', content: pair.assistant });
+        } else if (stored && Array.isArray(stored.messages)) {
+            state.messages = stored.messages.map(msg => ({ ...msg }));
+            if (stored.model) {
+                state.config.model = stored.model;
             }
         }
         ensureSystemMessage();
@@ -1357,6 +1386,14 @@
         const safeMime = mime || 'text/plain';
         const encoded = btoa(unescape(encodeURIComponent(text || '')));
         return `data:${safeMime};base64,${encoded}`;
+    }
+
+    function base64ToUtf8(base64) {
+        try {
+            return decodeURIComponent(escape(atob(base64)));
+        } catch (err) {
+            return '';
+        }
     }
 
     function getFileExtension(name) {

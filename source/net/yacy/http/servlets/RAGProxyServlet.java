@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -50,6 +52,7 @@ import org.apache.solr.servlet.cache.Method;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import net.yacy.ai.LLM;
 import net.yacy.cora.federate.solr.SolrType;
@@ -156,11 +159,12 @@ public class RAGProxyServlet extends HttpServlet {
             //List<DataURL> data_urls = userObject.getContentAttachments(); // this list is a copy of the content data_urls
             
             // RAG
+            String searchResultQuery = "";
             String searchResultMarkdown = "";
             if (rag) {
                 // modify system and user prompt here in bodyObject to enable RAG
-                String query = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
-                searchResultMarkdown = searchResultsAsMarkdown(query, 10);
+                searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
+                searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 4);
                 user += LLM_USER_PREFIX;
                 user += searchResultMarkdown;
                 userObject.setContentText(user);
@@ -170,8 +174,8 @@ public class RAGProxyServlet extends HttpServlet {
             body = bodyObject.toString();
 
             // Open request to back-end service
-            URL url = new URI(llm4Chat.llm.hoststub + "/v1/chat/completions").toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            final URL url = new URI(llm4Chat.llm.hoststub + "/v1/chat/completions").toURL();
+            final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             if (!llm4Chat.llm.api_key.isEmpty()) {
@@ -192,14 +196,41 @@ public class RAGProxyServlet extends HttpServlet {
             hresponse.setStatus(status);
 
             if (status == 200) {
-                // read the response of the back-end line-by-line and write it to the client line-by-line
-                final BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    out.print(inputLine); // i.e. data: {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
-                    out.flush();
-                }
-                in.close();
+                final BlockingQueue<String> inputQueue = new LinkedBlockingQueue<>();
+                final String POISON = "POISON"; 
+                Thread readerThread = new Thread(() -> {
+                    // read the response of the back-end line-by-line and push it to a stack concurrently
+                    try {
+                        final BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {inputQueue.put(inputLine);}
+                        in.close();
+                        inputQueue.put(POISON);
+                    } catch (IOException | InterruptedException e) {
+                    }
+                });
+                readerThread.start();
+                
+                // read the stack line-by-line and write it to the client line-by-line
+                try {
+                    String inputLine;
+                    int count = 0;
+                    while (!(inputLine = inputQueue.take()).equals(POISON)) {
+                        if (count == 0 && searchResultMarkdown.length() > 0) {
+                            // for the first line we modify the data line to integrate the search result as file
+                            int p = inputLine.indexOf('{');
+                            if (p > 0) {
+                                JSONObject j = new JSONObject(new JSONTokener(inputLine.substring(p)));
+                                j.put("search-filename", "search_result_"+ searchResultQuery.replace(' ', '_') + ".md");
+                                j.put("search-text-base64", new String(Base64.getEncoder().encode(searchResultMarkdown.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+                                inputLine = inputLine.substring(0, p) + j.toString();
+                            }
+                        }
+                        out.print(inputLine); // i.e. data: {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
+                        out.flush();
+                        count++;
+                    }
+                } catch (InterruptedException e) {}
             }
             out.close(); // close this here to end transmission
         } catch (JSONException | URISyntaxException e) {
