@@ -200,12 +200,23 @@
       .attachment-row.has-attachment .attachment-button {
         display: none;
       }
+      .attachment-row.has-attachment .search-button {
+        display: none;
+      }
+      .attachment-row.search-mode .attachment-button,
+      .attachment-row.search-mode .search-button {
+        display: none;
+      }
+      .attachment-row.search-mode .attachment-clear {
+        display: inline-flex;
+      }
       .attachment-row.loading .attachment-filename {
         font-style: italic;
         color: #6b7a90;
       }
 
       .attachment-button,
+      .search-button,
       .copy-button,
       .user-trim-button {
         width: 24px;
@@ -224,6 +235,7 @@
       }
 
       .attachment-button:hover,
+      .search-button:hover,
       .copy-button:hover,
       .user-trim-button:hover {
         background: #c3cbd9;
@@ -546,6 +558,9 @@
                 <div class="composer-main" id="composerMain">
                   <textarea class="chat-body" id="userInput" rows="3" placeholder="Ask me anything..." required="required"></textarea>
                   <div class="attachment-row" id="attachmentRow">
+                    <button type="button" class="search-button" id="searchButton" aria-label="Search">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
                     <button type="button" class="attachment-button" id="addFileButton" aria-label="Attach a file">
                       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
                     </button>
@@ -600,6 +615,7 @@
         },
         busy: false,
         attachment: null,
+        searchMode: false,
         assistantSeen: false,
         showSystem: false
     };
@@ -610,6 +626,7 @@
         input: document.getElementById('userInput'),
         sendButton: document.getElementById('sendButton'),
         fileInput: document.getElementById('fileInput'),
+        searchButton: document.getElementById('searchButton'),
         addFileButton: document.getElementById('addFileButton'),
         attachmentFilename: document.getElementById('attachmentFilename'),
         clearFileButton: document.getElementById('clearFileButton'),
@@ -905,16 +922,20 @@
 
     function clearAttachment() {
         state.attachment = null;
+        state.searchMode = false;
         dom.fileInput.value = '';
         dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         dom.attachmentRow.classList.remove('has-attachment');
+        dom.attachmentRow.classList.remove('search-mode');
         closeAttachmentPopover();
     }
 
     function setComposerAttachment(attachment) {
+        state.searchMode = false;
+        dom.attachmentRow.classList.remove('search-mode');
         state.attachment = attachment ? cloneAttachment(attachment) : null;
         if (state.attachment) {
-            dom.attachmentFilename.textContent = state.attachment.name || 'Attachment';
+            dom.attachmentFilename.textContent = `Attach File: ${state.attachment.name || 'Attachment'}`;
             dom.attachmentRow.classList.add('has-attachment');
         } else {
             clearAttachment();
@@ -993,7 +1014,7 @@
     function updateClearChatVisibility() {
         if (!dom.clearChatRow) return;
         dom.clearChatRow.style.visibility = state.assistantSeen ? 'visible' : 'hidden';
-        dom.clearChatRow.style.pointerEvents = state.assistantSeen ? '' : 'none';
+        dom.clearChatRow.style.pointerEvents = state.assistantSeen ? 'auto' : 'none';
     }
 
     function ensureComposerVisible(evt) {
@@ -1191,15 +1212,18 @@
             }
             return {
                 role: 'user',
-                content: parts
+                content: parts,
+                search: !!state.searchMode
             };
         }
-        return { role: 'user', content: promptText };
+        return { role: 'user', content: promptText, search: !!state.searchMode };
     }
 
     function stripMessageForApi(message) {
         if (!message) return null;
-        return { role: message.role, content: message.content };
+        const sanitized = { role: message.role, content: message.content };
+        if (message.search) sanitized.search = true;
+        return sanitized;
     }
 
     function buildRequestPayload() {
@@ -1745,7 +1769,8 @@
         state.messages.push({
             role: 'user',
             content: userMessage.content,
-            attachment: userAttachment
+            attachment: userAttachment,
+            search: !!state.searchMode
         });
         const userIndex = state.messages.length - 1;
         const preview = formatUserPreview(prompt);
@@ -1771,8 +1796,17 @@
     dom.addFileButton.addEventListener('click', () => {
         dom.fileInput.click();
     });
+    dom.searchButton?.addEventListener('click', () => {
+        state.searchMode = true;
+        state.attachment = null;
+        dom.attachmentRow.classList.remove('has-attachment');
+        dom.attachmentRow.classList.add('search-mode');
+        dom.attachmentFilename.textContent = 'Attach Search Results';
+    });
     dom.fileInput.addEventListener('change', handleFileChange);
-    dom.clearFileButton.addEventListener('click', clearAttachment);
+    dom.clearFileButton.addEventListener('click', () => {
+        clearAttachment();
+    });
     dom.clearChatButton?.addEventListener('click', clearChatHistory);
     dom.downloadChatButton?.addEventListener('click', downloadChat);
     dom.uploadChatButton?.addEventListener('click', () => dom.uploadChatInput?.click());

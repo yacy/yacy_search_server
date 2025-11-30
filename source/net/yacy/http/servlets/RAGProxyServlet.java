@@ -133,7 +133,6 @@ public class RAGProxyServlet extends HttpServlet {
             //Double temperature = bodyObject.optDouble("temperature", 0.0);
             //int max_tokens = bodyObject.optInt("max_tokens", 1024);
             //boolean stream = bodyObject.optBoolean("stream", false);
-            boolean rag = bodyObject.optBoolean("rag", false);
 
             // resolve true model name from configuration
             LLM.LLMUsage usage = LLM.LLMUsage.chat;
@@ -153,13 +152,15 @@ public class RAGProxyServlet extends HttpServlet {
             }
             UserObject userObject = new UserObject(messages.getJSONObject(messages.length() - 1));
             String user = userObject.getContentText(); // this is the latest prompt
+            boolean rag = userObject.getSearch();
             //List<DataURL> data_urls = userObject.getContentAttachments(); // this list is a copy of the content data_urls
             
             // RAG
+            String searchResultMarkdown = "";
             if (rag) {
                 // modify system and user prompt here in bodyObject to enable RAG
                 String query = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
-                String searchResultMarkdown = searchResultsAsMarkdown(query, 4);
+                searchResultMarkdown = searchResultsAsMarkdown(query, 10);
                 user += LLM_USER_PREFIX;
                 user += searchResultMarkdown;
                 userObject.setContentText(user);
@@ -257,6 +258,11 @@ public class RAGProxyServlet extends HttpServlet {
                 this.removeContentAttachment(data_url);
             }
             this.normalize();
+        }
+        
+        public boolean getSearch() {
+            boolean search = this.userObject.optBoolean("search", false);
+            return search;
         }
         
         public String getContentText() {
