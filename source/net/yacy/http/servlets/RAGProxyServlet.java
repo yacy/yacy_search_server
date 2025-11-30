@@ -28,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
@@ -141,13 +142,18 @@ public class RAGProxyServlet extends HttpServlet {
             LLM.LLMModel llm4tldr = LLM.llmFromUsage(LLM.LLMUsage.tldr);
             bodyObject.put("model", llm4Chat.model); // replace the model with the decoded model name
             
-            // get messages
+            // get messages and prepare user message attachments
             JSONArray messages = bodyObject.optJSONArray("messages");
-            //JSONObject systemObject = messages.getJSONObject(0);
-            //String system = systemObject.optString("content", ""); // the system prompt
+            for (int i = 0; i < messages.length(); i++) {
+                JSONObject message = messages.getJSONObject(i);
+                if (message.optString("role", "").equals("user")) {
+                    UserObject userObject = new UserObject(message);
+                    userObject.attachAttachment(LLM_USER_PREFIX);
+                }
+            }
             UserObject userObject = new UserObject(messages.getJSONObject(messages.length() - 1));
             String user = userObject.getContentText(); // this is the latest prompt
-            //List<DataURL> data_urls = userObject.getContentAttachments();
+            //List<DataURL> data_urls = userObject.getContentAttachments(); // this list is a copy of the content data_urls
             
             // RAG
             if (rag) {
@@ -203,6 +209,7 @@ public class RAGProxyServlet extends HttpServlet {
     public final static class DataURL {
     	private String mimetype;
     	private byte[] data;
+    	private int signature; // identifier/helper
     	public DataURL(String data_url) {
     		if (data_url == null || !data_url.startsWith("data:")) {
                 throw new IllegalArgumentException("data url not valid: it must start with 'data:'");
@@ -216,12 +223,16 @@ public class RAGProxyServlet extends HttpServlet {
             String[] headerParts = header.split(";");
             this.mimetype = headerParts[0]; // i.e. "image/jpeg"
             this.data = Base64.getDecoder().decode(base64Data);
+            this.signature = base64Data.hashCode();
     	}
     	public String getMimetype() {
     		return this.mimetype;
     	}
     	public byte[] getData() {
     		return this.data;
+    	}
+    	public int getSiganture() {
+    	    return this.signature;
     	}
     }
 
@@ -232,8 +243,25 @@ public class RAGProxyServlet extends HttpServlet {
             this.userObject = userObject;
         }
         
+        public void attachAttachment(String prefix) {
+            List<DataURL> data_urls = this.getContentAttachments(); // this list is a copy of the content data_urls
+            
+            // if the data_urls contains a text object, we remove that and inject it into the text prompt
+            for (DataURL data_url: data_urls) {
+                if (!data_url.getMimetype().startsWith("text/")) continue;
+                String user = this.getContentText(); // this is the latest prompt
+                String attachment = new String(data_url.getData(), StandardCharsets.UTF_8);
+                user += prefix;
+                user += attachment;
+                this.setContentText(user);
+                this.removeContentAttachment(data_url);
+            }
+            this.normalize();
+        }
+        
         public String getContentText() {
             Object content = this.userObject.opt("content");
+            assert content != null;
             if (content instanceof JSONArray) {
                 JSONArray array = (JSONArray) content;
                 for (int i = 0; i < array.length(); i++) {
@@ -253,6 +281,7 @@ public class RAGProxyServlet extends HttpServlet {
         public List<DataURL> getContentAttachments() {
         	ArrayList<DataURL> list = new ArrayList<>();
             Object content = this.userObject.opt("content");
+            assert content != null;
             if (content instanceof JSONArray) {
                 JSONArray array = (JSONArray) content;
                 for (int i = 0; i < array.length(); i++) {
@@ -273,10 +302,69 @@ public class RAGProxyServlet extends HttpServlet {
             return list;
         }
         
+        public void removeContentAttachment(final DataURL delete_data_url) {
+            Object content = this.userObject.opt("content");
+            assert content != null;
+            if (content instanceof JSONArray) {
+                JSONArray array = (JSONArray) content;
+                arrayloop: for (int i = 0; i < array.length(); i++) {
+                    JSONObject j = array.optJSONObject(i);
+                    String ctype = j.optString("type");
+                    if (ctype != null && ctype.equals("image_url")) {
+                        JSONObject image_url = j.optJSONObject("image_url");
+                        if (image_url != null) {
+                            String data_url = image_url.optString("url", "");
+                            if (data_url.length() > 0) {
+                                DataURL dataurl = new DataURL(data_url);
+                                if (dataurl.getSiganture() == delete_data_url.getSiganture()) {
+                                    array.remove(i);
+                                    break arrayloop;
+                                }
+                            }
+                        }
+                    }
+                }
+                normalize();
+            }
+        }
+        
+        public void normalize() {
+            // make a canonical form, which is that if the user object has no attachment,
+            // then it should not have a "content" object.
+            Object content = this.userObject.opt("content");
+            assert content != null;
+            if (content instanceof String) return;
+            assert content instanceof JSONArray;
+            JSONArray array = (JSONArray) content;
+            assert array.length() > 0;
+            if (array.length() != 1) return;
+            JSONObject j = array.optJSONObject(0);
+            String ctype = j.optString("type");
+            assert ctype != null;
+            assert ctype.equals("text");
+            if (!ctype.equals("text")) return; // but thats wrong
+            String text = j.optString("text", "");
+            // simply replace the content array with the text, because nothing else is there.
+            try {this.userObject.putOpt("content", text);} catch (JSONException e) {}
+        }
+        
         public void setContentText(String text) {
-            try {
-                this.userObject.put("content", text);
-            } catch (JSONException e) {}
+            Object content = this.userObject.opt("content");
+            assert content != null;
+            if (content instanceof String) {
+                try {this.userObject.put("content", text);} catch (JSONException e) {}
+                return;
+            }
+            assert content instanceof JSONArray;
+            JSONArray array = (JSONArray) content;
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject j = array.optJSONObject(i);
+                String ctype = j.optString("type");
+                if (ctype != null && ctype.equals("text")) {
+                    try {j.putOpt("text", text);} catch (JSONException e) {}
+                    return;
+                }
+            }
         }
     }
     

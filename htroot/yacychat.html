@@ -191,6 +191,7 @@
         gap: 10px;
         font-size: 0.95rem;
         color: #2c3e50;
+        position: relative;
       }
 
       .attachment-row.has-attachment .attachment-clear {
@@ -198,6 +199,10 @@
       }
       .attachment-row.has-attachment .attachment-button {
         display: none;
+      }
+      .attachment-row.loading .attachment-filename {
+        font-style: italic;
+        color: #6b7a90;
       }
 
       .attachment-button,
@@ -267,6 +272,188 @@
         opacity: 0;
         pointer-events: none;
       }
+
+      .attachment-chip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 6px 10px;
+        background: #d1d9e6;
+        color: #2c3e50;
+        border-radius: 4px;
+        border: 1px solid #c3cbd9;
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      .attachment-chip:hover,
+      .attachment-chip:focus {
+        background: #c3cbd9;
+        outline: none;
+      }
+
+      .attachment-chip .glyphicon {
+        font-size: 1.05rem;
+      }
+
+      .attachment-chip .attachment-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 260px;
+      }
+
+      .attachment-preview {
+        position: absolute;
+        z-index: 30;
+        min-width: 280px;
+        max-width: 420px;
+        background: #ffffff;
+        color: #2c3e50;
+        border: 1px solid #c3cbd9;
+        box-shadow: 3px 3px 0px rgba(0,0,0,0.15);
+        border-radius: 6px;
+        padding: 10px 12px;
+        top: calc(100% + 6px);
+        left: 0;
+      }
+
+      .attachment-preview.above {
+        top: auto;
+        bottom: calc(100% + 6px);
+      }
+
+      .attachment-preview h5 {
+        margin: 0 0 6px 0;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .attachment-preview .meta {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        color: #40536a;
+      }
+
+      .attachment-preview .preview-body {
+        max-height: 240px;
+        overflow: auto;
+        background: #f5f7fb;
+        border: 1px solid #e0e6f0;
+        padding: 8px;
+        border-radius: 4px;
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+        font-size: 0.95rem;
+        white-space: pre-wrap;
+      }
+
+      .attachment-preview .preview-image {
+        max-width: 100%;
+        max-height: 220px;
+        display: block;
+        margin: 0 auto;
+        border: 1px solid #e0e6f0;
+        border-radius: 4px;
+        background: #fff;
+      }
+
+      .attachment-preview .actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+
+      .attachment-preview .preview-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border: 1px solid #c3cbd9;
+        background: #d1d9e6;
+        color: #2c3e50;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      .attachment-preview .preview-action:hover {
+        background: #c3cbd9;
+      }
+
+      .attachment-preview .preview-note {
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: #6b7a90;
+      }
+
+      .attachment-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.65);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .attachment-modal {
+        background: #ffffff;
+        color: #2c3e50;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        border-radius: 8px;
+        box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+        padding: 16px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .attachment-modal .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .attachment-modal .modal-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .attachment-modal .modal-body {
+        max-height: 70vh;
+        overflow: auto;
+        border: 1px solid #e0e6f0;
+        border-radius: 4px;
+        padding: 10px;
+        background: #f5f7fb;
+      }
+
+      .attachment-modal .modal-body pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .attachment-modal .close-modal {
+        border: none;
+        background: #d1d9e6;
+        color: #2c3e50;
+        border-radius: 4px;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
     
       /* 7. The Button - Industrial Action */
       .composer .btn {
@@ -334,14 +521,14 @@
                 <div class="composer-main" id="composerMain">
                   <textarea class="chat-body" id="userInput" rows="3" placeholder="Ask me anything..." required="required"></textarea>
                   <div class="attachment-row" id="attachmentRow">
-                    <button type="button" class="attachment-button" id="addFileButton" aria-label="Attach an image">
+                    <button type="button" class="attachment-button" id="addFileButton" aria-label="Attach a file">
                       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
                     </button>
-                    <button type="button" class="attachment-clear" id="clearFileButton" aria-label="Remove attached image">
+                    <button type="button" class="attachment-clear" id="clearFileButton" aria-label="Remove attached file">
                       <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                     </button>
-                    <span class="attachment-filename" id="attachmentFilename">Attach a PNG or JPG</span>
-                    <input type="file" id="fileInput" class="hidden-file-input" accept="image/*,text/plain,text/markdown"/>
+                    <span class="attachment-filename" id="attachmentFilename">Attach PNG/JPG or text (.txt/.md/.tex)</span>
+                    <input type="file" id="fileInput" class="hidden-file-input" accept="image/png,image/jpeg,text/plain,text/markdown,text/x-tex,application/x-tex,application/x-latex,text/*,.png,.jpg,.jpeg,.txt,.md,.markdown,.tex"/>
                   </div>
                 </div>
                 <input type="submit" class="btn btn-primary" id="sendButton" value="Send"/>
@@ -410,6 +597,23 @@
         toggleSystemButton: document.getElementById('toggleSystemButton'),
         composerMain: document.getElementById('composerMain')
     };
+
+    const IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg']);
+    const TEXT_MIME_TYPES = new Set(['text/plain', 'text/markdown', 'text/x-tex', 'application/x-tex', 'application/x-latex']);
+    const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg']);
+    const TEXT_EXTENSIONS = new Set(['.txt', '.md', '.markdown', '.tex']);
+    const ALLOWED_MIME_TYPES = new Set([...IMAGE_MIME_TYPES, ...TEXT_MIME_TYPES, 'text/*']);
+    const ALLOWED_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, ...TEXT_EXTENSIONS]);
+    const FILE_ACCEPT_TYPES = [...ALLOWED_MIME_TYPES, ...ALLOWED_EXTENSIONS].join(',');
+
+    if (dom.fileInput) {
+        dom.fileInput.setAttribute('accept', FILE_ACCEPT_TYPES);
+    }
+
+    if (dom.attachmentFilename) {
+        dom.attachmentFilename.tabIndex = 0;
+        setupAttachmentPreviewTrigger(dom.attachmentFilename, () => state.attachment);
+    }
 
     if (typeof hljs !== 'undefined') {
         hljs.configure({ ignoreUnescapedHTML: true });
@@ -608,7 +812,7 @@
     }
 
     function appendMessage(role, text, opts = {}) {
-        const { skipScroll = false, skipVisibilityUpdate = false } = opts;
+        const { skipScroll = false, skipVisibilityUpdate = false, attachment = null } = opts;
         const entry = document.createElement('fieldset');
         entry.className = `chat-turn ${role}`;
         if (role === 'assistant' || role === 'user') {
@@ -628,6 +832,12 @@
         body.className = 'chat-body';
         applyMessageContent(body, role, text);
         entry.appendChild(body);
+
+        if (attachment && role === 'user') {
+            const attachmentContainer = document.createElement('div');
+            attachmentContainer.appendChild(createAttachmentChip(attachment));
+            entry.appendChild(attachmentContainer);
+        }
 
         dom.messages.appendChild(entry);
         if (typeof opts.messageIndex === 'number') {
@@ -664,8 +874,29 @@
     function clearAttachment() {
         state.attachment = null;
         dom.fileInput.value = '';
-        dom.attachmentFilename.textContent = 'Attach a PNG or JPG';
+        dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         dom.attachmentRow.classList.remove('has-attachment');
+        closeAttachmentPopover();
+    }
+
+    function setComposerAttachment(attachment) {
+        state.attachment = attachment ? cloneAttachment(attachment) : null;
+        if (state.attachment) {
+            dom.attachmentFilename.textContent = state.attachment.name || 'Attachment';
+            dom.attachmentRow.classList.add('has-attachment');
+        } else {
+            clearAttachment();
+        }
+    }
+
+    function setAttachmentLoading(isLoading) {
+        if (!dom.attachmentRow || !dom.attachmentFilename) return;
+        dom.attachmentRow.classList.toggle('loading', !!isLoading);
+        if (isLoading) {
+            dom.attachmentFilename.textContent = 'Loading attachment...';
+        } else if (!state.attachment) {
+            dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
+        }
     }
 
     async function copyAssistant(text) {
@@ -678,6 +909,7 @@
 
     function trimConversationFromIndex(index, reuseText) {
         if (typeof index !== 'number' || index < 0) return;
+        const targetMessage = state.messages[index];
         state.messages = state.messages.slice(0, index);
         state.assistantSeen = state.messages.some(m => m.role === 'assistant');
         state.showSystem = false;
@@ -685,7 +917,7 @@
         persistConversation();
         updateClearChatVisibility();
         updateSystemToggleButton();
-        clearAttachment();
+        setComposerAttachment(targetMessage?.attachment || null);
         dom.input.value = reuseText || '';
         resizeComposer();
         showComposer();
@@ -714,6 +946,8 @@
         state.assistantSeen = false;
         state.showSystem = false;
         localStorage.removeItem(STORAGE_KEY);
+        closeAttachmentPopover();
+        closeAttachmentModal();
         updateClearChatVisibility();
         updateSystemToggleButton();
         dom.input.value = '';
@@ -771,11 +1005,13 @@
     }
 
     async function streamChat(userMessage, assistantNode, options = {}) {
-        const { onFirstToken } = options;
+        const { onFirstToken, includeUserInPayload = true, pushUserToState = true } = options;
         ensureSystemMessage();
+        const sanitizedMessages = state.messages.map(stripMessageForApi).filter(Boolean);
+        const sanitizedUserMessage = includeUserInPayload ? stripMessageForApi(userMessage) : null;
         const payload = {
             model: state.config.model,
-            messages: [...state.messages, userMessage],
+            messages: sanitizedUserMessage ? [...sanitizedMessages, sanitizedUserMessage] : sanitizedMessages,
             stream: true
         };
         const headers = { 'Content-Type': 'application/json' };
@@ -835,7 +1071,9 @@
         if (!sawFirstToken && typeof onFirstToken === 'function') {
             onFirstToken();
         }
-        state.messages.push(userMessage);
+        if (pushUserToState) {
+            state.messages.push(userMessage);
+        }
         state.messages.push({ role: 'assistant', content: assistantText });
         persistConversation();
         renderConversation();
@@ -852,9 +1090,17 @@
         if (state.attachment) {
             const parts = [{ type: 'text', text: promptText }];
             if (state.attachment.kind === 'image' && state.attachment.dataUrl) {
-                parts.push({ type: 'image_url', image_url: { url: state.attachment.dataUrl } });
-            } else if (state.attachment.kind === 'text' && state.attachment.textContent) {
-                parts.push({ type: 'text', text: state.attachment.textContent });
+                parts.push({
+                    type: 'image_url',
+                    image_url: { url: state.attachment.dataUrl },
+                    filename: state.attachment.name
+                });
+            } else if (state.attachment.kind === 'text' && state.attachment.dataUrl) {
+                parts.push({
+                    type: 'image_url',
+                    image_url: { url: state.attachment.dataUrl },
+                    filename: state.attachment.name
+                });
             }
             return {
                 role: 'user',
@@ -864,11 +1110,16 @@
         return { role: 'user', content: promptText };
     }
 
+    function stripMessageForApi(message) {
+        if (!message) return null;
+        return { role: message.role, content: message.content };
+    }
+
     function buildRequestPayload() {
         ensureSystemMessage();
         return {
             model: state.config.model,
-            messages: state.messages.map(m => ({ role: m.role, content: m.content })),
+            messages: state.messages.map(stripMessageForApi).filter(Boolean),
             stream: true
         };
     }
@@ -900,12 +1151,13 @@
     }
 
     function renderConversation() {
+        closeAttachmentPopover();
         dom.messages.innerHTML = '';
         state.assistantSeen = state.messages.some(m => m.role === 'assistant');
         for (let i = 0; i < state.messages.length; i++) {
             const msg = state.messages[i];
             if (msg.role === 'system' && !state.showSystem) continue;
-            appendMessage(msg.role, messageText(msg.content), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i });
+            appendMessage(msg.role, messageText(msg.content), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i, attachment: msg.attachment });
         }
         updateClearChatVisibility();
         updateSystemToggleButton();
@@ -942,9 +1194,6 @@
     }
 
     function formatUserPreview(promptText) {
-        if (state.attachment?.name) {
-            return `${promptText}\n[Attachment: ${state.attachment.name}]`;
-        }
         return promptText;
     }
 
@@ -956,18 +1205,19 @@
             return;
         }
         try {
+            setAttachmentLoading(true);
             const attachment = await buildAttachment(file);
             if (!attachment) {
-                appendMessage('system', 'Please upload an image, .txt, or .md file.');
+                appendMessage('system', 'Please upload a PNG/JPG image or a text file (.txt, .md, .tex, or other plain text).');
                 clearAttachment();
                 return;
             }
-            state.attachment = attachment;
-            dom.attachmentFilename.textContent = attachment.name;
-            dom.attachmentRow.classList.add('has-attachment');
+            setComposerAttachment(attachment);
         } catch (err) {
             appendMessage('system', `Failed to read file: ${err.message}`);
             clearAttachment();
+        } finally {
+            setAttachmentLoading(false);
         }
     }
 
@@ -989,18 +1239,403 @@
         });
     }
 
+    function textToDataUrl(text, mime = 'text/plain') {
+        const safeMime = mime || 'text/plain';
+        const encoded = btoa(unescape(encodeURIComponent(text || '')));
+        return `data:${safeMime};base64,${encoded}`;
+    }
+
+    function getFileExtension(name) {
+        if (!name) return '';
+        const dot = name.lastIndexOf('.');
+        return dot >= 0 ? name.slice(dot).toLowerCase() : '';
+    }
+
+    function isAllowedByMime(mime) {
+        if (!mime) return false;
+        return ALLOWED_MIME_TYPES.has(mime) || (mime.startsWith('text/') && ALLOWED_MIME_TYPES.has('text/*'));
+    }
+
+    function isAllowedByExtension(ext) {
+        if (!ext) return false;
+        return ALLOWED_EXTENSIONS.has(ext);
+    }
+
+    function detectAttachmentKind(mime, ext) {
+        const lowerMime = mime || '';
+        if (IMAGE_MIME_TYPES.has(lowerMime) || IMAGE_EXTENSIONS.has(ext)) return 'image';
+        if (lowerMime.startsWith('text/') || TEXT_MIME_TYPES.has(lowerMime) || TEXT_EXTENSIONS.has(ext)) return 'text';
+        return null;
+    }
+
+    function formatFileSize(size) {
+        if (typeof size !== 'number' || size <= 0) return '';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let value = size;
+        let unitIndex = 0;
+        while (value >= 1024 && unitIndex < units.length - 1) {
+            value /= 1024;
+            unitIndex++;
+        }
+        return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unitIndex]}`;
+    }
+
+    function cloneAttachment(src) {
+        if (!src) return null;
+        return {
+            kind: src.kind,
+            name: src.name,
+            dataUrl: src.dataUrl || null,
+            textContent: src.textContent || '',
+            mime: src.mime || '',
+            size: typeof src.size === 'number' ? src.size : null
+        };
+    }
+
+    function buildTextPreview(text) {
+        const maxChars = 1200;
+        const maxLines = 20;
+        const lines = (text || '').split(/\r?\n/);
+        let snippet = lines.slice(0, maxLines).join('\n');
+        let truncated = lines.length > maxLines;
+        if (snippet.length > maxChars) {
+            snippet = snippet.slice(0, maxChars);
+            truncated = true;
+        }
+        return { snippet, truncated };
+    }
+
+    function makePreviewData(attachment) {
+        if (!attachment) return null;
+        const ext = getFileExtension(attachment.name);
+        const isMarkdown = ext === '.md' || ext === '.markdown';
+        const isTex = ext === '.tex';
+        if (attachment.kind === 'image' && attachment.dataUrl) {
+            return {
+                kind: 'image',
+                name: attachment.name,
+                mime: attachment.mime || 'image/*',
+                size: attachment.size,
+                imageUrl: attachment.dataUrl,
+                note: 'Image preview. Click to open larger view.'
+            };
+        }
+        if (attachment.kind === 'text') {
+            const { snippet, truncated } = buildTextPreview(attachment.textContent || '');
+            return {
+                kind: isMarkdown || isTex ? 'markdown' : 'text',
+                name: attachment.name,
+                mime: attachment.mime || 'text/plain',
+                size: attachment.size,
+                text: snippet,
+                truncated,
+                isMarkdown,
+                isTex,
+                note: truncated ? 'Preview truncated for brevity.' : 'Full text available.'
+            };
+        }
+        return {
+            kind: 'unknown',
+            name: attachment.name,
+            mime: attachment.mime || 'application/octet-stream',
+            size: attachment.size,
+            note: 'Preview not available. Download to view.'
+        };
+    }
+
+    let activePopover = null;
+    let popoverAnchor = null;
+    let hidePopoverTimer = null;
+    let activeModal = null;
+
+    function closeAttachmentPopover() {
+        if (activePopover && activePopover.parentNode) {
+            activePopover.parentNode.removeChild(activePopover);
+        }
+        activePopover = null;
+        popoverAnchor = null;
+    }
+
+    function scheduleHidePopover(delay = 120) {
+        clearTimeout(hidePopoverTimer);
+        hidePopoverTimer = setTimeout(() => {
+            closeAttachmentPopover();
+        }, delay);
+    }
+
+    function createActionButton(icon, label, handler) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preview-action';
+        btn.innerHTML = `<span class="glyphicon ${icon}" aria-hidden="true"></span><span>${label}</span>`;
+        btn.addEventListener('click', handler);
+        return btn;
+    }
+
+    function downloadAttachment(attachment) {
+        if (!attachment) return;
+        try {
+            const name = attachment.name || 'attachment';
+            if (attachment.dataUrl) {
+                const link = document.createElement('a');
+                link.href = attachment.dataUrl;
+                link.download = name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return;
+            }
+            const text = attachment.textContent || '';
+            const blob = new Blob([text], { type: attachment.mime || 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.warn('Download failed', err);
+        }
+    }
+
+    async function copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text || '');
+        } catch (err) {
+            console.warn('Clipboard copy failed', err);
+        }
+    }
+
+    function openInNewTab(attachment) {
+        if (!attachment) return;
+        if (attachment.kind === 'image' && attachment.dataUrl) {
+            const popup = window.open('', '_blank');
+            if (!popup) return;
+            const safeTitle = escapeHTML(attachment.name || 'Image');
+            popup.document.write(`
+                <html>
+                  <head>
+                    <title>${safeTitle}</title>
+                    <style>
+                      body { margin: 0; display: flex; align-items: center; justify-content: center; background: #111; }
+                      img { max-width: 100vw; max-height: 100vh; }
+                    </style>
+                  </head>
+                  <body>
+                    <img src="${attachment.dataUrl}" alt="${safeTitle}"/>
+                  </body>
+                </html>
+            `);
+            popup.document.close();
+        } else if (attachment.kind === 'text') {
+            const blob = new Blob([attachment.textContent || ''], { type: attachment.mime || 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+        }
+    }
+
+    function closeAttachmentModal() {
+        if (activeModal && activeModal.parentNode) {
+            activeModal.parentNode.removeChild(activeModal);
+        }
+        activeModal = null;
+    }
+
+    function openAttachmentModal(preview, attachment) {
+        closeAttachmentModal();
+        if (!preview) return;
+        const backdrop = document.createElement('div');
+        backdrop.className = 'attachment-modal-backdrop';
+        backdrop.addEventListener('click', event => {
+            if (event.target === backdrop) closeAttachmentModal();
+        });
+
+        const modal = document.createElement('div');
+        modal.className = 'attachment-modal';
+
+        const header = document.createElement('div');
+        header.className = 'modal-header';
+
+        const title = document.createElement('h4');
+        title.textContent = preview.name || 'Attachment';
+        header.appendChild(title);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'close-modal';
+        closeBtn.innerHTML = '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>';
+        closeBtn.addEventListener('click', closeAttachmentModal);
+        header.appendChild(closeBtn);
+
+        const body = document.createElement('div');
+        body.className = 'modal-body';
+
+        if (preview.kind === 'image' && preview.imageUrl) {
+            const img = document.createElement('img');
+            img.src = preview.imageUrl;
+            img.alt = preview.name || 'Attachment image';
+            img.style.maxWidth = '100%';
+            img.style.display = 'block';
+            body.appendChild(img);
+        } else {
+            const content = attachment?.textContent || preview.text || '';
+            if (preview.kind === 'markdown' && markdownSupport.enabled) {
+                const div = document.createElement('div');
+                div.innerHTML = renderMarkdown(content);
+                body.appendChild(div);
+            } else {
+                const pre = document.createElement('pre');
+                pre.textContent = content;
+                body.appendChild(pre);
+            }
+        }
+
+        modal.appendChild(header);
+        modal.appendChild(body);
+        backdrop.appendChild(modal);
+        document.body.appendChild(backdrop);
+        activeModal = backdrop;
+
+        window.addEventListener('keydown', function escHandler(event) {
+            if (event.key === 'Escape') {
+                closeAttachmentModal();
+                window.removeEventListener('keydown', escHandler);
+            }
+        }, { once: true });
+    }
+
+    function renderPreviewBody(container, preview) {
+        if (!container || !preview) return;
+        if (preview.kind === 'image' && preview.imageUrl) {
+            const img = document.createElement('img');
+            img.src = preview.imageUrl;
+            img.alt = preview.name || 'Attachment image';
+            img.className = 'preview-image';
+            container.appendChild(img);
+            return;
+        }
+        const body = document.createElement('div');
+        body.className = 'preview-body';
+        if (preview.kind === 'markdown' && markdownSupport.enabled) {
+            body.innerHTML = renderMarkdown(preview.text || '');
+        } else {
+            body.textContent = preview.text || 'Preview unavailable.';
+        }
+        container.appendChild(body);
+    }
+
+    function showAttachmentPopover(anchor, attachment) {
+        if (!anchor || !attachment) return;
+        const preview = makePreviewData(attachment);
+        if (!preview) return;
+        clearTimeout(hidePopoverTimer);
+        closeAttachmentPopover();
+        const host = anchor.parentElement || anchor;
+        const hostStyle = window.getComputedStyle(host);
+        if (hostStyle.position === 'static') {
+            host.style.position = 'relative';
+        }
+        const popover = document.createElement('div');
+        popover.className = 'attachment-preview';
+        popover.setAttribute('role', 'dialog');
+        const title = document.createElement('h5');
+        title.textContent = preview.name || 'Attachment';
+        popover.appendChild(title);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const parts = [];
+        if (preview.mime) parts.push(preview.mime);
+        if (preview.size) parts.push(formatFileSize(preview.size));
+        meta.textContent = parts.join(' • ');
+        popover.appendChild(meta);
+
+        renderPreviewBody(popover, preview);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        actions.appendChild(createActionButton('glyphicon-new-window', 'Full preview', () => openAttachmentModal(preview, attachment)));
+        actions.appendChild(createActionButton('glyphicon-download', 'Download', () => downloadAttachment(attachment)));
+        if (preview.kind === 'image') {
+            actions.appendChild(createActionButton('glyphicon-picture', 'Open tab', () => openInNewTab(attachment)));
+        }
+        if (preview.kind === 'text' || preview.kind === 'markdown') {
+            actions.appendChild(createActionButton('glyphicon-copy', 'Copy snippet', () => copyToClipboard(preview.text || '')));
+            actions.appendChild(createActionButton('glyphicon-list-alt', 'Copy all', () => copyToClipboard(attachment.textContent || preview.text || '')));
+        }
+        popover.appendChild(actions);
+
+        if (preview.note) {
+            const note = document.createElement('div');
+            note.className = 'preview-note';
+            note.textContent = preview.note;
+            popover.appendChild(note);
+        }
+
+        popover.addEventListener('mouseenter', () => clearTimeout(hidePopoverTimer));
+        popover.addEventListener('mouseleave', () => scheduleHidePopover());
+        host.appendChild(popover);
+
+        const rect = anchor.getBoundingClientRect();
+        const viewportMid = window.innerHeight / 2;
+        const placeAbove = rect.top > viewportMid;
+        if (placeAbove) {
+            popover.classList.add('above');
+        } else {
+            popover.classList.remove('above');
+        }
+
+        activePopover = popover;
+        popoverAnchor = anchor;
+    }
+
+    function setupAttachmentPreviewTrigger(anchor, attachmentProvider) {
+        if (!anchor) return;
+        const handler = () => {
+            const attachment = typeof attachmentProvider === 'function' ? attachmentProvider() : attachmentProvider;
+            if (!attachment) return;
+            showAttachmentPopover(anchor, attachment);
+        };
+        anchor.addEventListener('mouseenter', handler);
+        anchor.addEventListener('focus', handler);
+        anchor.addEventListener('mouseleave', () => scheduleHidePopover());
+        anchor.addEventListener('blur', () => scheduleHidePopover());
+    }
+
+    function createAttachmentChip(attachment) {
+        const chip = document.createElement('div');
+        chip.className = 'attachment-chip';
+        chip.tabIndex = 0;
+        const icon = document.createElement('span');
+        const iconClass = attachment?.kind === 'image' ? 'glyphicon-picture' : (attachment?.kind === 'text' ? 'glyphicon-file' : 'glyphicon-paperclip');
+        icon.className = `glyphicon ${iconClass}`;
+        chip.appendChild(icon);
+        const label = document.createElement('span');
+        label.className = 'attachment-label';
+        label.textContent = attachment?.name || 'Attachment';
+        chip.appendChild(label);
+        setupAttachmentPreviewTrigger(chip, () => attachment);
+        return chip;
+    }
+
     async function buildAttachment(file) {
         const name = file.name || 'attachment';
         const mime = (file.type || '').toLowerCase();
-        const isImage = mime.startsWith('image/');
-        const isText = mime.startsWith('text/') || name.endsWith('.txt') || name.endsWith('.md');
-        if (isImage) {
+        const ext = getFileExtension(name);
+        const allowed = isAllowedByMime(mime) || isAllowedByExtension(ext);
+        const kind = detectAttachmentKind(mime, ext);
+        if (!allowed || !kind) return null;
+        if (kind === 'image') {
             const dataUrl = await readFileAsDataURL(file);
-            return { kind: 'image', name, dataUrl };
+            return { kind: 'image', name, dataUrl, mime, size: file.size };
         }
-        if (isText) {
+        if (kind === 'text') {
             const textContent = await readFileAsText(file);
-            return { kind: 'text', name, textContent };
+            const dataUrl = textToDataUrl(textContent, mime || 'text/plain');
+            return { kind: 'text', name, textContent, dataUrl, mime, size: file.size };
         }
         return null;
     }
@@ -1010,18 +1645,30 @@
         if (state.busy) return;
         const prompt = dom.input.value.trim();
         if (!prompt) return;
+        ensureSystemMessage();
+        const userAttachment = cloneAttachment(state.attachment);
         const userMessage = buildUserMessage(prompt);
+        if (userAttachment) {
+            userMessage.attachment = userAttachment;
+        }
+        // add user message to state immediately so edit/trim is available right away
+        state.messages.push({
+            role: 'user',
+            content: userMessage.content,
+            attachment: userAttachment
+        });
+        const userIndex = state.messages.length - 1;
         const preview = formatUserPreview(prompt);
         state.busy = true;
         dom.sendButton.disabled = true;
-        appendMessage('user', preview);
+        appendMessage('user', preview, { attachment: userAttachment, messageIndex: userIndex });
         dom.input.value = '';
         clearAttachment();
         resizeComposer();
         const assistantNode = appendMessage('assistant', 'waiting for an answer...');
         hideComposer();
         try {
-            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer });
+            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer, includeUserInPayload: false, pushUserToState: false });
         } catch (err) {
             appendMessage('system', `Error: ${err.message}`);
             showComposer();
@@ -1045,6 +1692,7 @@
         state.showSystem = !state.showSystem;
         renderConversation();
     });
+    window.addEventListener('scroll', closeAttachmentPopover);
 
     dom.input.addEventListener('input', resizeComposer);
     dom.input.addEventListener('keydown', event => {
@@ -1066,17 +1714,18 @@
         const file = event.dataTransfer?.files && event.dataTransfer.files[0];
         if (!file) return;
         try {
+            setAttachmentLoading(true);
             const attachment = await buildAttachment(file);
             if (!attachment) {
-                appendMessage('system', 'Please drop an image, .txt, or .md file.');
+                appendMessage('system', 'Please drop a PNG/JPG image or a text file (.txt, .md, .tex, or other plain text).');
                 return;
             }
-            state.attachment = attachment;
-            dom.attachmentFilename.textContent = attachment.name;
-            dom.attachmentRow.classList.add('has-attachment');
+            setComposerAttachment(attachment);
         } catch (err) {
             appendMessage('system', `Failed to read file: ${err.message}`);
             clearAttachment();
+        } finally {
+            setAttachmentLoading(false);
         }
     });
     window.addEventListener('resize', resizeComposer);
