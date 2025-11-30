@@ -264,6 +264,29 @@
         right: 8px;
       }
 
+      .user-delete-button {
+        position: absolute;
+        top: -6px;
+        right: 36px;
+        width: 24px;
+        height: 24px;
+        border: none;
+        border-radius: 4px;
+        background: #d1d9e6;
+        color: #2c3e50;
+        font-weight: 800;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+
+      .user-delete-button:hover {
+        background: #c3cbd9;
+      }
+
       .hidden-file-input {
         position: absolute;
         left: -9999px;
@@ -491,7 +514,9 @@
       }
 
       .clear-chat-row {
-        display: none;
+        display: flex;
+        visibility: hidden;
+        pointer-events: none;
         margin-top: 12px;
         gap: 10px;
         align-items: center;
@@ -812,7 +837,7 @@
     }
 
     function appendMessage(role, text, opts = {}) {
-        const { skipScroll = false, skipVisibilityUpdate = false, attachment = null } = opts;
+        const { skipScroll = false, skipVisibilityUpdate = false, attachment = null, messageIndex = undefined } = opts;
         const entry = document.createElement('fieldset');
         entry.className = `chat-turn ${role}`;
         if (role === 'assistant' || role === 'user') {
@@ -852,16 +877,23 @@
             copyBtn.addEventListener('click', () => copyAssistant(body.textContent));
             entry.appendChild(copyBtn);
         }
-        if (role === 'user' && typeof opts.messageIndex === 'number') {
+        if (role === 'user' && typeof messageIndex === 'number') {
             const trimBtn = document.createElement('button');
             trimBtn.type = 'button';
             trimBtn.className = 'user-trim-button';
             trimBtn.title = 'Reuse from here';
             trimBtn.innerHTML = '<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>';
-            trimBtn.addEventListener('click', () => trimConversationFromIndex(opts.messageIndex, body.textContent));
+            trimBtn.addEventListener('click', () => trimConversationFromIndex(messageIndex, body.textContent));
             entry.appendChild(trimBtn);
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'user-delete-button';
+            deleteBtn.title = 'Delete this turn';
+            deleteBtn.innerHTML = '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>';
+            deleteBtn.addEventListener('click', () => deleteConversationPair(messageIndex));
+            entry.appendChild(deleteBtn);
         }
-        if (!skipScroll) {
+        if (!skipScroll && !state.busy) {
             scrollToBottom();
         }
         if (!skipVisibilityUpdate && role === 'assistant') {
@@ -923,21 +955,50 @@
         showComposer();
     }
 
+    function deleteConversationPair(userIndex) {
+        if (typeof userIndex !== 'number' || userIndex < 0) return;
+        if (!state.messages[userIndex] || state.messages[userIndex].role !== 'user') return;
+        const nextMessage = state.messages[userIndex + 1];
+        const removeCount = nextMessage && nextMessage.role === 'assistant' ? 2 : 1;
+        state.messages.splice(userIndex, removeCount);
+        state.assistantSeen = state.messages.some(m => m.role === 'assistant');
+        renderConversation();
+        persistConversation();
+        updateClearChatVisibility();
+        updateSystemToggleButton();
+        showComposer();
+    }
+
     function hideComposer() {
-        if (dom.form) dom.form.style.display = 'none';
+        if (dom.form) {
+            dom.form.style.visibility = 'hidden';
+            dom.form.style.pointerEvents = 'none';
+        }
     }
 
     function showComposer() {
-        if (dom.form) dom.form.style.display = '';
-        if (dom.input) dom.input.focus();
+        if (dom.form) {
+            dom.form.style.visibility = '';
+            dom.form.style.pointerEvents = '';
+        }
+        if (dom.input) {
+            try {
+                dom.input.focus({ preventScroll: true });
+            } catch (err) {
+                dom.input.focus();
+            }
+        }
     }
 
     function updateClearChatVisibility() {
         if (!dom.clearChatRow) return;
-        dom.clearChatRow.style.display = state.assistantSeen ? 'block' : 'none';
-        if (state.assistantSeen) {
-            scrollToBottom();
-        }
+        dom.clearChatRow.style.visibility = state.assistantSeen ? 'visible' : 'hidden';
+        dom.clearChatRow.style.pointerEvents = state.assistantSeen ? '' : 'none';
+    }
+
+    function ensureComposerVisible(evt) {
+        if (evt && evt.isTrusted === false) return;
+        scrollToBottom(true);
     }
 
     function clearChatHistory() {
@@ -1030,6 +1091,17 @@
         const decoder = new TextDecoder('utf-8');
         let assistantText = '';
         let sawFirstToken = false;
+        let autoScroll = true;
+
+        const performAutoScroll = () => {
+            if (!autoScroll) return;
+            scrollToBottom(false);
+            const rect = assistantNode?.getBoundingClientRect();
+            if (rect && rect.top <= 110) {
+                autoScroll = false;
+            }
+        };
+
         const parseChunk = chunk => {
             const segments = chunk
                 .split(/\n+/)
@@ -1045,20 +1117,20 @@
                 try {
                     const parsed = JSON.parse(clean);
                     const delta = parsed?.choices?.[0]?.delta?.content;
-                    if (delta) {
-                        if (!sawFirstToken && typeof onFirstToken === 'function') {
-                            sawFirstToken = true;
-                            applyMessageContent(assistantNode, 'assistant', '');
-                            onFirstToken();
+                        if (delta) {
+                            if (!sawFirstToken && typeof onFirstToken === 'function') {
+                                sawFirstToken = true;
+                                applyMessageContent(assistantNode, 'assistant', '');
+                                onFirstToken();
+                            }
+                            assistantText += delta;
+                            applyMessageContent(assistantNode, 'assistant', assistantText);
+                            performAutoScroll();
                         }
-                        assistantText += delta;
-                        applyMessageContent(assistantNode, 'assistant', assistantText);
-                        scrollToBottom(false);
+                    } catch (err) {
+                        console.warn('Failed to parse line', line, err);
                     }
-                } catch (err) {
-                    console.warn('Failed to parse line', line, err);
                 }
-            }
             return false;
         };
         let done = false;
@@ -1075,8 +1147,10 @@
             state.messages.push(userMessage);
         }
         state.messages.push({ role: 'assistant', content: assistantText });
+        state.assistantSeen = true;
         persistConversation();
-        renderConversation();
+        updateClearChatVisibility();
+        updateSystemToggleButton();
     }
 
     function resizeComposer() {
@@ -1150,7 +1224,8 @@
         return pairs.slice(-3);
     }
 
-    function renderConversation() {
+    function renderConversation(options = {}) {
+        const { skipScroll = false } = options;
         closeAttachmentPopover();
         dom.messages.innerHTML = '';
         state.assistantSeen = state.messages.some(m => m.role === 'assistant');
@@ -1161,7 +1236,9 @@
         }
         updateClearChatVisibility();
         updateSystemToggleButton();
-        scrollToBottom();
+        if (!skipScroll && !state.busy) {
+            scrollToBottom();
+        }
     }
 
     function persistConversation() {
@@ -1695,6 +1772,7 @@
     window.addEventListener('scroll', closeAttachmentPopover);
 
     dom.input.addEventListener('input', resizeComposer);
+    dom.input.addEventListener('input', ensureComposerVisible);
     dom.input.addEventListener('keydown', event => {
         if (event.isComposing) return;
         if (event.key === 'Enter' && !event.shiftKey) {
