@@ -1155,40 +1155,42 @@
             }
         };
 
+        const processLine = line => {
+            const trimmed = (line || '').trim();
+            if (!trimmed) return false;
+            if (trimmed === 'data: [DONE]' || trimmed === '[DONE]') return true;
+            if (!trimmed.startsWith('data:')) return false;
+            const clean = trimmed.replace(/^data:\s*/i, '');
+            if (!clean) return false;
+            try {
+                const parsed = JSON.parse(clean);
+                applySearchAttachment(parsed);
+                const delta = parsed?.choices?.[0]?.delta?.content;
+                if (delta) {
+                    if (!sawFirstDelta) {
+                        sawFirstDelta = true;
+                        applyMessageContent(assistantNode, 'assistant', '');
+                        if (!focusShown && typeof onFirstToken === 'function') {
+                            focusShown = true;
+                            onFirstToken();
+                        }
+                    }
+                    assistantText += delta;
+                    applyMessageContent(assistantNode, 'assistant', assistantText);
+                    performAutoScroll();
+                }
+            } catch (err) {
+                console.warn('Failed to parse line', trimmed, err);
+            }
+            return false;
+        };
+
         const parseChunk = chunk => {
             pending += chunk;
             const lines = pending.split(/\r?\n/);
             pending = lines.pop() || '';
-            for (const raw of lines) {
-                const fragments = raw.split(/(?=data:\s*)/).map(f => f.trim()).filter(Boolean);
-                for (const line of fragments) {
-                    if (line === 'data: [DONE]' || line === '[DONE]') {
-                        return true;
-                    }
-                    if (!line.startsWith('data:')) continue;
-                    const clean = line.replace(/^data:\s*/i, '');
-                    if (!clean) continue;
-                    try {
-                        const parsed = JSON.parse(clean);
-                        applySearchAttachment(parsed);
-                        const delta = parsed?.choices?.[0]?.delta?.content;
-                        if (delta) {
-                            if (!sawFirstDelta) {
-                                sawFirstDelta = true;
-                                applyMessageContent(assistantNode, 'assistant', '');
-                                if (!focusShown && typeof onFirstToken === 'function') {
-                                    focusShown = true;
-                                    onFirstToken();
-                                }
-                            }
-                            assistantText += delta;
-                            applyMessageContent(assistantNode, 'assistant', assistantText);
-                            performAutoScroll();
-                        }
-                    } catch (err) {
-                        console.warn('Failed to parse line', line, err);
-                    }
-                }
+            for (const line of lines) {
+                if (processLine(line)) return true;
             }
             return false;
         };

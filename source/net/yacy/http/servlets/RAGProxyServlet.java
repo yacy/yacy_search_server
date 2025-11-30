@@ -207,6 +207,8 @@ public class RAGProxyServlet extends HttpServlet {
                         in.close();
                         inputQueue.put(POISON);
                     } catch (IOException | InterruptedException e) {
+                    } finally {
+                        try {inputQueue.put(POISON);} catch (InterruptedException e) {}
                     }
                 });
                 readerThread.start();
@@ -226,7 +228,7 @@ public class RAGProxyServlet extends HttpServlet {
                                 inputLine = inputLine.substring(0, p) + j.toString();
                             }
                         }
-                        out.print(inputLine); // i.e. data: {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
+                        out.println(inputLine); // i.e. data: {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
                         out.flush();
                         count++;
                     }
