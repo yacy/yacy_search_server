@@ -1090,7 +1090,12 @@
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
         let assistantText = '';
-        let sawFirstToken = false;
+        let sawFirstDelta = false;
+        let focusShown = false;
+        if (typeof onFirstToken === 'function' && !focusShown) {
+            focusShown = true;
+            onFirstToken();
+        }
         let autoScroll = true;
 
         const performAutoScroll = () => {
@@ -1117,16 +1122,19 @@
                 try {
                     const parsed = JSON.parse(clean);
                     const delta = parsed?.choices?.[0]?.delta?.content;
-                        if (delta) {
-                            if (!sawFirstToken && typeof onFirstToken === 'function') {
-                                sawFirstToken = true;
-                                applyMessageContent(assistantNode, 'assistant', '');
+                    if (delta) {
+                        if (!sawFirstDelta) {
+                            sawFirstDelta = true;
+                            applyMessageContent(assistantNode, 'assistant', '');
+                            if (!focusShown && typeof onFirstToken === 'function') {
+                                focusShown = true;
                                 onFirstToken();
                             }
-                            assistantText += delta;
-                            applyMessageContent(assistantNode, 'assistant', assistantText);
-                            performAutoScroll();
                         }
+                        assistantText += delta;
+                        applyMessageContent(assistantNode, 'assistant', assistantText);
+                        performAutoScroll();
+                    }
                     } catch (err) {
                         console.warn('Failed to parse line', line, err);
                     }
@@ -1138,9 +1146,14 @@
             const { value, done: readerDone } = await reader.read();
             if (readerDone) break;
             const chunk = decoder.decode(value, { stream: true });
+            if (!focusShown && chunk && chunk.trim() && typeof onFirstToken === 'function') {
+                focusShown = true;
+                onFirstToken();
+            }
             done = parseChunk(chunk);
         }
-        if (!sawFirstToken && typeof onFirstToken === 'function') {
+        if (!focusShown && typeof onFirstToken === 'function') {
+            focusShown = true;
             onFirstToken();
         }
         if (pushUserToState) {
@@ -1743,7 +1756,6 @@
         clearAttachment();
         resizeComposer();
         const assistantNode = appendMessage('assistant', 'waiting for an answer...');
-        hideComposer();
         try {
             await streamChat(userMessage, assistantNode, { onFirstToken: showComposer, includeUserInPayload: false, pushUserToState: false });
         } catch (err) {
