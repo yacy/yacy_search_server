@@ -30,11 +30,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -164,7 +171,7 @@ public class RAGProxyServlet extends HttpServlet {
             if (rag) {
                 // modify system and user prompt here in bodyObject to enable RAG
                 searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
-                searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 4);
+                searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 10);
                 user += LLM_USER_PREFIX;
                 user += searchResultMarkdown;
                 userObject.setContentText(user);
@@ -437,7 +444,7 @@ public class RAGProxyServlet extends HttpServlet {
                     result.put("title", title == null ? "" : title.trim());
                     if (includeSnippet) {
                         String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                        result.put("snippet", text == null ? "" : text.trim());
+                        result.put("text", text == null ? "" : text.trim());
                     }
                 results.put(result);
                 } catch (JSONException e) {
@@ -454,21 +461,191 @@ public class RAGProxyServlet extends HttpServlet {
         JSONArray searchResults = searchResults(query, count, true);
         StringBuilder sb = new StringBuilder();
         
+        // collect snippets
+        List<Snippet> results = new ArrayList<>();
         for (int i  = 0; i < searchResults.length(); i++) {
             try {
                 JSONObject r = searchResults.getJSONObject(i);
                 String title = r.optString("title", "");
                 String url = r.optString("url", "");
-                String snippet = r.optString("snippet", "");
-                if (title.length() > 0 && snippet.length() > 0) {
-                    sb.append("## ").append(title).append("\n");
-                    sb.append(snippet).append("\n");
-                    if (url.length() > 0) sb.append("Source: ").append(url).append("\n");
-                    sb.append("\n\n");
+                String text = r.optString("text", "");
+                if (title.length() > 0 && text.length() > 0) {
+                    Snippet snippet = new Snippet(query, text, url, title, 256); // we always compute a snippet because that gives us a hint if the query appears at all
+                    if (snippet.getText().length() > 0) results.add(snippet);
                 }
             } catch (JSONException e) {}
         }
+        
+        // sort snippets again by score
+        results.sort(Comparator.comparingDouble(Snippet::getScore));
+        
+        for (int i  = 0; i < results.size() / 2; i++) {
+            Snippet snippet = results.get(i);
+            sb.append("## ").append(snippet.getTitle()).append("\n");
+            sb.append(snippet.text).append("\n");
+            if (snippet.getURL().length() > 0) sb.append("Source: ").append(snippet.getURL()).append("\n");
+            sb.append("\n\n");
+        }
+        
         return sb.toString();
+    }
+    
+    
+    public static class Snippet {
+        
+        private String text, url, title;
+        private double score;
+        
+        /**
+         * Find a snippet inside a given text that contains most of the searched words plus some context.
+         * @param query a string with a search query; query words are separated by space
+         * @param text the text where we want to find the snippets
+         * @param maxChunkLength the maximum length of a single chunk; however the snippet is three times as this.
+         * @return one string containing the snippet.
+         */
+        public Snippet(String query, String text, String url, String title, int maxChunkLength) {
+            this.url = url;
+            this.title = title;
+            this.score = 0.0;
+            
+            if (text == null || text.isEmpty() || maxChunkLength <= 0 || query == null) {
+                this.text = "";
+                return;
+            }
+
+            // Step 1: Slice text and make copy with lowercase version to support tf*idf computation
+            List<String> chunks = slicer(text, maxChunkLength);
+            if (chunks.isEmpty()) {
+                this.text = "";
+                return;
+            }
+            List<String> chunksLowerCase = new ArrayList<>(chunks.size());
+            for (String chunk: chunks) chunksLowerCase.add(chunk.toLowerCase());
+
+            // Step 2: Preprocess query
+            Set<String> queryWordSet = querySet(query);
+            if (queryWordSet.isEmpty()) {
+                this.text = "";
+                return;
+            }
+
+            // Step 3: Compute IDF
+            // IDF uses a logarithm because the information gain of rare words grows non-linearly; 
+            // the log dampens extreme ratios (N/df), stabilizes TF-IDF values, and matches the 
+            // information-theoretic definition of word informativeness.
+            int totalChunks = chunksLowerCase.size();
+            Map<String, Double> idf = new HashMap<>();
+            for (String word: queryWordSet) {
+                int docFreq = 0;
+                for (String chunk: chunksLowerCase) {
+                    if (chunk.contains(word)) docFreq++;
+                }
+                idf.put(word, Math.log((double) totalChunks / (docFreq + 1)) + 1);
+            }
+
+            // Step 4: Score chunks
+            Map<Integer, Double> chunkScores = new HashMap<>();
+            for (int i = 0; i < chunksLowerCase.size(); i++) {
+                String chunk = chunksLowerCase.get(i);
+                double score = 0.0;
+                Map<String, Integer> tf = new HashMap<>(); // counts occurrence in query for each word in chunk
+
+                // Extract words and clean
+                String[] wordsInChunk = chunk.split("\\s+");
+                for (String w : wordsInChunk) {
+                    String cleanWord = w.replaceAll("[.,!?;:]", "");
+                    if (cleanWord.length() > 0 && queryWordSet.contains(cleanWord)) {
+                        tf.put(cleanWord, tf.getOrDefault(cleanWord, 0) + 1);
+                    }
+                }
+
+                // Sum TF-IDF
+                for (String word: queryWordSet) {
+                    int tfValue = tf.getOrDefault(word, 0);
+                    double tfIdf = (double) tfValue * idf.getOrDefault(word, 1.0);
+                    score += tfIdf;
+                }
+                chunkScores.put(i, score);
+            }
+
+            // Step 5: Find best chunk
+            int topChunkIndex = -1;
+            for (Map.Entry<Integer, Double> entry: chunkScores.entrySet()) {
+                if (entry.getValue() > this.score) {
+                    this.score = entry.getValue();
+                    topChunkIndex = entry.getKey();
+                }
+            }
+
+            // if there is no best chunk, return an empty snippet
+            if (topChunkIndex < 0) {
+                this.text = "";
+                this.score = 0.0;
+                return;
+            }
+            
+            // Step 6: Get 3-slice snippet
+            List<String> snippetChunks = new ArrayList<>();
+            if (topChunkIndex > 0) {
+                snippetChunks.add(chunks.get(topChunkIndex - 1));
+            }
+            snippetChunks.add(chunks.get(topChunkIndex));
+            if (topChunkIndex < chunks.size() - 1) {
+                snippetChunks.add(chunks.get(topChunkIndex + 1));
+            }
+
+            // Step 7: Join
+            this.text = String.join(" ", snippetChunks);
+        }
+        
+        public double getScore() {
+            return this.score;
+        }
+        
+        public String getText() {
+            return this.text;
+        }
+        
+        public String getURL() {
+            return this.url;
+        }
+        
+        public String getTitle() {
+            return this.title;
+        }
+    }
+    
+    
+
+    /**
+     * Creates slices of a given text. We want slices of average same size,
+     * but we want to prevent that cuts are made within sentences.
+     * @param text the given text
+     * @param len the minimum length of the wanted slices; actual slices may be longer
+     * @return a list of text slices
+     */
+    public static List<String> slicer(String text, int len) {
+        List<String> result = new ArrayList<>();
+        if (text == null || len <= 0) return result;
+
+        int start = 0;
+        while (start < text.length()) {
+            int end = Math.min(start + len, text.length());
+
+            // Move end position further out until a a sentence end is found:
+            // look for sentence boundary: .!?, followed by whitespace char.
+            while (end < text.length()) {
+                char ch = text.charAt(end - 1);
+                if ((ch == '.' || ch == '?' || ch == '!') && Character.isWhitespace(text.charAt(end))) {
+                    break;
+                }
+                end++;
+            }
+            result.add(text.substring(start, end));
+            start = end;
+        }
+
+        return result;
     }
     
     private static String getOneString(SolrDocument doc, CollectionSchema field) {
@@ -477,25 +654,37 @@ public class RAGProxyServlet extends HttpServlet {
         Object r = doc.getFieldValue(field.getSolrFieldName());
         if (r == null) return "";
         if (r instanceof ArrayList) {
-            return ((ArrayList<String>) r).get(0);
+            return (String) ((ArrayList<?>) r).get(0);
         }
         return r.toString();
     }
 
     private String searchWordsForPrompt(LLM llm, String model, String prompt) {
-        StringBuilder query = new StringBuilder();
-        String question = "Make a list of a maximum of four search words for the following question; use a JSON Array: " + prompt;
+        String question = "Make a list of search words with low document frequency for the following prompt; use a JSON Array: " + prompt;
         try {
             LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX);
             context.addPrompt(question);
-            String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 80));
-            for (String s : a)
-                query.append(s).append(' ');
+            Set<String> singlewords = new LinkedHashSet<>();
+            String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 200));
+            // unfortunately this might not be a single word per line but several words; we collect them all.
+            for (String s: a) {
+                for (String t: s.split(" ")) singlewords.add(t.toLowerCase());
+            }
+            StringBuilder query = new StringBuilder();
+            for (String s: singlewords) query.append(s).append(' ');
             return query.toString().trim();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return "";
         }
+    }
+    
+    private static Set<String> querySet(String query) {
+        Set<String> queryWordSet = Arrays.stream(query.trim().toLowerCase().split("\\s+"))
+                .map(String::toLowerCase)
+                .filter(word -> !word.isEmpty())
+                .collect(Collectors.toSet());
+        return queryWordSet;
     }
 
     private static JSONObject responseLine(String payload) {
