@@ -79,7 +79,9 @@ public class AILab {
         prop.put("ailab_index_status", hasIndex ? "ready" : "pending");
         prop.putNum("ailab_index_count", indexDocs);
         prop.putNum("ailab_index_needed", indexNeeded);
-        prop.put("ailab_rag_status", hasRagRole ? "ready" : "pending");
+        // consider the RAG configuration page visit as completing the RAG quest
+        final boolean ragVisited = "true".equalsIgnoreCase(sb.getConfig("ui.RAGConfig_p.visited", "false"));
+        prop.put("ailab_rag_status", (hasRagRole || ragVisited) ? "ready" : "pending");
         prop.put("ailab_shield_status", hasShield ? "ready" : "pending");
 
         return prop;

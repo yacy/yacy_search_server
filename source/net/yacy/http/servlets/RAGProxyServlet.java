@@ -87,9 +87,11 @@ public class RAGProxyServlet extends HttpServlet {
 
     private static final long serialVersionUID = 3411544789759643137L;
 
-    private static String LLM_SYSTEM_PREFIX = "\n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.";
-    private static String LLM_USER_PREFIX = "\n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n";
-    
+    public static final String LLM_SYSTEM_PROMPT_DEFAULT = "You are a smart and helpful chatbot. If possible, use friendly emojies.";
+    private static final String LLM_SYSTEM_PREFIX_DEFAULT = "\n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.";
+    private static final String LLM_USER_PREFIX_DEFAULT = "\n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n";
+    private static final String LLM_QUERY_GENERATOR_PREFIX_DEFAULT = "Make a list of search words with low document frequency for the following prompt; use a JSON Array: ";
+
     @Override
     public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
         response.setContentType("application/json;charset=utf-8");
@@ -136,6 +138,7 @@ public class RAGProxyServlet extends HttpServlet {
         String body = bodyBuilder.toString();
         JSONObject bodyObject;
         try {
+            final Switchboard sb = Switchboard.getSwitchboard();
             // get system message and user prompt
             bodyObject = new JSONObject(body);
             // get chat functions
@@ -153,11 +156,13 @@ public class RAGProxyServlet extends HttpServlet {
             
             // get messages and prepare user message attachments
             JSONArray messages = bodyObject.optJSONArray("messages");
+            final String systemPrefix = sb.getConfig("ai.llm-system-prefix", LLM_SYSTEM_PREFIX_DEFAULT);
+            final String userPrefix = sb.getConfig("ai.llm-user-prefix", LLM_USER_PREFIX_DEFAULT);
             for (int i = 0; i < messages.length(); i++) {
                 JSONObject message = messages.getJSONObject(i);
                 if (message.optString("role", "").equals("user")) {
                     UserObject userObject = new UserObject(message);
-                    userObject.attachAttachment(LLM_USER_PREFIX);
+                    userObject.attachAttachment(userPrefix);
                 }
             }
             UserObject userObject = new UserObject(messages.getJSONObject(messages.length() - 1));
@@ -170,9 +175,10 @@ public class RAGProxyServlet extends HttpServlet {
             String searchResultMarkdown = "";
             if (rag) {
                 // modify system and user prompt here in bodyObject to enable RAG
-                searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user);
+                final String queryPrefix = sb.getConfig("ai.llm-query-generator-prefix", LLM_QUERY_GENERATOR_PREFIX_DEFAULT);
+                searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, queryPrefix + user);
                 searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 10);
-                user += LLM_USER_PREFIX;
+                user += userPrefix;
                 user += searchResultMarkdown;
                 userObject.setContentText(user);
             }
@@ -614,8 +620,6 @@ public class RAGProxyServlet extends HttpServlet {
             return this.title;
         }
     }
-    
-    
 
     /**
      * Creates slices of a given text. We want slices of average same size,
@@ -660,9 +664,9 @@ public class RAGProxyServlet extends HttpServlet {
     }
 
     private String searchWordsForPrompt(LLM llm, String model, String prompt) {
-        String question = "Make a list of search words with low document frequency for the following prompt; use a JSON Array: " + prompt;
+        String question = LLM_QUERY_GENERATOR_PREFIX_DEFAULT + prompt;
         try {
-            LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX);
+            LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX_DEFAULT);
             context.addPrompt(question);
             Set<String> singlewords = new LinkedHashSet<>();
             String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 200));

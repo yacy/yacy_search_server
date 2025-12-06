@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Wire RAG Retrieval</title>
+    #%env/templates/metas.template%#
+    <style type="text/css">
+      .rag-card {
+        border: 1px solid #e6e9ef;
+        border-left: 6px solid #5bc0de;
+        padding: 18px;
+        margin-bottom: 16px;
+        background: #fff;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      }
+      .rag-card h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        color: #0f2b46;
+      }
+      .rag-card p {
+        margin: 0 0 10px 0;
+        color: #3b4a5e;
+      }
+      .rag-textarea {
+        width: 100%;
+        resize: vertical;
+      }
+    </style>
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAI.template%#
+
+    <h2>Wire RAG Retrieval</h2>
+    <p>Tune how YaCy constructs prompts and search queries for Retrieval Augmented Generation.</p>
+
+    <form method="post" action="RAGConfig_p.html">
+      <div class="rag-card">
+        <h3>System Prompt</h3>
+        <p>This is sent as the system message for chats. Keep it concise and friendly.</p>
+        <textarea name="ai.system-prompt" class="rag-textarea form-control" rows="5">#[ai.system-prompt]#</textarea>
+      </div>
+
+      <div class="rag-card">
+        <h3>User Retrieval Prefix</h3>
+        <p>Prepended before attached search snippets in RAG mode to tell the LLM how to use them.</p>
+        <textarea name="ai.llm-user-prefix" class="rag-textarea form-control" rows="5">#[ai.llm-user-prefix]#</textarea>
+      </div>
+
+      <div class="rag-card">
+        <h3>Query Generator Prefix</h3>
+        <p>Prompt given to the model that generates search queries from user requests.</p>
+        <textarea name="ai.llm-query-generator-prefix" class="rag-textarea form-control" rows="5">#[ai.llm-query-generator-prefix]#</textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Save RAG Settings</button>
+    </form>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>
