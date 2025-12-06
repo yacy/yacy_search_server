@@ -58,6 +58,11 @@ public class LLMSelection_p {
                 //e.printStackTrace();
             }
         }
+
+        JSONObject inferenceSystem = bodyj.optJSONObject("inference_system");
+        if (inferenceSystem != null) {
+            sb.setConfig("ai.inference_system", inferenceSystem.toString());
+        }
         /*
         {"production_models":[{
           "service":"OLLAMA",
@@ -102,6 +107,19 @@ public class LLMSelection_p {
             prop.put("productionmodels", production_models.length());
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+
+        // prefill inference system configuration if present
+        final String inferenceJson = sb.getConfig("ai.inference_system", "{}");
+        try {
+            JSONObject inference = new JSONObject(new JSONTokener(inferenceJson));
+            prop.put("llm_service", inference.optString("service", "OLLAMA"));
+            prop.put("llm_hoststub", inference.optString("hoststub", "http://localhost:11434"));
+            prop.put("llm_apikey", inference.optString("api_key", ""));
+        } catch (JSONException e) {
+            prop.put("llm_service", "OLLAMA");
+            prop.put("llm_hoststub", "http://localhost:11434");
+            prop.put("llm_apikey", "");
         }
 
         if (post == null || env == null) {

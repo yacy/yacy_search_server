@@ -1,0 +1,423 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': AI Lab</title>
+    #%env/templates/metas.template%#
+    <style type="text/css">
+      .ailab-hero {
+        margin: 26px 0 20px 0;
+        padding: 24px 24px 18px 24px;
+        border: 1px solid #dce3f0;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #f7fbff 0%, #e8f1ff 40%, #ffffff 100%);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      }
+
+      .ailab-hero .eyebrow {
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #2c3e50;
+        margin: 0 0 6px 0;
+      }
+
+      .ailab-hero h2 {
+        margin: 0 0 8px 0;
+        font-weight: 700;
+        color: #172b4d;
+      }
+
+      .ailab-hero p {
+        margin: 0 0 14px 0;
+        color: #233142;
+      }
+
+      .bs-callout {
+        padding: 20px;
+        margin: 0 0 6px 0;
+        border: 1px solid #e8ecf2;
+        border-left: 6px solid #97a6b9;
+        border-radius: 4px;
+        background: #ffffff;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .bs-callout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .bs-callout-mandatory {
+        border-left-color: #f0ad4e;
+      }
+
+      .bs-callout-optional {
+        border-left-color: #5bc0de;
+      }
+
+      .quest-callout h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      .quest-callout p {
+        margin: 0 0 10px 0;
+        color: #34495e;
+      }
+
+      .quest-body {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .quest-visual img {
+        max-width: 64px;
+        width: 64px;
+        height: 64px;
+        border-radius: 6px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        object-fit: contain;
+      }
+
+      .quest-actions .btn {
+        margin-bottom: 6px;
+        text-decoration: none;
+        min-width: 200px;
+        font-size: 14px;
+      }
+
+      .quest-actions .btn-primary,
+      .quest-actions .btn-info,
+      .quest-actions .btn-success,
+      .quest-actions .btn-default {
+        background-color: #5bc0de;
+        border-color: #46b8da;
+        color: #ffffff;
+      }
+
+      .quest-actions .btn-primary:hover,
+      .quest-actions .btn-info:hover,
+      .quest-actions .btn-success:hover,
+      .quest-actions .btn-default:hover {
+        background-color: #31b0d5;
+        border-color: #269abc;
+        color: #ffffff;
+      }
+
+      .quest-note {
+        font-size: 0.95em;
+        color: #4c566a;
+      }
+
+      .quest-note .count {
+        font-weight: 700;
+      }
+
+      .quest-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .quest-meta .meta-arrow {
+        display: inline-flex;
+        align-items: center;
+        font-weight: 700;
+        color: #5bc0de;
+        padding: 0 4px;
+        animation: arrowPulse 1.4s ease-in-out infinite;
+      }
+
+      .quest-meta .label {
+        display: inline-block;
+        padding: 4px 12px;
+        font-size: 0.85em;
+        font-weight: 700;
+        line-height: 1.4;
+        border-radius: 999px;
+      }
+
+      .status-pill {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85em;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: #f0ad4e;
+        color: #ffffff;
+      }
+
+      @keyframes arrowPulse {
+        0% { transform: translateX(0); opacity: 0.8; }
+        50% { transform: translateX(3px); opacity: 1; }
+        100% { transform: translateX(0); opacity: 0.8; }
+      }
+
+      .status-ready .status-pill {
+        background: #5cb85c;
+      }
+
+      .status-locked .status-pill {
+        background: #b0b7c3;
+      }
+
+      .status-beta .status-pill {
+        background: #5bc0de;
+      }
+
+      .status-pending .status-pill {
+        background: #f0ad4e;
+      }
+
+      .lab-progress {
+        margin-top: 10px;
+      }
+
+      .lab-progress .progress {
+        margin-bottom: 0;
+      }
+
+      @media (max-width: 767px) {
+        .quest-callout {
+          margin-bottom: 16px;
+        }
+      }
+
+      .quest-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .quest-grid .quest-callout {
+        flex: 1 1 48%;
+        min-width: 320px;
+      }
+
+      .quest-locked {
+        opacity: 0.55;
+        filter: grayscale(0.2);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body id="AILab" data-ailab-inference-configured="#[ailab_inference_configured]#">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAI.template%#
+
+    <div class="container-fluid" style="padding-left:0;padding-right:0;">
+      <div class="ailab-hero">
+        <div class="eyebrow">AI Lab Build System</div>
+        <h2>Craft your AI toolkit</h2>
+        <p>Complete the quests below to unlock YaCy's AI sidekick: bind an inference engine, load production models, feed it with your index, then wire RAG and shields.</p>
+        <div class="lab-progress">
+          <div class="progress">
+            <div id="labProgressBar" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%">0 / 5 unlocked</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quest-grid">
+        <div class="bs-callout bs-callout-mandatory quest-callout status-pending" data-quest="inference" data-status="#[ailab_inference_status]#">
+          <div class="quest-meta">
+            <span class="label label-warning">Mandatory</span>
+            <span class="meta-arrow" aria-hidden="true">→</span>
+            <span class="status-pill">Needs setup</span>
+          </div>
+          <h3>Bind an inference engine</h3>
+          <p>Pick your host (Ollama, LM Studio, OpenAI-compatible) and give YaCy a place to send prompts.</p>
+          <div class="quest-body">
+            <div class="quest-visual">
+              <img src="env/grafics/AILab_Inference.png" alt="Inference engine setup" width="128" height="128" />
+            </div>
+            <div class="quest-actions">
+              <a class="btn btn-info btn-sm" href="LLMSelection_p.html">Open engine setup</a><br />
+              <span class="quest-note">Set hoststub, API keys, and defaults to unlock downloads.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bs-callout bs-callout-mandatory quest-callout status-pending" data-quest="model" data-status="#[ailab_model_status]#">
+        <div class="quest-meta">
+          <span class="label label-warning">Mandatory</span>
+          <span class="meta-arrow" aria-hidden="true">→</span>
+          <span class="status-pill">Needs setup</span>
+        </div>
+        <h3>Populate the Production Models Matrix</h3>
+        <p>Assign models for chat, search, translation, and more. This is your loadout bench.</p>
+        <div class="quest-body">
+          <div class="quest-visual">
+              <img src="env/grafics/AILab_Matrix.png" alt="Model assignment preview" width="128" height="128" />
+          </div>
+          <div class="quest-actions">
+            <a class="btn btn-info btn-sm" href="LLMSelection_p.html#availableModels">Go to Production Models Matrix</a><br />
+            <span class="quest-note">Deploy at least one model, then assign capabilities (chat, search-query, tooling, vision).</span>
+          </div>
+        </div>
+      </div>
+
+        <div class="bs-callout bs-callout-optional quest-callout status-pending" data-quest="index" data-status="#[ailab_index_status]#">
+          <div class="quest-meta">
+            <span class="label label-info">Optional</span>
+            <span class="meta-arrow" aria-hidden="true">→</span>
+            <span class="status-pill">Needs setup</span>
+          </div>
+          <h3>Grow a search index</h3>
+          <p>Create a local index for grounding: crawl a site or import a pack to give your AI facts to cite.</p>
+          <div class="quest-body">
+            <div class="quest-visual">
+              <img src="env/grafics/AILab_Crawl.png" alt="Index creation" width="128" height="128" />
+            </div>
+            <div class="quest-actions">
+              <a class="btn btn-info btn-sm" href="CrawlStartSite.html">Start a crawl</a>
+              <a class="btn btn-info btn-sm" href="IndexPackDownloader_p.html">Import an index pack</a><br />
+              <span class="quest-note">Indexed documents: <span class="count">#[ailab_index_count]#</span> / <span class="count">#[ailab_index_needed]#</span> required to unlock (need at least 1000 documents).</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bs-callout bs-callout-optional quest-callout status-pending" data-quest="rag" data-status="#[ailab_rag_status]#">
+          <div class="quest-meta">
+            <span class="label label-info">Optional</span>
+            <span class="meta-arrow" aria-hidden="true">→</span>
+            <span class="status-pill">Needs setup</span>
+          </div>
+          <h3>Wire RAG retrieval</h3>
+          <p>Map which production models answer search-query and Q/A pairs so the RAG proxy can mix search with chat.</p>
+          <div class="quest-body">
+            <div class="quest-visual">
+              <img src="env/grafics/AILab_RAG.png" alt="RAG configuration" width="128" height="128" />
+            </div>
+            <div class="quest-actions">
+              <a class="btn btn-info btn-sm" href="LLMSelection_p.html#productionModelsTable">Configure RAG roles</a>
+              <a class="btn btn-info btn-sm" href="yacychat.html">Test in Chat</a><br />
+              <span class="quest-note">Set the search-query and qapairs columns to connect retrieval to your chat flow.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bs-callout bs-callout-optional quest-callout status-pending" data-quest="shield" data-status="#[ailab_shield_status]#">
+          <div class="quest-meta">
+            <span class="label label-info">Optional</span>
+            <span class="meta-arrow" aria-hidden="true">→</span>
+            <span class="status-pill">Needs setup</span>
+          </div>
+          <h3>Define a shield</h3>
+          <p>Add guardrails: moderation prompts, content filters, or safety rules that wrap every request.</p>
+          <div class="quest-body">
+            <div class="quest-visual">
+              <img src="env/grafics/AILab_shield.png" alt="Shield definition" width="128" height="128" />
+            </div>
+            <div class="quest-actions">
+              <a class="btn btn-info btn-sm" href="ConfigProperties_p.html">Open shield settings</a><br />
+              <span class="quest-note">Store your shield directives (system prompts, stop words) as properties, then exercise them in chat.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      //<![CDATA[
+      (function() {
+        const statusLabels = {
+          ready: "Unlocked",
+          complete: "Unlocked",
+          completed: "Unlocked",
+          beta: "Beta",
+          optional: "Optional",
+          pending: "Needs setup",
+          todo: "Needs setup"
+        };
+
+        const callouts = Array.prototype.slice.call(document.querySelectorAll(".quest-callout"));
+        let readyCount = 0;
+        const statusMap = {};
+        const indexNeeded = parseInt("#[ailab_index_needed]#", 10) || 1000;
+        const indexCount = parseInt("#[ailab_index_count]#", 10) || 0;
+
+        callouts.forEach(callout => {
+          const raw = (callout.getAttribute("data-status") || "").toLowerCase();
+          let status = statusLabels[raw] ? raw : "pending";
+          if (status === "complete" || status === "completed") {
+            status = "ready";
+          }
+          callout.classList.remove("status-ready", "status-pending", "status-beta");
+          callout.classList.add("status-" + status);
+
+          if (status === "ready") {
+            readyCount++;
+          }
+
+          const pill = callout.querySelector(".status-pill");
+          if (pill) {
+            // special display for index quest showing counts while locked/pending
+            const questName = callout.getAttribute("data-quest");
+            if (questName === "index" && status !== "ready") {
+              pill.textContent = indexCount + " / " + indexNeeded;
+            } else {
+              pill.textContent = statusLabels[status] || statusLabels.pending;
+            }
+          }
+
+          const q = callout.getAttribute("data-quest");
+          if (q) {
+            statusMap[q] = status;
+          }
+        });
+
+        // Gating: enforce build order
+        const questOrder = ["inference", "model", "index", "rag", "shield"];
+        let prerequisitesMet = true;
+        questOrder.forEach(function(name) {
+          const callout = document.querySelector('.quest-callout[data-quest="' + name + '"]');
+          if (!callout) return;
+          const s = statusMap[name] || "pending";
+
+          // Only gate by prior quests; index stays clickable even while filling up.
+          let locked = !prerequisitesMet;
+          if (name === "model") {
+            const inferenceConfigured = document.body.getAttribute("data-ailab-inference-configured") === "1";
+            locked = locked || !inferenceConfigured;
+          }
+
+          if (locked) {
+            callout.classList.add("quest-locked", "status-locked");
+            const pill = callout.querySelector(".status-pill");
+            if (pill) {
+              pill.textContent = name === "index" ? (indexCount + " / " + indexNeeded) : "Locked";
+            }
+          } else {
+            callout.classList.remove("quest-locked", "status-locked");
+          }
+
+          // Block subsequent quests until current one is ready (index must reach threshold to release RAG and later steps).
+          if (s !== "ready" || (name === "index" && indexCount < indexNeeded)) {
+            prerequisitesMet = false;
+          }
+        });
+
+        const progressBar = document.getElementById("labProgressBar");
+        if (progressBar && callouts.length > 0) {
+          const percent = Math.round((readyCount / callouts.length) * 100);
+          progressBar.style.width = percent + "%";
+          progressBar.setAttribute("aria-valuenow", percent.toString());
+          progressBar.textContent = readyCount + " / " + callouts.length + " unlocked";
+        }
+      })();
+      //]]>
+    </script>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

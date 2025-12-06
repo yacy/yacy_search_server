@@ -5,7 +5,7 @@
     <title>YaCy '#[clientname]#': LLM Selection</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="IndexControl">
+  <body id="IndexControl" data-llm-service="#[llm_service]#" data-llm-hoststub="#[llm_hoststub]#" data-llm-apikey="#[llm_apikey]#">
     #%env/templates/header.template%#
     #%env/templates/submenuAI.template%#
     <script>
@@ -17,6 +17,17 @@
         event.preventDefault();
         event.returnValue = "Model downloads are still running. Please wait until they finish.";
       };
+      // Localization-friendly test strings and hints (translate/tune as needed)
+      const TEST_STRINGS = {
+        toolingEndpointPath: "/v1/chat/completions", // Endpoint used to probe tooling capability on OpenAI-compatible APIs
+        toolingSystemMessage: "You are a home assistant.", // System prompt for tooling capability test
+        toolingUserMessage: "Switch on the light", // User prompt for tooling capability test
+        visionSystemMessage: "you read out images", // System prompt for vision capability test
+        visionUserMessage: "what is in the image?", // User prompt for vision capability test
+        visionExpectedText: "42", // Expected mention in LLM response when reading the test image
+        visionTestImagePath: "env/grafics/llmtest.png" // Image used for the vision capability test
+      };
+
       const PRODUCTION_MODEL_TOTAL_COLUMNS = 15;
       const PRODUCTION_MODEL_MODEL_COLUMN_INDEX = 1;
       const PRODUCTION_MODEL_USAGE_COLUMN_START = 5;
@@ -45,14 +56,7 @@
         "vision"
       ];
       const PRODUCTION_MODEL_SUBMIT_URL = "LLMSelection_p.html";
-      const TOOLING_TEST_ENDPOINT_PATH = "/v1/chat/completions";
       const TOOLING_EXPECTED_FUNCTION_NAME = "lightswitch";
-      const TOOLING_TEST_SYSTEM_MESSAGE = "You are a home assistant.";
-      const TOOLING_TEST_USER_MESSAGE = "Switch on the light";
-      const VISION_TEST_SYSTEM_MESSAGE = "you read out images";
-      const VISION_TEST_USER_MESSAGE = "what is in the image?";
-      const VISION_TEST_EXPECTED_TEXT = "42";
-      const VISION_TEST_IMAGE_PATH = "env/grafics/llmtest.png";
       let cachedVisionTestImageBase64 = null;
       let cachedVisionTestImagePromise = null;
 
@@ -152,7 +156,7 @@
         }
       }
 
-      async function loadModelList() {
+      async function loadModelList(fromPreset = false) {
         availableModels = [];
         const service = document.getElementById("service").value;
         const hoststub = document.getElementById("hoststub").value;
@@ -168,8 +172,12 @@
             loadModelContainer.innerHTML = "";
             loadModelContainer.style.display = "none";
           }
+          persistInferenceSystem();
         } catch (error) {
           handleModelLoadError(service, error);
+          if (fromPreset) {
+            console.warn("Auto-load of model list failed for preset inference system.");
+          }
         }
       }
       
@@ -282,6 +290,27 @@
           apikeyInput.value = "";
         } else {
           apikeyInput.disabled = false;
+        }
+      }
+
+      function applyPresetInference() {
+        const serviceSelect = document.getElementById("service");
+        const hoststubInput = document.getElementById("hoststub");
+        const apikeyInput = document.getElementById("apikey");
+        const body = document.body;
+        const presetService = (body.getAttribute("data-llm-service") || "").trim();
+        const presetHoststub = (body.getAttribute("data-llm-hoststub") || "").trim();
+        const presetApikey = (body.getAttribute("data-llm-apikey") || "").trim();
+        if (serviceSelect && presetService) {
+          serviceSelect.value = presetService;
+        }
+        setHoststub();
+        if (hoststubInput && presetHoststub) {
+          hoststubInput.value = presetHoststub;
+        }
+        if (apikeyInput && presetApikey) {
+          apikeyInput.disabled = false;
+          apikeyInput.value = presetApikey;
         }
       }
 
@@ -606,6 +635,23 @@
         updateAvailableModelButtons();
       }
 
+      function persistInferenceSystem() {
+        const hoststubInput = document.getElementById("hoststub");
+        const apikeyInput = document.getElementById("apikey");
+        const serviceSelect = document.getElementById("service");
+        const inference_system = {
+          service: serviceSelect ? serviceSelect.value : "",
+          hoststub: hoststubInput ? hoststubInput.value : "",
+          api_key: apikeyInput ? apikeyInput.value : ""
+        };
+        fetch(PRODUCTION_MODEL_SUBMIT_URL, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inference_system })
+        }).catch(err => {
+          console.error("Failed to persist inference system", err);
+        });
+      }
+
       function ensureProductionRowUsageCells(row, defaultChecked) {
         if (!row) return;
         // ensure existence of checkboxes
@@ -669,6 +715,8 @@
               updateUndeployButtonState(row);
             }
           });
+        } else {
+          ensureFeatureAssignedToAnotherModel(columnIndex, currentRow);
         }
 
         if (currentRow) {
@@ -691,6 +739,15 @@
         undeployBtn.dataset.action = "undeploy";
         styleActionButton(undeployBtn);
         undeployBtn.addEventListener("click", () => {
+          // reassign any active features before removing this row
+          for (let col = PRODUCTION_MODEL_USAGE_COLUMN_START; col <= PRODUCTION_MODEL_USAGE_COLUMN_END; col += 1) {
+            const cell = row.cells[col];
+            if (!cell) continue;
+            const checkbox = cell.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) {
+              ensureFeatureAssignedToAnotherModel(col, row);
+            }
+          }
           row.remove();
           persistProductionModels();
         });
@@ -702,18 +759,32 @@
         if (!row) return;
         const button = row.querySelector('button[data-action="undeploy"]');
         if (!button) return;
-        hasFeatureChecked = false;
-        for (let col = PRODUCTION_MODEL_USAGE_COLUMN_START; col <= PRODUCTION_MODEL_USAGE_COLUMN_END; col += 1) {
-          const cell = row.cells[col];
-          if (!cell) continue;
-          const checkbox = cell.querySelector('input[type="checkbox"]');
-          if (checkbox && checkbox.checked) {
-            hasFeatureChecked =  true;
-            break;
-          }
+        button.disabled = false;
+        button.title = "Remove this model (features will be reassigned if possible).";
+      }
+
+      function ensureFeatureAssignedToAnotherModel(columnIndex, sourceRow) {
+        const tbody = getProductionTableBody();
+        if (!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        if (rows.length <= 1) return; // nothing to reassign to
+        // If any other row already has the feature, keep it.
+        const othersHave = rows.some(r => {
+          if (r === sourceRow) return false;
+          const cell = r.cells[columnIndex];
+          const cb = cell ? cell.querySelector('input[type="checkbox"]') : null;
+          return cb && cb.checked;
+        });
+        if (othersHave) return;
+        // pick the first other row and assign
+        const target = rows.find(r => r !== sourceRow);
+        if (!target) return;
+        const targetCell = target.cells[columnIndex];
+        const targetCb = targetCell ? targetCell.querySelector('input[type="checkbox"]') : null;
+        if (targetCb) {
+          targetCb.checked = true;
+          updateUndeployButtonState(target);
         }
-        button.disabled = hasFeatureChecked;
-        button.title = hasFeatureChecked ? "Disable the assigned features before undeploying." : "";
       }
 
       function persistProductionModels() {
@@ -741,9 +812,18 @@
         });
         
         // push to server
+        const hoststubInput = document.getElementById("hoststub");
+        const apikeyInput = document.getElementById("apikey");
+        const serviceSelect = document.getElementById("service");
+        const inference_system = {
+          service: serviceSelect ? serviceSelect.value : "",
+          hoststub: hoststubInput ? hoststubInput.value : "",
+          api_key: apikeyInput ? apikeyInput.value : ""
+        };
+
         fetch(PRODUCTION_MODEL_SUBMIT_URL, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ production_models: production_models_table })
+          body: JSON.stringify({ production_models: production_models_table, inference_system })
         }).catch(err => {
           console.error("Failed to persist production models", err);
         });
@@ -785,7 +865,7 @@
         if (!endpointBase) {
           return false;
         }
-        const targetUrl = `${endpointBase}${TOOLING_TEST_ENDPOINT_PATH}`;
+        const targetUrl = `${endpointBase}${TEST_STRINGS.toolingEndpointPath}`;
         const headers = { "Content-Type": "application/json" };
         if (apikey) {
           headers.Authorization = `Bearer ${apikey}`;
@@ -809,8 +889,8 @@
           temperature: 0.1,
           max_tokens: 1024,
           messages: [
-            { role: "system", content: TOOLING_TEST_SYSTEM_MESSAGE },
-            { role: "user", content: TOOLING_TEST_USER_MESSAGE }
+            { role: "system", content: TEST_STRINGS.toolingSystemMessage },
+            { role: "user", content: TEST_STRINGS.toolingUserMessage }
           ],
           tools: [{
             type: "function",
@@ -911,7 +991,7 @@
         if (!endpointBase) {
           return false;
         }
-        const targetUrl = `${endpointBase}${TOOLING_TEST_ENDPOINT_PATH}`;
+        const targetUrl = `${endpointBase}${TEST_STRINGS.toolingEndpointPath}`;
         const headers = { "Content-Type": "application/json" };
         if (apikey) {
           headers.Authorization = `Bearer ${apikey}`;
@@ -936,11 +1016,11 @@
           temperature: 0.1,
           max_tokens: 512,
           messages: [
-            { role: "system", content: VISION_TEST_SYSTEM_MESSAGE },
+            { role: "system", content: TEST_STRINGS.visionSystemMessage },
             {
               role: "user",
               content: [
-                { type: "text", text: VISION_TEST_USER_MESSAGE },
+                { type: "text", text: TEST_STRINGS.visionUserMessage },
                 {
                   type: "image_url",
                   image_url: {
@@ -963,7 +1043,7 @@
           if (!normalizedText) {
             return false;
           }
-          return normalizedText.indexOf(VISION_TEST_EXPECTED_TEXT) !== -1;
+          return normalizedText.indexOf(TEST_STRINGS.visionExpectedText) !== -1;
         });
       }
 
@@ -997,7 +1077,7 @@
         if (cachedVisionTestImagePromise) {
           return cachedVisionTestImagePromise;
         }
-        cachedVisionTestImagePromise = fetch(VISION_TEST_IMAGE_PATH)
+        cachedVisionTestImagePromise = fetch(TEST_STRINGS.visionTestImagePath)
           .then(response => {
             if (!response.ok) {
               throw new Error(`Failed to load test image (${response.status})`);
@@ -1078,7 +1158,21 @@
         return downloadBtn;
       }
 
-      document.addEventListener("DOMContentLoaded", normalizeProductionModelRows);
+      document.addEventListener("DOMContentLoaded", () => {
+        try {
+          normalizeProductionModelRows();
+          applyPresetInference();
+          // auto-show available models if a preset inference exists
+          const body = document.body;
+          const presetService = (body.getAttribute("data-llm-service") || "").trim();
+          const presetHoststub = (body.getAttribute("data-llm-hoststub") || "").trim();
+          if (presetService && presetHoststub) {
+            loadModelList(true);
+          }
+        } catch (e) {
+          console.error("Initialization failed", e);
+        }
+      });
 
     </script>
 
@@ -1087,7 +1181,7 @@
 
     <p>
         Here you can pick models from a LLM model service to select them as production model.
-        In the "Production Models" - Matrix you can then assign each selected model a function inside YaCy
+        In the "Production Models Matrix" you can then assign each selected model a function inside YaCy
     </p>
     <p>
         <b>Install your local LLM service!</b> You need either a local <a href="https://ollama.com/">ollama</a> or <a href="https://lmstudio.ai/">LM Studio</a> instance running on your local host or inside the intranet.
@@ -1138,9 +1232,9 @@
       <legend>Model Downloads</legend>
       <div id="downloadActivityList"></div>
     </fieldset>
-    <fieldset id="availableModelsContainer" style="display:none"></fieldset>
+    <fieldset id="availableModelsContainer" style="display:none"><a name="availableModels"></a></fieldset>
 
-    <fieldset id="productionModelsContainer" style="display: block;"><legend>Production Models</legend>
+    <fieldset id="productionModelsContainer" style="display: block;"><a name="productionModels"></a><legend>Production Models Matrix</legend>
         <table class="table table-striped" id="productionModelsTable">
             <thead class="thead-dark">
                 <tr>

@@ -1,6 +1,7 @@
 <div class="SubMenu">
   <h3>AI Lab</h3>
   <ul class="SubMenu">
+    <li><a href="AILab.html" class="MenuItemLink">AI Lab</a></li>
     <li><a href="LLMSelection_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">LLM Selection</a></li>
     <li><a href="yacychat.html" class="MenuItemLink">Chat</a></li>
   </ul>
