@@ -106,7 +106,7 @@
         <li>&nbsp;</li>
         <li id="header_community">
           <form action="https://community.searchlab.eu" target="_blank" method="get">
-            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-info" title="Community">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Community">
                 <span class="glyphicon glyphicon-user"></span>
                 <span class="hidden-sm"> Forum</span>
             </button>
@@ -149,13 +149,24 @@
           <li><a href="#">Please help! We need financial help to move on with the development!</a></li>
           </ul>
         </li>
+        #(navigation-showChatLink)#::
         <li>&nbsp;</li>
-        <li id="header_administration">
+        <li id="header_chat">
+          <form action="yacychat.html" method="get">
+            <button accesskey="c" type="submit" class="btn btn-inverse navbar-btn label-info" title="Chat">
+            	<span class="glyphicon glyphicon-console"></span>
+            	<span class="hidden-sm"> Chat</span>
+            </button>
+          </form>
+        </li>
+        #(/navigation-showChatLink)#
+        <li>&nbsp;</li>
+        <li id="header_search">
           <form action="index.html" method="get">
     		#(authorized)#::
   				<input type="hidden" name="auth" value=""/>
   			#(/authorized)#
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search">
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-info" title="Search">
             	<span class="glyphicon glyphicon-search"></span>
             	<span class="hidden-sm"> Search</span>
             </button>
@@ -178,8 +189,7 @@
     >
       <li><h3>First Steps</h3></li>
       <li><a href="ConfigBasic.html" class="MenuItemLink">Use Case &amp; Account</a></li>
-      <li><a href="CrawlStartSite.html" class="MenuItemLink">Load Web Pages, Crawler</a></li>
-      <li><a href="Performance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">RAM/Disk Usage &amp; Updates</a></li>
+      <li><a href="CrawlStartSite.html" class="MenuItemLink">Grab a whole site</a></li>
     </ul>
     #(navigation-advanced)#<script>$("#first-steps").popover();</script>::#(/navigation-advanced)#
 
@@ -201,17 +211,19 @@
     #(navigation-advanced)#::
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Production</h3></li>
-      <li><a href="CrawlStartExpert.html" class="MenuItemLink">Advanced Crawler</a></li>
-      <li><a href="IndexPackGenerator_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Export/Import</a></li>
+      <li><a href="CrawlStartExpert.html" class="MenuItemLink">Crawler</a></li>
+      <li><a href="AILab.html" class="MenuItemLink">AI Lab</a></li>
+      <li><a href="IndexPackGenerator_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">YaCy Packs &amp; Import/Export</a></li>
+      <li><a href="Table_API_p.html?sort=-date_recording" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Process Scheduler</a></li>
       <li><a href="Vocabulary_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Content Semantic</a></li>
-      <li><a href="CrawlCheck_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Target Analysis</a></li>      
+      <li><a href="CrawlCheck_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Target Analysis</a></li>
     </ul>
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Administration</h3></li>
       <li><a href="IndexControlURLs_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Administration</a></li>
       <li><a href="Settings_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">System Administration</a></li>
       <li><a href="Blacklist_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Filter &amp; Blacklists</a></li>
-      <li><a href="Table_API_p.html?sort=-date_recording" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Process Scheduler</a></li>
+      <li><a href="Performance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">RAM/Disk Usage &amp; Updates</a></li>
     </ul>
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Search Portal Integration</h3></li>

@@ -69,20 +69,21 @@ public class AILab {
         final long indexNeeded = 1000L;
         final boolean hasIndex = indexDocs >= indexNeeded;
 
-        // Shield configuration: treat any non-empty custom value as "ready".
-        final String shieldDefinition = sb.getConfig("ai.shield.definition", "").trim();
-        final boolean hasShield = !shieldDefinition.isEmpty();
+        // consider the RAG configuration page visit as completing the RAG quest
+        final boolean ragVisited = "true".equalsIgnoreCase(sb.getConfig("ui.RAGConfig_p.visited", "false"));
+        
+        // Shield configuration: consider the shield page visit as completion
+        final boolean hasShield = "true".equalsIgnoreCase(sb.getConfig("ui.AIShield_p.visited", "false"));
+        final boolean frontPageLinkActivated = sb.getConfigBool("ai.shield.show-chat-link", false);
 
         prop.put("ailab_inference_status", hasEngine ? "ready" : "pending");
-        prop.put("ailab_model_status", hasModel ? "ready" : "pending");
+        prop.put("ailab_model_status", hasEngine && hasModel ? "ready" : "pending");
         prop.put("ailab_inference_configured", hasEngine ? "1" : "0");
         prop.put("ailab_index_status", hasIndex ? "ready" : "pending");
         prop.putNum("ailab_index_count", indexDocs);
         prop.putNum("ailab_index_needed", indexNeeded);
-        // consider the RAG configuration page visit as completing the RAG quest
-        final boolean ragVisited = "true".equalsIgnoreCase(sb.getConfig("ui.RAGConfig_p.visited", "false"));
-        prop.put("ailab_rag_status", (hasRagRole || ragVisited) ? "ready" : "pending");
-        prop.put("ailab_shield_status", hasShield ? "ready" : "pending");
+        prop.put("ailab_rag_status", hasEngine && hasModel && (hasRagRole || ragVisited) ? "ready" : "pending");
+        prop.put("ailab_shield_status", hasEngine && hasModel && hasShield && frontPageLinkActivated ? "ready" : "pending");
 
         return prop;
     }

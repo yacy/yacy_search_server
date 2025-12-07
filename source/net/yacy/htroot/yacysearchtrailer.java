@@ -454,9 +454,9 @@ public class yacysearchtrailer {
         prop.put("navs", ni); // navigatior plugins - eof
 
         // about box
-        final String aboutBody = env.getConfig("about.body", "");
-        final String aboutHeadline = env.getConfig("about.headline", "");
-        if ((aboutBody.isEmpty() && aboutHeadline.isEmpty()) || theSearch.getResultCount() == 0) {
+        final String aboutBody = env.getConfig("about.body", "").trim();
+        final String aboutHeadline = env.getConfig("about.headline", "").trim();
+        if (aboutBody.isEmpty() || aboutHeadline.isEmpty() || theSearch.getResultCount() == 0) {
             prop.put("nav-about", 0);
         } else {
             prop.put("nav-about", 1);

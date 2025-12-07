@@ -20,6 +20,7 @@
           <li id="header_websearch"><a href="index.html#(authorized)#::?auth#(/authorized)#" onclick="this.href='index.html?#(authorized)#::auth&#(/authorized)#former='+encodeURIComponent(document.searchform.search.value)">Web Search</a></li>
           <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
           <li id="header_comparesearch"><a href="compare_yacy.html?display=0">Compare Search</a></li>
+          #(navigation-showChatLink)#::<li id="header_chat"><a href="yacychat.html">Chat</a></li>#(/navigation-showChatLink)#
           <li id="header_urlviewer"><a href="ViewFile.html">URL Viewer</a></li>
           <!--<li><a href="yacysearch_location.html">Location Search</a></li>-->
           <li class="divider" role="separator"></li>

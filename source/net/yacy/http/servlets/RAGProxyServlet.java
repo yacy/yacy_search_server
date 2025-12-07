@@ -29,10 +29,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -92,6 +95,13 @@ public class RAGProxyServlet extends HttpServlet {
     private static final String LLM_USER_PREFIX_DEFAULT = "\n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n";
     private static final String LLM_QUERY_GENERATOR_PREFIX_DEFAULT = "Make a list of search words with low document frequency for the following prompt; use a JSON Array: ";
 
+    // Volatile, in-memory access log for rate limiting. This is intentionally not persisted
+    // to respect user privacy; entries older than 24h are purged on each access.
+    public static final Deque<AbstractMap.SimpleEntry<Long, String>> ACCESS_LOG = new ConcurrentLinkedDeque<>();
+    public static final long ONE_MINUTE_MS = 60_000L;
+    public static final long ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
+    public static final long ONE_DAY_MS = 24 * ONE_HOUR_MS;
+
     @Override
     public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
         response.setContentType("application/json;charset=utf-8");
@@ -104,13 +114,23 @@ public class RAGProxyServlet extends HttpServlet {
         hresponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         hresponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
+        final Switchboard sb = Switchboard.getSwitchboard();
         final String clientIP = hrequest.getRemoteAddr();
         final boolean localhostAccess = Domains.isLocalhost(clientIP);
         if (!localhostAccess) {
-            // we will introduce a rate limit for non-localhost later, for now we just don't allow it
-            hresponse.sendError(HttpServletResponse.SC_FORBIDDEN);
+            // obey the allow-nonlocalhost shield setting
+            final boolean allowNonLocal = sb.getConfigBool("ai.shield.allow-nonlocalhost", false);
+            if (!allowNonLocal) {
+                hresponse.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
         }
-        
+        if (isRateLimited(sb, clientIP, localhostAccess)) {
+            hresponse.sendError(429, "Too Many Requests"); // standard status for rate limits
+            return;
+        }
+        recordAccess(clientIP);
+
         final Method reqMethod = Method.getMethod(hrequest.getMethod());
         if (reqMethod == Method.OTHER) {
             // required to handle CORS
@@ -138,7 +158,6 @@ public class RAGProxyServlet extends HttpServlet {
         String body = bodyBuilder.toString();
         JSONObject bodyObject;
         try {
-            final Switchboard sb = Switchboard.getSwitchboard();
             // get system message and user prompt
             bodyObject = new JSONObject(body);
             // get chat functions
@@ -664,7 +683,7 @@ public class RAGProxyServlet extends HttpServlet {
     }
 
     private String searchWordsForPrompt(LLM llm, String model, String prompt) {
-        String question = LLM_QUERY_GENERATOR_PREFIX_DEFAULT + prompt;
+        String question = prompt;
         try {
             LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX_DEFAULT);
             context.addPrompt(question);
@@ -712,6 +731,65 @@ public class RAGProxyServlet extends HttpServlet {
         } catch (JSONException e) {
         }
         return j;
+    }
+
+    public static void pruneOldEntries(long now) {
+        while (true) {
+            final AbstractMap.SimpleEntry<Long, String> head = ACCESS_LOG.peekFirst();
+            if (head == null) break;
+            if (now - head.getKey() > ONE_DAY_MS) {
+                ACCESS_LOG.pollFirst();
+            } else {
+                break;
+            }
+        }
+    }
+
+    public static void recordAccess(String ip) {
+        final long now = System.currentTimeMillis();
+        pruneOldEntries(now);
+        ACCESS_LOG.addLast(new AbstractMap.SimpleEntry<>(now, ip));
+    }
+
+    public static long countAccess(String ip, long windowMillis, long now) {
+        return ACCESS_LOG.stream()
+                .filter(e -> (ip == null || e.getValue().equals(ip)) && (now - e.getKey()) <= windowMillis)
+                .count();
+    }
+
+    public static boolean isRateLimited(Switchboard sb, String ip, boolean localhostAccess) {
+        final long now = System.currentTimeMillis();
+        pruneOldEntries(now);
+        boolean allow_nonlocalhost = sb.getConfigBool("ai.shield.allow-nonlocalhost", false);
+        boolean limit_all = sb.getConfigBool("ai.shield.limit-all", false);
+        
+        // guest limits apply only to non-localhost
+        if (!localhostAccess) {
+            long perMinuteLimit = allow_nonlocalhost ? parseLimit(sb.getConfig("ai.shield.rate.per-minute", "0")) : 0;
+            long perHourLimit = allow_nonlocalhost ? parseLimit(sb.getConfig("ai.shield.rate.per-hour", "0")) : 0;
+            long perDayLimit = allow_nonlocalhost ? parseLimit(sb.getConfig("ai.shield.rate.per-day", "0")) : 0;
+            if (perMinuteLimit > 0 && countAccess(ip, ONE_MINUTE_MS, now) >= perMinuteLimit) return true;
+            if (perHourLimit > 0 && countAccess(ip, ONE_HOUR_MS, now) >= perHourLimit) return true;
+            if (perDayLimit > 0 && countAccess(ip, ONE_DAY_MS, now) >= perDayLimit) return true;
+        }
+
+        if (localhostAccess && limit_all) {
+            long allMinute = parseLimit(sb.getConfig("ai.shield.all.per-minute", "0"));
+            long allHour = parseLimit(sb.getConfig("ai.shield.all.per-hour", "0"));
+            long allDay = parseLimit(sb.getConfig("ai.shield.all.per-day", "0"));
+            if (allMinute > 0 && countAccess(null, ONE_MINUTE_MS, now) >= allMinute) return true;
+            if (allHour > 0 && countAccess(null, ONE_HOUR_MS, now) >= allHour) return true;
+            if (allDay > 0 && countAccess(null, ONE_DAY_MS, now) >= allDay) return true;
+        }
+        return false;
+    }
+
+    private static long parseLimit(String value) {
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
     }
 
 }

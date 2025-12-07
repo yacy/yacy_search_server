@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': AI Shield</title>
+    #%env/templates/metas.template%#
+    <style type="text/css">
+      .shield-card {
+        border: 1px solid #e6e9ef;
+        border-left: 6px solid #5bc0de;
+        padding: 16px;
+        margin-bottom: 14px;
+        background: #fff;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      }
+      .shield-card h3 {
+        margin-top: 0;
+        margin-bottom: 6px;
+        color: #0f2b46;
+      }
+      .shield-card p {
+        margin: 0 0 8px 0;
+        color: #3b4a5e;
+      }
+      .shield-inline {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .shield-inline label {
+        margin: 0;
+      }
+      .shield-rate {
+        max-width: 120px;
+      }
+
+      .telemetry-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .telemetry-item {
+        border: 1px solid #e6e9ef;
+        border-radius: 6px;
+        padding: 10px;
+        background: #f9fbff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      }
+
+      .telemetry-label {
+        font-weight: 700;
+        color: #0f2b46;
+        margin-bottom: 4px;
+      }
+
+      .gauge {
+        position: relative;
+        height: 12px;
+        background: #e9edf5;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .gauge-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        transition: width 0.3s ease;
+      }
+
+      .gauge-meta {
+        margin-top: 4px;
+        font-size: 0.9em;
+        color: #3b4a5e;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .gauge-green { background: #5cb85c; }
+      .gauge-amber { background: #f0ad4e; }
+      .gauge-red { background: #d9534f; }
+      .gauge-neutral { background: #5bc0de; }
+    </style>
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAI.template%#
+
+    <h2>Wire RAG Retrieval Shield</h2>
+    <p>Control who can access the chat interface and rate-limit non-localhost clients to protect your peer and LLM backends from overload.</p>
+
+    <form method="post" action="AIShield_p.html" id="shieldForm">
+      <input type="hidden" name="submit" value="1" />
+      <div class="shield-card">
+        <h3>Overall Load Protection</h3>
+        <p>Recent access volume across all clients (localhost included). You can enforce global limits here to protect the host.</p>
+        <div class="telemetry-grid">
+          <div class="telemetry-item">
+            <div class="telemetry-label">Requests / minute</div>
+            <div class="gauge"><div class="gauge-fill" id="gaugeMinute"></div></div>
+            <div class="gauge-meta">
+              <span id="gaugeMinuteValue">#[telemetry.per-minute]#</span>
+              <span id="gaugeMinuteLimit">#[ai.shield.all.per-minute]#</span>
+            </div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Requests / hour</div>
+            <div class="gauge"><div class="gauge-fill" id="gaugeHour"></div></div>
+            <div class="gauge-meta">
+              <span id="gaugeHourValue">#[telemetry.per-hour]#</span>
+              <span id="gaugeHourLimit">#[ai.shield.all.per-hour]#</span>
+            </div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-label">Requests / day</div>
+            <div class="gauge"><div class="gauge-fill" id="gaugeDay"></div></div>
+            <div class="gauge-meta">
+              <span id="gaugeDayValue">#[telemetry.per-day]#</span>
+              <span id="gaugeDayLimit">#[ai.shield.all.per-day]#</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:8px;">
+          <label>
+            <input type="checkbox" name="ai.shield.limit-all" id="limitAll" #(ai.shield.limit-all)#::checked="checked"#(/ai.shield.limit-all)# />
+            Limit for all requests, including localhost
+          </label>
+        </p>
+        <div class="shield-inline">
+          <label>Per minute: <input type="number" class="form-control shield-rate" min="0" name="ai.shield.all.per-minute" id="allMinute" value="#[ai.shield.all.per-minute]#" /></label>
+          <label>Per hour: <input type="number" class="form-control shield-rate" min="0" name="ai.shield.all.per-hour" id="allHour" value="#[ai.shield.all.per-hour]#" /></label>
+          <label>Per day: <input type="number" class="form-control shield-rate" min="0" name="ai.shield.all.per-day" id="allDay" value="#[ai.shield.all.per-day]#" /></label>
+        </div>
+      </div>
+
+      <div class="shield-card">
+        <h3>Guest Access Control & Rate Limits</h3>
+        <p>By default only localhost may reach the chat UI. Enable non-localhost access and throttle requests to reduce abuse.</p>
+        <label>
+          <input type="checkbox" name="ai.shield.allow-nonlocalhost" id="allowNonLocal" #(ai.shield.allow-nonlocalhost)#::checked="checked"#(/ai.shield.allow-nonlocalhost)# />
+          Allow non-localhost clients to access the chat interface
+        </label>
+        <p style="margin-top:8px;">Requests from non-localhost will be throttled using these caps:</p>
+        <div class="shield-inline">
+          <label>Per minute: <input type="number" class="form-control shield-rate" min="0" name="ai.shield.rate.per-minute" id="rateMinute" value="#[ai.shield.rate.per-minute]#" /></label>
+          <label>Per hour: <input type="number" class="form-control shield-rate" min="0" name="ai.shield.rate.per-hour" id="rateHour" value="#[ai.shield.rate.per-hour]#" /></label>
+          <label>Per day: <input type="number" class="form-control shield-rate" min="0" name="ai.shield.rate.per-day" id="rateDay" value="#[ai.shield.rate.per-day]#" /></label>
+        </div>
+      </div>
+
+      <div class="shield-card">
+        <h3>Front Page Link</h3>
+        <p>Expose a shortcut to the chat UI on the search front page if you want users to discover it.</p>
+        <label>
+          <input type="checkbox" name="ai.shield.show-chat-link" id="showLink" #(ai.shield.show-chat-link)#::checked="checked"#(/ai.shield.show-chat-link)# />
+          Show a link to yacychat.html on the search front page
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Save Shield Settings</button>
+    </form>
+
+    <script type="text/javascript">
+      (function() {
+        const allowBox = document.getElementById("allowNonLocal");
+        const rateInputs = [document.getElementById("rateMinute"), document.getElementById("rateHour"), document.getElementById("rateDay")];
+        const limitAllBox = document.getElementById("limitAll");
+        const allRates = [document.getElementById("allMinute"), document.getElementById("allHour"), document.getElementById("allDay")];
+        function syncRates() {
+          const enabled = allowBox && allowBox.checked;
+          rateInputs.forEach(inp => { if (inp) inp.disabled = !enabled; });
+          const allEnabled = limitAllBox && limitAllBox.checked;
+          allRates.forEach(inp => { if (inp) inp.disabled = !allEnabled; });
+        }
+        if (allowBox) {
+          allowBox.addEventListener("change", syncRates);
+        }
+        if (limitAllBox) {
+          limitAllBox.addEventListener("change", syncRates);
+        }
+        syncRates();
+
+        function updateGauge(id, valueId, limitId) {
+          const fill = document.getElementById(id);
+          const valEl = document.getElementById(valueId);
+          const limitEl = document.getElementById(limitId);
+          if (!fill || !valEl || !limitEl) return;
+          const current = parseInt(valEl.textContent, 10) || 0;
+          const limit = parseInt(limitEl.textContent.replace('/', '').trim(), 10) || 0;
+          let pct = limit > 0 ? Math.min(100, Math.round((current / limit) * 100)) : 0;
+          fill.style.width = (limit > 0 ? pct : 100) + "%";
+          fill.className = "gauge-fill " + (limit > 0 ? (pct < 60 ? "gauge-green" : pct < 90 ? "gauge-amber" : "gauge-red") : "gauge-neutral");
+        }
+        updateGauge("gaugeMinute", "gaugeMinuteValue", "gaugeMinuteLimit");
+        updateGauge("gaugeHour", "gaugeHourValue", "gaugeHourLimit");
+        updateGauge("gaugeDay", "gaugeDayValue", "gaugeDayLimit");
+      })();
+    </script>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -4,6 +4,7 @@
     <li><a href="AILab.html" class="MenuItemLink">AI Lab</a></li>
     <li><a href="LLMSelection_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">LLM Selection</a></li>
     <li><a href="RAGConfig_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">RAG Config</a></li>
+    <li><a href="AIShield_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">AI Shield</a></li>
     <li><a href="yacychat.html" class="MenuItemLink">Chat</a></li>
   </ul>
 </div>

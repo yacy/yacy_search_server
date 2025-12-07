@@ -1143,6 +1143,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-crawlmonitor_authorized", authorized ? 1 : 0);
                 templatePatterns.put("navigation-advanced", advanced_enabled);
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
+                templatePatterns.put("navigation-showChatLink", sb.getConfigBool("ai.shield.show-chat-link", false) ? "1" : "0");
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));

@@ -542,8 +542,14 @@
     </style>
   </head>
   <body id="IndexControl">
-    #%env/templates/header.template%#
-    #%env/templates/submenuAI.template%#
+	#(topmenu)#
+      #%env/templates/embeddedheader.template%#
+    ::
+      #%env/templates/simpleheader.template%#
+	::
+      #%env/templates/header.template%#
+	  #%env/templates/submenuAI.template%#
+    #(/topmenu)#
 
     <h2>YaCy Chat</h2>
     <p>Chat with your configured LLM using the local YaCy settings. Requests are sent to the same host that served this page.</p>
@@ -1103,6 +1109,9 @@
             body: JSON.stringify(payload)
         });
         if (!response.ok) {
+            if (response.status === 429) {
+                throw new Error('Rate limit reached: please wait and try again. The server is protecting itself from overload.');
+            }
             throw new Error(`Request failed: ${response.status} ${response.statusText}`);
         }
         if (!response.body) {
