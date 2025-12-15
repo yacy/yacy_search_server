@@ -21,6 +21,7 @@
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
  */
+// Modified 15 dec 2025 By smokingwheels
 
 
 package net.yacy.cora.protocol.http;
@@ -29,6 +30,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -38,12 +41,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
@@ -62,6 +65,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.CookieSpecs;
@@ -77,6 +81,7 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -85,7 +90,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.auth.BasicSchemeFactory;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
@@ -118,7 +122,7 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
  */
 public class HTTPClient implements Closeable {
 
-    private static final int default_timeout = 6000;
+    private static final int default_timeout = 60000;
 
     /** Maximum number of simultaneously open outgoing HTTP connections in the pool */
     private static final int maxcon = 200;
@@ -164,13 +168,12 @@ public class HTTPClient implements Closeable {
         EXPIRED_CONNECTIONS_EVICTOR.start();
     }
 
+    private final static HttpClientBuilder clientBuilder = initClientBuilder();
     private final RequestConfig.Builder reqConfBuilder;
     private Set<Entry<String, String>> headers = null;
     private long upbytes = 0L;
     private String host = null;
     private final long timeout;
-    private final HttpClientBuilder clientBuilder;
-
     private static ExecutorService executor = Executors
             .newCachedThreadPool(new NamePrefixThreadFactory(HTTPClient.class.getSimpleName() + ".execute"));
 
@@ -183,19 +186,17 @@ public class HTTPClient implements Closeable {
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
         this.timeout = agent.clientTimeout();
-        this.clientBuilder = initClientBuilder();
-        this.clientBuilder.setUserAgent(agent.userAgent());
+        clientBuilder.setUserAgent(agent.userAgent());
         this.reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
-        this.setTimout(agent.clientTimeout());
+        setTimout(agent.clientTimeout());
     }
 
     public HTTPClient(final ClientIdentification.Agent agent, final int timeout) {
         super();
         this.timeout = timeout;
-        this.clientBuilder = initClientBuilder();
-        this.clientBuilder.setUserAgent(agent.userAgent());
+        clientBuilder.setUserAgent(agent.userAgent());
         this.reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
-        this.setTimout(timeout);
+        setTimout(timeout);
     }
 
     private static RequestConfig initRequestConfig(int timeout) {
@@ -219,9 +220,17 @@ public class HTTPClient implements Closeable {
 
         builder.setConnectionManager(CONNECTION_MANAGER);
         builder.setConnectionManagerShared(true);
+
         builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
+
+        // UserAgent
         builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent());
-        builder.setDefaultCookieStore(new BasicCookieStore());
+
+        // remove retries; we expect connections to fail; therefore we should not retry
+        //builder.disableAutomaticRetries();
+        // disable the cookiestore, cause this may cause segfaults and is not needed
+        builder.setDefaultCookieStore(null);
+        builder.disableCookieManagement();
 
         // add custom keep alive strategy
         builder.setKeepAliveStrategy(customKeepAliveStrategy());
@@ -243,22 +252,13 @@ public class HTTPClient implements Closeable {
                 .register("http", plainsf)
                 .register("https", getSSLSocketFactory())
                 .build();
-        PoolingHttpClientConnectionManager pooling = new PoolingHttpClientConnectionManager(registry);
-        /*
-        final PoolingHttpClientConnectionManager pooling = new PoolingHttpClientConnectionManager(registry, null, null, host0 -> {
-            final String qname = java.net.IDN.toASCII(host0);
-            final InetAddress ip = Domains.dnsResolve(qname);
-            if (ip == null) {
-                UnknownHostException uhe = new UnknownHostException(qname + " (DNS resolve returned null)");
-                // Optional: attach a hint for Unicode hosts
-                if (!qname.equals(host0)) {
-                    uhe.addSuppressed(new RuntimeException("IDN note: original host='" + host0 + "', ascii='" + qname + "'"));
-                }
-                throw uhe;
-            }
-            return new InetAddress[]{ip};
-        }, DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
-        */
+        final PoolingHttpClientConnectionManager pooling = new PoolingHttpClientConnectionManager(registry, null, null, new DnsResolver(){
+            @Override
+            public InetAddress[] resolve(final String host0)throws UnknownHostException {
+                final InetAddress ip = Domains.dnsResolve(host0);
+                if (ip == null) throw new UnknownHostException(host0);
+                return new InetAddress[]{ip};
+            }}, DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
         initPoolMaxConnections(pooling, maxcon);
 
         pooling.setValidateAfterInactivity(default_timeout); // on init set to default 5000ms
@@ -353,7 +353,7 @@ public class HTTPClient implements Closeable {
      * @param userAgent
      */
     public void setUserAgent(final ClientIdentification.Agent agent) {
-        this.clientBuilder.setUserAgent(agent.userAgent());
+        clientBuilder.setUserAgent(agent.userAgent());
     }
 
     /**
@@ -387,7 +387,7 @@ public class HTTPClient implements Closeable {
      * @throws IOException
      */
     public byte[] GETbytes(final String uri, final String username, final String pass, final boolean concurrent) throws IOException {
-        return this.GETbytes(uri, username, pass, Integer.MAX_VALUE, concurrent);
+        return GETbytes(uri, username, pass, Integer.MAX_VALUE, concurrent);
     }
 
     /**
@@ -402,7 +402,7 @@ public class HTTPClient implements Closeable {
      * @throws IOException
      */
     public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final boolean concurrent) throws IOException {
-        return this.GETbytes(url, username, pass, Integer.MAX_VALUE, concurrent);
+        return GETbytes(url, username, pass, Integer.MAX_VALUE, concurrent);
     }
 
     /**
@@ -418,7 +418,7 @@ public class HTTPClient implements Closeable {
      * @throws IOException
      */
     public byte[] GETbytes(final String uri, final String username, final String pass, final int maxBytes, final boolean concurrent) throws IOException {
-        return this.GETbytes(new MultiProtocolURL(uri), username, pass, maxBytes, concurrent);
+        return GETbytes(new MultiProtocolURL(uri), username, pass, maxBytes, concurrent);
     }
 
 
@@ -443,9 +443,9 @@ public class HTTPClient implements Closeable {
         } catch (final IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
-        if (!localhost) this.setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         if (!localhost || pass == null) {
-            return this.getContentBytes(maxBytes, concurrent);
+            return getContentBytes(maxBytes, concurrent);
         }
 
         final CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -453,12 +453,12 @@ public class HTTPClient implements Closeable {
                 new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(username, pass));
 
-        try (final CloseableHttpClient httpclient = this.clientBuilder.setDefaultCredentialsProvider(credsProvider)
+        try (final CloseableHttpClient httpclient = clientBuilder.setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
             this.httpResponse = httpclient.execute(this.currentRequest);
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
-                if (this.getStatusCode() == HttpStatus.SC_OK) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
                     if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
                         /* When anticipated content length is already known and exceed the specified limit :
                          * throw an exception and abort the connection, consistently with getByteArray() implementation
@@ -469,7 +469,7 @@ public class HTTPClient implements Closeable {
                 }
             }
         } finally {
-            this.close();
+            close();
         }
         return null;
     }
@@ -483,7 +483,7 @@ public class HTTPClient implements Closeable {
      * @throws IOException
      */
     public void GET(final String uri, final boolean concurrent) throws IOException {
-        this.GET(new MultiProtocolURL(uri), concurrent);
+        GET(new MultiProtocolURL(uri), concurrent);
     }
 
     /**
@@ -503,9 +503,9 @@ public class HTTPClient implements Closeable {
         } catch (final IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
-        this.setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
 
-        this.execute(concurrent);
+        execute(concurrent);
     }
 
     /**
@@ -516,7 +516,7 @@ public class HTTPClient implements Closeable {
      * @throws IOException
      */
     public HttpResponse HEADResponse(final String uri, final boolean concurrent) throws IOException {
-        return this.HEADResponse(new MultiProtocolURL(uri), concurrent);
+        return HEADResponse(new MultiProtocolURL(uri), concurrent);
     }
 
     /**
@@ -528,8 +528,8 @@ public class HTTPClient implements Closeable {
      */
     public HttpResponse HEADResponse(final MultiProtocolURL url, final boolean concurrent) throws IOException {
         this.currentRequest = new HttpHead(url.toNormalform(true));
-        this.setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        this.execute(concurrent);
+        setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        execute(concurrent);
         return this.httpResponse;
     }
 
@@ -564,12 +564,12 @@ public class HTTPClient implements Closeable {
         this.currentRequest = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
-        this.setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         final NonClosingInputStreamEntity inputStreamEntity = new NonClosingInputStreamEntity(instream, length);
         // statistics
         this.upbytes = length;
         ((HttpPost) this.currentRequest).setEntity(inputStreamEntity);
-        this.execute(concurrent);
+        execute(concurrent);
     }
 
     /**
@@ -598,7 +598,7 @@ public class HTTPClient implements Closeable {
      * @throws IOException
      */
     public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip, final boolean concurrent) throws IOException {
-        return this.POSTbytes(url, vhost, post, null, null, usegzip, concurrent);
+        return POSTbytes(url, vhost, post, null, null, usegzip, concurrent);
     }
 
     /**
@@ -617,8 +617,8 @@ public class HTTPClient implements Closeable {
             final String userName, final String password, final boolean usegzip, final boolean concurrent) throws IOException {
         this.currentRequest = new HttpPost(url.toNormalform(true));
         final boolean localhost = Domains.isLocalhost(url.getHost());
-        if (!localhost) this.setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        if (vhost == null) this.setHost(Domains.LOCALHOST);
+        if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        if (vhost == null) setHost(Domains.LOCALHOST);
 
         final MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
         for (final Entry<String,ContentBody> part : post.entrySet()) entityBuilder.addPart(part.getKey(), part.getValue());
@@ -633,7 +633,7 @@ public class HTTPClient implements Closeable {
         }
 
         if (!localhost || password == null) {
-            return this.getContentBytes(Integer.MAX_VALUE, concurrent);
+            return getContentBytes(Integer.MAX_VALUE, concurrent);
         }
 
         final CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -641,17 +641,17 @@ public class HTTPClient implements Closeable {
                 new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(userName, password));
 
-        try (final CloseableHttpClient httpclient = this.clientBuilder.setDefaultCredentialsProvider(credsProvider)
+        try (final CloseableHttpClient httpclient = clientBuilder.setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
             this.httpResponse = httpclient.execute(this.currentRequest);
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
-                if (this.getStatusCode() == HttpStatus.SC_OK) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
                     return getByteArray(httpEntity, Integer.MAX_VALUE);
                 }
             }
         } finally {
-            this.close();
+            close();
         }
         return null;
     }
@@ -779,7 +779,7 @@ public class HTTPClient implements Closeable {
             if (httpEntity != null) try {
                     return httpEntity.getContent();
             } catch (final IOException e) {
-                this.close();
+                close();
                 throw e;
             }
         }
@@ -800,7 +800,7 @@ public class HTTPClient implements Closeable {
                 httpEntity.writeTo(outputStream);
                 outputStream.flush();
             } finally {
-                this.close();
+                close();
             }
         }
     }
@@ -833,12 +833,12 @@ public class HTTPClient implements Closeable {
 
     private byte[] getContentBytes(final int maxBytes, final boolean concurrent) throws IOException {
         try {
-            this.execute(concurrent);
+            execute(concurrent);
             if (this.httpResponse == null) return null;
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
-                if (this.getStatusCode() == HttpStatus.SC_OK) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
                     if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
                         /* When anticipated content length is already known and exceed the specified limit :
                          * throw an exception and abort the connection, consistently with getByteArray() implementation
@@ -849,28 +849,55 @@ public class HTTPClient implements Closeable {
                 }
             }
         } finally {
-            this.close();
+            close();
         }
         return null;
     }
 
-    private void execute(final boolean concurrent) throws IOException {
-        final HttpClientContext context = HttpClientContext.create();
-        context.setRequestConfig(this.reqConfBuilder.build());
-        //if (this.host != null) context.setTargetHost(new HttpHost(this.host));
+   private void execute(final boolean concurrent) throws IOException {
+    final HttpClientContext context = HttpClientContext.create();
+    context.setRequestConfig(this.reqConfBuilder.build());
 
-        this.setHeaders();
-        // statistics
-        this.storeConnectionInfo();
-        // execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
-        if (this.currentRequest instanceof HttpEntityEnclosingRequest) {
-            final HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) this.currentRequest;
-            final HttpEntity entity = hrequest.getEntity();
-            assert entity != null;
-            //assert !entity.isChunked();
-            //assert entity.getContentLength() >= 0;
-            assert !hrequest.expectContinue();
-        }
+  // --------------------------------------------
+// I2P FORCE-PROXY PATCH smokingwheels
+// --------------------------------------------
+try {
+    final String h = this.currentRequest.getURI().getHost();
+    if (h != null && h.endsWith(".i2p")) {
+        this.reqConfBuilder.setSocketTimeout(60000);
+        this.reqConfBuilder.setConnectTimeout(60000);
+        this.reqConfBuilder.setConnectionRequestTimeout(60000);
+        context.setRequestConfig(this.reqConfBuilder.build());
+        net.yacy.cora.util.ConcurrentLog.info("HTTPClient", "I2P timeout boosted to 60s for " + h);
+    }
+} catch (Throwable t) {}
+
+
+try {
+    String host = null;
+    if (this.currentRequest != null && this.currentRequest.getURI() != null) {
+        host = this.currentRequest.getURI().getHost();
+    }
+
+    if (host != null && host.endsWith(".i2p")) {
+
+        // Build a new config based on existing one
+        RequestConfig baseConfig = this.reqConfBuilder.build();
+
+        RequestConfig i2pConfig = RequestConfig.copy(baseConfig)
+            .setProxy(new HttpHost("127.0.0.1", 4444))
+            .build();
+
+        // Attach the modified config to this request's context
+        context.setRequestConfig(i2pConfig);
+    }
+
+} catch (Throwable ee) {}
+// --------------------------------------------
+
+
+    if (this.host != null)
+        context.setTargetHost(new HttpHost(this.host));
 
         final String initialThreadName = Thread.currentThread().getName();
         final String uri = this.currentRequest.getURI().toString();
@@ -878,151 +905,42 @@ public class HTTPClient implements Closeable {
         final long time = System.currentTimeMillis();
         try {
 
-            this.client = this.clientBuilder.build();
+            this.client = clientBuilder.build();
             if (concurrent) {
-                final FutureTask<CloseableHttpResponse> t = new FutureTask<>(() -> {
-                    final CloseableHttpResponse response = HTTPClient.this.client.execute(HTTPClient.this.currentRequest, context);
-                    return response;
+                final FutureTask<CloseableHttpResponse> t = new FutureTask<CloseableHttpResponse>(new Callable<CloseableHttpResponse>() {
+                    @Override
+                    public CloseableHttpResponse call() throws ClientProtocolException, IOException {
+                        final CloseableHttpResponse response = HTTPClient.this.client.execute(HTTPClient.this.currentRequest, context);
+                        return response;
+                    }
                 });
                 executor.execute(t);
                 try {
                     this.httpResponse = t.get(this.timeout, TimeUnit.MILLISECONDS);
-                } catch (ExecutionException e) {
-                    Throwable c = e.getCause();
-                    if (c instanceof IOException) throw (IOException) c;
-                    throw new IOException(c == null ? e : c);
-                } catch (TimeoutException e) {
-                    t.cancel(true);
-                    throw new IOException("timeout after " + this.timeout + " ms for url " + uri, e);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("interrupted while executing " + uri, e);
+                } catch (final ExecutionException e) {
+                    throw e.getCause();
+                } catch (final Throwable e) {}
+                try {t.cancel(true);} catch (final Throwable e) {}
+                if (this.httpResponse == null) {
+                    throw new IOException("timout to client after " + this.timeout + "ms" + " for url " + uri);
                 }
             } else {
                 this.httpResponse = this.client.execute(this.currentRequest, context);
             }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (final Throwable e) {
-            final long runtime = System.currentTimeMillis() - time;
-
-            // Build rich diagnostics
-            final String diag = buildDiagnostics(
-                e,
-                this.currentRequest,
-                context,
-                this.host,
-                this.timeout,
-                concurrent,
-                runtime
-            );
-
-            // Ensure resources are closed before bubbling up
-            try { this.close(); } catch (IOException ignore) {}
-
-            // Preserve the original stack as cause
-            final IOException io = (e instanceof IOException) ? (IOException) e
-                    : new IOException(e.getMessage(), e);
-
-            throw new IOException(diag, io);
+            long runtime = System.currentTimeMillis() - time;
+            close();
+            throw new IOException("Client can't execute: "
+                    + (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
+                    + ", timeout=" + this.timeout
+                    + ", duration=" + Long.toString(runtime)
+                    + ", concurrent=" + Boolean.toString(concurrent)
+                    + ", url=" + uri);
         } finally {
             /* Restore the thread initial name */
             Thread.currentThread().setName(initialThreadName);
         }
-    }
-
-    private static String buildDiagnostics(
-            Throwable e,
-            HttpUriRequest req,
-            HttpClientContext ctx,
-            String vhost,
-            long timeoutMs,
-            boolean concurrent,
-            long durationMs) {
-
-        final StringBuilder sb = new StringBuilder(256);
-
-        // 1) Exception chain (class: message -> root cause)
-        sb.append("HTTPClient failure: ")
-          .append(exceptionChain(e));
-
-        // 2) Request line & basic info
-        String method = req != null ? req.getMethod() : "?";
-        String url    = req != null && req.getURI() != null ? req.getURI().toString() : "?";
-        sb.append(" | request=").append(method).append(" ").append(url);
-
-        // 3) Target & routing
-        HttpHost target = ctx != null ? ctx.getTargetHost() : null;
-        if (target != null) {
-            sb.append(" | target=").append(target.toURI());
-        }
-
-        // Route (proxy? TLS? direct?)
-        try {
-            org.apache.http.conn.routing.HttpRoute route =
-                (org.apache.http.conn.routing.HttpRoute) (ctx != null ? ctx.getAttribute(HttpClientContext.HTTP_ROUTE) : null);
-            if (route != null) {
-                sb.append(" | route=").append(route.toString());
-                if (route.getProxyHost() != null) sb.append(" viaProxy=").append(route.getProxyHost());
-            }
-        } catch (Throwable ignore) {}
-
-        // 4) Virtual host/SNI intent
-        if (vhost != null) sb.append(" | vhost=").append(vhost);
-        sb.append(" | sniEnabled=").append(ENABLE_SNI_EXTENSION.get());
-
-        // 5) DNS quick hint (best-effort)
-        try {
-            String host = req != null && req.getURI() != null ? req.getURI().getHost() : null;
-            if (host != null) {
-                java.net.InetAddress ip = net.yacy.cora.protocol.Domains.dnsResolve(host);
-                if (ip != null) sb.append(" | resolvedIp=").append(ip.getHostAddress());
-            }
-        } catch (Throwable ignore) {}
-
-        // 6) Timeouts & duration
-        sb.append(" | timeouts(ms){connect=")
-          .append(reqConfValue(ctx, "http.socket.timeout", "socket"))      // best-effort
-          .append(", lease=")
-          .append(reqConfValue(ctx, "http.connection-request.timeout", "lease"))
-          .append(", connect=")
-          .append(reqConfValue(ctx, "http.connection.timeout", "connect"))
-          .append("} | deadline=").append(timeoutMs)
-          .append(" | duration=").append(durationMs)
-          .append(" | concurrent=").append(concurrent);
-
-        return sb.toString();
-    }
-
-    /** Render exception class chain succinctly: IOException(ConnectException: Connection refused) … */
-    private static String exceptionChain(Throwable e) {
-        StringBuilder sb = new StringBuilder();
-        int depth = 0;
-        while (e != null && depth < 5) {
-            if (depth > 0) sb.append(" -> ");
-            sb.append(e.getClass().getSimpleName());
-            String msg = e.getMessage();
-            if (msg != null && !msg.isEmpty()) {
-                sb.append(": ").append(msg);
-            }
-            e = e.getCause();
-            depth++;
-        }
-        return sb.toString();
-    }
-
-    /** Best-effort extraction of timeouts from the context; falls back to "n/a". */
-    private static String reqConfValue(HttpClientContext ctx, String key, String label) {
-        try {
-            RequestConfig rc = ctx != null ? ctx.getRequestConfig() : null;
-            if (rc != null) {
-                switch (label) {
-                    case "socket":  return String.valueOf(rc.getSocketTimeout());
-                    case "lease":   return String.valueOf(rc.getConnectionRequestTimeout());
-                    case "connect": return String.valueOf(rc.getConnectTimeout());
-                }
-            }
-        } catch (Throwable ignore) {}
-        return "n/a";
     }
 
     /**
@@ -1088,7 +1006,7 @@ public class HTTPClient implements Closeable {
                 this.currentRequest.setHeader(entry.getKey(),entry.getValue());
             }
         }
-
+        if (this.host != null) this.currentRequest.setHeader(HTTP.TARGET_HOST, this.host);
         this.currentRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 
@@ -1108,16 +1026,18 @@ public class HTTPClient implements Closeable {
     private static SSLConnectionSocketFactory getSSLSocketFactory() {
         final TrustManager trustManager = new X509TrustManager() {
             @Override
-            public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+            public void checkClientTrusted(final X509Certificate[] chain, final String authType)
+                            throws CertificateException {
             }
 
             @Override
-            public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+            public void checkServerTrusted(final X509Certificate[] chain, final String authType)
+                            throws CertificateException {
             }
 
             @Override
             public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
+                    return null;
             }
         };
         SSLContext sslContext = null;
@@ -1132,11 +1052,13 @@ public class HTTPClient implements Closeable {
             // e.printStackTrace();
         }
 
-        return new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE) {
+        return new SSLConnectionSocketFactory(
+                sslContext,
+                new NoopHostnameVerifier()) {
 
             @Override
             protected void prepareSocket(final SSLSocket socket) throws IOException {
-                if (!ENABLE_SNI_EXTENSION.get()) {
+                if(!ENABLE_SNI_EXTENSION.get()) {
                     /* Set the SSLParameters server names to empty so we don't use SNI extension.
                      * See https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#ClientSNIExamples */
                     final SSLParameters sslParams = socket.getSSLParameters();
@@ -1145,7 +1067,6 @@ public class HTTPClient implements Closeable {
                 }
             }
         };
-
     }
 
     /**

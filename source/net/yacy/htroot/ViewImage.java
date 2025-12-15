@@ -20,15 +20,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Modified 15 dec 2025 By smokingwheels
+
 
 package net.yacy.htroot;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
+import java.net.UnknownHostException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -42,92 +53,143 @@ import net.yacy.visualization.ImageViewer;
 
 public class ViewImage {
 
-	/** Single instance of ImageViewer */
-	private static final ImageViewer VIEWER = new ImageViewer();
+    /** Single instance of ImageViewer */
+    private static final ImageViewer VIEWER = new ImageViewer();
+    private static final ConcurrentLog log = new ConcurrentLog("ViewImage");
 
-	/**
-	 * Try parsing image from post "url" parameter (authenticated users) or from "code" parameter (non authenticated users).
-	 * When image format is not supported, return directly image data. When
-	 * image could be parsed, try encoding to target format specified by header
-	 * "EXT".
-	 *
-	 * @param header
-	 *            request header
-	 * @param post
-	 *            post parameters
-	 * @param env
-	 *            environment
-	 * @return an {@link EncodedImage} instance encoded in format specified in
-	 *         post, or an InputStream pointing to original image data.
-	 *         Return and EncodedImage with empty data when image format is not supported,
-	 *         a read/write or any other error occured while loading resource.
-	 * @throws IOException
-	 *             when specified url is malformed.
-	 *             Sould end in a HTTP 500 error whose processing is more
-	 *             consistent across browsers than a response with zero content
-	 *             bytes.
-	 * @throws TemplateMissingParameterException when one required parameter is missing
-	 */
-	public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env)
-			throws IOException {
+    /**
+     * Main respond method with fallback (no 500 errors)
+     */
+    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env)
+            throws IOException {
 
-		final Switchboard sb = (Switchboard) env;
+        final Switchboard sb = (Switchboard) env;
 
-		if(post == null) {
-			throw new TemplateMissingParameterException("please fill at least url or code parameter");
-		}
+        if (post == null) {
+            throw new TemplateMissingParameterException("please fill at least url or code parameter");
+        }
 
-		final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, null);
-		final boolean auth = ImageViewer.hasFullViewingRights(header, sb); // handle access rights
+        final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, null);
+        final boolean auth = ImageViewer.hasFullViewingRights(header, sb);
+        final DigestURL url = VIEWER.parseURL(post, auth);
 
-		final DigestURL url = VIEWER.parseURL(post, auth);
+        InputStream inStream = null;
+        ImageInputStream imageInStream = null;
 
-		// get the image as stream
-		EncodedImage encodedImage;
+        try {
 
-		ImageInputStream imageInStream = null;
-		InputStream inStream = null;
-		try {
-			final String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
-			if (ext != null && ext.equalsIgnoreCase(urlExt) && ImageViewer.isBrowserRendered(urlExt)) {
-				return VIEWER.openInputStream(post, sb.loader, auth, url);
-			}
-			/*
-			 * When opening a file, the most efficient is to open
-			 * ImageInputStream directly on file
-			 */
-			if (url.isFile()) {
-				imageInStream = ImageIO.createImageInputStream(url.getFSFile());
-			} else {
-				inStream = VIEWER.openInputStream(post, sb.loader, auth, url);
-				imageInStream = ImageIO.createImageInputStream(inStream);
-			}
-			// read image
-			encodedImage = VIEWER.parseAndScale(post, auth, url, ext, imageInStream);
-		} catch (final Exception e) {
-			/*
-			 * Exceptions are not propagated here : many error causes are
-			 * possible, network errors, incorrect or unsupported format, bad
-			 * ImageIO plugin... Instead return an empty EncodedImage. Caller is
-			 * responsible for handling this correctly (500 status code
-			 * response)
-			 */
-			encodedImage = new EncodedImage(new byte[0], ext, post.getBoolean("isStatic"));
-		} finally {
-			/*
-			 * imageInStream.close() method doesn't close source input stream
-			 */
-			if (inStream != null) {
-				try {
-					inStream.close();
-				} catch (final IOException ignored) {
-				}
-			}
-		}
+            // If browser can display natively, bypass YaCy processing
+            final String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
+            if (ext != null && ext.equalsIgnoreCase(urlExt) && ImageViewer.isBrowserRendered(urlExt)) {
+                return VIEWER.openInputStream(post, sb.loader, auth, url);
+            }
 
-		return encodedImage;
-	}
+            // Load raw image
+            if (url.isFile()) {
 
+                // local file path → use normal decoding
+                imageInStream = ImageIO.createImageInputStream(url.getFSFile());
 
+                EncodedImage encoded = VIEWER.parseAndScale(post, auth, url, ext, imageInStream);
+                final int blen = (encoded == null || encoded.getImage() == null) ? -1 : encoded.getImage().length();
+                log.info("local parseAndScale ext=" + (encoded == null ? "null" : encoded.getExtension())
+                        + " bytes=" + blen + " url=" + url.toNormalform(true));
 
+                if (encoded == null || encoded.getImage() == null || encoded.getImage().length() == 0) {
+                    return createPlaceholder(ext);
+                }
+
+                return encoded;
+
+            } else {
+
+                // remote (HTTP/I2P)
+                try {
+                    inStream = VIEWER.openInputStream(post, sb.loader, auth, url);
+                    log.info("opened stream for " + url.toNormalform(true));
+
+                    if (inStream == null) {
+                        return createPlaceholder(ext);
+                    }
+
+                    // RAW PASS-THROUGH MODE for I2P
+                    byte[] raw = inStream.readAllBytes();
+
+                    if (raw == null || raw.length == 0) {
+                        return createPlaceholder(ext);
+                    }
+
+                    String extension = ext != null ? ext : MultiProtocolURL.getFileExtension(url.getFileName());
+                    return new EncodedImage(raw, extension, true);
+
+                } catch (UnknownHostException e) {
+                    log.warn("UnknownHost (addressbook?) for " + url.toNormalform(true) + " : " + e.getMessage());
+                    return createPlaceholder(ext);
+
+                } catch (ConnectException e) {
+                    log.warn("ConnectException (proxy/router?) for " + url.toNormalform(true) + " : " + e.getMessage());
+                    return createPlaceholder(ext);
+
+                } catch (SocketTimeoutException e) {
+                    log.warn("Timeout for " + url.toNormalform(true) + " : " + e.getMessage());
+                    return createPlaceholder(ext);
+
+                } catch (IOException e) {
+                    // unwrap nested causes (often wrapped by loaders)
+                    Throwable c = e.getCause();
+                    while (c != null) {
+                        if (c instanceof UnknownHostException) {
+                            log.warn("Wrapped UnknownHost (addressbook?) for " + url.toNormalform(true) + " : " + c.getMessage());
+                            return createPlaceholder(ext);
+                        }
+                        if (c instanceof ConnectException) {
+                            log.warn("Wrapped ConnectException (proxy/router?) for " + url.toNormalform(true) + " : " + c.getMessage());
+                            return createPlaceholder(ext);
+                        }
+                        if (c instanceof SocketTimeoutException) {
+                            log.warn("Wrapped Timeout for " + url.toNormalform(true) + " : " + c.getMessage());
+                            return createPlaceholder(ext);
+                        }
+                        c = c.getCause();
+                    }
+
+                    log.warn("IOException fetching image " + url.toNormalform(true) + " : " + e.getMessage());
+                    return createPlaceholder(ext);
+                }
+            }
+
+        } catch (Exception e) {
+            log.warn("ViewImage error for " + (url == null ? "null" : url.toNormalform(true)) + " : " + e.getMessage());
+            return createPlaceholder(ext);
+
+        } finally {
+            if (inStream != null) try { inStream.close(); } catch (IOException ignored) {}
+            if (imageInStream != null) try { imageInStream.close(); } catch (IOException ignored) {}
+        }
+    }
+
+    /**
+     * Placeholder fallback image (prevents 500 errors)
+     */
+    private static EncodedImage createPlaceholder(String ext) {
+
+        try {
+            BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = img.createGraphics();
+            g.setColor(Color.LIGHT_GRAY);
+            g.fillRect(0, 0, 64, 64);
+            g.setColor(Color.RED);
+            g.drawString("ERR", 20, 35);
+            g.dispose();
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            String fmt = (ext != null && ext.length() > 0) ? ext : "png";
+            ImageIO.write(img, fmt, out);
+
+            return new EncodedImage(out.toByteArray(), fmt, false);
+
+        } catch (Exception e) {
+            return new EncodedImage(new byte[]{1}, (ext != null ? ext : "png"), false);
+        }
+    }
 }
