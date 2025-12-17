@@ -1,4 +1,3 @@
-
 // ViewImage.java
 // -----------------------
 // part of YaCy
@@ -20,8 +19,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-// Modified 15 dec 2025 By smokingwheels
-
+// 15 dec 2025 by smokingwheels
+// 16 dec 2025 by smokingwheels
+// 17 dec 2025 by smokingwheels
 
 package net.yacy.htroot;
 
@@ -31,13 +31,16 @@ import java.io.ByteArrayOutputStream;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-
+import java.net.Proxy;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.net.HttpURLConnection;
 import java.net.UnknownHostException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.document.id.DigestURL;
@@ -53,15 +56,93 @@ import net.yacy.visualization.ImageViewer;
 
 public class ViewImage {
 
-    /** Single instance of ImageViewer */
-    private static final ImageViewer VIEWER = new ImageViewer();
     private static final ConcurrentLog log = new ConcurrentLog("ViewImage");
+    private static final ImageViewer VIEWER = new ImageViewer();
 
-    /**
-     * Main respond method with fallback (no 500 errors)
-     */
-    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env)
-            throws IOException {
+    private static final int MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+    /* ================= I2P stream ================= */
+
+    private static InputStream openI2PStream(final DigestURL url) throws IOException {
+
+        Proxy proxy = new Proxy(
+                Proxy.Type.HTTP,
+                new InetSocketAddress("127.0.0.1", 4444)
+        );
+
+        URL jurl = new URL(url.toNormalform(true));
+        HttpURLConnection conn = (HttpURLConnection) jurl.openConnection(proxy);
+
+        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(15000);
+        conn.setInstanceFollowRedirects(false);
+
+        int code = conn.getResponseCode();
+        if (code != HttpURLConnection.HTTP_OK) {
+            throw new IOException("I2P proxy HTTP " + code);
+        }
+
+        return conn.getInputStream();
+    }
+
+    /* ================= Retry decode ================= */
+
+    private static BufferedImage decodeWithRetries(
+            final DigestURL url,
+            final serverObjects post,
+            final Switchboard sb,
+            final boolean auth,
+            final int attempts,
+            final int delayMs) {
+
+        for (int i = 1; i <= attempts; i++) {
+
+            try (InputStream is =
+                    isI2P(url)
+                            ? openI2PStream(url)
+                            : VIEWER.openInputStream(post, sb.loader, auth, url)) {
+
+                if (is == null) return null;
+
+                BufferedImage img = ImageIO.read(is);
+                if (img != null) {
+                    if (i > 1) {
+                        log.info("Image decoded after retry " + i + " : " + url.toNormalform(true));
+                    }
+                    return img;
+                }
+
+                log.info("Decode attempt " + i + " failed for " + url.toNormalform(true));
+
+            } catch (SocketTimeoutException e) {
+                log.warn("Timeout attempt " + i + " : " + url.toNormalform(true));
+
+            } catch (UnknownHostException | ConnectException e) {
+                log.warn("Hard network failure: " + url.toNormalform(true) + " : " + e.getMessage());
+                return null;
+
+            } catch (Exception e) {
+                log.warn("Decode error: " + url.toNormalform(true) + " : " + e.getMessage());
+                return null;
+            }
+
+            try {
+                Thread.sleep(delayMs);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /* ================= Main ================= */
+
+    public static Object respond(
+            final RequestHeader header,
+            final serverObjects post,
+            final serverSwitch env) throws IOException {
 
         final Switchboard sb = (Switchboard) env;
 
@@ -78,88 +159,44 @@ public class ViewImage {
 
         try {
 
-            // If browser can display natively, bypass YaCy processing
-            final String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
-            if (ext != null && ext.equalsIgnoreCase(urlExt) && ImageViewer.isBrowserRendered(urlExt)) {
+            String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
+            if (ext != null && ext.equalsIgnoreCase(urlExt)
+                    && ImageViewer.isBrowserRendered(urlExt)) {
                 return VIEWER.openInputStream(post, sb.loader, auth, url);
             }
 
-            // Load raw image
             if (url.isFile()) {
-
-                // local file path → use normal decoding
                 imageInStream = ImageIO.createImageInputStream(url.getFSFile());
-
-                EncodedImage encoded = VIEWER.parseAndScale(post, auth, url, ext, imageInStream);
-                final int blen = (encoded == null || encoded.getImage() == null) ? -1 : encoded.getImage().length();
-                log.info("local parseAndScale ext=" + (encoded == null ? "null" : encoded.getExtension())
-                        + " bytes=" + blen + " url=" + url.toNormalform(true));
-
-                if (encoded == null || encoded.getImage() == null || encoded.getImage().length() == 0) {
-                    return createPlaceholder(ext);
-                }
-
-                return encoded;
-
-            } else {
-
-                // remote (HTTP/I2P)
-                try {
-                    inStream = VIEWER.openInputStream(post, sb.loader, auth, url);
-                    log.info("opened stream for " + url.toNormalform(true));
-
-                    if (inStream == null) {
-                        return createPlaceholder(ext);
-                    }
-
-                    // RAW PASS-THROUGH MODE for I2P
-                    byte[] raw = inStream.readAllBytes();
-
-                    if (raw == null || raw.length == 0) {
-                        return createPlaceholder(ext);
-                    }
-
-                    String extension = ext != null ? ext : MultiProtocolURL.getFileExtension(url.getFileName());
-                    return new EncodedImage(raw, extension, true);
-
-                } catch (UnknownHostException e) {
-                    log.warn("UnknownHost (addressbook?) for " + url.toNormalform(true) + " : " + e.getMessage());
-                    return createPlaceholder(ext);
-
-                } catch (ConnectException e) {
-                    log.warn("ConnectException (proxy/router?) for " + url.toNormalform(true) + " : " + e.getMessage());
-                    return createPlaceholder(ext);
-
-                } catch (SocketTimeoutException e) {
-                    log.warn("Timeout for " + url.toNormalform(true) + " : " + e.getMessage());
-                    return createPlaceholder(ext);
-
-                } catch (IOException e) {
-                    // unwrap nested causes (often wrapped by loaders)
-                    Throwable c = e.getCause();
-                    while (c != null) {
-                        if (c instanceof UnknownHostException) {
-                            log.warn("Wrapped UnknownHost (addressbook?) for " + url.toNormalform(true) + " : " + c.getMessage());
-                            return createPlaceholder(ext);
-                        }
-                        if (c instanceof ConnectException) {
-                            log.warn("Wrapped ConnectException (proxy/router?) for " + url.toNormalform(true) + " : " + c.getMessage());
-                            return createPlaceholder(ext);
-                        }
-                        if (c instanceof SocketTimeoutException) {
-                            log.warn("Wrapped Timeout for " + url.toNormalform(true) + " : " + c.getMessage());
-                            return createPlaceholder(ext);
-                        }
-                        c = c.getCause();
-                    }
-
-                    log.warn("IOException fetching image " + url.toNormalform(true) + " : " + e.getMessage());
-                    return createPlaceholder(ext);
-                }
+                EncodedImage enc = VIEWER.parseAndScale(post, auth, url, ext, imageInStream);
+                return enc != null ? enc : createPlaceholder(ext);
             }
 
+            if (isI2P(url)) {
+
+                BufferedImage img = decodeWithRetries(url, post, sb, auth, 5, 250);
+                if (img == null) {
+                    return createPlaceholder(ext);
+                }
+
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                String format = ext != null ? ext : "png";
+                ImageIO.write(img, format, out);
+                return new EncodedImage(out.toByteArray(), format, true);
+            }
+
+            inStream = VIEWER.openInputStream(post, sb.loader, auth, url);
+            if (inStream == null) return createPlaceholder(ext);
+
+            byte[] raw = readUpTo(inStream, MAX_IMAGE_BYTES);
+            if (raw.length == 0 || raw.length >= MAX_IMAGE_BYTES) {
+                return createPlaceholder(ext);
+            }
+
+            String format = ext != null ? ext : "png";
+            return new EncodedImage(raw, format, true);
+
         } catch (Exception e) {
-            log.warn("ViewImage error for " + (url == null ? "null" : url.toNormalform(true)) + " : " + e.getMessage());
+            log.warn("ViewImage error: " + e.getMessage());
             return createPlaceholder(ext);
 
         } finally {
@@ -168,11 +205,29 @@ public class ViewImage {
         }
     }
 
-    /**
-     * Placeholder fallback image (prevents 500 errors)
-     */
-    private static EncodedImage createPlaceholder(String ext) {
+    /* ================= Helpers ================= */
 
+    private static boolean isI2P(final DigestURL url) {
+        String host = url.getHost();
+        return host != null && (host.endsWith(".i2p") || host.endsWith(".b32.i2p"));
+    }
+
+    private static byte[] readUpTo(InputStream in, int max) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int total = 0;
+        int r;
+
+        while ((r = in.read(buf)) != -1) {
+            total += r;
+            if (total > max) break;
+            out.write(buf, 0, r);
+        }
+
+        return out.toByteArray();
+    }
+
+    private static EncodedImage createPlaceholder(String ext) {
         try {
             BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = img.createGraphics();
@@ -183,13 +238,12 @@ public class ViewImage {
             g.dispose();
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            String fmt = (ext != null && ext.length() > 0) ? ext : "png";
+            String fmt = ext != null ? ext : "png";
             ImageIO.write(img, fmt, out);
-
             return new EncodedImage(out.toByteArray(), fmt, false);
 
         } catch (Exception e) {
-            return new EncodedImage(new byte[]{1}, (ext != null ? ext : "png"), false);
+            return new EncodedImage(new byte[]{1}, ext != null ? ext : "png", false);
         }
     }
 }
