@@ -76,6 +76,50 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       <input type="hidden" name="sort" value="#[sort]#" />
       <input type="text" name="query" value="#[query]#" onchange="resetStartRecord()" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;"/>
 
+<!-- Action buttons moved above table -->
+<div class="row" style="margin-bottom:10px;">
+  <div class="form-group col-sm-12">
+    <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>
+    &nbsp;&nbsp;
+    <input type="submit" name="deleterows" value="Delete Selected Actions"
+           class="btn btn-danger"
+           onclick="return confirm('Confirm Deletion')"/>
+  </div>
+
+  <div class="form-group col-sm-6">
+    <input type="submit" name="deleteold"
+           value="Delete all Actions created before"
+           class="btn btn-warning"
+           onclick="return confirm('Confirm Deletion')"/>
+    <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto; display:inline-block;">
+      <option value="1">1 day</option>
+      <option value="2">2 days</option>
+      <option value="3">3 days</option>
+      <option value="4">4 days</option>
+      <option value="5">5 days</option>
+      <option value="6">6 days</option>
+      <option value="7">1 week</option>
+      <option value="14">2 weeks</option>
+      <option value="21">3 weeks</option>
+      <option value="30">1 month</option>
+      <option value="60" selected="selected">2 months</option>
+      <option value="90">3 months</option>
+      <option value="180">6 months</option>
+      <option value="270">9 months</option>
+      <option value="365">1 year</option>
+      <option value="730">2 years</option>
+    </select>
+  </div>
+
+  #(hasEditableNextExecDate)#::
+  <div class="form-group col-sm-6">
+    <input type="submit" name="submitNextExecDates"
+           class="btn btn-default"
+           value="Apply edited next execution dates"/>
+  </div>
+  #(/hasEditableNextExecDate)#
+</div>
+
       </span>
       <br/>
       <div style="clear:both;">
@@ -235,21 +279,7 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       <input type="hidden" name="scheduleeventaction" id="scheduleeventaction" value="false" />
       <input type="hidden" name="current_pk" id="current_pk" value="" />
       <input type="hidden" name="num" value="#[num]#" />
-      <div class="form-group col-sm-12">
-        <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
-        <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
-      </div>
-      <div class="form-group col-sm-6">
-        <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
-        <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
-          <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
-          <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
-          <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
-          <option value="30">1 month</option><option value="60" selected="selected">2 months</option><option value="90">3 months</option>
-          <option value="180">6 months</option><option value="270">9 months</option>
-          <option value="365">1 year</option><option value="730">2 years</option>
-        </select>
-      </div>
+
       #(hasEditableNextExecDate)#::
       <div class="form-group col-sm-6">
  		<input type="submit" name="submitNextExecDates" class="btn btn-default" value="Apply edited next execution dates"/>
