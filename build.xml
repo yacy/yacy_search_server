@@ -49,6 +49,10 @@
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="release_mac" location="${release}/MAC"/>
+  <property name="root_abs" location="."/>
+  <property name="release_abs" location="${release}"/>
+  <property name="release_main_abs" location="${release_main}"/>
+  <property name="release_windows_abs" location="${release_windows}"/>
   <property name="defaults" location="defaults"/>
   <property name="RDFaParser" location="RDFaParser"/>
 
@@ -136,6 +140,10 @@
     <property name="stdReleaseStub" value="yacy_v${releaseVersion}_${repository.revision.date}${repository.revision.time}_${repository.revision.hash}"/>
     <property name="stdReleaseFile" value="${stdReleaseStub}.tar.gz"/>
     <filter token="REPL_RELEASESTUB" value="${stdReleaseStub}"/>
+    <filter token="REPL_ROOT_ABS" value="${root_abs}"/>
+    <filter token="REPL_RELEASE_ABS" value="${release_abs}"/>
+    <filter token="REPL_RELEASE_MAIN_ABS" value="${release_main_abs}"/>
+    <filter token="REPL_RELEASE_WINDOWS_ABS" value="${release_windows_abs}"/>
 
     <!-- apply replacments -->
     <copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
@@ -375,7 +383,7 @@
       </tarfileset>
     </tar>
 
-    <delete dir="${release_main}"/>
+    <delete dir="${release_main}" failonerror="false"/>
     <delete dir="${release_windows}" failonerror="false" />
     <delete dir="${release}/SPECS" failonerror="false" />
   </target>
@@ -528,13 +536,12 @@
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
     <exec executable="makensis">
       <arg value="-V2" />
-      <arg value="-NOCD" />
       <arg value="${release_windows}/build.nsi" />
     </exec>
     <move file="${release_windows}/${stdReleaseStub}.exe"
           tofile="${release}/${stdReleaseStub}.exe" />
 
-    <delete dir="${release_main}"/>
+    <delete dir="${release_main}" failonerror="false"/>
     <delete dir="${release_windows}" failonerror="false" />
   </target>
 

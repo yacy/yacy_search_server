@@ -721,6 +721,18 @@ public final class yacy {
             // case for the application path if started normally with a jre command
             File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
             File dataRoot = applicationRoot;
+            final String dataRootOverrideProp = System.getProperty("yacy.data");
+            final String dataRootOverrideEnv = System.getenv("YACY_DATA");
+            final String dataRootOverride = (dataRootOverrideProp != null && !dataRootOverrideProp.isEmpty())
+                    ? dataRootOverrideProp
+                    : dataRootOverrideEnv;
+            if (dataRootOverride != null && !dataRootOverride.isEmpty()) {
+                dataRoot = new File(dataRootOverride);
+                if(!dataRoot.isAbsolute()) {
+                    /* data root folder provided as a path relative to the user home folder */
+                    dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), dataRootOverride);
+                }
+            }
             //System.out.println("args.length=" + args.length);
             //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
             if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
@@ -747,12 +759,22 @@ public final class yacy {
                 startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
             } else if ((args.length >= 1) && ((args[0].toLowerCase(Locale.ROOT).equals("-shutdown")) || (args[0].equals("-stop")))) {
                 // normal shutdown of yacy
-                if (args.length == 2) applicationRoot= new File(args[1]);
-                shutdown(applicationRoot);
+                if (args.length == 2) {
+                    dataRoot = new File(args[1]);
+                    if(!dataRoot.isAbsolute()) {
+                        dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+                    }
+                }
+                shutdown(dataRoot);
             } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-update"))) {
                 // aut-update yacy
-                if (args.length == 2) applicationRoot= new File(args[1]);
-                update(applicationRoot);
+                if (args.length == 2) {
+                    dataRoot = new File(args[1]);
+                    if(!dataRoot.isAbsolute()) {
+                        dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+                    }
+                }
+                update(dataRoot);
             } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-version"))) {
                 // show yacy version
                 System.out.println(copyright);

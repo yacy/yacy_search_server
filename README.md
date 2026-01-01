@@ -87,6 +87,25 @@ Stop YaCy on the console with
 ./stopYACY.sh
 ```
 
+### Build the Windows installer
+
+Windows installers are built with NSIS and require the release payload produced by Ant.
+Install NSIS (`makensis`) and then run:
+
+```
+ant distWinInstaller
+```
+
+This runs the full build, stages files into `RELEASE/MAIN`, and produces the installer
+in `RELEASE/` as `yacy_v<version>_*.exe`.
+
+If you want it in two steps, you can run:
+
+```
+ant copyMain4Dist
+makensis RELEASE/WINDOWS/build.nsi
+```
+
 ### Run YaCy using Docker
 
 The Official YaCy Image is `yacy/yacy_search_server:latest`. It is hosted on Dockerhub at [https://hub.docker.com/r/yacy/yacy_search_server](https://hub.docker.com/r/yacy/yacy_search_server)
