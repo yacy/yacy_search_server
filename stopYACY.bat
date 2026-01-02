@@ -6,5 +6,5 @@ Set CLASSPATH=lib\yacycore.jar
 
 Rem Stopping yacy
 Echo Generated Classpath:%CLASSPATH%
-java -classpath %CLASSPATH% net.yacy.yacy -shutdown
-
+if "%YACY_DATA%"=="" set "YACY_DATA=%LOCALAPPDATA%\YaCy"
+java -Dyacy.data="%YACY_DATA%" -classpath %CLASSPATH% net.yacy.yacy -shutdown "%YACY_DATA%"
