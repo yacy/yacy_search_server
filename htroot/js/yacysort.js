@@ -327,9 +327,14 @@ var updateSidebar = function() {
  */
 var processLatestInfo = function(latestInfo) {
 	if (latestInfo.feedRunning) {
-		$.get("yacysearchlatestinfo.json", {
-			eventID : theEventID
-		}, processItem);
+		$.get(
+			"yacysearchitem.html",
+			{
+				eventID : theEventID,
+				item: itemCount
+			},
+			processItem
+		);
 	} else {
 		fetchingResults = false;
 	}

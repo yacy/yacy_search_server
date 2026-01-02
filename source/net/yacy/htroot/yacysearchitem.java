@@ -168,7 +168,21 @@ public class yacysearchitem {
 
             // generate result object
             final URIMetadataNode result = theSearch.oneResult(item, timeout);
-            if (result == null) return prop; // no content
+            if (result == null) {
+                ConcurrentLog.info(
+                    "yacysearchitem",
+                    "NO RESULT: eventID="
+                        + eventID
+                        + " item="
+                        + item
+                        + " timeout="
+                        + timeout
+                        + " resultCount="
+                        + theSearch.getResultCount()
+                        + " feedRunning="
+                        + (!theSearch.isFeedingFinished()));
+                return prop; // no content
+            }
             final String resultUrlstring = result.urlstring();
             final DigestURL resultURL = result.url();
             final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");

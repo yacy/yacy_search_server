@@ -1013,7 +1013,7 @@ search.verify.delete = true
 # If enabled, the results are sorted in the browser using Javascript.
 # This usually improves ranking accuracy, but doesn't work well for users
 # who have Javascript disabled, are using screen readers, or are on slow computers.
-search.jsresort = false
+search.jsresort = true
 
 # remote search details
 remotesearch.maxcount = 10

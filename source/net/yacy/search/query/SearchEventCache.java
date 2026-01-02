@@ -144,6 +144,13 @@ public class SearchEventCache {
         if (MemoryControl.shortStatus()) cleanupEvents(true);
         final String id = query.id(false);
         SearchEvent event = getEvent(id);
+        if (event != null && query.isLocal()) {
+            synchronized (lastEvents) {
+                lastEvents.remove(id);
+            }
+            cacheDelete++;
+            event = null;
+        }
         if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
@@ -155,24 +162,19 @@ public class SearchEventCache {
             event = null;
         } else {
             if (event != null) {
-            	if(query.isLocal()) {
-            		/* Searching the local index only : we do not reuse the cached event each time the page size or offset changes.
-            		 * This allow to request last result pages of large result sets (larger than SearchEvent.max_results_node) 
-            		 * without the need to retrieve all the beginning pages */
-            		if(event.query.offset != query.offset || event.query.itemsPerPage != query.itemsPerPage) {
-                        synchronized (lastEvents) {
-                            lastEvents.remove(id);
-                        }
-                        cacheDelete++;
-                        event = null;
-            		}
-            	} else {
-            		//re-new the event time for this event, so it is not deleted next time too early
-            		event.resetEventTime();
-            		// replace the current result offset
-            		event.query.offset = query.offset;
-            		event.query.itemsPerPage = query.itemsPerPage;
-            	}
+                if (!query.isLocal() && event.getResultCount() == 0 && event.isFeedingFinished()) {
+                    synchronized (lastEvents) {
+                        lastEvents.remove(id);
+                    }
+                    cacheDelete++;
+                    event = null;
+                } else if (event != null) {
+                    // re-new the event time for this event, so it is not deleted next time too early
+                    event.resetEventTime();
+                    // replace the current result offset
+                    event.query.offset = query.offset;
+                    event.query.itemsPerPage = query.itemsPerPage;
+                }
             }
         }
         if (event == null) {

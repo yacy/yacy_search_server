@@ -836,6 +836,18 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset
                 startRecord = 0;
             }
+            ConcurrentLog.info(
+                "LOCAL_SEARCH",
+                "SEARCH EVENT: id="
+                    + theQuery.id(false)
+                    + " cached="
+                    + (cachedEvent != null)
+                    + " query="
+                    + theQuery.getQueryGoal().getQueryString(false)
+                    + " startRecord="
+                    + startRecord
+                    + " itemsPerPage="
+                    + theQuery.itemsPerPage());
             final SearchEvent theSearch =
                 SearchEventCache.getEvent(
                     theQuery,
@@ -970,6 +982,25 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
+
+            if (theSearch.getResultCount() == 0 && querystring.length() > 0) {
+                ConcurrentLog.info(
+                    "LOCAL_SEARCH",
+                    "ZERO RESULTS: id="
+                        + theQuery.id(false)
+                        + " query="
+                        + theQuery.getQueryGoal().getQueryString(false)
+                        + " localAvailable="
+                        + (theSearch.local_rwi_available.get() + theSearch.local_solr_stored.get())
+                        + " localStored="
+                        + (theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get())
+                        + " remoteAvailable="
+                        + (theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get())
+                        + " remoteStored="
+                        + (theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get())
+                        + " feedRunning="
+                        + (!theSearch.isFeedingFinished()));
+            }
 
             prop.put("jsResort", jsResort);
             prop.put("num-results_jsResort", jsResort);
