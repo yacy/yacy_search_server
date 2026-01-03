@@ -167,6 +167,77 @@
         color: #2c3e50;
       }
 
+      .search-default-control {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 1px 0 2px 0;
+      }
+
+      .search-default-options {
+        --segments: 2;
+        --active: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0px;
+        padding: 0px;
+        border: 1px solid #c3cbd9;
+        border-radius: 999px;
+        background: #eef2f7;
+        overflow: hidden;
+        width: 380px;
+        max-width: 100%;
+        height: 22px;
+      }
+
+      .search-default-options input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .search-default-options label {
+        flex: 1;
+        padding: 0;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 500;
+        line-height: 1.1;
+        color: #2c3e50;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        box-sizing: border-box;
+        transform: translateY(2px);
+      }
+
+      .search-default-options input:checked + label {
+        color: #ffffff;
+      }
+
+      .search-default-options .search-default-slider {
+        position: absolute;
+        top: 1px;
+        bottom: 1px;
+        left: 1px;
+        width: calc((100% - 2px) / var(--segments, 2));
+        background: #5092CF;
+        border-radius: 999px;
+        transform: translateX(calc(var(--active, 0) * 100%));
+        transition: transform 0.2s;
+        z-index: 0;
+      }
+
+      .search-default-options .is-future {
+        display: none;
+      }
+
       .composer-main {
         flex: 1;
         display: flex;
@@ -556,6 +627,18 @@
 
       <div class="chat-panel">
         <div class="chat-flow">
+          <div class="search-default-control">
+            <span>Default Dialog Augmentation:</span>
+            <div class="search-default-options" id="searchDefaultOptions" role="radiogroup" aria-label="Attach search results by default">
+              <input type="radio" id="searchDefaultNone" name="searchDefault" value="none"/>
+              <label for="searchDefaultNone">no search results, allow attachments</label>
+              <input type="radio" id="searchDefaultLocal" name="searchDefault" value="local" checked="checked"/>
+              <label for="searchDefaultLocal">use local search</label>
+              <input type="radio" id="searchDefaultGlobal" name="searchDefault" value="global" class="is-future" disabled="disabled"/>
+              <label for="searchDefaultGlobal" class="is-future">use global search</label>
+              <span class="search-default-slider" aria-hidden="true"></span>
+            </div>
+          </div>
           <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
           <form id="chatForm">
             <fieldset class="chat-turn user">
@@ -611,6 +694,12 @@
     const defaultApiHost = '';
 
     const STORAGE_KEY = 'yacychat_recent_pairs';
+    const SEARCH_DEFAULT_KEY = 'yacychat_search_default';
+    const SEARCH_DEFAULTS = {
+        none: 'none',
+        local: 'local',
+        global: 'global'
+    };
 
     const state = {
         messages: [],
@@ -622,6 +711,7 @@
         busy: false,
         attachment: null,
         searchMode: false,
+        searchDefault: SEARCH_DEFAULTS.local,
         assistantSeen: false,
         showSystem: false
     };
@@ -643,7 +733,11 @@
         uploadChatButton: document.getElementById('uploadChatButton'),
         uploadChatInput: document.getElementById('uploadChatInput'),
         toggleSystemButton: document.getElementById('toggleSystemButton'),
-        composerMain: document.getElementById('composerMain')
+        composerMain: document.getElementById('composerMain'),
+        searchDefaultOptions: document.getElementById('searchDefaultOptions'),
+        searchDefaultNone: document.getElementById('searchDefaultNone'),
+        searchDefaultLocal: document.getElementById('searchDefaultLocal'),
+        searchDefaultGlobal: document.getElementById('searchDefaultGlobal')
     };
 
     const IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg']);
@@ -926,7 +1020,8 @@
         return body;
     }
 
-    function clearAttachment() {
+    function clearAttachment(options = {}) {
+        const { applyDefault = true } = options;
         state.attachment = null;
         state.searchMode = false;
         dom.fileInput.value = '';
@@ -934,6 +1029,9 @@
         dom.attachmentRow.classList.remove('has-attachment');
         dom.attachmentRow.classList.remove('search-mode');
         closeAttachmentPopover();
+        if (applyDefault) {
+            applySearchDefaultToComposer();
+        }
     }
 
     function setComposerAttachment(attachment) {
@@ -954,8 +1052,69 @@
         if (isLoading) {
             dom.attachmentFilename.textContent = 'Loading attachment...';
         } else if (!state.attachment) {
+            dom.attachmentFilename.textContent = state.searchMode ? 'Attach Search Results' : 'Attach PNG/JPG or text (.txt/.md/.tex)';
+        }
+    }
+
+    function setSearchModeActive(enabled) {
+        state.searchMode = !!enabled;
+        state.attachment = null;
+        dom.fileInput.value = '';
+        dom.attachmentRow.classList.remove('has-attachment');
+        if (state.searchMode) {
+            dom.attachmentRow.classList.add('search-mode');
+            dom.attachmentFilename.textContent = 'Attach Search Results';
+        } else {
+            dom.attachmentRow.classList.remove('search-mode');
             dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         }
+    }
+
+    function applySearchDefaultToComposer() {
+        if (!dom.attachmentRow || state.attachment) return;
+        if (state.searchDefault === SEARCH_DEFAULTS.local) {
+            setSearchModeActive(true);
+        } else {
+            setSearchModeActive(false);
+        }
+    }
+
+    function updateSearchDefaultSlider() {
+        if (!dom.searchDefaultOptions) return;
+        const inputs = Array.from(dom.searchDefaultOptions.querySelectorAll('input[name="searchDefault"]:not(.is-future)'));
+        const activeIndex = inputs.findIndex(input => input.checked);
+        const segments = inputs.length || 2;
+        dom.searchDefaultOptions.style.setProperty('--segments', segments);
+        dom.searchDefaultOptions.style.setProperty('--active', activeIndex < 0 ? 0 : activeIndex);
+    }
+
+    function persistSearchDefault() {
+        try {
+            localStorage.setItem(SEARCH_DEFAULT_KEY, state.searchDefault);
+        } catch (err) {
+            console.warn('Failed to persist search default', err);
+        }
+    }
+
+    function loadSearchDefault() {
+        let stored = null;
+        try {
+            stored = localStorage.getItem(SEARCH_DEFAULT_KEY);
+        } catch (err) {
+            console.warn('Failed to load search default', err);
+        }
+        if (stored && Object.values(SEARCH_DEFAULTS).includes(stored)) {
+            state.searchDefault = stored;
+        }
+        if (dom.searchDefaultNone && state.searchDefault === SEARCH_DEFAULTS.none) {
+            dom.searchDefaultNone.checked = true;
+        } else if (dom.searchDefaultLocal && state.searchDefault === SEARCH_DEFAULTS.local) {
+            dom.searchDefaultLocal.checked = true;
+        } else if (dom.searchDefaultGlobal && state.searchDefault === SEARCH_DEFAULTS.global) {
+            dom.searchDefaultGlobal.checked = true;
+        }
+        updateSearchDefaultSlider();
+        applySearchDefaultToComposer();
     }
 
     async function copyAssistant(text) {
@@ -1845,15 +2004,12 @@
         dom.fileInput.click();
     });
     dom.searchButton?.addEventListener('click', () => {
-        state.searchMode = true;
-        state.attachment = null;
-        dom.attachmentRow.classList.remove('has-attachment');
-        dom.attachmentRow.classList.add('search-mode');
-        dom.attachmentFilename.textContent = 'Attach Search Results';
+        setSearchModeActive(true);
     });
     dom.fileInput.addEventListener('change', handleFileChange);
     dom.clearFileButton.addEventListener('click', () => {
-        clearAttachment();
+        const allowDefault = !(state.searchMode && !state.attachment);
+        clearAttachment({ applyDefault: allowDefault });
     });
     dom.clearChatButton?.addEventListener('click', clearChatHistory);
     dom.downloadChatButton?.addEventListener('click', downloadChat);
@@ -1862,6 +2018,16 @@
     dom.toggleSystemButton?.addEventListener('click', () => {
         state.showSystem = !state.showSystem;
         renderConversation();
+    });
+    dom.searchDefaultOptions?.addEventListener('change', event => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        if (target.name !== 'searchDefault') return;
+        if (!Object.values(SEARCH_DEFAULTS).includes(target.value)) return;
+        state.searchDefault = target.value;
+        updateSearchDefaultSlider();
+        persistSearchDefault();
+        applySearchDefaultToComposer();
     });
     window.addEventListener('scroll', closeAttachmentPopover);
 
@@ -1902,6 +2068,7 @@
     });
     window.addEventListener('resize', resizeComposer);
 
+    loadSearchDefault();
     hydrateConversation();
     updateSystemToggleButton();
     resizeComposer();
