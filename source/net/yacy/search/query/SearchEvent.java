@@ -2046,6 +2046,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
                 return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
+            } else if (!this.query.isLocal() || cacheStrategy == CacheStrategy.IFEXIST || cacheStrategy == CacheStrategy.IFFRESH) {
+                /* Do not drop remote or "use cache if available" results when snippet fetching fails. */
+                return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
             } else {
                 // problems with snippet fetch
                 if (this.snippetFetchWords.contains(Segment.catchallString)) {

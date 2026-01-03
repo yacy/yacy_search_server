@@ -799,7 +799,13 @@ public final class Protocol {
                 writerToLocalIndex.stopWriting();
                 throw new InterruptedException("remoteProcess stopped!");
             }
-            event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+            /* Ensure freshly stored metadata is visible to queries before adding results. */
+            event.query.getSegment().fulltext().commit(true);
+            if (storeDocs != null && !storeDocs.isEmpty()) {
+                event.addNodes(storeDocs, null, snip, false, target.getName() + "/" + target.hash, result.totalCount, true);
+            } else {
+                event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+            }
         } else {
             // feed results as nodes (SolrQuery results) which carry metadata,
             // to prevent a call to getMetaData for RWI results, which would fail (if no metadata in index and no display of these results)
