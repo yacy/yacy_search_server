@@ -72,7 +72,7 @@
 
     <sequential unless:set="ivy.debian.exists">
       <mkdir dir="${ivy.download.dir}"/>
-      <echo message="downloading ivy (if not already there) to ${ify.download.file} ..."/>
+      <echo message="downloading ivy (if not already there) to ${ivy.download.file} ..."/>
       <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.download.file}" skipexisting="true"/>
     </sequential>
 
