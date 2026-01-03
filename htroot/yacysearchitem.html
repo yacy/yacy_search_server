@@ -47,7 +47,7 @@
   #(showMetadata)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="solr/select?q=id:%22#[urlhash]#%22&start=0&rows=1&core=collection1&wt=html&omitHeader=true" target="_blank">Metadata</a>#(/showMetadata)#
   #(showParser)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
   #(showCitation)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="api/citation.html?hash=#[urlhash]#&filter=true" target="_blank">Citations</a>#(/showCitation)#
-  #(showPictures)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html?contentdom=image#(authSearch)#::&auth#(/authSearch)#&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
+  #(showPictures)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html?contentdom=image#(authSearch)#::&auth#(/authSearch)#&maximumRecords=20&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
   #(showCache)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#
   #(showProxy)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="proxy.html?url=#[link]#" target="_blank">View via proxy</a>#(/showProxy)#
   #(showIndexBrowser)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="IndexBrowser_p.html?path=#[link]#"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a>#(/showIndexBrowser)#
@@ -59,7 +59,7 @@
   ::
   #(item)#::<div class="thumbcontainer">
     <a href="#[hrefFullPreview]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
-      <img src="#[hrefCache]#" width="256" height="256" style="#[style]#" alt="#[name]#" onerror="handleResultThumbError(this)"/>
+      <img src="#[hrefCache]#" width="256" height="256" style="#[style]#" alt="#[name]#" data-original="#[href]#" data-fallback="env/grafics/nok.png" onerror="handleResultThumbError(this)"/>
     </a>
     <div class="highslide-caption"><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[name]#</a><br /><a href="#[source]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[sourcedom]#</a></div>
   </div>#(/item)#

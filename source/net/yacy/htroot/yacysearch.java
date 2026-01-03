@@ -256,6 +256,7 @@ public class yacysearch {
 
         // check an determine items per page (max of [100 or configured default]}
         final int defaultItemsPerPage = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
+        final boolean itemsPerPageExplicit = post != null && (post.containsKey("maximumRecords") || post.containsKey("count") || post.containsKey("rows"));
         int itemsPerPage = post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", defaultItemsPerPage))); // requested or default // SRU syntax with old property as alternative
         // whatever admin has set as default, that's always ok
         if (itemsPerPage > defaultItemsPerPage && itemsPerPage > 100) { // if above hardcoded 100 limit restrict request (except default allows more)
@@ -301,6 +302,9 @@ public class yacysearch {
 
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
+        if (contentdom == ContentDomain.IMAGE && itemsPerPage == defaultItemsPerPage) {
+            itemsPerPage = 20;
+        }
 
         // Strict/extended content domain constraint : configured setting may be overriden by request param
         final boolean strictContentDom = !Boolean.FALSE.toString().equalsIgnoreCase(post.get("strictContentDom",

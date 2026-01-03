@@ -22,6 +22,7 @@
     <input type="hidden" name="strictContentDom" value="#[strictContentDom]#" />
     <input type="hidden" name="former" value="#[former]#" />
     <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+    <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
     <input type="hidden" name="startRecord" value="#[startRecord]#" />
     <input type="hidden" name="verify" value="#[search.verify]#" />
     <input type="hidden" name="nav" value="#[search.navigation]#" />
@@ -112,28 +113,33 @@ $('#resource-switch-form').popover()
     <input id="contentDomTimezoneOffset" type="hidden" name="timezoneOffset" value=""><script>document.getElementById("contentDomTimezoneOffset").value = new Date().getTimezoneOffset();</script>
 	<div class="btn-group btn-group-justified">
 		#(searchtext)#::<div class="btn-group btn-group-xs">
-				<button type="#(check)#submit::button#(/check)#" name="contentdom" value="text" 
-					class="btn btn-default#(check)#:: active#(/check)#">Documents</button>
+				<button type="submit" name="contentdom" value="text" 
+					class="btn btn-default#(check)#:: active#(/check)#"
+					onclick="this.form.maximumRecords.value = '10';">Documents</button>
 			</div>
 		#(/searchtext)#
 		#(searchimage)#::<div class="btn-group btn-group-xs">
-					<button type="#(check)#submit::button#(/check)#" name="contentdom" value="image" 
- 						class="btn btn-default#(check)#:: active#(/check)#">Images</button>
+					<button type="submit" name="contentdom" value="image" 
+ 						class="btn btn-default#(check)#:: active#(/check)#"
+						onclick="this.form.maximumRecords.value = '20';">Images</button>
 				</div>
 		#(/searchimage)#
 		#(searchaudio)#::<div class="btn-group btn-group-xs">
-				<button type="#(check)#submit::button#(/check)#" name="contentdom" value="audio" 
- 					class="btn btn-default#(check)#:: active#(/check)#">Audio</button>
+				<button type="submit" name="contentdom" value="audio" 
+ 					class="btn btn-default#(check)#:: active#(/check)#"
+					onclick="this.form.maximumRecords.value = '10';">Audio</button>
 			</div>
 		#(/searchaudio)#
 		#(searchvideo)#::<div class="btn-group btn-group-xs">
-				<button type="#(check)#submit::button#(/check)#" name="contentdom" value="video" 
-					class="btn btn-default#(check)#:: active#(/check)#">Video</button>
+				<button type="submit" name="contentdom" value="video" 
+					class="btn btn-default#(check)#:: active#(/check)#"
+					onclick="this.form.maximumRecords.value = '10';">Video</button>
 			</div>
 		#(/searchvideo)#
 		#(searchapp)#::<div class="btn-group btn-group-xs">
-				<button type="#(check)#submit::button#(/check)#" name="contentdom" value="app" 
-					class="btn btn-default#(check)#:: active#(/check)#">Apps</button>
+				<button type="submit" name="contentdom" value="app" 
+					class="btn btn-default#(check)#:: active#(/check)#"
+					onclick="this.form.maximumRecords.value = '10';">Apps</button>
 			</div>
 		#(/searchapp)#
 	</div>
