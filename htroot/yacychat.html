@@ -120,6 +120,33 @@
         padding: 0;
       }
 
+      .think-block {
+        margin: 8px 0;
+        border: 1px solid #d6dbe5;
+        border-radius: 8px;
+        background: #f5f7fb;
+        padding: 6px 10px;
+      }
+
+      .think-block summary {
+        cursor: pointer;
+        font-weight: 700;
+        list-style: none;
+      }
+
+      .think-block summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .think-block[open] summary {
+        margin-bottom: 6px;
+      }
+
+      .think-content {
+        color: #394b59;
+        font-size: 0.85rem;
+      }
+
       .chat-body.markdown h1,
       .chat-body.markdown h2,
       .chat-body.markdown h3,
@@ -916,12 +943,174 @@
         }
     }
 
+    function stripThinkBlocks(text) {
+        if (!text || typeof text !== 'string') return text || '';
+        const ranges = buildFenceRanges(text);
+        const openPattern = /<think\s*>/ig;
+        const closePattern = /<\/think\s*>/ig;
+        let result = '';
+        let cursor = 0;
+        while (cursor < text.length) {
+            const open = findTagOutsideFences(text, cursor, openPattern, ranges);
+            if (!open) {
+                result += text.slice(cursor);
+                break;
+            }
+            result += text.slice(cursor, open.index);
+            const close = findTagOutsideFences(text, open.end, closePattern, ranges);
+            if (!close) {
+                break;
+            }
+            cursor = close.end;
+        }
+        return result;
+    }
+
+    function stripThinkFromContent(content) {
+        if (typeof content === 'string') return stripThinkBlocks(content);
+        if (Array.isArray(content)) {
+            return content.map(part => {
+                if (part?.type === 'text' && typeof part.text === 'string') {
+                    return { ...part, text: stripThinkBlocks(part.text) };
+                }
+                return part;
+            });
+        }
+        if (content && typeof content === 'object' && typeof content.text === 'string') {
+            return { ...content, text: stripThinkBlocks(content.text) };
+        }
+        return content;
+    }
+
+    function resolveThinkDefaultOpen(container) {
+        const index = Number.parseInt(container?.dataset?.messageIndex || '', 10);
+        const message = Number.isNaN(index) ? null : state.messages[index];
+        const explicitOpen = container?.dataset?.thinkOpen;
+        if (explicitOpen === 'true') return true;
+        if (explicitOpen === 'false') return false;
+        if (typeof message?.thinkOpen === 'boolean') return message.thinkOpen;
+        if (container?.dataset?.thinkAutoClosed === 'true') return false;
+        return container?.dataset?.streaming === 'true';
+    }
+
+    function buildFenceRanges(text) {
+        const ranges = [];
+        if (!text || typeof text !== 'string') return ranges;
+        let inFence = false;
+        let fenceChar = '';
+        let fenceStart = 0;
+        let offset = 0;
+        const lines = text.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const fenceMatch = line.match(/^\s*(```+|~~~+)/);
+            if (fenceMatch) {
+                const marker = fenceMatch[1];
+                if (!inFence) {
+                    inFence = true;
+                    fenceChar = marker[0];
+                    fenceStart = offset;
+                } else if (marker[0] === fenceChar) {
+                    inFence = false;
+                    ranges.push([fenceStart, offset + line.length + 1]);
+                    fenceChar = '';
+                }
+            }
+            offset += line.length + 1;
+        }
+        if (inFence) {
+            ranges.push([fenceStart, text.length]);
+        }
+        return ranges;
+    }
+
+    function isIndexInFence(index, ranges) {
+        return ranges.some(range => index >= range[0] && index < range[1]);
+    }
+
+    function findTagOutsideFences(text, start, pattern, ranges) {
+        const regex = new RegExp(pattern.source, pattern.flags);
+        regex.lastIndex = start;
+        let match = regex.exec(text);
+        while (match) {
+            if (!isIndexInFence(match.index, ranges)) {
+                return { index: match.index, end: regex.lastIndex, match };
+            }
+            regex.lastIndex = match.index + 1;
+            match = regex.exec(text);
+        }
+        return null;
+    }
+
+    function hasThinkCloseOutsideFences(text) {
+        if (!text || typeof text !== 'string') return false;
+        const ranges = buildFenceRanges(text);
+        return !!findTagOutsideFences(text, 0, /<\/think\s*>/ig, ranges);
+    }
+
+    function renderAssistantContent(text, defaultOpen) {
+        const source = typeof text === 'string' ? text : '';
+        if (!source) return '';
+        const openRe = /<think\s*>/ig;
+        const closeRe = /<\/think\s*>/ig;
+        const ranges = buildFenceRanges(source);
+        let html = '';
+        let cursor = 0;
+        while (cursor < source.length) {
+            const openMatch = findTagOutsideFences(source, cursor, openRe, ranges);
+            if (!openMatch) {
+                html += renderMarkdown(source.slice(cursor));
+                break;
+            }
+            const openIndex = openMatch.index;
+            const openEnd = openMatch.end;
+            if (openIndex > cursor) {
+                html += renderMarkdown(source.slice(cursor, openIndex));
+            }
+            const closeMatch = findTagOutsideFences(source, openEnd, closeRe, ranges);
+            const closeIndex = closeMatch ? closeMatch.index : -1;
+            const thinkBody = closeIndex === -1
+                ? source.slice(openEnd)
+                : source.slice(openEnd, closeIndex);
+            const openAttr = defaultOpen ? ' open="open"' : '';
+            html += `<details class="think-block"${openAttr}><summary>Model thoughts</summary><div class="think-content">${renderMarkdown(thinkBody)}</div></details>`;
+            if (!closeMatch) {
+                break;
+            }
+            cursor = closeMatch.end;
+        }
+        return html;
+    }
+
+    function bindThinkToggles(container) {
+        if (!container) return;
+        const detailsNodes = Array.from(container.querySelectorAll('details.think-block'));
+        if (!detailsNodes.length) return;
+        const index = Number.parseInt(container.dataset.messageIndex || '', 10);
+        detailsNodes.forEach(details => {
+            details.addEventListener('toggle', () => {
+                if (!Number.isNaN(index)) {
+                    const targetMessage = state.messages[index];
+                    if (targetMessage) {
+                        targetMessage.thinkOpen = details.open;
+                        persistConversation();
+                    }
+                } else {
+                    container.dataset.thinkOpen = details.open ? 'true' : 'false';
+                }
+            });
+        });
+    }
+
     function applyMessageContent(target, role, text) {
         if (!target) return;
         if (role === 'assistant') {
             target.classList.add('markdown', 'markdown-body');
             target.classList.remove('plain-text');
-            target.innerHTML = renderMarkdown(text);
+            target.dataset.rawMarkdown = text || '';
+            const defaultOpen = resolveThinkDefaultOpen(target);
+            target.innerHTML = renderAssistantContent(text, defaultOpen);
+            bindThinkToggles(target);
             rehighlightCode(target);
         } else {
             target.classList.add('plain-text');
@@ -972,6 +1161,9 @@
 
         const body = document.createElement('div');
         body.className = 'chat-body';
+        if (typeof messageIndex === 'number') {
+            body.dataset.messageIndex = String(messageIndex);
+        }
         applyMessageContent(body, role, text);
         entry.appendChild(body);
 
@@ -991,7 +1183,7 @@
             copyBtn.className = 'copy-button';
             copyBtn.title = 'Copy answer';
             copyBtn.innerHTML = '<span class="glyphicon glyphicon-copy" aria-hidden="true"></span>';
-            copyBtn.addEventListener('click', () => copyAssistant(body.textContent));
+            copyBtn.addEventListener('click', () => copyAssistant(body));
             entry.appendChild(copyBtn);
         }
         if (role === 'user' && typeof messageIndex === 'number') {
@@ -1117,9 +1309,12 @@
         applySearchDefaultToComposer();
     }
 
-    async function copyAssistant(text) {
+    async function copyAssistant(target) {
+        const raw = target?.dataset?.rawMarkdown;
+        const source = typeof raw === 'string' ? raw : (target?.textContent || '');
+        const cleaned = stripThinkBlocks(source);
         try {
-            await navigator.clipboard.writeText(text || '');
+            await navigator.clipboard.writeText(cleaned || '');
         } catch (err) {
             console.warn('Clipboard copy failed', err);
         }
@@ -1252,9 +1447,15 @@
     }
 
     async function streamChat(userMessage, assistantNode, options = {}) {
-        const { onFirstToken, includeUserInPayload = true, pushUserToState = true } = options;
+        const { onFirstToken, includeUserInPayload = true, pushUserToState = true, currentUserIndex = -1 } = options;
         ensureSystemMessage();
-        const sanitizedMessages = state.messages.map(stripMessageForApi).filter(Boolean);
+        const sanitizedMessages = state.messages
+            .map((msg, index) => {
+                const hasAttachment = msg?.role === 'user' && (Array.isArray(msg.content) || msg.attachment);
+                const textOnly = index !== currentUserIndex && !hasAttachment;
+                return stripMessageForApi(msg, { textOnly });
+            })
+            .filter(Boolean);
         const sanitizedUserMessage = includeUserInPayload ? stripMessageForApi(userMessage) : null;
         const payload = {
             model: state.config.model,
@@ -1282,6 +1483,12 @@
         let sawFirstDelta = false;
         let focusShown = false;
         let searchApplied = false;
+        let thinkAutoClosed = false;
+        let thinkAutoCloseFired = false;
+        let thinkAutoCloseTimer = null;
+        if (assistantNode) {
+            assistantNode.dataset.streaming = 'true';
+        }
         if (typeof onFirstToken === 'function' && !focusShown) {
             focusShown = true;
             onFirstToken();
@@ -1344,6 +1551,30 @@
                         }
                     }
                     assistantText += delta;
+                    if (!thinkAutoClosed && hasThinkCloseOutsideFences(assistantText)) {
+                        thinkAutoClosed = true;
+                        if (assistantNode) {
+                            assistantNode.dataset.thinkAutoClosing = 'true';
+                        }
+                        if (thinkAutoCloseTimer) {
+                            clearTimeout(thinkAutoCloseTimer);
+                        }
+                        thinkAutoCloseTimer = window.setTimeout(() => {
+                            thinkAutoCloseFired = true;
+                            if (assistantNode) {
+                                assistantNode.dataset.thinkAutoClosing = 'false';
+                                assistantNode.dataset.thinkAutoClosed = 'true';
+                                assistantNode.dataset.thinkOpen = 'false';
+                                applyMessageContent(assistantNode, 'assistant', assistantText);
+                            }
+                            const last = state.messages[state.messages.length - 1];
+                            if (last && last.role === 'assistant' && last.content === assistantText) {
+                                last.thinkOpen = false;
+                                persistConversation();
+                                renderConversation({ skipScroll: true });
+                            }
+                        }, 2000);
+                    }
                     applyMessageContent(assistantNode, 'assistant', assistantText);
                     performAutoScroll();
                 }
@@ -1383,7 +1614,13 @@
         if (pushUserToState) {
             state.messages.push(userMessage);
         }
-        state.messages.push({ role: 'assistant', content: assistantText });
+        const explicitThinkOpen = assistantNode?.dataset?.thinkOpen;
+        const storedThinkOpen = explicitThinkOpen === 'true'
+            ? true
+            : explicitThinkOpen === 'false'
+                ? false
+                : (thinkAutoClosed && !thinkAutoCloseFired);
+        state.messages.push({ role: 'assistant', content: assistantText, thinkOpen: storedThinkOpen });
         state.assistantSeen = true;
         persistConversation();
         updateClearChatVisibility();
@@ -1423,9 +1660,21 @@
         return { role: 'user', content: promptText, search: !!state.searchMode };
     }
 
-    function stripMessageForApi(message) {
+    function stripMessageForApi(message, options = {}) {
         if (!message) return null;
-        const sanitized = { role: message.role, content: message.content };
+        const { textOnly = false } = options;
+        let content = message.content;
+        if (textOnly) {
+            content = messageText(content);
+        }
+        if (message.role === 'assistant') {
+            if (textOnly || typeof content === 'string') {
+                content = stripThinkBlocks(String(content || ''));
+            } else {
+                content = stripThinkFromContent(content);
+            }
+        }
+        const sanitized = { role: message.role, content };
         if (message.search) sanitized.search = true;
         return sanitized;
     }
@@ -1989,7 +2238,7 @@
         resizeComposer();
         const assistantNode = appendMessage('assistant', 'waiting for an answer...');
         try {
-            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer, includeUserInPayload: false, pushUserToState: false });
+            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer, includeUserInPayload: false, pushUserToState: false, currentUserIndex: userIndex });
         } catch (err) {
             appendMessage('system', `Error: ${err.message}`);
             showComposer();
