@@ -33,9 +33,11 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,11 +67,27 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import net.yacy.ai.LLM;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
+import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.snippet.TextSnippet;
 
 /**
  * This class implements a Retrieval Augmented Generation ("RAG") proxy which
@@ -177,6 +195,10 @@ public class RAGProxyServlet extends HttpServlet {
             JSONArray messages = bodyObject.optJSONArray("messages");
             final String systemPrefix = sb.getConfig("ai.llm-system-prefix", LLM_SYSTEM_PREFIX_DEFAULT);
             final String userPrefix = sb.getConfig("ai.llm-user-prefix", LLM_USER_PREFIX_DEFAULT);
+            
+            // debug
+            //System.out.println(messages.toString());
+            
             for (int i = 0; i < messages.length(); i++) {
                 JSONObject message = messages.getJSONObject(i);
                 if (message.optString("role", "").equals("user")) {
@@ -186,17 +208,28 @@ public class RAGProxyServlet extends HttpServlet {
             }
             UserObject userObject = new UserObject(messages.getJSONObject(messages.length() - 1));
             String user = userObject.getContentText(); // this is the latest prompt
-            boolean rag = userObject.getSearch();
+            final String userPrompt = user;
+            String ragMode = userObject.getSearchMode();
+            ConcurrentLog.info("RAGProxy", "ragMode=" + ragMode + " userChars=" + (user == null ? 0 : user.length()));
             //List<DataURL> data_urls = userObject.getContentAttachments(); // this list is a copy of the content data_urls
             
             // RAG
             String searchResultQuery = "";
             String searchResultMarkdown = "";
-            if (rag) {
+            if (!"no".equals(ragMode)) {
                 // modify system and user prompt here in bodyObject to enable RAG
                 final String queryPrefix = sb.getConfig("ai.llm-query-generator-prefix", LLM_QUERY_GENERATOR_PREFIX_DEFAULT);
+                final long queryStart = System.currentTimeMillis();
                 searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, queryPrefix + user);
-                searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 10);
+                final long queryElapsed = System.currentTimeMillis() - queryStart;
+                final Set<String> boostTerms = intersectTokens(userPrompt, searchResultQuery, 8);
+                final long searchStart = System.currentTimeMillis();
+                searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 10, "global".equals(ragMode), boostTerms);
+                final long searchElapsed = System.currentTimeMillis() - searchStart;
+                ConcurrentLog.info(
+                    "RAGProxy",
+                    "searchQuery=\"" + searchResultQuery + "\" queryMs=" + queryElapsed + " searchMs=" + searchElapsed +
+                    " markdownChars=" + searchResultMarkdown.length() + " boostTerms=" + boostTerms.size());
                 user += userPrefix;
                 user += searchResultMarkdown;
                 userObject.setContentText(user);
@@ -304,7 +337,7 @@ public class RAGProxyServlet extends HttpServlet {
 
     public final static class UserObject {
         private JSONObject userObject;
-        
+
         public UserObject(JSONObject userObject) {
             this.userObject = userObject;
         }
@@ -325,9 +358,19 @@ public class RAGProxyServlet extends HttpServlet {
             this.normalize();
         }
         
-        public boolean getSearch() {
-            boolean search = this.userObject.optBoolean("search", false);
-            return search;
+        public String getSearchMode() {
+            Object raw = this.userObject.opt("search");
+            if (raw instanceof Boolean) {
+                return ((Boolean) raw) ? "local" : "no";
+            }
+            final String search = this.userObject.optString("search", "").trim().toLowerCase();
+            if (search.isEmpty() || "no".equals(search) || "false".equals(search)) {
+                return "no";
+            }
+            if ("local".equals(search) || "global".equals(search)) {
+                return search;
+            }
+            return "no";
         }
         
         public String getContentText() {
@@ -440,13 +483,38 @@ public class RAGProxyServlet extends HttpServlet {
     }
     
     public static JSONArray searchResults(String query, int count, final boolean includeSnippet) {
+        return searchResults(query, count, includeSnippet, new LinkedHashSet<>());
+    }
+
+    public static JSONArray searchResults(String query, int count, final boolean includeSnippet, final Set<String> boostTerms) {
         final JSONArray results = new JSONArray();
         if (query == null || query.length() == 0 || count == 0) return results;
         Switchboard sb = Switchboard.getSwitchboard();
         EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery(CollectionSchema.text_t.getSolrFieldName() + ":" + query);
+        params.setQuery(query);
+        params.set("defType", "edismax");
+        params.set("qf",
+            CollectionSchema.title.getSolrFieldName() + "^3 " +
+            CollectionSchema.text_t.getSolrFieldName() + "^1 " +
+            CollectionSchema.sku.getSolrFieldName() + "^0.5 " +
+            CollectionSchema.h1_txt.getSolrFieldName() + "^2");
+        params.set("pf",
+            CollectionSchema.title.getSolrFieldName() + "^5 " +
+            CollectionSchema.text_t.getSolrFieldName() + "^2");
+        params.set("mm", "2<75%");
+        final List<String> bqParts = new ArrayList<>();
+        if (boostTerms != null && !boostTerms.isEmpty()) {
+            for (String term : boostTerms) {
+                if (term == null || term.isEmpty()) continue;
+                bqParts.add(CollectionSchema.title.getSolrFieldName() + ":" + term + "^0.5");
+                bqParts.add(CollectionSchema.h1_txt.getSolrFieldName() + ":" + term + "^0.4");
+                bqParts.add(CollectionSchema.text_t.getSolrFieldName() + ":" + term + "^0.2");
+            }
+        }
+        bqParts.add("(" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(zip rar 7z tar gz bz2 xz tgz))^0.1");
+        params.set("bq", String.join(" ", bqParts));
         params.setRows(count);
         params.setStart(0);
         params.setFacet(false);
@@ -469,7 +537,7 @@ public class RAGProxyServlet extends HttpServlet {
                     result.put("title", title == null ? "" : title.trim());
                     if (includeSnippet) {
                         String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                        result.put("text", text == null ? "" : text.trim());
+                        result.put("text", limitSnippet(text == null ? "" : text.trim(), 2000));
                     }
                 results.put(result);
                 } catch (JSONException e) {
@@ -482,8 +550,14 @@ public class RAGProxyServlet extends HttpServlet {
         }
     }
     
-    public static String searchResultsAsMarkdown(String query, int count) {
-        JSONArray searchResults = searchResults(query, count, true);
+    public static String searchResultsAsMarkdown(String query, int count, boolean global) {
+        return searchResultsAsMarkdown(query, count, global, new LinkedHashSet<>());
+    }
+
+    public static String searchResultsAsMarkdown(String query, int count, boolean global, final Set<String> boostTerms) {
+        final long searchStart = System.currentTimeMillis();
+        JSONArray searchResults = global ? searchResultsGlobal(query, count, true) : searchResults(query, count, true, boostTerms);
+        ConcurrentLog.info("RAGProxy", "searchResults=" + searchResults.length() + " global=" + global + " searchMs=" + (System.currentTimeMillis() - searchStart));
         StringBuilder sb = new StringBuilder();
         
         // collect snippets
@@ -494,6 +568,8 @@ public class RAGProxyServlet extends HttpServlet {
                 String title = r.optString("title", "");
                 String url = r.optString("url", "");
                 String text = r.optString("text", "");
+                if (title.isEmpty()) title = url;
+                if (text.isEmpty()) text = title;
                 if (title.length() > 0 && text.length() > 0) {
                     Snippet snippet = new Snippet(query, text, url, title, 256); // we always compute a snippet because that gives us a hint if the query appears at all
                     if (snippet.getText().length() > 0) results.add(snippet);
@@ -504,7 +580,9 @@ public class RAGProxyServlet extends HttpServlet {
         // sort snippets again by score
         results.sort(Comparator.comparingDouble(Snippet::getScore));
         
-        for (int i  = 0; i < results.size() / 2; i++) {
+        int limit = results.size() / 2;
+        if (results.size() > 0 && limit == 0) limit = 1;
+        for (int i  = 0; i < limit; i++) {
             Snippet snippet = results.get(i);
             sb.append("## ").append(snippet.getTitle()).append("\n");
             sb.append(snippet.text).append("\n");
@@ -512,7 +590,129 @@ public class RAGProxyServlet extends HttpServlet {
             sb.append("\n\n");
         }
         
+        ConcurrentLog.info("RAGProxy", "markdownChars=" + sb.length() + " snippetCount=" + results.size());
         return sb.toString();
+    }
+
+    public static JSONArray searchResultsGlobal(String query, int count, final boolean includeSnippet) {
+        final JSONArray results = new JSONArray();
+        if (query == null || query.length() == 0 || count == 0) return results;
+        final Switchboard sb = Switchboard.getSwitchboard();
+        final RankingProfile ranking = sb.getRanking();
+        final int timezoneOffset = 0;
+        final QueryModifier modifier = new QueryModifier(timezoneOffset);
+        String querystring = modifier.parse(query);
+        if (querystring.length() == 0) {
+            querystring = query == null ? "" : query.trim();
+        }
+        if (querystring.length() == 0) return results;
+        final QueryGoal qg = new QueryGoal(querystring);
+        final QueryParams theQuery = new QueryParams(
+                qg,
+                modifier,
+                0,
+                "",
+                Classification.ContentDomain.TEXT,
+                "",
+                timezoneOffset,
+                new HashSet<Tagging.Metatag>(),
+                CacheStrategy.IFFRESH,
+                count,
+                0,
+                ".*",
+                null,
+                null,
+                QueryParams.Searchdom.GLOBAL,
+                null,
+                true,
+                DigestURL.hosthashess(sb.getConfig("search.excludehosth", "")),
+                MultiProtocolURL.TLD_any_zone_filter,
+                null,
+                false,
+                sb.index,
+                ranking,
+                ClientIdentification.yacyIntranetCrawlerAgent.userAgent(),
+                0.0d,
+                0.0d,
+                0.0d,
+                sb.getConfigSet("search.navigation"));
+        final SearchEvent theSearch = SearchEventCache.getEvent(
+                theQuery,
+                sb.peers,
+                sb.tables,
+                (sb.isRobinsonMode()) ? sb.clusterhashes : null,
+                false,
+                sb.loader,
+                (int) sb.getConfigLong(
+                        SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER,
+                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10)),
+                sb.getConfigLong(
+                        SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
+                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
+        final long timeout = sb.getConfigLong(
+                SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
+                sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000));
+        waitForFeedingAndResort(theSearch, timeout);
+        for (int i = 0; i < count; i++) {
+            URIMetadataNode node = theSearch.oneResult(i, timeout);
+            if (node == null) break;
+            try {
+                final JSONObject result = new JSONObject(true);
+                result.put("url", node.urlstring());
+                result.put("title", node.title());
+                if (includeSnippet) {
+                    String text = node.snippet();
+                    if (text == null || text.isEmpty()) {
+                        TextSnippet snippet = node.textSnippet();
+                        if (snippet != null && snippet.exists() && !snippet.getErrorCode().fail()) {
+                            text = snippet.getLineRaw();
+                        }
+                    }
+                    if (text == null || text.isEmpty()) {
+                        text = firstFieldString(node.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
+                    }
+                    if (text == null || text.isEmpty()) {
+                        text = firstFieldString(node.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
+                    }
+                    result.put("text", limitSnippet(text == null ? "" : text.trim(), 2000));
+                }
+                results.put(result);
+            } catch (JSONException e) {
+                // skip this result
+            }
+        }
+        return results;
+    }
+
+    private static String limitSnippet(String text, int maxChars) {
+        if (text == null) return "";
+        if (maxChars <= 0 || text.length() <= maxChars) return text;
+        return text.substring(0, maxChars);
+    }
+
+    private static String firstFieldString(Object value) {
+        if (value == null) return "";
+        if (value instanceof Collection) {
+            for (Object item : (Collection<?>) value) {
+                if (item != null) return item.toString();
+            }
+            return "";
+        }
+        return value.toString();
+    }
+
+    private static void waitForFeedingAndResort(SearchEvent search, long timeoutMs) {
+        if (search == null || timeoutMs <= 0) return;
+        final long end = System.currentTimeMillis() + timeoutMs;
+        while (!search.isFeedingFinished() && System.currentTimeMillis() < end) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        search.resortCachedResults();
     }
     
     
@@ -708,6 +908,27 @@ public class RAGProxyServlet extends HttpServlet {
                 .filter(word -> !word.isEmpty())
                 .collect(Collectors.toSet());
         return queryWordSet;
+    }
+
+    private static Set<String> intersectTokens(String originalPrompt, String computedQuery, int maxTerms) {
+        Set<String> promptTerms = querySet(originalPrompt == null ? "" : originalPrompt);
+        Set<String> queryTerms = querySet(computedQuery == null ? "" : computedQuery);
+        Set<String> intersection = new LinkedHashSet<>();
+        for (String term : promptTerms) {
+            if (!queryTerms.contains(term)) continue;
+            final String cleaned = cleanToken(term);
+            if (cleaned.isEmpty()) continue;
+            intersection.add(cleaned);
+            if (maxTerms > 0 && intersection.size() >= maxTerms) break;
+        }
+        return intersection;
+    }
+
+    private static String cleanToken(String term) {
+        if (term == null) return "";
+        String cleaned = term.replaceAll("[^A-Za-z0-9]", "");
+        if (cleaned.length() < 2) return "";
+        return cleaned.toLowerCase();
     }
 
     private static JSONObject responseLine(String payload) {

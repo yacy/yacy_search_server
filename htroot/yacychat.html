@@ -214,7 +214,7 @@
         border-radius: 999px;
         background: #eef2f7;
         overflow: hidden;
-        width: 380px;
+        width: 500px;
         max-width: 100%;
         height: 22px;
       }
@@ -657,12 +657,12 @@
           <div class="search-default-control">
             <span>Default Dialog Augmentation:</span>
             <div class="search-default-options" id="searchDefaultOptions" role="radiogroup" aria-label="Attach search results by default">
-              <input type="radio" id="searchDefaultNone" name="searchDefault" value="none"/>
-              <label for="searchDefaultNone">no search results, allow attachments</label>
+              <input type="radio" id="searchDefaultNone" name="searchDefault" value="no"/>
+              <label for="searchDefaultNone">no search, allow attachments</label>
               <input type="radio" id="searchDefaultLocal" name="searchDefault" value="local" checked="checked"/>
               <label for="searchDefaultLocal">use local search</label>
-              <input type="radio" id="searchDefaultGlobal" name="searchDefault" value="global" class="is-future" disabled="disabled"/>
-              <label for="searchDefaultGlobal" class="is-future">use global search</label>
+              <input type="radio" id="searchDefaultGlobal" name="searchDefault" value="global"/>
+              <label for="searchDefaultGlobal">use global search</label>
               <span class="search-default-slider" aria-hidden="true"></span>
             </div>
           </div>
@@ -723,7 +723,7 @@
     const STORAGE_KEY = 'yacychat_recent_pairs';
     const SEARCH_DEFAULT_KEY = 'yacychat_search_default';
     const SEARCH_DEFAULTS = {
-        none: 'none',
+        none: 'no',
         local: 'local',
         global: 'global'
     };
@@ -737,7 +737,7 @@
         },
         busy: false,
         attachment: null,
-        searchMode: false,
+        searchMode: SEARCH_DEFAULTS.none,
         searchDefault: SEARCH_DEFAULTS.local,
         assistantSeen: false,
         showSystem: false
@@ -1215,7 +1215,7 @@
     function clearAttachment(options = {}) {
         const { applyDefault = true } = options;
         state.attachment = null;
-        state.searchMode = false;
+        state.searchMode = SEARCH_DEFAULTS.none;
         dom.fileInput.value = '';
         dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         dom.attachmentRow.classList.remove('has-attachment');
@@ -1227,7 +1227,7 @@
     }
 
     function setComposerAttachment(attachment) {
-        state.searchMode = false;
+        state.searchMode = SEARCH_DEFAULTS.none;
         dom.attachmentRow.classList.remove('search-mode');
         state.attachment = attachment ? cloneAttachment(attachment) : null;
         if (state.attachment) {
@@ -1244,16 +1244,26 @@
         if (isLoading) {
             dom.attachmentFilename.textContent = 'Loading attachment...';
         } else if (!state.attachment) {
-            dom.attachmentFilename.textContent = state.searchMode ? 'Attach Search Results' : 'Attach PNG/JPG or text (.txt/.md/.tex)';
+            dom.attachmentFilename.textContent = state.searchMode !== SEARCH_DEFAULTS.none ? 'Attach Search Results' : 'Attach PNG/JPG or text (.txt/.md/.tex)';
         }
     }
 
-    function setSearchModeActive(enabled) {
-        state.searchMode = !!enabled;
+    function setSearchModeActive(mode) {
+        let nextMode = mode;
+        if (mode === true) {
+            nextMode = state.searchDefault === SEARCH_DEFAULTS.none ? SEARCH_DEFAULTS.local : state.searchDefault;
+        }
+        if (!nextMode || nextMode === false) {
+            nextMode = SEARCH_DEFAULTS.none;
+        }
+        if (nextMode !== SEARCH_DEFAULTS.local && nextMode !== SEARCH_DEFAULTS.global) {
+            nextMode = SEARCH_DEFAULTS.none;
+        }
+        state.searchMode = nextMode;
         state.attachment = null;
         dom.fileInput.value = '';
         dom.attachmentRow.classList.remove('has-attachment');
-        if (state.searchMode) {
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
             dom.attachmentRow.classList.add('search-mode');
             dom.attachmentFilename.textContent = 'Attach Search Results';
         } else {
@@ -1264,16 +1274,16 @@
 
     function applySearchDefaultToComposer() {
         if (!dom.attachmentRow || state.attachment) return;
-        if (state.searchDefault === SEARCH_DEFAULTS.local) {
-            setSearchModeActive(true);
+        if (state.searchDefault !== SEARCH_DEFAULTS.none) {
+            setSearchModeActive(state.searchDefault);
         } else {
-            setSearchModeActive(false);
+            setSearchModeActive(SEARCH_DEFAULTS.none);
         }
     }
 
     function updateSearchDefaultSlider() {
         if (!dom.searchDefaultOptions) return;
-        const inputs = Array.from(dom.searchDefaultOptions.querySelectorAll('input[name="searchDefault"]:not(.is-future)'));
+        const inputs = Array.from(dom.searchDefaultOptions.querySelectorAll('input[name="searchDefault"]'));
         const activeIndex = inputs.findIndex(input => input.checked);
         const segments = inputs.length || 2;
         dom.searchDefaultOptions.style.setProperty('--segments', segments);
@@ -1294,6 +1304,9 @@
             stored = localStorage.getItem(SEARCH_DEFAULT_KEY);
         } catch (err) {
             console.warn('Failed to load search default', err);
+        }
+        if (stored === 'none') {
+            stored = SEARCH_DEFAULTS.none;
         }
         if (stored && Object.values(SEARCH_DEFAULTS).includes(stored)) {
             state.searchDefault = stored;
@@ -1448,6 +1461,7 @@
 
     async function streamChat(userMessage, assistantNode, options = {}) {
         const { onFirstToken, includeUserInPayload = true, pushUserToState = true, currentUserIndex = -1 } = options;
+        const requestStart = performance.now();
         ensureSystemMessage();
         const sanitizedMessages = state.messages
             .map((msg, index) => {
@@ -1462,12 +1476,14 @@
             messages: sanitizedUserMessage ? [...sanitizedMessages, sanitizedUserMessage] : sanitizedMessages,
             stream: true
         };
+        console.debug('[yacychat] payload search modes', payload.messages.map(m => ({ role: m.role, search: m.search })));
         const headers = { 'Content-Type': 'application/json' };
         const response = await fetch(state.config.apiHost.replace(/\/$/, '') + '/v1/chat/completions', {
             method: 'POST',
             headers,
             body: JSON.stringify(payload)
         });
+        console.debug('[yacychat] request ms', Math.round(performance.now() - requestStart));
         if (!response.ok) {
             if (response.status === 429) {
                 throw new Error('Rate limit reached: please wait and try again. The server is protecting itself from overload.');
@@ -1502,11 +1518,12 @@
             const searchName = parsed['search-filename'];
             const searchBase64 = parsed['search-text-base64'];
             if (!searchName || !searchBase64) return;
+            console.debug('[yacychat] received search attachment', { searchName, size: searchBase64.length, ms: Math.round(performance.now() - requestStart) });
             const dataUrl = `data:text/markdown;base64,${searchBase64}`;
             const textContent = base64ToUtf8(searchBase64);
             for (let i = state.messages.length - 1; i >= 0; i--) {
                 const msg = state.messages[i];
-                if (msg && msg.role === 'user' && msg.search) {
+                if (msg && msg.role === 'user' && msg.search && msg.search !== SEARCH_DEFAULTS.none) {
                     msg.attachment = {
                         kind: 'text',
                         name: searchName,
@@ -1621,6 +1638,7 @@
                 ? false
                 : (thinkAutoClosed && !thinkAutoCloseFired);
         state.messages.push({ role: 'assistant', content: assistantText, thinkOpen: storedThinkOpen });
+        console.debug('[yacychat] response chars', assistantText.length, 'total ms', Math.round(performance.now() - requestStart));
         state.assistantSeen = true;
         persistConversation();
         updateClearChatVisibility();
@@ -1651,13 +1669,17 @@
                     filename: state.attachment.name
                 });
             }
-            return {
-                role: 'user',
-                content: parts,
-                search: !!state.searchMode
-            };
+            const message = { role: 'user', content: parts };
+            if (state.searchMode !== SEARCH_DEFAULTS.none) {
+                message.search = state.searchMode;
+            }
+            return message;
         }
-        return { role: 'user', content: promptText, search: !!state.searchMode };
+        const message = { role: 'user', content: promptText };
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            message.search = state.searchMode;
+        }
+        return message;
     }
 
     function stripMessageForApi(message, options = {}) {
@@ -1675,7 +1697,11 @@
             }
         }
         const sanitized = { role: message.role, content };
-        if (message.search) sanitized.search = true;
+        if (message.search === true) {
+            sanitized.search = SEARCH_DEFAULTS.local;
+        } else if (message.search === SEARCH_DEFAULTS.local || message.search === SEARCH_DEFAULTS.global) {
+            sanitized.search = message.search;
+        }
         return sanitized;
     }
 
@@ -1719,9 +1745,18 @@
 
     function persistConversation() {
         try {
+            const messages = state.messages.map(msg => {
+                if (!msg) return msg;
+                const safe = { ...msg };
+                if (safe.attachment) {
+                    const { kind, name, mime, size } = safe.attachment;
+                    safe.attachment = { kind, name, mime, size };
+                }
+                return safe;
+            });
             const payload = {
                 model: state.config.model,
-                messages: state.messages
+                messages
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
         } catch (err) {
@@ -2222,12 +2257,15 @@
             userMessage.attachment = userAttachment;
         }
         // add user message to state immediately so edit/trim is available right away
-        state.messages.push({
+        const userEntry = {
             role: 'user',
             content: userMessage.content,
-            attachment: userAttachment,
-            search: !!state.searchMode
-        });
+            attachment: userAttachment
+        };
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            userEntry.search = state.searchMode;
+        }
+        state.messages.push(userEntry);
         const userIndex = state.messages.length - 1;
         const preview = formatUserPreview(prompt);
         state.busy = true;
@@ -2253,11 +2291,12 @@
         dom.fileInput.click();
     });
     dom.searchButton?.addEventListener('click', () => {
-        setSearchModeActive(true);
+        const mode = state.searchDefault === SEARCH_DEFAULTS.none ? SEARCH_DEFAULTS.local : state.searchDefault;
+        setSearchModeActive(mode);
     });
     dom.fileInput.addEventListener('change', handleFileChange);
     dom.clearFileButton.addEventListener('click', () => {
-        const allowDefault = !(state.searchMode && !state.attachment);
+        const allowDefault = !(state.searchMode !== SEARCH_DEFAULTS.none && !state.attachment);
         clearAttachment({ applyDefault: allowDefault });
     });
     dom.clearChatButton?.addEventListener('click', clearChatHistory);
