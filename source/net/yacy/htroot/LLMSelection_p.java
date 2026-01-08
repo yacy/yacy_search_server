@@ -83,6 +83,7 @@ public class LLMSelection_p {
         
         // generate table for production_models
         String pms = sb.getConfig("ai.production_models", "[]");
+        if (pms.isEmpty() || pms.equals("{}")) pms = "[]";
         try {
             production_models = new JSONArray(new JSONTokener(pms));
             for (int i = 0; i < production_models.length(); i++) {
