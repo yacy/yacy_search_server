@@ -220,7 +220,8 @@ public class RAGProxyServlet extends HttpServlet {
                 // modify system and user prompt here in bodyObject to enable RAG
                 final String queryPrefix = sb.getConfig("ai.llm-query-generator-prefix", LLM_QUERY_GENERATOR_PREFIX_DEFAULT);
                 final long queryStart = System.currentTimeMillis();
-                searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, queryPrefix + user);
+                searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, queryPrefix + user); // might return null in case any error occurred
+                if (searchResultQuery == null || searchResultQuery.length() == 0) searchResultQuery = user; // in case there is an error we simply search with the prompt
                 final long queryElapsed = System.currentTimeMillis() - queryStart;
                 final Set<String> boostTerms = intersectTokens(userPrompt, searchResultQuery, 8);
                 final long searchStart = System.currentTimeMillis();
@@ -503,7 +504,7 @@ public class RAGProxyServlet extends HttpServlet {
         params.set("pf",
             CollectionSchema.title.getSolrFieldName() + "^5 " +
             CollectionSchema.text_t.getSolrFieldName() + "^2");
-        params.set("mm", "2<75%");
+        //params.set("mm", "2<75%"); // using mm is too strict; in many cases we don't get any hits
         final List<String> bqParts = new ArrayList<>();
         if (boostTerms != null && !boostTerms.isEmpty()) {
             for (String term : boostTerms) {
@@ -519,7 +520,12 @@ public class RAGProxyServlet extends HttpServlet {
         params.setStart(0);
         params.setFacet(false);
         params.clearSorts();
-        params.setFields(CollectionSchema.sku.getSolrFieldName(), CollectionSchema.text_t.getSolrFieldName());
+        params.setFields(
+            CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(), CollectionSchema.text_t.getSolrFieldName(),
+            CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.keywords.getSolrFieldName(), CollectionSchema.synonyms_sxt.getSolrFieldName(),
+            CollectionSchema.h1_txt.getSolrFieldName(), CollectionSchema.h2_txt.getSolrFieldName(), CollectionSchema.h3_txt.getSolrFieldName(),
+            CollectionSchema.h4_txt.getSolrFieldName(), CollectionSchema.h5_txt.getSolrFieldName(), CollectionSchema.h6_txt.getSolrFieldName()
+        );
         params.setIncludeScore(true);
         params.set("df", CollectionSchema.text_t.getSolrFieldName());
 
@@ -883,22 +889,34 @@ public class RAGProxyServlet extends HttpServlet {
     }
 
     private String searchWordsForPrompt(LLM llm, String model, String prompt) {
-        String question = prompt;
+        final String question = prompt == null ? "" : prompt;
+        if (llm == null || model == null || model.isEmpty()) {
+            return null;
+        }
         try {
             LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX_DEFAULT);
             context.addPrompt(question);
             Set<String> singlewords = new LinkedHashSet<>();
             String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 200));
+            if (a == null || a.length == 0) return null;
             // unfortunately this might not be a single word per line but several words; we collect them all.
             for (String s: a) {
-                for (String t: s.split(" ")) singlewords.add(t.toLowerCase());
+                if (s == null) continue;
+                for (String t: s.split(" ")) {
+                    if (!t.isEmpty()) singlewords.add(t.toLowerCase());
+                }
+            }
+            if (singlewords.isEmpty()) {
+                return null;
             }
             StringBuilder query = new StringBuilder();
             for (String s: singlewords) query.append(s).append(' ');
-            return query.toString().trim();
+            String querys = query.toString().trim();
+            if (querys.length() == 0) return null;
+            return querys;
         } catch (IOException | JSONException e) {
             e.printStackTrace();
-            return "";
+            return null;
         }
     }
     
