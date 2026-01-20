@@ -76,6 +76,7 @@ public final class transferURL {
         // response values
         String result = "";
         String doublevalues = "0";
+        final StringBuilder errorURLs = new StringBuilder();
 
         final Seed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
@@ -150,9 +151,29 @@ public final class transferURL {
             for (final String id : lEm.keySet()) {
                 if (sb.index.exists(id)) {
                     doublecheck++;
-                } else {
-                    lEntry = lEm.get(id);
-
+                    // Check if entry we already have is marked as error - if so, reject incoming replacement
+                    try {
+                        final URIMetadataNode meta = sb.index.fulltext().getMetadata(ASCII.getBytes(id));
+                        if (meta != null && meta.getFieldValue("httpstatus_i") != null) {
+                            final int httpstatus = (meta.getFieldValue("httpstatus_i") instanceof Integer) ? 
+                                (Integer) meta.getFieldValue("httpstatus_i") : 
+                                Integer.parseInt(meta.getFieldValue("httpstatus_i").toString());
+                            final Object failreason = meta.getFieldValue("failreason_s");
+                            if (httpstatus != 200 && failreason != null && failreason.toString().length() > 0) {
+                                if (Network.log.isFine()) Network.log.fine("transferURL: rejected URL hash '" + id + "' (known error, httpstatus=" + httpstatus + ") from peer " + otherPeerName);
+                                errorURLs.append(id).append(',');
+                                blocked++;
+                                continue;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        // Ignore errors during error status check
+                    }
+                }
+                
+                lEntry = lEm.get(id);
+                
+                if (lEntry != null) {
                     // write entry to database
                     if (Network.log.isFine()) Network.log.fine("Accepting URL from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
                     try {
@@ -182,6 +203,10 @@ public final class transferURL {
 
         prop.put("double", doublevalues);
         prop.put("result", result);
+        if (errorURLs.length() > 0) {
+            errorURLs.setLength(errorURLs.length() - 1); // remove trailing comma
+            prop.put("errorURL", errorURLs.toString());
+        }
         return prop;
     }
 }
