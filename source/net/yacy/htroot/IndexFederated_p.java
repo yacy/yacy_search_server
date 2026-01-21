@@ -72,7 +72,7 @@ public class IndexFederated_p {
             final int retryDays = post.getInt(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, 30);
             env.setConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, retryDays);
 
-            final String permanent = post.get(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410");
+            final String permanent = post.get(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410,-1");
             env.setConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, permanent);
         }
 

@@ -125,7 +125,7 @@
       <dd><input type="text" name="indexReceiveBlockErrors.retryAfterDays" value="#[indexReceiveBlockErrors.retryAfterDays]#" size="4" /> for temporary errors; permanent errors stay blocked.</dd>
 
       <dt class="TableCellDark">Permanent error statuses</dt>
-      <dd><input type="text" name="indexReceiveBlockErrors.permanentStatus" value="#[indexReceiveBlockErrors.permanentStatus]#" size="12" /> comma-separated (default: 404,410)</dd>
+      <dd><input type="text" name="indexReceiveBlockErrors.permanentStatus" value="#[indexReceiveBlockErrors.permanentStatus]#" size="15" /> comma-separated (default: 404,410,-1; -1=DNS/network errors)</dd>
       
       <dt><input type="submit" name="setrwi" class="btn btn-primary" value="Set" /></dt><dd></dd>
       </dl>

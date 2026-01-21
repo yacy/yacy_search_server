@@ -154,7 +154,7 @@ public final class transferURL {
             doublecheck = 0;
             final boolean blockErrors = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS, true);
             final int retryAfterDays = sb.getConfigInt(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, 30);
-            final String permanentStatusStr = sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410");
+            final String permanentStatusStr = sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410,-1");
             final Set<Integer> permanentStatus = new HashSet<Integer>();
             for (String s : permanentStatusStr.split(",")) {
                 try { permanentStatus.add(Integer.parseInt(s.trim())); } catch (NumberFormatException e) {}

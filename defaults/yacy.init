@@ -587,8 +587,9 @@ indexReceiveBlockErrors=true
 indexReceiveBlockErrors.retryAfterDays=30
 
 # Comma-separated list of HTTP status codes considered permanent errors (always block)
-# Default: 404 (Not Found), 410 (Gone)
-indexReceiveBlockErrors.permanentStatus=404,410
+# -1 = DNS/Network errors (UnknownHost, connection failures)
+# 404 = Not Found, 410 = Gone
+indexReceiveBlockErrors.permanentStatus=404,410,-1
 
 # the frequency is the number of links per minute, that the peer allowes
 # _every_ other peer to send to this peer
