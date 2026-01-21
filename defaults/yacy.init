@@ -295,7 +295,7 @@ proxyCacheSize = 4096
 
 # The compression level for cached content
 # Supported values ranging from 0 - no compression (lower CPU, higher disk usage), to 9 - best compression (higher CPU, lower disk use)
-proxyCache.compressionLevel = 6
+proxyCache.compressionLevel = 9
 
 # Timeout value (in milliseconds) for acquiring a synchronization lock on getContent/store Cache operations
 # When timeout occurs, loader should fall back to regular remote resource loading
@@ -723,7 +723,7 @@ recrawlindex_memprereq=1048576
 40_peerseedcycle_memprereq=4194304
 40_peerseedcycle_loadprereq=2.0
 50_localcrawl_idlesleep=2000
-50_localcrawl_busysleep=5
+50_localcrawl_busysleep=10
 50_localcrawl_memprereq=25165824
 50_localcrawl_loadprereq=8.0
 50_localcrawl_isPaused=false
@@ -731,13 +731,13 @@ recrawlindex_memprereq=1048576
 55_autocrawl_busysleep=10000
 55_autocrawl_memprereq=25165824
 55_autocrawl_loadprereq=8.0
-60_remotecrawlloader_idlesleep=2000
-60_remotecrawlloader_busysleep=200
+60_remotecrawlloader_idlesleep=4000
+60_remotecrawlloader_busysleep=800
 60_remotecrawlloader_memprereq=12582912
 60_remotecrawlloader_loadprereq=8.0
 60_remotecrawlloader_isPaused=false
-62_remotetriggeredcrawl_idlesleep=1000
-62_remotetriggeredcrawl_busysleep=50
+62_remotetriggeredcrawl_idlesleep=2000
+62_remotetriggeredcrawl_busysleep=200
 62_remotetriggeredcrawl_memprereq=12582912
 62_remotetriggeredcrawl_loadprereq=8.0
 62_remotetriggeredcrawl_isPaused=false
@@ -773,7 +773,7 @@ reindexSolr_loadprereq=16.0
 # is used to flush the RAM cache, which is the major part of the IO in YaCy
 performanceProfile=defaults/yacy.init
 performanceSpeed=100
-performanceIO=15
+performanceIO=10
 
 # cleanup-process:
 # properties for tasks that are performed during cleanup
@@ -814,13 +814,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. If you want to increase indexing speed, increase this
 # value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
-wordCacheMaxCount = 50000
-
-# Maximum number of references per term in the RWI index
-# If a term has more references than this value, the oldest references will be removed
-# This prevents memory issues with high-frequency terms (stopwords like 'the', 'and', etc.)
-# 0 = disabled (no shrinking), 10000 = recommended for standard installations
-index.maxReferences = 10000
+wordCacheMaxCount = 20000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -1083,7 +1077,7 @@ indexDistribution.maxChunkFails = 1
 # limit of references per term & blob to the younges of this value
 # a value of <= 0 disables this feature (no limit)
 # a value of e.g. 100000 can improve stability and reduce load while searching very popular words
-index.maxReferences = 10000
+index.maxReferences = 0
 
 # Search sequence settings
 # collection:
