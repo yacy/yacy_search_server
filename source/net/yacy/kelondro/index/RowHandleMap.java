@@ -89,12 +89,14 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
     @SuppressWarnings("resource")
     public RowHandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file) throws IOException, SpaceExceededException {
         this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), file.getAbsolutePath());
-        // read the index dump and fill the index
+        // read the index dump and fill the index with optimized batch loading
+        final int recordSize = keylength + idxbytes;
+        final int batchSize = Math.max(8192, (1024 * 1024) / recordSize); // load in batches for better performance
         InputStream is;
         FileInputStream fis = null;
         try {
         	fis = new FileInputStream(file);
-            is = new BufferedInputStream(fis, 1024 * 1024);
+            is = new BufferedInputStream(fis, 4 * 1024 * 1024); // larger buffer for faster I/O
         } catch (final OutOfMemoryError e) {
         	if (fis != null) {
         		/* Reuse if possible the already created FileInputStream */
@@ -105,15 +107,31 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         	}
         }
         try {
-        	if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
-        	final byte[] a = new byte[keylength + idxbytes];
-        	int c;
-        	Row.Entry entry;
-        	while (true) {
-        		c = is.read(a);
-        		if (c <= 0) break;
-        		entry = this.rowdef.newEntry(a); // may be null if a is not well-formed
-        		if (entry != null) this.index.addUnique(entry);
+        	if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is, 65536); // larger buffer for GZIP decompression
+        	
+        	// Use batch loading: read multiple records at once for better performance
+        	final byte[] batch = new byte[recordSize * batchSize];
+        	final byte[] a = new byte[recordSize];
+        	int bytesRead;
+        	long startTime = System.currentTimeMillis();
+        	long recordsLoaded = 0;
+        	
+        	while ((bytesRead = is.read(batch)) > 0) {
+        		// Process batch of records
+        		for (int offset = 0; offset < bytesRead; offset += recordSize) {
+        			if (offset + recordSize > bytesRead) break;
+        			System.arraycopy(batch, offset, a, 0, recordSize);
+        			Row.Entry entry = this.rowdef.newEntry(a); // may be null if a is not well-formed
+        			if (entry != null) {
+        				this.index.addUnique(entry);
+        				recordsLoaded++;
+        			}
+        		}
+        	}
+        	
+        	long loadTime = System.currentTimeMillis() - startTime;
+        	if (loadTime > 1000) { // only log if it takes more than 1 second
+        		ConcurrentLog.info("RowHandleMap", "loaded " + recordsLoaded + " records from " + file.getName() + " in " + loadTime + "ms (batch size: " + batchSize + ")");
         	}
         } finally {
         	is.close();
