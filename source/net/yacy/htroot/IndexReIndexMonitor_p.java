@@ -165,6 +165,18 @@ public class IndexReIndexMonitor_p {
             			}
             			sb.tables.recordAPICall(post, IndexReIndexMonitor_p.SERVLET_NAME, WorkTables.TABLE_API_TYPE_CRAWLER,
             					"Recrawl documents matching selection query : " + recrawlQuery);
+						/* Ensure the recrawl job restarts on peer reboot */
+						final Row recrawlCall = WorkTables.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
+						if (recrawlCall != null) {
+							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "regular");
+							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
+							WorkTables.calculateAPIScheduler(recrawlCall, false);
+							try {
+								sb.tables.update(WorkTables.TABLE_API_NAME, recrawlCall);
+							} catch (final IOException e) {
+								ConcurrentLog.logException(e);
+							}
+						}
             		}
             	} else if(post.containsKey("simulateRecrawl")) {
             		final SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
@@ -207,6 +219,19 @@ public class IndexReIndexMonitor_p {
             		 * because we want to be able to provide a report after its termination */
                     recrawlbt.terminate(false);
                     prop.put("recrawljobrunning", 0);
+					if (sb.tables != null) {
+						final Row recrawlCall = WorkTables.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
+						if (recrawlCall != null) {
+							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
+							recrawlCall.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
+							try {
+								sb.tables.update(WorkTables.TABLE_API_NAME, recrawlCall);
+							} catch (final IOException e) {
+								ConcurrentLog.logException(e);
+							}
+						}
+					}
                 }
             }
 
