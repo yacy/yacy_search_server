@@ -284,9 +284,14 @@ public class HostBalancer implements Balancer {
      */
     @Override
     public String push(final Request entry, final CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
-        if (this.has(entry.url().hash())) return "double occurrence";
-        depthCache.put(entry.url().hash(), entry.depth());
+        // Check only in THIS balancer instance, not in global depthCache
+        // This allows shifting URLs between different balancer instances (REMOTE->LOCAL)
         final String hosthash = entry.url().hosthash();
+        final HostQueue existingQueue = this.queues.get(hosthash);
+        if (existingQueue != null && existingQueue.has(entry.url().hash())) {
+            return "double occurrence in this queue";
+        }
+        depthCache.put(entry.url().hash(), entry.depth());
 
         // try a concurrent push
         HostQueue queue = this.queues.get(hosthash);
