@@ -109,17 +109,17 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
         if (tagname == null || tagname.isEmpty()) return;
 
         if (tagname.equalsIgnoreCase("meta")) {
-            if (tagopts.containsKey("http-equiv")) {
+            if (tagopts.containsKey("charset")) {
+                // parse lines like <meta charset="UTF-8">
+                this.detectedCharset = tagopts.getProperty("charset");
+                this.charsetChanged = true;
+            } else if (tagopts.containsKey("http-equiv")) {
                 final String value = tagopts.getProperty("http-equiv");
                 if (value.equalsIgnoreCase("Content-Type")) {
                     // parse lines like <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
                     final String contentType = tagopts.getProperty("content","");
                     this.detectedCharset = extractCharsetFromMimetypeHeader(contentType);
                     if (this.detectedCharset != null && this.detectedCharset.length() > 0) {
-                        this.charsetChanged = true;
-                    } else if (tagopts.containsKey("charset")) {
-                        // sometimes the charset property is configured as extra attribut. try it ...
-                        this.detectedCharset = tagopts.getProperty("charset");
                         this.charsetChanged = true;
                     }
                 }
