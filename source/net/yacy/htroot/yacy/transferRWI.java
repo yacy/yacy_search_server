@@ -28,10 +28,14 @@
 
 package net.yacy.htroot.yacy;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.apache.solr.common.SolrDocument;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -55,6 +59,7 @@ import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -75,6 +80,7 @@ public final class transferRWI {
         prop.put("unknownURL", "");
         prop.put("pause", 60000);
         String result = "";
+        final StringBuilder errorURLs = new StringBuilder(4000);
         if ((post == null) || (env == null)) {
             result = "post or env is null!";
             logWarning(contentType, result);
@@ -127,7 +133,6 @@ public final class transferRWI {
         int pause = 0;
         result = "ok";
         final StringBuilder unknownURLs = new StringBuilder(6000);
-
         final double load = Memory.getSystemLoadAverage();
         final float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f);
         if (load > maxload) {
@@ -188,6 +193,7 @@ public final class transferRWI {
             final ArrayList<String> wordhashes = new ArrayList<String>();
             int received = 0;
             int blocked = 0;
+            int blockedErrors = 0;
             int count = 0;
             final Set<String> testids = new HashSet<String>();
             while (it.hasNext()) {
@@ -222,6 +228,75 @@ public final class transferRWI {
                     continue;
                 }
 
+                // reject RWI entries for URLs we already know are broken
+                final String urlHashStr = ASCII.String(urlHash);
+                final boolean blockErrors = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS, true);
+                if (blockErrors && sb.index.fulltext().exists(urlHashStr)) {
+                    try {
+                        final SolrDocument errorCheck = sb.index.fulltext().getDefaultConnector().getDocumentById(urlHashStr,
+                                CollectionSchema.httpstatus_i.getSolrFieldName(), CollectionSchema.failreason_s.getSolrFieldName(),
+                                CollectionSchema.load_date_dt.getSolrFieldName());
+                        if (errorCheck != null) {
+                            final Object httpstatus = errorCheck.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName());
+                            final Object failreason = errorCheck.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
+                            if (httpstatus != null && failreason != null && failreason.toString().length() > 0) {
+                                int hs = (httpstatus instanceof Integer) ? (Integer) httpstatus : Integer.parseInt(httpstatus.toString());
+                                if (hs != 200) {
+                                    boolean shouldBlock = false;
+                                    
+                                    // Get configuration
+                                    final int retryAfterDays = sb.getConfigInt(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, 30);
+                                    final String permanentStatusStr = sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410,-1");
+                                    final Set<Integer> permanentStatus = new HashSet<Integer>();
+                                    for (String s : permanentStatusStr.split(",")) {
+                                        try { permanentStatus.add(Integer.parseInt(s.trim())); } catch (NumberFormatException e) {}
+                                    }
+                                    final long retryAfterMillis = retryAfterDays * 24L * 60L * 60L * 1000L;
+                                    final long now = System.currentTimeMillis();
+                                    
+                                    // Permanent errors (404, 410) - always block
+                                    if (permanentStatus.contains(hs)) {
+                                        shouldBlock = true;
+                                        if (Network.log.isFine()) Network.log.fine("transferRWI: rejected RWI for known permanent error URL hash '" + urlHashStr + "' (httpstatus=" + hs + ") from peer " + otherPeerName);
+                                    } else {
+                                        // Temporary errors - check age
+                                        final Object loadDate = errorCheck.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+                                        if (loadDate != null) {
+                                            try {
+                                                final Date errorDate = (loadDate instanceof Date) ? (Date) loadDate : 
+                                                    new Date(Long.parseLong(loadDate.toString()));
+                                                final long errorAge = now - errorDate.getTime();
+                                                
+                                                if (errorAge < retryAfterMillis) {
+                                                    shouldBlock = true;
+                                                    if (Network.log.isFine()) Network.log.fine("transferRWI: rejected RWI for known temporary error URL hash '" + urlHashStr + "' (httpstatus=" + hs + ", age=" + (errorAge / (24*60*60*1000)) + " days) from peer " + otherPeerName);
+                                                } else {
+                                                    if (Network.log.isFine()) Network.log.fine("transferRWI: allowing retry for URL hash '" + urlHashStr + "' (error age=" + (errorAge / (24*60*60*1000)) + " days exceeds retry threshold) from peer " + otherPeerName);
+                                                }
+                                            } catch (Exception e) {
+                                                // If we can't parse the date, treat as permanent error to be safe
+                                                shouldBlock = true;
+                                            }
+                                        } else {
+                                            // No load_date available - treat as permanent error
+                                            shouldBlock = true;
+                                        }
+                                    }
+                                    
+                                    if (shouldBlock) {
+                                        errorURLs.append(urlHashStr).append(',');
+                                        blocked++;
+                                        blockedErrors++;
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (final IOException e) {
+                        // ignore Solr errors during error URL check
+                    }
+                }
+
                 // learn entry
                 try {
                     sb.index.storeRWI(ASCII.getBytes(wordHash), iEntry);
@@ -251,14 +326,16 @@ public final class transferRWI {
                 unknownURLs.append(UTF8.String(bit.next())).append(',');
             }
             if (unknownURLs.length() > 0) { unknownURLs.setLength(unknownURLs.length() - 1); }
+            if (errorURLs.length() > 0) { errorURLs.setLength(errorURLs.length() - 1); }
+            
             if (wordhashes.isEmpty() || received == 0) {
-                sb.getLog().info("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
+                sb.getLog().info("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs, reporting " + blockedErrors + " error URLs");
             } else {
                 final String firstHash = wordhashes.get(0);
                 final String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (Distribution.horizontalDHTDistance(firstHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash)) + Distribution.horizontalDHTDistance(lastHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash))) / 2;
-                sb.getLog().info("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received+ " URLs from " + otherPeerName);
-                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received + " URLs from " + otherPeerName, "", otherPeer.hash));
+                sb.getLog().info("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + " (error " + blockedErrors + "), requesting " + unknownURL.size() + "/" + received+ " URLs, reporting " + blockedErrors + " error URLs from " + otherPeerName);
+                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + " (error " + blockedErrors + "), requesting " + unknownURL.size() + "/" + received + " URLs, reporting " + blockedErrors + " error URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
 
@@ -266,6 +343,7 @@ public final class transferRWI {
         }
 
         prop.put("unknownURL", unknownURLs.toString());
+        prop.put("errorURL", errorURLs.toString());
         prop.put("result", result);
         prop.put("pause", pause);
 

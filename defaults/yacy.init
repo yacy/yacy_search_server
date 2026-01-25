@@ -577,6 +577,20 @@ allowReceiveIndex=true
 allowReceiveIndex.search=true
 indexReceiveBlockBlacklist=true
 
+# Proactive Error-URL Rejection: block distribution of known broken URLs via DHT
+# Set to false to disable this feature (opt-out)
+indexReceiveBlockErrors=true
+
+# How many days to block error URLs before allowing retry
+# Permanent errors (404, 410) are always blocked
+# Temporary errors (5xx, timeouts) are blocked for this many days
+indexReceiveBlockErrors.retryAfterDays=30
+
+# Comma-separated list of HTTP status codes considered permanent errors (always block)
+# -1 = DNS/Network errors (UnknownHost, connection failures)
+# 404 = Not Found, 410 = Gone
+indexReceiveBlockErrors.permanentStatus=404,410,-1
+
 # the frequency is the number of links per minute, that the peer allowes
 # _every_ other peer to send to this peer
 defaultWordReceiveFrequency=100
