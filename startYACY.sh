@@ -33,7 +33,8 @@ then
     echo "You can also set a path to java manually, in \$JAVA option of $0 script."
     #Cron supports setting the path in 
     #echo "Has this script been invoked by CRON?"
-    #echo "if so, please set PATH in the crontab, or set the correct path in the variable in this script."
+    #echo "if so, please set PATH in the crontab, by running 'crontab -e' and editing the path to java"
+	#echo "or set the correct path in the variable in this script."
     exit 1
 fi
 

@@ -64,6 +64,16 @@ public class IndexFederated_p {
                 final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
                 sb.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
+
+            // DHT error URL blocking settings
+            final boolean blockErrors = post.getBoolean(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS);
+            env.setConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS, blockErrors);
+
+            final int retryDays = post.getInt(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, 30);
+            env.setConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, retryDays);
+
+            final String permanent = post.get(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410,-1");
+            env.setConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, permanent);
         }
 
         if (post != null && post.containsKey("setcitation")) {
@@ -222,6 +232,11 @@ public class IndexFederated_p {
         prop.put("core.service.rwi.checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_WEBGRAPH + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false) ? 1 : 0);
+
+                // DHT error URL blocking settings
+                prop.put(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS + ".checked", env.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS, true) ? 1 : 0);
+                prop.put(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, env.getConfigInt(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, 30));
+                prop.put(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, env.getConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410"));
 		prop.put("solr.indexing.solrremote.checked",
 				env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
 						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT) ? 1 : 0);

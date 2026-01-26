@@ -115,7 +115,8 @@ var numberedPage = function(pageNumber) {
   // Check if the pageNumber is too high before updating the currentPage
   var checkedPageNumber;
   if(allItems.length > 0) {
-	  checkedPageNumber = Math.min(pageNumber, Math.floor(allItems.length / requestedResults));
+	  //checkedPageNumber = Math.min(pageNumber, Math.floor(allItems.length / requestedResults));
+      checkedPageNumber = Math.min(pageNumber, Math.floor((allItems.length - 1) / requestedResults));
   } else {
 	  checkedPageNumber = 0;
   }
@@ -327,16 +328,22 @@ var updateSidebar = function() {
  */
 var processLatestInfo = function(latestInfo) {
 	if (latestInfo.feedRunning) {
-		$.get("yacysearchlatestinfo.json", {
-			eventID : theEventID
-		}, processItem);
+		$.get(
+			"yacysearchitem.html",
+			{
+				eventID : theEventID,
+				item: itemCount
+			},
+			processItem
+		);
 	} else {
 		fetchingResults = false;
 	}
 }
 
 var processItem = function(data) {
-  var newItem = $(data);
+  var $data = $(data);
+  var newItem = $data.is(".searchresults") ? $data : $data.find(".searchresults").first();
   newItem.addClass("hidden fresh");
 
   /* If we didn't get a valid response from YaCy, wait a bit and check if the results feeders are still running on the server side */

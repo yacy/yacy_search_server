@@ -120,6 +120,33 @@
         padding: 0;
       }
 
+      .think-block {
+        margin: 8px 0;
+        border: 1px solid #d6dbe5;
+        border-radius: 8px;
+        background: #f5f7fb;
+        padding: 6px 10px;
+      }
+
+      .think-block summary {
+        cursor: pointer;
+        font-weight: 700;
+        list-style: none;
+      }
+
+      .think-block summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .think-block[open] summary {
+        margin-bottom: 6px;
+      }
+
+      .think-content {
+        color: #394b59;
+        font-size: 0.85rem;
+      }
+
       .chat-body.markdown h1,
       .chat-body.markdown h2,
       .chat-body.markdown h3,
@@ -165,6 +192,77 @@
         border-left-style: solid;
         border-color: #d1d9e6;
         color: #2c3e50;
+      }
+
+      .search-default-control {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 1px 0 2px 0;
+      }
+
+      .search-default-options {
+        --segments: 2;
+        --active: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0px;
+        padding: 0px;
+        border: 1px solid #c3cbd9;
+        border-radius: 999px;
+        background: #eef2f7;
+        overflow: hidden;
+        width: 500px;
+        max-width: 100%;
+        height: 22px;
+      }
+
+      .search-default-options input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .search-default-options label {
+        flex: 1;
+        padding: 0;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 500;
+        line-height: 1.1;
+        color: #2c3e50;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        box-sizing: border-box;
+        transform: translateY(2px);
+      }
+
+      .search-default-options input:checked + label {
+        color: #ffffff;
+      }
+
+      .search-default-options .search-default-slider {
+        position: absolute;
+        top: 1px;
+        bottom: 1px;
+        left: 1px;
+        width: calc((100% - 2px) / var(--segments, 2));
+        background: #5092CF;
+        border-radius: 999px;
+        transform: translateX(calc(var(--active, 0) * 100%));
+        transition: transform 0.2s;
+        z-index: 0;
+      }
+
+      .search-default-options .is-future {
+        display: none;
       }
 
       .composer-main {
@@ -556,6 +654,18 @@
 
       <div class="chat-panel">
         <div class="chat-flow">
+          <div class="search-default-control">
+            <span>Default Dialog Augmentation:</span>
+            <div class="search-default-options" id="searchDefaultOptions" role="radiogroup" aria-label="Attach search results by default">
+              <input type="radio" id="searchDefaultNone" name="searchDefault" value="no"/>
+              <label for="searchDefaultNone">no search, allow attachments</label>
+              <input type="radio" id="searchDefaultLocal" name="searchDefault" value="local" checked="checked"/>
+              <label for="searchDefaultLocal">use local search</label>
+              <input type="radio" id="searchDefaultGlobal" name="searchDefault" value="global"/>
+              <label for="searchDefaultGlobal">use global search</label>
+              <span class="search-default-slider" aria-hidden="true"></span>
+            </div>
+          </div>
           <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
           <form id="chatForm">
             <fieldset class="chat-turn user">
@@ -611,6 +721,12 @@
     const defaultApiHost = '';
 
     const STORAGE_KEY = 'yacychat_recent_pairs';
+    const SEARCH_DEFAULT_KEY = 'yacychat_search_default';
+    const SEARCH_DEFAULTS = {
+        none: 'no',
+        local: 'local',
+        global: 'global'
+    };
 
     const state = {
         messages: [],
@@ -621,7 +737,8 @@
         },
         busy: false,
         attachment: null,
-        searchMode: false,
+        searchMode: SEARCH_DEFAULTS.none,
+        searchDefault: SEARCH_DEFAULTS.local,
         assistantSeen: false,
         showSystem: false
     };
@@ -643,7 +760,11 @@
         uploadChatButton: document.getElementById('uploadChatButton'),
         uploadChatInput: document.getElementById('uploadChatInput'),
         toggleSystemButton: document.getElementById('toggleSystemButton'),
-        composerMain: document.getElementById('composerMain')
+        composerMain: document.getElementById('composerMain'),
+        searchDefaultOptions: document.getElementById('searchDefaultOptions'),
+        searchDefaultNone: document.getElementById('searchDefaultNone'),
+        searchDefaultLocal: document.getElementById('searchDefaultLocal'),
+        searchDefaultGlobal: document.getElementById('searchDefaultGlobal')
     };
 
     const IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg']);
@@ -822,12 +943,174 @@
         }
     }
 
+    function stripThinkBlocks(text) {
+        if (!text || typeof text !== 'string') return text || '';
+        const ranges = buildFenceRanges(text);
+        const openPattern = /<think\s*>/ig;
+        const closePattern = /<\/think\s*>/ig;
+        let result = '';
+        let cursor = 0;
+        while (cursor < text.length) {
+            const open = findTagOutsideFences(text, cursor, openPattern, ranges);
+            if (!open) {
+                result += text.slice(cursor);
+                break;
+            }
+            result += text.slice(cursor, open.index);
+            const close = findTagOutsideFences(text, open.end, closePattern, ranges);
+            if (!close) {
+                break;
+            }
+            cursor = close.end;
+        }
+        return result;
+    }
+
+    function stripThinkFromContent(content) {
+        if (typeof content === 'string') return stripThinkBlocks(content);
+        if (Array.isArray(content)) {
+            return content.map(part => {
+                if (part?.type === 'text' && typeof part.text === 'string') {
+                    return { ...part, text: stripThinkBlocks(part.text) };
+                }
+                return part;
+            });
+        }
+        if (content && typeof content === 'object' && typeof content.text === 'string') {
+            return { ...content, text: stripThinkBlocks(content.text) };
+        }
+        return content;
+    }
+
+    function resolveThinkDefaultOpen(container) {
+        const index = Number.parseInt(container?.dataset?.messageIndex || '', 10);
+        const message = Number.isNaN(index) ? null : state.messages[index];
+        const explicitOpen = container?.dataset?.thinkOpen;
+        if (explicitOpen === 'true') return true;
+        if (explicitOpen === 'false') return false;
+        if (typeof message?.thinkOpen === 'boolean') return message.thinkOpen;
+        if (container?.dataset?.thinkAutoClosed === 'true') return false;
+        return container?.dataset?.streaming === 'true';
+    }
+
+    function buildFenceRanges(text) {
+        const ranges = [];
+        if (!text || typeof text !== 'string') return ranges;
+        let inFence = false;
+        let fenceChar = '';
+        let fenceStart = 0;
+        let offset = 0;
+        const lines = text.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const fenceMatch = line.match(/^\s*(```+|~~~+)/);
+            if (fenceMatch) {
+                const marker = fenceMatch[1];
+                if (!inFence) {
+                    inFence = true;
+                    fenceChar = marker[0];
+                    fenceStart = offset;
+                } else if (marker[0] === fenceChar) {
+                    inFence = false;
+                    ranges.push([fenceStart, offset + line.length + 1]);
+                    fenceChar = '';
+                }
+            }
+            offset += line.length + 1;
+        }
+        if (inFence) {
+            ranges.push([fenceStart, text.length]);
+        }
+        return ranges;
+    }
+
+    function isIndexInFence(index, ranges) {
+        return ranges.some(range => index >= range[0] && index < range[1]);
+    }
+
+    function findTagOutsideFences(text, start, pattern, ranges) {
+        const regex = new RegExp(pattern.source, pattern.flags);
+        regex.lastIndex = start;
+        let match = regex.exec(text);
+        while (match) {
+            if (!isIndexInFence(match.index, ranges)) {
+                return { index: match.index, end: regex.lastIndex, match };
+            }
+            regex.lastIndex = match.index + 1;
+            match = regex.exec(text);
+        }
+        return null;
+    }
+
+    function hasThinkCloseOutsideFences(text) {
+        if (!text || typeof text !== 'string') return false;
+        const ranges = buildFenceRanges(text);
+        return !!findTagOutsideFences(text, 0, /<\/think\s*>/ig, ranges);
+    }
+
+    function renderAssistantContent(text, defaultOpen) {
+        const source = typeof text === 'string' ? text : '';
+        if (!source) return '';
+        const openRe = /<think\s*>/ig;
+        const closeRe = /<\/think\s*>/ig;
+        const ranges = buildFenceRanges(source);
+        let html = '';
+        let cursor = 0;
+        while (cursor < source.length) {
+            const openMatch = findTagOutsideFences(source, cursor, openRe, ranges);
+            if (!openMatch) {
+                html += renderMarkdown(source.slice(cursor));
+                break;
+            }
+            const openIndex = openMatch.index;
+            const openEnd = openMatch.end;
+            if (openIndex > cursor) {
+                html += renderMarkdown(source.slice(cursor, openIndex));
+            }
+            const closeMatch = findTagOutsideFences(source, openEnd, closeRe, ranges);
+            const closeIndex = closeMatch ? closeMatch.index : -1;
+            const thinkBody = closeIndex === -1
+                ? source.slice(openEnd)
+                : source.slice(openEnd, closeIndex);
+            const openAttr = defaultOpen ? ' open="open"' : '';
+            html += `<details class="think-block"${openAttr}><summary>Model thoughts</summary><div class="think-content">${renderMarkdown(thinkBody)}</div></details>`;
+            if (!closeMatch) {
+                break;
+            }
+            cursor = closeMatch.end;
+        }
+        return html;
+    }
+
+    function bindThinkToggles(container) {
+        if (!container) return;
+        const detailsNodes = Array.from(container.querySelectorAll('details.think-block'));
+        if (!detailsNodes.length) return;
+        const index = Number.parseInt(container.dataset.messageIndex || '', 10);
+        detailsNodes.forEach(details => {
+            details.addEventListener('toggle', () => {
+                if (!Number.isNaN(index)) {
+                    const targetMessage = state.messages[index];
+                    if (targetMessage) {
+                        targetMessage.thinkOpen = details.open;
+                        persistConversation();
+                    }
+                } else {
+                    container.dataset.thinkOpen = details.open ? 'true' : 'false';
+                }
+            });
+        });
+    }
+
     function applyMessageContent(target, role, text) {
         if (!target) return;
         if (role === 'assistant') {
             target.classList.add('markdown', 'markdown-body');
             target.classList.remove('plain-text');
-            target.innerHTML = renderMarkdown(text);
+            target.dataset.rawMarkdown = text || '';
+            const defaultOpen = resolveThinkDefaultOpen(target);
+            target.innerHTML = renderAssistantContent(text, defaultOpen);
+            bindThinkToggles(target);
             rehighlightCode(target);
         } else {
             target.classList.add('plain-text');
@@ -878,6 +1161,9 @@
 
         const body = document.createElement('div');
         body.className = 'chat-body';
+        if (typeof messageIndex === 'number') {
+            body.dataset.messageIndex = String(messageIndex);
+        }
         applyMessageContent(body, role, text);
         entry.appendChild(body);
 
@@ -897,7 +1183,7 @@
             copyBtn.className = 'copy-button';
             copyBtn.title = 'Copy answer';
             copyBtn.innerHTML = '<span class="glyphicon glyphicon-copy" aria-hidden="true"></span>';
-            copyBtn.addEventListener('click', () => copyAssistant(body.textContent));
+            copyBtn.addEventListener('click', () => copyAssistant(body));
             entry.appendChild(copyBtn);
         }
         if (role === 'user' && typeof messageIndex === 'number') {
@@ -926,18 +1212,22 @@
         return body;
     }
 
-    function clearAttachment() {
+    function clearAttachment(options = {}) {
+        const { applyDefault = true } = options;
         state.attachment = null;
-        state.searchMode = false;
+        state.searchMode = SEARCH_DEFAULTS.none;
         dom.fileInput.value = '';
         dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         dom.attachmentRow.classList.remove('has-attachment');
         dom.attachmentRow.classList.remove('search-mode');
         closeAttachmentPopover();
+        if (applyDefault) {
+            applySearchDefaultToComposer();
+        }
     }
 
     function setComposerAttachment(attachment) {
-        state.searchMode = false;
+        state.searchMode = SEARCH_DEFAULTS.none;
         dom.attachmentRow.classList.remove('search-mode');
         state.attachment = attachment ? cloneAttachment(attachment) : null;
         if (state.attachment) {
@@ -954,13 +1244,90 @@
         if (isLoading) {
             dom.attachmentFilename.textContent = 'Loading attachment...';
         } else if (!state.attachment) {
+            dom.attachmentFilename.textContent = state.searchMode !== SEARCH_DEFAULTS.none ? 'Attach Search Results' : 'Attach PNG/JPG or text (.txt/.md/.tex)';
+        }
+    }
+
+    function setSearchModeActive(mode) {
+        let nextMode = mode;
+        if (mode === true) {
+            nextMode = state.searchDefault === SEARCH_DEFAULTS.none ? SEARCH_DEFAULTS.local : state.searchDefault;
+        }
+        if (!nextMode || nextMode === false) {
+            nextMode = SEARCH_DEFAULTS.none;
+        }
+        if (nextMode !== SEARCH_DEFAULTS.local && nextMode !== SEARCH_DEFAULTS.global) {
+            nextMode = SEARCH_DEFAULTS.none;
+        }
+        state.searchMode = nextMode;
+        state.attachment = null;
+        dom.fileInput.value = '';
+        dom.attachmentRow.classList.remove('has-attachment');
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            dom.attachmentRow.classList.add('search-mode');
+            dom.attachmentFilename.textContent = 'Attach Search Results';
+        } else {
+            dom.attachmentRow.classList.remove('search-mode');
             dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         }
     }
 
-    async function copyAssistant(text) {
+    function applySearchDefaultToComposer() {
+        if (!dom.attachmentRow || state.attachment) return;
+        if (state.searchDefault !== SEARCH_DEFAULTS.none) {
+            setSearchModeActive(state.searchDefault);
+        } else {
+            setSearchModeActive(SEARCH_DEFAULTS.none);
+        }
+    }
+
+    function updateSearchDefaultSlider() {
+        if (!dom.searchDefaultOptions) return;
+        const inputs = Array.from(dom.searchDefaultOptions.querySelectorAll('input[name="searchDefault"]'));
+        const activeIndex = inputs.findIndex(input => input.checked);
+        const segments = inputs.length || 2;
+        dom.searchDefaultOptions.style.setProperty('--segments', segments);
+        dom.searchDefaultOptions.style.setProperty('--active', activeIndex < 0 ? 0 : activeIndex);
+    }
+
+    function persistSearchDefault() {
         try {
-            await navigator.clipboard.writeText(text || '');
+            localStorage.setItem(SEARCH_DEFAULT_KEY, state.searchDefault);
+        } catch (err) {
+            console.warn('Failed to persist search default', err);
+        }
+    }
+
+    function loadSearchDefault() {
+        let stored = null;
+        try {
+            stored = localStorage.getItem(SEARCH_DEFAULT_KEY);
+        } catch (err) {
+            console.warn('Failed to load search default', err);
+        }
+        if (stored === 'none') {
+            stored = SEARCH_DEFAULTS.none;
+        }
+        if (stored && Object.values(SEARCH_DEFAULTS).includes(stored)) {
+            state.searchDefault = stored;
+        }
+        if (dom.searchDefaultNone && state.searchDefault === SEARCH_DEFAULTS.none) {
+            dom.searchDefaultNone.checked = true;
+        } else if (dom.searchDefaultLocal && state.searchDefault === SEARCH_DEFAULTS.local) {
+            dom.searchDefaultLocal.checked = true;
+        } else if (dom.searchDefaultGlobal && state.searchDefault === SEARCH_DEFAULTS.global) {
+            dom.searchDefaultGlobal.checked = true;
+        }
+        updateSearchDefaultSlider();
+        applySearchDefaultToComposer();
+    }
+
+    async function copyAssistant(target) {
+        const raw = target?.dataset?.rawMarkdown;
+        const source = typeof raw === 'string' ? raw : (target?.textContent || '');
+        const cleaned = stripThinkBlocks(source);
+        try {
+            await navigator.clipboard.writeText(cleaned || '');
         } catch (err) {
             console.warn('Clipboard copy failed', err);
         }
@@ -1093,21 +1460,30 @@
     }
 
     async function streamChat(userMessage, assistantNode, options = {}) {
-        const { onFirstToken, includeUserInPayload = true, pushUserToState = true } = options;
+        const { onFirstToken, includeUserInPayload = true, pushUserToState = true, currentUserIndex = -1 } = options;
+        const requestStart = performance.now();
         ensureSystemMessage();
-        const sanitizedMessages = state.messages.map(stripMessageForApi).filter(Boolean);
+        const sanitizedMessages = state.messages
+            .map((msg, index) => {
+                const hasAttachment = msg?.role === 'user' && (Array.isArray(msg.content) || msg.attachment);
+                const textOnly = index !== currentUserIndex && !hasAttachment;
+                return stripMessageForApi(msg, { textOnly });
+            })
+            .filter(Boolean);
         const sanitizedUserMessage = includeUserInPayload ? stripMessageForApi(userMessage) : null;
         const payload = {
             model: state.config.model,
             messages: sanitizedUserMessage ? [...sanitizedMessages, sanitizedUserMessage] : sanitizedMessages,
             stream: true
         };
+        console.debug('[yacychat] payload search modes', payload.messages.map(m => ({ role: m.role, search: m.search })));
         const headers = { 'Content-Type': 'application/json' };
         const response = await fetch(state.config.apiHost.replace(/\/$/, '') + '/v1/chat/completions', {
             method: 'POST',
             headers,
             body: JSON.stringify(payload)
         });
+        console.debug('[yacychat] request ms', Math.round(performance.now() - requestStart));
         if (!response.ok) {
             if (response.status === 429) {
                 throw new Error('Rate limit reached: please wait and try again. The server is protecting itself from overload.');
@@ -1123,6 +1499,12 @@
         let sawFirstDelta = false;
         let focusShown = false;
         let searchApplied = false;
+        let thinkAutoClosed = false;
+        let thinkAutoCloseFired = false;
+        let thinkAutoCloseTimer = null;
+        if (assistantNode) {
+            assistantNode.dataset.streaming = 'true';
+        }
         if (typeof onFirstToken === 'function' && !focusShown) {
             focusShown = true;
             onFirstToken();
@@ -1136,11 +1518,12 @@
             const searchName = parsed['search-filename'];
             const searchBase64 = parsed['search-text-base64'];
             if (!searchName || !searchBase64) return;
+            console.debug('[yacychat] received search attachment', { searchName, size: searchBase64.length, ms: Math.round(performance.now() - requestStart) });
             const dataUrl = `data:text/markdown;base64,${searchBase64}`;
             const textContent = base64ToUtf8(searchBase64);
             for (let i = state.messages.length - 1; i >= 0; i--) {
                 const msg = state.messages[i];
-                if (msg && msg.role === 'user' && msg.search) {
+                if (msg && msg.role === 'user' && msg.search && msg.search !== SEARCH_DEFAULTS.none) {
                     msg.attachment = {
                         kind: 'text',
                         name: searchName,
@@ -1185,6 +1568,30 @@
                         }
                     }
                     assistantText += delta;
+                    if (!thinkAutoClosed && hasThinkCloseOutsideFences(assistantText)) {
+                        thinkAutoClosed = true;
+                        if (assistantNode) {
+                            assistantNode.dataset.thinkAutoClosing = 'true';
+                        }
+                        if (thinkAutoCloseTimer) {
+                            clearTimeout(thinkAutoCloseTimer);
+                        }
+                        thinkAutoCloseTimer = window.setTimeout(() => {
+                            thinkAutoCloseFired = true;
+                            if (assistantNode) {
+                                assistantNode.dataset.thinkAutoClosing = 'false';
+                                assistantNode.dataset.thinkAutoClosed = 'true';
+                                assistantNode.dataset.thinkOpen = 'false';
+                                applyMessageContent(assistantNode, 'assistant', assistantText);
+                            }
+                            const last = state.messages[state.messages.length - 1];
+                            if (last && last.role === 'assistant' && last.content === assistantText) {
+                                last.thinkOpen = false;
+                                persistConversation();
+                                renderConversation({ skipScroll: true });
+                            }
+                        }, 2000);
+                    }
                     applyMessageContent(assistantNode, 'assistant', assistantText);
                     performAutoScroll();
                 }
@@ -1224,7 +1631,14 @@
         if (pushUserToState) {
             state.messages.push(userMessage);
         }
-        state.messages.push({ role: 'assistant', content: assistantText });
+        const explicitThinkOpen = assistantNode?.dataset?.thinkOpen;
+        const storedThinkOpen = explicitThinkOpen === 'true'
+            ? true
+            : explicitThinkOpen === 'false'
+                ? false
+                : (thinkAutoClosed && !thinkAutoCloseFired);
+        state.messages.push({ role: 'assistant', content: assistantText, thinkOpen: storedThinkOpen });
+        console.debug('[yacychat] response chars', assistantText.length, 'total ms', Math.round(performance.now() - requestStart));
         state.assistantSeen = true;
         persistConversation();
         updateClearChatVisibility();
@@ -1255,19 +1669,39 @@
                     filename: state.attachment.name
                 });
             }
-            return {
-                role: 'user',
-                content: parts,
-                search: !!state.searchMode
-            };
+            const message = { role: 'user', content: parts };
+            if (state.searchMode !== SEARCH_DEFAULTS.none) {
+                message.search = state.searchMode;
+            }
+            return message;
         }
-        return { role: 'user', content: promptText, search: !!state.searchMode };
+        const message = { role: 'user', content: promptText };
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            message.search = state.searchMode;
+        }
+        return message;
     }
 
-    function stripMessageForApi(message) {
+    function stripMessageForApi(message, options = {}) {
         if (!message) return null;
-        const sanitized = { role: message.role, content: message.content };
-        if (message.search) sanitized.search = true;
+        const { textOnly = false } = options;
+        let content = message.content;
+        if (textOnly) {
+            content = messageText(content);
+        }
+        if (message.role === 'assistant') {
+            if (textOnly || typeof content === 'string') {
+                content = stripThinkBlocks(String(content || ''));
+            } else {
+                content = stripThinkFromContent(content);
+            }
+        }
+        const sanitized = { role: message.role, content };
+        if (message.search === true) {
+            sanitized.search = SEARCH_DEFAULTS.local;
+        } else if (message.search === SEARCH_DEFAULTS.local || message.search === SEARCH_DEFAULTS.global) {
+            sanitized.search = message.search;
+        }
         return sanitized;
     }
 
@@ -1311,9 +1745,18 @@
 
     function persistConversation() {
         try {
+            const messages = state.messages.map(msg => {
+                if (!msg) return msg;
+                const safe = { ...msg };
+                if (safe.attachment) {
+                    const { kind, name, mime, size } = safe.attachment;
+                    safe.attachment = { kind, name, mime, size };
+                }
+                return safe;
+            });
             const payload = {
                 model: state.config.model,
-                messages: state.messages
+                messages
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
         } catch (err) {
@@ -1814,12 +2257,15 @@
             userMessage.attachment = userAttachment;
         }
         // add user message to state immediately so edit/trim is available right away
-        state.messages.push({
+        const userEntry = {
             role: 'user',
             content: userMessage.content,
-            attachment: userAttachment,
-            search: !!state.searchMode
-        });
+            attachment: userAttachment
+        };
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            userEntry.search = state.searchMode;
+        }
+        state.messages.push(userEntry);
         const userIndex = state.messages.length - 1;
         const preview = formatUserPreview(prompt);
         state.busy = true;
@@ -1830,7 +2276,7 @@
         resizeComposer();
         const assistantNode = appendMessage('assistant', 'waiting for an answer...');
         try {
-            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer, includeUserInPayload: false, pushUserToState: false });
+            await streamChat(userMessage, assistantNode, { onFirstToken: showComposer, includeUserInPayload: false, pushUserToState: false, currentUserIndex: userIndex });
         } catch (err) {
             appendMessage('system', `Error: ${err.message}`);
             showComposer();
@@ -1845,15 +2291,13 @@
         dom.fileInput.click();
     });
     dom.searchButton?.addEventListener('click', () => {
-        state.searchMode = true;
-        state.attachment = null;
-        dom.attachmentRow.classList.remove('has-attachment');
-        dom.attachmentRow.classList.add('search-mode');
-        dom.attachmentFilename.textContent = 'Attach Search Results';
+        const mode = state.searchDefault === SEARCH_DEFAULTS.none ? SEARCH_DEFAULTS.local : state.searchDefault;
+        setSearchModeActive(mode);
     });
     dom.fileInput.addEventListener('change', handleFileChange);
     dom.clearFileButton.addEventListener('click', () => {
-        clearAttachment();
+        const allowDefault = !(state.searchMode !== SEARCH_DEFAULTS.none && !state.attachment);
+        clearAttachment({ applyDefault: allowDefault });
     });
     dom.clearChatButton?.addEventListener('click', clearChatHistory);
     dom.downloadChatButton?.addEventListener('click', downloadChat);
@@ -1862,6 +2306,16 @@
     dom.toggleSystemButton?.addEventListener('click', () => {
         state.showSystem = !state.showSystem;
         renderConversation();
+    });
+    dom.searchDefaultOptions?.addEventListener('change', event => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        if (target.name !== 'searchDefault') return;
+        if (!Object.values(SEARCH_DEFAULTS).includes(target.value)) return;
+        state.searchDefault = target.value;
+        updateSearchDefaultSlider();
+        persistSearchDefault();
+        applySearchDefaultToComposer();
     });
     window.addEventListener('scroll', closeAttachmentPopover);
 
@@ -1902,6 +2356,7 @@
     });
     window.addEventListener('resize', resizeComposer);
 
+    loadSearchDefault();
     hydrateConversation();
     updateSystemToggleButton();
     resizeComposer();

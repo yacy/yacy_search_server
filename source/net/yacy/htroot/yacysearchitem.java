@@ -168,7 +168,21 @@ public class yacysearchitem {
 
             // generate result object
             final URIMetadataNode result = theSearch.oneResult(item, timeout);
-            if (result == null) return prop; // no content
+            if (result == null) {
+                ConcurrentLog.info(
+                    "yacysearchitem",
+                    "NO RESULT: eventID="
+                        + eventID
+                        + " item="
+                        + item
+                        + " timeout="
+                        + timeout
+                        + " resultCount="
+                        + theSearch.getResultCount()
+                        + " feedRunning="
+                        + (!theSearch.isFeedingFinished()));
+                return prop; // no content
+            }
             final String resultUrlstring = result.urlstring();
             final DigestURL resultURL = result.url();
             final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
@@ -769,28 +783,32 @@ public class yacysearchitem {
 		    final String imageUrlExt = MultiProtocolURL.getFileExtension(image.imageUrl.getFileName());
 		    final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
-		    final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
+		    String license = ""; // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
 		    /* Image format ouput for ViewImage servlet : default is png, except with gif and svg images */
 		    final String viewImageExt = !imageUrlExt.isEmpty() && ImageViewer.isBrowserRendered(imageUrlExt) ? imageUrlExt : "png";
 		    /* Thumb URL */
-			final StringBuilder thumbURLBuilder = new StringBuilder("ViewImage.").append(viewImageExt).append("?maxwidth=")
+		    final StringBuilder thumbURLBuilder = new StringBuilder("ViewImage.").append(viewImageExt).append("?maxwidth=")
 					.append(DEFAULT_IMG_WIDTH).append("&maxheight=").append(DEFAULT_IMG_HEIGHT)
 					.append("&isStatic=true&quadratic");
 		    /* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
+		    final String thumbURL;
+		    final String fullPreviewURL;
 		    if(fullViewingRights) {
 		    	thumbURLBuilder.append("&url=").append(imageUrlstring);
+		    	thumbURL = thumbURLBuilder.toString();
+		    	/* Full size preview URL */
+		    	fullPreviewURL = "ViewImage." + viewImageExt + "?isStatic=true&url=" + imageUrlstring;
 		    } else {
-		    	thumbURLBuilder.append("&code=").append(URLLicense.aquireLicense(image.imageUrl));
+		    	final String thumbLicense = URLLicense.aquireLicense(image.imageUrl);
+		    	final String fullPreviewLicense = URLLicense.aquireLicense(image.imageUrl);
+		    	final String baseThumbURL = thumbURLBuilder.toString();
+		    	thumbURL = baseThumbURL + "&code=" + thumbLicense;
+		    	license = thumbLicense;
+		    	/* Not authenticated : full preview URL must be the same as thumb URL, but with a separate one-time license */
+		    	fullPreviewURL = baseThumbURL + "&code=" + fullPreviewLicense;
 		    }
-		    final String thumbURL = thumbURLBuilder.toString();
 		    prop.putHTML("content_item_hrefCache", thumbURL);
-		    /* Full size preview URL */
-		    if(fullViewingRights) {
-		    	prop.putHTML("content_item_hrefFullPreview", "ViewImage." + viewImageExt + "?isStatic=true&url=" + imageUrlstring);
-		    } else {
-		    	/* Not authenticated : full preview URL must be the same as thumb URL */
-		    	prop.putHTML("content_item_hrefFullPreview", thumbURL);
-		    }
+		    prop.putHTML("content_item_hrefFullPreview", fullPreviewURL);
 		    prop.putHTML("content_item_href", imageUrlstring);
 		    prop.putHTML("content_item_target", target);
 		    prop.put("content_item_code", license);

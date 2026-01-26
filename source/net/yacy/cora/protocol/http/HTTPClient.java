@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -60,6 +61,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthSchemeProvider;
@@ -76,6 +78,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.config.Lookup;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -92,10 +95,12 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.auth.BasicSchemeFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.IdleConnectionEvictor;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ProtocolException;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.ByteArrayBuffer;
@@ -224,6 +229,7 @@ public class HTTPClient implements Closeable {
         builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
 
         // UserAgent
+        builder.setRedirectStrategy(new YaCyRedirectStrategy());
         builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent());
 
         // remove retries; we expect connections to fail; therefore we should not retry
@@ -273,6 +279,26 @@ public class HTTPClient implements Closeable {
         pooling.setDefaultSocketConfig(socketConfig);
 
         return pooling;
+    }
+
+    private static final class YaCyRedirectStrategy extends DefaultRedirectStrategy {
+        @Override
+        protected boolean isRedirectable(final String method) {
+            return true;
+        }
+
+        @Override
+        public HttpUriRequest getRedirect(
+                final HttpRequest request,
+                final HttpResponse response,
+                final HttpContext context) throws ProtocolException {
+            final URI uri = getLocationURI(request, response, context);
+            final int status = response.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_SEE_OTHER) {
+                return new HttpGet(uri);
+            }
+            return RequestBuilder.copy(request).setUri(uri).build();
+        }
     }
 
     /**

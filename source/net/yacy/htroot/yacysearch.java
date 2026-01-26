@@ -256,6 +256,7 @@ public class yacysearch {
 
         // check an determine items per page (max of [100 or configured default]}
         final int defaultItemsPerPage = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
+        final boolean itemsPerPageExplicit = post != null && (post.containsKey("maximumRecords") || post.containsKey("count") || post.containsKey("rows"));
         int itemsPerPage = post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", defaultItemsPerPage))); // requested or default // SRU syntax with old property as alternative
         // whatever admin has set as default, that's always ok
         if (itemsPerPage > defaultItemsPerPage && itemsPerPage > 100) { // if above hardcoded 100 limit restrict request (except default allows more)
@@ -301,6 +302,9 @@ public class yacysearch {
 
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
+        if (contentdom == ContentDomain.IMAGE && itemsPerPage == defaultItemsPerPage) {
+            itemsPerPage = 20;
+        }
 
         // Strict/extended content domain constraint : configured setting may be overriden by request param
         final boolean strictContentDom = !Boolean.FALSE.toString().equalsIgnoreCase(post.get("strictContentDom",
@@ -836,6 +840,18 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset
                 startRecord = 0;
             }
+            ConcurrentLog.info(
+                "LOCAL_SEARCH",
+                "SEARCH EVENT: id="
+                    + theQuery.id(false)
+                    + " cached="
+                    + (cachedEvent != null)
+                    + " query="
+                    + theQuery.getQueryGoal().getQueryString(false)
+                    + " startRecord="
+                    + startRecord
+                    + " itemsPerPage="
+                    + theQuery.itemsPerPage());
             final SearchEvent theSearch =
                 SearchEventCache.getEvent(
                     theQuery,
@@ -970,6 +986,25 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
+
+            if (theSearch.getResultCount() == 0 && querystring.length() > 0) {
+                ConcurrentLog.info(
+                    "LOCAL_SEARCH",
+                    "ZERO RESULTS: id="
+                        + theQuery.id(false)
+                        + " query="
+                        + theQuery.getQueryGoal().getQueryString(false)
+                        + " localAvailable="
+                        + (theSearch.local_rwi_available.get() + theSearch.local_solr_stored.get())
+                        + " localStored="
+                        + (theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get())
+                        + " remoteAvailable="
+                        + (theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get())
+                        + " remoteStored="
+                        + (theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get())
+                        + " feedRunning="
+                        + (!theSearch.isFeedingFinished()));
+            }
 
             prop.put("jsResort", jsResort);
             prop.put("num-results_jsResort", jsResort);

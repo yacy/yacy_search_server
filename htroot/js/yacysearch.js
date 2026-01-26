@@ -294,10 +294,32 @@ function toggleMoreTags(button, moreTagsId) {
  *            {HTMLImageElement} the html img element that could not be rendered
  */
 function handleResultThumbError(imgElem) {
+	if (imgElem == null) {
+		return;
+	}
+	var stage = imgElem.getAttribute("data-error-stage") || "0";
+	if (stage === "0") {
+		var original = imgElem.getAttribute("data-original");
+		if (original && imgElem.src !== original) {
+			imgElem.setAttribute("data-error-stage", "1");
+			imgElem.src = original;
+			return;
+		}
+	}
+	if (stage === "1") {
+		var fallback = imgElem.getAttribute("data-fallback");
+		if (fallback && imgElem.src.indexOf(fallback) < 0) {
+			imgElem.setAttribute("data-error-stage", "2");
+			imgElem.src = fallback;
+			return;
+		}
+	}
 	if (imgElem.parentNode != null && imgElem.parentNode.parentNode != null
-			&& imgElem.parentNode.parentNode.className == "thumbcontainer") {
-		/* Hide the thumbnail container */
-		imgElem.parentNode.parentNode.className = "thumbcontainer thumbError hidden";
+			&& imgElem.parentNode.parentNode.className.indexOf("thumbcontainer") >= 0) {
+		/* Keep the thumbnail container visible, but mark it as failed */
+		if (imgElem.parentNode.parentNode.className.indexOf("thumbError") < 0) {
+			imgElem.parentNode.parentNode.className += " thumbError";
+		}
 		var errorsInfoElem = document.getElementById("imageErrorsInfo");
 		if (errorsInfoElem != null && errorsInfoElem.className.indexOf("hidden") >= 0) {
 			/* Show the image errors information block */

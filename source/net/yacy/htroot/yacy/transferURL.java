@@ -30,8 +30,11 @@ package net.yacy.htroot.yacy;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -76,6 +79,7 @@ public final class transferURL {
         // response values
         String result = "";
         String doublevalues = "0";
+        final StringBuilder errorURLs = new StringBuilder();
 
         final Seed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
@@ -89,6 +93,7 @@ public final class transferURL {
         } else {
             int received = 0;
             int blocked = 0;
+            int blockedErrors = 0;
             int doublecheck = 0;
             // read the urls from the other properties and store
             String urls;
@@ -147,12 +152,78 @@ public final class transferURL {
             }
 
             doublecheck = 0;
+            final boolean blockErrors = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS, true);
+            final int retryAfterDays = sb.getConfigInt(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS, 30);
+            final String permanentStatusStr = sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT, "404,410,-1");
+            final Set<Integer> permanentStatus = new HashSet<Integer>();
+            for (String s : permanentStatusStr.split(",")) {
+                try { permanentStatus.add(Integer.parseInt(s.trim())); } catch (NumberFormatException e) {}
+            }
+            final long retryAfterMillis = retryAfterDays * 24L * 60L * 60L * 1000L;
+            final long now = System.currentTimeMillis();
+            
             for (final String id : lEm.keySet()) {
                 if (sb.index.exists(id)) {
                     doublecheck++;
-                } else {
-                    lEntry = lEm.get(id);
-
+                    // Check if entry we already have is marked as error - if so, reject incoming replacement
+                    if (blockErrors) {
+                        try {
+                            final URIMetadataNode meta = sb.index.fulltext().getMetadata(ASCII.getBytes(id));
+                            if (meta != null && meta.getFieldValue("httpstatus_i") != null) {
+                                final int httpstatus = (meta.getFieldValue("httpstatus_i") instanceof Integer) ? 
+                                    (Integer) meta.getFieldValue("httpstatus_i") : 
+                                    Integer.parseInt(meta.getFieldValue("httpstatus_i").toString());
+                                final Object failreason = meta.getFieldValue("failreason_s");
+                                
+                                if (httpstatus != 200 && failreason != null && failreason.toString().length() > 0) {
+                                    boolean shouldBlock = false;
+                                    
+                                    // Permanent errors (404, 410) - always block
+                                    if (permanentStatus.contains(httpstatus)) {
+                                        shouldBlock = true;
+                                        if (Network.log.isFine()) Network.log.fine("transferURL: rejected URL hash '" + id + "' (permanent error, httpstatus=" + httpstatus + ") from peer " + otherPeerName);
+                                    } else {
+                                        // Temporary errors - check age
+                                        final Object loadDate = meta.getFieldValue("load_date_dt");
+                                        if (loadDate != null) {
+                                            try {
+                                                final Date errorDate = (loadDate instanceof Date) ? (Date) loadDate : 
+                                                    new Date(Long.parseLong(loadDate.toString()));
+                                                final long errorAge = now - errorDate.getTime();
+                                                
+                                                if (errorAge < retryAfterMillis) {
+                                                    shouldBlock = true;
+                                                    if (Network.log.isFine()) Network.log.fine("transferURL: rejected URL hash '" + id + "' (temporary error, httpstatus=" + httpstatus + ", age=" + (errorAge / (24*60*60*1000)) + " days) from peer " + otherPeerName);
+                                                } else {
+                                                    if (Network.log.isFine()) Network.log.fine("transferURL: allowing retry of URL hash '" + id + "' (error age=" + (errorAge / (24*60*60*1000)) + " days exceeds retry threshold) from peer " + otherPeerName);
+                                                }
+                                            } catch (Exception e) {
+                                                // If we can't parse the date, treat as permanent error to be safe
+                                                shouldBlock = true;
+                                            }
+                                        } else {
+                                            // No load_date available - treat as permanent error
+                                            shouldBlock = true;
+                                        }
+                                    }
+                                    
+                                    if (shouldBlock) {
+                                        errorURLs.append(id).append(',');
+                                        blocked++;
+                                        blockedErrors++;
+                                        continue;
+                                    }
+                                }
+                            }
+                        } catch (final Exception e) {
+                            // Ignore errors during error status check
+                        }
+                    }
+                }
+                
+                lEntry = lEm.get(id);
+                
+                if (lEntry != null) {
                     // write entry to database
                     if (Network.log.isFine()) Network.log.fine("Accepting URL from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
                     try {
@@ -169,8 +240,8 @@ public final class transferURL {
             sb.peers.mySeed().incRU(received);
 
             // return rewrite properties
-            Network.log.info("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
-            EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
+            Network.log.info("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " (error " + blockedErrors + ") URLs, reporting " + blockedErrors + " error URLs");
+            EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " (error " + blockedErrors + ") URLs, reporting " + blockedErrors + " error URLs from peer " + otherPeerName, "", otherPeer.hash));
             if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.dhtin.play(-10.0f);
 
             if (doublecheck > 0) {
@@ -182,6 +253,10 @@ public final class transferURL {
 
         prop.put("double", doublevalues);
         prop.put("result", result);
+        if (errorURLs.length() > 0) {
+            errorURLs.setLength(errorURLs.length() - 1); // remove trailing comma
+            prop.put("errorURL", errorURLs.toString());
+        }
         return prop;
     }
 }

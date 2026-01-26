@@ -88,6 +88,7 @@ import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
@@ -799,7 +800,13 @@ public final class Protocol {
                 writerToLocalIndex.stopWriting();
                 throw new InterruptedException("remoteProcess stopped!");
             }
-            event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+            /* Ensure freshly stored metadata is visible to queries before adding results. */
+            event.query.getSegment().fulltext().commit(true);
+            if (storeDocs != null && !storeDocs.isEmpty()) {
+                event.addNodes(storeDocs, null, snip, false, target.getName() + "/" + target.hash, result.totalCount, true);
+            } else {
+                event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+            }
         } else {
             // feed results as nodes (SolrQuery results) which carry metadata,
             // to prevent a call to getMetaData for RWI results, which would fail (if no metadata in index and no display of these results)
@@ -1731,6 +1738,52 @@ public final class Protocol {
             return result;
         }
 
+        // DHT error propagation: process error URLs reported by remote peer
+        String errorURLs = in.get("errorURL");
+        if ( errorURLs != null && !errorURLs.isEmpty() && !errorURLs.equals(",") ) {
+            final String[] euhs = CommonPattern.COMMA.split(errorURLs.trim());
+            if ( euhs.length > 0 ) {
+                Network.log.info("DHT: Received " + euhs.length + " error URL reports from peer " + targetSeed.getName() + "/[" + targetSeed.hash + "]");
+                for ( final String errorHash : euhs ) {
+                    if ( errorHash == null || errorHash.length() != 12 ) continue;
+                    try {
+                        // Check if we have this URL locally without error status
+                        final URIMetadataNode metadata = segment.fulltext().getMetadata(ASCII.getBytes(errorHash));
+                        if ( metadata != null ) {
+                            // Extract crawl depth if available; default to 0 when missing
+                            int crawldepth = 0;
+                            final Object cd = metadata.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
+                            if (cd instanceof Integer) {
+                                crawldepth = ((Integer) cd).intValue();
+                            } else if (cd instanceof Long) {
+                                crawldepth = ((Long) cd).intValue();
+                            }
+
+                            // Mark as error to prevent re-distribution via DHT
+                            sb.crawlQueues.errorURL.push(
+                                metadata.url(),
+                                crawldepth,
+                                null,
+                                net.yacy.cora.federate.solr.FailCategory.FINAL_LOAD_CONTEXT,
+                                "DHT error propagation from peer " + targetSeed.getName(),
+                                -1
+                            );
+                            if (Network.log.isFine()) Network.log.fine("DHT: Marked URL hash '" + errorHash + "' as error based on peer report");
+                        }
+                    } catch ( final Exception e ) {
+                        Network.log.warn("DHT: Failed to process error URL hash '" + errorHash + "': " + e.getMessage());
+                    }
+                }
+                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(
+                    new RSSMessage(
+                        "Received " + euhs.length + " error URL reports from peer " + targetSeed.getName() + "/[" + targetSeed.hash + "]",
+                        "",
+                        targetSeed.hash
+                    )
+                );
+            }
+        }
+
         // in now contains a list of unknown hashes
         String uhss = in.get("unknownURL");
         if ( uhss == null ) {
@@ -1767,6 +1820,36 @@ public final class Protocol {
             sb.peers.addConnected(targetSeed); // update the peer
             return result;
         }
+        
+        // Process error URLs reported back by receiver
+        final String rejectedURLs = in.get("errorURL");
+        if (rejectedURLs != null && !rejectedURLs.isEmpty() && !rejectedURLs.equals(",")) {
+            final String[] ruhs = CommonPattern.COMMA.split(rejectedURLs.trim());
+            if (ruhs.length > 0) {
+                Network.log.info("DHT: Received " + ruhs.length + " rejected error URL reports from peer " + targetSeed.getName());
+                for (final String errorHash : ruhs) {
+                    if (errorHash == null || errorHash.length() != 12) continue;
+                    try {
+                        final URIMetadataNode metadata = segment.fulltext().getMetadata(ASCII.getBytes(errorHash));
+                        if (metadata != null) {
+                            // Extract crawl depth safely
+                            int crawldepth = 0;
+                            final Object cd = metadata.getFieldValue("crawldepth_i");
+                            if (cd instanceof Integer) crawldepth = ((Integer) cd).intValue();
+                            else if (cd instanceof Long) crawldepth = ((Long) cd).intValue();
+                            
+                            // Mark as error locally
+                            sb.crawlQueues.errorURL.push(metadata.url(), crawldepth, null,
+                                FailCategory.FINAL_LOAD_CONTEXT,
+                                "DHT error propagation from peer " + targetSeed.getName(), -1);
+                        }
+                    } catch (final Exception e) {
+                        Network.log.warn("DHT: Failed to process rejected error URL hash '" + errorHash + "': " + e.getMessage());
+                    }
+                }
+            }
+        }
+        
         EventChannel.channels(EventChannel.DHTSEND).addMessage(
             new RSSMessage(
                 "Sent " + uhs.length + " URLs to peer " + targetSeed.getName()+ "/[" + targetSeed.hash + "]",

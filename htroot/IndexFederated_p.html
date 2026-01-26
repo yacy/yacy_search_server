@@ -117,6 +117,15 @@
       
       <dt><input type="checkbox" name="core.service.rwi" id="core_service_rwi" #(core.service.rwi.checked)#:: checked="checked"#(/core.service.rwi.checked)# /></dt>
       <dd>support peer-to-peer index transmission (DHT RWI index)</dd>
+
+      <dt class="TableCellDark">Block known error URLs in DHT&nbsp;<input type="checkbox" name="indexReceiveBlockErrors" #(indexReceiveBlockErrors.checked)#:: checked="checked"#(/indexReceiveBlockErrors.checked)# /></dt>
+      <dd>Reject URLs/RWIs with known errors from peers. Disable to opt out.</dd>
+
+      <dt class="TableCellDark">Retry after (days)</dt>
+      <dd><input type="text" name="indexReceiveBlockErrors.retryAfterDays" value="#[indexReceiveBlockErrors.retryAfterDays]#" size="4" /> for temporary errors; permanent errors stay blocked.</dd>
+
+      <dt class="TableCellDark">Permanent error statuses</dt>
+      <dd><input type="text" name="indexReceiveBlockErrors.permanentStatus" value="#[indexReceiveBlockErrors.permanentStatus]#" size="15" /> comma-separated (default: 404,410,-1; -1=DNS/network errors)</dd>
       
       <dt><input type="submit" name="setrwi" class="btn btn-primary" value="Set" /></dt><dd></dd>
       </dl>

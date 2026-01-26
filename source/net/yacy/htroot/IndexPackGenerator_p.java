@@ -177,7 +177,7 @@ public class IndexPackGenerator_p {
                 final long now = System.currentTimeMillis();
                 final long doccount = sb.index.fulltext().getDefaultConnector().getCountByQuery(query);
                 if (doccount == 0) throw new IOException("number of exported documents == 0");
-                final String category = post.get("category", "scroll"); // core, scroll, codex, gem, fiction, map, echo, spirit, vault
+                final String category = post.get("category", "scroll"); // core, scroll, regula, gem, fiction, map, echo, spirit, vault
                 final String tier = "common"; // common, uncommon, rare, epic, legendary, legendary
                 final String origin = "web"; // web, synth,
                 String slug = post.get("slug", "export").trim().replaceAll(" ", "-");

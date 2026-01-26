@@ -207,6 +207,10 @@ public final class SwitchboardConstants {
     public static final String INDEX_RECEIVE_ALLOW              = "allowReceiveIndex";
     public static final String INDEX_RECEIVE_ALLOW_SEARCH       = "allowReceiveIndex.search";
     public static final String INDEX_RECEIVE_BLOCK_BLACKLIST    = "indexReceiveBlockBlacklist";
+    public static final String INDEX_RECEIVE_BLOCK_ERRORS       = "indexReceiveBlockErrors";
+    public static final String INDEX_RECEIVE_BLOCK_ERRORS_RETRY_DAYS = "indexReceiveBlockErrors.retryAfterDays";
+    /** Permanent error HTTP status codes (comma-separated). Default: 404,410,-1 (-1=DNS/network errors) */
+    public static final String INDEX_RECEIVE_BLOCK_ERRORS_PERMANENT  = "indexReceiveBlockErrors.permanentStatus";
 
     /**
      * <p><code>public static final String <strong>INDEX_DIST_ALLOW_WHILE_CRAWLING</strong> = "allowDistributeIndexWhileCrawling"</code></p>

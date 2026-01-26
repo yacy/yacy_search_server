@@ -577,6 +577,20 @@ allowReceiveIndex=true
 allowReceiveIndex.search=true
 indexReceiveBlockBlacklist=true
 
+# Proactive Error-URL Rejection: block distribution of known broken URLs via DHT
+# Set to false to disable this feature (opt-out)
+indexReceiveBlockErrors=true
+
+# How many days to block error URLs before allowing retry
+# Permanent errors (404, 410) are always blocked
+# Temporary errors (5xx, timeouts) are blocked for this many days
+indexReceiveBlockErrors.retryAfterDays=30
+
+# Comma-separated list of HTTP status codes considered permanent errors (always block)
+# -1 = DNS/Network errors (UnknownHost, connection failures)
+# 404 = Not Found, 410 = Gone
+indexReceiveBlockErrors.permanentStatus=404,410,-1
+
 # the frequency is the number of links per minute, that the peer allowes
 # _every_ other peer to send to this peer
 defaultWordReceiveFrequency=100
@@ -1013,7 +1027,7 @@ search.verify.delete = true
 # If enabled, the results are sorted in the browser using Javascript.
 # This usually improves ranking accuracy, but doesn't work well for users
 # who have Javascript disabled, are using screen readers, or are on slow computers.
-search.jsresort = false
+search.jsresort = true
 
 # remote search details
 remotesearch.maxcount = 10
@@ -1423,17 +1437,17 @@ decoration.hostanalysis = false
 decoration.simpleheadernavbar = navbar-default
 
 # ai settings
-ai.production_models = {}
+ai.production_models = []
 ai.system-prompt = You are a smart and helpful chatbot. If possible, use friendly emojies.
 ai.llm-system-prefix = \n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.
 ai.llm-user-prefix = \n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n
 ai.llm-query-generator-prefix = Make a list of search words with low document frequency for the following prompt; use a JSON Array: 
 ai.shield.allow-nonlocalhost = false
 ai.shield.show-chat-link = false
-ai.shield.rate.per-minute = 1
-ai.shield.rate.per-hour = 12
-ai.shield.rate.per-day = 30
+ai.shield.rate.per-minute = 4
+ai.shield.rate.per-hour = 60
+ai.shield.rate.per-day = 120
 ai.shield.limit-all = false
-ai.shield.all.per-minute = 1
-ai.shield.all.per-hour = 12
-ai.shield.all.per-day = 30
+ai.shield.all.per-minute = 16
+ai.shield.all.per-hour = 240
+ai.shield.all.per-day = 480
