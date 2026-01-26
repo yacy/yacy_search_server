@@ -1,0 +1,179 @@
+/**
+ *  Balancer
+ *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)>
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ *  Frankfurt am Main, Germany
+ *  First released 14.04.2014 at https://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+package net.yacy.crawler;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.robots.RobotsTxt;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class PatchedBalancer implements Balancer {
+    private final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
+    private final int cacheMaxSize = 1000; // Adjust based on memory capacity
+
+    @Override
+    public void push(CrawlProfile profile, String url, byte[] urlhash) {
+        long startTime = System.currentTimeMillis();
+
+        // Cache the URL for faster access
+        if (cache.size() < cacheMaxSize) {
+            cache.putIfAbsent(new String(urlhash), url);
+        }
+
+        // Call the original implementation or save to disk
+        saveToDisk(profile, url, urlhash);
+
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("Push operation took " + elapsedTime + "ms");
+    }
+
+    private void saveToDisk(CrawlProfile profile, String url, byte[] urlhash) {
+        // TODO: Add your existing implementation for disk writes
+    }
+
+    @Override
+    public String pop() {
+        long startTime = System.currentTimeMillis();
+
+        // Attempt to retrieve from cache first
+        Iterator<String> cacheIterator = cache.values().iterator();
+        if (cacheIterator.hasNext()) {
+            String url = cacheIterator.next();
+            cacheIterator.remove();
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            System.out.println("Pop operation took " + elapsedTime + "ms");
+            return url;
+        }
+
+        // Fall back to disk if not found in cache
+        String url = readFromDisk();
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("Pop operation took " + elapsedTime + "ms");
+        return url;
+    }
+
+    private String readFromDisk() {
+        // TODO: Add your existing implementation for reading from disk
+        return null;
+    }
+
+    @Override
+    public void removeAllByProfileHandle(String profileHandle) {
+        long startTime = System.currentTimeMillis();
+
+        // Remove from cache
+        List<String> toRemove = new ArrayList<>();
+        for (String url : cache.keySet()) {
+            if (urlBelongsToProfile(url, profileHandle)) {
+                toRemove.add(url);
+            }
+        }
+        toRemove.forEach(cache::remove);
+
+        // Perform disk operations in batches
+        batchRemoveFromDisk(profileHandle);
+
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("RemoveAllByProfileHandle operation took " + elapsedTime + "ms");
+    }
+
+    private void batchRemoveFromDisk(String profileHandle) {
+        // TODO: Add optimized bulk removal implementation
+    }
+
+    private boolean urlBelongsToProfile(String url, String profileHandle) {
+        // TODO: Implement logic to check if a URL belongs to a profile
+        return true;
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        return new Iterator<>() {
+            private final Iterator<String> cacheIterator = cache.values().iterator();
+            private final Iterator<String> diskIterator = readFromDiskIterator();
+
+            @Override
+            public boolean hasNext() {
+                return cacheIterator.hasNext() || diskIterator.hasNext();
+            }
+
+            @Override
+            public String next() {
+                if (cacheIterator.hasNext()) {
+                    return cacheIterator.next();
+                } else {
+                    return diskIterator.next();
+                }
+            }
+        };
+    }
+
+    private Iterator<String> readFromDiskIterator() {
+        // TODO: Implement disk-backed iterator
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public void clear() {
+        cache.clear();
+        clearDiskStorage();
+    }
+
+    private void clearDiskStorage() {
+        // TODO: Add implementation to clear disk storage
+    }
+
+    @Override
+    public int size() {
+        return cache.size() + getDiskSize();
+    }
+
+    private int getDiskSize() {
+        // TODO: Add implementation to get size from disk
+        return 0;
+    }
+
+    @Override
+    public Set<String> getDomainStackHosts() {
+        // TODO: Implement this method
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Map<String, Integer> getDomainStackReferences() {
+        // TODO: Implement this method
+        return Collections.emptyMap();
+    }
+}
+

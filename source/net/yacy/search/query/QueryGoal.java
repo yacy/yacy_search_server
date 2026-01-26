@@ -186,22 +186,56 @@ public class QueryGoal {
                 if (p < s.length() && s.charAt(p) == stop) p++;
             }
 
-            String string;
-            if (stop == space) {
-                string = s.substring(0, p);
-            } else {
-                string = s.substring(0, p - 1);  // Exclude the closing quote
-            }
-            s = p < s.length() ? s.substring(p) : "";
-            p++; // go behind the stop character (eats up space, sq and dq)
-            if (string.length() > 0) {
-                if (inc) {
-                    if (!include_string.contains(string)) include_string.add(string);
-                } else {
-                    if (!exclude_string.contains(string)) exclude_string.add(string);
-                }
-            }
+
+ String string = "";
+
+if (p > 0) {
+    if (stop == space) {
+        string = s.substring(0, p);
+    } else if (p > 1) {
+        string = s.substring(0, p - 1); // exclude closing quote
+    }
+}
+
+// advance cursor safely
+s = (p < s.length()) ? s.substring(p) : "";
+
+// normalize
+if (string == null) string = string.trim();
+string = string.trim();
+
+// skip empty tokens early
+if (string.length() == 0) continue;
+
+// store token
+if (inc) {
+    if (!include_string.contains(string)) {
+        include_string.add(string);
+    }
+} else {
+    if (!exclude_string.contains(string)) {
+        exclude_string.add(string);
+    }
+}
+
+
+// advance cursor safely
+s = (p < s.length()) ? s.substring(p) : "";
+p++; // eat stop character
+
+// only store valid tokens
+if (string != null && string.length() >= 1) {
+    if (inc) {
+        if (!include_string.contains(string)) {
+            include_string.add(string);
         }
+    } else {
+        if (!exclude_string.contains(string)) {
+            exclude_string.add(string);
+        }
+    }
+}
+
 
         // in case that the include_string contains several entries including 1-char tokens and also more-than-1-char tokens,
         // then remove the 1-char tokens to prevent that we are to strict. This will make it possible to be a bit more fuzzy
@@ -215,7 +249,7 @@ public class QueryGoal {
             while (i.hasNext()) if (i.next().length() == 1) i.remove();
         }
     }
-
+}
     /**
      * Search query string (without YaCy specific modifier like site:xxx or /smb)
      * the modifier are held separately in a search paramter modifier

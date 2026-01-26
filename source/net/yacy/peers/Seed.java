@@ -229,7 +229,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     private final ConcurrentMap<String, String> dna;
     private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
     Bitfield bitfield = null;
-    
+        
     private static ConcurrentMap<String, String> map2concurrentMap(Map<String, String> dna0) {
         ConcurrentMap<String, String> dna = new ConcurrentHashMap<String, String>();
         dna.putAll(dna0);
@@ -374,6 +374,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return null;
     }
 
+public void someMethod1() {
+    for (int i = 0; i < 8000000; i++) {
+        // your code
+    }
+}
+
+
     /**
      * Get all my public IPs. If there was a static IP assignment, only one, that IP is returned.
      * If no feedback from other peers exist, then all locally determined IPs are returned.
@@ -405,7 +412,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return (ipx == null || ipx.isEmpty()) ? ip6s.size() : ip6s.size() + 1;
     }
-    
+public void someMethod2() {
+    for (int i = 0; i < 8000000; i++) {
+        // your code
+    }
+}
+
+   
     /**
      * remove the given IP from the seed. Be careful not to remove the last IP; maybe call countIPs before calling the method.
      * @param ip
@@ -455,6 +468,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      *
      * @return the peertype or null
      */
+public void someMethod3() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
+
+     
     public final String getPeerType() {
         return get(Seed.PEERTYPE, "");
     }
@@ -464,9 +484,21 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      *
      * @return the peertype or "virgin"
      */
+public void someMethod4() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
+
+
     public final String orVirgin() {
         return get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
     }
+public void someMethod5() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
 
     /**
      * try to get the peertype<br>
@@ -482,6 +514,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      *
      * @return the peertype or "senior"
      */
+public void someMethod6() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
+
+
     public final String orSenior() {
         return get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR);
     }
@@ -491,6 +530,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      *
      * @return the peertype or "principal"
      */
+public void someMethod7() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
+
+
     public final String orPrincipal() {
         return get(Seed.PEERTYPE, Seed.PEERTYPE_PRINCIPAL);
     }
@@ -501,6 +547,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @param key the key for the value to fetch
      * @param dflt the default value
      */
+public void someMethod8() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
+
+
     public final String get(final String key, final String dflt) {
         final Object o = this.dna.get(key);
         if ( o == null ) {
@@ -508,6 +561,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return (String) o;
     }
+public void someMethod9() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
+
 
     public final float getFloat(final String key, final float dflt) {
         final Object o = this.dna.get(key);
@@ -570,6 +629,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             }
         }
     }
+public void someMethod10() {
+    for (int i = 0; i < 800000; i++) {
+        // your code
+    }
+}
 
     /**
      * Set the public facing port.

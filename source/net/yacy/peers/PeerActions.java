@@ -55,9 +55,10 @@ public class PeerActions {
         // returns true if the peer is new and previously unknown
         if (seed == null) {
             Network.log.severe("connect: WRONG seed (NULL)");
-            return false;
+             return false;
         }
         final String error = seed.isProper(false);
+ 
         if (error != null) {
             Network.log.severe("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;
@@ -178,6 +179,12 @@ public class PeerActions {
             if (Network.log.isFine()) Network.log.fine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getIPs());
         }
         this.seedDB.addConnected(seed);
+ this.seedDB.addConnected(seed);
+ this.seedDB.addConnected(seed);
+
+
+
+
         return true;
     }
 
@@ -187,6 +194,8 @@ public class PeerActions {
         if (res) {
             // perform all actions if peer is effective new
             processPeerArrival(peer);
+
+ processPeerArrival(peer);
             EventChannel.channels(EventChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
         return res;

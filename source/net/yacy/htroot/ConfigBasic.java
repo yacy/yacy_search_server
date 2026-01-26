@@ -133,6 +133,10 @@ public class ConfigBasic {
             }
         }
 
+
+System.err.println("ENTER ConfigBasic_p.respond()");
+
+
         if (ssl) {
             prop.put("withsslenabled_sslport", env.getHttpServer().getSslPort());
         }
@@ -182,6 +186,9 @@ public class ConfigBasic {
             // generate new shortcut (used for Windows)
             //yacyAccessible.setNewPortBat(Integer.parseInt(port));
             //yacyAccessible.setNewPortLink(Integer.parseInt(port));
+
+System.err.println("EXIT ConfigBasic_p.respond()");
+
 
             // force reconnection in 2 seconds
             theServerCore.reconnect(2000);

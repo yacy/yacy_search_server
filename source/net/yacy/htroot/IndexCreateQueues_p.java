@@ -72,6 +72,18 @@ public class IndexCreateQueues_p {
         boolean embed = false;
         String deletepattern = ".*";
 
+
+String abortUrl = post.get("abortLoader", (String) null);
+if (abortUrl != null) {
+    try {
+        DigestURL u = new DigestURL(abortUrl);
+        sb.crawlQueues.abortLoaderByURL(u);
+    } catch (MalformedURLException e) {
+        // ignore invalid input
+    }
+}
+
+
         if (post != null) {
             stackType = StackType.valueOf(post.get("stack", stackType.name()).toUpperCase());
             urlsPerHost = post.getInt("urlsPerHost", urlsPerHost);

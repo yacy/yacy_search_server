@@ -36,6 +36,7 @@
 
 package net.yacy.search;
 
+import net.yacy.crawler.DNSThrottle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -462,7 +463,19 @@ public final class Switchboard extends serverSwitch {
 
         // init global host name cache
         Domains.init(new File(this.workPath, "globalhosts.list"));
+        
+        // init DNS throttle (global Hz limiter)
+        DNSThrottle.configure(
+        this.getConfigBool("dns.throttle.enabled", true),
+        (int) this.getConfigLong("dns.throttle.hz", 2000)
+     );
 
+     this.log.config(
+    "DNS throttle enabled @ " +
+    this.getConfigLong("dns.throttle.hz", 2000) + " Hz"
+    );
+
+ 
         // init sessionid name file
         final String sessionidNamesFile = this.getConfig("sessionidNamesFile", "defaults/sessionid.names");
         this.log.config("Loading sessionid file " + sessionidNamesFile);
@@ -666,6 +679,8 @@ public final class Switchboard extends serverSwitch {
 
         // create a crawler
         this.crawler = new CrawlSwitchboard(this);
+        
+        
 
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");

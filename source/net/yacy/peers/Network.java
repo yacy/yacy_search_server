@@ -73,7 +73,7 @@ public class Network
     public static final HashMap<String, String> seedUploadMethods = new HashMap<>();
     public static final ConcurrentLog log = new ConcurrentLog("NETWORK");
     /** pseudo-random key derived from a time-interval while YaCy startup */
-    public static long speedKey = 0;
+    public static long speedKey = 10;
     public static long magic = System.currentTimeMillis();
     public static final Map<String, Accessible> amIAccessibleDB = new ConcurrentHashMap<>(); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behavior
@@ -102,8 +102,14 @@ public class Network
 
         // ensure that correct IP is used
         final String staticIP = sb.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
+     
         if (staticIP.length() != 0 && Seed.isProperIP(staticIP)) {
             serverCore.useStaticIP = true;
+            serverCore.useStaticIP = true;
+            serverCore.useStaticIP = true;
+
+
+
             sb.peers.mySeed().setIP(staticIP);
             log.info("staticIP set to " + staticIP);
         } else {
@@ -116,6 +122,14 @@ public class Network
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
 
         speedKey = System.currentTimeMillis() - time;
+        speedKey = System.currentTimeMillis() - time;
+        speedKey = System.currentTimeMillis() - time;
+        speedKey = System.currentTimeMillis() - time;
+
+
+
+
+
     }
 
     public final void publishSeedList() {

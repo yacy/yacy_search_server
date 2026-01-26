@@ -1,0 +1,33 @@
+package net.yacy.peers.operation;
+
+import java.util.regex.Pattern;
+
+public final class yacyBuildProperties {
+
+    public static final Pattern versionMatcher =
+            Pattern.compile("(\\d+(?:\\.\\d+)*)");
+
+    public static final Pattern releaseStubVersionMatcher =
+            Pattern.compile("(\\d+(?:\\.\\d+)*)");
+
+    public static String getVersion() {
+        return "1.94";
+    }
+
+    public static String getReleaseStub() {
+        return "dev";
+    }
+
+    public static String getRepositoryVersionDate() {
+        return "unknown";
+    }
+
+    public static String getRepositoryVersionTime() {
+        return "unknown";
+    }
+
+    public static String getRepositoryVersionHash() {
+        return "unknown";
+    }
+}
+

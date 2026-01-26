@@ -214,21 +214,40 @@ public class NoticedURL {
      * @param urlhash
      * @return true, if the entry was removed; false if not
      */
-    public boolean removeByURLHash(final byte[] urlhashBytes) {
+   public boolean removeByURLHash(final byte[] urlhashBytes) {
+    try {
+        final HandleSet urlHashes = new RowHandleSet(
+            Word.commonHashLength,
+            Base64Order.enhancedCoder,
+            1
+        );
+        urlHashes.put(urlhashBytes);
+
+        boolean ret = false;
+
         try {
-            final HandleSet urlHashes = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
-            urlHashes.put(urlhashBytes);
-            boolean ret = false;
-            try {ret |= this.noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= this.coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= this.limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= this.remoteStack != null && this.remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            return ret;
-        } catch (final SpaceExceededException e) {
-            ConcurrentLog.logException(e);
-            return false;
-        }
+            ret |= this.noloadStack != null && this.noloadStack.remove(urlHashes) > 0;
+        } catch (final IOException e) {}
+
+        try {
+            ret |= this.coreStack.remove(urlHashes) > 0;
+        } catch (final IOException e) {}
+
+        try {
+            ret |= this.limitStack.remove(urlHashes) > 0;
+        } catch (final IOException e) {}
+
+        try {
+            ret |= this.remoteStack != null && this.remoteStack.remove(urlHashes) > 0;
+        } catch (final IOException e) {}
+
+        return ret;
+    } catch (final SpaceExceededException e) {
+        ConcurrentLog.logException(e);
+        return false;
     }
+}
+
 
     public int removeByProfileHandle(final String handle, final long timeout) throws SpaceExceededException {
         int removed = 0;

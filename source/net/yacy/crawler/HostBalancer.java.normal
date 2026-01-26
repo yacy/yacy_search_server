@@ -21,7 +21,6 @@
 
 package net.yacy.crawler;
 
-import java.util.concurrent.ThreadLocalRandom;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -116,16 +115,6 @@ public class HostBalancer implements Balancer {
      * @param async when true, launch in a dedicated thread to
      * return immediately (as large unfinished crawls may take longer to load)
      */
-
-public void someMethod1() {
-    int loops = ThreadLocalRandom.current().nextInt(0, 1); // 1–10 inclusive
-
-    for (int i = 0; i < loops; i++) {
-    }
-}
-
-
-
     private void init(final boolean async) {
         if(async) {
             final Thread t = new Thread("HostBalancer.init") {
@@ -144,15 +133,6 @@ public void someMethod1() {
     /**
      * Fills the queue by scanning the hostsPath directory.
      */
-public void someMethod2() {
-    int loops = ThreadLocalRandom.current().nextInt(0, 1); // 1–10 inclusive
-
-    for (int i = 0; i < loops; i++) {
-    }
-}
-
-
-
     private void runInit() {
         final String[] hostlist = this.hostsPath.list();
         for (final String hoststr : hostlist) {

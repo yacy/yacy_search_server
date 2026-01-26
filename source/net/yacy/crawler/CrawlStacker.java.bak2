@@ -1,0 +1,177 @@
+package net.yacy.crawler;
+
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.document.AnchorURL;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowTask;
+import net.yacy.crawler.robots.RobotsTxt;
+import net.yacy.peers.SeedDB;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.repository.FilterEngine;
+import net.yacy.crawler.retrieval.DigestURL;
+import net.yacy.crawler.data.CrawlProfile;
+
+public final class CrawlStacker implements WorkflowTask<Request> {
+
+    public static final String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
+    public static final String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
+    public static final String CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX = "double in";
+
+    private final RobotsTxt robots;
+    private final WorkflowProcessor<Request> requestQueue;
+    private final CrawlQueues nextQueue;
+    private final CrawlSwitchboard crawler;
+    private final Segment indexSegment;
+    private final SeedDB peers;
+    private final boolean acceptLocalURLs;
+    private final boolean acceptGlobalURLs;
+    private final FilterEngine domainList;
+    private final BlockingQueue<DelayedCrawlTask> delayedQueue;
+
+    public CrawlStacker(
+            final RobotsTxt robots,
+            final CrawlQueues cq,
+            final CrawlSwitchboard cs,
+            final Segment indexSegment,
+            final SeedDB peers,
+            final boolean acceptLocalURLs,
+            final boolean acceptGlobalURLs,
+            final FilterEngine domainList) {
+        this.robots = robots;
+        this.nextQueue = cq;
+        this.crawler = cs;
+        this.indexSegment = indexSegment;
+        this.peers = peers;
+        this.acceptLocalURLs = acceptLocalURLs;
+        this.acceptGlobalURLs = acceptGlobalURLs;
+        this.domainList = domainList;
+        this.requestQueue = new WorkflowProcessor<>("CrawlStacker", "Process URLs for crawling", null, this, 10000, null, WorkflowProcessor.availableCPU);
+        this.delayedQueue = new PriorityBlockingQueue<>();
+
+        // Start thread for processing delayed tasks
+        new Thread(this::processDelayedTasks).start();
+    }
+
+    private void processDelayedTasks() {
+        try {
+            while (true) {
+                DelayedCrawlTask delayedTask = delayedQueue.take();
+                enqueueEntry(delayedTask.getRequest());
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void enqueueWithDelay(Request request, long delayInMillis) {
+        delayedQueue.add(new DelayedCrawlTask(request, delayInMillis));
+    }
+
+    @Override
+    public Request process(Request entry) {
+        if (entry == null) return null;
+
+        try {
+            String rejectReason = stackCrawl(entry);
+            if (rejectReason == null) {
+                return null; // Successfully processed
+            } else if (rejectReason.startsWith("Crawl delay")) {
+                enqueueWithDelay(entry, 2000); // Example delay
+            }
+        } catch (Exception e) {
+            // Log or handle error
+        }
+        return null;
+    }
+
+    public void enqueueEntry(Request request) {
+        try {
+            this.requestQueue.enQueue(request);
+        } catch (Exception e) {
+            // Log enqueue failure
+        }
+    }
+
+    public String stackCrawl(Request entry) {
+        // Crawl stacking logic implementation
+        return null; // Return null if successful
+    }
+
+    public void enqueueEntries(byte[] initiator, String profileHandle, List<AnchorURL> hyperlinks, boolean replace) {
+        for (AnchorURL url : hyperlinks) {
+            if (url == null) continue;
+            enqueueEntry(new Request(initiator, url, null, url.getNameProperty(), new Date(), profileHandle, 0, 0));
+        }
+    }
+
+    public CrawlQueues getNextQueue() {
+        return this.nextQueue;
+    }
+
+    public boolean isEmpty() {
+        return this.delayedQueue.isEmpty() && this.requestQueue.isEmpty();
+    }
+
+    public void clear() {
+        this.requestQueue.clear();
+        this.delayedQueue.clear();
+    }
+
+    public String urlInAcceptedDomain(DigestURL url) {
+        if (domainList.isListed(url.getHost())) {
+            return null; // Accepted
+        }
+        return "URL is outside accepted domains.";
+    }
+
+    public String checkAcceptanceChangeable(DigestURL url, CrawlProfile profile, int depth) {
+        return null; // Accepted
+    }
+
+    public String checkAcceptanceInitially(DigestURL url, CrawlProfile profile) {
+        return null; // Accepted
+    }
+
+    public int size() {
+        return this.requestQueue.size() + this.delayedQueue.size();
+    }
+
+    public void announceClose() {
+        // Logic to announce closing
+    }
+}
+
+// Represents a delayed crawl task
+class DelayedCrawlTask implements Delayed {
+    private final Request request;
+    private final long scheduledTime;
+
+    public DelayedCrawlTask(Request request, long delayInMillis) {
+        this.request = request;
+        this.scheduledTime = System.currentTimeMillis() + delayInMillis;
+    }
+
+    @Override
+    public long getDelay(TimeUnit unit) {
+        long delay = scheduledTime - System.currentTimeMillis();
+        return unit.convert(delay, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public int compareTo(Delayed other) {
+        return Long.compare(this.getDelay(TimeUnit.MILLISECONDS), other.getDelay(TimeUnit.MILLISECONDS));
+    }
+
+    public Request getRequest() {
+        return this.request;
+    }
+}
+

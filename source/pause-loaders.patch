@@ -1,0 +1,116 @@
+diff --git a/source/net/yacy/crawler/data/CrawlQueues.java b/source/net/yacy/crawler/data/CrawlQueues.java
+index 1234567..abcdef0 100644
+--- a/source/net/yacy/crawler/data/CrawlQueues.java
++++ b/source/net/yacy/crawler/data/CrawlQueues.java
+@@ -78,6 +78,9 @@ public class CrawlQueues {
+     private final Loader[] worker;
+     private final ArrayBlockingQueue<Request> workerQueue;
+
++    /** Pause flag for crawler loaders (soft pause, not shutdown) */
++    private volatile boolean forceDisconnectLoaders = false;
++
+     /** Track active loaders */
+     private final ConcurrentHashMap<Long, Loader> activeLoaders = new ConcurrentHashMap<>();
+
+@@ -135,6 +138,39 @@ public class CrawlQueues {
+         this.delegatedURL = null;
+     }
+
++    /** Pause crawler loaders without killing queues or host state */
++    public synchronized void disconnectLoaders() {
++        CrawlQueues.log.warn("Pausing crawler loaders");
++        forceDisconnectLoaders = true;
++
++        for (Loader l : activeLoaders.values()) {
++            try {
++                l.abortCurrentLoad();
++                l.interrupt();
++            } catch (Throwable t) {
++                // ignore
++            }
++        }
++    }
++
++    /** Resume crawler loaders after pause */
++    public synchronized void resumeLoaders() {
++        CrawlQueues.log.warn("Resuming crawler loaders");
++        forceDisconnectLoaders = false;
++
++        for (int i = 0; i < this.worker.length; i++) {
++            if (this.worker[i] == null || !this.worker[i].isAlive()) {
++                this.worker[i] = new Loader();
++                this.worker[i].start();
++            }
++        }
++    }
++
++    /** @return true when loaders are paused */
++    public boolean isDisconnected() {
++        return forceDisconnectLoaders;
++    }
+
+@@ -602,6 +638,11 @@ public class CrawlQueues {
+     private String loadIsPossible(final StackType stackType) {
+
++        // Do not enqueue work while loaders are paused
++        if (forceDisconnectLoaders) {
++            return "loaders paused";
++        }
++
+         if (this.noticeURL.isEmpty(stackType)) {
+             return "stack is empty";
+         }
+
+@@ -817,21 +858,36 @@ public class CrawlQueues {
+         @Override
+         public void run() {
+             this.setPriority(Thread.MIN_PRIORITY);
+             activeLoaders.put(this.getId(), this);
+
+-            try {
+-                while (!forceDisconnectLoaders &&
+-                       !this.abort &&
+-                       (this.request = CrawlQueues.this.workerQueue.poll(10, TimeUnit.SECONDS)) != POISON_REQUEST) {
+-
+-                    if (this.request == null) break;
++            try {
++                while (true) {
++
++                    // Soft pause: stay alive but do no work
++                    if (forceDisconnectLoaders || abort) {
++                        try { Thread.sleep(200); } catch (InterruptedException ie) {}
++                        continue;
++                    }
++
++                    this.request = CrawlQueues.this.workerQueue.poll(10, TimeUnit.SECONDS);
++
++                    if (this.request == null) {
++                        continue; // idle wait
++                    }
++
++                    if (this.request == POISON_REQUEST) {
++                        break; // real shutdown
++                    }
+
+                     this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
+                     this.setName("CrawlQueues.Loader(" + this.request.url().toNormalform(false) + ")");
+
+
+
+diff --git a/source/net/yacy/htroot/Crawler_p.java b/source/net/yacy/htroot/Crawler_p.java
+index 7654321..fedcba0 100644
+--- a/source/net/yacy/htroot/Crawler_p.java
++++ b/source/net/yacy/htroot/Crawler_p.java
+@@ -184,7 +184,15 @@ public class Crawler_p {
+
+     if (post != null) {
+
+-        if (post.containsKey("loaderDisconnect")) {
+-            sb.crawlQueues.disconnectLoaders();
++        if (post.containsKey("loaderDisconnect")) {
++            if (sb.crawlQueues.isDisconnected()) {
++                sb.crawlQueues.resumeLoaders();
++            } else {
++                sb.crawlQueues.disconnectLoaders();
++            }
+         }

@@ -1,0 +1,487 @@
+diff --git a/source/net/yacy/kelondro/index/OnDemandOpenFileIndex.java b/source/net/yacy/kelondro/index/OnDemandOpenFileIndex.java
+index 3c1a2aa..rwlock 100644
+--- a/source/net/yacy/kelondro/index/OnDemandOpenFileIndex.java
++++ b/source/net/yacy/kelondro/index/OnDemandOpenFileIndex.java
+@@ -23,6 +23,8 @@ package net.yacy.kelondro.index;
+
+ import java.io.File;
+ import java.io.IOException;
++import java.util.concurrent.locks.ReentrantReadWriteLock;
++import java.util.concurrent.locks.Lock;
+ import java.util.ArrayList;
+ import java.util.Collection;
+ import java.util.Iterator;
+@@ -52,7 +54,10 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
+
+     private final File file;
+     private final Row rowdef;
+-    private int sizecache;
++    private volatile int sizecache;
+     private final boolean exceed134217727;
++    private final ReentrantReadWriteLock rw = new ReentrantReadWriteLock(true);
++    private final Lock r = rw.readLock(), w = rw.writeLock();
+
+     public OnDemandOpenFileIndex(final File file, Row rowdef, final boolean exceed134217727) {
+         this.file = file;
+@@ -71,66 +76,80 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
+         }
+     }
+
+     @Override
+-    public synchronized byte[] smallestKey() {
++    public byte[] smallestKey() {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         final byte[] b = index.smallestKey();
+         index.close();
+         return b;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized byte[] largestKey() {
++    public byte[] largestKey() {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         final byte[] b = index.largestKey();
+         index.close();
+         return b;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized void optimize() {
++    public void optimize() {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return;
+         index.optimize();
+         index.close();
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized long mem() {
++    public long mem() {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return 0;
+         final long l = index.mem();
+         index.close();
+         return l;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized void addUnique(final Entry row) throws SpaceExceededException, IOException {
++    public void addUnique(final Entry row) throws SpaceExceededException, IOException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return;
+         try {
+             index.addUnique(row);
+             if (this.sizecache >= 0) this.sizecache++;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized void clear() throws IOException {
++    public void clear() throws IOException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return;
+         try {
+             index.clear();
+             this.sizecache = 0;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized void close() {
++    public void close() {
+         // there is actually nothing to do here because this class does not hold any data
+     }
+
+     @Override
+-    public synchronized void deleteOnExit() {
++    public void deleteOnExit() {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return;
+         index.deleteOnExit();
+         index.close();
++        } finally { w.unlock(); }
+     }
+
+     @Override
+     public String filename() {
+         return this.file.toString();
+     }
+
+     @Override
+-    public synchronized int size() {
++    public int size() {
++        r.lock();
++        try {
+         if (this.sizecache >= 0) return this.sizecache;
+         final Index index = this.getIndex();
+         if (index == null) return 0;
+         final int i = index.size();
+         index.close();
+         this.sizecache = i;
+         return i;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized Entry get(final byte[] key, final boolean forcecopy) throws IOException {
++    public Entry get(final byte[] key, final boolean forcecopy) throws IOException {
++        r.lock();
++        try {
+         if (this.sizecache == 0) return null;
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             return index.get(key, forcecopy);
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
++    public Map<byte[], Row.Entry> getMap(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
++        r.lock();
++        try {
+         final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
+         if (this.sizecache == 0) return map;
+         Row.Entry entry;
+         for (final byte[] key: keys) {
+             entry = this.get(key, forcecopy);
+             if (entry != null) map.put(key, entry);
+         }
+         return map;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
++    public List<Row.Entry> getList(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
++        r.lock();
++        try {
+         final List<Row.Entry> list = new ArrayList<>(keys.size());
+         if (this.sizecache == 0) return list;
+         Row.Entry entry;
+         for (final byte[] key: keys) {
+             entry = this.get(key, forcecopy);
+             if (entry != null) list.add(entry);
+         }
+         return list;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized boolean has(final byte[] key) {
++    public boolean has(final byte[] key) {
++        r.lock();
++        try {
+         if (this.sizecache == 0) return false;
+         final Index index = this.getIndex();
+         if (index == null) return false;
+         final boolean b = index.has(key);
+         index.close();
+         return b;
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized boolean isEmpty() {
++    public boolean isEmpty() {
++        r.lock();
++        try {
+         if (this.sizecache == 0) return true;
+         final Index index = this.getIndex();
+         if (index == null) return true;
+         final boolean b = index.isEmpty();
+         if (b) this.sizecache = 0;
+         index.close();
+         return b;
++        } finally { r.unlock(); }
+     }
+
+@@ -141,7 +160,9 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
+      * @throws IOException
+      * @throws SpaceExceededException
+      */
+     @Override
+-    public synchronized boolean put(final Entry row) throws IOException, SpaceExceededException {
++    public boolean put(final Entry row) throws IOException, SpaceExceededException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return false;
+         try {
+             final boolean b = index.put(row);
+             if (this.sizecache >= 0 && b) this.sizecache++;
+             return b;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+@@ -153,7 +174,9 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
+      * @throws IOException
+      * @throws SpaceExceededException
+      */
+-    public synchronized void put(final RowSet rowset) throws IOException, SpaceExceededException {
++    public void put(final RowSet rowset) throws IOException, SpaceExceededException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return;
+         try {
+             for (final Row.Entry row: rowset) {
+                 final boolean b = index.put(row);
+                 if (this.sizecache >= 0 && b) this.sizecache++;
+             }
+             return;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized Entry remove(final byte[] key) throws IOException {
++    public Entry remove(final byte[] key) throws IOException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             final Entry e = index.remove(key);
+             if (this.sizecache >= 0 && e != null) this.sizecache--;
+             return e;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized boolean delete(final byte[] key) throws IOException {
++    public boolean delete(final byte[] key) throws IOException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return false;
+         try {
+             final boolean b = index.delete(key);
+             if (this.sizecache >= 0 && b) this.sizecache--;
+             return b;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
++    public List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             final List<RowCollection> l = index.removeDoubles();
+             this.sizecache = index.size();
+             return l;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized List<Row.Entry> top(final int count) throws IOException {
++    public List<Row.Entry> top(final int count) throws IOException {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             return index.top(count);
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized List<Row.Entry> random(final int count) throws IOException {
++    public List<Row.Entry> random(final int count) throws IOException {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             return index.random(count);
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized Entry removeOne() throws IOException {
++    public Entry removeOne() throws IOException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             final Entry e = index.removeOne();
+             if (this.sizecache >= 0 && e != null) this.sizecache--;
+             return e;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+-    public synchronized Entry replace(final Entry row) throws SpaceExceededException, IOException {
++    public Entry replace(final Entry row) throws SpaceExceededException, IOException {
++        w.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             final Entry e = index.replace(row);
+             if (this.sizecache >= 0 && e == null) this.sizecache++;
+             return e;
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { w.unlock(); }
+     }
+
+     @Override
+     public Row row() {
+         return this.rowdef;
+     }
+
+     @Override
+-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
++    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         try {
+             return index.keys(up, firstKey);
+         } catch (final IOException e) {
+             throw e;
+         } finally {
+             index.close();
+         }
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized Iterator<Entry> iterator() {
++    public Iterator<Entry> iterator() {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         final List<Entry> list = new ArrayList<>();
+         final Iterator<Entry> i = index.iterator();
+         while (i.hasNext()) list.add(i.next());
+         index.close();
+         return list.iterator();
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
++    public CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         final List<Entry> list = new ArrayList<>();
+         final Iterator<Entry> i = index.rows(up, firstKey);
+         while (i.hasNext()) list.add(i.next());
+         index.close();
+         final Iterator<Entry> li = list.iterator();
+         return new CloneableIterator<>(){
+@@ -257,11 +295,13 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
+             @Override
+             public void close() {
+             }
+         };
++        } finally { r.unlock(); }
+     }
+
+     @Override
+-    public synchronized CloneableIterator<Entry> rows() throws IOException {
++    public CloneableIterator<Entry> rows() throws IOException {
++        r.lock();
++        try {
+         final Index index = this.getIndex();
+         if (index == null) return null;
+         final List<Entry> list = new ArrayList<>();
+         final Iterator<Entry> i = index.rows();
+         while (i.hasNext()) list.add(i.next());
+         index.close();
+         final Iterator<Entry> li = list.iterator();
+         return new CloneableIterator<>(){
+@@ -287,6 +327,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
+             @Override
+             public void close() {
+             }
+         };
++        } finally { r.unlock(); }
+     }

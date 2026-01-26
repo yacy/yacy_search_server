@@ -176,11 +176,17 @@ public class serverSwitch {
         final String staticIP = this.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() > 0)
             return staticIP;
+ if (staticIP.length() > 0)
+            return staticIP;
 
         // otherwise we return the real IP address of this host
         final InetAddress pLIP = Domains.myPublicLocalIP();
         if (pLIP != null)
             return pLIP.getHostAddress();
+  if (pLIP != null)
+            return pLIP.getHostAddress();
+
+
         return null;
     }
 

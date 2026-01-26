@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleSet;
@@ -51,11 +52,22 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     private final int buffersize;
     private final Row.EntryComparator entryComparator;
 
+    /**
+     * Cached total size (backend + buffer) to avoid synchronized backend lock convoys on size().
+     * Exactness is not critical for crawl control; this is maintained best-effort and resynced where needed.
+     */
+    private final AtomicInteger approxTotalSize = new AtomicInteger(0);
+
     public BufferedObjectIndex(final Index backend, final int buffersize) {
         this.backend = backend;
         this.buffersize = buffersize;
         this.buffer = new RowSet(backend.row());
         this.entryComparator = new Row.EntryComparator(backend.row().objectOrder);
+
+        // initialize cached size once
+        synchronized (this.backend) {
+            this.approxTotalSize.set(this.backend.size() + this.buffer.size());
+        }
     }
 
     public boolean isOnDemand() {
@@ -85,6 +97,8 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                     this.backend.put(e);
                 }
             }
+            // Total size should remain stable across a flush (entries move buffer -> backend).
+            // But backend may overwrite existing keys; we keep approxTotalSize as-is.
             this.buffer.clear();
         }
     }
@@ -114,7 +128,8 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     public void addUnique(final Entry row) throws SpaceExceededException, IOException {
         synchronized (this.backend) {
             this.checkBuffer();
-            this.buffer.put(row);
+            final boolean added = this.buffer.put(row);
+            if (added) this.approxTotalSize.incrementAndGet();
         }
     }
 
@@ -123,6 +138,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         synchronized (this.backend) {
             this.backend.clear();
             this.buffer.clear();
+            this.approxTotalSize.set(0);
         }
     }
 
@@ -137,6 +153,8 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                 ConcurrentLog.logException(e);
             }
             this.backend.close();
+            // After close, size is not meaningful but keep consistent.
+            this.approxTotalSize.set(this.buffer.size() + this.backend.size());
         }
     }
 
@@ -152,9 +170,14 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public int size() {
-        synchronized (this.backend) {
-            return this.buffer.size() + this.backend.size();
-        }
+        // lock-free: prevents backend monitor convoy
+        final int s = this.approxTotalSize.get();
+        return s < 0 ? 0 : s;
+    }
+
+    private void resyncApproxSizeLocked() {
+        // must be called under synchronized(backend)
+        this.approxTotalSize.set(this.backend.size() + this.buffer.size());
     }
 
     @Override
@@ -213,7 +236,9 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     public boolean put(final Entry row) throws IOException, SpaceExceededException {
         synchronized (this.backend) {
             this.checkBuffer();
-            return this.buffer.put(row);
+            final boolean added = this.buffer.put(row);
+            if (added) this.approxTotalSize.incrementAndGet();
+            return added;
         }
     }
 
@@ -221,8 +246,13 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     public Entry remove(final byte[] key) throws IOException {
         synchronized (this.backend) {
             final Entry entry = this.buffer.remove(key);
-            if (entry != null) return entry;
-            return this.backend.remove(key);
+            if (entry != null) {
+                this.approxTotalSize.decrementAndGet();
+                return entry;
+            }
+            final Entry be = this.backend.remove(key);
+            if (be != null) this.approxTotalSize.decrementAndGet();
+            return be;
         }
     }
 
@@ -230,8 +260,13 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     public boolean delete(final byte[] key) throws IOException {
         synchronized (this.backend) {
             final boolean b = this.buffer.delete(key);
-            if (b) return true;
-            return this.backend.delete(key);
+            if (b) {
+                this.approxTotalSize.decrementAndGet();
+                return true;
+            }
+            final boolean bb = this.backend.delete(key);
+            if (bb) this.approxTotalSize.decrementAndGet();
+            return bb;
         }
     }
 
@@ -239,7 +274,10 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     public List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
         synchronized (this.backend) {
             this.flushBuffer();
-            return this.backend.removeDoubles();
+            final List<RowCollection> r = this.backend.removeDoubles();
+            // removeDoubles can change actual size in non-trivial ways; resync.
+            this.resyncApproxSizeLocked();
+            return r;
         }
     }
 
@@ -278,9 +316,14 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         synchronized (this.backend) {
             if (!this.buffer.isEmpty()) {
                 final Entry entry = this.buffer.removeOne();
-                if (entry != null) return entry;
+                if (entry != null) {
+                    this.approxTotalSize.decrementAndGet();
+                    return entry;
+                }
             }
-            return this.backend.removeOne();
+            final Entry be = this.backend.removeOne();
+            if (be != null) this.approxTotalSize.decrementAndGet();
+            return be;
         }
     }
 
@@ -366,6 +409,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
             while (missing-- > 0) {
                 try {
                     this.buffer.put(this.backend.removeOne());
+                    // total size unchanged (move backend -> buffer)
                 } catch (final SpaceExceededException e) {
                     ConcurrentLog.logException(e);
                     break;
@@ -387,3 +431,4 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
 }
+

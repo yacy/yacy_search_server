@@ -31,6 +31,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.http.pool.PoolStats;
+import net.yacy.cora.document.id.DigestURL;
+import java.net.MalformedURLException;
+import net.yacy.search.Switchboard;
 
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.protocol.ConnectionInfo;
@@ -54,6 +57,9 @@ public class PerformanceQueues_p {
 
     @SuppressWarnings("deprecation")
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+// System.err.println(">>> ENTER PerformanceQueues_p.respond()");
+
+
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -417,7 +423,13 @@ public class PerformanceQueues_p {
         prop.put("memoryAcceptDHT", memoryAcceptDHT);
         if(observerTrigger) prop.put("observerTrigger", "1");
 
-        // return rewrite values for templates
+// System.err.println("<<< EXIT PerformanceQueues_p.respond()");
+try {
+    Thread.sleep(10); // 10 ms
+} catch (InterruptedException e) {
+    Thread.currentThread().interrupt();
+}
+       // return rewrite values for templates
         return prop;
     }
 

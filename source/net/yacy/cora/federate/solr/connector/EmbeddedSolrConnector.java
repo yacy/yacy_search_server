@@ -131,9 +131,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         boolean changed = false;
         // Iterate over pluginInfos to find and update documentCache
         for (final PluginInfo pluginInfo : pluginInfos) {
-            if (pluginInfo.name.equals("documentCache")) {
-                pluginInfo.initArgs.addAll(cacheConfig);
-                changed = true;
+           if ("query".equals(pluginInfo.name)) {
             }
         }
 
