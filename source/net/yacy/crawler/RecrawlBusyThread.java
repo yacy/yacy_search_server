@@ -141,7 +141,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         this.currentQuery = query;
         this.includefailed = includeFailed;
         this.deleteOnRecrawl = deleteOnRecrawl;
-        this.urlstack = new HashSet<>();
+        this.urlstack = new LinkedHashMap<>();
+        this.baseRecrawlCollections = this.sb.crawler.defaultRecrawlJobProfile.get(CrawlAttribute.COLLECTIONS.key);
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
         this.solrSortBy = CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
