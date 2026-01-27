@@ -333,6 +333,12 @@ public class ArrayStack implements BLOB {
         return f;
     }
 
+    /**
+     * Unmount and return the first BLOB file found that exceeds the given max size.
+     * Returns null when no such file exists.
+     */
+    // No explicit unmount by size; use existing smallest/matching policies
+
     public synchronized File[] unmountSmallest(final long maxResultSize) {
     	if (this.blobs.size() < 2) return null;
     	final File f0 = smallestBLOB(null, maxResultSize);
@@ -1054,6 +1060,8 @@ public class ArrayStack implements BLOB {
         FileUtils.deletedelete(f);
         return newFile;
     }
+
+    // No explicit splitting; large BLOBs will be reduced via merge processes
 
     private static <ReferenceType extends Reference> void merge(
             final CloneableIterator<ReferenceContainer<ReferenceType>> i1,

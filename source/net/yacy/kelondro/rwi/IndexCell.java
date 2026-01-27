@@ -187,6 +187,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         if (this.array.entries() < 2) return false;
         boolean donesomething = false;
 
+        // keep blobs small by merge thresholds only (no active splitting)
+
         // first try to merge small files that match
         int term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 3 || this.array.entries() >= 50)) {
