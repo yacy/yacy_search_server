@@ -27,8 +27,11 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
@@ -41,6 +44,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.TagValency;
@@ -82,8 +86,11 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     private final int chunksize = 100;
     private final Switchboard sb;
 
-    /** buffer of urls to recrawl */
-    private final Set<DigestURL> urlstack;
+    /** buffer of urls to recrawl and their original collections */
+    private final Map<DigestURL, String> urlstack;
+
+    /** The base collection configured on the recrawl profile (used when no per-doc collection exists) */
+    private final String baseRecrawlCollections;
 
     /** The total number of candidate URLs found for recrawl */
     private long urlsToRecrawl = 0;
@@ -134,7 +141,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         this.currentQuery = query;
         this.includefailed = includeFailed;
         this.deleteOnRecrawl = deleteOnRecrawl;
-        this.urlstack = new HashSet<>();
+        this.urlstack = new LinkedHashMap<>();
+        this.baseRecrawlCollections = this.sb.crawler.defaultRecrawlJobProfile.get(CrawlAttribute.COLLECTIONS.key);
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
         this.solrSortBy = CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
@@ -212,7 +220,13 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         if (!this.urlstack.isEmpty()) {
             final CrawlProfile profile = this.sb.crawler.defaultRecrawlJobProfile;
 
-            for (final DigestURL url : this.urlstack) {
+            for (final Map.Entry<DigestURL, String> entry : this.urlstack.entrySet()) {
+                final DigestURL url = entry.getKey();
+                final String collections = entry.getValue();
+
+                /* Preserve the original collection of the document when available */
+                profile.setCollections(collections != null ? collections : this.baseRecrawlCollections);
+
                 final Request request = new Request(ASCII.getBytes(this.sb.peers.mySeed().hash), url, null, "",
                         new Date(), profile.handle(), 0, profile.timezoneOffset());
                 String acceptedError = this.sb.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
@@ -235,6 +249,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                     this.recrawledUrlsCount++;
                 }
             }
+            /* Reset to base collections to avoid leaking per-document overrides */
+            profile.setCollections(this.baseRecrawlCollections);
             this.urlstack.clear();
         }
         return (added > 0);
@@ -300,7 +316,9 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         try {
             // query all or only httpstatus=200 depending on includefailed flag
             docList = solrConnector.getDocumentListByQuery(RecrawlBusyThread.buildSelectionQuery(this.currentQuery, this.includefailed),
-                this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+                this.solrSortBy, this.chunkstart, this.chunksize,
+                CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(),
+                CollectionSchema.collection_sxt.getSolrFieldName());
             this.urlsToRecrawl = docList.getNumFound();
         } catch (final Throwable e) {
             this.urlsToRecrawl = 0;
@@ -311,7 +329,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             final Set<String> tobedeletedIDs = new HashSet<>();
             for (final SolrDocument doc : docList) {
                 try {
-                    this.urlstack.add(new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName())));
+                    final DigestURL url = new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                    this.urlstack.put(url, extractCollections(doc));
                     if (this.deleteOnRecrawl) tobedeletedIDs.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 } catch (final MalformedURLException ex) {
                     this.malformedUrlsCount++;
@@ -336,6 +355,23 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Extract collections from a Solr document and return as a comma-separated list.
+     * @param doc Solr document
+     * @return comma-separated collection names or null when none
+     */
+    private static String extractCollections(final SolrDocument doc) {
+        final Collection<Object> values = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
+        if (values == null || values.isEmpty()) return null;
+        final StringBuilder sb = new StringBuilder();
+        for (final Object v : values) {
+            if (v == null) continue;
+            if (sb.length() > 0) sb.append(',');
+            sb.append(v.toString());
+        }
+        return sb.length() == 0 ? null : sb.toString();
     }
 
     /**
