@@ -20,6 +20,7 @@
 
 package net.yacy.http.servlets;
 
+import net.yacy.ai.RAGAugmentor;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 
@@ -58,6 +59,17 @@ public class MCPSearchServlet extends HttpServlet {
     private static final int DEFAULT_RESULT_COUNT = 10;
     private static final int MAX_RESULT_COUNT = 100;
 
+    /**
+     * Handles JSON-RPC requests for the MCP surface.
+     * <p>
+     * Accepts single request objects and batch arrays, supports notifications, and
+     * always returns UTF-8 JSON responses.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException servlet errors
+     * @throws IOException I/O errors
+     */
     @Override
     public void service(final ServletRequest request, final ServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
@@ -72,6 +84,7 @@ public class MCPSearchServlet extends HttpServlet {
 
         final Method reqMethod = Method.getMethod(hrequest.getMethod());
         if (reqMethod == Method.OTHER) {
+            // Browsers perform CORS preflight with OPTIONS; answer quickly.
             hresponse.setStatus(HttpServletResponse.SC_OK);
             return;
         }
@@ -85,10 +98,12 @@ public class MCPSearchServlet extends HttpServlet {
             parsed = tokener.nextValue();
         } catch (JSONException e) {
             writeJsonResponse(hresponse, errorResponse(JSONObject.NULL, -32700, e.getMessage()));
+            return;
         }
         
         try {
             if (parsed instanceof JSONObject) {
+                // Support shorthand endpoint style: infer method from URI path.
                 if (((JSONObject) parsed).optString("method", "").length() == 0) {
                     String uri = hrequest.getRequestURI();
                     ((JSONObject) parsed).put("method", uri.substring(1));
@@ -100,6 +115,7 @@ public class MCPSearchServlet extends HttpServlet {
                     hresponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 }
             } else if (parsed instanceof JSONArray) {
+                // Batch request mode.
                 final JSONArray requestArray = (JSONArray) parsed;
                 final JSONArray responseArray = new JSONArray();
                 for (int i = 0; i < requestArray.length(); i++) {
@@ -124,6 +140,12 @@ public class MCPSearchServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Routes one JSON-RPC request object to the corresponding MCP handler.
+     *
+     * @param requestObject parsed request
+     * @return response object or {@code null} for notifications
+     */
     private JSONObject handleRequest(final JSONObject requestObject) {
         final Object id = requestObject.opt("id");
         final String jsonrpc = requestObject.optString("jsonrpc", JSONRPC_VERSION);
@@ -147,6 +169,7 @@ public class MCPSearchServlet extends HttpServlet {
         }
 
         if (id == JSONObject.NULL || id == null) {
+            // Notifications must not produce a response body.
             // Notification: acknowledge silently
             if ("ping".equals(method)) {
                 return null;
@@ -167,6 +190,13 @@ public class MCPSearchServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles MCP initialize call and advertises protocol/capabilities.
+     *
+     * @param id JSON-RPC id
+     * @param params initialize params
+     * @return JSON-RPC success or error response
+     */
     private JSONObject handleInitialize(final Object id, final JSONObject params) {
         try {log.info("MCPSearchServlet: initialize " + (params == null ? "" : params.toString(0)));} catch (JSONException e) {}
         final JSONObject result = new JSONObject(true);
@@ -190,6 +220,13 @@ public class MCPSearchServlet extends HttpServlet {
         return successResponse(id, result);
     }
 
+    /**
+     * Handles MCP tool listing and returns schema for the single {@code search}
+     * tool.
+     *
+     * @param id JSON-RPC id
+     * @return JSON-RPC success or error response
+     */
     private JSONObject handleToolsList(final Object id) {
         log.info("MCPSearchServlet: list " + (id == null ? "" : id.toString()));
         try {
@@ -245,6 +282,13 @@ public class MCPSearchServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles tool invocation for {@code search}.
+     *
+     * @param id JSON-RPC id
+     * @param params tool call params
+     * @return JSON-RPC success or error response
+     */
     private JSONObject handleToolsCall(final Object id, final JSONObject params) {
         try {log.info("MCPSearchServlet: call " + (id == null ? "" : id.toString()) + " params: " + (params == null ? "" : params.toString(0)));} catch (JSONException e) {}
         if (params == null) {
@@ -265,6 +309,7 @@ public class MCPSearchServlet extends HttpServlet {
             return errorResponse(id, -32602, "Tool argument 'query' must be a non-empty string");
         }
 
+        // Sanitize and clamp result limit.
         int limit = arguments.optInt("limit", DEFAULT_RESULT_COUNT);
         if (limit <= 0) {
             limit = DEFAULT_RESULT_COUNT;
@@ -272,8 +317,9 @@ public class MCPSearchServlet extends HttpServlet {
         limit = Math.min(limit, MAX_RESULT_COUNT);
         final boolean includeSnippet = arguments.optBoolean("include_snippet", true);
 
+        // Delegate the actual search to the RAG helper utility.
         JSONArray results;
-        results = RAGProxyServlet.searchResults(query, limit, includeSnippet);
+        results = RAGAugmentor.searchResults(query, limit, includeSnippet);
 
         try {
             final JSONObject payload = new JSONObject(true);
@@ -294,6 +340,13 @@ public class MCPSearchServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads full HTTP request body into a string.
+     *
+     * @param request servlet request
+     * @return request body (possibly empty)
+     * @throws IOException when reader access fails
+     */
     private static String readBody(final ServletRequest request) throws IOException {
         final StringBuilder builder = new StringBuilder();
         try (BufferedReader reader = request.getReader()) {
@@ -305,6 +358,13 @@ public class MCPSearchServlet extends HttpServlet {
         return builder.toString();
     }
 
+    /**
+     * Builds a JSON-RPC success object.
+     *
+     * @param id JSON-RPC id
+     * @param result result payload
+     * @return JSON-RPC success response
+     */
     private static JSONObject successResponse(final Object id, final JSONObject result) {
         final JSONObject response = new JSONObject(true);
         try {
@@ -318,6 +378,14 @@ public class MCPSearchServlet extends HttpServlet {
         return response;
     }
 
+    /**
+     * Builds a JSON-RPC error object.
+     *
+     * @param id JSON-RPC id
+     * @param code JSON-RPC error code
+     * @param message human-readable error message
+     * @return JSON-RPC error response
+     */
     private static JSONObject errorResponse(final Object id, final int code, final String message) {
         final JSONObject response = new JSONObject(true);
         try {
@@ -333,6 +401,13 @@ public class MCPSearchServlet extends HttpServlet {
         return response;
     }
 
+    /**
+     * Serializes and writes either a JSON object or JSON array response.
+     *
+     * @param response servlet response
+     * @param payload JSONObject or JSONArray
+     * @throws IOException when writing fails
+     */
     private static void writeJsonResponse(final HttpServletResponse response, final Object payload) throws IOException {
         final String serialized = payload instanceof JSONObject ? ((JSONObject) payload).toString()
             : payload instanceof JSONArray ? ((JSONArray) payload).toString() : payload.toString();

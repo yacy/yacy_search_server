@@ -22,31 +22,14 @@ package net.yacy.http.servlets;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -56,38 +39,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.servlet.cache.Method;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import net.yacy.ai.LLM;
-import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.solr.SolrType;
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.ai.RAGAugmentor;
+import net.yacy.ai.ToolCallProtocol;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.query.QueryGoal;
-import net.yacy.search.query.QueryModifier;
-import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.SearchEvent;
-import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.snippet.TextSnippet;
 
 /**
  * This class implements a Retrieval Augmented Generation ("RAG") proxy which
@@ -109,7 +71,6 @@ public class RAGProxyServlet extends HttpServlet {
     private static final long serialVersionUID = 3411544789759643137L;
 
     public static final String LLM_SYSTEM_PROMPT_DEFAULT = "You are a smart and helpful chatbot. If possible, use friendly emojies.";
-    private static final String LLM_SYSTEM_PREFIX_DEFAULT = "\n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.";
     private static final String LLM_USER_PREFIX_DEFAULT = "\n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n";
     private static final String LLM_QUERY_GENERATOR_PREFIX_DEFAULT = "Make a list of search words with low document frequency for the following prompt; use a JSON Array: ";
 
@@ -193,7 +154,6 @@ public class RAGProxyServlet extends HttpServlet {
             
             // get messages and prepare user message attachments
             JSONArray messages = bodyObject.optJSONArray("messages");
-            final String systemPrefix = sb.getConfig("ai.llm-system-prefix", LLM_SYSTEM_PREFIX_DEFAULT);
             final String userPrefix = sb.getConfig("ai.llm-user-prefix", LLM_USER_PREFIX_DEFAULT);
             
             // debug
@@ -206,26 +166,40 @@ public class RAGProxyServlet extends HttpServlet {
                     userObject.attachAttachment(userPrefix);
                 }
             }
-            UserObject userObject = new UserObject(messages.getJSONObject(messages.length() - 1));
-            String user = userObject.getContentText(); // this is the latest prompt
-            final String userPrompt = user;
-            String ragMode = userObject.getSearchMode();
+            UserObject userObject = null;
+            String user = "";
+            String ragMode = "no";
+            String userPrompt = "";
+            int lastUserIndex = -1;
+            for (int i = messages.length() - 1; i >= 0; i--) {
+                JSONObject message = messages.getJSONObject(i);
+                if ("user".equals(message.optString("role", ""))) {
+                    lastUserIndex = i;
+                    break;
+                }
+            }
+            if (lastUserIndex >= 0) {
+                userObject = new UserObject(messages.getJSONObject(lastUserIndex));
+                user = userObject.getContentText(); // this is the latest user prompt
+                userPrompt = user;
+                ragMode = userObject.getSearchMode();
+            }
             ConcurrentLog.info("RAGProxy", "ragMode=" + ragMode + " userChars=" + (user == null ? 0 : user.length()));
             //List<DataURL> data_urls = userObject.getContentAttachments(); // this list is a copy of the content data_urls
             
             // RAG
             String searchResultQuery = "";
             String searchResultMarkdown = "";
-            if (!"no".equals(ragMode)) {
+            if (userObject != null && !"no".equals(ragMode)) {
                 // modify system and user prompt here in bodyObject to enable RAG
                 final String queryPrefix = sb.getConfig("ai.llm-query-generator-prefix", LLM_QUERY_GENERATOR_PREFIX_DEFAULT);
                 final long queryStart = System.currentTimeMillis();
-                searchResultQuery = this.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, queryPrefix + user); // might return null in case any error occurred
+                searchResultQuery = RAGAugmentor.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, queryPrefix + user); // might return null in case any error occurred
                 if (searchResultQuery == null || searchResultQuery.length() == 0) searchResultQuery = user; // in case there is an error we simply search with the prompt
                 final long queryElapsed = System.currentTimeMillis() - queryStart;
-                final Set<String> boostTerms = intersectTokens(userPrompt, searchResultQuery, 8);
+                final Set<String> boostTerms = RAGAugmentor.intersectTokens(userPrompt, searchResultQuery, 8);
                 final long searchStart = System.currentTimeMillis();
-                searchResultMarkdown = searchResultsAsMarkdown(searchResultQuery, 10, "global".equals(ragMode), boostTerms);
+                searchResultMarkdown = RAGAugmentor.searchResultsAsMarkdown(searchResultQuery, 10, "global".equals(ragMode), boostTerms);
                 final long searchElapsed = System.currentTimeMillis() - searchStart;
                 ConcurrentLog.info(
                     "RAGProxy",
@@ -236,76 +210,22 @@ public class RAGProxyServlet extends HttpServlet {
                 userObject.setContentText(user);
             }
             
-            // write back modified bodyMap to body
-            body = bodyObject.toString();
-
-            // Open request to back-end service
-            final URL url = new URI(llm4Chat.llm.hoststub + "/v1/chat/completions").toURL();
-            final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            if (!llm4Chat.llm.api_key.isEmpty()) {
-                conn.setRequestProperty("Authorization", "Bearer " + llm4Chat.llm.api_key);
+            JSONObject initialMetadata = null;
+            if (searchResultMarkdown.length() > 0) {
+                initialMetadata = new JSONObject(true);
+                initialMetadata.put("search-filename", "search_result_" + searchResultQuery.replace(' ', '_') + ".md");
+                initialMetadata.put("search-text-base64", new String(Base64.getEncoder().encode(searchResultMarkdown.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
             }
-            conn.setDoOutput(true);
 
-            // write the body to back-end LLM
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(body.getBytes());
-                os.flush();
-            } // here we wait for the response from upstream
-
-            // write back response of the back-end service to the client; use status of
-            // backend-response
-            final int status = conn.getResponseCode();
-            // String rmessage = conn.getResponseMessage();
+            // ToolCallProtocol owns request preparation, initial stream handling and follow-up tool rounds.
+            final int status = ToolCallProtocol.proxyToolLifecycle(out, llm4Chat, bodyObject, messages, initialMetadata);
             hresponse.setStatus(status);
-
-            if (status == 200) {
-                final BlockingQueue<String> inputQueue = new LinkedBlockingQueue<>();
-                final String POISON = "POISON"; 
-                Thread readerThread = new Thread(() -> {
-                    // read the response of the back-end line-by-line and push it to a stack concurrently
-                    try {
-                        final BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                        String inputLine;
-                        while ((inputLine = in.readLine()) != null) {inputQueue.put(inputLine);}
-                        in.close();
-                        inputQueue.put(POISON);
-                    } catch (IOException | InterruptedException e) {
-                    } finally {
-                        try {inputQueue.put(POISON);} catch (InterruptedException e) {}
-                    }
-                });
-                readerThread.start();
-                
-                // read the stack line-by-line and write it to the client line-by-line
-                try {
-                    String inputLine;
-                    int count = 0;
-                    while (!(inputLine = inputQueue.take()).equals(POISON)) {
-                        if (count == 0 && searchResultMarkdown.length() > 0) {
-                            // for the first line we modify the data line to integrate the search result as file
-                            int p = inputLine.indexOf('{');
-                            if (p > 0) {
-                                JSONObject j = new JSONObject(new JSONTokener(inputLine.substring(p)));
-                                j.put("search-filename", "search_result_"+ searchResultQuery.replace(' ', '_') + ".md");
-                                j.put("search-text-base64", new String(Base64.getEncoder().encode(searchResultMarkdown.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
-                                inputLine = inputLine.substring(0, p) + j.toString();
-                            }
-                        }
-                        out.println(inputLine); // i.e. data: {"id":"chatcmpl-69","object":"chat.completion.chunk","created":1715908287,"model":"llama3:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"ߘ"},"finish_reason":null}]}
-                        out.flush();
-                        count++;
-                    }
-                } catch (InterruptedException e) {}
-            }
             out.close(); // close this here to end transmission
-        } catch (JSONException | URISyntaxException e) {
+        } catch (JSONException e) {
             throw new IOException(e.getMessage());
         }
     }
-    
+
     public final static class DataURL {
     	private String mimetype;
     	private byte[] data;
@@ -481,495 +401,6 @@ public class RAGProxyServlet extends HttpServlet {
                 }
             }
         }
-    }
-    
-    public static JSONArray searchResults(String query, int count, final boolean includeSnippet) {
-        return searchResults(query, count, includeSnippet, new LinkedHashSet<>());
-    }
-
-    public static JSONArray searchResults(String query, int count, final boolean includeSnippet, final Set<String> boostTerms) {
-        final JSONArray results = new JSONArray();
-        if (query == null || query.length() == 0 || count == 0) return results;
-        Switchboard sb = Switchboard.getSwitchboard();
-        EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
-        // construct query
-        final SolrQuery params = new SolrQuery();
-        params.setQuery(query);
-        params.set("defType", "edismax");
-        params.set("qf",
-            CollectionSchema.title.getSolrFieldName() + "^3 " +
-            CollectionSchema.text_t.getSolrFieldName() + "^1 " +
-            CollectionSchema.sku.getSolrFieldName() + "^0.5 " +
-            CollectionSchema.h1_txt.getSolrFieldName() + "^2");
-        params.set("pf",
-            CollectionSchema.title.getSolrFieldName() + "^5 " +
-            CollectionSchema.text_t.getSolrFieldName() + "^2");
-        //params.set("mm", "2<75%"); // using mm is too strict; in many cases we don't get any hits
-        final List<String> bqParts = new ArrayList<>();
-        if (boostTerms != null && !boostTerms.isEmpty()) {
-            for (String term : boostTerms) {
-                if (term == null || term.isEmpty()) continue;
-                bqParts.add(CollectionSchema.title.getSolrFieldName() + ":" + term + "^0.5");
-                bqParts.add(CollectionSchema.h1_txt.getSolrFieldName() + ":" + term + "^0.4");
-                bqParts.add(CollectionSchema.text_t.getSolrFieldName() + ":" + term + "^0.2");
-            }
-        }
-        bqParts.add("(" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(zip rar 7z tar gz bz2 xz tgz))^0.1");
-        params.set("bq", String.join(" ", bqParts));
-        params.setRows(count);
-        params.setStart(0);
-        params.setFacet(false);
-        params.clearSorts();
-        params.setFields(
-            CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(), CollectionSchema.text_t.getSolrFieldName(),
-            CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.keywords.getSolrFieldName(), CollectionSchema.synonyms_sxt.getSolrFieldName(),
-            CollectionSchema.h1_txt.getSolrFieldName(), CollectionSchema.h2_txt.getSolrFieldName(), CollectionSchema.h3_txt.getSolrFieldName(),
-            CollectionSchema.h4_txt.getSolrFieldName(), CollectionSchema.h5_txt.getSolrFieldName(), CollectionSchema.h6_txt.getSolrFieldName()
-        );
-        params.setIncludeScore(true);
-        params.set("df", CollectionSchema.text_t.getSolrFieldName());
-
-        // query the server
-        try {
-            final SolrDocumentList sdl = connector.getDocumentListByParams(params);
-            Iterator<SolrDocument> i = sdl.iterator();
-            while (i.hasNext()) {
-                try {
-                    SolrDocument doc = i.next();
-                    final JSONObject result = new JSONObject(true);
-                    String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                    result.put("url", url == null ? "" : url.trim());
-                    String title = getOneString(doc, CollectionSchema.title);
-                    result.put("title", title == null ? "" : title.trim());
-                    if (includeSnippet) {
-                        String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                        result.put("text", limitSnippet(text == null ? "" : text.trim(), 2000));
-                    }
-                results.put(result);
-                } catch (JSONException e) {
-                    // skip this result
-                }
-            }
-            return results;
-        } catch (SolrException | IOException e) {
-            return results;
-        }
-    }
-    
-    public static String searchResultsAsMarkdown(String query, int count, boolean global) {
-        return searchResultsAsMarkdown(query, count, global, new LinkedHashSet<>());
-    }
-
-    public static String searchResultsAsMarkdown(String query, int count, boolean global, final Set<String> boostTerms) {
-        final long searchStart = System.currentTimeMillis();
-        JSONArray searchResults = global ? searchResultsGlobal(query, count, true) : searchResults(query, count, true, boostTerms);
-        ConcurrentLog.info("RAGProxy", "searchResults=" + searchResults.length() + " global=" + global + " searchMs=" + (System.currentTimeMillis() - searchStart));
-        StringBuilder sb = new StringBuilder();
-        
-        // collect snippets
-        List<Snippet> results = new ArrayList<>();
-        for (int i  = 0; i < searchResults.length(); i++) {
-            try {
-                JSONObject r = searchResults.getJSONObject(i);
-                String title = r.optString("title", "");
-                String url = r.optString("url", "");
-                String text = r.optString("text", "");
-                if (title.isEmpty()) title = url;
-                if (text.isEmpty()) text = title;
-                if (title.length() > 0 && text.length() > 0) {
-                    Snippet snippet = new Snippet(query, text, url, title, 256); // we always compute a snippet because that gives us a hint if the query appears at all
-                    if (snippet.getText().length() > 0) results.add(snippet);
-                }
-            } catch (JSONException e) {}
-        }
-        
-        // sort snippets again by score
-        results.sort(Comparator.comparingDouble(Snippet::getScore));
-        
-        int limit = results.size() / 2;
-        if (results.size() > 0 && limit == 0) limit = 1;
-        for (int i  = 0; i < limit; i++) {
-            Snippet snippet = results.get(i);
-            sb.append("## ").append(snippet.getTitle()).append("\n");
-            sb.append(snippet.text).append("\n");
-            if (snippet.getURL().length() > 0) sb.append("Source: ").append(snippet.getURL()).append("\n");
-            sb.append("\n\n");
-        }
-        
-        ConcurrentLog.info("RAGProxy", "markdownChars=" + sb.length() + " snippetCount=" + results.size());
-        return sb.toString();
-    }
-
-    public static JSONArray searchResultsGlobal(String query, int count, final boolean includeSnippet) {
-        final JSONArray results = new JSONArray();
-        if (query == null || query.length() == 0 || count == 0) return results;
-        final Switchboard sb = Switchboard.getSwitchboard();
-        final RankingProfile ranking = sb.getRanking();
-        final int timezoneOffset = 0;
-        final QueryModifier modifier = new QueryModifier(timezoneOffset);
-        String querystring = modifier.parse(query);
-        if (querystring.length() == 0) {
-            querystring = query == null ? "" : query.trim();
-        }
-        if (querystring.length() == 0) return results;
-        final QueryGoal qg = new QueryGoal(querystring);
-        final QueryParams theQuery = new QueryParams(
-                qg,
-                modifier,
-                0,
-                "",
-                Classification.ContentDomain.TEXT,
-                "",
-                timezoneOffset,
-                new HashSet<Tagging.Metatag>(),
-                CacheStrategy.IFFRESH,
-                count,
-                0,
-                ".*",
-                null,
-                null,
-                QueryParams.Searchdom.GLOBAL,
-                null,
-                true,
-                DigestURL.hosthashess(sb.getConfig("search.excludehosth", "")),
-                MultiProtocolURL.TLD_any_zone_filter,
-                null,
-                false,
-                sb.index,
-                ranking,
-                ClientIdentification.yacyIntranetCrawlerAgent.userAgent(),
-                0.0d,
-                0.0d,
-                0.0d,
-                sb.getConfigSet("search.navigation"));
-        final SearchEvent theSearch = SearchEventCache.getEvent(
-                theQuery,
-                sb.peers,
-                sb.tables,
-                (sb.isRobinsonMode()) ? sb.clusterhashes : null,
-                false,
-                sb.loader,
-                (int) sb.getConfigLong(
-                        SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER,
-                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10)),
-                sb.getConfigLong(
-                        SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
-                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
-        final long timeout = sb.getConfigLong(
-                SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
-                sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000));
-        waitForFeedingAndResort(theSearch, timeout);
-        for (int i = 0; i < count; i++) {
-            URIMetadataNode node = theSearch.oneResult(i, timeout);
-            if (node == null) break;
-            try {
-                final JSONObject result = new JSONObject(true);
-                result.put("url", node.urlstring());
-                result.put("title", node.title());
-                if (includeSnippet) {
-                    String text = node.snippet();
-                    if (text == null || text.isEmpty()) {
-                        TextSnippet snippet = node.textSnippet();
-                        if (snippet != null && snippet.exists() && !snippet.getErrorCode().fail()) {
-                            text = snippet.getLineRaw();
-                        }
-                    }
-                    if (text == null || text.isEmpty()) {
-                        text = firstFieldString(node.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
-                    }
-                    if (text == null || text.isEmpty()) {
-                        text = firstFieldString(node.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
-                    }
-                    result.put("text", limitSnippet(text == null ? "" : text.trim(), 2000));
-                }
-                results.put(result);
-            } catch (JSONException e) {
-                // skip this result
-            }
-        }
-        return results;
-    }
-
-    private static String limitSnippet(String text, int maxChars) {
-        if (text == null) return "";
-        if (maxChars <= 0 || text.length() <= maxChars) return text;
-        return text.substring(0, maxChars);
-    }
-
-    private static String firstFieldString(Object value) {
-        if (value == null) return "";
-        if (value instanceof Collection) {
-            for (Object item : (Collection<?>) value) {
-                if (item != null) return item.toString();
-            }
-            return "";
-        }
-        return value.toString();
-    }
-
-    private static void waitForFeedingAndResort(SearchEvent search, long timeoutMs) {
-        if (search == null || timeoutMs <= 0) return;
-        final long end = System.currentTimeMillis() + timeoutMs;
-        while (!search.isFeedingFinished() && System.currentTimeMillis() < end) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        search.resortCachedResults();
-    }
-    
-    
-    public static class Snippet {
-        
-        private String text, url, title;
-        private double score;
-        
-        /**
-         * Find a snippet inside a given text that contains most of the searched words plus some context.
-         * @param query a string with a search query; query words are separated by space
-         * @param text the text where we want to find the snippets
-         * @param maxChunkLength the maximum length of a single chunk; however the snippet is three times as this.
-         * @return one string containing the snippet.
-         */
-        public Snippet(String query, String text, String url, String title, int maxChunkLength) {
-            this.url = url;
-            this.title = title;
-            this.score = 0.0;
-            
-            if (text == null || text.isEmpty() || maxChunkLength <= 0 || query == null) {
-                this.text = "";
-                return;
-            }
-
-            // Step 1: Slice text and make copy with lowercase version to support tf*idf computation
-            List<String> chunks = slicer(text, maxChunkLength);
-            if (chunks.isEmpty()) {
-                this.text = "";
-                return;
-            }
-            List<String> chunksLowerCase = new ArrayList<>(chunks.size());
-            for (String chunk: chunks) chunksLowerCase.add(chunk.toLowerCase());
-
-            // Step 2: Preprocess query
-            Set<String> queryWordSet = querySet(query);
-            if (queryWordSet.isEmpty()) {
-                this.text = "";
-                return;
-            }
-
-            // Step 3: Compute IDF
-            // IDF uses a logarithm because the information gain of rare words grows non-linearly; 
-            // the log dampens extreme ratios (N/df), stabilizes TF-IDF values, and matches the 
-            // information-theoretic definition of word informativeness.
-            int totalChunks = chunksLowerCase.size();
-            Map<String, Double> idf = new HashMap<>();
-            for (String word: queryWordSet) {
-                int docFreq = 0;
-                for (String chunk: chunksLowerCase) {
-                    if (chunk.contains(word)) docFreq++;
-                }
-                idf.put(word, Math.log((double) totalChunks / (docFreq + 1)) + 1);
-            }
-
-            // Step 4: Score chunks
-            Map<Integer, Double> chunkScores = new HashMap<>();
-            for (int i = 0; i < chunksLowerCase.size(); i++) {
-                String chunk = chunksLowerCase.get(i);
-                double score = 0.0;
-                Map<String, Integer> tf = new HashMap<>(); // counts occurrence in query for each word in chunk
-
-                // Extract words and clean
-                String[] wordsInChunk = chunk.split("\\s+");
-                for (String w : wordsInChunk) {
-                    String cleanWord = w.replaceAll("[.,!?;:]", "");
-                    if (cleanWord.length() > 0 && queryWordSet.contains(cleanWord)) {
-                        tf.put(cleanWord, tf.getOrDefault(cleanWord, 0) + 1);
-                    }
-                }
-
-                // Sum TF-IDF
-                for (String word: queryWordSet) {
-                    int tfValue = tf.getOrDefault(word, 0);
-                    double tfIdf = (double) tfValue * idf.getOrDefault(word, 1.0);
-                    score += tfIdf;
-                }
-                chunkScores.put(i, score);
-            }
-
-            // Step 5: Find best chunk
-            int topChunkIndex = -1;
-            for (Map.Entry<Integer, Double> entry: chunkScores.entrySet()) {
-                if (entry.getValue() > this.score) {
-                    this.score = entry.getValue();
-                    topChunkIndex = entry.getKey();
-                }
-            }
-
-            // if there is no best chunk, return an empty snippet
-            if (topChunkIndex < 0) {
-                this.text = "";
-                this.score = 0.0;
-                return;
-            }
-            
-            // Step 6: Get 3-slice snippet
-            List<String> snippetChunks = new ArrayList<>();
-            if (topChunkIndex > 0) {
-                snippetChunks.add(chunks.get(topChunkIndex - 1));
-            }
-            snippetChunks.add(chunks.get(topChunkIndex));
-            if (topChunkIndex < chunks.size() - 1) {
-                snippetChunks.add(chunks.get(topChunkIndex + 1));
-            }
-
-            // Step 7: Join
-            this.text = String.join(" ", snippetChunks);
-        }
-        
-        public double getScore() {
-            return this.score;
-        }
-        
-        public String getText() {
-            return this.text;
-        }
-        
-        public String getURL() {
-            return this.url;
-        }
-        
-        public String getTitle() {
-            return this.title;
-        }
-    }
-
-    /**
-     * Creates slices of a given text. We want slices of average same size,
-     * but we want to prevent that cuts are made within sentences.
-     * @param text the given text
-     * @param len the minimum length of the wanted slices; actual slices may be longer
-     * @return a list of text slices
-     */
-    public static List<String> slicer(String text, int len) {
-        List<String> result = new ArrayList<>();
-        if (text == null || len <= 0) return result;
-
-        int start = 0;
-        while (start < text.length()) {
-            int end = Math.min(start + len, text.length());
-
-            // Move end position further out until a a sentence end is found:
-            // look for sentence boundary: .!?, followed by whitespace char.
-            while (end < text.length()) {
-                char ch = text.charAt(end - 1);
-                if ((ch == '.' || ch == '?' || ch == '!') && Character.isWhitespace(text.charAt(end))) {
-                    break;
-                }
-                end++;
-            }
-            result.add(text.substring(start, end));
-            start = end;
-        }
-
-        return result;
-    }
-    
-    private static String getOneString(SolrDocument doc, CollectionSchema field) {
-        assert field.isMultiValued();
-        assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
-        Object r = doc.getFieldValue(field.getSolrFieldName());
-        if (r == null) return "";
-        if (r instanceof ArrayList) {
-            return (String) ((ArrayList<?>) r).get(0);
-        }
-        return r.toString();
-    }
-
-    private String searchWordsForPrompt(LLM llm, String model, String prompt) {
-        final String question = prompt == null ? "" : prompt;
-        if (llm == null || model == null || model.isEmpty()) {
-            return null;
-        }
-        try {
-            LLM.Context context = new LLM.Context(LLM_SYSTEM_PREFIX_DEFAULT);
-            context.addPrompt(question);
-            Set<String> singlewords = new LinkedHashSet<>();
-            String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 200));
-            if (a == null || a.length == 0) return null;
-            // unfortunately this might not be a single word per line but several words; we collect them all.
-            for (String s: a) {
-                if (s == null) continue;
-                for (String t: s.split(" ")) {
-                    if (!t.isEmpty()) singlewords.add(t.toLowerCase());
-                }
-            }
-            if (singlewords.isEmpty()) {
-                return null;
-            }
-            StringBuilder query = new StringBuilder();
-            for (String s: singlewords) query.append(s).append(' ');
-            String querys = query.toString().trim();
-            if (querys.length() == 0) return null;
-            return querys;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    
-    private static Set<String> querySet(String query) {
-        Set<String> queryWordSet = Arrays.stream(query.trim().toLowerCase().split("\\s+"))
-                .map(String::toLowerCase)
-                .filter(word -> !word.isEmpty())
-                .collect(Collectors.toSet());
-        return queryWordSet;
-    }
-
-    private static Set<String> intersectTokens(String originalPrompt, String computedQuery, int maxTerms) {
-        Set<String> promptTerms = querySet(originalPrompt == null ? "" : originalPrompt);
-        Set<String> queryTerms = querySet(computedQuery == null ? "" : computedQuery);
-        Set<String> intersection = new LinkedHashSet<>();
-        for (String term : promptTerms) {
-            if (!queryTerms.contains(term)) continue;
-            final String cleaned = cleanToken(term);
-            if (cleaned.isEmpty()) continue;
-            intersection.add(cleaned);
-            if (maxTerms > 0 && intersection.size() >= maxTerms) break;
-        }
-        return intersection;
-    }
-
-    private static String cleanToken(String term) {
-        if (term == null) return "";
-        String cleaned = term.replaceAll("[^A-Za-z0-9]", "");
-        if (cleaned.length() < 2) return "";
-        return cleaned.toLowerCase();
-    }
-
-    private static JSONObject responseLine(String payload) {
-        JSONObject j = new JSONObject(true);
-        try {
-            j.put("id", "log");
-            j.put("object", "chat.completion.chunk");
-            j.put("created", System.currentTimeMillis() / 1000);
-            j.put("model", "log");
-            j.put("system_fingerprint", "YaCy");
-            JSONArray choices = new JSONArray();
-            JSONObject choice = new JSONObject(true); // {"index":0,"delta":{"role":"assistant","content":"ߘ"
-            choice.put("index", 0);
-            JSONObject delta = new JSONObject(true);
-            delta.put("role", "assistant");
-            delta.put("content", payload);
-            choice.put("delta", delta);
-            choices.put(choice);
-            j.put("choices", choices);
-            // j.put("finish_reason", null); // this is problematic with the JSON library
-        } catch (JSONException e) {
-        }
-        return j;
     }
 
     public static void pruneOldEntries(long now) {

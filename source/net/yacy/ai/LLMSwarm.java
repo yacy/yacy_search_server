@@ -1,5 +1,5 @@
 /**
- *  OllamaSwarm.java
+ *  LLMSwarm.java
  *  Copyright 2025 by Michael Peter Christen
  *  First released 01.06.2025 at https://yacy.net
  *

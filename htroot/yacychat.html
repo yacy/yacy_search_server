@@ -83,6 +83,21 @@
         color: #ffffff;
         border: 1px solid #2c3e50;
       }
+
+      /* --- TOOL: Tool Call Output --- */
+      .chat-turn.tool {
+        background-color: #f0f7e8;
+        border-left-width: 5px;
+        border-left-style: solid;
+        border-color: #b7d7a8;
+        color: #24421a;
+      }
+
+      .chat-turn.tool legend {
+        background: #3d6b2f;
+        color: #ffffff;
+        border: 1px solid #3d6b2f;
+      }
     
       /* --- SYSTEM: Log Entry Style --- */
       .chat-turn.system {
@@ -145,6 +160,68 @@
       .think-content {
         color: #394b59;
         font-size: 0.85rem;
+      }
+
+      .toolcalls-popover {
+        position: absolute;
+        z-index: 20;
+        top: 24px;
+        right: 8px;
+        min-width: 280px;
+        max-width: min(560px, calc(100vw - 40px));
+        max-height: 380px;
+        overflow: auto;
+        border: 1px solid #c3cbd9;
+        border-radius: 6px;
+        background: #eef2f7;
+        box-shadow: 3px 3px 0px rgba(0,0,0,0.15);
+        padding: 8px 10px;
+      }
+
+      .toolcalls-popover-header {
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .toolcalls-list {
+        margin-top: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .toolcall-item {
+        border: 1px solid #d6dbe5;
+        border-radius: 4px;
+        background: #f5f7fb;
+        padding: 6px 8px;
+      }
+
+      .toolcall-name {
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .toolcall-args {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      .toolcall-result-title {
+        margin-top: 6px;
+        margin-bottom: 4px;
+        font-weight: 700;
+      }
+
+      .toolcall-result {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.95rem;
+        line-height: 1.4;
       }
 
       .chat-body.markdown h1,
@@ -316,7 +393,8 @@
       .attachment-button,
       .search-button,
       .copy-button,
-      .user-trim-button {
+      .user-trim-button,
+      .toolcalls-button {
         width: 24px;
         height: 24px;
         border: none;
@@ -335,7 +413,8 @@
       .attachment-button:hover,
       .search-button:hover,
       .copy-button:hover,
-      .user-trim-button:hover {
+      .user-trim-button:hover,
+      .toolcalls-button:hover {
         background: #c3cbd9;
       }
 
@@ -372,6 +451,20 @@
         position: absolute;
         top: -6px;
         right: 8px;
+      }
+
+      .toolcalls-button {
+        position: static;
+      }
+
+      .toolcall-toolbar {
+        position: absolute;
+        top: -6px;
+        right: 36px;
+        display: inline-flex;
+        flex-direction: row;
+        gap: 4px;
+        align-items: center;
       }
 
       .user-delete-button {
@@ -775,6 +868,7 @@
     const ALLOWED_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, ...TEXT_EXTENSIONS]);
     const FILE_ACCEPT_TYPES = [...ALLOWED_MIME_TYPES, ...ALLOWED_EXTENSIONS].join(',');
 
+
     if (dom.fileInput) {
         dom.fileInput.setAttribute('accept', FILE_ACCEPT_TYPES);
     }
@@ -966,18 +1060,31 @@
         return result;
     }
 
+    function stripToolProtocolMarkup(text) {
+        if (!text || typeof text !== 'string') return text || '';
+        // Remove legacy/model-emitted tool protocol snippets like:
+        // <function=name>
+        // <parameter=key>
+        // value
+        let cleaned = text.replace(/^\s*<function=[^>\n]+>\s*$[\s\S]*?(?=^\s*$|$)/gim, '');
+        cleaned = cleaned.replace(/^\s*<parameter=[^>\n]+>\s*$[\s\S]*?(?=^\s*$|$)/gim, '');
+        // Collapse excessive blank lines introduced by stripping.
+        cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+        return cleaned;
+    }
+
     function stripThinkFromContent(content) {
-        if (typeof content === 'string') return stripThinkBlocks(content);
+        if (typeof content === 'string') return stripToolProtocolMarkup(stripThinkBlocks(content));
         if (Array.isArray(content)) {
             return content.map(part => {
                 if (part?.type === 'text' && typeof part.text === 'string') {
-                    return { ...part, text: stripThinkBlocks(part.text) };
+                    return { ...part, text: stripToolProtocolMarkup(stripThinkBlocks(part.text)) };
                 }
                 return part;
             });
         }
         if (content && typeof content === 'object' && typeof content.text === 'string') {
-            return { ...content, text: stripThinkBlocks(content.text) };
+            return { ...content, text: stripToolProtocolMarkup(stripThinkBlocks(content.text)) };
         }
         return content;
     }
@@ -1143,7 +1250,7 @@
     }
 
     function appendMessage(role, text, opts = {}) {
-        const { skipScroll = false, skipVisibilityUpdate = false, attachment = null, messageIndex = undefined } = opts;
+        const { skipScroll = false, skipVisibilityUpdate = false, attachment = null, messageIndex = undefined, toolCalls = null, toolResults = null } = opts;
         const entry = document.createElement('fieldset');
         entry.className = `chat-turn ${role}`;
         if (role === 'assistant' || role === 'user') {
@@ -1154,6 +1261,8 @@
             legend.textContent = 'Assistant';
         } else if (role === 'user') {
             legend.textContent = 'User';
+        } else if (role === 'tool') {
+            legend.textContent = 'Tool';
         } else {
             legend.textContent = 'System';
         }
@@ -1172,7 +1281,6 @@
             attachmentContainer.appendChild(createAttachmentChip(attachment));
             entry.appendChild(attachmentContainer);
         }
-
         dom.messages.appendChild(entry);
         if (typeof opts.messageIndex === 'number') {
             entry.dataset.messageIndex = String(opts.messageIndex);
@@ -1185,6 +1293,56 @@
             copyBtn.innerHTML = '<span class="glyphicon glyphicon-copy" aria-hidden="true"></span>';
             copyBtn.addEventListener('click', () => copyAssistant(body));
             entry.appendChild(copyBtn);
+            if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+                const toolbar = document.createElement('div');
+                toolbar.className = 'toolcall-toolbar';
+                const panels = [];
+                const resultsById = new Map();
+                const resultsByName = new Map();
+                if (Array.isArray(toolResults)) {
+                    for (const result of toolResults) {
+                        if (!result) continue;
+                        if (result.id) resultsById.set(result.id, result);
+                        if (result.tool_call_id) resultsById.set(result.tool_call_id, result);
+                        const rname = result?.name || result?.function?.name;
+                        if (rname && !resultsByName.has(rname)) resultsByName.set(rname, result);
+                    }
+                }
+
+                for (let i = 0; i < toolCalls.length; i++) {
+                    const call = toolCalls[i];
+                    if (!call) continue;
+                    const fnName = call?.function?.name || call?.name || 'tool';
+                    const matchedResult = (call.id && resultsById.get(call.id)) || resultsByName.get(fnName) || null;
+
+                    const toolBtn = document.createElement('button');
+                    toolBtn.type = 'button';
+                    toolBtn.className = 'toolcalls-button';
+                    toolBtn.title = `Tool: ${fnName}`;
+                    toolBtn.innerHTML = '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>';
+
+                    const toolPanel = createToolCallPanel(call, matchedResult, toolCalls.length, i);
+                    toolPanel.style.display = 'none';
+                    toolPanel.addEventListener('click', evt => evt.stopPropagation());
+                    entry.appendChild(toolPanel);
+                    panels.push(toolPanel);
+
+                    toolBtn.addEventListener('click', event => {
+                        event.stopPropagation();
+                        const open = toolPanel.style.display !== 'none';
+                        for (const panel of panels) panel.style.display = 'none';
+                        toolPanel.style.display = open ? 'none' : 'block';
+                    });
+                    toolbar.appendChild(toolBtn);
+                }
+                entry.appendChild(toolbar);
+
+                document.addEventListener('click', evt => {
+                    if (!entry.contains(evt.target)) {
+                        for (const panel of panels) panel.style.display = 'none';
+                    }
+                });
+            }
         }
         if (role === 'user' && typeof messageIndex === 'number') {
             const trimBtn = document.createElement('button');
@@ -1496,6 +1654,9 @@
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
         let assistantText = '';
+        let roundToolCalls = [];
+        let collectedToolCalls = [];
+        let collectedToolResults = [];
         let sawFirstDelta = false;
         let focusShown = false;
         let searchApplied = false;
@@ -1557,7 +1718,31 @@
             try {
                 const parsed = JSON.parse(clean);
                 applySearchAttachment(parsed);
-                const delta = parsed?.choices?.[0]?.delta?.content;
+                if (Array.isArray(parsed['tool-results']) && parsed['tool-results'].length > 0) {
+                    collectedToolResults = collectedToolResults.concat(normalizeToolResults(parsed['tool-results']));
+                }
+                const choice = parsed?.choices?.[0];
+                const delta = choice?.delta;
+                const finishReason = choice?.finish_reason;
+                const toolDelta = delta?.tool_calls;
+                if (toolDelta) {
+                    roundToolCalls = mergeToolCalls(roundToolCalls, toolDelta);
+                }
+                if (delta?.function_call) {
+                    roundToolCalls = mergeToolCalls(roundToolCalls, [{
+                        index: 0,
+                        type: 'function',
+                        function: delta.function_call
+                    }]);
+                }
+                if (finishReason === 'tool_calls' || finishReason === 'function_call') {
+                    const finalized = normalizeToolCalls(roundToolCalls);
+                    if (finalized.length) {
+                        collectedToolCalls = collectedToolCalls.concat(finalized);
+                    }
+                    roundToolCalls = [];
+                }
+                const contentDelta = delta?.content;
                 if (delta) {
                     if (!sawFirstDelta) {
                         sawFirstDelta = true;
@@ -1567,7 +1752,10 @@
                             onFirstToken();
                         }
                     }
-                    assistantText += delta;
+                    if (contentDelta) {
+                        assistantText += contentDelta;
+                        assistantText = stripToolProtocolMarkup(assistantText);
+                    }
                     if (!thinkAutoClosed && hasThinkCloseOutsideFences(assistantText)) {
                         thinkAutoClosed = true;
                         if (assistantNode) {
@@ -1637,7 +1825,22 @@
             : explicitThinkOpen === 'false'
                 ? false
                 : (thinkAutoClosed && !thinkAutoCloseFired);
-        state.messages.push({ role: 'assistant', content: assistantText, thinkOpen: storedThinkOpen });
+        const normalizedToolCalls = normalizeToolCalls(collectedToolCalls.concat(roundToolCalls));
+        const assistantMessage = {
+            role: 'assistant',
+            content: assistantText,
+            thinkOpen: storedThinkOpen
+        };
+        if (normalizedToolCalls.length) {
+            assistantMessage.tool_calls = normalizedToolCalls;
+            if (collectedToolResults.length) {
+                assistantMessage.tool_results = collectedToolResults;
+            }
+            assistantMessage.display = assistantText && assistantText.trim()
+                ? assistantText
+                : `Tool call: ${normalizedToolCalls.map(call => call?.function?.name || 'tool').join(', ')}`;
+        }
+        state.messages.push(assistantMessage);
         console.debug('[yacychat] response chars', assistantText.length, 'total ms', Math.round(performance.now() - requestStart));
         state.assistantSeen = true;
         persistConversation();
@@ -1691,12 +1894,21 @@
         }
         if (message.role === 'assistant') {
             if (textOnly || typeof content === 'string') {
-                content = stripThinkBlocks(String(content || ''));
+                content = stripToolProtocolMarkup(stripThinkBlocks(String(content || '')));
             } else {
                 content = stripThinkFromContent(content);
             }
         }
         const sanitized = { role: message.role, content };
+        if (message.tool_calls) {
+            sanitized.tool_calls = message.tool_calls;
+        }
+        if (message.tool_call_id) {
+            sanitized.tool_call_id = message.tool_call_id;
+        }
+        if (message.name) {
+            sanitized.name = message.name;
+        }
         if (message.search === true) {
             sanitized.search = SEARCH_DEFAULTS.local;
         } else if (message.search === SEARCH_DEFAULTS.local || message.search === SEARCH_DEFAULTS.global) {
@@ -1726,6 +1938,12 @@
         return '';
     }
 
+    function messageDisplayText(message) {
+        if (!message) return '';
+        if (typeof message.display === 'string') return message.display;
+        return messageText(message.content);
+    }
+
     function renderConversation(options = {}) {
         const { skipScroll = false } = options;
         closeAttachmentPopover();
@@ -1734,13 +1952,126 @@
         for (let i = 0; i < state.messages.length; i++) {
             const msg = state.messages[i];
             if (msg.role === 'system' && !state.showSystem) continue;
-            appendMessage(msg.role, messageText(msg.content), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i, attachment: msg.attachment });
+            appendMessage(msg.role, messageDisplayText(msg), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i, attachment: msg.attachment, toolCalls: msg.tool_calls, toolResults: msg.tool_results });
         }
         updateClearChatVisibility();
         updateSystemToggleButton();
         if (!skipScroll && !state.busy) {
             scrollToBottom();
         }
+    }
+
+    function normalizeToolCalls(calls) {
+        if (!Array.isArray(calls)) return [];
+        const stamp = Date.now();
+        return calls
+            .filter(Boolean)
+            .map((call, index) => {
+                const fn = call.function || {};
+                return {
+                    id: call.id || `toolcall_${stamp}_${index}`,
+                    type: call.type || 'function',
+                    function: {
+                        name: fn.name || call.name || 'unknown',
+                        arguments: typeof fn.arguments === 'string' ? fn.arguments : (call.arguments || '')
+                    }
+                };
+            });
+    }
+
+    function normalizeToolResults(results) {
+        if (!Array.isArray(results)) return [];
+        const stamp = Date.now();
+        return results
+            .filter(Boolean)
+            .map((result, index) => ({
+                id: result.id || result.tool_call_id || `toolres_${stamp}_${index}`,
+                tool_call_id: result.tool_call_id || result.id || '',
+                name: result.name || result?.function?.name || 'unknown',
+                content: typeof result.content === 'string'
+                    ? result.content
+                    : (result?.function?.content ? String(result.function.content) : '')
+            }));
+    }
+
+    function mergeToolCalls(existing, deltaCalls) {
+        const result = Array.isArray(existing) ? [...existing] : [];
+        if (!Array.isArray(deltaCalls)) return result;
+        for (const delta of deltaCalls) {
+            if (!delta) continue;
+            const index = readToolCallIndex(delta);
+            if (index === null || index < 0) continue;
+            if (!result[index]) {
+                result[index] = { id: '', type: delta.type || 'function', function: { name: '', arguments: '' } };
+            }
+            const target = result[index];
+            if (delta.id) target.id = delta.id;
+            if (delta.type) target.type = delta.type;
+            if (delta.function?.name) target.function.name = delta.function.name;
+            if (typeof delta.function?.arguments === 'string' && delta.function.arguments.length > 0) {
+                target.function.arguments = (target.function.arguments || '') + delta.function.arguments;
+            }
+        }
+        return result;
+    }
+
+    function readToolCallIndex(delta) {
+        if (!delta || typeof delta !== 'object' || !Object.prototype.hasOwnProperty.call(delta, 'index')) {
+            return null;
+        }
+        return Number.isInteger(delta.index) ? delta.index : null;
+    }
+
+    function formatToolArguments(raw) {
+        if (typeof raw !== 'string' || !raw.trim()) return '(no arguments)';
+        try {
+            return JSON.stringify(JSON.parse(raw), null, 2);
+        } catch (err) {
+            return raw;
+        }
+    }
+
+    function createToolCallPanel(call, result, totalCount, index) {
+        const panel = document.createElement('div');
+        panel.className = 'toolcalls-popover';
+        panel.style.right = `${36 + (index * 28)}px`;
+
+        const header = document.createElement('div');
+        header.className = 'toolcalls-popover-header';
+        header.textContent = `Tool ${index + 1}/${totalCount}`;
+        panel.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className = 'toolcalls-list';
+        const item = document.createElement('div');
+        item.className = 'toolcall-item';
+
+        const fnName = call?.function?.name || call?.name || 'unknown';
+        const name = document.createElement('div');
+        name.className = 'toolcall-name';
+        name.textContent = fnName;
+        item.appendChild(name);
+
+        const args = document.createElement('pre');
+        args.className = 'toolcall-args';
+        args.textContent = formatToolArguments(call?.function?.arguments || call?.arguments || '');
+        item.appendChild(args);
+
+        if (result) {
+            const responseTitle = document.createElement('div');
+            responseTitle.className = 'toolcall-result-title';
+            responseTitle.textContent = 'Response';
+            item.appendChild(responseTitle);
+
+            const responseBody = document.createElement('pre');
+            responseBody.className = 'toolcall-result';
+            responseBody.textContent = formatToolArguments(result?.content || result?.function?.content || '');
+            item.appendChild(responseBody);
+        }
+
+        list.appendChild(item);
+        panel.appendChild(list);
+        return panel;
     }
 
     function persistConversation() {

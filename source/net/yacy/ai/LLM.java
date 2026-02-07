@@ -1,5 +1,5 @@
 /**
- *  LLMEndpoint
+ *  LLM
  *  Copyright 2024 by Michael Peter Christen
  *  First released 17.05.2024 at https://yacy.net
  *
