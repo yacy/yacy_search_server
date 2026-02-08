@@ -52,7 +52,7 @@ public class NetworkPicture {
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
 
         final long timeSeconds = System.currentTimeMillis() / 1000;
-        if (NetworkGraph.buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
+        if (NetworkGraph.buffer != null && timeSeconds - lastAccessSeconds < 2) {
             if (log.isFine()) log.fine("cache hit (1); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
@@ -60,21 +60,25 @@ public class NetworkPicture {
             return NetworkGraph.buffer;
         }
 
-        if ( NetworkGraph.buffer != null && sync.availablePermits() == 0 ) {
-            return NetworkGraph.buffer;
+        boolean lockAcquired = sync.tryAcquire();
+        if (!lockAcquired) {
+            if (NetworkGraph.buffer != null) {
+                return NetworkGraph.buffer;
+            }
+            sync.acquireUninterruptibly();
+            lockAcquired = true;
         }
-        sync.acquireUninterruptibly();
+        try {
+            final long refreshCheckSeconds = System.currentTimeMillis() / 1000;
+            if (NetworkGraph.buffer != null && refreshCheckSeconds - lastAccessSeconds < 2) {
+                if (log.isFine()) log.fine("cache hit (2); authorized = "
+                    + authorized
+                    + ", timeSeconds - lastAccessSeconds = "
+                    + (refreshCheckSeconds - lastAccessSeconds));
+                return NetworkGraph.buffer;
+            }
 
-        if (NetworkGraph.buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
-            if (log.isFine()) log.fine("cache hit (2); authorized = "
-                + authorized
-                + ", timeSeconds - lastAccessSeconds = "
-                + (timeSeconds - lastAccessSeconds));
-            sync.release();
-            return NetworkGraph.buffer;
-        }
-
-        int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
+            int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
         int height = 720;
         int passiveLimit = 1440; // minutes; 1440 = 1 day; 720 = 12 hours; 1440 = 24 hours, 10080 = 1 week;
         int potentialLimit = 1440;
@@ -111,20 +115,20 @@ public class NetworkPicture {
             maxCount = 10000;
         }
 
-        NetworkGraph.buffer =
-            new EncodedImage(NetworkGraph.getNetworkPicture(
-                sb.peers,
-                width,
-                height,
-                passiveLimit,
-                potentialLimit,
-                maxCount,
-                coronaangle,
-                communicationTimeout,
-                env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
-                env.getConfig("network.unit.description", "unspecified"),
-                Long.parseLong(bgcolor, 16),
-                cyc), "png", false);
+            NetworkGraph.buffer =
+                new EncodedImage(NetworkGraph.getNetworkPicture(
+                    sb.peers,
+                    width,
+                    height,
+                    passiveLimit,
+                    potentialLimit,
+                    maxCount,
+                    coronaangle,
+                    communicationTimeout,
+                    env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
+                    env.getConfig("network.unit.description", "unspecified"),
+                    Long.parseLong(bgcolor, 16),
+                    cyc), "png", false);
 
         /*
         NetworkGraph.buffer =
@@ -142,10 +146,13 @@ public class NetworkPicture {
                 Long.parseLong(bgcolor, 16),
                 cyc), "png", false);
          */
-        lastAccessSeconds = System.currentTimeMillis() / 1000;
-
-        sync.release();
-        return NetworkGraph.buffer;
+            lastAccessSeconds = System.currentTimeMillis() / 1000;
+            return NetworkGraph.buffer;
+        } finally {
+            if (lockAcquired) {
+                sync.release();
+            }
+        }
     }
 
 }
