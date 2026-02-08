@@ -758,7 +758,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     protected Object invokeServlet(final Method targetMethod, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return targetMethod.invoke(null, request, args, Switchboard.getSwitchboard()); // add switchboard
+        final serverSwitch.SaveConfigOrigin previousOrigin = serverSwitch.pushSaveConfigOriginUI();
+        try {
+            return targetMethod.invoke(null, request, args, Switchboard.getSwitchboard()); // add switchboard
+        } finally {
+            serverSwitch.popSaveConfigOrigin(previousOrigin);
+        }
     }
 
     /**

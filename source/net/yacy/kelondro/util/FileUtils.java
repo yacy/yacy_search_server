@@ -45,6 +45,9 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,12 +64,16 @@ import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
 
 public final class FileUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
+    /**
+     * Serialize save operations per destination file to avoid concurrent writes
+     * stepping on each other.
+     */
+    private static final ConcurrentHashMap<String, Object> SAVE_MAP_LOCKS = new ConcurrentHashMap<>();
 
     /**
      * Copy a whole InputStream to an OutputStream. Important : it is the responsibility of the caller to close the input and output streams.
@@ -528,40 +535,55 @@ public final class FileUtils {
     private final static String[] unescaped_strings_out = {"\\", "\n", "="};
 
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
-        boolean err = false;
-        PrintWriter pw = null;
-        final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
-        try {
-            pw = new PrintWriter(tf, StandardCharsets.UTF_8.name());
-            pw.println("# " + comment);
-            String key, value;
-            for ( final Map.Entry<String, String> entry : props.entrySet() ) {
-                key = entry.getKey();
-                if ( key != null ) {
-                    key = StringUtils.replaceEach(key, unescaped_strings_in, escaped_strings_out);
+        final String lockKey = file.getAbsolutePath();
+        final Object lock = SAVE_MAP_LOCKS.computeIfAbsent(lockKey, k -> new Object());
+        synchronized (lock) {
+            File tf = null;
+            PrintWriter pw = null;
+            try {
+                final File parent = file.getAbsoluteFile().getParentFile();
+                if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                    ConcurrentLog.warn("FileUtils", "Could not create parent directory for " + file);
+                    return;
                 }
-                if ( entry.getValue() == null ) {
-                    value = "";
-                } else {
-                    value = entry.getValue();
-                    value = StringUtils.replaceEach(value, unescaped_strings_in, escaped_strings_out);
+                final String baseName = file.getName();
+                final String prefix = (baseName.length() < 3) ? (baseName + "___").substring(0, 3) : baseName;
+                tf = File.createTempFile(prefix, ".tmp", parent);
+
+                pw = new PrintWriter(tf, StandardCharsets.UTF_8.name());
+                pw.println("# " + comment);
+                String key, value;
+                for ( final Map.Entry<String, String> entry : props.entrySet() ) {
+                    key = entry.getKey();
+                    if ( key != null ) {
+                        key = StringUtils.replaceEach(key, unescaped_strings_in, escaped_strings_out);
+                    }
+                    if ( entry.getValue() == null ) {
+                        value = "";
+                    } else {
+                        value = entry.getValue();
+                        value = StringUtils.replaceEach(value, unescaped_strings_in, escaped_strings_out);
+                    }
+                    pw.println(key + "=" + value);
                 }
-                pw.println(key + "=" + value);
-            }
-            pw.println("# EOF");
-        } catch (final  FileNotFoundException | UnsupportedEncodingException e ) {
-            ConcurrentLog.warn("FileUtils", e.getMessage(), e);
-            err = true;
-        } finally {
-            if ( pw != null ) {
+                pw.println("# EOF");
+                pw.flush();
                 pw.close();
+                pw = null;
+
+                forceMove(tf, file);
+            } catch (final FileNotFoundException | UnsupportedEncodingException e ) {
+                ConcurrentLog.warn("FileUtils", "Could not write map to temporary file for " + file + ": " + e.getMessage(), e);
+            } catch (final IOException e) {
+                ConcurrentLog.severe("FileUtils", "Could not persist map to " + file + ": " + e.getMessage(), e);
+            } finally {
+                if (pw != null) {
+                    pw.close();
+                }
+                if (tf != null && tf.exists()) {
+                    FileUtils.deletedelete(tf);
+                }
             }
-            pw = null;
-        }
-        if (!err) try {
-            forceMove(tf, file);
-        } catch (final  IOException e ) {
-            // ignore
         }
     }
 
@@ -890,10 +912,12 @@ public final class FileUtils {
      * @throws IOException
      */
     private static void forceMove(final File from, final File to) throws IOException {
-        if ( !(to.delete() && from.renameTo(to)) ) {
-            // do it manually
-            Files.copy(from, to);
-            FileUtils.deletedelete(from);
+        final Path fromPath = from.toPath();
+        final Path toPath = to.toPath();
+        try {
+            java.nio.file.Files.move(fromPath, toPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final AtomicMoveNotSupportedException e) {
+            java.nio.file.Files.move(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 

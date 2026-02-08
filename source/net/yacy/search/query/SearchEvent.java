@@ -951,7 +951,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             }
         }
          */
-        this.snippets.putAll(solrsnippets);
+        if (solrsnippets != null && !solrsnippets.isEmpty()) {
+            this.snippets.putAll(solrsnippets);
+        }
         assert (nodeList != null);
         if (nodeList.isEmpty()) return;
 
