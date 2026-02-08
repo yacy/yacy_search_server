@@ -185,17 +185,19 @@ public class PromptToMermaidTool implements ToolHandler {
 
         if ("fallback".equals(status)) {
             String fallbackReason = reasoning.isEmpty() ? "Prompt could not be deterministically mapped to a clear diagram." : reasoning;
-            return buildResult("fallback", null, "", fallbackReason, warnings, prompt, preferredType);
+            return buildResult("fallback", null, "", "", fallbackReason, warnings, prompt, preferredType);
         }
-        return buildResult("success", diagramType, mermaidCode, reasoning, warnings, prompt, preferredType);
+        String mermaidAscii = toAsciiDiagram(mermaidCode);
+        return buildResult("success", diagramType, mermaidCode, mermaidAscii, reasoning, warnings, prompt, preferredType);
     }
 
-    private static JSONObject buildResult(String status, String diagramType, String mermaidCode, String reasoning,
+    private static JSONObject buildResult(String status, String diagramType, String mermaidCode, String mermaidAscii, String reasoning,
             JSONArray warnings, String prompt, String preferredType) throws JSONException {
         JSONObject out = new JSONObject(true);
         out.put("status", status);
         out.put("diagram_type", diagramType == null ? JSONObject.NULL : diagramType);
         out.put("mermaid_code", mermaidCode == null ? "" : mermaidCode);
+        out.put("mermaid_ascii", mermaidAscii == null ? "" : mermaidAscii);
         out.put("reasoning", reasoning == null ? "" : reasoning);
         out.put("warnings", warnings == null ? new JSONArray() : warnings);
         if (prompt != null && !prompt.isEmpty()) out.put("prompt_redacted", prompt);
@@ -266,11 +268,21 @@ public class PromptToMermaidTool implements ToolHandler {
                     if (warning != null && !warning.isEmpty()) w.put(warning);
                 }
             }
-            return buildResult("fallback", null, "",
+            return buildResult("fallback", null, "", "",
                     reason == null ? "Fallback used due to insufficient structure in prompt." : reason,
                     w, prompt, preferredType).toString();
         } catch (JSONException e) {
             return ToolHandler.errorJson("Failed to build fallback response");
+        }
+    }
+
+    private static String toAsciiDiagram(String mermaidCode) {
+        if (mermaidCode == null || mermaidCode.trim().isEmpty()) return "";
+        try {
+            // Render in strict ASCII to keep tool output model-friendly and terminal-safe.
+            return Mermaid2ASCIITool.renderMermaidAscii(mermaidCode, true, 3, 2, 1);
+        } catch (Exception e) {
+            return "";
         }
     }
 

@@ -35,6 +35,7 @@ import net.yacy.ai.tools.ChitChatTool;
 import net.yacy.ai.tools.DateMathTool;
 import net.yacy.ai.tools.DateTimeTool;
 import net.yacy.ai.tools.HttpJsonTool;
+import net.yacy.ai.tools.Mermaid2ASCIITool;
 import net.yacy.ai.tools.NumberParserTool;
 import net.yacy.ai.tools.PromptToMermaidTool;
 import net.yacy.ai.tools.SelfReflectTool;
@@ -71,6 +72,7 @@ public final class ToolProvider {
             new SelfReflectTool(),
             new ChitChatTool(),
             new PromptToMermaidTool(),
+            new Mermaid2ASCIITool(),
             new WikipediaLinkCreatorTool()
     );
 
