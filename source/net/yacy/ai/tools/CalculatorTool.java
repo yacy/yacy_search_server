@@ -41,7 +41,7 @@ public class CalculatorTool implements ToolHandler {
         tool.put("type", "function");
         JSONObject fn = new JSONObject(true);
         fn.put("name", NAME);
-        fn.put("description", "Evaluate a mathematical formula. Supports operators (+,-,*,/,%,^), constants (pi,e,tau,phi), functions (sqrt,abs,ln,log,sin,cos,tan,asin,acos,atan,min,max,pow,root,...) and scientific notation. Use this as your calculator.");
+        fn.put("description", "Evaluate a mathematical formula. Supports operators (+, -, *, /, %, ^), constants (pi, e, tau, phi), functions (sqrt, abs, ln, log, sin, cos, tan, asin, acos, atan, min, max, pow, root, ...) and scientific notation. Use this as your calculator.");
         JSONObject params = new JSONObject(true);
         params.put("type", "object");
         JSONObject props = new JSONObject(true);

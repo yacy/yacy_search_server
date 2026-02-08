@@ -209,6 +209,12 @@
         filter: grayscale(0.2);
         pointer-events: none;
       }
+
+      @media (min-width: 768px) {
+        .quest-body-nowrap {
+          flex-wrap: nowrap;
+        }
+      }
     </style>
   </head>
   <body id="AILab" data-ailab-inference-configured="#[ailab_inference_configured]#">
@@ -222,7 +228,7 @@
         <p>Complete the quests below to unlock YaCy's AI sidekick: bind an inference engine, load production models, feed it with your index, then wire RAG and shields.</p>
         <div class="lab-progress">
           <div class="progress">
-            <div id="labProgressBar" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%">0 / 5 unlocked</div>
+            <div id="labProgressBar" class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%">0 / 6 unlocked</div>
           </div>
         </div>
       </div>
@@ -306,6 +312,25 @@
           </div>
         </div>
 
+        <div class="bs-callout bs-callout-optional quest-callout status-pending" data-quest="tools" data-status="#[ailab_tools_status]#">
+          <div class="quest-meta">
+            <span class="label label-info">Optional</span>
+            <span class="meta-arrow" aria-hidden="true">→</span>
+            <span class="status-pill">Needs setup</span>
+          </div>
+          <h3>Enable/Disable Sills</h3>
+          <p>Superpowers for the YaCy Chat</p>
+          <div class="quest-body">
+            <div class="quest-visual">
+              <img src="env/grafics/AILab_Matrix.png" alt="Tools configuration" width="128" height="128" />
+            </div>
+            <div class="quest-actions">
+              <a class="btn btn-info btn-sm" href="SkillsConfig_p.html">Open skills configuration</a><br />
+              <span class="quest-note">Tune descriptions and set maxCallsPerTurn per tool (0 disables a tool).</span>
+            </div>
+          </div>
+        </div>
+
         <div class="bs-callout bs-callout-optional quest-callout status-pending" data-quest="shield" data-status="#[ailab_shield_status]#">
           <div class="quest-meta">
             <span class="label label-info">Optional</span>
@@ -314,7 +339,7 @@
           </div>
           <h3>Define a shield</h3>
           <p>Add guardrails: access rates, grant or deny non-localhost access. Activate the front page link for chat to complete this quest.</p>
-          <div class="quest-body">
+          <div class="quest-body quest-body-nowrap">
           <div class="quest-visual">
             <img src="env/grafics/AILab_shield.png" alt="Shield definition" width="128" height="128" />
           </div>
@@ -377,7 +402,7 @@
         });
 
         // Gating: enforce build order
-        const questOrder = ["inference", "model", "index", "rag", "shield"];
+        const questOrder = ["inference", "model", "index", "rag", "tools", "shield"];
         let prerequisitesMet = true;
         questOrder.forEach(function(name) {
           const callout = document.querySelector('.quest-callout[data-quest="' + name + '"]');
@@ -386,6 +411,9 @@
 
           // Only gate by prior quests; index stays clickable even while filling up.
           let locked = !prerequisitesMet;
+          if (name === "tools" || name === "shield") {
+            locked = false;
+          }
           if (name === "model") {
             const inferenceConfigured = document.body.getAttribute("data-ailab-inference-configured") === "1";
             locked = locked || !inferenceConfigured;
@@ -402,7 +430,7 @@
           }
 
           // Block subsequent quests until current one is ready (index must reach threshold to release RAG and later steps).
-          if (s !== "ready" || (name === "index" && indexCount < indexNeeded)) {
+          if (name !== "tools" && (s !== "ready" || (name === "index" && indexCount < indexNeeded))) {
             prerequisitesMet = false;
           }
         });

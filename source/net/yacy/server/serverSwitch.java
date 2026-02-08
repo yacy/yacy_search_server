@@ -117,17 +117,13 @@ public class serverSwitch {
             }
         });
 
-        // remove all values from config that do not appear in init
+        /*
+         * Keep unknown keys from yacy.conf.
+         * Some dynamic features (for example ai.tools.* settings) intentionally
+         * store keys that are not present in defaults/yacy.init.
+         */
         this.configRemoved = new ConcurrentHashMap<>();
-        final Iterator<String> i = this.configProps.keySet().iterator();
         String key;
-        while (i.hasNext()) {
-            key = i.next();
-            if (!(initProps.containsKey(key))) {
-                this.configRemoved.put(key, this.configProps.get(key));
-                i.remove();
-            }
-        }
 
         // merge new props from init to config
         // this is necessary for migration, when new properties are attached

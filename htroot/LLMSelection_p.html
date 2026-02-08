@@ -411,6 +411,12 @@
       function renderModelTable(container, title, rows) {
         if (!container) return;
         container.innerHTML = `<legend>${title}</legend>`;
+        if (title === "Available Models") {
+          const legend = container.querySelector("legend");
+          if (legend) {
+            legend.id = "availableModels";
+          }
+        }
         if (!rows || !rows.length) {
           container.style.display = "none";
           return;
@@ -1167,6 +1173,20 @@
           if (presetService && presetHoststub) {
             loadModelList(true);
           }
+          if (window.location.hash === "#availableModels") {
+            loadModelList(true)
+              .catch(() => null)
+              .finally(() => {
+                window.setTimeout(() => {
+                  const target = document.getElementById("availableModels")
+                      || document.getElementById("availableModelsAnchor")
+                      || document.getElementById("availableModelsContainer");
+                  if (target) {
+                    target.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }, 0);
+              });
+          }
         } catch (e) {
           console.error("Initialization failed", e);
         }
@@ -1230,6 +1250,7 @@
       <legend>Model Downloads</legend>
       <div id="downloadActivityList"></div>
     </fieldset>
+    <a id="availableModelsAnchor"></a>
     <fieldset id="availableModelsContainer" style="display:none"><a name="availableModels"></a></fieldset>
 
     <fieldset id="productionModelsContainer" style="display: block;"><a name="productionModels"></a><legend>Production Models Matrix</legend>

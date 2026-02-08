@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Skills Config</title>
+    #%env/templates/metas.template%#
+    <style type="text/css">
+      .tool-card {
+        border: 1px solid #e6e9ef;
+        border-left: 6px solid #5bc0de;
+        padding: 10px 18px 18px 18px;
+        margin-bottom: 16px;
+        background: #fff;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      }
+      .tool-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .tool-header h3 {
+        margin: 0;
+        color: #0f2b46;
+      }
+      .tool-limit {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+        color: #3b4a5e;
+        white-space: nowrap;
+      }
+      .tool-limit label {
+        display: inline-flex;
+        align-items: center;
+      }
+      .tool-limit input {
+        width: 56px;
+        height: 34px;
+        padding: 6px 8px;
+      }
+      .tool-limit .toggle-button {
+        min-width: 70px;
+        height: 34px;
+        padding: 6px 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .tool-description {
+        width: 100%;
+        resize: vertical;
+      }
+      .skills-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        align-items: stretch;
+      }
+      .skills-grid .tool-card {
+        flex: 1 1 48%;
+        min-width: 320px;
+        margin-bottom: 0;
+      }
+      @media (max-width: 767px) {
+        .skills-grid .tool-card {
+          flex-basis: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body id="SkillsConfig">
+    #%env/templates/header.template%#
+    #%env/templates/submenuAI.template%#
+
+    <h2>Skills</h2>
+    <p>Add superpowers to the YaCy Chat. Skills may be disabled by setting maxCallsPerTurn to 0.</p>
+    <!-- Technical naming note: internally these are called tools; in the user experience they are shown as skills. -->
+
+    #(status)#
+    ::<div class="alert alert-success">Tool settings were saved.</div>
+    #(/status)#
+    #(status_hasInvalidMaxCalls)#
+    ::<div class="alert alert-warning">#[status_invalidMaxCalls]# invalid maxCallsPerTurn value(s) were reset to the previous values.</div>
+    #(/status_hasInvalidMaxCalls)#
+
+    <form action="SkillsConfig_p.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="save" value="1" />
+
+      <h3>Basic Skills</h3>
+      <div class="skills-grid">
+      #{basic_tools}#
+      <div class="tool-card">
+        <div class="tool-header">
+          <h3><code>#[name]#</code></h3>
+          <div class="tool-limit">
+            <label for="tool-limit-basic-#[name]#">maxCallsPerTurn</label>
+            <input id="tool-limit-basic-#[name]#" type="number" class="form-control max-calls-input" min="0" max="99" name="ai.tools.#[name]#.maxCallsPerTurn" value="#[maxCallsPerTurn]#" />
+            <button type="button" class="btn btn-default toggle-button">disable</button>
+          </div>
+        </div>
+        <textarea class="tool-description form-control" name="ai.tools.#[name]#.description" rows="2">#[description]#</textarea>
+      </div>
+      #{/basic_tools}#
+      </div>
+
+      <h3>Visualization Skills</h3>
+      <div class="skills-grid">
+      #{visualization_tools}#
+      <div class="tool-card">
+        <div class="tool-header">
+          <h3><code>#[name]#</code></h3>
+          <div class="tool-limit">
+            <label for="tool-limit-vis-#[name]#">maxCallsPerTurn</label>
+            <input id="tool-limit-vis-#[name]#" type="number" class="form-control max-calls-input" min="0" max="99" name="ai.tools.#[name]#.maxCallsPerTurn" value="#[maxCallsPerTurn]#" />
+            <button type="button" class="btn btn-default toggle-button">disable</button>
+          </div>
+        </div>
+        <textarea class="tool-description form-control" name="ai.tools.#[name]#.description" rows="2">#[description]#</textarea>
+      </div>
+      #{/visualization_tools}#
+      </div>
+
+      <h3>Data Retrieval Skills</h3>
+      <div class="skills-grid">
+      #{retrieval_tools}#
+      <div class="tool-card">
+        <div class="tool-header">
+          <h3><code>#[name]#</code></h3>
+          <div class="tool-limit">
+            <label for="tool-limit-ret-#[name]#">maxCallsPerTurn</label>
+            <input id="tool-limit-ret-#[name]#" type="number" class="form-control max-calls-input" min="0" max="99" name="ai.tools.#[name]#.maxCallsPerTurn" value="#[maxCallsPerTurn]#" />
+            <button type="button" class="btn btn-default toggle-button">disable</button>
+          </div>
+        </div>
+        <textarea class="tool-description form-control" name="ai.tools.#[name]#.description" rows="2">#[description]#</textarea>
+      </div>
+      #{/retrieval_tools}#
+      </div>
+      <button type="submit" class="btn btn-primary">Save Skills Configuration</button>
+    </form>
+
+    <script type="text/javascript">
+      (function() {
+        function readValue(input) {
+          if (!input) return 0;
+          var value = parseInt(input.value, 10);
+          return isNaN(value) ? 0 : value;
+        }
+
+        function updateToggleLabel(input, button) {
+          if (!input || !button) return;
+          button.textContent = readValue(input) > 0 ? "disable" : "enable";
+        }
+
+        var inputs = document.querySelectorAll(".max-calls-input");
+        Array.prototype.forEach.call(inputs, function(input) {
+          var wrapper = input.parentElement;
+          var button = wrapper ? wrapper.querySelector(".toggle-button") : null;
+          if (!button) return;
+
+          updateToggleLabel(input, button);
+
+          button.addEventListener("click", function() {
+            if (readValue(input) > 0) {
+              input.value = "0";
+            } else {
+              input.value = "1";
+            }
+            updateToggleLabel(input, button);
+          });
+
+          input.addEventListener("input", function() {
+            updateToggleLabel(input, button);
+          });
+          input.addEventListener("change", function() {
+            updateToggleLabel(input, button);
+          });
+        });
+      })();
+    </script>
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -20,6 +20,7 @@
 
 package net.yacy.ai;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -43,6 +44,7 @@ import net.yacy.ai.tools.TableOpsTool;
 import net.yacy.ai.tools.UnitConverterTool;
 import net.yacy.ai.tools.WebFetchTool;
 import net.yacy.ai.tools.WikipediaLinkCreatorTool;
+import net.yacy.search.Switchboard;
 
 /**
  * Central registry and dispatch utility for all built-in YaCy LLM tools.
@@ -55,31 +57,65 @@ import net.yacy.ai.tools.WikipediaLinkCreatorTool;
  * </ul>
  */
 public final class ToolProvider {
+    private static final String CONFIG_PREFIX = "ai.tools.";
+    private static final String DESCRIPTION_SUFFIX = ".description";
+    private static final String MAX_CALLS_SUFFIX = ".maxCallsPerTurn";
+
 
     /**
-     * Ordered list of built-in tool handlers. Order is preserved when exposing
-     * definitions to providers.
+     * Tool handlers for different skill groups
      */
-    private static final List<ToolHandler> TOOLS = Arrays.asList(
+    private static final List<ToolHandler> TOOLS_BASIC = Arrays.asList(
             new DateTimeTool(),
             new DateMathTool(),
             new CalculatorTool(),
             new NumberParserTool(),
             new UnitConverterTool(),
-            new WebFetchTool(),
             new HttpJsonTool(),
             new TableOpsTool(),
             new SelfReflectTool(),
-            new ChitChatTool(),
-            new PromptToMermaidTool(),
-            new Mermaid2ASCIITool(),
-            new WikipediaLinkCreatorTool()
+            new ChitChatTool()
     );
+    private static final List<ToolHandler> TOOLS_VISUALIZATION = Arrays.asList(
+            new PromptToMermaidTool(),
+            new Mermaid2ASCIITool()
+    );
+    private static final List<ToolHandler> TOOLS_RETRIEVAL = Arrays.asList(
+            new WikipediaLinkCreatorTool(),
+            new WebFetchTool()
+    );
+    
+    /**
+     * Ordered list of built-in tool handlers. Order is preserved when exposing
+     * definitions to providers.
+     */
+    private static final List<ToolHandler> TOOLS = new ArrayList<>();
+    static {
+        TOOLS.addAll(TOOLS_BASIC);
+        TOOLS.addAll(TOOLS_VISUALIZATION);
+        TOOLS.addAll(TOOLS_RETRIEVAL);
+    }
 
     /**
      * Lookup table for fast runtime dispatch by function/tool name.
      */
     private static final Map<String, ToolHandler> TOOL_BY_NAME = buildToolIndex(TOOLS);
+
+    public static final class ToolConfig {
+        public final String name;
+        public final String description;
+        public final int maxCallsPerTurn;
+        public final int defaultMaxCallsPerTurn;
+        public final boolean enabled;
+
+        private ToolConfig(final String name, final String description, final int maxCallsPerTurn, final int defaultMaxCallsPerTurn) {
+            this.name = name;
+            this.description = description;
+            this.maxCallsPerTurn = Math.max(0, maxCallsPerTurn);
+            this.defaultMaxCallsPerTurn = Math.max(0, defaultMaxCallsPerTurn);
+            this.enabled = this.maxCallsPerTurn > 0;
+        }
+    }
 
     /**
      * Utility class; not instantiable.
@@ -105,7 +141,8 @@ public final class ToolProvider {
             }
             // Merge registry definitions without duplicating by tool name.
             for (ToolHandler tool : TOOLS) {
-                JSONObject definition = tool.definition();
+                JSONObject definition = configuredDefinition(tool);
+                if (definition == null) continue;
                 addToolDefinitionIfMissing(tools, definition);
             }
             // Providers usually expect explicit tool-choice mode.
@@ -128,6 +165,7 @@ public final class ToolProvider {
         if (name == null) return errorJson("Invalid tool call");
         ToolHandler tool = TOOL_BY_NAME.get(name);
         if (tool == null) return errorJson("Unknown tool: " + name);
+        if (maxCallsPerTurn(name) <= 0) return errorJson("Tool disabled: " + name);
         // Tool implementations are responsible for argument parsing/validation.
         return tool.execute(arguments);
     }
@@ -143,8 +181,47 @@ public final class ToolProvider {
         if (name == null) return 1;
         ToolHandler tool = TOOL_BY_NAME.get(name);
         if (tool == null) return 1;
-        int max = tool.maxCallsPerTurn();
-        return max <= 0 ? 1 : max;
+        int max = configuredMaxCalls(name, tool.maxCallsPerTurn());
+        return Math.max(0, max);
+    }
+
+    public static List<ToolConfig> listTools() {
+        return listToolConfigs(TOOLS);
+    }
+
+    public static List<ToolConfig> listBasicTools() {
+        return listToolConfigs(TOOLS_BASIC);
+    }
+
+    public static List<ToolConfig> listVisualizationTools() {
+        return listToolConfigs(TOOLS_VISUALIZATION);
+    }
+
+    public static List<ToolConfig> listRetrievalTools() {
+        return listToolConfigs(TOOLS_RETRIEVAL);
+    }
+
+    private static List<ToolConfig> listToolConfigs(final List<ToolHandler> source) {
+        final List<ToolConfig> configuredTools = new ArrayList<>();
+        for (ToolHandler tool : source) {
+            if (tool == null) continue;
+            try {
+                final JSONObject definition = tool.definition();
+                final String name = extractToolName(definition);
+                if (name == null || name.isEmpty()) continue;
+                final JSONObject fn = definition.optJSONObject("function");
+                final String defaultDescription = fn == null ? "" : fn.optString("description", "");
+                final int defaultMaxCalls = Math.max(0, tool.maxCallsPerTurn());
+                configuredTools.add(new ToolConfig(
+                        name,
+                        configuredDescription(name, defaultDescription),
+                        configuredMaxCalls(name, defaultMaxCalls),
+                        defaultMaxCalls));
+            } catch (JSONException e) {
+                // skip invalid definitions
+            }
+        }
+        return Collections.unmodifiableList(configuredTools);
     }
 
     /**
@@ -207,6 +284,39 @@ public final class ToolProvider {
         if (fn == null) return null;
         String name = fn.optString("name", "");
         return name == null ? null : name.trim();
+    }
+
+    private static JSONObject configuredDefinition(final ToolHandler tool) {
+        if (tool == null) return null;
+        try {
+            final JSONObject definition = tool.definition();
+            final String name = extractToolName(definition);
+            if (name == null || name.isEmpty()) return definition;
+            if (configuredMaxCalls(name, tool.maxCallsPerTurn()) <= 0) return null;
+            final JSONObject fn = definition.optJSONObject("function");
+            if (fn != null) {
+                final String defaultDescription = fn.optString("description", "");
+                fn.put("description", configuredDescription(name, defaultDescription));
+            }
+            return definition;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    private static String configuredDescription(final String toolName, final String defaultDescription) {
+        if (toolName == null || toolName.isEmpty()) return defaultDescription == null ? "" : defaultDescription;
+        final Switchboard sb = Switchboard.getSwitchboard();
+        if (sb == null) return defaultDescription == null ? "" : defaultDescription;
+        return sb.getConfig(CONFIG_PREFIX + toolName + DESCRIPTION_SUFFIX, defaultDescription == null ? "" : defaultDescription);
+    }
+
+    private static int configuredMaxCalls(final String toolName, final int defaultMaxCalls) {
+        if (toolName == null || toolName.isEmpty()) return Math.max(0, defaultMaxCalls);
+        final Switchboard sb = Switchboard.getSwitchboard();
+        if (sb == null) return Math.max(0, defaultMaxCalls);
+        final int configured = sb.getConfigInt(CONFIG_PREFIX + toolName + MAX_CALLS_SUFFIX, defaultMaxCalls);
+        return Math.max(0, configured);
     }
 
     /**
