@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>YaCy '#[clientname]#': Peer Steering</title>
+    <title>YaCy '#[clientname]#': Automation</title>
     
     #%env/templates/metas.template%#
 	<script type="text/javascript">
@@ -18,7 +18,7 @@
     </script>
     <script type="text/javascript">
     function submitchange(from) {
-    	document.getElementById("apilist").action = "Table_API_p.html#" + from;
+    	document.getElementById("apilist").action = "Automation_p.html#" + from;
         document.getElementById ("scheduleeventaction").value = "true";
         document.getElementById("current_pk").value = from;
     	document.getElementById("apilist").submit();
@@ -40,9 +40,8 @@
 
     <div id="fullcontent">
   	#(inline)##%env/templates/header.template%#
-    <h2>Process Scheduler</h2>
-    <p>This table shows actions that had been issued on the YaCy interface
-    to change the configuration or to request crawl actions.
+    <h2>Process Automation</h2>
+    <p>This table shows actions that had been issued on the YaCy interface.
     These recorded actions can be used to repeat specific actions and to send them
     to a scheduler for a periodic execution.
     </p>::#(/inline)#
@@ -55,7 +54,7 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
 </div>
 
     #(showtable)#::	
-    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="apilist">
+    <form action="Automation_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="apilist">
 	  <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset>
       <legend>Recorded Actions</legend>
@@ -63,9 +62,9 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       <span id="resCounter" style="display: inline;">
       #(navigation)#
       ::
-      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
+      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
       #[startRecord]#-#[to]# of #[of]#
-      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
+      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
       <img src="env/grafics/nave.gif" alt="" />
       #(/navigation)#
 
@@ -83,27 +82,27 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
         <tr class="TableHeader" valign="bottom">
           <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
           <th #(sortedByType)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByType)#>
-          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortTypeDesc)#::-#(/nextSortTypeDesc)#type&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortTypeDesc)#ascending::descending#(/nextSortTypeDesc)# types">Type</a>
+          	<a class="sortTableLink" href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortTypeDesc)#::-#(/nextSortTypeDesc)#type&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortTypeDesc)#ascending::descending#(/nextSortTypeDesc)# types">Type</a>
           	#(sortedByType)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByType)#
           </th>
           <th style="width: 100%;" #(sortedByComment)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByComment)#>
-          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortCommentDesc)#::-#(/nextSortCommentDesc)#comment&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortCommentDesc)#ascending::descending#(/nextSortCommentDesc)# comments">Comment</a>
+          	<a class="sortTableLink" href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortCommentDesc)#::-#(/nextSortCommentDesc)#comment&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortCommentDesc)#ascending::descending#(/nextSortCommentDesc)# comments">Comment</a>
           	#(sortedByComment)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByComment)#
           </th>
           <th #(sortedByApiCallCount)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByApiCallCount)#>
-          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortApiCallCountDesc)#::-#(/nextSortApiCallCountDesc)#apicall_count&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortApiCallCountDesc)#ascending::descending#(/nextSortApiCallCountDesc)# call counts">Call Count</a>
+          	<a class="sortTableLink" href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortApiCallCountDesc)#::-#(/nextSortApiCallCountDesc)#apicall_count&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortApiCallCountDesc)#ascending::descending#(/nextSortApiCallCountDesc)# call counts">Call Count</a>
           	#(sortedByApiCallCount)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByApiCallCount)#
           </th>
           <th #(sortedByDateRecording)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateRecording)#>
-          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateRecordingDesc)#::-#(/nextSortDateRecordingDesc)#date_recording&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateRecordingDesc)#ascending::descending#(/nextSortDateRecordingDesc)# recording dates">Recording&nbsp;Date</a>
+          	<a class="sortTableLink" href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateRecordingDesc)#::-#(/nextSortDateRecordingDesc)#date_recording&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateRecordingDesc)#ascending::descending#(/nextSortDateRecordingDesc)# recording dates">Recording&nbsp;Date</a>
           	#(sortedByDateRecording)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateRecording)#
           </th>
           <th #(sortedByDateLastExec)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateLastExec)#>
-          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateLastExecDesc)#::-#(/nextSortDateLastExecDesc)#date_last_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateLastExecDesc)#ascending::descending#(/nextSortDateLastExecDesc)# last execution dates">Last&nbsp;Exec&nbsp;Date</a>
+          	<a class="sortTableLink" href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateLastExecDesc)#::-#(/nextSortDateLastExecDesc)#date_last_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateLastExecDesc)#ascending::descending#(/nextSortDateLastExecDesc)# last execution dates">Last&nbsp;Exec&nbsp;Date</a>
           	#(sortedByDateLastExec)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateLastExec)#
           </th>
           <th #(sortedByDateNextExec)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateNextExec)#>
-          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateNextExecDesc)#::-#(/nextSortDateNextExecDesc)#date_next_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateNextExecDesc)#ascending::descending#(/nextSortDateNextExecDesc)# last execution dates">Next&nbsp;Exec&nbsp;Date</a>
+          	<a class="sortTableLink" href="Automation_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateNextExecDesc)#::-#(/nextSortDateNextExecDesc)#date_next_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateNextExecDesc)#ascending::descending#(/nextSortDateNextExecDesc)# last execution dates">Next&nbsp;Exec&nbsp;Date</a>
           	#(sortedByDateNextExec)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateNextExec)#
           	#(hasEditableNextExecDate)#:: <button type="submit" name="submitNextExecDates" class="btn btn-default btn-xs" title="Apply edited next execution dates">
           		<span class="glyphicon glyphicon-ok"></span>

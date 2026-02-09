@@ -1572,7 +1572,7 @@ A 'shallow crawl' which is not limited to a single host (or site)==当目标服�
 can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==会将生产量上升到每分钟无限页面数(ppm)。
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==可在<a href="CrawlStartExpert.html">专家爬虫</a>中开启。
 >Scheduler Steering<==>调度器控制<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==可以使用<a href="Table_API_p.html">API控制</a>改变或删除爬虫调度器。
+The scheduler on crawls can be changed or removed using <a href="Automation_p.html">Automation</a>.==可以使用<a href="Automation_p.html">API控制</a>改变或删除爬虫调度器。
 #-----------------------------
 
 #File: DictionaryLoader_p.html
@@ -3511,7 +3511,7 @@ Hide surftips for users without autorization==隐藏非认证用户的建议功�
 Show surftips to everyone==所有人均可使用建议
 #-----------------------------
 
-#File: Table_API_p.html
+#File: Automation_p.html
 #---------------------------
 : Peer Steering==: 节点控制
 The information that is presented on this page can also be retrieved as XML.==The information that is presented on this page can also be retrieved as XML.

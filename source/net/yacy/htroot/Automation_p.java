@@ -1,4 +1,4 @@
-// Table_API_p.java
+// Automation_p.java
 // -----------------------
 // (C) 2010 by Michael Peter Christen; mc@yacy.net
 // first published 01.02.2010 in Frankfurt, Germany on http://yacy.net
@@ -53,7 +53,7 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-public class Table_API_p {
+public class Automation_p {
 
 	/** Default results page size */
 	private static final int DEFAULT_MAX_RECORDS = 25;
@@ -277,7 +277,7 @@ public class Table_API_p {
                         ei.remove();
                     }
                 }
-                sb.tables.recordAPICall(post, "Table_API_p.html", WorkTables.TABLE_API_TYPE_STEERING, "delete API calls older than " + days + " days");
+                sb.tables.recordAPICall(post, "Automation_p.html", WorkTables.TABLE_API_TYPE_STEERING, "delete API calls older than " + days + " days");
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }

@@ -1395,7 +1395,7 @@ A 'shallow crawl' which is not limited to a single host (or site)==Bir 'yüzeyse
 can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==hedef ana bilgisayar sayısı yüksek olduğunda dakikadaki sayfaları sınırsız belgeye kadar genişletebilir.
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Bu, <a href="CrawlStartExpert.html">Uzman Tarama Başlatma</a> aracılığıyla yapılabilir.
 >Scheduler Steering<==>Zamanlayıcı Yönlendirmesi<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==Zamanlamalı taramalardaki zamanlayıcı, <a href="Table_API_p.html">API Yönlendirmesi</a> kullanılarak değiştirilebilir veya kaldırılabilir.
+The scheduler on crawls can be changed or removed using <a href="Automation_p.html">API Steering</a>.==Zamanlamalı taramalardaki zamanlayıcı, <a href="Automation_p.html">API Yönlendirmesi</a> kullanılarak değiştirilebilir veya kaldırılabilir.
 #-----------------------------
 #File: Help.html
 
@@ -3258,7 +3258,7 @@ Hide surftips for users without autorization==Yetkisi olmayan kullanıcılar iç
 Show surftips to everyone==Herkese surf ipuçları göster
 #-----------------------------```
 
-#File: Table_API_p.html
+#File: Automation_p.html
 #---------------------------
 : Peer Steering==: Peer Yönlendirme
 The information that is presented on this page can also be retrieved as XML.==Bu sayfada sunulan bilgiler aynı zamanda XML formatında alınabilir.

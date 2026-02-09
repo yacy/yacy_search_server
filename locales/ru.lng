@@ -1506,7 +1506,7 @@ A 'shallow crawl' which is not limited to a single host (or site)=='Медлен
 can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==скорость индексирования которого может быть увеличена на неограниченное, когда число удалённых хостов высока.
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Это можно сделать с помощью <a href="CrawlStartExpert.html">запуска расширенного индексирования</a>.
 >Scheduler Steering<==>Управление планировщиком<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==Расписание индексирования может быть изменено или удалено, используя <a href="Table_API_p.html">управление API</a>.
+The scheduler on crawls can be changed or removed using <a href="Automation_p.html">API Steering</a>.==Расписание индексирования может быть изменено или удалено, используя <a href="Automation_p.html">управление API</a>.
 #-----------------------------
 
 #File: Help.html
@@ -3398,7 +3398,7 @@ Hide surftips for users without autorization==Скрыть подсказки д
 Show surftips to everyone==Разрешить подсказки всем
 #-----------------------------
 
-#File: Table_API_p.html
+#File: Automation_p.html
 #---------------------------
 : Peer Steering==: Управление узлом
 The information that is presented on this page can also be retrieved as XML.==Информация представленная на этой странице, также может быть получена в XML-формате.

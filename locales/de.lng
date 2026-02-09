@@ -1387,7 +1387,7 @@ A 'shallow crawl' which is not limited to a single host (or site)==Ein 'oberflä
 can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==kann die Anzahl der Seiten pro Minute (ppm) auf unendlich viele Dokumente pro Minute erweitern wenn die Anzahl der Ziel Hosts hoch ist.
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Das kann erreicht werden durch Verwendung des <a href="CrawlStartExpert.html">Crawl Start (Expert)</a> Servlets.
 >Scheduler Steering<==>Geplante Steuerung<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==Die geplante Ausführung von Crawls kann geändert oder entfernt werden mit der <a href="Table_API_p.html">API Aktionen Steuerung</a>.
+The scheduler on crawls can be changed or removed using <a href="Automation_p.html">Automation</a>.==Die geplante Ausführung von Crawls kann geändert oder entfernt werden mit <a href="Automation_p.html">Automatisierung</a>.
 #-----------------------------
 
 #File: Help.html
@@ -3248,7 +3248,7 @@ Hide surftips for users without autorization==Verberge Surftipps für Benutzer o
 Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 
-#File: Table_API_p.html
+#File: Automation_p.html
 #---------------------------
 : Peer Steering==: Peer Steuerung
 The information that is presented on this page can also be retrieved as XML.==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden.

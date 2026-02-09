@@ -3599,7 +3599,7 @@
        <source>&gt;Scheduler Steering&lt;</source>
     </trans-unit>
     <trans-unit id="eeb827f7" xml:space="preserve" approved="no" translate="yes">
-       <source>The scheduler on crawls can be changed or removed using the &lt;a href="Table_API_p.html"&gt;API Steering&lt;/a&gt;.</source>
+       <source>The scheduler on crawls can be changed or removed using &lt;a href="Automation_p.html"&gt;Automation&lt;/a&gt;.</source>
     </trans-unit>
   </body>
 </file>
@@ -8651,7 +8651,7 @@
   </body>
 </file>
 
-<file original="Table_API_p.html"  source-language="en"  datatype="html">
+<file original="Automation_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="9166e009" xml:space="preserve" approved="no" translate="yes">
        <source>: Peer Steering</source>

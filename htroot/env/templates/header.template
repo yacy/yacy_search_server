@@ -213,8 +213,8 @@
       <li><h3>Production</h3></li>
       <li><a href="CrawlStartExpert.html" class="MenuItemLink">Crawler</a></li>
       <li><a href="AILab.html" class="MenuItemLink">AI Lab</a></li>
+      <li><a href="Automation_p.html?sort=-date_recording" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Automation</a></li>
       <li><a href="IndexPackGenerator_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">YaCy Packs &amp; Import/Export</a></li>
-      <li><a href="Table_API_p.html?sort=-date_recording" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Process Scheduler</a></li>
       <li><a href="Vocabulary_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Content Semantic</a></li>
       <li><a href="CrawlCheck_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Target Analysis</a></li>
     </ul>

@@ -997,7 +997,7 @@ can extend the pages per minute (ppm) rate to unlimited documents per minute ==p
 when the number of target hosts is high.==lorsque le nombre d'h&ocirc;tes cibl&eacute;s est &eacute;lev&eacute;.
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Cela peut &ecirc;tre effectu&eacute; au moyen de cette servlet: <a href="CrawlStartExpert.html">d&eacute;marrer un balayage expert</a>.
 >Scheduler Steering<==>Commande du planificateur<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering==Le planificateur de balayage peut &ecirc;tre modifi&eacute; ou supprim&eacute; au moyen de la <a href="Table_API_p.html">commande de l'API
+The scheduler on crawls can be changed or removed using <a href="Automation_p.html">API Steering==Le planificateur de balayage peut &ecirc;tre modifi&eacute; ou supprim&eacute; au moyen de la <a href="Automation_p.html">commande de l'API
 #---------------------------
 
 #File: IndexBrowser_p.html
@@ -2332,7 +2332,7 @@ Hide surftips==Surftipps cach&eacute;s
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="S'il vous plait, commentez votre recommandation de lien. (Votre avis sera accept&eacute; m&ecirc;me sans commentaire.)"
 #-----------------------------
 
-#File: Table_API_p.html
+#File: Automation_p.html
 #---------------------------
 : Peer Steering==: Peer Contr&ocirc;le
 #Steering of API Actions<==Steuerung der API Aktionen<

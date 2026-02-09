@@ -1258,7 +1258,7 @@ A 'shallow crawl' which is not limited to a single host (or site)=="Миттєв
 can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==може розширити Сторіки За Хвилину (ppm) до нескінченної кількості документів за хвилину, коли кількість кінцевих хостів велика.
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Це може бути здійснене з допомогою сервлетів <a href="CrawlStartExpert.html">Сканування (Знавець)</a>.
 >Scheduler Steering<==>Плановий контроль<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==Заплановане виконання сканування може бути змінене або видалене з <a href="Table_API_p.html">API</a>.
+The scheduler on crawls can be changed or removed using <a href="Automation_p.html">Automation</a>.==Заплановане виконання сканування може бути змінене або видалене з <a href="Automation_p.html">API</a>.
 Start URL==Початкова URL
 Sitemap URL==Карта сайту
 #-----------------------------
@@ -2977,7 +2977,7 @@ Hide surftips for users without autorization==Приховати поради д
 Show surftips to everyone==Показувати поради для всіх
 #-----------------------------
 
-#File: Table_API_p.html
+#File: Automation_p.html
 #---------------------------
 : Peer Steering==: Керування вузлом
 Steering of API Actions<==Керування подіями API<
