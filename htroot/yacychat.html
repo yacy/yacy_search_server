@@ -369,27 +369,13 @@
         position: relative;
       }
 
-      .attachment-row.has-attachment .attachment-clear {
-        display: inline-flex;
-      }
-      .attachment-row.has-attachment .attachment-button {
-        display: none;
-      }
-      .attachment-row.has-attachment .search-button {
-        display: none;
-      }
-      .attachment-row.search-mode .attachment-button,
-      .attachment-row.search-mode .search-button {
-        display: none;
-      }
       .attachment-row.search-mode .attachment-clear {
-        display: inline-flex;
+        display: none;
       }
       .attachment-row.loading .attachment-filename {
         font-style: italic;
         color: #6b7a90;
       }
-
       .attachment-button,
       .search-button,
       .copy-button,
@@ -417,6 +403,13 @@
       .toolcalls-button:hover {
         background: #c3cbd9;
       }
+      .button-active {
+        background: #337ab7;
+        color: #fff;
+      }
+      .button-active:hover {
+        background: #2b669a;
+      }
 
       .attachment-filename {
         font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
@@ -424,6 +417,13 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      .search-hint {
+        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        color: #2c3e50;
       }
 
       .attachment-clear {
@@ -770,6 +770,7 @@
                     <button type="button" class="search-button" id="searchButton" aria-label="Search">
                       <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                     </button>
+                    <span class="search-hint" id="searchHint">Attach Search Results</span>
                     <button type="button" class="attachment-button" id="addFileButton" aria-label="Attach a file">
                       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
                     </button>
@@ -1378,6 +1379,8 @@
         dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         dom.attachmentRow.classList.remove('has-attachment');
         dom.attachmentRow.classList.remove('search-mode');
+        dom.searchButton?.classList.remove('button-active');
+        dom.addFileButton?.classList.remove('button-active');
         closeAttachmentPopover();
         if (applyDefault) {
             applySearchDefaultToComposer();
@@ -1387,11 +1390,14 @@
     function setComposerAttachment(attachment) {
         state.searchMode = SEARCH_DEFAULTS.none;
         dom.attachmentRow.classList.remove('search-mode');
+        dom.searchButton?.classList.remove('button-active');
         state.attachment = attachment ? cloneAttachment(attachment) : null;
         if (state.attachment) {
             dom.attachmentFilename.textContent = `Attach File: ${state.attachment.name || 'Attachment'}`;
             dom.attachmentRow.classList.add('has-attachment');
+            dom.addFileButton?.classList.add('button-active');
         } else {
+            dom.addFileButton?.classList.remove('button-active');
             clearAttachment();
         }
     }
@@ -1402,7 +1408,7 @@
         if (isLoading) {
             dom.attachmentFilename.textContent = 'Loading attachment...';
         } else if (!state.attachment) {
-            dom.attachmentFilename.textContent = state.searchMode !== SEARCH_DEFAULTS.none ? 'Attach Search Results' : 'Attach PNG/JPG or text (.txt/.md/.tex)';
+            dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         }
     }
 
@@ -1421,9 +1427,11 @@
         state.attachment = null;
         dom.fileInput.value = '';
         dom.attachmentRow.classList.remove('has-attachment');
+        dom.searchButton?.classList.toggle('button-active', state.searchMode !== SEARCH_DEFAULTS.none);
+        dom.addFileButton?.classList.remove('button-active');
         if (state.searchMode !== SEARCH_DEFAULTS.none) {
             dom.attachmentRow.classList.add('search-mode');
-            dom.attachmentFilename.textContent = 'Attach Search Results';
+            dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
         } else {
             dom.attachmentRow.classList.remove('search-mode');
             dom.attachmentFilename.textContent = 'Attach PNG/JPG or text (.txt/.md/.tex)';
@@ -2619,9 +2627,28 @@
     });
 
     dom.addFileButton.addEventListener('click', () => {
+        if (state.attachment) {
+            clearAttachment({ applyDefault: false });
+            return;
+        }
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            setSearchModeActive(SEARCH_DEFAULTS.none);
+        }
+        dom.addFileButton.classList.add('button-active');
         dom.fileInput.click();
+        window.setTimeout(() => {
+            window.addEventListener('focus', () => {
+                if (!state.attachment && !dom.fileInput.value) {
+                    dom.addFileButton.classList.remove('button-active');
+                }
+            }, { once: true });
+        }, 0);
     });
     dom.searchButton?.addEventListener('click', () => {
+        if (state.searchMode !== SEARCH_DEFAULTS.none) {
+            clearAttachment({ applyDefault: false });
+            return;
+        }
         const mode = state.searchDefault === SEARCH_DEFAULTS.none ? SEARCH_DEFAULTS.local : state.searchDefault;
         setSearchModeActive(mode);
     });
