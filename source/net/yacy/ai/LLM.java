@@ -304,42 +304,100 @@ public class LLM {
     }
     
     public static String[] stringsFromChat(String chatanswer) throws JSONException {
-        JSONArray ja = new JSONArray(chatanswer);
-        List<String> list = new ArrayList<>();
-        // parse the JSON array and extract strings
+        final List<String> list = new ArrayList<>();
+        if (chatanswer == null || chatanswer.isEmpty()) return new String[0];
+
+        try {
+            extractStrings(new JSONArray(chatanswer), list);
+        } catch (JSONException e) {
+            // Some models return a truncated JSON array on token limit. Try salvage.
+            final String trimmed = chatanswer.trim();
+            final int lastArrayEnd = trimmed.lastIndexOf(']');
+            if (lastArrayEnd > 0) {
+                try {
+                    extractStrings(new JSONArray(trimmed.substring(0, lastArrayEnd + 1)), list);
+                } catch (JSONException ignored) {
+                    // ignore and continue with lightweight quoted-string extraction
+                }
+            }
+            if (list.isEmpty()) {
+                list.addAll(extractQuotedStrings(trimmed));
+            }
+            if (list.isEmpty()) throw e;
+        }
+
+        String[] result = new String[list.size()];
+        return list.toArray(result);
+    }
+
+    private static void extractStrings(final JSONArray ja, final List<String> list) {
         for (int i = 0; i < ja.length(); i++) {
-            Object item = ja.get(i);
+            final Object item = ja.opt(i);
+            if (item == null) continue;
             if (item instanceof String) {
-                list.add((String) item);
-            } else if (item instanceof JSONObject) {
-                JSONObject jo = (JSONObject) item;
-                String answer = jo.optString("answer", null);
+                final String s = ((String) item).trim();
+                if (!s.isEmpty()) list.add(s);
+                continue;
+            }
+            if (item instanceof JSONObject) {
+                final JSONObject jo = (JSONObject) item;
+                final String answer = jo.optString("answer", null);
                 if (answer != null) {
-                    list.add(answer);
-                } else {
-                    // take any string value from the object
-                    for (String key : jo.keySet()) {
-                        Object value = jo.optString(key, null);
-                        if (value != null && value instanceof String) {
-                            list.add((String) value);
-                            break; // take the first string found
-                        }
-                    }
+                    final String s = answer.trim();
+                    if (!s.isEmpty()) list.add(s);
+                    continue;
+                }
+                for (String key : jo.keySet()) {
+                    final String value = jo.optString(key, null);
+                    if (value == null) continue;
+                    final String s = value.trim();
+                    if (s.isEmpty()) continue;
+                    list.add(s);
+                    break;
                 }
             }
         }
-        // convert the list to an array
-        String[] result = new String[list.size()];
-        return list.toArray(result);        
+    }
+
+    private static List<String> extractQuotedStrings(final String input) {
+        final List<String> list = new ArrayList<>();
+        if (input == null || input.isEmpty()) return list;
+        boolean inString = false;
+        boolean escaped = false;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            final char c = input.charAt(i);
+            if (!inString) {
+                if (c == '"') {
+                    inString = true;
+                    sb.setLength(0);
+                }
+                continue;
+            }
+            if (escaped) {
+                sb.append(c);
+                escaped = false;
+                continue;
+            }
+            if (c == '\\') {
+                escaped = true;
+                continue;
+            }
+            if (c == '"') {
+                final String s = sb.toString().trim();
+                if (!s.isEmpty()) list.add(s);
+                inString = false;
+                continue;
+            }
+            sb.append(c);
+        }
+        return list;
     }
     
     public final static JSONObject listSchema = new JSONObject(Map.of(
         "title", "Answer List",
         "type", "array",
-        "properties", Map.of(
-            "answer", Map.of("type", "string")
-        ),
-        "required", List.of("answer")
+        "items", Map.of("type", "string")
     ));
     
     public static void main(final String[] args) {

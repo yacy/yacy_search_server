@@ -369,9 +369,6 @@
         position: relative;
       }
 
-      .attachment-row.search-mode .attachment-clear {
-        display: none;
-      }
       .attachment-row.loading .attachment-filename {
         font-style: italic;
         color: #6b7a90;
@@ -424,26 +421,6 @@
         font-size: 0.95rem;
         white-space: nowrap;
         color: #2c3e50;
-      }
-
-      .attachment-clear {
-        display: none;
-        width: 24px;
-        height: 24px;
-        border: none;
-        border-radius: 4px;
-        background: #d1d9e6;
-        color: #2c3e50;
-        font-weight: 800;
-        font-size: 1.25rem;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background 0.15s, border-color 0.15s, color 0.15s;
-      }
-
-      .attachment-clear:hover {
-        background: #c3cbd9;
       }
 
       .copy-button,
@@ -774,9 +751,6 @@
                     <button type="button" class="attachment-button" id="addFileButton" aria-label="Attach a file">
                       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
                     </button>
-                    <button type="button" class="attachment-clear" id="clearFileButton" aria-label="Remove attached file">
-                      <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                    </button>
                     <span class="attachment-filename" id="attachmentFilename">Attach PNG/JPG or text (.txt/.md/.tex)</span>
                     <input type="file" id="fileInput" class="hidden-file-input" accept="image/png,image/jpeg,text/plain,text/markdown,text/x-tex,application/x-tex,application/x-latex,text/*,.png,.jpg,.jpeg,.txt,.md,.markdown,.tex"/>
                   </div>
@@ -810,12 +784,13 @@
     <script src="js/highlight.min.js"></script>
     <script src="js/marked.umd.js"></script>
     <script src="js/index.umd.min.js"></script>
+    <script src="js/vfs.js"></script>
     <script type="text/javascript">
     const SYSTEM_PROMPT = '#[system_prompt]#';
     const defaultApiHost = '';
 
-    const STORAGE_KEY = 'yacychat_recent_pairs';
-    const SEARCH_DEFAULT_KEY = 'yacychat_search_default';
+    const CHAT_VFS_PATH = '/yacy/chat/chat.json';
+    const SETTINGS_VFS_PATH = '/yacy/chat/settings.json';
     const SEARCH_DEFAULTS = {
         none: 'no',
         local: 'local',
@@ -846,7 +821,6 @@
         searchButton: document.getElementById('searchButton'),
         addFileButton: document.getElementById('addFileButton'),
         attachmentFilename: document.getElementById('attachmentFilename'),
-        clearFileButton: document.getElementById('clearFileButton'),
         attachmentRow: document.getElementById('attachmentRow'),
         clearChatRow: document.getElementById('clearChatRow'),
         clearChatButton: document.getElementById('clearChatButton'),
@@ -1456,24 +1430,57 @@
         dom.searchDefaultOptions.style.setProperty('--active', activeIndex < 0 ? 0 : activeIndex);
     }
 
-    function persistSearchDefault() {
+    async function getVfsClient() {
+        if (window.vfs) return window.vfs;
+        if (window.vfsReady) return await window.vfsReady;
+        throw new Error('VFS unavailable');
+    }
+
+    async function readVfsJson(path) {
         try {
-            localStorage.setItem(SEARCH_DEFAULT_KEY, state.searchDefault);
+            const vfs = await getVfsClient();
+            const value = await vfs.get(path);
+            if (value && typeof value === 'object') return value;
+            if (typeof value === 'string' && value.trim()) {
+                if (value.trim() === '[object Object]') return null;
+                try {
+                    return JSON.parse(value);
+                } catch (err) {
+                    return null;
+                }
+            }
+            return null;
         } catch (err) {
-            console.warn('Failed to persist search default', err);
+            if (String(err) === 'Key not found') return null;
+            throw err;
         }
     }
 
-    function loadSearchDefault() {
+    async function writeVfsJson(path, value) {
+        const vfs = await getVfsClient();
+        await vfs.put(path, JSON.stringify(value, null, 2));
+    }
+
+    async function removeVfsPath(path) {
+        const vfs = await getVfsClient();
+        await vfs.rm(path);
+    }
+
+    function persistSearchDefault() {
+        writeVfsJson(SETTINGS_VFS_PATH, { search_default: state.searchDefault }).catch(err => {
+            console.warn('Failed to persist search default', err);
+        });
+    }
+
+    async function loadSearchDefault() {
         let stored = null;
         try {
-            stored = localStorage.getItem(SEARCH_DEFAULT_KEY);
+            const settings = await readVfsJson(SETTINGS_VFS_PATH);
+            stored = settings?.search_default || null;
         } catch (err) {
             console.warn('Failed to load search default', err);
         }
-        if (stored === 'none') {
-            stored = SEARCH_DEFAULTS.none;
-        }
+        if (stored === 'none') stored = SEARCH_DEFAULTS.none;
         if (stored && Object.values(SEARCH_DEFAULTS).includes(stored)) {
             state.searchDefault = stored;
         }
@@ -1509,7 +1516,7 @@
         persistConversation();
         updateClearChatVisibility();
         updateSystemToggleButton();
-        setComposerAttachment(targetMessage?.attachment || null);
+        setComposerAttachment(inferAttachmentFromContent(targetMessage?.content) || null);
         dom.input.value = reuseText || '';
         resizeComposer();
         showComposer();
@@ -1566,7 +1573,9 @@
         state.messages = [];
         state.assistantSeen = false;
         state.showSystem = false;
-        localStorage.removeItem(STORAGE_KEY);
+        removeVfsPath(CHAT_VFS_PATH).catch(err => {
+            console.warn('Failed to clear chat history', err);
+        });
         closeAttachmentPopover();
         closeAttachmentModal();
         updateClearChatVisibility();
@@ -1600,7 +1609,7 @@
         }
         for (const msg of payload.messages) {
             if (!msg?.role || msg.content === undefined) continue;
-            state.messages.push({ role: msg.role, content: msg.content });
+            state.messages.push({ ...msg });
         }
         renderConversation();
         persistConversation();
@@ -1631,7 +1640,7 @@
         ensureSystemMessage();
         const sanitizedMessages = state.messages
             .map((msg, index) => {
-                const hasAttachment = msg?.role === 'user' && (Array.isArray(msg.content) || msg.attachment);
+                const hasAttachment = msg?.role === 'user' && Array.isArray(msg.content);
                 const textOnly = index !== currentUserIndex && !hasAttachment;
                 return stripMessageForApi(msg, { textOnly });
             })
@@ -1693,13 +1702,14 @@
             for (let i = state.messages.length - 1; i >= 0; i--) {
                 const msg = state.messages[i];
                 if (msg && msg.role === 'user' && msg.search && msg.search !== SEARCH_DEFAULTS.none) {
-                    msg.attachment = {
+                    const attachment = {
                         kind: 'text',
                         name: searchName,
                         dataUrl,
                         mime: 'text/markdown',
                         textContent
                     };
+                    msg.content = buildContentWithAttachment(messageText(msg.content), attachment);
                     delete msg.search;
                     searchApplied = true;
                     break;
@@ -1864,23 +1874,21 @@
         dom.input.style.height = `${Math.max(minHeight, measured)}px`;
     }
 
+    function buildContentWithAttachment(promptText, attachment) {
+        const parts = [{ type: 'text', text: promptText }];
+        if (attachment?.dataUrl) {
+            parts.push({
+                type: 'image_url',
+                image_url: { url: attachment.dataUrl },
+                filename: attachment.name
+            });
+        }
+        return parts;
+    }
+
     function buildUserMessage(promptText) {
         if (state.attachment) {
-            const parts = [{ type: 'text', text: promptText }];
-            if (state.attachment.kind === 'image' && state.attachment.dataUrl) {
-                parts.push({
-                    type: 'image_url',
-                    image_url: { url: state.attachment.dataUrl },
-                    filename: state.attachment.name
-                });
-            } else if (state.attachment.kind === 'text' && state.attachment.dataUrl) {
-                parts.push({
-                    type: 'image_url',
-                    image_url: { url: state.attachment.dataUrl },
-                    filename: state.attachment.name
-                });
-            }
-            const message = { role: 'user', content: parts };
+            const message = { role: 'user', content: buildContentWithAttachment(promptText, state.attachment) };
             if (state.searchMode !== SEARCH_DEFAULTS.none) {
                 message.search = state.searchMode;
             }
@@ -1946,6 +1954,26 @@
         return '';
     }
 
+    function inferAttachmentFromContent(content) {
+        if (!Array.isArray(content)) return null;
+        const mediaPart = content.find(part => part?.type === 'image_url' && part?.image_url?.url);
+        if (!mediaPart) return null;
+        const dataUrl = String(mediaPart.image_url.url || '');
+        const mimeMatch = dataUrl.match(/^data:([^;]+);/i);
+        const mime = mimeMatch?.[1] || 'application/octet-stream';
+        const name = mediaPart.filename || 'Attachment';
+        const kind = mime.startsWith('image/') ? 'image' : 'text';
+        return { kind, name, mime, dataUrl };
+    }
+
+    function attachmentTextContent(attachment) {
+        if (!attachment || attachment.kind !== 'text') return '';
+        if (typeof attachment.textContent === 'string' && attachment.textContent) return attachment.textContent;
+        if (!attachment.dataUrl || !attachment.dataUrl.startsWith('data:')) return '';
+        const base64 = attachment.dataUrl.split(',', 2)[1] || '';
+        return base64 ? base64ToUtf8(base64) : '';
+    }
+
     function messageDisplayText(message) {
         if (!message) return '';
         if (typeof message.display === 'string') return message.display;
@@ -1960,7 +1988,7 @@
         for (let i = 0; i < state.messages.length; i++) {
             const msg = state.messages[i];
             if (msg.role === 'system' && !state.showSystem) continue;
-            appendMessage(msg.role, messageDisplayText(msg), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i, attachment: msg.attachment, toolCalls: msg.tool_calls, toolResults: msg.tool_results });
+            appendMessage(msg.role, messageDisplayText(msg), { skipScroll: true, skipVisibilityUpdate: true, messageIndex: i, attachment: inferAttachmentFromContent(msg.content), toolCalls: msg.tool_calls, toolResults: msg.tool_results });
         }
         updateClearChatVisibility();
         updateSystemToggleButton();
@@ -2083,43 +2111,20 @@
     }
 
     function persistConversation() {
-        try {
-            const messages = state.messages.map(msg => {
-                if (!msg) return msg;
-                const safe = { ...msg };
-                if (safe.attachment) {
-                    const { kind, name, mime, size } = safe.attachment;
-                    safe.attachment = { kind, name, mime, size };
-                }
-                return safe;
-            });
-            const payload = {
-                model: state.config.model,
-                messages
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        } catch (err) {
+        const payload = buildRequestPayload();
+        writeVfsJson(CHAT_VFS_PATH, payload).catch(err => {
             console.warn('Failed to persist conversation', err);
-        }
+        });
     }
 
-    function hydrateConversation() {
+    async function hydrateConversation() {
         let stored = null;
         try {
-            stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+            stored = await readVfsJson(CHAT_VFS_PATH);
         } catch (err) {
             console.warn('Failed to parse stored conversation', err);
         }
-        if (Array.isArray(stored) && stored.length) {
-            for (const pair of stored) {
-                if (pair?.user) {
-                    state.messages.push({ role: 'user', content: pair.user });
-                }
-                if (pair?.assistant) {
-                    state.messages.push({ role: 'assistant', content: pair.assistant });
-                }
-            }
-        } else if (stored && Array.isArray(stored.messages)) {
+        if (stored && Array.isArray(stored.messages)) {
             state.messages = stored.messages.map(msg => ({ ...msg }));
             if (stored.model) {
                 state.config.model = stored.model;
@@ -2265,7 +2270,7 @@
             };
         }
         if (attachment.kind === 'text') {
-            const { snippet, truncated } = buildTextPreview(attachment.textContent || '');
+            const { snippet, truncated } = buildTextPreview(attachmentTextContent(attachment));
             return {
                 kind: isMarkdown || isTex ? 'markdown' : 'text',
                 name: attachment.name,
@@ -2329,7 +2334,7 @@
                 document.body.removeChild(link);
                 return;
             }
-            const text = attachment.textContent || '';
+            const text = attachmentTextContent(attachment);
             const blob = new Blob([text], { type: attachment.mime || 'text/plain' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -2374,7 +2379,7 @@
             `);
             popup.document.close();
         } else if (attachment.kind === 'text') {
-            const blob = new Blob([attachment.textContent || ''], { type: attachment.mime || 'text/plain' });
+            const blob = new Blob([attachmentTextContent(attachment)], { type: attachment.mime || 'text/plain' });
             const url = URL.createObjectURL(blob);
             window.open(url, '_blank');
             setTimeout(() => URL.revokeObjectURL(url), 2000);
@@ -2425,7 +2430,7 @@
             img.style.display = 'block';
             body.appendChild(img);
         } else {
-            const content = attachment?.textContent || preview.text || '';
+            const content = attachmentTextContent(attachment) || preview.text || '';
             if (preview.kind === 'markdown' && markdownSupport.enabled) {
                 const div = document.createElement('div');
                 div.innerHTML = renderMarkdown(content);
@@ -2508,7 +2513,7 @@
         }
         if (preview.kind === 'text' || preview.kind === 'markdown') {
             actions.appendChild(createActionButton('glyphicon-copy', 'Copy snippet', () => copyToClipboard(preview.text || '')));
-            actions.appendChild(createActionButton('glyphicon-list-alt', 'Copy all', () => copyToClipboard(attachment.textContent || preview.text || '')));
+            actions.appendChild(createActionButton('glyphicon-list-alt', 'Copy all', () => copyToClipboard(attachmentTextContent(attachment) || preview.text || '')));
         }
         popover.appendChild(actions);
 
@@ -2590,26 +2595,15 @@
         const prompt = dom.input.value.trim();
         if (!prompt) return;
         ensureSystemMessage();
-        const userAttachment = cloneAttachment(state.attachment);
         const userMessage = buildUserMessage(prompt);
-        if (userAttachment) {
-            userMessage.attachment = userAttachment;
-        }
         // add user message to state immediately so edit/trim is available right away
-        const userEntry = {
-            role: 'user',
-            content: userMessage.content,
-            attachment: userAttachment
-        };
-        if (state.searchMode !== SEARCH_DEFAULTS.none) {
-            userEntry.search = state.searchMode;
-        }
+        const userEntry = { ...userMessage };
         state.messages.push(userEntry);
         const userIndex = state.messages.length - 1;
         const preview = formatUserPreview(prompt);
         state.busy = true;
         dom.sendButton.disabled = true;
-        appendMessage('user', preview, { attachment: userAttachment, messageIndex: userIndex });
+        appendMessage('user', preview, { attachment: inferAttachmentFromContent(userEntry.content), messageIndex: userIndex });
         dom.input.value = '';
         clearAttachment();
         resizeComposer();
@@ -2653,10 +2647,6 @@
         setSearchModeActive(mode);
     });
     dom.fileInput.addEventListener('change', handleFileChange);
-    dom.clearFileButton.addEventListener('click', () => {
-        const allowDefault = !(state.searchMode !== SEARCH_DEFAULTS.none && !state.attachment);
-        clearAttachment({ applyDefault: allowDefault });
-    });
     dom.clearChatButton?.addEventListener('click', clearChatHistory);
     dom.downloadChatButton?.addEventListener('click', downloadChat);
     dom.uploadChatButton?.addEventListener('click', () => dom.uploadChatInput?.click());
@@ -2714,11 +2704,20 @@
     });
     window.addEventListener('resize', resizeComposer);
 
-    loadSearchDefault();
-    hydrateConversation();
-    updateSystemToggleButton();
-    resizeComposer();
-    updateClearChatVisibility();
+    async function initializeChat() {
+        await loadSearchDefault();
+        await hydrateConversation();
+        updateSystemToggleButton();
+        resizeComposer();
+        updateClearChatVisibility();
+    }
+
+    initializeChat().catch(err => {
+        console.warn('Failed to initialize chat from VFS', err);
+        updateSystemToggleButton();
+        resizeComposer();
+        updateClearChatVisibility();
+    });
     </script>
 
     #%env/templates/footer.template%#
