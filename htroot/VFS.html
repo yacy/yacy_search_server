@@ -1,0 +1,951 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <title>YaCy '#[clientname]#': Virtual File System</title>
+    #%env/templates/metas.template%#
+    <link rel="stylesheet" type="text/css" href="js/styles/default.min.css" />
+    <style type="text/css">
+      #vfs-intro {
+        margin-bottom: 12px;
+      }
+
+      #finder-window {
+        border: 1px solid #d5d5d5;
+        background: #ffffff;
+      }
+
+      #finder-titlebar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-bottom: 1px solid #e5e5e5;
+        background: #f8f8f8;
+      }
+
+      #finder-controls {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      #finder-controls span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 1px solid #bfbfbf;
+        background: #e4e4e4;
+      }
+
+      #finder-path {
+        flex: 1 1 220px;
+        font-family: monospace;
+        background: #ffffff;
+        border: 1px solid #d9d9d9;
+        border-radius: 2px;
+        padding: 4px 8px;
+      }
+
+      #finder-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      #finder-upload-input {
+        display: none;
+      }
+
+      #finder-body {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) minmax(280px, 1fr);
+        gap: 0;
+      }
+
+      #finder-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        max-height: 420px;
+        overflow: auto;
+      }
+
+      #finder-list li {
+        border-bottom: 1px solid #efefef;
+      }
+
+      #finder-list ul {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 16px;
+      }
+
+      #finder-list li > div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 10px;
+      }
+
+      #finder-list li > div[data-selected="true"] {
+        background: #f2f7ff;
+      }
+
+      #finder-list li > div[data-drop-target="true"] {
+        box-shadow: inset 0 0 0 2px #9fc3ff;
+      }
+
+      #finder-list [data-role="toggle-spacer"] {
+        display: inline-block;
+        width: 22px;
+      }
+
+      #finder-list button[data-action] {
+        border: 1px solid transparent;
+        background: transparent;
+        padding: 2px 6px;
+        line-height: 1;
+        border-radius: 2px;
+      }
+
+      #finder-list button[data-action="toggle"] {
+        width: 22px;
+        text-align: center;
+        padding: 2px 0;
+        font-family: monospace;
+      }
+
+      #finder-list button[data-action]:hover,
+      #finder-list button[data-action]:focus {
+        border-color: #d6d6d6;
+        background: #f7f7f7;
+        outline: none;
+      }
+
+      #finder-list [data-role="name"] {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      #finder-list [data-role="actions"] {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      #finder-list [data-icon] {
+        width: 16px;
+        text-align: center;
+        font-size: 14px;
+        color: #4e6070;
+      }
+
+      #finder-empty {
+        margin: 0;
+        padding: 12px 10px;
+        color: #666666;
+      }
+
+      #finder-preview {
+        border-left: 1px solid #ececec;
+        min-height: 280px;
+      }
+
+      #finder-preview-title {
+        margin: 0;
+        padding: 10px;
+        border-bottom: 1px solid #ececec;
+        font-size: 14px;
+      }
+
+      #finder-preview-body {
+        padding: 10px;
+        overflow: auto;
+        max-height: 420px;
+      }
+
+      .finder-editor {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        padding: 14px;
+      }
+
+      .finder-editor[data-open="true"] {
+        display: flex;
+      }
+
+      .vfs-editor__dialog {
+        width: min(1080px, 100%);
+        max-height: 90vh;
+        background: #ffffff;
+        border: 1px solid #cccccc;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .vfs-editor__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .vfs-editor__title {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .vfs-editor__path {
+        margin: 0;
+        font-family: monospace;
+        font-size: 12px;
+        color: #666666;
+      }
+
+      .vfs-editor__input {
+        min-height: 58vh;
+        resize: vertical;
+        font-family: monospace;
+        font-size: 13px;
+        border: 1px solid #cfcfcf;
+        padding: 8px;
+      }
+
+      .vfs-editor__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      @media (max-width: 900px) {
+        #finder-body {
+          grid-template-columns: 1fr;
+        }
+
+        #finder-preview {
+          border-left: 0;
+          border-top: 1px solid #ececec;
+        }
+      }
+    </style>
+  </head>
+  <body id="vfs">
+    #%env/templates/header.template%#
+    <h2>Virtual File System</h2>
+    <p id="vfs-intro">
+      User storage in the browser cache with file-system-like navigation.
+    </p>
+
+    <div id="finder-window" aria-label="File system browser">
+      <div id="finder-titlebar">
+        <div id="finder-controls" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div id="finder-path">/</div>
+        <div id="finder-toolbar">
+          <button type="button" id="finder-create-folder" class="btn btn-default btn-sm">New Folder</button>
+          <button type="button" id="finder-upload-button" class="btn btn-primary btn-sm">Upload File</button>
+          <input type="file" id="finder-upload-input" />
+        </div>
+      </div>
+      <div id="finder-body">
+        <div>
+          <ul id="finder-list" aria-label="Root contents"></ul>
+          <p id="finder-empty">No files yet. Upload a file or create a folder.</p>
+        </div>
+        <div id="finder-preview">
+          <h3 id="finder-preview-title">Preview</h3>
+          <div id="finder-preview-body">
+            <p>Select a <code>.txt</code> or <code>.md</code> file to preview.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="vfs-editor" class="finder-editor" aria-hidden="true">
+      <div id="vfs-editor-dialog" class="vfs-editor__dialog" role="dialog" aria-modal="true" aria-labelledby="vfs-editor-title">
+        <div id="vfs-editor-header" class="vfs-editor__header">
+          <h3 id="vfs-editor-title" class="vfs-editor__title">Edit file</h3>
+          <p id="vfs-editor-path" class="vfs-editor__path"></p>
+        </div>
+        <textarea id="vfs-editor-input" class="vfs-editor__input" spellcheck="false"></textarea>
+        <div id="vfs-editor-actions" class="vfs-editor__actions">
+          <button type="button" id="vfs-editor-discard" class="btn btn-default">Discard</button>
+          <button type="button" id="vfs-editor-save" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="js/vfs.js?v=20260210"></script>
+    <script type="text/javascript" src="js/highlight.min.js"></script>
+    <script type="text/javascript">
+(function () {
+	const finderList = document.getElementById("finder-list");
+	const finderEmpty = document.getElementById("finder-empty");
+	const createFolderButton = document.getElementById("finder-create-folder");
+	const uploadButton = document.getElementById("finder-upload-button");
+	const uploadInput = document.getElementById("finder-upload-input");
+	const finderPath = document.getElementById("finder-path");
+	const previewTitle = document.getElementById("finder-preview-title");
+	const previewBody = document.getElementById("finder-preview-body");
+	const editorOverlay = document.getElementById("vfs-editor");
+	const editorTitle = document.getElementById("vfs-editor-title");
+	const editorPathLabel = document.getElementById("vfs-editor-path");
+	const editorInput = document.getElementById("vfs-editor-input");
+	const editorDiscard = document.getElementById("vfs-editor-discard");
+	const editorSave = document.getElementById("vfs-editor-save");
+	const expandedPaths = new Set(["/"]);
+	let selectedPath = null;
+	let currentDirectory = "/";
+	let activeDropTarget = null;
+	let editorPath = null;
+
+	if (
+		!finderList ||
+		!uploadInput ||
+		!uploadButton ||
+		!createFolderButton ||
+		!finderPath ||
+		!previewTitle ||
+		!previewBody ||
+		!editorOverlay ||
+		!editorTitle ||
+		!editorPathLabel ||
+		!editorInput ||
+		!editorDiscard ||
+		!editorSave
+	) {
+		return;
+	}
+
+	const seedEntries = [
+		{ path: "/Projects/", value: "" },
+		{ path: "/Projects/brief.txt", value: "Futuris VFS sample file." },
+		{ path: "/Design/", value: "" },
+		{ path: "/Design/notes.md", value: "Palette notes and layout ideas." },
+		{ path: "/Readme.md", value: "Welcome to the Futuris VFS root." }
+	];
+
+	const refreshDelay = (fn) => {
+		setTimeout(fn, 120);
+	};
+
+	const escapeHtml = (value) =>
+		String(value)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;");
+
+	const renderHighlighted = (text, languageHint) => {
+		if (window.hljs && typeof window.hljs.highlight === "function") {
+			try {
+				if (languageHint) {
+					return window.hljs.highlight(text, { language: languageHint }).value;
+				}
+				return window.hljs.highlightAuto(text).value;
+			} catch (error) {
+				return escapeHtml(text);
+			}
+		}
+		return escapeHtml(text);
+	};
+
+	const readFileAsText = (file) =>
+		new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result || "");
+			reader.onerror = () => reject(reader.error || new Error("Upload failed"));
+			reader.readAsText(file);
+		});
+
+	const createGlyphIcon = (name, role) => {
+		const icon = document.createElement("span");
+		icon.setAttribute("aria-hidden", "true");
+		icon.dataset.icon = role;
+		icon.className = `glyphicon glyphicon-${name}`;
+		return icon;
+	};
+
+	const normalizeDirectoryPath = (path) => {
+		if (!path || path === "/") return "/";
+		if (!String(path).startsWith("/")) throw new Error("Invalid directory path");
+		return path.endsWith("/") ? path : `${path}/`;
+	};
+
+	const parentDirectory = (path) => {
+		if (!path || path === "/") return "/";
+		if (path.endsWith("/")) return normalizeDirectoryPath(path);
+		const index = path.lastIndexOf("/");
+		return index <= 0 ? "/" : path.substring(0, index + 1);
+	};
+
+	const setCurrentDirectory = (path) => {
+		currentDirectory = normalizeDirectoryPath(path);
+		finderPath.textContent = currentDirectory;
+		finderPath.title = currentDirectory;
+	};
+
+	const getEventElement = (event) => {
+		const target = event.target;
+		if (target instanceof Element) return target;
+		if (target && target.nodeType === Node.TEXT_NODE && target.parentElement) {
+			return target.parentElement;
+		}
+		return null;
+	};
+
+	const buildTree = (entries) => {
+		const root = { name: "/", path: "/", type: "folder", children: new Map() };
+
+		entries.forEach((entry) => {
+			if (!entry) return;
+			const isDir = entry.endsWith("/");
+			const parts = entry.split("/").filter(Boolean);
+			let current = root;
+			let currentPath = "/";
+
+			parts.forEach((part, index) => {
+				const isLast = index === parts.length - 1;
+				const partIsDir = isLast ? isDir : true;
+				const nextPath = `${currentPath}${part}${partIsDir ? "/" : ""}`;
+				if (!current.children.has(part)) {
+					current.children.set(part, {
+						name: part,
+						path: nextPath,
+						type: partIsDir ? "folder" : "file",
+						children: new Map()
+					});
+				}
+				const child = current.children.get(part);
+				if (partIsDir) {
+					child.type = "folder";
+				} else if (isLast) {
+					child.type = "file";
+				}
+				current = child;
+				currentPath = nextPath;
+			});
+		});
+
+		return root;
+	};
+
+	const renderTree = (node, container) => {
+		const nodes = Array.from(node.children.values()).sort((a, b) => {
+			if (a.type !== b.type) {
+				return a.type === "folder" ? -1 : 1;
+			}
+			return a.name.localeCompare(b.name);
+		});
+
+		nodes.forEach((child) => {
+			const li = document.createElement("li");
+			li.dataset.path = child.path;
+			li.dataset.kind = child.type;
+
+			const row = document.createElement("div");
+			row.setAttribute("draggable", "true");
+			row.dataset.dragPath = child.path;
+			if (selectedPath === child.path) {
+				row.dataset.selected = "true";
+			}
+
+			if (child.type === "folder") {
+				const toggle = document.createElement("button");
+				toggle.type = "button";
+				toggle.dataset.action = "toggle";
+				toggle.setAttribute("draggable", "false");
+				toggle.textContent = expandedPaths.has(child.path) ? "v" : ">";
+				toggle.setAttribute("aria-label", expandedPaths.has(child.path) ? "Collapse folder" : "Expand folder");
+				row.appendChild(toggle);
+				row.dataset.dropPath = child.path;
+			} else {
+				const spacer = document.createElement("span");
+				spacer.setAttribute("aria-hidden", "true");
+				spacer.dataset.role = "toggle-spacer";
+				row.appendChild(spacer);
+			}
+
+			const icon = createGlyphIcon(child.type === "folder" ? "folder-open" : "file", child.type);
+			row.appendChild(icon);
+
+			const name = document.createElement("span");
+			name.textContent = child.name;
+			name.dataset.role = "name";
+			row.appendChild(name);
+
+			const actions = document.createElement("span");
+			actions.dataset.role = "actions";
+
+			if (child.type === "file") {
+				const edit = document.createElement("button");
+				edit.type = "button";
+				edit.dataset.action = "edit";
+				edit.setAttribute("draggable", "false");
+				edit.title = "Edit file";
+				const editIcon = createGlyphIcon("pencil", "edit");
+				edit.appendChild(editIcon);
+				actions.appendChild(edit);
+
+				const download = document.createElement("button");
+				download.type = "button";
+				download.dataset.action = "download";
+				download.setAttribute("draggable", "false");
+				download.title = "Download file";
+				const downloadIcon = createGlyphIcon("download-alt", "download");
+				download.appendChild(downloadIcon);
+				actions.appendChild(download);
+			}
+
+			const remove = document.createElement("button");
+			remove.type = "button";
+			remove.dataset.action = "delete";
+			remove.setAttribute("draggable", "false");
+			remove.title = "Delete";
+			const deleteIcon = createGlyphIcon("trash", "delete");
+			remove.appendChild(deleteIcon);
+			actions.appendChild(remove);
+
+			row.appendChild(actions);
+			li.appendChild(row);
+
+			if (child.type === "folder" && expandedPaths.has(child.path)) {
+				const nestedList = document.createElement("ul");
+				nestedList.dataset.dropPath = child.path;
+				renderTree(child, nestedList);
+				li.appendChild(nestedList);
+			}
+
+			container.appendChild(li);
+		});
+	};
+
+	const refreshView = async () => {
+		const vfs = await window.vfsReady;
+		const entries = await vfs.ls("/");
+		if (entries.length === 0) {
+			for (const entry of seedEntries) {
+				await vfs.put(entry.path, entry.value);
+			}
+		}
+
+		const updatedEntries = await vfs.ls("/");
+		finderList.innerHTML = "";
+		const tree = buildTree(updatedEntries);
+
+		const rootItem = document.createElement("li");
+		rootItem.dataset.path = "/";
+		rootItem.dataset.kind = "folder";
+		const rootRow = document.createElement("div");
+		rootRow.dataset.dragPath = "/";
+		rootRow.dataset.dropPath = "/";
+		rootRow.dataset.root = "true";
+		if (selectedPath === "/") {
+			rootRow.dataset.selected = "true";
+		}
+
+		const rootToggle = document.createElement("button");
+		rootToggle.type = "button";
+		rootToggle.dataset.action = "toggle";
+		rootToggle.setAttribute("draggable", "false");
+		rootToggle.textContent = expandedPaths.has("/") ? "v" : ">";
+		rootToggle.setAttribute("aria-label", expandedPaths.has("/") ? "Collapse folder" : "Expand folder");
+		rootRow.appendChild(rootToggle);
+
+		const rootIcon = createGlyphIcon("folder-open", "folder");
+		rootRow.appendChild(rootIcon);
+
+		const rootName = document.createElement("span");
+		rootName.textContent = "/";
+		rootName.dataset.role = "name";
+		rootRow.appendChild(rootName);
+
+		rootRow.addEventListener("click", (event) => {
+			const eventElement = getEventElement(event);
+			if (!eventElement) return;
+			if (eventElement.closest("button[data-action], [data-role=\"actions\"]")) return;
+			event.stopPropagation();
+			selectedPath = "/";
+			setCurrentDirectory("/");
+			showPreviewPlaceholder("Select a file to preview.");
+			refreshView();
+		});
+
+		rootItem.appendChild(rootRow);
+
+		if (expandedPaths.has("/")) {
+			const nestedList = document.createElement("ul");
+			nestedList.dataset.dropPath = "/";
+			renderTree(tree, nestedList);
+			rootItem.appendChild(nestedList);
+		}
+
+		finderList.appendChild(rootItem);
+		finderEmpty.style.display = updatedEntries.length ? "none" : "block";
+	};
+
+	const refreshSoon = () => {
+		refreshDelay(refreshView);
+	};
+
+	const showPreviewPlaceholder = (message) => {
+		previewTitle.textContent = "Preview";
+		previewBody.innerHTML = `<p>${escapeHtml(message)}</p>`;
+	};
+
+	const openEditor = async (path) => {
+		if (!path || path.endsWith("/")) return;
+		try {
+			const vfs = await window.vfsReady;
+			const contents = await vfs.getasync(path);
+			editorPath = path;
+			editorTitle.textContent = "Edit file";
+			editorPathLabel.textContent = path;
+			editorInput.value = contents;
+			editorOverlay.dataset.open = "true";
+			editorOverlay.setAttribute("aria-hidden", "false");
+			editorInput.focus();
+		} catch (error) {
+			window.alert("Unable to load file for editing.");
+		}
+	};
+
+	const closeEditor = () => {
+		editorPath = null;
+		editorOverlay.removeAttribute("data-open");
+		editorOverlay.setAttribute("aria-hidden", "true");
+		editorInput.value = "";
+	};
+
+	const extensionToLanguage = (name) => {
+		const match = name.toLowerCase().match(/\.([a-z0-9]+)$/);
+		if (!match) return null;
+		const ext = match[1];
+		const map = {
+			js: "javascript",
+			mjs: "javascript",
+			cjs: "javascript",
+			ts: "typescript",
+			jsx: "javascript",
+			tsx: "typescript",
+			json: "json",
+			md: "markdown",
+			txt: "plaintext",
+			html: "xml",
+			htm: "xml",
+			css: "css",
+			yml: "yaml",
+			yaml: "yaml",
+			sh: "bash",
+			bash: "bash",
+			py: "python",
+			rs: "rust",
+			go: "go",
+			java: "java",
+			c: "c",
+			h: "c",
+			cpp: "cpp",
+			hpp: "cpp"
+		};
+		return map[ext] || null;
+	};
+
+	const updatePreview = async (path) => {
+		if (!path) {
+			showPreviewPlaceholder("Select a file to preview.");
+			return;
+		}
+
+		const fileName = path.split("/").pop() || "";
+		const languageHint = extensionToLanguage(fileName);
+
+		try {
+			const vfs = await window.vfsReady;
+			const contents = await vfs.getasync(path);
+			previewTitle.textContent = fileName;
+			const highlighted = renderHighlighted(contents, languageHint);
+			const languageClass = languageHint ? ` language-${languageHint}` : "";
+			previewBody.innerHTML = `<pre><code class="hljs${languageClass}">${highlighted}</code></pre>`;
+		} catch (error) {
+			showPreviewPlaceholder("Unable to load file preview.");
+		}
+	};
+
+	const moveEntry = async (srcPath, destDir) => {
+		const vfs = await window.vfsReady;
+		const isFolder = srcPath.endsWith("/");
+		const destPath = await vfs.moveTree(srcPath, destDir);
+
+		if (expandedPaths.has(srcPath)) {
+			expandedPaths.delete(srcPath);
+			expandedPaths.add(destPath);
+		}
+		if (selectedPath === srcPath) {
+			selectedPath = destPath;
+		}
+		if (isFolder && currentDirectory.startsWith(srcPath)) {
+			setCurrentDirectory(`${destPath}${currentDirectory.substring(srcPath.length)}`);
+		}
+	};
+
+	createFolderButton.addEventListener("click", async () => {
+		const name = window.prompt("Folder name");
+		if (!name) return;
+		const trimmed = name.trim().replace(/^\/+|\/+$/g, "");
+		if (!trimmed || trimmed.includes("/")) {
+			window.alert("Folder name must be a single segment.");
+			return;
+		}
+		const vfs = await window.vfsReady;
+		const targetDirectory = vfs.normalizeDirPath(currentDirectory);
+		const folderPath = await vfs.mkdir(`${targetDirectory}${trimmed}`);
+		expandedPaths.add(targetDirectory);
+		expandedPaths.add(folderPath);
+		selectedPath = folderPath;
+		setCurrentDirectory(folderPath);
+		refreshSoon();
+	});
+
+	uploadButton.addEventListener("click", () => {
+		uploadInput.click();
+	});
+
+	uploadInput.addEventListener("change", async (event) => {
+		const files = Array.from(event.target.files || []);
+		if (!files.length) return;
+		const vfs = await window.vfsReady;
+		const targetDirectory = vfs.normalizeDirPath(currentDirectory);
+		for (const file of files) {
+			const contents = await readFileAsText(file);
+			await vfs.put(`${targetDirectory}${file.name}`, contents);
+		}
+		uploadInput.value = "";
+		refreshSoon();
+	});
+
+	finderList.addEventListener("click", async (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const button = eventElement.closest("button[data-action]");
+		if (!button) return;
+		const item = button.closest("li");
+		if (!item) return;
+		const path = item.dataset.path;
+		const action = button.dataset.action;
+		const vfs = await window.vfsReady;
+
+		if (action === "toggle") {
+			setCurrentDirectory(path);
+			selectedPath = path;
+			if (expandedPaths.has(path)) {
+				expandedPaths.delete(path);
+			} else {
+				expandedPaths.add(path);
+			}
+			refreshView();
+			return;
+		}
+
+		if (action === "delete") {
+			if (path.endsWith("/")) {
+				await vfs.deleteTree(path);
+				expandedPaths.delete(path);
+				if (selectedPath && selectedPath.startsWith(path)) {
+					selectedPath = null;
+					showPreviewPlaceholder("Select a file to preview.");
+				}
+				if (currentDirectory.startsWith(path)) {
+					setCurrentDirectory("/");
+				}
+			} else {
+				await vfs.deleteTree(path);
+				if (selectedPath === path) {
+					selectedPath = null;
+					showPreviewPlaceholder("Select a file to preview.");
+				}
+			}
+			refreshSoon();
+			return;
+		}
+
+		if (action === "download") {
+			try {
+				const contents = await vfs.getasync(path);
+				const blob = new Blob([contents], { type: "text/plain" });
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = path.split("/").pop() || "download.txt";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			} catch (error) {
+				window.alert("Unable to download file.");
+			}
+			return;
+		}
+
+		if (action === "edit") {
+			openEditor(path);
+		}
+	});
+
+	finderList.addEventListener("click", (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const button = eventElement.closest("button[data-action]");
+		if (button) return;
+		const rootRow = eventElement.closest("[data-root=\"true\"]");
+		if (rootRow) {
+			selectedPath = "/";
+			setCurrentDirectory("/");
+			showPreviewPlaceholder("Select a file to preview.");
+			refreshView();
+			return;
+		}
+		const item = eventElement.closest("li[data-path]");
+		if (!item) return;
+		const path = item.dataset.path;
+		const kind = item.dataset.kind;
+		selectedPath = path;
+		if (kind === "folder") {
+			setCurrentDirectory(path);
+			showPreviewPlaceholder("Select a file to preview.");
+			refreshView();
+			return;
+		}
+		setCurrentDirectory(parentDirectory(path));
+		refreshView();
+		updatePreview(selectedPath);
+	});
+
+	finderList.addEventListener("dragstart", (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const row = eventElement.closest("[data-drag-path]");
+		if (!row) return;
+		if (eventElement.closest("[data-role=\"actions\"], button, [data-icon], [data-action=\"toggle\"]")) {
+			event.preventDefault();
+			return;
+		}
+		event.dataTransfer.setData("text/plain", row.dataset.dragPath);
+		event.dataTransfer.effectAllowed = "move";
+		row.dataset.dragging = "true";
+	});
+
+	finderList.addEventListener("dragend", (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const row = eventElement.closest("[data-drag-path]");
+		if (row) {
+			delete row.dataset.dragging;
+		}
+		if (activeDropTarget) {
+			delete activeDropTarget.dataset.dropTarget;
+			activeDropTarget = null;
+		}
+	});
+
+	finderList.addEventListener("dragover", (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const target = eventElement.closest("[data-drop-path]");
+		if (!target) return;
+		event.preventDefault();
+		event.dataTransfer.dropEffect = "move";
+		if (activeDropTarget && activeDropTarget !== target) {
+			delete activeDropTarget.dataset.dropTarget;
+		}
+		activeDropTarget = target;
+		activeDropTarget.dataset.dropTarget = "true";
+	});
+
+	finderList.addEventListener("dragleave", (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const target = eventElement.closest("[data-drop-path]");
+		if (!target || !activeDropTarget) return;
+		if (target === activeDropTarget) {
+			delete activeDropTarget.dataset.dropTarget;
+			activeDropTarget = null;
+		}
+	});
+
+	finderList.addEventListener("drop", async (event) => {
+		const eventElement = getEventElement(event);
+		if (!eventElement) return;
+		const target = eventElement.closest("[data-drop-path]");
+		if (!target) return;
+		event.preventDefault();
+		const srcPath = event.dataTransfer.getData("text/plain");
+		const destDir = target.dataset.dropPath || "/";
+		if (!srcPath || !destDir) return;
+		try {
+			await moveEntry(srcPath, destDir);
+		} catch (error) {
+			window.alert(error && error.message ? error.message : "Unable to move entry.");
+		}
+		if (activeDropTarget) {
+			delete activeDropTarget.dataset.dropTarget;
+			activeDropTarget = null;
+		}
+		refreshSoon();
+	});
+
+	editorOverlay.addEventListener("click", (event) => {
+		if (event.target === editorOverlay) {
+			closeEditor();
+		}
+	});
+
+	editorDiscard.addEventListener("click", () => {
+		closeEditor();
+	});
+
+	editorSave.addEventListener("click", async () => {
+		if (!editorPath) {
+			closeEditor();
+			return;
+		}
+		const vfs = await window.vfsReady;
+		await vfs.put(editorPath, editorInput.value);
+		const savedPath = editorPath;
+		closeEditor();
+		if (selectedPath === savedPath) {
+			updatePreview(savedPath);
+		}
+	});
+
+	const clearActiveDrop = () => {
+		if (activeDropTarget) {
+			delete activeDropTarget.dataset.dropTarget;
+			activeDropTarget = null;
+		}
+	};
+
+	setCurrentDirectory("/");
+	refreshView();
+	updatePreview(selectedPath);
+})();
+    </script>
+    #%env/templates/footer.template%#
+  </body>
+</html>
