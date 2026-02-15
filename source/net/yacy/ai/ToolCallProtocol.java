@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletOutputStream;
 
@@ -121,6 +122,8 @@ public final class ToolCallProtocol {
         final int status = conn.getResponseCode();
         if (status == 200) {
             handleInitialStreamAndContinue(out, conn, llm4Chat, preparedBody, messages, initialMetadata);
+        } else {
+            Logger.getLogger("ToolCallProtocoll").severe(status + " " + conn.getResponseMessage());
         }
         return status;
     }
@@ -359,7 +362,7 @@ public final class ToolCallProtocol {
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
-        if (!llm4Chat.llm.api_key.isEmpty()) {
+        if (llm4Chat.llm.api_key != null && !llm4Chat.llm.api_key.isEmpty()) {
             conn.setRequestProperty("Authorization", "Bearer " + llm4Chat.llm.api_key);
         }
         conn.setDoOutput(true);

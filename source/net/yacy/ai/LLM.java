@@ -128,11 +128,14 @@ public class LLM {
 
     // API Helper Methods
 
-    private static String sendPostRequest(final String urls, final JSONObject data) throws IOException, URISyntaxException {
+    private static String sendPostRequest(final String urls, final JSONObject data, final String apiKey) throws IOException, URISyntaxException {
         final URL url = new URI(urls).toURL();
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
+        if (apiKey != null && !apiKey.isEmpty()) {
+            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+        }
         conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
@@ -208,7 +211,7 @@ public class LLM {
         final JSONObject data = new JSONObject();
         try {
             data.put("name", name);
-            sendPostRequest(this.hoststub + "/api/show", data);
+            sendPostRequest(this.hoststub + "/api/show", data, this.api_key);
             return true;
         } catch (JSONException | URISyntaxException | IOException e) {
             return false;
@@ -220,7 +223,7 @@ public class LLM {
         try {
             data.put("name", name);
             data.put("stream", false);
-            final String response = sendPostRequest(this.hoststub + "/api/pull", data);
+            final String response = sendPostRequest(this.hoststub + "/api/pull", data, this.api_key);
             // this sends {"status": "success"} in case of success
             final JSONObject responseObject = new JSONObject(response);
             final String status = responseObject.optString("status", "");
@@ -281,7 +284,7 @@ public class LLM {
                 data.put("response_format", response_format);
             }
             
-            final String response = sendPostRequest(this.hoststub + "/v1/chat/completions", data);
+            final String response = sendPostRequest(this.hoststub + "/v1/chat/completions", data, this.api_key);
             final JSONObject responseObject = new JSONObject(response);
             final JSONArray choices = responseObject.getJSONArray("choices");
             final JSONObject choice = choices.getJSONObject(0);
