@@ -27,9 +27,6 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 
 import net.yacy.migration;
@@ -52,6 +49,7 @@ public class IndexReIndexMonitor_p {
 
 	/** This servlet name, used for identifying recorded API calls */
 	private static final String SERVLET_NAME = IndexReIndexMonitor_p.class.getSimpleName() + ".html";
+	private static final String RECRAWL_STARTUP_APICALL_PK_CONFIG = "recrawlindex.startup.apicall.pk";
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
@@ -176,6 +174,10 @@ public class IndexReIndexMonitor_p {
 							WorkTables.calculateAPIScheduler(recrawlCall, false);
 							try {
 								sb.tables.update(WorkTables.TABLE_API_NAME, recrawlCall);
+								final byte[] recrawlCallPk = recrawlCall.getPK();
+								if (recrawlCallPk != null) {
+									sb.setConfig(RECRAWL_STARTUP_APICALL_PK_CONFIG, UTF8.String(recrawlCallPk));
+								}
 							} catch (final IOException e) {
 								ConcurrentLog.logException(e);
 							}
@@ -221,7 +223,7 @@ public class IndexReIndexMonitor_p {
 					sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
 					recrawlbt = null;
 					prop.put("recrawljobrunning", 0);
-					deleteRecrawlStartupApiCalls(sb);
+					deleteTrackedRecrawlStartupApiCall(sb);
                 }
             }
 
@@ -376,33 +378,20 @@ public class IndexReIndexMonitor_p {
 		return formattedTime;
 	}
 
-	private static void deleteRecrawlStartupApiCalls(final Switchboard sb) {
+	private static void deleteTrackedRecrawlStartupApiCall(final Switchboard sb) {
 		if (sb == null || sb.tables == null) {
 			return;
 		}
-		final List<byte[]> pksToDelete = new ArrayList<>();
+		final String trackedPk = sb.getConfig(RECRAWL_STARTUP_APICALL_PK_CONFIG, "");
+		if (trackedPk.isEmpty()) {
+			return;
+		}
 		try {
-			final Iterator<Row> rows = sb.tables.iterator(WorkTables.TABLE_API_NAME);
-			while (rows.hasNext()) {
-				final Row row = rows.next();
-				if (row == null) {
-					continue;
-				}
-				final String eventAction = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "");
-				if (!"startup".equals(eventAction)) {
-					continue;
-				}
-				final String url = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
-				if (url != null && url.startsWith("/" + SERVLET_NAME) && url.contains("setup=recrawljob")
-						&& url.contains("recrawlnow=")) {
-					pksToDelete.add(row.getPK());
-				}
-			}
-			for (final byte[] pk : pksToDelete) {
-				sb.tables.delete(WorkTables.TABLE_API_NAME, pk);
-			}
+			sb.tables.delete(WorkTables.TABLE_API_NAME, UTF8.getBytes(trackedPk));
 		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
+		} finally {
+			sb.setConfig(RECRAWL_STARTUP_APICALL_PK_CONFIG, "");
 		}
 	}
 }
