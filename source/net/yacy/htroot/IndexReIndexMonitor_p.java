@@ -220,8 +220,9 @@ public class IndexReIndexMonitor_p {
                 }
             } else {
 				if (post.containsKey("stoprecrawl")) {
-					sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
-					recrawlbt = null;
+					/* We do not remove the thread from the Switchboard worker threads using serverSwitch.terminateThread(String,boolean),
+					 * because we want to be able to provide a report after its termination */
+					recrawlbt.terminate(false);
 					prop.put("recrawljobrunning", 0);
 					deleteTrackedRecrawlStartupApiCall(sb);
                 }
