@@ -27,6 +27,9 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import net.yacy.migration;
@@ -214,24 +217,11 @@ public class IndexReIndexMonitor_p {
                     deleteOnRecrawl = RecrawlBusyThread.DEFAULT_DELETE_ON_RECRAWL;
                 }
             } else {
-                if (post.containsKey("stoprecrawl")) {
-            		/* We do not remove the thread from the Switchboard worker threads using serverSwitch.terminateThread(String,boolean),
-            		 * because we want to be able to provide a report after its termination */
-                    recrawlbt.terminate(false);
-                    prop.put("recrawljobrunning", 0);
-					if (sb.tables != null) {
-						final Row recrawlCall = WorkTables.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
-						if (recrawlCall != null) {
-							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
-							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
-							recrawlCall.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
-							try {
-								sb.tables.update(WorkTables.TABLE_API_NAME, recrawlCall);
-							} catch (final IOException e) {
-								ConcurrentLog.logException(e);
-							}
-						}
-					}
+				if (post.containsKey("stoprecrawl")) {
+					sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
+					recrawlbt = null;
+					prop.put("recrawljobrunning", 0);
+					deleteRecrawlStartupApiCalls(sb);
                 }
             }
 
@@ -384,5 +374,35 @@ public class IndexReIndexMonitor_p {
 			formattedTime = "";
 		}
 		return formattedTime;
+	}
+
+	private static void deleteRecrawlStartupApiCalls(final Switchboard sb) {
+		if (sb == null || sb.tables == null) {
+			return;
+		}
+		final List<byte[]> pksToDelete = new ArrayList<>();
+		try {
+			final Iterator<Row> rows = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+			while (rows.hasNext()) {
+				final Row row = rows.next();
+				if (row == null) {
+					continue;
+				}
+				final String eventAction = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "");
+				if (!"startup".equals(eventAction)) {
+					continue;
+				}
+				final String url = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
+				if (url != null && url.startsWith("/" + SERVLET_NAME) && url.contains("setup=recrawljob")
+						&& url.contains("recrawlnow=")) {
+					pksToDelete.add(row.getPK());
+				}
+			}
+			for (final byte[] pk : pksToDelete) {
+				sb.tables.delete(WorkTables.TABLE_API_NAME, pk);
+			}
+		} catch (final IOException e) {
+			ConcurrentLog.logException(e);
+		}
 	}
 }
