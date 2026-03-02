@@ -1,0 +1,1 @@
+{ "version": 2, "builds": [ { "src": "startYACY.sh", "use": "@vercel/static-build", "config": { "distDir": "public" } } ], "routes": [ { "src": "/(.*)", "dest": "/startYACY.sh" } ] }
