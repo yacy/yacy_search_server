@@ -574,6 +574,8 @@ public final class SwitchboardConstants {
     public static final long RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT    = 1048576L;
 
     public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove"; // minimum memory to accept dht-in (MiB)
+    public static final String RWI_MAX_HEAP_FRACTION = "rwi.memory.maxHeapFraction";
+    public static final float RWI_MAX_HEAP_FRACTION_DEFAULT = 0.25f;
     public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT"; // set if DHT was disabled by ResourceObserver
     public static final String CRAWLJOB_LOCAL_AUTODISABLED = "memory.disabledLocalCrawler"; // set if local crawl was disabled by ResourceObserver
     public static final String CRAWLJOB_REMOTE_AUTODISABLED = "memory.disabledRemoteCrawler"; // set if remote crawl was disabled by ResourceObserver
