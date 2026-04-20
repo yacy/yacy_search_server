@@ -308,7 +308,7 @@ public final class CrawlSwitchboard {
                 false, true, CrawlProfile.MATCH_NEVER_STRING,
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_AUTOCRAWL_DEEP,
-                ClientIdentification.yacyInternetCrawlerAgentName,
+                ClientIdentification.getEffectiveInternetCrawlerAgentName(),
                 TagValency.EVAL,
                 null, null,
                 0);
@@ -343,7 +343,7 @@ public final class CrawlSwitchboard {
                 false, true, CrawlProfile.MATCH_NEVER_STRING,
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_AUTOCRAWL_SHALLOW,
-                ClientIdentification.yacyInternetCrawlerAgentName,
+                ClientIdentification.getEffectiveInternetCrawlerAgentName(),
                 TagValency.EVAL,
                 null, null,
                 0);
@@ -411,7 +411,7 @@ public final class CrawlSwitchboard {
                 -1, false, true, CrawlProfile.MATCH_NEVER_STRING,
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_REMOTE,
-                ClientIdentification.yacyInternetCrawlerAgentName,
+                ClientIdentification.getEffectiveInternetCrawlerAgentName(),
                 TagValency.EVAL,
                 null, null,
                 0);

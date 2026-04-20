@@ -124,9 +124,28 @@ public class ClientIdentification {
     }
 
     public static void generateCustomBot(final String name, final String string, final int minimumdelta, final int clienttimeout) {
-        if (name.toLowerCase().indexOf("yacy") >= 0 || string.toLowerCase().indexOf("yacy") >= 0) return; // don't allow 'yacy' in custom bot strings
+        if (name == null || name.isEmpty() || string == null || string.isEmpty()) return;
+        if (name.toLowerCase().indexOf("yacy") >= 0 || string.toLowerCase().indexOf("yacy") >= 0) {
+            // Silently refuse to prevent impersonation of the YaCy bot identity
+            return;
+        }
         final String agentString = string.replace("$$SYSTEM$$", yacySystem.replace("java", "O"));
         agents.put(customAgentName, new Agent(new String[]{agentString}, new String[]{name}, minimumdelta, clienttimeout));
+    }
+
+    /**
+     * Returns the agent name to use for internet crawling.
+     * When a custom bot has been configured (via crawler.userAgent.name/string in yacy.conf),
+     * returns {@link #customAgentName} so crawl profiles pick up the custom identity.
+     * Falls back to the default yacyInternetCrawlerAgentName when no custom bot is set.
+     *
+     * @return the agent name key suitable for passing to {@link #getAgent(String)}
+     */
+    public static String getEffectiveInternetCrawlerAgentName() {
+        if (agents.containsKey(customAgentName)) {
+            return customAgentName;
+        }
+        return yacyInternetCrawlerAgentName;
     }
 
     /**
