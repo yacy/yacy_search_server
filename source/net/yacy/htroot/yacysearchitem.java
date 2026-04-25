@@ -409,7 +409,13 @@ public class yacysearchitem {
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));
-            prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
+            final String resultHost = resultURL.getHost() == null ? "" : resultURL.getHost();
+            prop.putHTML("content_host", resultHost);
+            final int domainSkipped = theSearch.getDomainSkippedCount(result.hosthash());
+            prop.put("content_showDomainMore", domainSkipped > 0 ? 1 : 0);
+            prop.put("content_showDomainMore_count", domainSkipped);
+            prop.putHTML("content_showDomainMore_host", resultHost);
+            prop.putUrlEncodedHTML("content_showDomainMore_siteQuery", "site:" + resultHost + (origQ.isEmpty() ? "" : " " + origQ));
             prop.putXML("content_file", resultFileName); // putXML for rss
             prop.putXML("content_path", resultURL.getPath()); // putXML for rss
             prop.put("content_nl", (item == theSearch.query.offset) ? 0 : 1);

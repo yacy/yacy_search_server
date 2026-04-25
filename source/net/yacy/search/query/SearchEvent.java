@@ -237,6 +237,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     private final boolean disablePostRanking;
     public  final boolean excludeintext_image;
 
+    private static final int MAX_RESULTS_PER_DOMAIN = 2;
+    /** counts emitted results per domain hosthash; null when site: query is active */
+    private final ConcurrentHashMap<String, AtomicInteger> domainResultCount;
+    /** counts results skipped per domain hosthash due to the domain cap */
+    private final ConcurrentHashMap<String, AtomicInteger> domainSkippedCount;
+
     // the following values are filled during the search process as statistics for the search
     // In the next comments "filtering" is doubles checking and applying eventual search query constraints/modifiers
 
@@ -355,6 +361,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         }
         this.loader = loader;
         this.nodeStack = new WeakPriorityBlockingQueue<>(max_results_node, false);
+        this.domainResultCount = new ConcurrentHashMap<>();
+        this.domainSkippedCount = new ConcurrentHashMap<>();
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
@@ -2608,13 +2616,31 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         if (this.urlhashes.has(entry.hash())) {
             return false;
         }
+        // enforce domain cap unless query is for a specific site
+        final boolean checkDomain = this.query == null || this.query.modifier.sitehash == null;
+        AtomicInteger domainCounter = null;
+        if (checkDomain) {
+            final String hosthash = entry.hosthash();
+            domainCounter = this.domainResultCount.computeIfAbsent(hosthash, k -> new AtomicInteger(0));
+            if (domainCounter.get() >= MAX_RESULTS_PER_DOMAIN) {
+                this.domainSkippedCount.computeIfAbsent(hosthash, k -> new AtomicInteger(0)).incrementAndGet();
+                return false;
+            }
+        }
         try {
             this.urlhashes.putUnique(entry.hash());
-            return true;
         } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             return false;
         }
+        if (domainCounter != null) domainCounter.incrementAndGet();
+        return true;
+    }
+
+    /** Returns the number of results from this domain's hosthash that were hidden by the domain cap. */
+    public int getDomainSkippedCount(final String hosthash) {
+        final AtomicInteger c = this.domainSkippedCount.get(hosthash);
+        return c == null ? 0 : c.get();
     }
 
     private void decrementNodeAvailableCount(final URIMetadataNode entry) {
