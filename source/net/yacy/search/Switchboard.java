@@ -4516,7 +4516,14 @@ public final class Switchboard extends serverSwitch {
             throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
         }
         this.log.info("caught delayed terminate request: " + reason);
-        (new Shutdown(this, delay, reason)).start();
+        final Switchboard self = this;
+        final Thread t = new Thread("Shutdown") {
+            @Override public void run() {
+                try { Thread.sleep(delay); } catch (final InterruptedException e) { self.getLog().info("interrupted delayed shutdown"); } catch (final Exception e) { ConcurrentLog.logException(e); }
+                self.terminate(reason);
+            }
+        };
+        t.start();
     }
 
     public boolean shallTerminate() {
