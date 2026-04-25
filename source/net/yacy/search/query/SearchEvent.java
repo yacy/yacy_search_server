@@ -218,6 +218,10 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     private final HandleSet urlhashes;
     /** best known candidate quality per url hash, used to prefer richer duplicates before final emission */
     private final ConcurrentHashMap<String, Integer> bestResultQualityByUrlHash;
+    /** per-hosthash emission count, used to enforce domain diversity in results */
+    private final ConcurrentHashMap<String, AtomicInteger> domainResultCount;
+    /** maximum results from a single domain per page; bypassed when a site: query targets one domain */
+    private static final int MAX_RESULTS_PER_DOMAIN = 2;
 
     /** a map from tagging vocabulary names to tagging predicate uris */
     private final Map<String, String> taggingPredicates;
@@ -443,6 +447,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.order = new ReferenceOrder(this.query.ranking, this.query.targetlang);
         this.urlhashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 100);
         this.bestResultQualityByUrlHash = new ConcurrentHashMap<>();
+        this.domainResultCount = new ConcurrentHashMap<>();
         this.taggingPredicates = new HashMap<>();
         for (final Tagging t: LibraryProvider.autotagging.getVocabularies()) {
             this.taggingPredicates.put(t.getName(), t.getPredicate());
@@ -2608,13 +2613,23 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         if (this.urlhashes.has(entry.hash())) {
             return false;
         }
+        // enforce domain diversity unless the query targets a specific site (site:example.com)
+        final boolean checkDomain = this.query.modifier.sitehash == null;
+        AtomicInteger domainCounter = null;
+        if (checkDomain) {
+            domainCounter = this.domainResultCount.computeIfAbsent(entry.hosthash(), k -> new AtomicInteger(0));
+            if (domainCounter.get() >= MAX_RESULTS_PER_DOMAIN) {
+                return false;
+            }
+        }
         try {
             this.urlhashes.putUnique(entry.hash());
-            return true;
         } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             return false;
         }
+        if (domainCounter != null) domainCounter.incrementAndGet();
+        return true;
     }
 
     private void decrementNodeAvailableCount(final URIMetadataNode entry) {
