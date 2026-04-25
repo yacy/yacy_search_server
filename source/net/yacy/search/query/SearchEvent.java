@@ -235,6 +235,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     private final boolean pollImmediately;
     /** Disable post-ranking when operating in explicit local-search mode. */
     private final boolean disablePostRanking;
+    /** Multiplier for freshness decay boost: >1.0 for news-like queries, 1.0 otherwise. */
+    private final double freshnessMultiplier;
     public  final boolean excludeintext_image;
 
     // the following values are filled during the search process as statistics for the search
@@ -353,6 +355,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             /* Image counter will eventually grow up faster than offset, but must start first with the same value as query offset */
             this.imagePageCounter = query.offset;
         }
+        this.freshnessMultiplier = computeFreshnessMultiplier(query);
         this.loader = loader;
         this.nodeStack = new WeakPriorityBlockingQueue<>(max_results_node, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
@@ -1986,6 +1989,21 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.addTopics(resultEntry);
     }
 
+    private static final java.util.regex.Pattern NEWS_YEAR_PATTERN = java.util.regex.Pattern.compile("\\b(19|20)\\d{2}\\b");
+    private static final java.util.Set<String> NEWS_TERMS = new java.util.HashSet<>(java.util.Arrays.asList(
+            "today", "latest", "new", "recent", "breaking", "update", "updates", "news"));
+
+    private static double computeFreshnessMultiplier(final QueryParams query) {
+        if (query == null) return 1.0;
+        final java.util.Set<String> words = query.getQueryGoal().getIncludeWordsSet();
+        if (words == null || words.isEmpty()) return 1.0;
+        for (final String word : words) {
+            if (NEWS_TERMS.contains(word.toLowerCase(java.util.Locale.ROOT))) return 3.0;
+            if (NEWS_YEAR_PATTERN.matcher(word).matches()) return 2.0;
+        }
+        return 1.0;
+    }
+
     private long postRanking(final URIMetadataNode rentry, final ScoreMap<String> topwords) {
         long r = 0;
 
@@ -2044,13 +2062,13 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             if (descrcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_app_dc_title;
         }
 
-        // apply exponential freshness decay boost
-        // a document modified today gets +256, one modified 365 days ago gets +128, 730 days ago +64, etc.
+        // apply exponential freshness decay boost, scaled by query-adaptive multiplier
+        // a document modified today gets +256 * multiplier; news/year queries boost freshness further
         final java.util.Date moddate = rentry.moddate();
         if (moddate != null) {
             final long ageDays = Math.max(0L, (System.currentTimeMillis() - moddate.getTime()) / 86_400_000L);
             final double decayFactor = Math.exp(-ageDays / 365.0);
-            r += (long)(256.0 * decayFactor);
+            r += (long)(256.0 * decayFactor * this.freshnessMultiplier);
         }
 
         return r;
