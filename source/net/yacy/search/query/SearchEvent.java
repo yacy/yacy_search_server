@@ -977,6 +977,16 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             this.remote_solr_peerCount.incrementAndGet();
         }
 
+        // Compute the max Solr score in this peer's result batch so we can normalize
+        // individual scores into [0, 1] before inserting into the shared priority queue.
+        // Without this, peers with higher absolute Solr scores always dominate peers
+        // with lower absolute scores, producing biased cross-node result ordering.
+        float maxSolrScore = 0.0f;
+        for (final URIMetadataNode node : nodeList) {
+            final Float s = (Float) node.getFieldValue("score");
+            if (s != null && s > maxSolrScore) maxSolrScore = s;
+        }
+
         long timer = System.currentTimeMillis();
 
         // normalize entries
@@ -1111,7 +1121,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                         // so far Solr score is used (with abitrary factor to get value similar to rwi ranking values)
                         final Float scorex = (Float) iEntry.getFieldValue("score"); // this is a special field containing the ranking score of a Solr search result
                         if (scorex != null && scorex > 0)
-                            score = (long) ((1000000.0f * scorex) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
+                            score = (long) ((1000000.0f * (maxSolrScore > 0.0f ? scorex / maxSolrScore : scorex)) - iEntry.urllength()); // normalize to [0,1] across this peer's batch so scores are comparable across peers
                         else
                             score = this.order.cardinal(iEntry);
                         this.nodeStack.put(new ReverseElement<>(iEntry, score)); // inserts the element and removes the worst (which is smallest)
