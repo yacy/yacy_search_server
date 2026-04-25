@@ -128,6 +128,24 @@ Use the RSS search result format to add static searches to your RSS reader, if y
        #(/resortEnabled)#
     </div>
   </div>
+  <div style="font-size:11px;margin-top:3px;">
+    <label for="lang-select" style="color:#777;margin-right:3px;">Language:</label>
+    <select name="lr" id="lang-select" style="font-size:11px;padding:1px 2px;height:20px;">
+      <option value="">any</option>
+      <option value="lang_en">English</option>
+      <option value="lang_de">Deutsch</option>
+      <option value="lang_fr">Français</option>
+      <option value="lang_es">Español</option>
+      <option value="lang_it">Italiano</option>
+      <option value="lang_pt">Português</option>
+      <option value="lang_ru">Русский</option>
+      <option value="lang_nl">Nederlands</option>
+      <option value="lang_zh">中文</option>
+      <option value="lang_ja">日本語</option>
+      <option value="lang_ar">العربية</option>
+    </select>
+    <script>document.getElementById('lang-select').value='#[languageSel]#';</script>
+  </div>
     #(authSearch)#::
   	<input type="hidden" name="auth" id="auth" value=""/>
   	#(/authSearch)#
