@@ -45,6 +45,7 @@ import java.util.Set;
 import org.xml.sax.SAXException;
 
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -232,54 +233,53 @@ public class sharedBlacklist_p {
                 }
             } else if (post.containsKey("add")) {
                 /* ======================================================
-                 * Add loaded items into blacklist file
+                 * Add loaded items into blacklist file (background thread)
                  * ====================================================== */
 
-                prop.put("page", "1"); //result page
-                prop.put("status", STATUS_ENTRIES_ADDED); //list of added Entries
-
-                try {
-                    // loop through the received entry list
-                    final int num = post.getInt("num", 0);
-                    final Collection<BlacklistHostAndPath> newItems = new ArrayList<>();
-                    /* Prepare the new blacklist items list to add then them in one operation for better performance */
-                    for(int i = 0; i < num; i++) {
-                    	String newItem = post.get("item" + i);
-                        if(newItem != null){
-
-                            //This should not be needed...
-                            if ( newItem.startsWith("http://") ){
-                                newItem = newItem.substring(7);
-                            }
-
-                            // separate the newItem into host and path
-                            int pos = newItem.indexOf('/',0);
-                            if (pos < 0) {
-                                // add default empty path pattern
-                                pos = newItem.length();
-                                newItem = newItem + "/.*";
-                            }
-                            newItems.add(new BlacklistHostAndPath(newItem.substring(0, pos), newItem.substring(pos + 1)));
-                        }
-                    }
-                    if (Switchboard.urlBlacklist != null) {
-                        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-                            if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",selectedBlacklistName)) {
-                                Switchboard.urlBlacklist.add(supportedBlacklistType, selectedBlacklistName, newItems);
-                            }
-                        }
-                        SearchEventCache.cleanupEvents(true);
-                    }
-                } catch (final Exception e) {
-                    prop.put("status", "1");
-                    prop.putHTML("status_error", e.getLocalizedMessage());
+                // Read all items from post before handing off to background thread
+                final int num = post.getInt("num", 0);
+                final List<String> rawItems = new ArrayList<>(num);
+                for (int i = 0; i < num; i++) {
+                    final String item = post.get("item" + i);
+                    if (item != null) rawItems.add(item);
                 }
+                final String targetBlacklist = selectedBlacklistName;
+
+                final Thread importThread = new Thread("BlacklistImport") {
+                    @Override
+                    public void run() {
+                        try {
+                            final Collection<BlacklistHostAndPath> newItems = new ArrayList<>();
+                            for (String newItem : rawItems) {
+                                if (newItem.startsWith("http://")) newItem = newItem.substring(7);
+                                int pos = newItem.indexOf('/', 0);
+                                if (pos < 0) {
+                                    pos = newItem.length();
+                                    newItem = newItem + "/.*";
+                                }
+                                newItems.add(new BlacklistHostAndPath(newItem.substring(0, pos), newItem.substring(pos + 1)));
+                            }
+                            if (Switchboard.urlBlacklist != null) {
+                                for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+                                    if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", targetBlacklist)) {
+                                        Switchboard.urlBlacklist.add(supportedBlacklistType, targetBlacklist, newItems);
+                                    }
+                                }
+                                SearchEventCache.cleanupEvents(true);
+                            }
+                        } catch (final Exception e) {
+                            ConcurrentLog.warn("BlacklistImport", "Import into " + targetBlacklist + " failed: " + e.getMessage());
+                        }
+                    }
+                };
+                importThread.setDaemon(true);
+                importThread.start();
 
                 /* unable to use prop.putHTML() or prop.putXML() here because they
                  * turn the ampersand into &amp; which renders the parameters
                  * useless (at least when using Opera 9.53, haven't tested other browsers)
                  */
-                prop.put(serverObjects.ACTION_LOCATION,"Blacklist_p.html?selectedListName=" + CharacterCoding.unicode2html(selectedBlacklistName, true) + "&selectList=select");
+                prop.put(serverObjects.ACTION_LOCATION,"Blacklist_p.html?selectedListName=" + CharacterCoding.unicode2html(targetBlacklist, true) + "&selectList=select");
                 return prop;
             }
 

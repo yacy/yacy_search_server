@@ -197,20 +197,20 @@ then
     if [ -z "$YACY_JAVASTART_XMX" ]
     then
         # When YACY_JAVASTART_XMX is not set or empty:
-        # Read from $CONFIGFILE
-        j="`grep javastart_Xmx "$CONFIGFILE" | sed 's/^[^=]*=//'`";
+        # Read from $CONFIGFILE (strip comment lines first to avoid matching #javastart_Xmx=...)
+        j="`grep -v '^\s*#' "$CONFIGFILE" | grep 'javastart_Xmx' | sed 's/^[^=]*=//'`";
         if [ -n "$j" ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
     else
         # use the YACY_JAVASTART_XMX variable
         JAVA_ARGS="-$YACY_JAVASTART_XMX $JAVA_ARGS"
     fi
 
-    # Priority
-    j="`grep javastart_priority "$CONFIGFILE" | sed 's/^[^=]*=//'`";
+    # Priority (strip comment lines first)
+    j="`grep -v '^\s*#' "$CONFIGFILE" | grep 'javastart_priority' | sed 's/^[^=]*=//'`";
 
     if [ -n "$j" ]; then JAVA="nice -n $j $JAVA"; fi;
 
-    PORT="`grep ^port= "$CONFIGFILE" | sed 's/^[^=]*=//'`";
+    PORT="`grep -v '^\s*#' "$CONFIGFILE" | grep '^port=' | sed 's/^[^=]*=//'`";
     if [ -z "$PORT" ]; then PORT="8090"; fi;
     
 #    for i in `grep javastart "$CONFIGFILE"`;do
