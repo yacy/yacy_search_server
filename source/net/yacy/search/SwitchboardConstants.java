@@ -700,6 +700,8 @@ public final class SwitchboardConstants {
      * ranking+evaluation
      */
     public static final String SEARCH_RANKING_RWI_PROFILE = "search.ranking.rwi.profile"; // old rwi rankingProfile ranking
+    public static final String SEARCH_RANKING_RWI_DEMOTED_HOSTS = "search.ranking.rwi.demotedhosts"; // newline-separated list of hostnames to demote in RWI results
+    public static final String SEARCH_RANKING_RWI_DEMOTED_WORDS = "search.ranking.rwi.demotedwords"; // newline-separated list of words that demote results whose URL or title contains them
     public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH = "search.ranking.solr.doubledetection.minlength";
     public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE = "search.ranking.solr.doubledetection.quantrate";
 

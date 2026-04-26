@@ -30,6 +30,7 @@ package net.yacy.htroot;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringJoiner;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -99,6 +100,8 @@ public class RankingRWI_p {
         prop.put("urlmaskoptions", "0");
         prop.putHTML("urlmaskoptions_urlmaskfilter", ".*");
         prop.put("jumpToCursor", "1");
+        prop.put("demotedHosts", "");
+        prop.put("demotedWords", "");
         return prop;
     }
 
@@ -142,6 +145,15 @@ public class RankingRWI_p {
         }
     }
 
+    private static String normalizeDemotedHosts(final String raw) {
+        final StringJoiner sj = new StringJoiner("\n");
+        for (final String line : raw.split("[\\r\\n]+")) {
+            final String host = line.trim().toLowerCase(java.util.Locale.ROOT);
+            if (!host.isEmpty()) sj.add(host);
+        }
+        return sj.toString();
+    }
+
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
@@ -154,7 +166,11 @@ public class RankingRWI_p {
             final serverObjects prop = defaultValues();
             final RankingProfile ranking;
             if (sb == null) ranking = new RankingProfile(Classification.ContentDomain.TEXT);
-            else ranking = sb.getRanking();
+            else {
+                ranking = sb.getRanking();
+                prop.putHTML("demotedHosts", sb.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_HOSTS, ""));
+                prop.putHTML("demotedWords", sb.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_WORDS, ""));
+            }
             putRanking(prop, ranking, "local");
             return prop;
         }
@@ -162,17 +178,23 @@ public class RankingRWI_p {
         if (post.containsKey("EnterRanking")) {
             final RankingProfile ranking = new RankingProfile("local", post.toString());
             sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_PROFILE, crypt.simpleEncode(ranking.toExternalString()));
+            final String demotedHosts = normalizeDemotedHosts(post.get("demotedHosts", ""));
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_HOSTS, demotedHosts);
+            final String demotedWords = normalizeDemotedHosts(post.get("demotedWords", ""));
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_WORDS, demotedWords);
             final serverObjects prop = defaultValues();
-            //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");
+            prop.putHTML("demotedHosts", demotedHosts);
+            prop.putHTML("demotedWords", demotedWords);
             return prop;
         }
 
         if (post.containsKey("ResetRanking")) {
             sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_PROFILE, "");
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_HOSTS, "");
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_WORDS, "");
             final RankingProfile ranking = new RankingProfile(Classification.ContentDomain.TEXT);
             final serverObjects prop = defaultValues();
-            //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");
             return prop;
         }
@@ -181,6 +203,8 @@ public class RankingRWI_p {
         final serverObjects prop = new serverObjects();
         putRanking(prop, localRanking, "local");
         prop.putAll(localRanking.toExternalMap("local"));
+        prop.putHTML("demotedHosts", sb.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_HOSTS, ""));
+        prop.putHTML("demotedWords", sb.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_WORDS, ""));
 
         return prop;
     }

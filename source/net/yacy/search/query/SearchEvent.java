@@ -29,9 +29,11 @@ package net.yacy.search.query;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -443,7 +445,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.addRunning = true;
         this.disablePostRanking = this.query.isLocal();
         this.receivedRemoteReferences = new AtomicInteger(0);
-        this.order = new ReferenceOrder(this.query.ranking, this.query.targetlang);
+        final String queryString = this.query.getQueryGoal().getQueryString(false);
+        this.order = new ReferenceOrder(this.query.ranking, this.query.targetlang, loadDemotedHostHashes(queryString), loadDemotedWords());
         this.urlhashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 100);
         this.bestResultQualityByUrlHash = new ConcurrentHashMap<>();
         this.taggingPredicates = new HashMap<>();
@@ -1117,6 +1120,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                             score = (long) ((1000000.0f * scorex) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
                         else
                             score = this.order.cardinal(iEntry);
+                        final long hostDiv = this.order.getDemotionDivisor(iEntry.hosthash());
+                        if (hostDiv > 1L) score /= hostDiv;
+                        else { final long wordDiv = this.order.getDemotionDivisorByWords(iEntry.url().toNormalform(true), iEntry.dc_title(), String.join(" ", iEntry.getDescription())); if (wordDiv > 1L) score /= wordDiv; }
                         this.nodeStack.put(new ReverseElement<>(iEntry, score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch (final ArithmeticException e ) {
@@ -2471,6 +2477,62 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
     public ReferenceOrder getOrder() {
         return this.order;
+    }
+
+    private static Map<String, Long> loadDemotedWords() {
+        final Switchboard sb = Switchboard.getSwitchboard();
+        if (sb == null) return Collections.emptyMap();
+        final String raw = sb.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_WORDS, "").trim();
+        if (raw.isEmpty()) return Collections.emptyMap();
+        final Map<String, Long> words = new HashMap<>();
+        for (final String line : raw.split("[\\r\\n]+")) {
+            String entry = line.trim().toLowerCase(java.util.Locale.ROOT);
+            if (entry.isEmpty()) continue;
+            final long divisor = parseTrailingDivisor(entry);
+            if (divisor > 0) entry = entry.substring(0, entry.lastIndexOf(' ')).trim();
+            if (entry.startsWith("\"") && entry.endsWith("\"") && entry.length() > 2) entry = entry.substring(1, entry.length() - 1).trim();
+            if (!entry.isEmpty()) words.put(entry, divisor > 0 ? divisor : 100L);
+        }
+        return words;
+    }
+
+    private static long parseTrailingDivisor(final String entry) {
+        final int lastSpace = entry.lastIndexOf(' ');
+        if (lastSpace < 1) return 0L;
+        try {
+            final long d = Long.parseLong(entry.substring(lastSpace + 1));
+            return d > 1 ? d : 0L;
+        } catch (final NumberFormatException ignored) { return 0L; }
+    }
+
+    private static Map<String, Long> loadDemotedHostHashes(final String queryString) {
+        final Switchboard sb = Switchboard.getSwitchboard();
+        if (sb == null) return Collections.emptyMap();
+        final String raw = sb.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_DEMOTED_HOSTS, "").trim();
+        if (raw.isEmpty()) return Collections.emptyMap();
+        final String queryLower = queryString == null ? "" : queryString.toLowerCase(java.util.Locale.ROOT);
+        final Map<String, Long> hashes = new HashMap<>();
+        for (final String line : raw.split("[\\r\\n]+")) {
+            String entry = line.trim().toLowerCase(java.util.Locale.ROOT);
+            if (entry.isEmpty()) continue;
+            final long divisor = parseTrailingDivisor(entry);
+            if (divisor > 0) entry = entry.substring(0, entry.lastIndexOf(' ')).trim();
+            if (entry.isEmpty()) continue;
+            // skip demotion if any part of the hostname appears in the query
+            if (!queryLower.isEmpty()) {
+                boolean queryMatchesHost = false;
+                for (final String label : entry.split("\\.")) {
+                    if (label.length() > 2 && queryLower.contains(label)) { queryMatchesHost = true; break; }
+                }
+                if (queryMatchesHost) continue;
+            }
+            final long d = divisor > 0 ? divisor : 100L;
+            try {
+                hashes.put(net.yacy.cora.document.id.DigestURL.hosthash(entry, 80), d);
+                hashes.put(net.yacy.cora.document.id.DigestURL.hosthash(entry, 443), d);
+            } catch (final java.net.MalformedURLException ignored) {}
+        }
+        return hashes;
     }
 
     /**
