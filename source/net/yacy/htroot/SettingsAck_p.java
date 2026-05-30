@@ -219,9 +219,8 @@ public class SettingsAck_p {
             try {
                 final Integer pport = Integer.parseInt(publicPort);
                 if(pport < 65535 && pport >= 0) {
-                    serverCore.usePublicPort = true;
-                    sb.peers.mySeed().setPort(pport);
-                    env.setConfig(SwitchboardConstants.SERVER_PUBLICPORT, publicPort);
+                    env.setConfig(SwitchboardConstants.SERVER_PORT_PUBLIC, pport);
+                    sb.updateMySeed();
                 }
             } catch (final NumberFormatException e) {
                 // noop

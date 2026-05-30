@@ -4405,7 +4405,7 @@ public final class Switchboard extends serverSwitch {
     private static long indeSizeCache = 0;
     private static long indexSizeTime = 0;
     public void updateMySeed() {
-        this.peers.mySeed().put(Seed.PORT, Integer.toString(this.getPublicPort(SwitchboardConstants.SERVER_PORT, 8090)));
+        this.peers.mySeed().put(Seed.PORT, Integer.toString(this.getPublicPort(false)));
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
@@ -4433,7 +4433,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.setFlagAcceptRemoteCrawl(this.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         mySeed.setFlagAcceptRemoteIndex(this.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && this.getConfigBool("server.https", false));
-        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(this.getPublicPort(SwitchboardConstants.SERVER_SSLPORT, 8443)));
+        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(this.getPublicPort(true)));
 
         // set local ips
         final String staticIP = this.getConfig(SwitchboardConstants.SERVER_STATICIP, "");

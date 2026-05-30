@@ -19,6 +19,11 @@ port.ssl = 8443
 # port to listen for a shutdown signal ( -1 = disable use of a shutdown port, 8005 = recommended default )
 port.shutdown = -1
 
+# port communicated to peers for connections
+# This setting is intended for cases where YaCy listens on e.g. port 8090, but should be connected to
+# by peers through e.g. port 443.
+port.public = 
+
 # use UPnP [true/false]
 upnp.enabled = true
 # remote host on UPnP device (for more than one connection)
