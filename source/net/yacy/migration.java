@@ -106,6 +106,15 @@ public class migration {
                 ConcurrentLog.config("MIGRATION", "disabled https support (reason: port already used)");
             }
         }
+
+        // migrating from old publicPort setting to new port.public
+        int publicPort = sb.getConfigInt(SwitchboardConstants.SERVER_PUBLICPORT, -1);
+        int portDotPublic = sb.getConfigInt(SwitchboardConstants.SERVER_PORT_PUBLIC, -1);
+        if (portDotPublic < 1 && publicPort > 0) {
+            // publicPort is set, port.public is not
+            ConcurrentLog.info("MIGRATION", "Migrating from publicPort to port.public setting");
+            sb.setConfig(SwitchboardConstants.SERVER_PORT_PUBLIC, publicPort);
+        }
     }
     /*
      * remove the static defaultfiles. We use them through a overlay now.
