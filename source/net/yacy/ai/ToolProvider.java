@@ -43,6 +43,7 @@ import net.yacy.ai.tools.SearchTool;
 import net.yacy.ai.tools.SelfReflectTool;
 import net.yacy.ai.tools.TableOpsTool;
 import net.yacy.ai.tools.UnitConverterTool;
+import net.yacy.ai.tools.UpdatePlanTool;
 import net.yacy.ai.tools.WebFetchTool;
 import net.yacy.ai.tools.WikipediaLinkCreatorTool;
 import net.yacy.search.Switchboard;
@@ -74,6 +75,7 @@ public final class ToolProvider {
             new UnitConverterTool(),
             new HttpJsonTool(),
             new TableOpsTool(),
+            new UpdatePlanTool(),
             new SelfReflectTool(),
             new ChitChatTool()
     );

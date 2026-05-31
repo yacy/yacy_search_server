@@ -410,6 +410,18 @@
       .toolcalls-button:hover {
         background: #c3cbd9;
       }
+      .toolcalls-button.pending {
+        cursor: default;
+        opacity: 0.75;
+        animation: toolcall-pulse 1s ease-in-out infinite;
+      }
+      .toolcalls-button.pending:hover {
+        background: #d1d9e6;
+      }
+      @keyframes toolcall-pulse {
+        0%, 100% { opacity: 0.45; }
+        50% { opacity: 1; }
+      }
       .button-active {
         background: #337ab7;
         color: #fff;
@@ -1300,56 +1312,7 @@
             copyBtn.innerHTML = '<span class="glyphicon glyphicon-copy" aria-hidden="true"></span>';
             copyBtn.addEventListener('click', () => copyAssistant(body));
             entry.appendChild(copyBtn);
-            if (Array.isArray(toolCalls) && toolCalls.length > 0) {
-                const toolbar = document.createElement('div');
-                toolbar.className = 'toolcall-toolbar';
-                const panels = [];
-                const resultsById = new Map();
-                const resultsByName = new Map();
-                if (Array.isArray(toolResults)) {
-                    for (const result of toolResults) {
-                        if (!result) continue;
-                        if (result.id) resultsById.set(result.id, result);
-                        if (result.tool_call_id) resultsById.set(result.tool_call_id, result);
-                        const rname = result?.name || result?.function?.name;
-                        if (rname && !resultsByName.has(rname)) resultsByName.set(rname, result);
-                    }
-                }
-
-                for (let i = 0; i < toolCalls.length; i++) {
-                    const call = toolCalls[i];
-                    if (!call) continue;
-                    const fnName = call?.function?.name || call?.name || 'tool';
-                    const matchedResult = (call.id && resultsById.get(call.id)) || resultsByName.get(fnName) || null;
-
-                    const toolBtn = document.createElement('button');
-                    toolBtn.type = 'button';
-                    toolBtn.className = 'toolcalls-button';
-                    toolBtn.title = `Tool: ${fnName}`;
-                    toolBtn.innerHTML = '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>';
-
-                    const toolPanel = createToolCallPanel(call, matchedResult, toolCalls.length, i);
-                    toolPanel.style.display = 'none';
-                    toolPanel.addEventListener('click', evt => evt.stopPropagation());
-                    entry.appendChild(toolPanel);
-                    panels.push(toolPanel);
-
-                    toolBtn.addEventListener('click', event => {
-                        event.stopPropagation();
-                        const open = toolPanel.style.display !== 'none';
-                        for (const panel of panels) panel.style.display = 'none';
-                        toolPanel.style.display = open ? 'none' : 'block';
-                    });
-                    toolbar.appendChild(toolBtn);
-                }
-                entry.appendChild(toolbar);
-
-                document.addEventListener('click', evt => {
-                    if (!entry.contains(evt.target)) {
-                        for (const panel of panels) panel.style.display = 'none';
-                    }
-                });
-            }
+            renderToolCallControls(entry, toolCalls, toolResults);
         }
         if (role === 'user' && typeof messageIndex === 'number') {
             const trimBtn = document.createElement('button');
@@ -1375,6 +1338,89 @@
             updateClearChatVisibility();
         }
         return body;
+    }
+
+    function renderToolCallControls(entry, toolCalls, toolResults, pendingToolCalls = []) {
+        if (!entry) return;
+        if (entry._toolcallOutsideClickHandler) {
+            document.removeEventListener('click', entry._toolcallOutsideClickHandler);
+            entry._toolcallOutsideClickHandler = null;
+        }
+        Array.prototype.slice.call(entry.children).forEach(node => {
+            if (node.classList && (node.classList.contains('toolcall-toolbar') || node.classList.contains('toolcalls-popover'))) {
+                node.remove();
+            }
+        });
+        if (!Array.isArray(toolCalls) || toolCalls.length === 0) return;
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'toolcall-toolbar';
+        const panels = [];
+        const resultsById = new Map();
+        const resultsByName = new Map();
+        if (Array.isArray(toolResults)) {
+            for (const result of toolResults) {
+                if (!result) continue;
+                if (result.id) resultsById.set(result.id, result);
+                if (result.tool_call_id) resultsById.set(result.tool_call_id, result);
+                const rname = result?.name || result?.function?.name;
+                if (rname && !resultsByName.has(rname)) resultsByName.set(rname, result);
+            }
+        }
+
+        for (let i = 0; i < toolCalls.length; i++) {
+            const call = toolCalls[i];
+            if (!call) continue;
+            const fnName = call?.function?.name || call?.name || 'tool';
+            const matchedResult = (call.id && resultsById.get(call.id)) || resultsByName.get(fnName) || null;
+            const pending = isPendingToolCall(call, pendingToolCalls);
+
+            const toolBtn = document.createElement('button');
+            toolBtn.type = 'button';
+            toolBtn.className = pending ? 'toolcalls-button pending' : 'toolcalls-button';
+            toolBtn.title = pending ? `Preparing tool: ${fnName}` : `Tool: ${fnName}`;
+            toolBtn.disabled = pending;
+            toolBtn.innerHTML = '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>';
+
+            if (!pending) {
+                const toolPanel = createToolCallPanel(call, matchedResult, toolCalls.length, i);
+                toolPanel.style.display = 'none';
+                toolPanel.addEventListener('click', evt => evt.stopPropagation());
+                entry.appendChild(toolPanel);
+                panels.push(toolPanel);
+
+                toolBtn.addEventListener('click', event => {
+                    event.stopPropagation();
+                    const open = toolPanel.style.display !== 'none';
+                    for (const panel of panels) panel.style.display = 'none';
+                    toolPanel.style.display = open ? 'none' : 'block';
+                });
+            }
+            toolbar.appendChild(toolBtn);
+        }
+        entry.appendChild(toolbar);
+
+        entry._toolcallOutsideClickHandler = evt => {
+            if (!entry.contains(evt.target)) {
+                for (const panel of panels) panel.style.display = 'none';
+            }
+        };
+        document.addEventListener('click', entry._toolcallOutsideClickHandler);
+    }
+
+    function isPendingToolCall(call, pendingToolCalls) {
+        if (!call || !Array.isArray(pendingToolCalls)) return false;
+        return pendingToolCalls.some(pending => sameToolCall(call, pending));
+    }
+
+    function sameToolCall(a, b) {
+        if (!a || !b) return false;
+        if (a.id && b.id) return a.id === b.id;
+        const an = a?.function?.name || a?.name || '';
+        const bn = b?.function?.name || b?.name || '';
+        const aa = a?.function?.arguments || a?.arguments || '';
+        const ba = b?.function?.arguments || b?.arguments || '';
+        return an === bn && aa === ba;
     }
 
     function clearAttachment(options = {}) {
@@ -1788,6 +1834,22 @@
             }
         };
 
+        const renderLiveToolControls = () => {
+            if (!assistantNode || collectedToolResults.length === 0 || collectedToolCalls.length === 0) return;
+            const entry = assistantNode.closest('.chat-turn.assistant');
+            if (!entry) return;
+            renderToolCallControls(entry, collectedToolCalls, collectedToolResults);
+        };
+
+        const renderPendingToolControls = () => {
+            if (!assistantNode || roundToolCalls.length === 0) return;
+            const entry = assistantNode.closest('.chat-turn.assistant');
+            if (!entry) return;
+            const pendingCalls = normalizeToolCalls(roundToolCalls);
+            const visibleCalls = appendToolCalls(collectedToolCalls, pendingCalls);
+            renderToolCallControls(entry, visibleCalls, collectedToolResults, pendingCalls);
+        };
+
         const processLine = line => {
             const trimmed = (line || '').trim();
             if (!trimmed) return false;
@@ -1797,17 +1859,23 @@
             if (!clean) return false;
             try {
                 const parsed = JSON.parse(clean);
+                let toolMetadataChanged = false;
                 applySearchAttachment(parsed);
                 if (Array.isArray(parsed['tool-calls']) && parsed['tool-calls'].length > 0) {
                     const injectedToolCalls = normalizeToolCalls(parsed['tool-calls']);
                     if (injectedToolCalls.length > 0) {
-                        collectedToolCalls = injectedToolCalls;
+                        collectedToolCalls = appendToolCalls(collectedToolCalls, injectedToolCalls);
                         roundToolCalls = [];
+                        toolMetadataChanged = true;
                     }
                 }
                 if (Array.isArray(parsed['tool-results']) && parsed['tool-results'].length > 0) {
                     const normalizedResults = normalizeToolResults(parsed['tool-results']);
                     collectedToolResults = collectedToolResults.concat(normalizedResults);
+                    toolMetadataChanged = true;
+                }
+                if (toolMetadataChanged) {
+                    renderLiveToolControls();
                 }
                 const choice = parsed?.choices?.[0];
                 const delta = choice?.delta;
@@ -1815,6 +1883,7 @@
                 const toolDelta = delta?.tool_calls;
                 if (toolDelta) {
                     roundToolCalls = mergeToolCalls(roundToolCalls, toolDelta);
+                    renderPendingToolControls();
                 }
                 if (delta?.function_call) {
                     roundToolCalls = mergeToolCalls(roundToolCalls, [{
@@ -1822,6 +1891,7 @@
                         type: 'function',
                         function: delta.function_call
                     }]);
+                    renderPendingToolControls();
                 }
                 if (finishReason === 'tool_calls' || finishReason === 'function_call') {
                     const finalized = normalizeToolCalls(roundToolCalls);
@@ -2132,6 +2202,19 @@
                     ? result.content
                     : (result?.function?.content ? String(result.function.content) : '')
             }));
+    }
+
+    function appendToolCalls(existing, incoming) {
+        const result = Array.isArray(existing) ? [...existing] : [];
+        if (!Array.isArray(incoming)) return result;
+        for (const call of incoming) {
+            if (!call) continue;
+            const id = call.id || '';
+            if (id && result.some(existingCall => existingCall && existingCall.id === id)) continue;
+            if (!id && result.some(existingCall => sameToolCall(existingCall, call))) continue;
+            result.push(call);
+        }
+        return result;
     }
 
     function mergeToolCalls(existing, deltaCalls) {

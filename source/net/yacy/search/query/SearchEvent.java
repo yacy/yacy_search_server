@@ -354,7 +354,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             this.imagePageCounter = query.offset;
         }
         this.loader = loader;
-        this.nodeStack = new WeakPriorityBlockingQueue<>(max_results_node, false);
+        this.nodeStack = new WeakPriorityBlockingQueue<>(max_results_node + (query != null ? query.offset + query.itemsPerPage() : 0), false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);

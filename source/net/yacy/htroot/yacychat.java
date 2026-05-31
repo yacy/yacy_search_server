@@ -29,7 +29,14 @@ public class yacychat {
 
     // system prompt comes from configuration; default is empty
     final String systemPrompt = sb.getConfig("ai.system-prompt", net.yacy.http.servlets.RAGProxyServlet.LLM_SYSTEM_PROMPT_DEFAULT);
-    prop.put("system_prompt", systemPrompt);
+    // escape for safe embedding in a JS single-quoted string literal
+    final String systemPromptJs = systemPrompt
+        .replace("\\", "\\\\")
+        .replace("'", "\\'")
+        .replace("\r\n", "\\n")
+        .replace("\n", "\\n")
+        .replace("\r", "\\n");
+    prop.put("system_prompt", systemPromptJs);
     prop.put("topmenu", sb.getConfigBool("ai.shield.show-chat-link", false) ? (sb.getConfigBool("publicTopmenu", true) ? 1 : 0) : 2);
 
     String promoteChatPageGreeting = env.getConfig("promoteChatPageGreeting", "");

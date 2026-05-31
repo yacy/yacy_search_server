@@ -188,7 +188,7 @@ public class yacysearch {
             prop.put("offset", "0");
             prop.put("resource", "global");
             prop.put("urlmaskfilter", (post == null) ? ".*" : post.get("urlmaskfilter", ".*"));
-            prop.put("prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
+            prop.putHTML("prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
             prop.put("indexof", "off");
             prop.put("constraint", "");
             prop.put("depth", "0");

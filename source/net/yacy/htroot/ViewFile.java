@@ -279,13 +279,14 @@ public class ViewFile {
                 final String content = document.getTextString();
                 // content = wikiCode.replaceHTML(content); // added by Marc Nause
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
-                prop.put("viewMode_title", document.dc_title());
-                prop.put("viewMode_creator", document.dc_creator());
-                prop.put("viewMode_subject", document.dc_subject(','));
-                prop.put("viewMode_description", document.dc_description().length == 0 ? new String[]{""} : document.dc_description());
-                prop.put("viewMode_publisher", document.dc_publisher());
-                prop.put("viewMode_format", document.dc_format());
-                prop.put("viewMode_identifier", document.dc_identifier());
+                prop.putHTML("viewMode_title", document.dc_title());
+                prop.putHTML("viewMode_creator", document.dc_creator());
+                prop.putHTML("viewMode_subject", document.dc_subject(','));
+                final String[] descs = document.dc_description();
+                prop.putHTML("viewMode_description", descs.length == 0 ? "" : String.join("; ", descs));
+                prop.putHTML("viewMode_publisher", document.dc_publisher());
+                prop.putHTML("viewMode_format", document.dc_format());
+                prop.putHTML("viewMode_identifier", document.dc_identifier());
                 prop.put("viewMode_source", url.toNormalform(false));
                 prop.put("viewMode_lat", document.lat());
                 prop.put("viewMode_lon", document.lon());
