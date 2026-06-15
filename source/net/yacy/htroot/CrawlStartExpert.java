@@ -583,7 +583,7 @@ public class CrawlStartExpert {
         if (ClientIdentification.getAgent(ClientIdentification.customAgentName) != null) agentNames.add(ClientIdentification.customAgentName);
         String defaultAgentName = agentNames.get(0);
         if (post != null && post.containsKey("agentName")) {
-            final String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
+            final String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.getEffectiveInternetCrawlerAgentName());
             if (agentNames.contains(agentName)) defaultAgentName = agentName;
         }
         for (int i = 0; i < agentNames.size(); i++) {
@@ -591,7 +591,7 @@ public class CrawlStartExpert {
             prop.put("list_" + i + "_default", agentNames.get(i).equals(defaultAgentName) ? 1 : 0);
         }
         prop.put("list", agentNames.size());
-        prop.put("defaultAgentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
+        prop.put("defaultAgentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.getEffectiveInternetCrawlerAgentName());
 
         // ---------- Valency Switch Tag Names
         if (post != null && post.containsKey("valency_switch_tag_names")) {

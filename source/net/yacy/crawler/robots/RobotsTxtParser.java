@@ -101,6 +101,8 @@ public final class RobotsTxtParser {
         final ArrayList<String> deny4ThisAgents = new ArrayList<>();
         final ArrayList<String> allow4AllAgents = new ArrayList<>();
         final ArrayList<String> allow4ThisAgents = new ArrayList<>();
+        long crawlDelay4AllAgents = 0;
+        long crawlDelay4ThisAgents = 0;
 
         int pos;
         String line = null, lineUpper = null;
@@ -145,7 +147,6 @@ public final class RobotsTxtParser {
                         inBlock = false;
                         isRule4AllAgents = false;
                         isRule4ThisAgents = false;
-                        this.crawlDelayMillis = 0; // each block has a separate delay
                     }
 
                     // cutting off comments at the line end
@@ -183,16 +184,18 @@ public final class RobotsTxtParser {
                         if (pos != -1) {
                             try {
                                 // the crawl delay can be a float number
-                                this.crawlDelayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
+                                long delayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
                                 // Because different crawlers apply different interpretations, we should do the same here for YaCy
                                 // Many robots.txt entries have crawl-delay entries which makes it impossible to crawl the page at all,
                                 // i.e. for values like "900" (would be 900 seconds which would be 15 minutes). To be able to operate,
                                 // we must do a "good-for-everyone" interpetation. This is done already with the "flux"-compensation delay
                                 // factor, which is applied additionally (its the 2-fold of the loading time from last visit), so we would be good
                                 // even if we ignore the craw-delay at all.
-                                this.crawlDelayMillis = Math.min(10000, this.crawlDelayMillis);
+                                delayMillis = Math.min(10000, delayMillis);
                                 // In this case we limit the delay to 10 seconds most. If a host wants not to be indexed at all, there is
                                 // an option for this in the robots.txt as well.
+                                if (isRule4ThisAgents) crawlDelay4ThisAgents = delayMillis;
+                                if (isRule4AllAgents) crawlDelay4AllAgents = delayMillis;
                             } catch (final NumberFormatException e) {
                                 // invalid crawling delay
                             }
@@ -250,6 +253,7 @@ public final class RobotsTxtParser {
 
         this.allowList.addAll(rule4ThisAgentsFound ? allow4ThisAgents : allow4AllAgents);
         this.denyList.addAll(rule4ThisAgentsFound ? deny4ThisAgents : deny4AllAgents);
+        this.crawlDelayMillis = rule4ThisAgentsFound ? crawlDelay4ThisAgents : crawlDelay4AllAgents;
     }
 
     /**

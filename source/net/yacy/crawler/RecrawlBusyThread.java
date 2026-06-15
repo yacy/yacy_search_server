@@ -357,7 +357,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 true, true, true, false, -1, false, true, CrawlProfile.MATCH_NEVER_STRING, CacheStrategy.IFFRESH,
                 "robot_" + CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB,
-                ClientIdentification.yacyInternetCrawlerAgentName,
+                ClientIdentification.getEffectiveInternetCrawlerAgentName(),
                 TagValency.EVAL, null, null, 0);
         return profile;
     }
