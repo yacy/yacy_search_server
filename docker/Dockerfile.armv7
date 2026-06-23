@@ -18,12 +18,16 @@ RUN apt-get update && apt-get install -yq curl wkhtmltopdf imagemagick xvfb ghos
 WORKDIR /opt
 COPY . /opt/yacy_search_server/
 
+# .git dir deleted here because .git is needed during the build to deterime the version,
+# but isn't required at runtime
+RUN ant compile -f /opt/yacy_search_server/build.xml \
 RUN rm -rf /opt/yacy_search_server/.git && \
     apt-get update && \
 	apt-get install -yq ant && \
 	ant compile -f /opt/yacy_search_server/build.xml && \
 	apt-get purge -yq --auto-remove ant && \
 	apt-get clean && \
+  rm -fr /opt/yacy_search_server/.git && \
 	rm -rf /var/lib/apt/lists/*
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
