@@ -43,6 +43,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LogRedaction;
 
 /**
  * Implements the protocol glue for streamed chat completions that include tool
@@ -62,6 +64,8 @@ import org.json.JSONTokener;
  * stream is forwarded.
  */
 public final class ToolCallProtocol {
+
+    private static final ConcurrentLog log = new ConcurrentLog("TOOLCALL");
 
     /**
      * Hard stop to prevent infinite tool loops (assistant requests tool calls
@@ -117,16 +121,24 @@ public final class ToolCallProtocol {
      * @throws IOException on network/stream/protocol errors
      */
     public static int proxyToolLifecycle(ServletOutputStream out, LLM.LLMModel llm4Chat, JSONObject originalBody, JSONArray messages, JSONObject initialMetadata) throws IOException {
+        return proxyToolLifecycle(out, llm4Chat, originalBody, messages, initialMetadata, null);
+    }
+
+    public static int proxyToolLifecycle(ServletOutputStream out, LLM.LLMModel llm4Chat, JSONObject originalBody, JSONArray messages, JSONObject initialMetadata, final String runId) throws IOException {
+        final long start = System.currentTimeMillis();
         final JSONObject preparedBody = prepareToolRequestBody(originalBody, false, llm4Chat != null && llm4Chat.tooling);
         if (llm4Chat != null && llm4Chat.thinking) {
             LLM.applyNoThinkingParameters(preparedBody);
         }
+        log.info(prefix(runId) + "event=tool-lifecycle phase=start tooling=" + (llm4Chat != null && llm4Chat.tooling) + " thinking=" + (llm4Chat != null && llm4Chat.thinking) + " messages=" + (messages == null ? 0 : messages.length()) + " metadata=" + (initialMetadata == null ? 0 : initialMetadata.length()));
         final HttpURLConnection conn = openChatCompletionConnection(llm4Chat, preparedBody);
         final int status = conn.getResponseCode();
         //final String message = conn.getResponseMessage();
         if (status == 200) {
-            handleInitialStreamAndContinue(out, conn, llm4Chat, preparedBody, messages, initialMetadata);
+            handleInitialStreamAndContinue(out, conn, llm4Chat, preparedBody, messages, initialMetadata, runId);
+            log.info(prefix(runId) + "event=tool-lifecycle phase=end result=success status=" + status + " durationMs=" + (System.currentTimeMillis() - start));
         } else {
+            log.warn(prefix(runId) + "event=tool-lifecycle phase=end result=upstream-error status=" + status + " reason=" + LogRedaction.redact(conn.getResponseMessage()) + " durationMs=" + (System.currentTimeMillis() - start));
             Logger.getLogger("ToolCallProtocoll").severe(status + " " + conn.getResponseMessage());
         }
         return status;
@@ -196,6 +208,11 @@ public final class ToolCallProtocol {
      * @throws IOException on I/O errors
      */
     private static void handleInitialStreamAndContinue(ServletOutputStream out, HttpURLConnection conn, LLM.LLMModel llm4Chat, JSONObject originalBody, JSONArray messages, JSONObject initialMetadata) throws IOException {
+        handleInitialStreamAndContinue(out, conn, llm4Chat, originalBody, messages, initialMetadata, null);
+    }
+
+    private static void handleInitialStreamAndContinue(ServletOutputStream out, HttpURLConnection conn, LLM.LLMModel llm4Chat, JSONObject originalBody, JSONArray messages, JSONObject initialMetadata, final String runId) throws IOException {
+        final long start = System.currentTimeMillis();
         final StringBuilder assistantContent = new StringBuilder();
         final Map<Integer, ToolCall> toolCalls = new HashMap<>();
         final boolean[] sawToolCalls = new boolean[]{false};
@@ -232,8 +249,9 @@ public final class ToolCallProtocol {
             conn.disconnect();
         }
 
+        log.info(prefix(runId) + "event=tool-stream phase=initial-end sawToolCalls=" + sawToolCalls[0] + " toolCalls=" + toolCalls.size() + " assistantChars=" + assistantContent.length() + " durationMs=" + (System.currentTimeMillis() - start));
         if (sawToolCalls[0]) {
-            handleToolCallsAndContinue(out, llm4Chat, originalBody, messages, assistantContent.toString(), toolCalls);
+            handleToolCallsAndContinue(out, llm4Chat, originalBody, messages, assistantContent.toString(), toolCalls, runId);
         }
     }
 
@@ -259,6 +277,11 @@ public final class ToolCallProtocol {
      * @throws IOException when network I/O or JSON processing fails
      */
     public static void handleToolCallsAndContinue(ServletOutputStream out, LLM.LLMModel llm4Chat, JSONObject originalBody, JSONArray messages, String assistantContent, Map<Integer, ToolCall> toolCalls) throws IOException {
+        handleToolCallsAndContinue(out, llm4Chat, originalBody, messages, assistantContent, toolCalls, null);
+    }
+
+    public static void handleToolCallsAndContinue(ServletOutputStream out, LLM.LLMModel llm4Chat, JSONObject originalBody, JSONArray messages, String assistantContent, Map<Integer, ToolCall> toolCalls, final String runId) throws IOException {
+        final long start = System.currentTimeMillis();
         try {
             // Work on a copy so caller-owned message arrays are not modified unexpectedly.
             JSONArray newMessages = new JSONArray();
@@ -272,9 +295,10 @@ public final class ToolCallProtocol {
 
             for (int round = 0; round < MAX_TOOL_ROUNDS; round++) {
                 // Convert captured tool calls into assistant/tool messages and execute tools.
-                ToolRoundData roundData = appendAssistantAndToolMessages(newMessages, roundAssistantContent, roundToolCalls, toolCallCounters);
+                ToolRoundData roundData = appendAssistantAndToolMessages(newMessages, roundAssistantContent, roundToolCalls, toolCallCounters, runId, round);
                 if (roundData == null || roundData.toolResults.length() == 0) {
                     // No executable tool calls; terminate stream cleanly.
+                    log.info(prefix(runId) + "event=tool-round phase=end round=" + round + " result=no-executable-tool-calls requested=" + (roundToolCalls == null ? 0 : roundToolCalls.size()));
                     out.println("data: [DONE]");
                     out.flush();
                     return;
@@ -286,9 +310,11 @@ public final class ToolCallProtocol {
                     LLM.applyNoThinkingParameters(followup);
                 }
                 followup.put("messages", newMessages);
+                log.info(prefix(runId) + "event=tool-round phase=followup-call round=" + round + " toolResults=" + roundData.toolResults.length() + " messages=" + newMessages.length());
                 final HttpURLConnection followConn = openChatCompletionConnection(llm4Chat, followup);
                 if (followConn.getResponseCode() != 200) {
                     // Upstream error: close downstream stream instead of sending broken chunks.
+                    log.warn(prefix(runId) + "event=tool-round phase=followup-return round=" + round + " result=upstream-error status=" + followConn.getResponseCode() + " reason=" + LogRedaction.redact(followConn.getResponseMessage()));
                     out.println("data: [DONE]");
                     out.flush();
                     followConn.disconnect();
@@ -337,16 +363,22 @@ public final class ToolCallProtocol {
                 // Ignore phantom rounds where stream signaled tool-calls but no concrete calls were parsed.
                 if (nextToolCalls.isEmpty()) sawToolCalls[0] = false;
                 // Final answer reached; caller already received forwarded stream lines.
-                if (!sawToolCalls[0]) return;
+                if (!sawToolCalls[0]) {
+                    log.info(prefix(runId) + "event=tool-round phase=end round=" + round + " result=final-answer toolResults=" + roundData.toolResults.length() + " assistantChars=" + nextAssistantContent.length() + " durationMs=" + (System.currentTimeMillis() - start));
+                    return;
+                }
 
                 // Continue with next round tool request that was found in follow-up stream.
+                log.info(prefix(runId) + "event=tool-round phase=continue round=" + round + " nextToolCalls=" + nextToolCalls.size() + " assistantChars=" + nextAssistantContent.length());
                 roundAssistantContent = nextAssistantContent.toString();
                 roundToolCalls = nextToolCalls;
             }
             // Safety fallback when round cap is hit.
+            log.warn(prefix(runId) + "event=tool-lifecycle phase=end result=max-rounds maxRounds=" + MAX_TOOL_ROUNDS + " durationMs=" + (System.currentTimeMillis() - start));
             out.println("data: [DONE]");
             out.flush();
         } catch (JSONException e) {
+            log.warn(prefix(runId) + "event=tool-lifecycle phase=end result=failure errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e) + " durationMs=" + (System.currentTimeMillis() - start));
             throw new IOException("JSON processing error in tool handling", e);
         }
     }
@@ -442,6 +474,10 @@ public final class ToolCallProtocol {
      *         results, or {@code null} when JSON assembly fails
      */
     private static ToolRoundData appendAssistantAndToolMessages(JSONArray messages, String assistantContent, Map<Integer, ToolCall> toolCalls, Map<String, Integer> toolCallCounters) {
+        return appendAssistantAndToolMessages(messages, assistantContent, toolCalls, toolCallCounters, null, -1);
+    }
+
+    private static ToolRoundData appendAssistantAndToolMessages(JSONArray messages, String assistantContent, Map<Integer, ToolCall> toolCalls, Map<String, Integer> toolCallCounters, final String runId, final int round) {
         try {
             // Keep original model call order stable by sorting call indices.
             List<Integer> indices = new ArrayList<>(toolCalls.keySet());
@@ -460,7 +496,10 @@ public final class ToolCallProtocol {
                 final String toolName = call.name == null ? "" : call.name.trim();
                 final int maxCalls = net.yacy.ai.ToolProvider.maxCallsPerTurn(toolName);
                 final int usedCalls = toolCallCounters.getOrDefault(toolName, Integer.valueOf(0)).intValue();
-                if (usedCalls >= maxCalls) continue;
+                if (usedCalls >= maxCalls) {
+                    log.warn(prefix(runId) + "event=tool-execution phase=skip round=" + round + " tool=" + LogRedaction.redact(toolName) + " reason=max-calls used=" + usedCalls + " max=" + maxCalls);
+                    continue;
+                }
 
                 // Assistant message representation of requested tool call.
                 JSONObject toolCallJson = new JSONObject(true);
@@ -473,7 +512,10 @@ public final class ToolCallProtocol {
                 toolCallsArray.put(toolCallJson);
 
                 // Execute tool locally and create "tool" role response message.
+                final long toolStart = System.currentTimeMillis();
+                log.info(prefix(runId) + "event=tool-execution phase=start round=" + round + " tool=" + LogRedaction.redact(call.name) + " argumentChars=" + (call.arguments == null ? 0 : call.arguments.length()));
                 String result = net.yacy.ai.ToolProvider.executeTool(call.name, call.arguments);
+                log.info(prefix(runId) + "event=tool-execution phase=end round=" + round + " tool=" + LogRedaction.redact(call.name) + " resultChars=" + (result == null ? 0 : result.length()) + " durationMs=" + (System.currentTimeMillis() - toolStart));
                 JSONObject toolMessage = new JSONObject(true);
                 toolMessage.put("role", "tool");
                 toolMessage.put("tool_call_id", call.id);
@@ -506,8 +548,13 @@ public final class ToolCallProtocol {
 
             return new ToolRoundData(toolCallsArray, toolResults);
         } catch (JSONException e) {
+            log.warn(prefix(runId) + "event=tool-execution phase=end round=" + round + " result=failure errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e));
             return null;
         }
+    }
+
+    private static String prefix(final String runId) {
+        return runId == null || runId.isEmpty() ? "" : "runId=" + runId + " ";
     }
 
     /**

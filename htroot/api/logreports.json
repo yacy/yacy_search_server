@@ -1,0 +1,17 @@
+{
+  #(authorized)#
+  "error": "authorization required",
+  ::
+  #(/authorized)#
+  "reports": [
+    #{reports}#
+    {
+      "filename": "#[filename]#",
+      "title": "#[title]#",
+      "published": "#[published]#",
+      "daily": #(daily)#false::true#(/daily)#,
+      "content": "#[content]#"
+    }#(comma)#::,#(/comma)#
+    #{/reports}#
+  ]
+}

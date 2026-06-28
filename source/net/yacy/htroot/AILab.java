@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import net.yacy.ai.LogReportService;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -87,6 +88,7 @@ public class AILab {
         prop.put("ailab_rag_status", hasEngine && hasModel && (hasRagRole || ragVisited) ? "ready" : "pending");
         prop.put("ailab_tools_status", hasToolsConfig ? "ready" : "pending");
         prop.put("ailab_shield_status", hasShield ? "ready" : "pending");
+        prop.put("ailab_logreports_status", LogReportService.hasConfiguredLogReportModel() ? "ready" : "pending");
 
         return prop;
     }

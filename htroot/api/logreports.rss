@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>#[channel_title]#</title>
+<description>#[channel_description]#</description>
+<pubDate>#[channel_pubDate]#</pubDate>
+#(authorized)#
+<item>
+<title>Authorization required</title>
+<description>Administrative authentication is required to read YaCy log reports.</description>
+<guid isPermaLink="false">authorization-required</guid>
+</item>
+::
+#(/authorized)#
+#{reports}#
+<item>
+<title>#[title-rss]#</title>
+<description>#[description-rss]#</description>
+<pubDate>#[pubDate-rss]#</pubDate>
+<guid isPermaLink="false">#[guid-rss]#</guid>
+</item>
+#{/reports}#
+</channel>
+</rss>
