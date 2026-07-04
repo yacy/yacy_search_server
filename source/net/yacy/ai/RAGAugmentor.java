@@ -41,6 +41,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LogRedaction;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -99,8 +100,12 @@ public final class RAGAugmentor {
      * @return JSON array with {@code url,title[,text]} entries
      */
     public static JSONArray searchResults(String query, int count, final boolean includeSnippet) {
+        return searchResults(query, count, includeSnippet, null);
+    }
+
+    public static JSONArray searchResults(String query, int count, final boolean includeSnippet, final String runId) {
         final QueryParams theQuery = buildTextQueryParams(query, count, QueryParams.Searchdom.LOCAL);
-        return searchResults(theQuery, count, includeSnippet);
+        return searchResults(theQuery, count, includeSnippet, runId);
     }
 
     /**
@@ -112,9 +117,13 @@ public final class RAGAugmentor {
      * @return markdown context block
      */
     public static String searchResultsAsMarkdown(String query, int count, boolean global) {
+        return searchResultsAsMarkdown(query, count, global, null);
+    }
+
+    public static String searchResultsAsMarkdown(String query, int count, boolean global, final String runId) {
         final long searchStart = System.currentTimeMillis();
-        JSONArray searchResults = global ? searchResultsGlobal(query, count, true) : searchResults(query, count, true);
-        ConcurrentLog.info("RAGProxy", "searchResults=" + searchResults.length() + " global=" + global + " searchMs=" + (System.currentTimeMillis() - searchStart));
+        JSONArray searchResults = global ? searchResultsGlobal(query, count, true, runId) : searchResults(query, count, true, runId);
+        ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-search phase=results resultCount=" + searchResults.length() + " global=" + global + " searchMs=" + (System.currentTimeMillis() - searchStart));
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < searchResults.length(); i++) {
@@ -135,7 +144,7 @@ public final class RAGAugmentor {
         }
 
         final String markdown = truncateSearchDocument(sb.toString());
-        ConcurrentLog.info("RAGProxy", "markdownChars=" + markdown.length() + " resultCount=" + searchResults.length());
+        ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-search phase=markdown markdownChars=" + markdown.length() + " resultCount=" + searchResults.length());
         return markdown;
     }
 
@@ -184,8 +193,12 @@ public final class RAGAugmentor {
      * @return JSON array with normalized result objects
      */
     public static JSONArray searchResultsGlobal(String query, int count, final boolean includeSnippet) {
+        return searchResultsGlobal(query, count, includeSnippet, null);
+    }
+
+    public static JSONArray searchResultsGlobal(String query, int count, final boolean includeSnippet, final String runId) {
         final QueryParams theQuery = buildTextQueryParams(query, count, QueryParams.Searchdom.GLOBAL);
-        return searchResults(theQuery, count, includeSnippet);
+        return searchResults(theQuery, count, includeSnippet, runId);
     }
 
     /**
@@ -199,9 +212,23 @@ public final class RAGAugmentor {
      * @return JSON array with normalized result objects
      */
     private static JSONArray searchResults(final QueryParams theQuery, final int count, final boolean includeSnippet) {
+        return searchResults(theQuery, count, includeSnippet, null);
+    }
+
+    private static JSONArray searchResults(final QueryParams theQuery, final int count, final boolean includeSnippet, final String runId) {
+        final long start = System.currentTimeMillis();
         final JSONArray results = new JSONArray();
-        if (theQuery == null || count == 0) return results;
+        if (theQuery == null || count == 0) {
+            ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-search phase=skip reason=empty-query count=" + count);
+            return results;
+        }
         final Switchboard sb = Switchboard.getSwitchboard();
+        if (sb == null) {
+            ConcurrentLog.warn("RAGProxy", prefix(runId) + "event=rag-search phase=fail reason=switchboard-unavailable");
+            return results;
+        }
+        final boolean globalSearch = !theQuery.isLocal();
+        ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-search phase=start global=" + globalSearch + " count=" + count + " includeSnippet=" + includeSnippet);
         final SearchEvent theSearch = SearchEventCache.getEvent(
                 theQuery,
                 sb.peers,
@@ -218,7 +245,6 @@ public final class RAGAugmentor {
         final long timeout = sb.getConfigLong(
                 SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
                 sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000));
-        final boolean globalSearch = !theQuery.isLocal();
         if (globalSearch) {
             theSearch.resortCachedResults();
         } else {
@@ -255,8 +281,10 @@ public final class RAGAugmentor {
                 results.put(result);
                 resultIndex++;
             } catch (JSONException e) {
+                ConcurrentLog.warn("RAGProxy", prefix(runId) + "event=rag-search phase=result result=failure errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e));
             }
         }
+        ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-search phase=end result=success global=" + globalSearch + " requested=" + count + " returned=" + results.length() + " includeSnippet=" + includeSnippet + " durationMs=" + (System.currentTimeMillis() - start));
         return results;
     }
 
@@ -332,17 +360,29 @@ public final class RAGAugmentor {
      * @return space-separated lowercase term list or {@code null} on failure
      */
     public static String searchWordsForPrompt(final LLM llm, final String model, final String prompt, final String systemPrompt) {
+        return searchWordsForPrompt(llm, model, prompt, systemPrompt, null);
+    }
+
+    public static String searchWordsForPrompt(final LLM llm, final String model, final String prompt, final String systemPrompt, final String runId) {
+        final long start = System.currentTimeMillis();
         final String question = prompt == null ? "" : prompt.trim();
         final String instruction = systemPrompt == null || systemPrompt.trim().isEmpty()
                 ? "Compress the user prompt into a short search description. Return only a JSON array of concise, discriminative search terms in lowercase."
                 : systemPrompt.trim();
-        if (llm == null || model == null || model.isEmpty()) return null;
+        if (llm == null || model == null || model.isEmpty()) {
+            ConcurrentLog.warn("RAGProxy", prefix(runId) + "event=rag-query-generation phase=skip reason=no-model promptChars=" + question.length());
+            return null;
+        }
         try {
+            ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-query-generation phase=model-call model=" + LogRedaction.redact(model) + " backend=" + LogRedaction.redact(llm.hoststub) + " promptChars=" + question.length() + " promptWords=" + wordCount(question));
             LLM.Context context = new LLM.Context(instruction);
             context.addPrompt(question);
             Set<String> singlewords = new LinkedHashSet<>();
             String[] a = LLM.stringsFromChat(llm.chat(model, context, LLM.listSchema, 200));
-            if (a == null || a.length == 0) return null;
+            if (a == null || a.length == 0) {
+                ConcurrentLog.warn("RAGProxy", prefix(runId) + "event=rag-query-generation phase=model-return result=empty durationMs=" + (System.currentTimeMillis() - start));
+                return null;
+            }
             for (String s: a) {
                 if (s == null) continue;
                 // Flatten model output into unique lowercased tokens.
@@ -353,11 +393,23 @@ public final class RAGAugmentor {
             for (String s: singlewords) query.append(s).append(' ');
             String querys = query.toString().trim();
             if (querys.length() == 0) return null;
+            ConcurrentLog.info("RAGProxy", prefix(runId) + "event=rag-query-generation phase=end result=success terms=" + singlewords.size() + " queryChars=" + querys.length() + " durationMs=" + (System.currentTimeMillis() - start));
             return querys;
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            ConcurrentLog.warn("RAGProxy", prefix(runId) + "event=rag-query-generation phase=end result=failure errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e) + " durationMs=" + (System.currentTimeMillis() - start));
             return null;
         }
+    }
+
+    private static String prefix(final String runId) {
+        return runId == null || runId.isEmpty() ? "" : "runId=" + runId + " ";
+    }
+
+    private static int wordCount(final String text) {
+        if (text == null) return 0;
+        final String trimmed = text.trim();
+        if (trimmed.isEmpty()) return 0;
+        return trimmed.split("\\s+").length;
     }
 
     /**

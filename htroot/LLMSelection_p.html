@@ -53,12 +53,12 @@
         required: ["mood"]
       };
 
-      const PRODUCTION_MODEL_TOTAL_COLUMNS = 17;
+      const PRODUCTION_MODEL_TOTAL_COLUMNS = 18;
       const PRODUCTION_MODEL_MODEL_COLUMN_INDEX = 1;
       const PRODUCTION_MODEL_USAGE_COLUMN_START = 5;
-      const PRODUCTION_MODEL_USAGE_COLUMN_END = 11; // including
-      const PRODUCTION_MODEL_FEATURE_COLUMN_START = 12;
-      const PRODUCTION_MODEL_FEATURE_COLUMN_END = 15; // including
+      const PRODUCTION_MODEL_USAGE_COLUMN_END = 12; // including
+      const PRODUCTION_MODEL_FEATURE_COLUMN_START = 13;
+      const PRODUCTION_MODEL_FEATURE_COLUMN_END = 16; // including
       const PRODUCTION_MODEL_ACTION_COLUMN_INDEX = PRODUCTION_MODEL_TOTAL_COLUMNS - 1;
       const PRODUCTION_MODEL_THINKING_COLUMN_INDEX = PRODUCTION_MODEL_FEATURE_COLUMN_START;
       const PRODUCTION_MODEL_TOOLING_COLUMN_INDEX = PRODUCTION_MODEL_FEATURE_COLUMN_START + 1;
@@ -66,7 +66,8 @@
       const PRODUCTION_MODEL_FORMAT_COLUMN_INDEX = PRODUCTION_MODEL_FEATURE_COLUMN_START + 3;
       const PRODUCTION_MODEL_ENABLED_USAGE_COLUMNS = new Set([
         6,  // chat
-        11  // tldr
+        11, // tldr
+        12  // log-report
       ]);
       const PRODUCTION_MODEL_COLUMN_NAMES = [
         "service",
@@ -82,6 +83,7 @@
         "query",
         "qapairs",
         "tldr",
+        "logreport",
 
         "thinking",
         "tooling",
@@ -111,7 +113,7 @@
         //["qwen3-vl:30b-a3b-instruct-q4_K_M",                  "17.33", "22GB", "Very fast, exceptional good 30B model, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"],
 		["qwen3.5:9b-q4_K_M",                                 "18.37", "14GB", "multimodal, outstanding for its size, long-context 256K Tokens, strong instruction following model", "Alibaba", "apache-2.0"],
 		["hf.co/mradermacher/Ling-mini-2.0-GGUF:Q4_K_M",      "20.00", "20GB", "very fast 16B MoE model with 1.4B activated parameters per expert", "InclusionAI", "mit"],
-		["qwen3.5:35b-a3b-q4_K_M",                            "44.63", "25GB", "Very fast MoE, exceptional good 35B model with vision, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"]
+		["qwen3.6:27b-mtp-q4_K_M",                            "80", "17GB", "Exceptional good 27B model with vision, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"]
       ];
 	  
       const MODEL_TABLE_HEADERS = ["Model", "Ranking", "Size", "Description", "Provider", "License", "Actions"];
@@ -1871,6 +1873,7 @@
                     <td class="narrow">search-query<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model produces search queries to YaCy search from prompts in RAG or chat</span></span></td>
                     <td class="narrow">qa-pairs<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to produce query-answer pairs which enhance search from chat prompts</span></span></td>
                     <td class="narrow">tldr-shortener<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to make summaries from web content</span></span></td>
+                    <td class="narrow">log-report<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model evaluates YaCy runtime logs and creates self-enhancement reports</span></span></td>
                     
                     <td class="narrow">thinking<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>we detect thinking only to be able to suppress thinking. thinking is not used in YaCy</span></span></td>
                     <td class="narrow">tooling<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>tooling is required for agentic abilities.</span></span></td>
@@ -1895,6 +1898,7 @@
                 <td><input type="checkbox" #(query)#::checked=true#(/query)# disabled="disabled"></td>
                 <td><input type="checkbox" #(qapairs)#::checked=true#(/qapairs)# disabled="disabled"></td>
                 <td><input type="checkbox" #(tldr)#::checked=true#(/tldr)#></td>
+                <td><input type="checkbox" #(logreport)#::checked=true#(/logreport)#></td>
                 
                 <td>#[thinking]#</td>
                 <td>#[tooling]#</td>

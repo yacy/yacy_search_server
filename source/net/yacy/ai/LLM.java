@@ -39,10 +39,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LogRedaction;
 import net.yacy.search.Switchboard;
 
 public class LLM {
 
+    private static final ConcurrentLog log = new ConcurrentLog("LLM");
     private static final String MODEL_CAPABILITIES_CONFIG = "ai.model_capabilities";
     private static String[] STOPTOKENS = new String[]{"[/INST]", "<|im_end|>", "<|end_of_turn|>", "<|eot_id|>", "<|end_header_id|>", "<EOS_TOKEN>", "</s>", "<|end|>"};
 
@@ -65,7 +68,8 @@ public class LLM {
         classification,
         query,
         qapairs,
-        tldr
+        tldr,
+        logreport
     }
     
     public static class LLMModel {
@@ -99,8 +103,25 @@ public class LLM {
      * @return
      */
     public static LLMModel llmFromUsage(LLMUsage llmUsage) {
-        Switchboard sb = Switchboard.getSwitchboard();
-        String pms = sb.getConfig("ai.production_models", "[]");
+        return llmFromUsage(llmUsage, null, null);
+    }
+
+    public static LLMModel llmFromUsage(final LLMUsage llmUsage, final String runId, final String caller) {
+        return llmFromUsage(llmUsage, runId, caller, true);
+    }
+
+    public static LLMModel llmFromUsageQuiet(final LLMUsage llmUsage) {
+        return llmFromUsage(llmUsage, null, null, false);
+    }
+
+    private static LLMModel llmFromUsage(final LLMUsage llmUsage, final String runId, final String caller, final boolean logRouting) {
+        final long start = System.currentTimeMillis();
+        final Switchboard sb = Switchboard.getSwitchboard();
+        if (sb == null) {
+            if (logRouting) log.warn(routePrefix(runId, caller) + "event=model-routing phase=fail usage=" + llmUsage + " reason=switchboard-unavailable durationMs=" + elapsed(start));
+            return null;
+        }
+        final String pms = sb.getConfig("ai.production_models", "[]");
         JSONObject model_capabilities = readModelCapabilities();
         try {
             JSONArray production_models = new JSONArray(new JSONTokener(pms));
@@ -126,15 +147,34 @@ public class LLM {
                     }
                     LLM llm = new LLM(hoststub, api_key, max_tokens, type);
                     LLMModel llmmodel = new LLMModel(llm, model, tooling, thinking);
+                    if (logRouting) {
+                        log.info(routePrefix(runId, caller) + "event=model-routing phase=select usage=" + llmUsage + " row=" + i + " service=" + type.name() + " model=" + LogRedaction.redact(model) + " backend=" + LogRedaction.redact(llm.hoststub) + " maxTokens=" + llm.max_tokens + " tooling=" + tooling + " thinking=" + thinking + " productionRows=" + production_models.length() + " durationMs=" + elapsed(start));
+                    }
                     return llmmodel;
                 }
             }
-        } catch (JSONException | NumberFormatException e) {
-            e.printStackTrace();
+            if (logRouting) {
+                log.info(routePrefix(runId, caller) + "event=model-routing phase=miss usage=" + llmUsage + " productionRows=" + production_models.length() + " durationMs=" + elapsed(start));
+            }
+        } catch (JSONException | IllegalArgumentException e) {
+            if (logRouting) {
+                log.warn(routePrefix(runId, caller) + "event=model-routing phase=fail usage=" + llmUsage + " errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e) + " durationMs=" + elapsed(start));
+            }
         }
         // so if we don't find a model for that specific usage, we purposely return null to show that there is a missing configuration
         return null;
     }    
+
+    private static String routePrefix(final String runId, final String caller) {
+        final StringBuilder prefix = new StringBuilder();
+        if (runId != null && !runId.isEmpty()) prefix.append("runId=").append(runId).append(' ');
+        if (caller != null && !caller.isEmpty()) prefix.append("caller=").append(caller).append(' ');
+        return prefix.toString();
+    }
+
+    private static long elapsed(final long start) {
+        return System.currentTimeMillis() - start;
+    }
     
     public String getHoststub() {
 		return this.hoststub;

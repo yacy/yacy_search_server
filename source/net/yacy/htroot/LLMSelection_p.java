@@ -76,6 +76,11 @@ public class LLMSelection_p {
         return service + "|" + hoststub + "|" + model;
     }
 
+    private static boolean optBooleanRole(final JSONObject row, final String canonicalKey, final String displayKey) {
+        if (row == null) return false;
+        return row.optBoolean(canonicalKey, row.optBoolean(displayKey, false));
+    }
+
     private static JSONObject normalizeProductionModelRow(final JSONObject row) throws JSONException {
         final JSONObject normalized = new JSONObject(true);
         normalized.put("service", row.optString("service", "OLLAMA"));
@@ -91,6 +96,7 @@ public class LLMSelection_p {
         normalized.put("query", false);
         normalized.put("qapairs", false);
         normalized.put("tldr", row.optBoolean("tldr", false));
+        normalized.put("logreport", optBooleanRole(row, "logreport", "log-report"));
 
         normalized.put("thinking", row.optBoolean("thinking", false));
         normalized.put("tooling", row.optBoolean("tooling", false));
@@ -186,6 +192,7 @@ public class LLMSelection_p {
                 prop.put("productionmodels_" + i + "_query", row.optBoolean("query", false));
                 prop.put("productionmodels_" + i + "_qapairs", row.optBoolean("qapairs", false));
                 prop.put("productionmodels_" + i + "_tldr", row.optBoolean("tldr", false));
+                prop.put("productionmodels_" + i + "_logreport", row.optBoolean("logreport", false));
                 
                 final String key = capabilityKey(row);
                 JSONObject capabilityEntry = key.isEmpty() ? null : capabilities.optJSONObject(key);

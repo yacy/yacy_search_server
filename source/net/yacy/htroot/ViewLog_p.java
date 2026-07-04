@@ -40,6 +40,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LogRedaction;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.LogalizerHandler;
 import net.yacy.server.serverObjects;
@@ -59,6 +60,7 @@ public class ViewLog_p {
          * interface.
          */
         String filter = ".*.*";
+        String filterMode = "regex";
 
         if (post != null){
             reversed = (post.containsKey("mode") && "reversed".equals(post.get("mode")));
@@ -70,6 +72,11 @@ public class ViewLog_p {
 
             if(post.containsKey("filter")){
                 filter = post.get("filter");
+            }
+
+            if(post.containsKey("filterMode")){
+                filterMode = post.get("filterMode");
+                if (!"terms".equals(filterMode)) filterMode = "regex";
             }
         }
 
@@ -91,15 +98,26 @@ public class ViewLog_p {
         prop.put("lines", lines);
         prop.put("maxlines", maxlines);
         prop.putHTML("filter", filter);
+        prop.put("filterMode", filterMode);
+        prop.put("filterModeRegex", "regex".equals(filterMode) ? "1" : "0");
+        prop.put("filterModeTerms", "terms".equals(filterMode) ? "1" : "0");
 
-        // trying to compile the regular expression filter expression
         Matcher filterMatcher = null;
-        try {
-            final Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
-            filterMatcher = filterPattern.matcher("");
-        } catch (final PatternSyntaxException e) {
-            ConcurrentLog.logException(e);
+        String[] filterTerms = new String[0];
+        boolean validFilter = true;
+        if ("terms".equals(filterMode)) {
+            filterTerms = parseFilterTerms(filter);
+        } else {
+            // trying to compile the regular expression filter expression
+            try {
+                final Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
+                filterMatcher = filterPattern.matcher("");
+            } catch (final PatternSyntaxException e) {
+                validFilter = false;
+                ConcurrentLog.warn("ViewLog", "Invalid log regex filter: " + LogRedaction.redactMessage(e));
+            }
         }
+        prop.put("filterError", validFilter ? "0" : "1");
 
         int level = 0;
         int lc = 0;
@@ -107,9 +125,13 @@ public class ViewLog_p {
             if (logLine == null) break;
             final String nextLogLine = logLine.trim();
 
-            if (filterMatcher != null) {
+            if ("terms".equals(filterMode)) {
+                if (!matchesAllTerms(nextLogLine, filterTerms)) continue;
+            } else if (validFilter && filterMatcher != null) {
                 filterMatcher.reset(nextLogLine);
                 if (!filterMatcher.find()) continue;
+            } else if (!validFilter) {
+                continue;
             }
 
             if (nextLogLine.startsWith("E ")) {
@@ -138,5 +160,28 @@ public class ViewLog_p {
 
         // return rewrite properties
         return prop;
+    }
+
+    private static String[] parseFilterTerms(final String filter) {
+        if (filter == null || filter.trim().isEmpty()) return new String[0];
+        final String[] rawTerms = filter.split(",");
+        int count = 0;
+        for (int i = 0; i < rawTerms.length; i++) {
+            final String term = rawTerms[i].trim().toLowerCase();
+            if (term.isEmpty()) continue;
+            rawTerms[count++] = term;
+        }
+        final String[] terms = new String[count];
+        System.arraycopy(rawTerms, 0, terms, 0, count);
+        return terms;
+    }
+
+    private static boolean matchesAllTerms(final String line, final String[] terms) {
+        if (terms == null || terms.length == 0) return true;
+        final String normalizedLine = line == null ? "" : line.toLowerCase();
+        for (final String term : terms) {
+            if (!normalizedLine.contains(term)) return false;
+        }
+        return true;
     }
 }

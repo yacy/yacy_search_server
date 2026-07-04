@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -62,6 +63,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.ai.LogReportService;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
@@ -293,6 +295,7 @@ public final class yacy {
             // start main threads
             final int port = sb.getLocalPort();
             final String host = sb.getLocalHost();
+            ScheduledExecutorService logReportScheduler = null;
             try {
                 // start http server
                 YaCyHttpServer httpServer;
@@ -374,6 +377,8 @@ public final class yacy {
                 if (!lang.equals("browser")) // "default" is handled by .setLocale()
                     Formatter.setLocale(lang);
 
+                logReportScheduler = LogReportService.startScheduler(sb);
+
                 // registering shutdown hook
                 ConcurrentLog.config("STARTUP", "Registering Shutdown Hook");
                 final Runtime run = Runtime.getRuntime();
@@ -396,11 +401,13 @@ public final class yacy {
                 }
                 // shut down
                 ConcurrentLog.config("SHUTDOWN", "caught termination signal");
+                LogReportService.stopScheduler(logReportScheduler);
                 httpServer.stop();
 
                 ConcurrentLog.config("SHUTDOWN", "server has terminated");
                 sb.close();
             } catch (final Exception e) {
+                LogReportService.stopScheduler(logReportScheduler);
                 ConcurrentLog.severe("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }

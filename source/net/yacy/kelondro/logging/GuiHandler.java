@@ -43,7 +43,7 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class GuiHandler extends Handler {
 
-    private final static int DEFAULT_SIZE = 10000; // don't make this too big, it eats up a lot of memory!
+    private final static int DEFAULT_SIZE = 100000; // don't make this too big, it eats up a lot of memory!
     private static int size = DEFAULT_SIZE;
     private static String buffer[];
     private static int start, count;

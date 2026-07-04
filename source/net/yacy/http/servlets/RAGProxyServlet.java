@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Deque;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.servlet.ServletException;
@@ -48,6 +49,7 @@ import net.yacy.ai.RAGAugmentor;
 import net.yacy.ai.ToolCallProtocol;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LogRedaction;
 import net.yacy.search.Switchboard;
 
 /**
@@ -83,6 +85,8 @@ public class RAGProxyServlet extends HttpServlet {
 
     @Override
     public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+        final String runId = UUID.randomUUID().toString();
+        final long requestStart = System.currentTimeMillis();
         response.setContentType("application/json;charset=utf-8");
 
         HttpServletResponse hresponse = (HttpServletResponse) response;
@@ -96,15 +100,18 @@ public class RAGProxyServlet extends HttpServlet {
         final Switchboard sb = Switchboard.getSwitchboard();
         final String clientIP = hrequest.getRemoteAddr();
         final boolean localhostAccess = Domains.isLocalhost(clientIP);
+        ConcurrentLog.info("RAGProxy", "runId=" + runId + " event=rag-request phase=start method=" + hrequest.getMethod() + " localhost=" + localhostAccess);
         if (!localhostAccess) {
             // obey the allow-nonlocalhost shield setting
             final boolean allowNonLocal = sb.getConfigBool("ai.shield.allow-nonlocalhost", false);
             if (!allowNonLocal) {
+                ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-request phase=reject reason=nonlocalhost-blocked durationMs=" + elapsed(requestStart));
                 hresponse.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         }
         if (isRateLimited(sb, clientIP, localhostAccess)) {
+            ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-request phase=reject reason=rate-limited localhost=" + localhostAccess + " durationMs=" + elapsed(requestStart));
             hresponse.sendError(429, "Too Many Requests"); // standard status for rate limits
             return;
         }
@@ -114,11 +121,13 @@ public class RAGProxyServlet extends HttpServlet {
         if (reqMethod == Method.OTHER) {
             // required to handle CORS
             hresponse.setStatus(HttpServletResponse.SC_OK);
+            ConcurrentLog.info("RAGProxy", "runId=" + runId + " event=rag-request phase=end result=options durationMs=" + elapsed(requestStart));
             return;
         }
 
         // We expect a POST request
         if (reqMethod != Method.POST) {
+            ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-request phase=reject reason=method-not-allowed method=" + hrequest.getMethod() + " durationMs=" + elapsed(requestStart));
             hresponse.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             return;
         }
@@ -135,6 +144,7 @@ public class RAGProxyServlet extends HttpServlet {
             bodyBuilder.append(line);
         }
         String body = bodyBuilder.toString();
+        ConcurrentLog.info("RAGProxy", "runId=" + runId + " event=rag-request phase=body-read bodyChars=" + body.length());
         JSONObject bodyObject;
         try {
             // get system message and user prompt
@@ -148,8 +158,13 @@ public class RAGProxyServlet extends HttpServlet {
             // resolve true model name from configuration
             LLM.LLMUsage usage = LLM.LLMUsage.chat;
             try {usage = LLM.LLMUsage.valueOf(model);} catch (IllegalArgumentException e) {}
-            LLM.LLMModel llm4Chat = LLM.llmFromUsage(usage);
-            LLM.LLMModel llm4tldr = LLM.llmFromUsage(LLM.LLMUsage.tldr);
+            LLM.LLMModel llm4Chat = LLM.llmFromUsage(usage, runId, "rag-chat");
+            LLM.LLMModel llm4tldr = LLM.llmFromUsage(LLM.LLMUsage.tldr, runId, "rag-query-generator");
+            if (llm4Chat == null) {
+                ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-request phase=reject reason=no-chat-model usage=" + usage + " durationMs=" + elapsed(requestStart));
+                hresponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "No chat model configured");
+                return;
+            }
             bodyObject.put("model", llm4Chat.model); // replace the model with the decoded model name
             
             // get messages and prepare user message attachments
@@ -182,7 +197,7 @@ public class RAGProxyServlet extends HttpServlet {
                 user = userObject.getContentText(); // this is the latest user prompt
                 ragMode = userObject.getSearchMode();
             }
-            ConcurrentLog.info("RAGProxy", "ragMode=" + ragMode + " userChars=" + (user == null ? 0 : user.length()));
+            ConcurrentLog.info("RAGProxy", "runId=" + runId + " event=rag-request phase=messages messages=" + messages.length() + " lastUserIndex=" + lastUserIndex + " ragMode=" + ragMode + " userChars=" + (user == null ? 0 : user.length()));
             //List<DataURL> data_urls = userObject.getContentAttachments(); // this list is a copy of the content data_urls
             
             // RAG
@@ -194,17 +209,26 @@ public class RAGProxyServlet extends HttpServlet {
                 final long queryStart = System.currentTimeMillis();
                 if (countWords(user) <= DIRECT_SEARCH_WORD_LIMIT) {
                     searchResultQuery = user;
+                    ConcurrentLog.info("RAGProxy", "runId=" + runId + " event=rag-query phase=select source=direct userWords=" + countWords(user));
                 } else {
-                    searchResultQuery = RAGAugmentor.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user, queryPrefix); // might return null in case any error occurred
-                    if (searchResultQuery == null || searchResultQuery.length() == 0) searchResultQuery = user; // in case there is an error we simply search with the prompt
+                    if (llm4tldr == null) {
+                        searchResultQuery = user;
+                        ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-query phase=fallback reason=no-tldr-model userWords=" + countWords(user));
+                    } else {
+                        searchResultQuery = RAGAugmentor.searchWordsForPrompt(llm4tldr.llm, llm4tldr.model, user, queryPrefix, runId); // might return null in case any error occurred
+                        if (searchResultQuery == null || searchResultQuery.length() == 0) {
+                            searchResultQuery = user; // in case there is an error we simply search with the prompt
+                            ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-query phase=fallback reason=query-generation-empty userWords=" + countWords(user));
+                        }
+                    }
                 }
                 final long queryElapsed = System.currentTimeMillis() - queryStart;
                 final long searchStart = System.currentTimeMillis();
-                searchResultMarkdown = RAGAugmentor.searchResultsAsMarkdown(searchResultQuery, 10, "global".equals(ragMode));
+                searchResultMarkdown = RAGAugmentor.searchResultsAsMarkdown(searchResultQuery, 10, "global".equals(ragMode), runId);
                 final long searchElapsed = System.currentTimeMillis() - searchStart;
                 ConcurrentLog.info(
                     "RAGProxy",
-                    "searchQuery=\"" + searchResultQuery + "\" queryMs=" + queryElapsed + " searchMs=" + searchElapsed +
+                    "runId=" + runId + " event=rag-retrieval phase=end ragMode=" + ragMode + " queryChars=" + searchResultQuery.length() + " queryWords=" + countWords(searchResultQuery) + " queryMs=" + queryElapsed + " searchMs=" + searchElapsed +
                     " markdownChars=" + searchResultMarkdown.length());
                 user += userPrefix;
                 user += searchResultMarkdown;
@@ -217,12 +241,18 @@ public class RAGProxyServlet extends HttpServlet {
             }
 
             // ToolCallProtocol owns request preparation, initial stream handling and follow-up tool rounds.
-            final int status = ToolCallProtocol.proxyToolLifecycle(out, llm4Chat, bodyObject, messages, initialMetadata);
+            final int status = ToolCallProtocol.proxyToolLifecycle(out, llm4Chat, bodyObject, messages, initialMetadata, runId);
             hresponse.setStatus(status);
             out.close(); // close this here to end transmission
+            ConcurrentLog.info("RAGProxy", "runId=" + runId + " event=rag-request phase=end result=success status=" + status + " durationMs=" + elapsed(requestStart));
         } catch (JSONException e) {
+            ConcurrentLog.warn("RAGProxy", "runId=" + runId + " event=rag-request phase=end result=failure errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e) + " durationMs=" + elapsed(requestStart));
             throw new IOException(e.getMessage());
         }
+    }
+
+    private static long elapsed(final long start) {
+        return System.currentTimeMillis() - start;
     }
 
     private static int countWords(final String text) {
