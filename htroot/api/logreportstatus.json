@@ -1,0 +1,12 @@
+{
+  #(authorized)#
+  "error": "authorization required",
+  ::
+  #(/authorized)#
+  "running": #(running)#false::true#(/running)#,
+  "elapsedSeconds": #[elapsedSeconds]#,
+  "partial": "#[partial]#",
+  "outcome": #[outcome]#,
+  "message": "#[message]#",
+  "durationSeconds": #[durationSeconds]#
+}

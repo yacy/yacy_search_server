@@ -26,16 +26,32 @@
         list-style: none;
       }
       .logreport-nav li {
+        position: relative;
         border-bottom: 1px solid #eee;
       }
       .logreport-nav a {
         display: block;
-        padding: 8px 10px;
+        padding: 8px 26px 8px 10px;
         text-decoration: none;
         color: #333;
       }
       .logreport-nav a:hover {
         background: #f5f5f5;
+      }
+      /* small per-report delete button, deletes immediately without confirmation */
+      .logreport-nav a.nav-delete {
+        position: absolute;
+        top: 50%;
+        right: 4px;
+        transform: translateY(-50%);
+        padding: 0 6px;
+        font-size: 1.2em;
+        line-height: 1.2;
+        color: #999;
+      }
+      .logreport-nav a.nav-delete:hover {
+        color: #a94442;
+        background: none;
       }
       .logreport-nav li.selected a {
         background: #eef4fa;
@@ -151,30 +167,135 @@
 
     <h2>Log Reports</h2>
 
+    <!-- the report computation runs asynchronously on the server (LogReportService
+         manual job); this form only triggers it and returns immediately. While the
+         job is running the button is disabled, the progress box is shown and the
+         script below polls the page until the result is available -->
     <form action="LogReports_p.html" method="post" accept-charset="UTF-8" class="logreport-actions" id="runReportForm">
-      <button type="submit" name="runReportNow" value="1" class="btn btn-primary" id="runReportButton">run report now</button>
+      <button type="submit" name="runReportNow" value="1" class="btn btn-primary" id="runReportButton" #(reportRunning)#::disabled="disabled"#(/reportRunning)#>run report now</button>
     </form>
 
-    <!-- shown while the synchronous report generation request is running; the page
-         reloads with the result when the server is done, which removes this again -->
-    <div class="logreport-progress" id="runReportProgress">
+    <div class="logreport-progress" id="runReportProgress" #(reportRunning)#::style="display:flex"#(/reportRunning)#>
       <div class="spinner"></div>
       <div>Generating report from the current-hour log lines &mdash; the LLM call can take a while &hellip;
-        <span id="runReportElapsed">0</span> seconds elapsed</div>
+        <span id="runReportElapsed">#(reportRunning)#0::#[elapsedSeconds]##(/reportRunning)#</span> seconds elapsed</div>
     </div>
 
     <script type="text/javascript">
-      document.getElementById("runReportForm").addEventListener("submit", function () {
+      // Live view of the manual report generation: the job runs asynchronously on
+      // the server, the model output is streamed into a buffer there, and this
+      // script polls api/logreportstatus.json in the background. No hard page
+      // reloads - the partially generated report is rendered in place so the user
+      // can read and scroll in it while it is still being completed.
+      (function () {
         var button = document.getElementById("runReportButton");
-        // a submit button disabled during the submit event would drop its
-        // runReportNow=1 value from the request, so disable it one tick later
-        setTimeout(function () { button.disabled = true; }, 0);
-        document.getElementById("runReportProgress").style.display = "flex";
-        var started = Date.now();
-        setInterval(function () {
-          document.getElementById("runReportElapsed").textContent = Math.floor((Date.now() - started) / 1000);
-        }, 1000);
-      });
+        var progress = document.getElementById("runReportProgress");
+        var elapsedElement = document.getElementById("runReportElapsed");
+        var liveCard = document.getElementById("liveReportCard");
+        var liveBody = document.getElementById("liveReportMarkdown");
+        var liveTitle = document.getElementById("liveReportTitle");
+        var liveMeta = document.getElementById("liveReportMeta");
+        var selectedCard = document.getElementById("selectedReportCard");
+        var pollTimer = null;
+
+        function setRunningUI(running) {
+          button.disabled = running;
+          progress.style.display = running ? "flex" : "none";
+        }
+
+        function renderPartial(partial) {
+          // the shared markdown module is loaded at the end of the page and might
+          // not be ready when the very first poll response arrives
+          if (!liveCard || !partial || typeof YaCyMarkdown === "undefined") return;
+          liveCard.style.display = "block";
+          if (selectedCard) selectedCard.style.display = "none";
+          // re-rendering the grown markdown into the same element preserves the
+          // scroll position, so the user can read while the report is completed
+          liveBody.innerHTML = YaCyMarkdown.render(partial, { breaks: false });
+          liveBody.classList.add("markdown-body");
+        }
+
+        function showResultBox(cssClass, text) {
+          var box = document.createElement("div");
+          box.className = cssClass;
+          box.textContent = text;
+          progress.parentNode.insertBefore(box, progress);
+        }
+
+        function finish(status) {
+          clearInterval(pollTimer);
+          setRunningUI(false);
+          if (status.outcome === 1) {
+            if (liveTitle) liveTitle.textContent = "YaCy hourly log report (just generated)";
+            if (liveMeta) liveMeta.textContent = status.message + " - " + status.durationSeconds + " seconds";
+            showResultBox("logreport-message", "Current-hour report written: " + status.message + " (" + status.durationSeconds + " seconds)");
+            // add the new report to the navigation column; a delete button is
+            // omitted here on purpose, a page reload will offer it
+            var nav = document.querySelector(".logreport-nav");
+            if (nav) {
+              var li = document.createElement("li");
+              var a = document.createElement("a");
+              a.href = "LogReports_p.html?report=" + encodeURIComponent(status.message);
+              a.title = status.message;
+              var date = document.createElement("span");
+              date.className = "nav-date";
+              date.textContent = status.message.replace(/^report-(\d{4}-\d{2}-\d{2})-(\d{2})\.md$/, "$1 $2:00");
+              var type = document.createElement("span");
+              type.className = "nav-type";
+              type.textContent = "hourly report";
+              a.appendChild(date);
+              a.appendChild(type);
+              li.appendChild(a);
+              nav.insertBefore(li, nav.firstChild);
+            }
+          } else if (status.outcome === 2) {
+            showResultBox("logreport-warning", "No log lines were found for the current hour.");
+          } else if (status.outcome === 3) {
+            showResultBox("logreport-warning", "No production model is configured for the log-report role.");
+          } else if (status.outcome === 4) {
+            showResultBox("logreport-warning", "Report generation failed after " + status.durationSeconds + " seconds: " + status.message);
+          }
+        }
+
+        function poll() {
+          fetch("api/logreportstatus.json", { cache: "no-store" })
+            .then(function (response) { return response.json(); })
+            .then(function (status) {
+              if (status.running) {
+                elapsedElement.textContent = status.elapsedSeconds;
+                renderPartial(status.partial);
+              } else {
+                renderPartial(status.partial); // final render of the complete text
+                finish(status);
+              }
+            })
+            .catch(function (err) { console.warn("report status poll failed", err); });
+        }
+
+        function startPolling() {
+          setRunningUI(true);
+          if (pollTimer) clearInterval(pollTimer);
+          pollTimer = setInterval(poll, 2000);
+          poll();
+        }
+
+        // start the job via fetch instead of a regular form submit, so the page
+        // is not reloaded and the live view keeps its state
+        document.getElementById("runReportForm").addEventListener("submit", function (event) {
+          event.preventDefault();
+          setRunningUI(true);
+          fetch("LogReports_p.html", { method: "POST", body: new URLSearchParams({ runReportNow: "1" }) })
+            .then(function () { startPolling(); })
+            .catch(function (err) {
+              console.warn("could not start report generation", err);
+              setRunningUI(false);
+            });
+        });
+
+        // a job may already be running (started earlier or by another admin)
+        var reportRunning = #(reportRunning)#false::true#(/reportRunning)#;
+        if (reportRunning) startPolling();
+      })();
     </script>
 
     #(runReportResult)#
@@ -223,14 +344,26 @@
             <span class="nav-date">#[date]#</span>
             <span class="nav-type">#[type]# report</span>
           </a>
+          <a class="nav-delete" href="LogReports_p.html?deleteReport=#[filename]#" title="delete this report">&times;</a>
         </li>
         #{/reports}#
       </ul>
 
       <div class="logreport-main">
+        <!-- live view of the report which is currently being generated: the polling
+             script streams the partial model output into this card. Intentionally
+             without a delete button - the report file does not exist yet -->
+        <div class="logreport-card" id="liveReportCard" style="display:none">
+          <div class="logreport-header">
+            <div class="logreport-title" id="liveReportTitle">Report generation in progress &hellip;</div>
+            <div class="logreport-meta" id="liveReportMeta">the report below is completed live while the model is writing</div>
+          </div>
+          <div class="logreport-body" id="liveReportMarkdown"></div>
+        </div>
+
         #(selectedReport)#
         ::
-        <div class="logreport-card">
+        <div class="logreport-card" id="selectedReportCard">
           <div class="logreport-header">
             <div class="logreport-title">#[title]#</div>
             <div class="logreport-meta">

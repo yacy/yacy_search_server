@@ -133,6 +133,103 @@ public class LogReportService {
         return LLM.llmFromUsageQuiet(LLMUsage.logreport) != null;
     }
 
+    /*
+     * Manual "run report now" job, triggered from /LogReports_p.html. The report
+     * computation is a long-running LLM call which would exceed the browser/servlet
+     * timeout when executed synchronously, therefore the servlet only starts this
+     * job and returns; the front-end polls the page and reads the state below until
+     * the job is finished. The computation itself is the same
+     * generateCurrentHourReportOverwrite() that the scheduler environment uses.
+     */
+
+    private static final AtomicBoolean MANUAL_JOB_RUNNING = new AtomicBoolean(false);
+    /** partially generated report text, filled live from the model output stream */
+    private static final StringBuilder MANUAL_JOB_PARTIAL = new StringBuilder();
+    private static volatile long manualJobStart = 0L;
+    /** outcome of the last finished job, using the runReportResult template cases of
+     *  LogReports_p.html: 0=none, 1=success, 2=no log lines, 3=no model, 4=failure */
+    private static volatile int manualJobOutcome = 0;
+    private static volatile String manualJobMessage = "";
+    private static volatile long manualJobDurationSeconds = 0L;
+
+    /** Snapshot of a finished manual report job for one-time display. */
+    public static final class ManualJobResult {
+        public final int outcome;
+        public final String message; // report filename on success, error message on failure
+        public final long durationSeconds;
+        private ManualJobResult(final int outcome, final String message, final long durationSeconds) {
+            this.outcome = outcome;
+            this.message = message;
+            this.durationSeconds = durationSeconds;
+        }
+    }
+
+    /**
+     * Start the manual report computation in a background thread.
+     * @return true if a new job was started, false if one is already running
+     */
+    public boolean startManualReportJob() {
+        if (!MANUAL_JOB_RUNNING.compareAndSet(false, true)) return false;
+        manualJobStart = System.currentTimeMillis();
+        manualJobOutcome = 0;
+        synchronized (MANUAL_JOB_PARTIAL) {
+            MANUAL_JOB_PARTIAL.setLength(0);
+        }
+        final Thread worker = new Thread(() -> {
+            final long start = System.currentTimeMillis();
+            try {
+                final File reportFile = generateCurrentHourReportOverwrite(delta -> {
+                    synchronized (MANUAL_JOB_PARTIAL) {
+                        MANUAL_JOB_PARTIAL.append(delta);
+                    }
+                });
+                if (reportFile == null) {
+                    manualJobMessage = "";
+                    manualJobOutcome = hasConfiguredLogReportModel() ? 2 : 3;
+                } else {
+                    manualJobMessage = reportFile.getName();
+                    manualJobOutcome = 1;
+                }
+            } catch (final Exception e) {
+                manualJobMessage = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+                manualJobOutcome = 4;
+            } finally {
+                manualJobDurationSeconds = Math.max(0L, (System.currentTimeMillis() - start) / 1000L);
+                MANUAL_JOB_RUNNING.set(false);
+            }
+        }, "LogReportService.manualReport");
+        worker.setDaemon(true);
+        worker.start();
+        return true;
+    }
+
+    public static boolean isManualReportJobRunning() {
+        return MANUAL_JOB_RUNNING.get();
+    }
+
+    public static long manualReportJobElapsedSeconds() {
+        return MANUAL_JOB_RUNNING.get() ? Math.max(0L, (System.currentTimeMillis() - manualJobStart) / 1000L) : 0L;
+    }
+
+    /** @return the report text generated so far by the running manual job */
+    public static String manualReportJobPartialReport() {
+        synchronized (MANUAL_JOB_PARTIAL) {
+            return MANUAL_JOB_PARTIAL.toString();
+        }
+    }
+
+    /**
+     * Fetch and clear the outcome of the last finished manual report job, so the
+     * result message is displayed exactly once on the next page render.
+     * @return the result snapshot, or null when no job finished since the last call
+     */
+    public static ManualJobResult consumeManualReportJobResult() {
+        if (MANUAL_JOB_RUNNING.get() || manualJobOutcome == 0) return null;
+        final ManualJobResult result = new ManualJobResult(manualJobOutcome, manualJobMessage, manualJobDurationSeconds);
+        manualJobOutcome = 0;
+        return result;
+    }
+
     public static ScheduledExecutorService startScheduler(final Switchboard sb) {
         if (sb == null) return null;
         if (!sb.getConfigBool(CONFIG_ENABLED, true)) {
@@ -259,7 +356,7 @@ public class LogReportService {
                 final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
                 log.info("runId=" + runId + " event=hourly-report phase=model-call bucket=" + bucket.getKey() + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " inputLines=" + bucket.getValue().size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
                 final long modelStart = System.currentTimeMillis();
-                final String report = model.llm.chat(model.model, SYSTEM_PROMPT, prompt, maxTokens);
+                final String report = model.llm.chatStream(model.model, SYSTEM_PROMPT, prompt, maxTokens, null);
                 final long modelDuration = elapsed(modelStart);
                 log.info("runId=" + runId + " event=hourly-report phase=model-return bucket=" + bucket.getKey() + " durationMs=" + modelDuration + " outputChars=" + (report == null ? 0 : report.length()));
                 if (report == null || report.trim().isEmpty()) {
@@ -278,6 +375,15 @@ public class LogReportService {
     }
 
     public File generateCurrentHourReportOverwrite() throws IOException {
+        return generateCurrentHourReportOverwrite(null);
+    }
+
+    /**
+     * Generate the current-hour report, streaming the model output into the given
+     * consumer while the generation is running (used for the live view of the
+     * manual "run report now" job).
+     */
+    public File generateCurrentHourReportOverwrite(final java.util.function.Consumer<String> onDelta) throws IOException {
         final String runId = newRunId();
         final long start = System.currentTimeMillis();
         log.info("runId=" + runId + " event=current-hour-report phase=start mode=manual");
@@ -310,7 +416,7 @@ public class LogReportService {
         final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
         log.info("runId=" + runId + " event=current-hour-report phase=model-call bucket=" + currentHour + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " inputLines=" + bucketLines.size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
         final long modelStart = System.currentTimeMillis();
-        final String report = model.llm.chat(model.model, SYSTEM_PROMPT, prompt, maxTokens);
+        final String report = model.llm.chatStream(model.model, SYSTEM_PROMPT, prompt, maxTokens, onDelta);
         log.info("runId=" + runId + " event=current-hour-report phase=model-return bucket=" + currentHour + " durationMs=" + elapsed(modelStart) + " outputChars=" + (report == null ? 0 : report.length()));
         if (report == null || report.trim().isEmpty()) {
             log.warn("runId=" + runId + " event=current-hour-report phase=model-return result=failure bucket=" + currentHour + " reason=empty-report");
@@ -373,7 +479,7 @@ public class LogReportService {
                 final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
                 log.info("runId=" + runId + " event=daily-report phase=model-call day=" + day.getKey() + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " sourceReports=" + day.getValue().size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
                 final long modelStart = System.currentTimeMillis();
-                final String report = model.llm.chat(model.model, SYSTEM_PROMPT, prompt, maxTokens);
+                final String report = model.llm.chatStream(model.model, SYSTEM_PROMPT, prompt, maxTokens, null);
                 log.info("runId=" + runId + " event=daily-report phase=model-return day=" + day.getKey() + " durationMs=" + elapsed(modelStart) + " outputChars=" + (report == null ? 0 : report.length()));
                 if (report == null || report.trim().isEmpty()) {
                     throw new IOException("model returned an empty daily report");
@@ -498,11 +604,50 @@ public class LogReportService {
                 .append("6. Concrete actions\n\n")
                 .append("Each concrete action must identify the log trigger and expected effect. ")
                 .append("Do not include secrets, credentials, or raw user content beyond what already appears in the log metadata.\n\n")
-                .append("Log lines:\n");
+                .append("Log lines (noise lines are omitted here, they are already summarized in the noise classification above):\n");
+        // Only non-noise lines go into the prompt: the classified noise lines are
+        // already represented by the category counts and examples above. Sending
+        // them again as raw text would blow the prompt up to hundreds of kilobytes,
+        // and the model-side prompt processing time grows with every token - this
+        // was the reason why a report generation took many minutes.
+        final StringBuilder linesText = new StringBuilder(lines.size() * 120);
+        int omittedNoise = 0;
         for (final String line : lines) {
-            prompt.append(line).append('\n');
+            if (noiseCategory(line) != null) {
+                omittedNoise++;
+                continue;
+            }
+            linesText.append(line).append('\n');
         }
+        if (omittedNoise > 0) {
+            prompt.append("(").append(omittedNoise).append(" noise lines omitted)\n");
+        }
+        appendWithPromptBudget(prompt, linesText);
         return prompt.toString();
+    }
+
+    /**
+     * Upper bound for the variable part of a report prompt. Local models process the
+     * prompt token by token before they generate anything, so an unbounded prompt
+     * makes the report generation arbitrarily slow. 64k chars are roughly 16k tokens.
+     */
+    private static final int MAX_PROMPT_PAYLOAD_CHARS = 65536;
+
+    /**
+     * Append the payload to the prompt, truncated to MAX_PROMPT_PAYLOAD_CHARS.
+     * When truncating, the most recent part (the tail) is kept because the newest
+     * log lines are the most relevant ones for the report.
+     */
+    private static void appendWithPromptBudget(final StringBuilder prompt, final StringBuilder payload) {
+        if (payload.length() <= MAX_PROMPT_PAYLOAD_CHARS) {
+            prompt.append(payload);
+            return;
+        }
+        int cut = payload.length() - MAX_PROMPT_PAYLOAD_CHARS;
+        final int lineStart = payload.indexOf("\n", cut);
+        if (lineStart >= 0) cut = lineStart + 1; // do not start with a partial line
+        prompt.append("(older content truncated to fit the prompt budget)\n")
+                .append(payload, cut, payload.length());
     }
 
     private static NoiseSummary classifyNoise(final List<String> lines) {
@@ -664,10 +809,12 @@ public class LogReportService {
                 .append("5. Possible improvements\n")
                 .append("6. Concrete actions\n\n")
                 .append("Find common patterns across the day. Each concrete action must identify the repeated log trigger and expected effect.\n\n");
+        final StringBuilder reportsText = new StringBuilder(hourlyReports.size() * 4096);
         for (final File hourlyReport : hourlyReports) {
-            prompt.append("\n\n## ").append(hourlyReport.getName()).append("\n\n")
+            reportsText.append("\n\n## ").append(hourlyReport.getName()).append("\n\n")
                     .append(new String(Files.readAllBytes(hourlyReport.toPath()), StandardCharsets.UTF_8));
         }
+        appendWithPromptBudget(prompt, reportsText);
         return prompt.toString();
     }
 

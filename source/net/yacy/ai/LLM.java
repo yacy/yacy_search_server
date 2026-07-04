@@ -402,6 +402,70 @@ public class LLM {
             throw new IOException(e.getMessage());
         }
     }
+
+    /**
+     * OpenAI chat client like chat(), but with streaming: the model output is read
+     * as server-sent events and every content delta is passed to the onDelta consumer
+     * as soon as it arrives. This allows callers (i.e. the log report generator) to
+     * show partially generated output live while the model is still working.
+     * @param onDelta receives each content fragment in order; may be null
+     * @return the complete concatenated model output
+     */
+    public String chatStream(final String model, final String systemPrompt, final String userPrompt, final int max_tokens, final java.util.function.Consumer<String> onDelta) throws IOException {
+        final JSONObject data = new JSONObject();
+        try {
+            final Context context = new Context(systemPrompt);
+            context.addPrompt(userPrompt);
+            data.put("model", model);
+            data.put("temperature", 0.1);
+            data.put("max_tokens", max_tokens);
+            data.put("messages", context);
+            data.put("stop", new JSONArray(STOPTOKENS));
+            data.put("stream", true);
+            applyNoThinkingParametersIfNeeded(model, data);
+
+            final URL url = new URI(this.hoststub + "/v1/chat/completions").toURL();
+            final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Accept", "text/event-stream");
+            if (this.api_key != null && !this.api_key.isEmpty()) {
+                conn.setRequestProperty("Authorization", "Bearer " + this.api_key);
+            }
+            conn.setDoOutput(true);
+            try (OutputStream os = conn.getOutputStream()) {
+                final byte[] input = data.toString().getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            final int responseCode = conn.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new IOException("Request failed with response code " + responseCode);
+            }
+            final StringBuilder full = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    line = line.trim();
+                    if (!line.startsWith("data:")) continue; // SSE frames only; keep-alive lines are skipped
+                    final String payload = line.substring(5).trim();
+                    if (payload.equals("[DONE]")) break;
+                    final JSONObject event = new JSONObject(payload);
+                    final JSONArray choices = event.optJSONArray("choices");
+                    if (choices == null || choices.length() == 0) continue;
+                    final JSONObject delta = choices.getJSONObject(0).optJSONObject("delta");
+                    final String content = delta == null ? "" : delta.optString("content", "");
+                    if (!content.isEmpty()) {
+                        full.append(content);
+                        if (onDelta != null) onDelta.accept(content);
+                    }
+                }
+            }
+            return full.toString();
+        } catch (JSONException | URISyntaxException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
     
     public static String[] stringsFromChat(String chatanswer) throws JSONException {
         final List<String> list = new ArrayList<>();

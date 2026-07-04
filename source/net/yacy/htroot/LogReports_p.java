@@ -35,30 +35,35 @@ public class LogReports_p {
 
         sb.setConfig("ui.LogReports_p.visited", "true");
 
+        // "run report now" starts the computation asynchronously (the LLM call can take
+        // minutes and would run into the request timeout); the page polls itself while
+        // LogReportService reports the job as running and shows the result afterwards
         prop.put("runReportResult", "0");
-        prop.putHTML("runReportFile", "");
         prop.putHTML("runReportResult_runReportFile", "");
         prop.putNum("runReportResult_runReportDurationSeconds", 0);
         if (post != null && post.containsKey("runReportNow")) {
-            final long start = System.currentTimeMillis();
-            try {
-                final File reportFile = service.generateCurrentHourReportOverwrite();
-                final long durationSeconds = Math.max(0L, (System.currentTimeMillis() - start) / 1000L);
-                prop.putNum("runReportResult_runReportDurationSeconds", durationSeconds);
-                if (reportFile == null) {
-                    prop.put("runReportResult", LogReportService.hasConfiguredLogReportModel() ? "2" : "3");
-                } else {
-                    prop.put("runReportResult", "1");
-                    prop.putHTML("runReportFile", reportFile.getName());
-                    prop.putHTML("runReportResult_runReportFile", reportFile.getName());
-                }
-            } catch (final Exception e) {
-                final long durationSeconds = Math.max(0L, (System.currentTimeMillis() - start) / 1000L);
-                prop.putNum("runReportResult_runReportDurationSeconds", durationSeconds);
-                prop.put("runReportResult", "4");
-                final String message = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
-                prop.putHTML("runReportFile", message);
-                prop.putHTML("runReportResult_runReportFile", message);
+            service.startManualReportJob(); // no-op if a job is already running
+        }
+        final boolean reportRunning = LogReportService.isManualReportJobRunning();
+        prop.put("reportRunning", reportRunning ? "1" : "0");
+        prop.putNum("reportRunning_elapsedSeconds", LogReportService.manualReportJobElapsedSeconds());
+        if (!reportRunning) {
+            final LogReportService.ManualJobResult result = LogReportService.consumeManualReportJobResult();
+            if (result != null) {
+                prop.put("runReportResult", result.outcome);
+                prop.putHTML("runReportResult_runReportFile", result.message);
+                prop.putNum("runReportResult_runReportDurationSeconds", result.durationSeconds);
+            }
+        }
+
+        // delete a report when requested from the navigation column (immediate, no
+        // confirmation); the filename is strictly validated against the report
+        // filename patterns, which excludes any path traversal
+        final String deleteReport = post == null ? "" : post.get("deleteReport", "");
+        if (deleteReport.matches("report-\\d{4}-\\d{2}-\\d{2}(-\\d{2})?\\.md")) {
+            final File deleteFile = new File(reportDirectory, deleteReport);
+            if (deleteFile.isFile() && !deleteFile.delete()) {
+                net.yacy.cora.util.ConcurrentLog.warn("LogReports", "could not delete log report " + deleteFile.getAbsolutePath());
             }
         }
 
