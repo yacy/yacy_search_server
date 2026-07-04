@@ -227,6 +227,11 @@ public class LLM {
     private static String sendPostRequest(final String urls, final JSONObject data, final String apiKey) throws IOException, URISyntaxException {
         final URL url = new URI(urls).toURL();
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        // Batch calls like the log report generation run large models on CPU and may
+        // take many minutes for a single response. Nothing on our side is allowed to
+        // abort such a call: connecting must fail fast, but reading must never time out.
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(0);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
         if (apiKey != null && !apiKey.isEmpty()) {
@@ -387,10 +392,34 @@ public class LLM {
             final JSONObject choice = choices.getJSONObject(0);
             final JSONObject message = choice.getJSONObject("message");
             final String content = message.optString("content", "");
-            return content;
+            // A truncated answer is not an abort on our side but a generation limit;
+            // make the cause visible because the caller only sees a fragment.
+            final String finishReason = choice.optString("finish_reason", "");
+            if ("length".equals(finishReason)) {
+                log.warn("chat response was truncated by the max_tokens limit (" + max_tokens
+                        + "), model=" + LogRedaction.redact(model)
+                        + ", contentChars=" + content.length()
+                        + ". Configure a higher max_tokens for this model if complete outputs are required.");
+            }
+            return stripThinkBlocks(content);
         } catch (JSONException | URISyntaxException e) {
             throw new IOException(e.getMessage());
         }
+    }
+
+    /**
+     * Remove reasoning blocks from a chat answer. Some backends deliver the chain of
+     * thought of thinking models inline as &lt;think&gt;...&lt;/think&gt; in the content;
+     * a report or answer must only contain the text after the reasoning. An unclosed
+     * think block (e.g. because the response was cut by the token limit) is removed
+     * up to the end of the content.
+     */
+    protected static String stripThinkBlocks(final String content) {
+        if (content == null || content.indexOf("<think>") < 0) return content;
+        final String withoutClosed = content.replaceAll("(?s)<think>.*?</think>", "");
+        final int unclosed = withoutClosed.indexOf("<think>");
+        final String result = unclosed < 0 ? withoutClosed : withoutClosed.substring(0, unclosed);
+        return result.trim();
     }
     
     public String chat(final String model, final String systemPrompt, final String userPrompt, final int max_tokens) throws IOException {

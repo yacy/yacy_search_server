@@ -236,10 +236,12 @@ public class LogReportService {
             log.info("Log report scheduler is disabled by " + CONFIG_ENABLED + ".");
             return null;
         }
-        if (!hasConfiguredLogReportModel()) {
-            log.info("Log report scheduler is inactive because no production model is configured for logreport usage.");
-            return null;
-        }
+        // Note: the scheduler is started even when no logreport model is configured
+        // yet. The model assignment can happen at any time on /LLMSelection_p.html
+        // and must not require a restart; the tick below skips (with a single log
+        // line) as long as the model is missing and picks up work automatically once
+        // it is configured. Do not add an early return here for a missing model -
+        // that would silently disable report generation until the next restart.
 
         final LogReportService service = new LogReportService(sb);
         final long initialDelay = Math.max(0L, sb.getConfigLong(CONFIG_INITIAL_DELAY_MINUTES, DEFAULT_INITIAL_DELAY_MINUTES));
