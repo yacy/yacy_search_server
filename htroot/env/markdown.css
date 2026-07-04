@@ -1,0 +1,64 @@
+/*
+ * Shared styles for rendered markdown content, scoped to the .markdown-body class.
+ * Used by yacychat.html (chat messages) and LogReports_p.html (log reports);
+ * rendered together with js/yacy-markdown.js.
+ * Page-specific container properties (padding, max-height, borders) stay local
+ * to the page stylesheets.
+ */
+
+.markdown-body {
+  white-space: normal;
+}
+
+.markdown-body,
+.markdown-body * {
+  font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace !important; /* Force markdown output and descendants to stay monospace, FTW! */
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6,
+.markdown-body p,
+.markdown-body li,
+.markdown-body pre,
+.markdown-body code {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  border: 1px solid #c3cbd9;
+  margin: 8px 0;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #c3cbd9;
+  padding: 4px 8px;
+}
+
+.markdown-body th {
+  background-color: rgba(27,31,35,0.05);
+}
+
+.markdown-body pre {
+  background-color: #2c3e50;
+  border: 1px solid #dfe2e5;
+  border-radius: 4px;
+  padding: 2px;
+  overflow-x: auto;
+  font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+  white-space: pre;
+}
+
+.markdown-body code {
+  font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 0.95rem;
+  background-color: rgba(27,31,35,0.05);
+  padding: 2px 4px;
+  border-radius: 4px;
+}

@@ -397,8 +397,7 @@ public class PerformanceQueues_p {
 				SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT));
 
 		// parse initialization memory settings
-		final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);
-		prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
+		prop.put("Xmx", xmxToMebibytes(sb.getConfig("javastart_Xmx", "Xmx600m")));
 
         final long diskFree = sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, 3000L);
         final long diskFreeHardlimit = sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, 1000L);
@@ -419,6 +418,34 @@ public class PerformanceQueues_p {
 
         // return rewrite values for templates
         return prop;
+    }
+
+    /**
+     * Parse a JVM maximum heap size option like "Xmx600m", "Xmx16g" or "Xmx2048k"
+     * into mebibytes for display and editing on the Performance page. The value may
+     * have been edited manually in the config file, so all JVM unit suffixes
+     * (k/m/g/t, case-insensitive) and a plain byte count without suffix must be
+     * understood; simply cutting off the last character would misread "Xmx16g" as
+     * 16 MiB and a subsequent form submit would rewrite it as "Xmx16m".
+     * @return the heap size in mebibytes, or 600 if the value cannot be parsed
+     */
+    private static long xmxToMebibytes(String xmx) {
+        try {
+            if (xmx.startsWith("Xmx")) xmx = xmx.substring(3);
+            xmx = xmx.trim();
+            final char unit = Character.toLowerCase(xmx.charAt(xmx.length() - 1));
+            if (Character.isDigit(unit)) return Long.parseLong(xmx) / (1024L * 1024L); // no suffix means bytes
+            final long value = Long.parseLong(xmx.substring(0, xmx.length() - 1));
+            switch (unit) {
+                case 'k': return value / 1024L;
+                case 'm': return value;
+                case 'g': return value * 1024L;
+                case 't': return value * 1024L * 1024L;
+                default: return 600L;
+            }
+        } catch (final RuntimeException e) {
+            return 600L;
+        }
     }
 
     private static String d(final String a, final String b) {
