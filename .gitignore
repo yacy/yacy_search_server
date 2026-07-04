@@ -1,8 +1,11 @@
+.classpath
+.project
 *.class
 *.*~
 lib/yacycore.jar
 libbuild/svnRevNr.jar
 libbuild/GitRevTask.jar
+org.eclipse.*
 gen/**
 /DATA
 classes/
