@@ -48,6 +48,10 @@ public class OpenAIModelsServlet extends HttpServlet {
         HttpServletResponse hresponse = (HttpServletResponse) response;
         HttpServletRequest hrequest = (HttpServletRequest) request;
 
+        // admin passthrough mode: a hoststub parameter selects an LLM endpoint
+        // whose /v1/models is mirrored 1:1 (admin-only)
+        if (LLMAdminProxyServlet.tryHandle(hrequest, hresponse)) return;
+
         // Add CORS headers
         hresponse.setHeader("Access-Control-Allow-Origin", "*");
         hresponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");

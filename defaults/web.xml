@@ -65,6 +65,13 @@
         <servlet-class>net.yacy.http.servlets.OpenAIModelsServlet</servlet-class>
     </servlet>
     
+    <!-- admin passthrough proxy for configured LLM endpoints; also embedded in the
+         RAGProxy/OllamaTags/OpenAIModels servlets, activated by a hoststub parameter -->
+    <servlet>
+        <servlet-name>LLMAdminProxyServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.LLMAdminProxyServlet</servlet-class>
+    </servlet>
+
     <servlet>
         <servlet-name>MCPSearchServlet</servlet-name>
         <servlet-class>net.yacy.http.servlets.MCPSearchServlet</servlet-class>
@@ -116,6 +123,13 @@
     <servlet-mapping>
         <servlet-name>OpenAIModelsServlet</servlet-name>
         <url-pattern>/v1/models</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LLMAdminProxyServlet</servlet-name>
+        <url-pattern>/api/pull</url-pattern>
+        <url-pattern>/api/delete</url-pattern>
+        <url-pattern>/api/show</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

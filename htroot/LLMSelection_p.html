@@ -128,7 +128,21 @@
 
       /***
        ***  API functions to access Ollama or OpenAI endpoints (list/load/delete models)
+       ***
+       ***  All endpoint calls are routed through the YaCy-internal admin passthrough
+       ***  proxy (see LLMAdminProxyServlet.java): instead of calling the LLM endpoint
+       ***  directly, the browser calls the same API path on YaCy itself (same-origin)
+       ***  and passes the target endpoint as hoststub parameter. This keeps endpoints
+       ***  reachable which are only visible from the YaCy server (remote YaCy
+       ***  installations), avoids CORS/mixed-content issues and lets YaCy inject the
+       ***  stored api_key server-side. The proxy requires admin authentication, which
+       ***  the browser already holds on this page.
        ***/
+
+      function proxyUrl(hoststub, path) {
+        const target = (hoststub || "").trim().replace(/\/+$/, "");
+        return `${path}?hoststub=${encodeURIComponent(target)}`;
+      }
 
       async function fetchJsonOrThrow(url, options = {}) {
         const response = await fetch(url, options);
@@ -222,7 +236,7 @@
       }
 
       async function deleteOllamaModel(hoststub, modelName) {
-        const response = await fetch(`${hoststub}/api/delete`, {
+        const response = await fetch(proxyUrl(hoststub, "/api/delete"), {
           method: "DELETE",
           headers: {"Accept": "application/json", "Content-Type": "application/json"},
           body: JSON.stringify({ model: modelName })
@@ -235,7 +249,7 @@
       }
 
       async function downloadOllamaModel(hoststub, modelName) {
-        const response = await fetch(`${hoststub}/api/pull`, {
+        const response = await fetch(proxyUrl(hoststub, "/api/pull"), {
           method: "POST",
           headers: {"Accept": "application/json", "Content-Type": "application/json"},
           body: JSON.stringify({ model: modelName, stream: false })
@@ -256,7 +270,15 @@
       }
 
       async function requestModelsForService(service, hoststub) {
-        return service === "OLLAMA" ? fetchJsonOrThrow(`${hoststub}/api/tags`) : fetchJsonOrThrow(`${hoststub}/v1/models`);
+        const url = service === "OLLAMA" ? proxyUrl(hoststub, "/api/tags") : proxyUrl(hoststub, "/v1/models");
+        const options = {};
+        const apikeyEl = document.getElementById("apikey");
+        const apikey = apikeyEl ? apikeyEl.value.trim() : "";
+        if (apikey) {
+          // for endpoints which are not saved yet the proxy cannot look up the key itself
+          options.headers = { "Authorization": `Bearer ${apikey}` };
+        }
+        return fetchJsonOrThrow(url, options);
       }
 
       function handleModelLoadError(service, error) {
@@ -1200,7 +1222,7 @@
         if (!endpointBase) {
           return false;
         }
-        const targetUrl = `${endpointBase}${TEST_STRINGS.toolingEndpointPath}`;
+        const targetUrl = proxyUrl(endpointBase, TEST_STRINGS.toolingEndpointPath);
         const headers = { "Content-Type": "application/json" };
         if (apikey) {
           headers.Authorization = `Bearer ${apikey}`;
@@ -1296,7 +1318,7 @@
         if (!endpointBase) {
           return false;
         }
-        const targetUrl = `${endpointBase}${TEST_STRINGS.toolingEndpointPath}`;
+        const targetUrl = proxyUrl(endpointBase, TEST_STRINGS.toolingEndpointPath);
         const headers = { "Content-Type": "application/json" };
         if (apikey) {
           headers.Authorization = `Bearer ${apikey}`;
@@ -1429,7 +1451,7 @@
         if (!endpointBase) {
           return false;
         }
-        const targetUrl = `${endpointBase}${TEST_STRINGS.toolingEndpointPath}`;
+        const targetUrl = proxyUrl(endpointBase, TEST_STRINGS.toolingEndpointPath);
         const headers = { "Content-Type": "application/json" };
         if (apikey) {
           headers.Authorization = `Bearer ${apikey}`;
@@ -1618,7 +1640,7 @@
       }
 
       async function runSingleFormatCapabilityTest(service, endpointBase, modelName, apikey, inputText) {
-        const targetUrl = `${endpointBase}${TEST_STRINGS.toolingEndpointPath}`;
+        const targetUrl = proxyUrl(endpointBase, TEST_STRINGS.toolingEndpointPath);
         const headers = { "Content-Type": "application/json" };
         if (apikey) {
           headers.Authorization = `Bearer ${apikey}`;

@@ -55,6 +55,13 @@ import net.yacy.search.Switchboard;
 /**
  * This class implements a Retrieval Augmented Generation ("RAG") proxy which
  * uses a YaCy search index to enrich a chat with search results.
+ *
+ * The endpoint has two operation modes (see LLMAdminProxyServlet for the concept):
+ * without a "hoststub" request parameter it is the public, AIShield-regulated RAG chat
+ * proxy implemented in this class, where the target LLM comes from the server-side
+ * configuration. With a "hoststub" parameter the request is handed over to the
+ * admin-only passthrough proxy which mirrors the given endpoint 1:1.
+ *
  * You can test this using a curl command:
  curl -X POST "http://localhost:8090/v1/chat/completions"\
      -s -H "Content-Type: application/json"\
@@ -91,6 +98,10 @@ public class RAGProxyServlet extends HttpServlet {
 
         HttpServletResponse hresponse = (HttpServletResponse) response;
         HttpServletRequest hrequest = (HttpServletRequest) request;
+
+        // admin passthrough mode: a hoststub parameter selects a configured LLM endpoint
+        // which is mirrored 1:1 (admin-only, no RAG augmentation, no AIShield rules)
+        if (LLMAdminProxyServlet.tryHandle(hrequest, hresponse)) return;
 
         // Add CORS headers
         hresponse.setHeader("Access-Control-Allow-Origin", "*");
