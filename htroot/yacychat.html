@@ -4,6 +4,7 @@
     <title>YaCy '#[clientname]#': Chat</title>
     #%env/templates/metas.template%#
     <link rel="stylesheet" href="js/styles/a11y-dark.min.css" type="text/css" />
+    <link rel="stylesheet" href="env/markdown.css" type="text/css" />
     <style type="text/css">
       /* 1. Global Container */
       .chat-panel {
@@ -121,16 +122,9 @@
         font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
       }
 
-      .chat-body.markdown {
-        white-space: normal;
-      }
-
-      .chat-body.markdown,
-      .chat-body.markdown * {
-        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace !important; /* Force markdown output and descendants to stay monospace, FTW! */
-      }
-
-      .chat-body.markdown.markdown-body {
+      /* markdown output styles come from the shared env/markdown.css (.markdown-body);
+         only the chat-specific container properties are set here */
+      .chat-body.markdown-body {
         max-width: 100%;
         padding: 0;
       }
@@ -224,38 +218,6 @@
         line-height: 1.4;
       }
 
-      .chat-body.markdown h1,
-      .chat-body.markdown h2,
-      .chat-body.markdown h3,
-      .chat-body.markdown h4,
-      .chat-body.markdown h5,
-      .chat-body.markdown h6,
-      .chat-body.markdown p,
-      .chat-body.markdown li,
-      .chat-body.markdown pre,
-      .chat-body.markdown code {
-        font-size: 1.2rem;
-        line-height: 1.6;
-      }
-
-      .chat-body pre {
-        background-color: #2c3e50;
-        border: 1px solid #dfe2e5;
-        border-radius: 4px;
-        padding: 2px;
-        overflow-x: auto;
-        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
-        white-space: pre;
-      }
-
-      .chat-body code {
-        font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
-        font-size: 0.95rem;
-        background-color: rgba(27,31,35,0.05);
-        padding: 2px 4px;
-        border-radius: 4px;
-      }
-    
       /* 6. Composer Row (inside User fieldset) */
       .composer {
         display: flex;
@@ -816,6 +778,7 @@
 
     <script src="js/highlight.min.js"></script>
     <script src="js/marked.umd.js"></script>
+    <script src="js/yacy-markdown.js"></script>
     <script src="js/index.umd.min.js"></script>
     <script src="js/vfs.js"></script>
     <script type="text/javascript">
@@ -996,52 +959,13 @@
         } catch (err) {
             console.warn('Failed to initialize syntax highlighting', err);
         }
-        marked.setOptions({
-            gfm: true,
-            breaks: true,
-            smartLists: true,
-            mangle: false,
-            headerIds: false
-        });
+        marked.setOptions(YaCyMarkdown.markedOptions);
         return { enabled: true };
     })();
 
-    function escapeHTML(value) {
-        const div = document.createElement('div');
-        div.textContent = value || '';
-        return div.innerHTML;
-    }
-
-    function sanitizeHTML(html) {
-        if (!html) return '';
-        const template = document.createElement('template');
-        template.innerHTML = html;
-        const blockedTags = new Set(['script', 'style', 'iframe', 'object', 'embed', 'link', 'meta']);
-        const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT, null);
-        const toRemove = [];
-        while (walker.nextNode()) {
-            const el = walker.currentNode;
-            if (!el || !el.tagName) continue;
-            const tag = el.tagName.toLowerCase();
-            if (blockedTags.has(tag)) {
-                toRemove.push(el);
-                continue;
-            }
-            for (const attr of Array.from(el.attributes)) {
-                const name = attr.name.toLowerCase();
-                const value = attr.value || '';
-                if (name.startsWith('on')) {
-                    el.removeAttribute(attr.name);
-                    continue;
-                }
-                if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
-                    el.removeAttribute(attr.name);
-                }
-            }
-        }
-        toRemove.forEach(node => node.remove());
-        return template.innerHTML;
-    }
+    // shared markdown helpers from js/yacy-markdown.js, also used by LogReports_p.html
+    const escapeHTML = YaCyMarkdown.escapeHTML;
+    const sanitizeHTML = YaCyMarkdown.sanitizeHTML;
 
     function renderMarkdown(content) {
         const source = typeof content === 'string' ? content : '';

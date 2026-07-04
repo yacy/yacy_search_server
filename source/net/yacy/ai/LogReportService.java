@@ -63,7 +63,6 @@ public class LogReportService {
     public static final String CONFIG_PERIOD_MINUTES = "ai.logreport.period_minutes";
     public static final String CONFIG_MAX_TOKENS = "ai.logreport.max_tokens";
     public static final String CONFIG_DAILY_COMPRESSION_ENABLED = "ai.logreport.daily_compression.enabled";
-    public static final String CONFIG_DELETE_HOURLY_AFTER_DAILY = "ai.logreport.daily_compression.delete_hourly";
     public static final String CONFIG_FEED_MAX_ENTRIES = "ai.logreport.feed.max_entries";
     public static final String DEFAULT_REPORT_DIR = "DATA/REPORTS/log";
     public static final int DEFAULT_MAX_BUCKET_LINES = 100000;
@@ -348,21 +347,24 @@ public class LogReportService {
             return Collections.emptyList();
         }
 
-        final Map<LocalDate, List<File>> completeDays = completeHourlyReportSets(reportDirectory);
-        log.info("runId=" + runId + " event=daily-reports phase=scan completeDays=" + completeDays.size() + " path=" + reportDirectory.getAbsolutePath());
-        if (completeDays.isEmpty()) {
-            log.info("runId=" + runId + " event=daily-reports phase=skip reason=no-complete-day durationMs=" + elapsed(start));
+        final Map<LocalDate, List<File>> pastDays = pastDayHourlyReportSets(reportDirectory);
+        log.info("runId=" + runId + " event=daily-reports phase=scan pastDays=" + pastDays.size() + " path=" + reportDirectory.getAbsolutePath());
+        if (pastDays.isEmpty()) {
+            log.info("runId=" + runId + " event=daily-reports phase=skip reason=no-past-day-hourly-reports durationMs=" + elapsed(start));
             return Collections.emptyList();
         }
 
         final List<File> writtenReports = new ArrayList<>();
         int skippedExisting = 0;
         int failedReports = 0;
-        for (final Map.Entry<LocalDate, List<File>> day : completeDays.entrySet()) {
+        for (final Map.Entry<LocalDate, List<File>> day : pastDays.entrySet()) {
             final File dailyReportFile = new File(reportDirectory, dailyReportFilename(day.getKey()));
             if (dailyReportFile.exists()) {
+                // the day was already compressed earlier; only clean up leftover hourly
+                // reports (e.g. written by a manual "run report now" after the compression)
                 skippedExisting++;
-                log.info("runId=" + runId + " event=daily-report phase=skip day=" + day.getKey() + " reason=report-exists file=" + dailyReportFile.getAbsolutePath());
+                deleteHourlyReports(day.getValue());
+                log.info("runId=" + runId + " event=daily-report phase=skip day=" + day.getKey() + " reason=report-exists deletedLeftoverHourly=" + day.getValue().size() + " file=" + dailyReportFile.getAbsolutePath());
                 continue;
             }
             try {
@@ -379,16 +381,15 @@ public class LogReportService {
                 writeReport(dailyReportFile, dailyReportDocument(day.getKey(), day.getValue().size(), report));
                 writtenReports.add(dailyReportFile);
                 log.info("runId=" + runId + " event=daily-report phase=write result=success day=" + day.getKey() + " sourceReports=" + day.getValue().size() + " outputChars=" + report.length() + " file=" + dailyReportFile.getAbsolutePath());
-                if (this.sb.getConfigBool(CONFIG_DELETE_HOURLY_AFTER_DAILY, false)) {
-                    deleteHourlyReports(day.getValue());
-                    log.info("runId=" + runId + " event=daily-report phase=delete-hourly day=" + day.getKey() + " sourceReports=" + day.getValue().size());
-                }
+                // the hourly reports are now bundled into the daily report and must be deleted
+                deleteHourlyReports(day.getValue());
+                log.info("runId=" + runId + " event=daily-report phase=delete-hourly day=" + day.getKey() + " sourceReports=" + day.getValue().size());
             } catch (final IOException e) {
                 failedReports++;
                 log.warn("runId=" + runId + " event=daily-report phase=write result=failure day=" + day.getKey() + " file=" + LogRedaction.redact(dailyReportFile.getAbsolutePath()) + " errorClass=" + e.getClass().getName() + " reason=" + LogRedaction.redactMessage(e));
             }
         }
-        log.info("runId=" + runId + " event=daily-reports phase=end result=success completeDays=" + completeDays.size() + " written=" + writtenReports.size() + " skippedExisting=" + skippedExisting + " failed=" + failedReports + " durationMs=" + elapsed(start));
+        log.info("runId=" + runId + " event=daily-reports phase=end result=success pastDays=" + pastDays.size() + " written=" + writtenReports.size() + " skippedExisting=" + skippedExisting + " failed=" + failedReports + " durationMs=" + elapsed(start));
         return writtenReports;
     }
 
@@ -573,16 +574,25 @@ public class LogReportService {
         return text.toString();
     }
 
-    private static Map<LocalDate, List<File>> completeHourlyReportSets(final File reportDirectory) {
+    /**
+     * Group all hourly reports of past days (strictly before today) by day, ordered
+     * chronologically within each day. Every past day that still has hourly reports is
+     * a compression candidate, no matter how many hours were actually reported - the
+     * peer may have been offline for parts of the day. Only the current day is excluded
+     * because its hourly reports are still accumulating.
+     */
+    private static Map<LocalDate, List<File>> pastDayHourlyReportSets(final File reportDirectory) {
         final File[] files = reportDirectory.listFiles();
         if (files == null || files.length == 0) return Collections.emptyMap();
 
+        final LocalDate today = LocalDate.now();
         final Map<LocalDate, List<File>> candidates = new TreeMap<>();
         for (final File file : files) {
             if (!file.isFile()) continue;
             final LocalDateTime hour = parseHourlyReportFilename(file.getName());
             if (hour == null) continue;
             final LocalDate day = hour.toLocalDate();
+            if (!day.isBefore(today)) continue;
             List<File> dayFiles = candidates.get(day);
             if (dayFiles == null) {
                 dayFiles = new ArrayList<>();
@@ -590,14 +600,11 @@ public class LogReportService {
             }
             dayFiles.add(file);
         }
-
-        final Map<LocalDate, List<File>> complete = new TreeMap<>();
-        for (final Map.Entry<LocalDate, List<File>> entry : candidates.entrySet()) {
-            if (entry.getValue().size() != 24) continue;
-            final List<File> ordered = hourlyFilesForDay(reportDirectory, entry.getKey());
-            if (ordered.size() == 24) complete.put(entry.getKey(), ordered);
+        // the hourly filename pattern sorts chronologically
+        for (final List<File> dayFiles : candidates.values()) {
+            dayFiles.sort((a, b) -> a.getName().compareTo(b.getName()));
         }
-        return complete;
+        return candidates;
     }
 
     private static LocalDateTime parseHourlyReportFilename(final String filename) {
@@ -642,16 +649,6 @@ public class LogReportService {
 
     private static String readFile(final File file) throws IOException {
         return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-    }
-
-    private static List<File> hourlyFilesForDay(final File reportDirectory, final LocalDate day) {
-        final List<File> files = new ArrayList<>(24);
-        for (int hour = 0; hour < 24; hour++) {
-            final File file = new File(reportDirectory, hourlyReportFilename(day.atTime(hour, 0)));
-            if (!file.isFile()) return Collections.emptyList();
-            files.add(file);
-        }
-        return files;
     }
 
     private static String dailyPrompt(final LocalDate day, final List<File> hourlyReports) throws IOException {

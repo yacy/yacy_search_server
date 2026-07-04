@@ -30,9 +30,8 @@ public class LogReports_p {
         final LogReportService service = new LogReportService(sb);
         final File reportDirectory = service.getReportDirectory();
 
-        final int configuredMax = sb.getConfigInt(LogReportService.CONFIG_FEED_MAX_ENTRIES, LogReportService.DEFAULT_FEED_MAX_ENTRIES);
-        final int requestedMax = post == null ? Math.min(20, configuredMax) : post.getInt("count", Math.min(20, configuredMax));
-        final int maxEntries = Math.max(0, Math.min(requestedMax, configuredMax));
+        // fixed display limit; the navigation column shows at most this many reports
+        final int maxEntries = 100;
 
         sb.setConfig("ui.LogReports_p.visited", "true");
 
@@ -66,25 +65,47 @@ public class LogReports_p {
         final List<ReportEntry> reports = service.discoverReports(maxEntries);
 
         prop.put("modelConfigured", LogReportService.hasConfiguredLogReportModel() ? "1" : "0");
-        prop.putNum("count", maxEntries);
-        prop.putNum("maxcount", configuredMax);
         prop.putHTML("reportdir", reportDirectory.getAbsolutePath());
         prop.put("reportdirExists", reportDirectory.isDirectory() ? "1" : "0");
         prop.put("reportdirMissing", reportDirectory.isDirectory() ? "0" : "1");
         prop.put("jsonFeed", "api/logreports.json?count=" + maxEntries);
         prop.put("rssFeed", "api/logreports.rss?count=" + maxEntries);
 
+        // the report to show in the main view is selected by filename from the navigation
+        // column; matching against the discovered list only prevents path traversal.
+        // default is the newest report (first entry, list is sorted newest first)
+        final String requestedReport = post == null ? "" : post.get("report", "");
+        ReportEntry selected = null;
+        for (final ReportEntry report : reports) {
+            if (report.filename.equals(requestedReport)) {
+                selected = report;
+                break;
+            }
+        }
+        if (selected == null && !reports.isEmpty()) selected = reports.get(0);
+
+        // navigation list and selected report live inside the #(hasReports)# alternative,
+        // therefore all template keys carry the "hasReports_" prefix
         for (int i = 0; i < reports.size(); i++) {
             final ReportEntry report = reports.get(i);
-            prop.putHTML("reports_" + i + "_filename", report.filename);
-            prop.putHTML("reports_" + i + "_title", report.title);
-            prop.putHTML("reports_" + i + "_published", report.published.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-            prop.putHTML("reports_" + i + "_type", report.daily ? "daily" : "hourly");
-            prop.put("reports_" + i + "_daily", report.daily ? "1" : "0");
-            prop.putNum("reports_" + i + "_chars", report.content.length());
-            prop.putHTML("reports_" + i + "_content", report.content);
+            final String p = "hasReports_reports_" + i + "_";
+            prop.putHTML(p + "filename", report.filename);
+            prop.putHTML(p + "title", report.title);
+            prop.putHTML(p + "date", report.published.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+            prop.putHTML(p + "type", report.daily ? "daily" : "hourly");
+            prop.put(p + "selected", report == selected ? "1" : "0");
         }
-        prop.put("reports", reports.size());
+        prop.put("hasReports_reports", reports.size());
+
+        prop.put("hasReports_selectedReport", selected == null ? "0" : "1");
+        if (selected != null) {
+            prop.putHTML("hasReports_selectedReport_filename", selected.filename);
+            prop.putHTML("hasReports_selectedReport_title", selected.title);
+            prop.putHTML("hasReports_selectedReport_published", selected.published.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+            prop.putHTML("hasReports_selectedReport_type", selected.daily ? "daily" : "hourly");
+            prop.putNum("hasReports_selectedReport_chars", selected.content.length());
+            prop.putHTML("hasReports_selectedReport_content", selected.content);
+        }
         prop.putNum("reportCount", reports.size());
         prop.put("hasReports", reports.isEmpty() ? "0" : "1");
         prop.put("noReports", reports.isEmpty() ? "1" : "0");

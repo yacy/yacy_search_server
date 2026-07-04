@@ -1450,7 +1450,6 @@ ai.logreport.period_minutes = 60
 ai.logreport.max_bucket_lines = 100000
 ai.logreport.max_tokens = 4096
 ai.logreport.daily_compression.enabled = true
-ai.logreport.daily_compression.delete_hourly = false
 ai.logreport.feed.max_entries = 100
 ai.shield.allow-nonlocalhost = false
 ai.shield.show-chat-link = false

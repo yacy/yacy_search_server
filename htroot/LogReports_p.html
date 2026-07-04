@@ -3,9 +3,58 @@
   <head>
     <title>YaCy '#[clientname]#': Log Reports</title>
     #%env/templates/metas.template%#
+    <link rel="stylesheet" href="js/styles/a11y-dark.min.css" type="text/css" />
+    <link rel="stylesheet" href="env/markdown.css" type="text/css" />
     <style type="text/css">
       .logreport-feeds {
         margin: 0 0 16px 0;
+      }
+      /* two-column layout: navigation of existing reports left, selected report right */
+      .logreport-layout {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .logreport-nav {
+        flex: 0 0 260px;
+        max-height: 640px;
+        overflow: auto;
+        border: 1px solid #ddd;
+        background: #fff;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .logreport-nav li {
+        border-bottom: 1px solid #eee;
+      }
+      .logreport-nav a {
+        display: block;
+        padding: 8px 10px;
+        text-decoration: none;
+        color: #333;
+      }
+      .logreport-nav a:hover {
+        background: #f5f5f5;
+      }
+      .logreport-nav li.selected a {
+        background: #eef4fa;
+        border-left: 4px solid #337ab7;
+        padding-left: 6px;
+        font-weight: bold;
+      }
+      .logreport-nav .nav-date {
+        display: block;
+        font-size: 0.9em;
+      }
+      .logreport-nav .nav-type {
+        display: block;
+        color: #888;
+        font-size: 0.8em;
+      }
+      .logreport-main {
+        flex: 1 1 auto;
+        min-width: 0;
       }
       .logreport-card {
         border: 1px solid #ddd;
@@ -38,6 +87,16 @@
         font-size: 12px;
         line-height: 1.45;
       }
+      /* markdown output styles come from the shared env/markdown.css (.markdown-body);
+         only the report container itself is styled locally. white-space must be
+         repeated here: the .logreport-body pre-wrap rule (raw markdown fallback)
+         would otherwise win over the shared .markdown-body rule, which renders the
+         newlines between the generated HTML blocks as visible empty lines */
+      .logreport-body.markdown-body {
+        max-width: 100%;
+        padding: 12px;
+        white-space: normal;
+      }
       .logreport-empty {
         border: 1px solid #ddd;
         background: #f9f9f9;
@@ -53,6 +112,28 @@
       }
       .logreport-actions {
         margin: 0 0 16px 0;
+      }
+      .logreport-progress {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #5bc0de;
+        border-left: 6px solid #5bc0de;
+        background: #eef9fc;
+        color: #245269;
+        padding: 12px;
+        margin: 10px 0 16px 0;
+      }
+      .logreport-progress .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #b7dff0;
+        border-top-color: #31708f;
+        border-radius: 50%;
+        animation: logreport-spin 0.8s linear infinite;
+      }
+      @keyframes logreport-spin {
+        to { transform: rotate(360deg); }
       }
       .logreport-message {
         border: 1px solid #5bc0de;
@@ -70,18 +151,31 @@
 
     <h2>Log Reports</h2>
 
-    <form action="LogReports_p.html" method="get" accept-charset="UTF-8">
-      <fieldset>
-        <label for="count">Reports</label>
-        <input type="number" name="count" id="count" min="0" max="#[maxcount]#" value="#[count]#" />
-        <input type="submit" value="refresh" />
-      </fieldset>
+    <form action="LogReports_p.html" method="post" accept-charset="UTF-8" class="logreport-actions" id="runReportForm">
+      <button type="submit" name="runReportNow" value="1" class="btn btn-primary" id="runReportButton">run report now</button>
     </form>
 
-    <form action="LogReports_p.html" method="post" accept-charset="UTF-8" class="logreport-actions">
-      <input type="hidden" name="count" value="#[count]#" />
-      <button type="submit" name="runReportNow" value="1" class="btn btn-primary">run report now</button>
-    </form>
+    <!-- shown while the synchronous report generation request is running; the page
+         reloads with the result when the server is done, which removes this again -->
+    <div class="logreport-progress" id="runReportProgress">
+      <div class="spinner"></div>
+      <div>Generating report from the current-hour log lines &mdash; the LLM call can take a while &hellip;
+        <span id="runReportElapsed">0</span> seconds elapsed</div>
+    </div>
+
+    <script type="text/javascript">
+      document.getElementById("runReportForm").addEventListener("submit", function () {
+        var button = document.getElementById("runReportButton");
+        // a submit button disabled during the submit event would drop its
+        // runReportNow=1 value from the request, so disable it one tick later
+        setTimeout(function () { button.disabled = true; }, 0);
+        document.getElementById("runReportProgress").style.display = "flex";
+        var started = Date.now();
+        setInterval(function () {
+          document.getElementById("runReportElapsed").textContent = Math.floor((Date.now() - started) / 1000);
+        }, 1000);
+      });
+    </script>
 
     #(runReportResult)#
     ::
@@ -119,22 +213,65 @@
     <div class="logreport-empty">The report directory does not exist yet. Reports will appear here after the scheduler has generated the first completed hourly report.</div>
     #(/reportdirMissing)#
 
-    #{reports}#
-    <div class="logreport-card">
-      <div class="logreport-header">
-        <div class="logreport-title">#[title]#</div>
-        <div class="logreport-meta">
-          #[type]# report - #[filename]# - #[published]# - #[chars]# characters
+    #(hasReports)#
+    ::
+    <div class="logreport-layout">
+      <ul class="logreport-nav">
+        #{reports}#
+        <li #(selected)#::class="selected"#(/selected)#>
+          <a href="LogReports_p.html?report=#[filename]#" title="#[filename]#">
+            <span class="nav-date">#[date]#</span>
+            <span class="nav-type">#[type]# report</span>
+          </a>
+        </li>
+        #{/reports}#
+      </ul>
+
+      <div class="logreport-main">
+        #(selectedReport)#
+        ::
+        <div class="logreport-card">
+          <div class="logreport-header">
+            <div class="logreport-title">#[title]#</div>
+            <div class="logreport-meta">
+              #[type]# report - #[filename]# - #[published]# - #[chars]# characters
+            </div>
+          </div>
+          <!-- the template writes the escaped markdown source into this element; the
+               script below replaces it with rendered markdown (same pipeline as the
+               chat messages in yacychat.html) and adds the markdown-body class. Without
+               JavaScript the raw markdown stays readable through the pre-wrap rule -->
+          <div class="logreport-body" id="reportMarkdown">#[content]#</div>
         </div>
+        #(/selectedReport)#
       </div>
-      <pre class="logreport-body">#[content]#</pre>
     </div>
-    #{/reports}#
+    #(/hasReports)#
 
     #(noReports)#
     ::
     <div class="logreport-empty">No generated log reports were found.</div>
     #(/noReports)#
+
+    <script src="js/highlight.min.js"></script>
+    <script src="js/marked.umd.js"></script>
+    <script src="js/yacy-markdown.js"></script>
+    <script type="text/javascript">
+      // Render the selected report with the shared markdown pipeline (js/yacy-markdown.js),
+      // the same one used for the chat messages in yacychat.html. textContent yields the
+      // raw markdown source which the server-side template wrote in HTML-escaped form.
+      (function () {
+        var container = document.getElementById("reportMarkdown");
+        if (!container || typeof marked === "undefined") return;
+        // breaks:false because report files have hard-wrapped source lines which
+        // must flow as continuous text, not render as one <br> per source line
+        container.innerHTML = YaCyMarkdown.render(container.textContent, { breaks: false });
+        // the class switches the container from the pre-wrap raw-text fallback
+        // to the rendered-markdown styles from env/markdown.css
+        container.classList.add("markdown-body");
+        YaCyMarkdown.highlightAll(container);
+      })();
+    </script>
 
     #%env/templates/footer.template%#
   </body>
