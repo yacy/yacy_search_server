@@ -193,9 +193,7 @@ public class DocumentIndex extends Segment {
                     condenser,
                     null,
                     DocumentIndex.class.getName() + ".add",
-                    false,
-                    null,
-                    null);
+                    false);
         }
         return rows;
     }

@@ -120,10 +120,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         STORE_HTCACHE                ("storeHTCache",               false, CrawlAttribute.BOOLEAN, "Store in HTCache"),
         CACHE_STRAGEGY               ("cacheStrategy",              false, CrawlAttribute.STRING,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)"),
         AGENT_NAME                   ("agentName",                  false, CrawlAttribute.STRING,  "User Agent Profile Name"),
-        SNAPSHOTS_MAXDEPTH           ("snapshotsMaxDepth",          false, CrawlAttribute.INTEGER, "Max Depth for Snapshots"),
-        SNAPSHOTS_REPLACEOLD         ("snapshotsReplaceOld",        false, CrawlAttribute.BOOLEAN, "Multiple Snapshot Versions - replace old with new"),
-        SNAPSHOTS_MUSTNOTMATCH       ("snapshotsMustnotmatch",      false, CrawlAttribute.STRING,  "must-not-match filter for snapshot generation"),
-        SNAPSHOTS_LOADIMAGE          ("snapshotsLoadImage",         false, CrawlAttribute.BOOLEAN, "Flag for Snapshot image generation"),
         REMOTE_INDEXING              ("remoteIndexing",             false, CrawlAttribute.BOOLEAN, "Remote Indexing (only for p2p networks)"),
         INDEX_TEXT                   ("indexText",                  false, CrawlAttribute.BOOLEAN, "Index Text"),
         INDEX_MEDIA                  ("indexMedia",                 false, CrawlAttribute.BOOLEAN, "Index Media"),
@@ -174,7 +170,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @see CollectionSchema#content_type  */
     private Pattern indexMediaTypeMustNotMatch = null;
 
-    private Pattern snapshotsMustnotmatch = null;
 
     private final Map<String, AtomicInteger> doms;
     private final TagValency defaultValency;
@@ -204,10 +199,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param indexMedia true if media content of URL shall be indexed
      * @param storeHTCache true if content chall be kept in cache after indexing
      * @param remoteIndexing true if part of the crawl job shall be distributed
-     * @param snapshotsMaxDepth if the current crawl depth is equal or below that given depth, a snapshot is generated
-     * @param snapshotsLoadImage true if graphical (== pdf) shapshots shall be made
-     * @param snapshotsReplaceOld true if snapshots shall not be historized
-     * @param snapshotsMustnotmatch a regular expression; if it matches on the url, the snapshot is not generated
      * @param xsstopw true if static stop words shall be ignored
      * @param xdstopw true if dynamic stop words shall be ignored
      * @param xpstopw true if parent stop words shall be ignored
@@ -235,10 +226,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean indexMedia,
                  final boolean storeHTCache,
                  final boolean remoteIndexing,
-                 final int snapshotsMaxDepth,
-                 final boolean snapshotsLoadImage,
-                 final boolean snapshotsReplaceOld,
-                 final String snapshotsMustnotmatch,
                  final CacheStrategy cacheStrategy,
                  final String collections,
                  final String userAgentName,
@@ -281,10 +268,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         this.put(CrawlAttribute.INDEX_MEDIA.key,               indexMedia);
         this.put(CrawlAttribute.STORE_HTCACHE.key,             storeHTCache);
         this.put(CrawlAttribute.REMOTE_INDEXING.key,           remoteIndexing);
-        this.put(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key,        snapshotsMaxDepth);
-        this.put(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key,       snapshotsLoadImage);
-        this.put(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key,      snapshotsReplaceOld);
-        this.put(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key,    snapshotsMustnotmatch);
         this.put(CrawlAttribute.CACHE_STRAGEGY.key,            cacheStrategy.toString());
         this.put(CrawlAttribute.COLLECTIONS.key,               CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
         // we transform the ignore_class_name and scraper information into a JSON Array
@@ -895,41 +878,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
-    public int snapshotMaxdepth() {
-        final String r = this.get(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key);
-        if (r == null) return -1;
-        try {
-            final int i = Integer.parseInt(r);
-            if (i < 0) return -1;
-            return i;
-        } catch (final NumberFormatException e) {
-            ConcurrentLog.logException(e);
-            return -1;
-        }
-    }
-
-    public boolean snapshotLoadImage() {
-        final String r = this.get(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key);
-        if (r == null) return false;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-
-    public boolean snapshotReplaceold() {
-        final String r = this.get(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key);
-        if (r == null) return false;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-
-    public Pattern snapshotsMustnotmatch() {
-        if (this.snapshotsMustnotmatch == null) {
-            final String r = this.get(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key);
-            try {
-                this.snapshotsMustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (final PatternSyntaxException e) { this.snapshotsMustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
-        }
-        return this.snapshotsMustnotmatch;
-    }
-
     public int timezoneOffset() {
         final String timezoneOffset = this.get(CrawlAttribute.TIMEZONEOFFSET.key);
         if (timezoneOffset == null) return 0;
@@ -1038,10 +986,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CrawlAttribute.CACHE_STRAGEGY.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(CrawlAttribute.AGENT_NAME.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_MAXDEPTH.key, this.get(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_REPLACEOLD.key, this.get(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key, this.get(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_LOADIMAGE.key, this.get(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", this.indexText() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);

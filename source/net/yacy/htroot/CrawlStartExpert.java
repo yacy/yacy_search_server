@@ -36,7 +36,6 @@ import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.document.LibraryProvider;
@@ -631,18 +630,6 @@ public class CrawlStartExpert {
                 count++;
             }
             prop.put("vocabularySelect_vocabularyset", count);
-        }
-
-        // ---------- Snapshot generation
-        final boolean wkhtmltopdfAvailable = Html2Image.wkhtmltopdfAvailable();
-        //boolean convertAvailable = Html2Image.convertAvailable();
-        prop.put("snapshotsMaxDepth", post == null ? "-1" : post.get("snapshotsMaxDepth", "-1"));
-        prop.put("snapshotsMustnotmatch", post == null ? "" : post.get("snapshotsMustnotmatch", ""));
-        if (wkhtmltopdfAvailable) {
-            prop.put("snapshotEnableImages", 1);
-            prop.put("snapshotEnableImages_snapshotsLoadImageChecked", post == null ? 1 : post.getBoolean("snapshotsLoadImage") ? 1 : 0);
-        } else {
-            prop.put("snapshotEnableImages", 0);
         }
 
         // ---------- Index Administration

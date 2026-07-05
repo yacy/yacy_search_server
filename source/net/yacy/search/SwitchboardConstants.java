@@ -360,12 +360,6 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
     public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
 
-    /** Key of the setting controlling the maximum time to wait for each wkhtmltopdf call when rendering PDF snapshots */
-    public static final String SNAPSHOTS_WKHTMLTOPDF_TIMEOUT          = "snapshots.wkhtmltopdf.timeout";
-
-    /** Default maximum time in seconds to wait for each wkhtmltopdf call when rendering PDF snapshots*/
-    public static final long SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT   = 30;
-
     /* --- debug flags ---  */
 
     /** when set to true : do not use the local dht/rwi index (which is not done if we do remote searches) */

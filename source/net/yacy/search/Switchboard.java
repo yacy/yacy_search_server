@@ -148,7 +148,6 @@ import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxt;
@@ -789,9 +788,6 @@ public final class Switchboard extends serverSwitch {
                         SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT_DEFAULT),
                 this.getConfigInt(SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL,
                         SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL_DEFAULT));
-        final File transactiondir = new File(this.htCachePath, "snapshots");
-        Transactions.init(transactiondir, this.getConfigLong(SwitchboardConstants.SNAPSHOTS_WKHTMLTOPDF_TIMEOUT,
-                SwitchboardConstants.SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT));
 
         // create the packs directories
         this.packsHoldPath = this.getDataPath(SwitchboardConstants.PACKS_HOLD_PATH, SwitchboardConstants.PACKS_HOLD_PATH_DEFAULT);
@@ -3455,9 +3451,7 @@ public final class Switchboard extends serverSwitch {
                         condenser,
                         searchEvent,
                         sourceName,
-                        this.getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, false),
-                        this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090) : null,
-                                this.getConfig("crawler.http.acceptLanguage", null));
+                        this.getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, false));
         final RSSFeed feed =
                 EventChannel.channels(queueEntry.initiator() == null
                 ? EventChannel.PROXY

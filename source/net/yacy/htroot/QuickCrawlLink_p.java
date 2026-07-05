@@ -160,7 +160,6 @@ public class QuickCrawlLink_p {
                         obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                         indexText, indexMedia,
                         storeHTCache, remoteIndexing,
-                        -1, false, true, CrawlProfile.MATCH_NEVER_STRING,
                         CacheStrategy.IFFRESH,
                         collection,
                         ClientIdentification.yacyIntranetCrawlerAgentName,

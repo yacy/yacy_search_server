@@ -779,7 +779,6 @@ Maximum Pages per Domain==ドメイン毎の最大のページ数
 >No&nbsp;Doubles<==>重複させない<
 >Re-load<==>再読み込み<
 >Document Cache<==>ドキュメントのキャッシュ<
->Snapshot Creation<==>スナップショットの作成<
 >Index Attributes<==>索引の属性<
 "Start New Crawl Job"=="新たなクロールのジョブを開始する"
 #-----------------------------

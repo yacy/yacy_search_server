@@ -480,12 +480,6 @@ public class Crawler_p {
                     }
                 }
 
-                final String snapshotsMaxDepthString = post.get("snapshotsMaxDepth", "-1");
-                final int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
-                final boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
-                final boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
-                final String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
-
                 final String valency_switch_tag_names_s = post.get("valency_switch_tag_names");
                 final Set<String> valency_switch_tag_names = new HashSet<>();
                 if (valency_switch_tag_names_s != null) {
@@ -626,10 +620,6 @@ public class Crawler_p {
                             indexMedia,
                             storeHTCache,
                             crawlOrder,
-                            snapshotsMaxDepth,
-                            snapshotsLoadImage,
-                            snapshotsReplaceOld,
-                            snapshotsMustnotmatch,
                             cachePolicy,
                             collection,
                             agentName,

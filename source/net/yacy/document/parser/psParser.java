@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -47,10 +46,6 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class psParser extends AbstractParser implements Parser {
 
-    private final static Object modeScan = new Object();
-    private static boolean modeScanDone = false;
-    private static String parserMode = "java";
-
     public psParser() {
         super("PostScript Document Parser");
         this.SUPPORTED_EXTENSIONS.add("ps");
@@ -59,32 +54,7 @@ public class psParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-postscript");
         this.SUPPORTED_MIME_TYPES.add("application/x-ps");
         this.SUPPORTED_MIME_TYPES.add("application/x-postscript-not-eps");
-        if (!modeScanDone) synchronized (modeScan) {
-        	if (testForPs2Ascii()) parserMode = "ps2ascii";
-        	else parserMode = "java";
-        	modeScanDone = true;
-		}
     }
-
-    private boolean testForPs2Ascii() {
-        try {
-            String procOutputLine = null;
-            final StringBuilder procOutput = new StringBuilder(80);
-
-            final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", "--version"});
-            final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
-            while ((procOutputLine = stdOut.readLine()) != null) {
-                procOutput.append(procOutputLine).append(", ");
-            }
-            stdOut.close();
-            final int returnCode = ps2asciiProc.waitFor();
-            return (returnCode == 0);
-        } catch (final Exception e) {
-            if (AbstractParser.log != null) AbstractParser.log.info("ps2ascii not found. Switching to java parser mode.");
-            return false;
-        }
-    }
-
 
     private Document[] parse(final DigestURL location, final String mimeType, @SuppressWarnings("unused") final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
 
@@ -93,12 +63,7 @@ public class psParser extends AbstractParser implements Parser {
         	// creating a temp file for the output
         	outputFile = FileUtils.createTempFile(this.getClass(), "ascii.txt");
 
-        	// decide with parser mode to use
-            if (parserMode.equals("ps2ascii")) {
-                parseUsingPS2ascii(sourceFile,outputFile);
-            } else {
-                parseUsingJava(sourceFile,outputFile);
-            }
+            parseUsingJava(sourceFile,outputFile);
 
             // return result
             final Document[] docs = new Document[]{new Document(
@@ -219,41 +184,6 @@ public class psParser extends AbstractParser implements Parser {
         }
 
 
-    }
-
-    /**
-     * This function requires the ghostscript-library
-     * @param inputFile
-     * @param outputFile
-     * @throws Exception
-     */
-    private void parseUsingPS2ascii(final File inputFile, final File outputFile) throws Exception {
-    	int execCode = 0;
-    	StringBuilder procErr = null;
-    	try {
-            String procOutputLine;
-            final StringBuilder procOut = new StringBuilder();
-            procErr = new StringBuilder();
-
-            final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", inputFile.getAbsolutePath(),outputFile.getAbsolutePath()});
-            final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
-            final BufferedReader stdErr = new BufferedReader(new InputStreamReader(ps2asciiProc.getErrorStream()));
-            while ((procOutputLine = stdOut.readLine()) != null) {
-                procOut.append(procOutputLine);
-            }
-            stdOut.close();
-            while ((procOutputLine = stdErr.readLine()) != null) {
-                procErr.append(procOutputLine);
-            }
-            stdErr.close();
-            execCode = ps2asciiProc.waitFor();
-    	} catch (final Exception e) {
-            final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
-            AbstractParser.log.severe(errorMsg);
-            throw new Exception(errorMsg);
-    	}
-
-    	if (execCode != 0) throw new Exception("Unable to convert ps to ascii. ps2ascii returned statuscode " + execCode + "\n" + procErr.toString());
     }
 
     @Override

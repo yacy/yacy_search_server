@@ -1313,16 +1313,7 @@ never use the cache, all content from fresh internet source;==Никогда н�
 use the cache if the cache exists and is fresh using the proxy-fresh rules;==использовать кэш, если кэш существует и это новое использование правил прокси
 use the cache if the cache exist. Do no check freshness. Otherwise use online source;==использовать кэш, если кэш существует. Не проверять на обновления. Иначе использовать интернет-источник;
 never go online, use all content from cache. If no cache exist, treat content as unavailable==всегда оффлайн, использовать весь контент из кэша. Если кэш не существует, то считать что контент недоступен.
->Snapshot Creation<==>Создание снимка<
-Max Depth for Snapshots==Максимальная глубина снимка
-Multiple Snapshot Versions==Версии снимков
-replace old snapshots with new one==заменить старые снимки новыми
 add new versions for each crawl==добавить новые версии для каждого индексирования
-Snapshots are xml metadata and pictures of web pages that can be created during crawling time.==Снимки состоят их XML-данных  и изображений вэб-страниц и могут быть созданы во время индексирования.
-The xml data is stored in the same way as a Solr search result with one hit and the pictures will be stored as pdf into subdirectories==XML-данные хранятся таким же образом, как и результаты поиска Solr; изображения сохраняются в формате pdf в директории
-of HTCACHE/snapshots/. From the pdfs the jpg thumbnails are computed. Snapshot generation can be controlled using a depth parameter; that==HTCACHE/snapshots/. Из pdf создаются эскизы в формате jpg. Создание снимков регулируется параметром "глубина снимка".
-means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,==Это означает, что снимки создаются только, если глубина индексирования документов низкая или равна заданному здесь значению. Если значение "-1",
-no snapshots are generated.==то снимки не создаются.
 >Crawler Filter<==>Фильтр индексатора<
 These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.==Ограничения работы индексатора. Фильтры применяются до загрузки страницы.
 Crawling Depth<==Глубина индексирования<

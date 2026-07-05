@@ -11,7 +11,7 @@
 FROM arm32v7/openjdk:11-jdk as builder
 
 # Install needed packages not in base image
-RUN apt-get update && apt-get install -yq curl wkhtmltopdf imagemagick xvfb ghostscript && \
+RUN apt-get update && apt-get install -yq curl && \
   rm -rf /var/lib/apt/lists/*
 
 # set current working dir & copy sources

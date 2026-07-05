@@ -15,19 +15,14 @@ icon: addon/YaCy256x256.png
 
 apps:
   yacy-search:
-    environment:
-      # needed to run wkhtmltopdf from YaCy within the Snap for Snapshots generation
-      # with wkhtmltopdf 0.12.2.4 included with Ubuntu 16.04 LTS (recommended minimum system to build Snaps in 2018)
-      QT_QPA_PLATFORM_PLUGIN_PATH: "$SNAP/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms"
     command: sh "$SNAP/yacy/addon/snap/snapStartYACY.sh"
     # Interfaces authorizations requirements
     # network-bind - to allow acting as an HTTP server and client
     # desktop - to launch the default desktop navigator when starting (with xdg-open command) - not strictly necessary
-    # home - not strictly necessary but can be convenient for some features to have read/write access to files outside the snap data folders, notably 
+    # home - not strictly necessary but can be convenient for some features to have read/write access to files outside the snap data folders, notably
     #  - to index files in Intranet mode
     #  - for index, dump, vocabulary import/export features
-    # x11 - needed by wkhtmltopdf to generate Snapshots using WebKit engine - not necessary when Snapshots feature is not used
-    plugs: [network-bind, desktop, home, x11]
+    plugs: [network-bind, desktop, home]
   passwd: # set the YaCy administrator password
     command: sh "$SNAP/yacy/addon/snap/snapPasswd.sh"
     # Interfaces authorizations requirements
@@ -43,9 +38,7 @@ parts:
   yacy-search:
     # Additional packages
     # curl : needed by the passwd.sh script to call a YaCy API when the server is running
-    # wkhtmltopdf : needed by the snapshot generation feature. 
-    # Conversion from PDF snapshots to images is done using the pure java pdfbox library, as imagemagick is more difficult to propertly embed within a Snap 
-    stage-packages: [curl, wkhtmltopdf]
+    stage-packages: [curl]
     plugin: ant
     ant-build-targets: 
       - clean

@@ -908,7 +908,6 @@ Max. tags initially displayed==初始显示的最大标签数
 >Pictures<==>图片<
 >Cache<==>缓存<
 >View via Proxy<==>通过代理查看<
->JPG Snapshot<==>JPG快照<
 For this option URL proxy must be enabled.==对于这个选项，必须启用URL代理。
 menu: System Administration > Advanced Settings==菜单：系统管理>高级设置
 Ranking score value, mainly for debug/analysis purpose, configured in <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a>==排名分数值，主要用于调试/分析目的，在<a href="Settings_p.html?page=debug">调试/分析</a>设置中配置
@@ -1465,20 +1464,8 @@ alternative user agents here which have different crawl timings and also identif
 >Enrich Vocabulary<==>丰富词汇<
 >Scraping Fields<==>刮领域<
 You can use class names to enrich the terms of a vocabulary based on the text content that appears on web pages. Please write the names of classes into the matrix.==你可以根据网页上显示的文本内容，使用类名丰富词汇表中的术语。请把类名写进表格。
->Snapshot Creation==>创建快照
->Max Depth for Snapshots<==>快照最大深度<
-Snapshots are xml metadata and pictures of web pages that can be created during crawling time.==快照是可以在爬取期间创建的xml元数据和网页图片。
-The xml data is stored in the same way as a Solr search result with one hit and the pictures will be stored as pdf into subdirectories==xml数据以与Solr搜索结果相同的方式存储，只需点击一次，图片将以pdf格式存储到HTCACHE/snapshots/的子目录中。
-of HTCACHE/snapshots/. From the pdfs the jpg thumbnails are computed. Snapshot generation can be controlled using a depth parameter; that==根据PDF计算jpg缩略图。可以使用深度参数控制快照生成；
-means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,==这意味着只有当文档的爬网深度小于或等于此处给定的数字时，才会生成快照。
-no snapshots are generated.==如果该数字设置为-1，则不会生成快照。
->Multiple Snapshot Versions<==>多个快照版本<
-replace old snapshots with new one==用新快照代替老快照
 add new versions for each crawl==每次爬取添加新版本
->must-not-match filter for snapshot generation<==>快照产生排除过滤器<
 >Image Creation<==>生成快照<
-Only XML snapshots can be generated. as the <a href="https://wkhtmltopdf.org/" target="_blank">wkhtmltopdf</a> util is not found by YaCy on your system.==只能生成XML快照。因为YaCy在你的系统上找不到<a href="https://wkhtmltopdf.org/" target="_blank">wkhtmltopdf</a>工具。
-It is required to generate PDF snapshots from crawled pages that can then be converted to images.==需要从爬取的页面中生成PDF快照，然后将其转换为图像。
 >Index Attributes==>索引属性
 >Indexing<==>创建索引<
 This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==这样就可以对爬虫将下载的网页进行索引。

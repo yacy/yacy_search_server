@@ -63,12 +63,10 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.word.Word;
@@ -596,9 +594,7 @@ public class Segment {
             final Condenser condenser,
             final SearchEvent searchEvent,
             final String sourceName, // contains the crawl profile hash if this comes from a web crawl
-            final boolean storeToRWI,
-            final String proxy,
-            final String acceptLanguage
+            final boolean storeToRWI
             ) {
         final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
         final String language = votedLanguage(url, url.toNormalform(true), document, condenser); // identification of the language
@@ -608,7 +604,7 @@ public class Segment {
 				this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
 
 		return storeDocument(url, crawlProfile, responseHeader, document, vector, language, condenser,
-				searchEvent, sourceName, storeToRWI, proxy, acceptLanguage);
+				searchEvent, sourceName, storeToRWI);
     }
 
     public SolrInputDocument storeDocument(
@@ -621,9 +617,7 @@ public class Segment {
             final Condenser condenser,
             final SearchEvent searchEvent,
             final String sourceName, // contains the crawl profile hash if this comes from a web crawl
-            final boolean storeToRWI,
-            final String proxy,
-            final String acceptLanguage
+            final boolean storeToRWI
             ) {
         final long startTime = System.currentTimeMillis();
 
@@ -646,21 +640,6 @@ public class Segment {
 
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);
-
-        // CREATE SNAPSHOT
-        if ((url.getProtocol().equals("http") || url.getProtocol().equals("https")) &&
-                crawlProfile != null && document.getDepth() <= crawlProfile.snapshotMaxdepth() &&
-                !crawlProfile.snapshotsMustnotmatch().matcher(urlNormalform).matches()) {
-            // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
-            Parser p = document.getParserObject();
-            boolean mimesupported = false;
-            if (p instanceof htmlParser)
-                    mimesupported = ((htmlParser)p).supportedMimeTypes().contains(document.dc_format());
-
-            if (mimesupported)
-                // STORE IMAGE AND METADATA
-                Transactions.store(vector, true, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, acceptLanguage);
-        }
 
         // STORE TO SOLR
         this.putDocument(vector);

@@ -706,42 +706,6 @@
         </fieldset>
         #(/vocabularySelect)#
 
-        <fieldset>
-          <legend>Snapshot Creation</legend>
-          <dl>
-          <dt><label>Max Depth for Snapshots</label></dt>
-          <dd>
-            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            Snapshots are xml metadata and pictures of web pages that can be created during crawling time.
-            The xml data is stored in the same way as a Solr search result with one hit and the pictures will be stored as pdf into subdirectories
-            of HTCACHE/snapshots/. From the pdfs the jpg thumbnails are computed. Snapshot generation can be controlled using a depth parameter; that
-            means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,
-            no snapshots are generated.
-            </span></span>
-            <input type="text" name="snapshotsMaxDepth" id="snapshotsMaxDepth" size="2" maxlength="2" value="#[snapshotsMaxDepth]#" />
-          </dd>
-          <dt><label>Multiple Snapshot Versions</label></dt>
-          <dd>
-            <input type="radio" name="snapshotsReplaceOld" value="on" checked="checked"/> replace old snapshots with new one&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="snapshotsReplaceOld" value="off" /> add new versions for each crawl
-          </dd>
-          <dt><label for="snapshotsMustnotmatch">must-not-match filter for snapshot generation</label></dt>
-          <dd><input name="snapshotsMustnotmatch" id="snapshotsMustnotmatch" type="text" size="55" maxlength="100000" value="#[snapshotsMustnotmatch]#" /></dd>
-          #(snapshotEnableImages)#
-          <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>
-          <dt><label>Image Creation</label></dt>
-          <dd>
-            <div class="info">Only XML snapshots can be generated. as the <a href="https://wkhtmltopdf.org/" target="_blank">wkhtmltopdf</a> util is not found by YaCy on your system.
-                            It is required to generate PDF snapshots from crawled pages that can then be converted to images.</div>
-          </dd>::
-          <dt><label>Image Creation</label></dt>
-          <dd>
-            <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage"#(snapshotsLoadImageChecked)#:: checked="checked"#(/snapshotsLoadImageChecked)#/>
-          </dd>
-          #(/snapshotEnableImages)#
-          </dl>
-        </fieldset>
-
         <dl>
           <dt><input type="hidden" name="crawlingstart" value="1"/><input type="submit" value="Start New Crawl Job" class="btn btn-primary"/></dt><dd></dd>
         </dl>
