@@ -746,56 +746,75 @@ public final class SeedDB implements AlternativeDomainNames {
         final String ipString = peerIP.getHostAddress();
 
         if (lookupConnected) {
-            try {
-                final Collection<byte[]> idx = this.seedActiveDB.select(Seed.IP, ipString);
-                for (final byte[] pk: idx) {
-                    seed = this.getConnected(pk);
-                    if (seed == null) continue;
-                    if (port > 0 && seed.getPort() != port) continue;
-                    //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
-                    return seed;
-                }
-            } catch (final IOException e ) {
-                ConcurrentLog.logException(e);
-            }
+            seed = this.lookupByIndexedIP(this.seedActiveDB, ipString, port);
+            if (seed != null) return seed;
         }
 
         if (lookupDisconnected) {
-            try {
-                final Collection<byte[]> idx = this.seedPassiveDB.select(Seed.IP, ipString);
-                for (final byte[] pk: idx) {
-                    seed = this.getDisconnected(pk);
-                    if (seed == null) continue;
-                    if (port > 0 && seed.getPort() != port) continue;
-                    //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
-                    return seed;
-                }
-            } catch (final IOException e ) {
-                ConcurrentLog.logException(e);
-            }
+            seed = this.lookupByIndexedIP(this.seedPassiveDB, ipString, port);
+            if (seed != null) return seed;
         }
 
         if (lookupPotential) {
-            try {
-                final Collection<byte[]> idx = this.seedPotentialDB.select(Seed.IP, ipString);
-                for (final byte[] pk: idx) {
-                    seed = this.getPotential(pk);
-                    if (seed == null) continue;
-                    if (port > 0 && seed.getPort() != port) continue;
-                    //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
-                    return seed;
-                }
-            } catch (final IOException e ) {
-                ConcurrentLog.logException(e);
-            }
+            seed = this.lookupByIndexedIP(this.seedPotentialDB, ipString, port);
+            if (seed != null) return seed;
+        }
+
+        if (lookupConnected) {
+            seed = this.lookupBySeedAddresses(peerIP, ipString, port, this.seedsConnected(true, false, null, 0.0));
+            if (seed != null) return seed;
+        }
+
+        if (lookupDisconnected) {
+            seed = this.lookupBySeedAddresses(peerIP, ipString, port, this.seedsDisconnected(true, false, null, 0.0));
+            if (seed != null) return seed;
+        }
+
+        if (lookupPotential) {
+            seed = this.lookupBySeedAddresses(peerIP, ipString, port, new seedEnum(true, false, null, null, this.seedPotentialDB, 0.0));
+            if (seed != null) return seed;
         }
 
         // check local seed
-        if (this.mySeed == null || !this.mySeed.getIPs().contains(ipString)) return null;
+        if (this.mySeed == null || !seedHasIP(this.mySeed, peerIP, ipString)) return null;
         final int p = this.mySeed.getPort();
         if (port > 0 && p != port) return null;
         //System.out.println("*** found lookupByIP as my seed: " + peerIP.toString() + " -> " + this.mySeed.getName());
         return this.mySeed;
+    }
+
+    private Seed lookupByIndexedIP(final MapDataMining database, final String ipString, final int port) {
+        try {
+            final Collection<byte[]> idx = database.select(Seed.IP, ipString);
+            for (final byte[] pk: idx) {
+                final Seed seed = this.get(pk, database);
+                if (seed == null) continue;
+                if (port > 0 && seed.getPort() != port) continue;
+                return seed;
+            }
+        } catch (final IOException e ) {
+            ConcurrentLog.logException(e);
+        }
+        return null;
+    }
+
+    private Seed lookupBySeedAddresses(final InetAddress peerIP, final String ipString, final int port, final Iterator<Seed> seeds) {
+        while (seeds.hasNext()) {
+            final Seed seed = seeds.next();
+            if (seed == null) continue;
+            if (port > 0 && seed.getPort() != port) continue;
+            if (seedHasIP(seed, peerIP, ipString)) return seed;
+        }
+        return null;
+    }
+
+    private static boolean seedHasIP(final Seed seed, final InetAddress peerIP, final String ipString) {
+        for (final String seedIP: seed.getIPs()) {
+            if (ipString.equals(seedIP)) return true;
+            final InetAddress resolvedSeedIP = Domains.dnsResolve(seedIP);
+            if (peerIP.equals(resolvedSeedIP)) return true;
+        }
+        return false;
     }
 
     private ArrayList<String> storeSeedList(final File seedFile, final boolean addMySeed) throws IOException {

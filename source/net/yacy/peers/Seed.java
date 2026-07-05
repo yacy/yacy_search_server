@@ -354,7 +354,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if (ip6s == null) return set;
         final StringTokenizer st = new StringTokenizer(ip6s, "|");
         while (st.hasMoreTokens()) {
-            set.add(Domains.chopZoneID(st.nextToken().trim()));
+            final String ip = Domains.chopZoneID(st.nextToken().trim());
+            if (ip != null && !ip.isEmpty()) set.add(ip);
         }
         return set;
     }
@@ -366,12 +367,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     @Deprecated
     public final String getIP() {
-        final String ipx = this.dna.get(Seed.IP); // may contain both, IPv4 or IPv6
-        if (ipx != null && !ipx.isEmpty()) return Domains.chopZoneID(ipx);
-        
-        Set<String> ip6s = getIPv6Entries();
-        if (ip6s != null && ip6s.size() > 0) return ip6s.iterator().next(); 
-        return null;
+        final Set<String> ips = getIPs();
+        return ips.isEmpty() ? null : ips.iterator().next();
     }
 
     /**
@@ -397,13 +394,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return the number of peers in field IP (should be 1 all the time) plus the number of IPs in the IP6 field.
      */
     public final int countIPs() {
-        final String ipx = this.dna.get(Seed.IP); // may contain both, IPv4 or IPv6
-        Set<String> ip6s = getIPv6Entries();
-        
-        if (ip6s == null || ip6s.size() == 0) {
-            return (ipx == null || ipx.isEmpty()) ? 0 : 1;
-        }
-        return (ipx == null || ipx.isEmpty()) ? ip6s.size() : ip6s.size() + 1;
+        return getIPs().size();
     }
     
     /**
@@ -412,6 +403,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return true if the IP was in the seed and had been removed. If the peer did not change, this returns false.
      */
     public final boolean removeIP(String ip) {
+        // A failed publish attempt can pass a missing legacy IPv4 address for IPv6-only seeds.
+        if (ip == null || ip.isEmpty()) return false;
+        ip = Domains.chopZoneID(ip);
         String ipx = Domains.chopZoneID(this.dna.get(Seed.IP)); // may contain both, IPv4 or IPv6
         Set<String> ip6s = getIPv6Entries();
                 
@@ -445,9 +439,23 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public boolean clash(Set<String> ips) {
         Set<String> myIPs = getIPs();
         for (String s: ips) {
-            if (myIPs.contains(s) && isProperIP(s)) return true;
+            if (!isProperIP(s)) continue;
+            if (myIPs.contains(Domains.chopZoneID(s))) return true;
+            for (final String myIP: myIPs) {
+                if (sameIP(myIP, s)) return true;
+            }
         }
         return false;
+    }
+
+    private static boolean sameIP(final String left, final String right) {
+        final String normalizedLeft = Domains.chopZoneID(left);
+        final String normalizedRight = Domains.chopZoneID(right);
+        if (normalizedLeft == null || normalizedRight == null) return false;
+        if (normalizedLeft.equals(normalizedRight)) return true;
+        final java.net.InetAddress leftAddress = Domains.dnsResolve(normalizedLeft);
+        final java.net.InetAddress rightAddress = Domains.dnsResolve(normalizedRight);
+        return leftAddress != null && leftAddress.equals(rightAddress);
     }
     
     /**
@@ -549,26 +557,36 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     
     /**
      * set the Peer ip.
-     * This sets the IP and IP6 field according to the current fill state of that fields:
-     * - if no field has a content, then IP is filled with the given ip, even if that ip is of type IPv6
-     * - if IP is already set then check if this is equivalent with the given ip. If both are equal, nothing is done.
-     *   If they are not equal, the IP and IPv6 field is set according to the type if the given ip: if the given ip
-     *   is of type IPv4, then IP is set with ip, otherwise IP6 is set with the ip.
-     * ATTENTION: if the given IP is IPv6, then after the call that IP is the only one assigned to the peer!
+     * IPv4 stays the preferred primary address in the legacy IP field. IPv6 is added to IP6
+     * when a primary address already exists, while IPv6-only peers can still use IP as their
+     * existence address until an IPv4 address becomes known.
      * @param ip
      */
     public final void setIP(String ip) {
         ip = Domains.chopZoneID(ip);
         if (!isProperIP(ip)) return;
-        String oldIP = this.dna.get(Seed.IP);
-        String oldIP6 = this.dna.get(Seed.IP6);
-        if ((oldIP == null || oldIP.length() == 0) && (oldIP6 == null || oldIP6.length() == 0)) {
+        final boolean ipv6 = ip.indexOf(':') >= 0;
+        String oldIP = Domains.chopZoneID(this.dna.get(Seed.IP));
+        final Set<String> ip6s = getIPv6Entries();
+
+        if (oldIP == null || oldIP.length() == 0) {
             this.dna.put(Seed.IP, ip);
-        } else {
-            if (oldIP == null || !oldIP.equals(ip)) {
-                if (oldIP == null || oldIP.length() == 0 || ip.indexOf(':') == 0) this.dna.put(Seed.IP, ip); else this.dna.put(Seed.IP6, ip);
-            }
+            ip6s.remove(ip);
+            this.dna.put(Seed.IP6, MapTools.set2string(ip6s, "|", false));
+            return;
         }
+
+        if (oldIP.equals(ip)) return;
+
+        if (ipv6) {
+            ip6s.add(ip);
+        } else {
+            // When IPv4 appears after an IPv6-only primary address, preserve that IPv6 in IP6.
+            if (oldIP.indexOf(':') >= 0) ip6s.add(oldIP);
+            ip6s.remove(ip);
+            this.dna.put(Seed.IP, ip);
+        }
+        this.dna.put(Seed.IP6, MapTools.set2string(ip6s, "|", false));
     }
 
     /**
@@ -1389,10 +1407,14 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public static final boolean isProperIP(final String ipString) {
         if (ipString == null) return false;
         if (ipString.length() < 3) return false;
-        if (Switchboard.getSwitchboard().isAllIPMode()) return true; // accept everyting
+        final Switchboard switchboard = Switchboard.getSwitchboard();
+        // Seed address normalization is also used in isolated tests and early object setup.
+        // When no Switchboard exists yet, keep the method limited to basic sanity checks.
+        if (switchboard == null) return true;
+        if (switchboard.isAllIPMode()) return true; // accept everyting
         final boolean islocal = Domains.isLocal(ipString, null);
         //if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
-        return islocal == Switchboard.getSwitchboard().isIntranetMode();
+        return islocal == switchboard.isIntranetMode();
     }
 
     /**

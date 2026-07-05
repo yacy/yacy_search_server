@@ -1184,6 +1184,8 @@ public class Domains {
     }
 
     public static String chopZoneID(final String ip) {
+        // Some peer seeds are IPv6-only and may not carry the legacy Seed.IP value.
+        if (ip == null) return null;
         final int i = ip.indexOf('%');
         return i < 0 ? ip : ip.substring(0, i);
     }
