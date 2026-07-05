@@ -61,7 +61,6 @@ public class LogReportService {
     public static final String CONFIG_MAX_BUCKET_LINES = "ai.logreport.max_bucket_lines";
     public static final String CONFIG_INITIAL_DELAY_MINUTES = "ai.logreport.initial_delay_minutes";
     public static final String CONFIG_PERIOD_MINUTES = "ai.logreport.period_minutes";
-    public static final String CONFIG_MAX_TOKENS = "ai.logreport.max_tokens";
     public static final String CONFIG_DAILY_COMPRESSION_ENABLED = "ai.logreport.daily_compression.enabled";
     public static final String CONFIG_FEED_MAX_ENTRIES = "ai.logreport.feed.max_entries";
     public static final String DEFAULT_REPORT_DIR = "DATA/REPORTS/log";
@@ -352,8 +351,8 @@ public class LogReportService {
             }
             try {
                 final NoiseSummary noiseSummary = classifyNoise(bucket.getValue());
-                final int configuredMaxTokens = this.sb.getConfigInt(CONFIG_MAX_TOKENS, model.llm.max_tokens);
-                final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
+                // output cap follows the model's configured max_tokens (Production Models Matrix)
+                final int maxTokens = Math.max(1, model.llm.max_tokens);
                 final String prompt = hourlyPrompt(bucket.getKey(), bucket.getValue(), noiseSummary, promptPayloadCharBudget(model, maxTokens));
                 log.info("runId=" + runId + " event=hourly-report phase=classify-noise bucket=" + bucket.getKey() + " inputLines=" + bucket.getValue().size() + " noiseLines=" + noiseSummary.classifiedLines() + " noiseCategories=" + noiseSummary.buckets.size());
                 log.info("runId=" + runId + " event=hourly-report phase=model-call bucket=" + bucket.getKey() + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " inputLines=" + bucket.getValue().size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
@@ -412,8 +411,8 @@ public class LogReportService {
 
         final File reportFile = new File(reportDirectory, hourlyReportFilename(currentHour));
         final NoiseSummary noiseSummary = classifyNoise(bucketLines);
-        final int configuredMaxTokens = this.sb.getConfigInt(CONFIG_MAX_TOKENS, model.llm.max_tokens);
-        final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
+        // output cap follows the model's configured max_tokens (Production Models Matrix)
+        final int maxTokens = Math.max(1, model.llm.max_tokens);
         final String prompt = hourlyPrompt(currentHour, bucketLines, noiseSummary, promptPayloadCharBudget(model, maxTokens));
         log.info("runId=" + runId + " event=current-hour-report phase=classify-noise bucket=" + currentHour + " inputLines=" + bucketLines.size() + " noiseLines=" + noiseSummary.classifiedLines() + " noiseCategories=" + noiseSummary.buckets.size());
         log.info("runId=" + runId + " event=current-hour-report phase=model-call bucket=" + currentHour + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " inputLines=" + bucketLines.size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
@@ -476,8 +475,8 @@ public class LogReportService {
                 continue;
             }
             try {
-                final int configuredMaxTokens = this.sb.getConfigInt(CONFIG_MAX_TOKENS, model.llm.max_tokens);
-                final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
+                // output cap follows the model's configured max_tokens (Production Models Matrix)
+                final int maxTokens = Math.max(1, model.llm.max_tokens);
                 final String prompt = dailyPrompt(day.getKey(), day.getValue(), promptPayloadCharBudget(model, maxTokens));
                 log.info("runId=" + runId + " event=daily-report phase=model-call day=" + day.getKey() + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " sourceReports=" + day.getValue().size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
                 final long modelStart = System.currentTimeMillis();
@@ -631,22 +630,23 @@ public class LogReportService {
 
     /**
      * Character budget for the variable part of a report prompt (log lines or hourly
-     * reports), derived from the model's token window. A local model must ingest the
-     * entire prompt before it emits a single output token, and the prompt and the
-     * generated report share one context window: prompt + output has to fit into
-     * model.llm.max_tokens. The payload is therefore sized to (window - output reserve)
-     * tokens, converted to characters.
+     * reports), derived from the service's context window (num_ctx). A local model must
+     * ingest the entire prompt before it emits a single output token, and the prompt and
+     * the generated report share one context window: prompt + output has to fit into
+     * num_ctx. The payload is therefore sized to (num_ctx - output reserve) tokens,
+     * converted to characters.
      * <p>
      * A fixed budget (previously 64k chars ≈ 16k tokens) overflows small windows: with a
-     * default 4k-token model the ~16k-token hourly prompt filled the whole window, left no
-     * room to generate, and the report stopped after one or two tokens. When the output
-     * cap already fills the window (the common case where max_tokens equals the context
-     * length) the payload falls back to a quarter of the window so a report is still
-     * produced; if the output then hits its cap it is truncated and logged
-     * (finish_reason=length) instead of the prompt silently overflowing.
+     * default 4k-token window the ~16k-token hourly prompt filled the whole window, left no
+     * room to generate, and the report stopped after one or two tokens. When the output cap
+     * already fills the window the payload falls back to a quarter of the window so a report
+     * is still produced; if the output then hits its cap it is truncated and logged
+     * (finish_reason=length) instead of the prompt silently overflowing. Raise the service's
+     * num_ctx (on /LLMSelection_p.html, matching the backend's OLLAMA_CONTEXT_LENGTH) to give
+     * the prompt more room.
      */
     private static int promptPayloadCharBudget(final LLMModel model, final int maxTokens) {
-        final int contextTokens = Math.max(1, model.llm.max_tokens);
+        final int contextTokens = Math.max(1, model.llm.num_ctx);
         final int promptTokens = Math.max(
                 Math.max(MIN_PROMPT_PAYLOAD_TOKENS, contextTokens / 4),
                 contextTokens - maxTokens);

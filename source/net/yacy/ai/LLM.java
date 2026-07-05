@@ -47,6 +47,8 @@ public class LLM {
 
     private static final ConcurrentLog log = new ConcurrentLog("LLM");
     private static final String MODEL_CAPABILITIES_CONFIG = "ai.model_capabilities";
+    /** config key: JSON object mapping a service hoststub to its context window (num_ctx) */
+    public static final String SERVICE_NUM_CTX_CONFIG = "ai.service_num_ctx";
     private static String[] STOPTOKENS = new String[]{"[/INST]", "<|im_end|>", "<|end_of_turn|>", "<|eot_id|>", "<|end_header_id|>", "<EOS_TOKEN>", "</s>", "<|end|>"};
 
     public static enum LLMType {
@@ -85,15 +87,31 @@ public class LLM {
         }
     }
     
+    /** Ollama's out-of-the-box context window; used when a service has no num_ctx configured. */
+    public static final int DEFAULT_NUM_CTX = 4096;
+    /**
+     * Sole fallback for a model's max_tokens when a config row is missing the field
+     * (legacy/malformed rows only). The Production Models Matrix is the place where
+     * max_tokens is defined; this must match the matrix UI default (DEFAULT_MAX_TOKENS
+     * in LLMSelection_p.html) so no divergent default exists.
+     */
+    public static final int DEFAULT_MAX_TOKENS = 2048;
+
     public final String hoststub;
     public final String api_key;
-    public final int max_tokens; // the max_tokens as configured by the endpoint for all models
+    public final int max_tokens; // output-token cap (OpenAI max_tokens = Ollama num_predict)
+    public final int num_ctx;    // context window of the inference service (per-service, advisory)
     public final LLMType type;
-    
+
     public LLM(final String hoststub, final String api_key, final int max_tokens, final LLMType type) {
+        this(hoststub, api_key, max_tokens, DEFAULT_NUM_CTX, type);
+    }
+
+    public LLM(final String hoststub, final String api_key, final int max_tokens, final int num_ctx, final LLMType type) {
         this.hoststub = hoststub.endsWith("/") ? hoststub.substring(0, hoststub.length() - 1) : hoststub;
         this.api_key = api_key == null ? "" : api_key;
-        this.max_tokens = max_tokens <= 0 ? 4096 : max_tokens;
+        this.max_tokens = max_tokens <= 0 ? DEFAULT_MAX_TOKENS : max_tokens;
+        this.num_ctx = num_ctx <= 0 ? DEFAULT_NUM_CTX : num_ctx;
         this.type = type;
     }
     
@@ -133,7 +151,7 @@ public class LLM {
                     // found one that shall be used for this use case
                     final String hoststub = row.optString("hoststub", "");
                     final String api_key = row.optString("api_key", "");
-                    final int max_tokens = Integer.parseInt(row.optString("max_tokens", "4096"));
+                    final int max_tokens = Integer.parseInt(row.optString("max_tokens", String.valueOf(DEFAULT_MAX_TOKENS)));
                     final String model = row.optString("model", "");
                     final LLMType type = LLMType.valueOf(row.optString("service", "OLLAMA"));
                     boolean tooling = row.optBoolean("tooling", false);
@@ -145,10 +163,11 @@ public class LLM {
                             if (!thinking) thinking = "supported".equals(capabilityEntry.optString("thinking", ""));
                         }
                     }
-                    LLM llm = new LLM(hoststub, api_key, max_tokens, type);
+                    final int num_ctx = serviceNumCtx(sb, hoststub);
+                    LLM llm = new LLM(hoststub, api_key, max_tokens, num_ctx, type);
                     LLMModel llmmodel = new LLMModel(llm, model, tooling, thinking);
                     if (logRouting) {
-                        log.info(routePrefix(runId, caller) + "event=model-routing phase=select usage=" + llmUsage + " row=" + i + " service=" + type.name() + " model=" + LogRedaction.redact(model) + " backend=" + LogRedaction.redact(llm.hoststub) + " maxTokens=" + llm.max_tokens + " tooling=" + tooling + " thinking=" + thinking + " productionRows=" + production_models.length() + " durationMs=" + elapsed(start));
+                        log.info(routePrefix(runId, caller) + "event=model-routing phase=select usage=" + llmUsage + " row=" + i + " service=" + type.name() + " model=" + LogRedaction.redact(model) + " backend=" + LogRedaction.redact(llm.hoststub) + " maxTokens=" + llm.max_tokens + " numCtx=" + llm.num_ctx + " tooling=" + tooling + " thinking=" + thinking + " productionRows=" + production_models.length() + " durationMs=" + elapsed(start));
                     }
                     return llmmodel;
                 }
@@ -185,6 +204,31 @@ public class LLM {
         final String normalizedHoststub = hoststub == null ? "" : hoststub.replaceAll("/+$", "");
         final String normalizedModel = model == null ? "" : model.trim();
         return normalizedType + "|" + normalizedHoststub + "|" + normalizedModel;
+    }
+
+    /** Normalize a hoststub for use as a service key: trim and drop trailing slashes. */
+    public static String normalizeHoststub(final String hoststub) {
+        if (hoststub == null) return "";
+        return hoststub.trim().replaceAll("/+$", "");
+    }
+
+    /**
+     * Context window (num_ctx) configured for the inference service at the given hoststub.
+     * num_ctx is a per-service setting (a self-hosted server exposes one context length for
+     * all its models via OLLAMA_CONTEXT_LENGTH), stored under SERVICE_NUM_CTX_CONFIG keyed by
+     * hoststub. The value is advisory: YaCy uses it to budget the prompt against the window,
+     * it does not enforce it on the backend. Falls back to DEFAULT_NUM_CTX when unset.
+     */
+    public static int serviceNumCtx(final Switchboard sb, final String hoststub) {
+        if (sb == null) return DEFAULT_NUM_CTX;
+        final String json = sb.getConfig(SERVICE_NUM_CTX_CONFIG, "{}");
+        try {
+            final JSONObject map = new JSONObject(new JSONTokener(json));
+            final int value = map.optInt(normalizeHoststub(hoststub), 0);
+            return value <= 0 ? DEFAULT_NUM_CTX : value;
+        } catch (final JSONException e) {
+            return DEFAULT_NUM_CTX;
+        }
     }
 
     private static JSONObject readModelCapabilities() {
@@ -370,12 +414,12 @@ public class LLM {
             data.put("model", model);
             data.put("temperature", 0.1);
             data.put("max_tokens", max_tokens);
-            // Best-effort hint for Ollama's context window (num_ctx). Ollama's
-            // OpenAI-compatible endpoint does not read this today and pure-OpenAI
-            // backends ignore unknown fields, so it is a harmless forward-looking
-            // hedge; the reliable way to raise the context window remains
+            // Best-effort hint for Ollama's context window (num_ctx), taken from the
+            // per-service configuration. Ollama's OpenAI-compatible endpoint does not read
+            // this today and pure-OpenAI backends ignore unknown fields, so it is a harmless
+            // forward-looking hedge; the reliable way to raise the context window remains
             // OLLAMA_CONTEXT_LENGTH or a Modelfile PARAMETER num_ctx.
-            data.put("num_ctx", max_tokens);
+            data.put("num_ctx", this.num_ctx);
             data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", false);
@@ -454,8 +498,8 @@ public class LLM {
             data.put("model", model);
             data.put("temperature", 0.1);
             data.put("max_tokens", max_tokens);
-            // best-effort num_ctx hint, see chat(); harmless to non-Ollama backends
-            data.put("num_ctx", max_tokens);
+            // best-effort num_ctx hint from the per-service config, see chat(); harmless to non-Ollama backends
+            data.put("num_ctx", this.num_ctx);
             data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", true);

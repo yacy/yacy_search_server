@@ -1434,6 +1434,10 @@ decoration.simpleheadernavbar = navbar-default
 
 # ai settings
 ai.production_models = []
+# per-service context window (num_ctx), JSON object mapping a service hoststub to its
+# token window. Advisory: must match the window the backend actually serves (e.g. Ollama
+# OLLAMA_CONTEXT_LENGTH). Used to budget prompts; unset services default to 4096 tokens.
+ai.service_num_ctx = {}
 ai.system-prompt = You are a smart and helpful chatbot. If possible, use friendly emojies.
 ai.llm-system-prefix = \n\nYou may receive additional expert knowledge in the user prompt after a 'Additional Information' headline to enhance your knowledge. Use it only if applicable.
 ai.llm-user-prefix = \n\nAdditional Information:\n\nbelow you find a collection of texts that might be useful to generate a response. Do not discuss these documents, just use them to answer the question above.\n\n
@@ -1443,10 +1447,6 @@ ai.logreport.dir = DATA/REPORTS/log
 ai.logreport.initial_delay_minutes = 5
 ai.logreport.period_minutes = 60
 ai.logreport.max_bucket_lines = 100000
-# Output-token cap for a generated report. This is the report length only, NOT the
-# context window: the prompt budget is (model max_tokens - this value), so a smaller
-# value here leaves more of the model's context window for the log lines in the prompt.
-ai.logreport.max_tokens = 16384
 ai.logreport.daily_compression.enabled = true
 ai.logreport.feed.max_entries = 100
 ai.shield.allow-nonlocalhost = false

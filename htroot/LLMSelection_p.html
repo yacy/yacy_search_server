@@ -5,7 +5,7 @@
     <title>YaCy '#[clientname]#': LLM Selection</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="IndexControl" data-llm-service="#[llm_service]#" data-llm-hoststub="#[llm_hoststub]#" data-llm-apikey="#[llm_apikey]#" data-model-capabilities="#[model_capabilities]#">
+  <body id="IndexControl" data-llm-service="#[llm_service]#" data-llm-hoststub="#[llm_hoststub]#" data-llm-apikey="#[llm_apikey]#" data-model-capabilities="#[model_capabilities]#" data-service-num-ctx="#[service_num_ctx_json]#">
     #%env/templates/header.template%#
     #%env/templates/submenuAI.template%#
     <script>
@@ -580,6 +580,13 @@
         }
       }
 
+      // Service dropdown handler: reset the hoststub to the service default, then
+      // reflect the resulting endpoint in the Services table.
+      function serviceChanged() {
+        setHoststub();
+        syncSelectedServiceRow();
+      }
+
       function applyPresetInference() {
         const serviceSelect = document.getElementById("service");
         const hoststubInput = document.getElementById("hoststub");
@@ -882,8 +889,10 @@
         upsertProductionModel(modelName);
       }
 
-      const MAX_TOKEN_OPTIONS = ["4096", "8192", "16384", "32768", "65536", "131072", "262440"];
-      const DEFAULT_MAX_TOKENS = "16384";
+      // max_tokens (num_predict) options start at 2048 = half of the default num_ctx (4096),
+      // so a freshly deployed model reserves output room that fits inside the default window.
+      const MAX_TOKEN_OPTIONS = ["2048", "4096", "8192", "16384", "32768", "65536", "131072", "262440"];
+      const DEFAULT_MAX_TOKENS = "2048";
 
       function normalizeMaxTokenValue(value) {
         const text = (value == null ? "" : String(value)).trim();
@@ -939,13 +948,13 @@
         const serviceField = document.getElementById("service");
         const hoststubField = document.getElementById("hoststub");
         const apikeyField = document.getElementById("apikey");
-        const maxTokenField = document.getElementById("maxtoken");
 
         const service = serviceField ? serviceField.value : "";
         const hoststub = hoststubField ? hoststubField.value.trim() : "";
         const apikey = apikeyField ? apikeyField.value.trim() : "";
-        const maxToken = maxTokenField ? maxTokenField.value : "";
         const persistedCaps = getPersistedCapabilitiesForModel(service, hoststub, modelName);
+        // a newly deployed endpoint should also show up in the Services table
+        ensureServiceRow(service, hoststub);
 
         let targetRow = Array.from(tbody.querySelectorAll("tr")).find(row => {
           const modelCell = row.cells && row.cells[PRODUCTION_MODEL_MODEL_COLUMN_INDEX];
@@ -968,10 +977,10 @@
         }
 
         const cells = targetRow.cells;
-        // for a new row take the max_tokens from the top selection; for an
-        // existing row keep the per-row value the user may have edited
+        // a new row starts at the default max_tokens; an existing row keeps the
+        // per-row value the user may have edited in the Production Models Matrix
         const effectiveMaxToken = isNewRow
-          ? maxToken
+          ? DEFAULT_MAX_TOKENS
           : readMaxTokenValue(cells[PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX]);
         const values = [service, modelName, hoststub, apikey, effectiveMaxToken];
         values.forEach((value, index) => {
@@ -1054,6 +1063,94 @@
           body: JSON.stringify({ inference_system })
         }).catch(err => {
           console.error("Failed to persist inference system", err);
+        });
+      }
+
+      const SERVICE_DEFAULT_NUM_CTX = 4096;
+      // fixed num_ctx choices (4k..256k); max_tokens additionally offers 2048 below this range
+      const NUM_CTX_OPTIONS = ["4096", "8192", "16384", "32768", "65536", "131072", "262440"];
+      let storedServiceNumCtx = {};
+
+      function normalizeHoststubJs(hoststub) {
+        return (hoststub == null ? "" : String(hoststub)).trim().replace(/\/+$/, "");
+      }
+
+      // Build the fixed-option num_ctx <select> for a Services-table cell. Auto-saves on
+      // change, like the other inputs on this page.
+      function createNumCtxSelect(hoststub, value) {
+        const normalized = String(value || SERVICE_DEFAULT_NUM_CTX);
+        const select = document.createElement("select");
+        select.className = "form-control service-num-ctx";
+        select.dataset.hoststub = hoststub;
+        select.style.width = "140px";
+        const optionValues = NUM_CTX_OPTIONS.includes(normalized) ? NUM_CTX_OPTIONS : [normalized, ...NUM_CTX_OPTIONS];
+        optionValues.forEach(v => {
+          const option = document.createElement("option");
+          option.value = v;
+          option.textContent = v;
+          select.appendChild(option);
+        });
+        select.value = normalized;
+        select.addEventListener("change", () => saveServiceNumCtx());
+        return select;
+      }
+
+      // Populate the server-rendered num_ctx cells (.num-ctx-cell) with their selects.
+      function initServiceRows() {
+        document.querySelectorAll("#servicesTable tbody .num-ctx-cell").forEach(cell => {
+          if (cell.querySelector("select")) return;
+          cell.appendChild(createNumCtxSelect(cell.dataset.hoststub || "", cell.dataset.numCtx));
+        });
+      }
+
+      // Ensure the Services table has a row for the given endpoint. Server-rendered rows
+      // exist for deployed endpoints; this adds a row for a service that is selected in
+      // the Service Selection box but not yet deployed, prefilled with its stored window
+      // or the default. Existing rows (and any edits) are left untouched.
+      function ensureServiceRow(service, hoststub) {
+        const tbody = document.querySelector("#servicesTable tbody");
+        const key = normalizeHoststubJs(hoststub);
+        if (!tbody || !key) return;
+        const present = Array.from(tbody.querySelectorAll(".service-num-ctx"))
+          .some(sel => normalizeHoststubJs(sel.dataset.hoststub) === key);
+        if (present) return;
+        const value = storedServiceNumCtx[key] || SERVICE_DEFAULT_NUM_CTX;
+        const tr = document.createElement("tr");
+        const tdService = document.createElement("td");
+        tdService.textContent = service || "";
+        const tdHost = document.createElement("td");
+        tdHost.textContent = key;
+        const tdCtx = document.createElement("td");
+        tdCtx.className = "num-ctx-cell";
+        tdCtx.dataset.hoststub = key;
+        tdCtx.dataset.numCtx = value;
+        tdCtx.appendChild(createNumCtxSelect(key, value));
+        tr.appendChild(tdService);
+        tr.appendChild(tdHost);
+        tr.appendChild(tdCtx);
+        tbody.appendChild(tr);
+      }
+
+      // Reflect the currently selected Service Selection endpoint in the Services table.
+      function syncSelectedServiceRow() {
+        const serviceSelect = document.getElementById("service");
+        const hoststubInput = document.getElementById("hoststub");
+        if (!serviceSelect || !hoststubInput) return;
+        ensureServiceRow(serviceSelect.value, hoststubInput.value);
+      }
+
+      function saveServiceNumCtx() {
+        const service_num_ctx = {};
+        document.querySelectorAll("#servicesTable .service-num-ctx").forEach(sel => {
+          const hoststub = (sel.dataset.hoststub || "").trim();
+          const value = parseInt(sel.value, 10);
+          if (hoststub && Number.isFinite(value) && value > 0) service_num_ctx[hoststub] = value;
+        });
+        fetch(PRODUCTION_MODEL_SUBMIT_URL, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ service_num_ctx })
+        }).catch(err => {
+          console.error("Failed to persist service context windows", err);
         });
       }
 
@@ -1965,28 +2062,18 @@
         return downloadBtn;
       }
 
-      // Mirror the most recently deployed row's max_tokens into the top select so
-      // the field reflects the current configuration instead of always resetting
-      // to the hardcoded default. The per-row selects remain the source of truth.
-      function prefillTopMaxTokenFromTable() {
-        const select = document.getElementById("maxtoken");
-        const tbody = getProductionTableBody();
-        if (!select || !tbody) return;
-        const rows = tbody.querySelectorAll("tr");
-        if (!rows.length) return;
-        const lastRow = rows[rows.length - 1];
-        const value = readMaxTokenValue(lastRow.cells[PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX]);
-        if (Array.from(select.options).some(o => o.value === value)) {
-          select.value = value;
-        }
-      }
-
       document.addEventListener("DOMContentLoaded", () => {
         try {
+          try {
+            storedServiceNumCtx = JSON.parse(document.body.dataset.serviceNumCtx || "{}") || {};
+          } catch (e) {
+            storedServiceNumCtx = {};
+          }
           persistedModelCapabilities = readPersistedModelCapabilities();
           normalizeProductionModelRows();
-          prefillTopMaxTokenFromTable();
+          initServiceRows();
           applyPresetInference();
+          syncSelectedServiceRow();
           resumePendingPulls();
           // auto-show available models if a preset inference exists
           const body = document.body;
@@ -2031,7 +2118,7 @@
       <dl>
         <dt class="TableCellDark">service</dt>
         <dd>
-            <select name="service" id="service" class="form-control" onchange="setHoststub()">
+            <select name="service" id="service" class="form-control" onchange="serviceChanged()">
             <option value="OLLAMA" selected="selected">Ollama</option>
             <option value="LMSTUDIO">LMStudio</option>
             <option value="OPENAI">OpenAI</option>
@@ -2040,34 +2127,16 @@
         </dd>
 
         <dt class="TableCellDark">hoststub</dt>
-        <dd><input type="text" name="hoststub" id="hoststub" value="http://localhost:11434" size="30" maxlength="60" class="form-control"/>&nbsp; you can probably leave this to the default value
+        <dd><input type="text" name="hoststub" id="hoststub" value="http://localhost:11434" size="30" maxlength="60" class="form-control" onchange="syncSelectedServiceRow()"/>&nbsp; you can probably leave this to the default value
         </dd>
 
         <dt class="TableCellDark">api_key</dt>
         <dd><input type="text" name="apikey" id="apikey" value="" disabled=true size="30" maxlength="120" class="form-control"/>&nbsp; (not required for Ollama or LMStudio)
-        </dd>
-        
-        <dt class="TableCellDark">max_tokens</dt>
-        <dd>
-            <select id="maxtoken" name="maxtoken" class="form-control">
-                <option>4096</option>
-                <option>8192</option>
-                <option selected="selected">16384</option>
-                <option>32768</option>
-                <option>65536</option>
-                <option>131072</option>
-                <option>262440</option>
-            </select>
-            <span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>
-                This is the default max_tokens applied to a model when you deploy it; you can change it per model afterwards in the Production Models Matrix below.
-            </span></span>
             <br/>
             <small>
-                <b>max_tokens</b> caps the number of <i>generated</i> tokens (sent as the OpenAI <code>max_tokens</code>, i.e. Ollama <code>num_predict</code>).
-                It does <b>not</b> enlarge the model's context window: Ollama defaults <code>num_ctx</code> to 4096 regardless of this value,
-                and its OpenAI-compatible endpoint (<code>/v1/chat/completions</code>) cannot set <code>num_ctx</code> per request.
-                To actually use a large context in Ollama, raise the context length once via the environment variable
-                <code>OLLAMA_CONTEXT_LENGTH</code>, a Modelfile <code>PARAMETER num_ctx &lt;n&gt;</code>, or the Context Length slider in the Ollama app settings.
+                The selected service's context window (<code>num_ctx</code>) is shown and editable in the
+                <a href="#services">Services</a> table below. A model's generated-token cap (<code>max_tokens</code> =
+                Ollama <code>num_predict</code>) is set per model in the Production Models Matrix.
             </small>
         </dd>
 
@@ -2077,6 +2146,36 @@
       </dl>
     </fieldset>
     </form>
+
+    <fieldset id="servicesContainer" style="display: block;"><a name="services"></a><legend>Services</legend>
+        <p>
+            <b>num_ctx</b> is the context window (in tokens) of the inference service &mdash; a per-service
+            value, shared by all models on that endpoint. It is the total budget for prompt <i>plus</i>
+            generated output; YaCy uses it to size prompts so they leave room to generate. The row for the
+            service selected above appears here automatically with its stored (or default) window.
+            This value is <b>advisory</b>: set it to match the window your backend actually serves
+            (Ollama: <code>OLLAMA_CONTEXT_LENGTH</code>, a Modelfile <code>PARAMETER num_ctx</code>, or the
+            Context Length setting). YaCy does not enforce it on the backend.
+        </p>
+        <table class="table table-striped" id="servicesTable">
+            <thead class="thead-dark">
+                <tr>
+                    <td>service</td>
+                    <td>hoststub</td>
+                    <td>num_ctx</td>
+                </tr>
+            </thead>
+            <tbody>
+        #{services}#
+            <tr>
+                <td>#[service]#</td>
+                <td>#[hoststub]#</td>
+                <td class="num-ctx-cell" data-hoststub="#[hoststub]#" data-num-ctx="#[num_ctx]#"></td>
+            </tr>
+        #{/services}#
+            </tbody>
+        </table>
+    </fieldset>
 
     <fieldset id="loadModelContainer" style="display:none"></fieldset>
     <fieldset id="downloadActivityContainer" style="display:none">
