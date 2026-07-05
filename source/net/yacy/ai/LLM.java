@@ -370,6 +370,12 @@ public class LLM {
             data.put("model", model);
             data.put("temperature", 0.1);
             data.put("max_tokens", max_tokens);
+            // Best-effort hint for Ollama's context window (num_ctx). Ollama's
+            // OpenAI-compatible endpoint does not read this today and pure-OpenAI
+            // backends ignore unknown fields, so it is a harmless forward-looking
+            // hedge; the reliable way to raise the context window remains
+            // OLLAMA_CONTEXT_LENGTH or a Modelfile PARAMETER num_ctx.
+            data.put("num_ctx", max_tokens);
             data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", false);
@@ -448,6 +454,8 @@ public class LLM {
             data.put("model", model);
             data.put("temperature", 0.1);
             data.put("max_tokens", max_tokens);
+            // best-effort num_ctx hint, see chat(); harmless to non-Ollama backends
+            data.put("num_ctx", max_tokens);
             data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", true);

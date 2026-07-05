@@ -55,6 +55,7 @@
 
       const PRODUCTION_MODEL_TOTAL_COLUMNS = 18;
       const PRODUCTION_MODEL_MODEL_COLUMN_INDEX = 1;
+      const PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX = 4;
       const PRODUCTION_MODEL_USAGE_COLUMN_START = 5;
       const PRODUCTION_MODEL_USAGE_COLUMN_END = 12; // including
       const PRODUCTION_MODEL_FEATURE_COLUMN_START = 13;
@@ -881,6 +882,55 @@
         upsertProductionModel(modelName);
       }
 
+      const MAX_TOKEN_OPTIONS = ["4096", "8192", "16384", "32768", "65536", "131072", "262440"];
+      const DEFAULT_MAX_TOKENS = "16384";
+
+      function normalizeMaxTokenValue(value) {
+        const text = (value == null ? "" : String(value)).trim();
+        return text || DEFAULT_MAX_TOKENS;
+      }
+
+      // The per-row max_tokens cell is an editable <select> so the value can be
+      // changed per model after deployment; it is the persisted source of truth
+      // (the max_tokens field at the top of the page is only a default for the
+      // next deploy). This ensures such a select exists in the cell and selects
+      // the given value, adding a bespoke option if the value is not a preset.
+      function ensureMaxTokenSelect(cell, value) {
+        if (!cell) return;
+        const normalized = normalizeMaxTokenValue(value);
+        let select = cell.querySelector('select[data-role="max-tokens"]');
+        if (!select) {
+          select = document.createElement("select");
+          select.className = "form-control";
+          select.dataset.role = "max-tokens";
+          const optionValues = MAX_TOKEN_OPTIONS.includes(normalized)
+            ? MAX_TOKEN_OPTIONS
+            : [normalized, ...MAX_TOKEN_OPTIONS];
+          optionValues.forEach(v => {
+            const option = document.createElement("option");
+            option.value = v;
+            option.textContent = v;
+            select.appendChild(option);
+          });
+          cell.textContent = "";
+          cell.appendChild(select);
+          select.addEventListener("change", () => persistProductionModels());
+        } else if (!Array.from(select.options).some(o => o.value === normalized)) {
+          const option = document.createElement("option");
+          option.value = normalized;
+          option.textContent = normalized;
+          select.appendChild(option);
+        }
+        select.value = normalized;
+      }
+
+      function readMaxTokenValue(cell) {
+        if (!cell) return DEFAULT_MAX_TOKENS;
+        const select = cell.querySelector('select[data-role="max-tokens"]');
+        if (select) return normalizeMaxTokenValue(select.value);
+        return normalizeMaxTokenValue(cell.textContent);
+      }
+
       function upsertProductionModel(modelName) {
         const tbody = getProductionTableBody();
         if (!tbody) return;
@@ -918,9 +968,17 @@
         }
 
         const cells = targetRow.cells;
-        const values = [service, modelName, hoststub, apikey, maxToken];
+        // for a new row take the max_tokens from the top selection; for an
+        // existing row keep the per-row value the user may have edited
+        const effectiveMaxToken = isNewRow
+          ? maxToken
+          : readMaxTokenValue(cells[PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX]);
+        const values = [service, modelName, hoststub, apikey, effectiveMaxToken];
         values.forEach((value, index) => {
-          if (cells[index]) {
+          if (!cells[index]) return;
+          if (index === PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX) {
+            ensureMaxTokenSelect(cells[index], value);
+          } else {
             cells[index].textContent = value || "";
           }
         });
@@ -948,6 +1006,8 @@
           for (let i = 0; i < missingCells; i += 1) {
             row.appendChild(document.createElement("td"));
           }
+          const maxTokenCell = row.cells[PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX];
+          ensureMaxTokenSelect(maxTokenCell, readMaxTokenValue(maxTokenCell));
           ensureProductionRowUsageCells(row, false);
           ensureProductionRowActionButton(row);
           scheduleCapabilityVerificationForRow(row);
@@ -1155,6 +1215,8 @@
             } else if (index >= PRODUCTION_MODEL_USAGE_COLUMN_START && index <= PRODUCTION_MODEL_USAGE_COLUMN_END) {
               const checkbox = row.cells[index] ? row.cells[index].querySelector('input[type="checkbox"]') : null;
               rowData[columnName] = checkbox && isSelectableUsageColumn(index) ? checkbox.checked : false;
+            } else if (index === PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX) {
+              rowData[columnName] = readMaxTokenValue(row.cells[index]);
             } else {
               rowData[columnName] = row.cells[index] ? row.cells[index].textContent.trim() : "";
             }
@@ -1903,10 +1965,27 @@
         return downloadBtn;
       }
 
+      // Mirror the most recently deployed row's max_tokens into the top select so
+      // the field reflects the current configuration instead of always resetting
+      // to the hardcoded default. The per-row selects remain the source of truth.
+      function prefillTopMaxTokenFromTable() {
+        const select = document.getElementById("maxtoken");
+        const tbody = getProductionTableBody();
+        if (!select || !tbody) return;
+        const rows = tbody.querySelectorAll("tr");
+        if (!rows.length) return;
+        const lastRow = rows[rows.length - 1];
+        const value = readMaxTokenValue(lastRow.cells[PRODUCTION_MODEL_MAX_TOKENS_COLUMN_INDEX]);
+        if (Array.from(select.options).some(o => o.value === value)) {
+          select.value = value;
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         try {
           persistedModelCapabilities = readPersistedModelCapabilities();
           normalizeProductionModelRows();
+          prefillTopMaxTokenFromTable();
           applyPresetInference();
           resumePendingPulls();
           // auto-show available models if a preset inference exists
@@ -1978,7 +2057,18 @@
                 <option>65536</option>
                 <option>131072</option>
                 <option>262440</option>
-            </select>&nbsp; You must set the Context Length in the LLM service to fit to your selected max_tokens; in Ollama you find a Context Length slider in the settings
+            </select>
+            <span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>
+                This is the default max_tokens applied to a model when you deploy it; you can change it per model afterwards in the Production Models Matrix below.
+            </span></span>
+            <br/>
+            <small>
+                <b>max_tokens</b> caps the number of <i>generated</i> tokens (sent as the OpenAI <code>max_tokens</code>, i.e. Ollama <code>num_predict</code>).
+                It does <b>not</b> enlarge the model's context window: Ollama defaults <code>num_ctx</code> to 4096 regardless of this value,
+                and its OpenAI-compatible endpoint (<code>/v1/chat/completions</code>) cannot set <code>num_ctx</code> per request.
+                To actually use a large context in Ollama, raise the context length once via the environment variable
+                <code>OLLAMA_CONTEXT_LENGTH</code>, a Modelfile <code>PARAMETER num_ctx &lt;n&gt;</code>, or the Context Length slider in the Ollama app settings.
+            </small>
         </dd>
 
         <dt>&nbsp;</dt>
