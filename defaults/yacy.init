@@ -1443,7 +1443,10 @@ ai.logreport.dir = DATA/REPORTS/log
 ai.logreport.initial_delay_minutes = 5
 ai.logreport.period_minutes = 60
 ai.logreport.max_bucket_lines = 100000
-ai.logreport.max_tokens = 4096
+# Output-token cap for a generated report. This is the report length only, NOT the
+# context window: the prompt budget is (model max_tokens - this value), so a smaller
+# value here leaves more of the model's context window for the log lines in the prompt.
+ai.logreport.max_tokens = 16384
 ai.logreport.daily_compression.enabled = true
 ai.logreport.feed.max_entries = 100
 ai.shield.allow-nonlocalhost = false

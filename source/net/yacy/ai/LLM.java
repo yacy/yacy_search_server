@@ -480,6 +480,7 @@ public class LLM {
                 throw new IOException("Request failed with response code " + responseCode);
             }
             final StringBuilder full = new StringBuilder();
+            String finishReason = "";
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"))) {
                 String line;
                 while ((line = br.readLine()) != null) {
@@ -490,13 +491,28 @@ public class LLM {
                     final JSONObject event = new JSONObject(payload);
                     final JSONArray choices = event.optJSONArray("choices");
                     if (choices == null || choices.length() == 0) continue;
-                    final JSONObject delta = choices.getJSONObject(0).optJSONObject("delta");
+                    final JSONObject choice = choices.getJSONObject(0);
+                    final JSONObject delta = choice.optJSONObject("delta");
                     final String content = delta == null ? "" : delta.optString("content", "");
                     if (!content.isEmpty()) {
                         full.append(content);
                         if (onDelta != null) onDelta.accept(content);
                     }
+                    // the terminal chunk carries the finish_reason; remember the last non-empty one
+                    final String reason = choice.optString("finish_reason", "");
+                    if (!reason.isEmpty()) finishReason = reason;
                 }
+            }
+            // A truncated answer is not an abort on our side but a generation limit. Unlike
+            // chat() the streaming path used to drop this signal, so a report that ends
+            // mid-word (prompt fills the context window, leaving no room to generate) was
+            // invisible in the logs; surface it explicitly here.
+            if ("length".equals(finishReason)) {
+                log.warn("chatStream response was truncated by the max_tokens limit (" + max_tokens
+                        + "), model=" + LogRedaction.redact(model)
+                        + ", contentChars=" + full.length()
+                        + ". The prompt likely fills the context window, leaving no room to generate;"
+                        + " reduce the prompt size or raise the model context/max_tokens.");
             }
             return full.toString();
         } catch (JSONException | URISyntaxException e) {

@@ -352,10 +352,10 @@ public class LogReportService {
             }
             try {
                 final NoiseSummary noiseSummary = classifyNoise(bucket.getValue());
-                final String prompt = hourlyPrompt(bucket.getKey(), bucket.getValue(), noiseSummary);
-                log.info("runId=" + runId + " event=hourly-report phase=classify-noise bucket=" + bucket.getKey() + " inputLines=" + bucket.getValue().size() + " noiseLines=" + noiseSummary.classifiedLines() + " noiseCategories=" + noiseSummary.buckets.size());
                 final int configuredMaxTokens = this.sb.getConfigInt(CONFIG_MAX_TOKENS, model.llm.max_tokens);
                 final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
+                final String prompt = hourlyPrompt(bucket.getKey(), bucket.getValue(), noiseSummary, promptPayloadCharBudget(model, maxTokens));
+                log.info("runId=" + runId + " event=hourly-report phase=classify-noise bucket=" + bucket.getKey() + " inputLines=" + bucket.getValue().size() + " noiseLines=" + noiseSummary.classifiedLines() + " noiseCategories=" + noiseSummary.buckets.size());
                 log.info("runId=" + runId + " event=hourly-report phase=model-call bucket=" + bucket.getKey() + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " inputLines=" + bucket.getValue().size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
                 final long modelStart = System.currentTimeMillis();
                 final String report = model.llm.chatStream(model.model, SYSTEM_PROMPT, prompt, maxTokens, null);
@@ -412,10 +412,10 @@ public class LogReportService {
 
         final File reportFile = new File(reportDirectory, hourlyReportFilename(currentHour));
         final NoiseSummary noiseSummary = classifyNoise(bucketLines);
-        final String prompt = hourlyPrompt(currentHour, bucketLines, noiseSummary);
-        log.info("runId=" + runId + " event=current-hour-report phase=classify-noise bucket=" + currentHour + " inputLines=" + bucketLines.size() + " noiseLines=" + noiseSummary.classifiedLines() + " noiseCategories=" + noiseSummary.buckets.size());
         final int configuredMaxTokens = this.sb.getConfigInt(CONFIG_MAX_TOKENS, model.llm.max_tokens);
         final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
+        final String prompt = hourlyPrompt(currentHour, bucketLines, noiseSummary, promptPayloadCharBudget(model, maxTokens));
+        log.info("runId=" + runId + " event=current-hour-report phase=classify-noise bucket=" + currentHour + " inputLines=" + bucketLines.size() + " noiseLines=" + noiseSummary.classifiedLines() + " noiseCategories=" + noiseSummary.buckets.size());
         log.info("runId=" + runId + " event=current-hour-report phase=model-call bucket=" + currentHour + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " inputLines=" + bucketLines.size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
         final long modelStart = System.currentTimeMillis();
         final String report = model.llm.chatStream(model.model, SYSTEM_PROMPT, prompt, maxTokens, onDelta);
@@ -476,9 +476,9 @@ public class LogReportService {
                 continue;
             }
             try {
-                final String prompt = dailyPrompt(day.getKey(), day.getValue());
                 final int configuredMaxTokens = this.sb.getConfigInt(CONFIG_MAX_TOKENS, model.llm.max_tokens);
                 final int maxTokens = Math.max(1, Math.min(model.llm.max_tokens, configuredMaxTokens));
+                final String prompt = dailyPrompt(day.getKey(), day.getValue(), promptPayloadCharBudget(model, maxTokens));
                 log.info("runId=" + runId + " event=daily-report phase=model-call day=" + day.getKey() + " model=" + LogRedaction.redact(model.model) + " backend=" + LogRedaction.redact(model.llm.hoststub) + " sourceReports=" + day.getValue().size() + " promptChars=" + prompt.length() + " maxTokens=" + maxTokens);
                 final long modelStart = System.currentTimeMillis();
                 final String report = model.llm.chatStream(model.model, SYSTEM_PROMPT, prompt, maxTokens, null);
@@ -585,11 +585,7 @@ public class LogReportService {
         return System.currentTimeMillis() - start;
     }
 
-    private static String hourlyPrompt(final LocalDateTime bucket, final List<String> lines) {
-        return hourlyPrompt(bucket, lines, classifyNoise(lines));
-    }
-
-    private static String hourlyPrompt(final LocalDateTime bucket, final List<String> lines, final NoiseSummary noiseSummary) {
+    private static String hourlyPrompt(final LocalDateTime bucket, final List<String> lines, final NoiseSummary noiseSummary, final int maxPayloadChars) {
         final StringBuilder prompt = new StringBuilder(1024 + lines.size() * 120);
         prompt.append("Create a YaCy self-enhancement log report for hour ")
                 .append(bucket)
@@ -624,28 +620,50 @@ public class LogReportService {
         if (omittedNoise > 0) {
             prompt.append("(").append(omittedNoise).append(" noise lines omitted)\n");
         }
-        appendWithPromptBudget(prompt, linesText);
+        appendWithPromptBudget(prompt, linesText, maxPayloadChars);
         return prompt.toString();
     }
 
-    /**
-     * Upper bound for the variable part of a report prompt. Local models process the
-     * prompt token by token before they generate anything, so an unbounded prompt
-     * makes the report generation arbitrarily slow. 64k chars are roughly 16k tokens.
-     */
-    private static final int MAX_PROMPT_PAYLOAD_CHARS = 65536;
+    /** rough characters-per-token ratio used to budget the prompt against the model's token window */
+    private static final int CHARS_PER_TOKEN = 4;
+    /** never shrink the prompt payload below this many tokens, even for tiny model windows */
+    private static final int MIN_PROMPT_PAYLOAD_TOKENS = 512;
 
     /**
-     * Append the payload to the prompt, truncated to MAX_PROMPT_PAYLOAD_CHARS.
-     * When truncating, the most recent part (the tail) is kept because the newest
-     * log lines are the most relevant ones for the report.
+     * Character budget for the variable part of a report prompt (log lines or hourly
+     * reports), derived from the model's token window. A local model must ingest the
+     * entire prompt before it emits a single output token, and the prompt and the
+     * generated report share one context window: prompt + output has to fit into
+     * model.llm.max_tokens. The payload is therefore sized to (window - output reserve)
+     * tokens, converted to characters.
+     * <p>
+     * A fixed budget (previously 64k chars ≈ 16k tokens) overflows small windows: with a
+     * default 4k-token model the ~16k-token hourly prompt filled the whole window, left no
+     * room to generate, and the report stopped after one or two tokens. When the output
+     * cap already fills the window (the common case where max_tokens equals the context
+     * length) the payload falls back to a quarter of the window so a report is still
+     * produced; if the output then hits its cap it is truncated and logged
+     * (finish_reason=length) instead of the prompt silently overflowing.
      */
-    private static void appendWithPromptBudget(final StringBuilder prompt, final StringBuilder payload) {
-        if (payload.length() <= MAX_PROMPT_PAYLOAD_CHARS) {
+    private static int promptPayloadCharBudget(final LLMModel model, final int maxTokens) {
+        final int contextTokens = Math.max(1, model.llm.max_tokens);
+        final int promptTokens = Math.max(
+                Math.max(MIN_PROMPT_PAYLOAD_TOKENS, contextTokens / 4),
+                contextTokens - maxTokens);
+        return promptTokens * CHARS_PER_TOKEN;
+    }
+
+    /**
+     * Append the payload to the prompt, truncated to maxPayloadChars. When truncating,
+     * the most recent part (the tail) is kept because the newest log lines are the most
+     * relevant ones for the report.
+     */
+    private static void appendWithPromptBudget(final StringBuilder prompt, final StringBuilder payload, final int maxPayloadChars) {
+        if (payload.length() <= maxPayloadChars) {
             prompt.append(payload);
             return;
         }
-        int cut = payload.length() - MAX_PROMPT_PAYLOAD_CHARS;
+        int cut = payload.length() - maxPayloadChars;
         final int lineStart = payload.indexOf("\n", cut);
         if (lineStart >= 0) cut = lineStart + 1; // do not start with a partial line
         prompt.append("(older content truncated to fit the prompt budget)\n")
@@ -798,7 +816,7 @@ public class LogReportService {
         return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
     }
 
-    private static String dailyPrompt(final LocalDate day, final List<File> hourlyReports) throws IOException {
+    private static String dailyPrompt(final LocalDate day, final List<File> hourlyReports, final int maxPayloadChars) throws IOException {
         final StringBuilder prompt = new StringBuilder(4096);
         prompt.append("Create one consolidated YaCy self-enhancement report for ")
                 .append(day)
@@ -816,7 +834,7 @@ public class LogReportService {
             reportsText.append("\n\n## ").append(hourlyReport.getName()).append("\n\n")
                     .append(new String(Files.readAllBytes(hourlyReport.toPath()), StandardCharsets.UTF_8));
         }
-        appendWithPromptBudget(prompt, reportsText);
+        appendWithPromptBudget(prompt, reportsText, maxPayloadChars);
         return prompt.toString();
     }
 
