@@ -137,8 +137,12 @@ public class CrawlQueues {
         this.noticeURL.close();
         // removed pending requests
         this.workerQueue.clear();
-        // wait for all workers to finish
-        for (int i = 0; i < this.workerQueue.remainingCapacity(); i++) {
+        // Send one POISON_REQUEST per worker so that every worker blocked in poll() wakes up and
+        // terminates its while loop cleanly, without having to be interrupted.
+        // Note: we iterate over a fixed count (this.worker.length) and not over the shrinking
+        // remainingCapacity(): each offer() reduces remainingCapacity(), so using it as the loop
+        // bound would insert only half the required pills and leave the remaining workers blocked.
+        for (int i = 0; i < this.worker.length; i++) {
         	/* We use the non-blocking offer() function instead of the blocking put() in the unlikely eventual case another thread
         	 * added an element to workerQueue during this loop.*/
 			try {
@@ -805,7 +809,10 @@ public class CrawlQueues {
                     profile = null;
                 }
             } catch (InterruptedException e2) {
-                ConcurrentLog.logException(e2);
+                // an interrupt is the expected signal to stop this worker during shutdown or a
+                // network switch: terminate quietly instead of logging a stack trace. We restore
+                // the interrupt flag so that any caller up the stack can still observe it.
+                Thread.currentThread().interrupt();
             }
         }
     }
