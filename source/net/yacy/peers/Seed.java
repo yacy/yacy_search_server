@@ -448,6 +448,35 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return false;
     }
 
+    public static String addressFamily(final String ip) {
+        final String normalizedIP = Domains.chopZoneID(ip);
+        if (normalizedIP == null || normalizedIP.isEmpty()) return "unknown";
+        return normalizedIP.indexOf(':') >= 0 ? "ipv6" : "ipv4";
+    }
+
+    public static String addressProfile(final Set<String> ips) {
+        if (ips == null || ips.isEmpty()) return "total=0,ipv4=0,ipv6=0";
+        int ipv4 = 0;
+        int ipv6 = 0;
+        for (final String ip: ips) {
+            if ("ipv6".equals(addressFamily(ip))) ipv6++;
+            else if ("ipv4".equals(addressFamily(ip))) ipv4++;
+        }
+        return "total=" + ips.size() + ",ipv4=" + ipv4 + ",ipv6=" + ipv6;
+    }
+
+    public static boolean hasIPv4(final Set<String> ips) {
+        if (ips == null) return false;
+        for (final String ip: ips) if ("ipv4".equals(addressFamily(ip))) return true;
+        return false;
+    }
+
+    public static boolean hasIPv6(final Set<String> ips) {
+        if (ips == null) return false;
+        for (final String ip: ips) if ("ipv6".equals(addressFamily(ip))) return true;
+        return false;
+    }
+
     private static boolean sameIP(final String left, final String right) {
         final String normalizedLeft = Domains.chopZoneID(left);
         final String normalizedRight = Domains.chopZoneID(right);

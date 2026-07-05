@@ -83,6 +83,13 @@ public final class TextParser {
 
     private static final Parser genericIdiom = new genericParser();
 
+    private static String locationLogMeta(final DigestURL location, final String mimeType) {
+        return "host=" + (location == null ? "unknown" : location.getHost()) +
+                " url=" + (location == null ? "unknown" : location.toNormalform(true)) +
+                " ext=" + (location == null ? "" : MultiProtocolURL.getFileExtension(location.getFileName())) +
+                " mime=" + (mimeType == null ? "" : mimeType);
+    }
+
     /** A generic XML parser instance */
     private static final Parser genericXMLIdiom = new GenericXMLParser();
 
@@ -262,7 +269,7 @@ public final class TextParser {
             final Date lastModified
             ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) {
-            AbstractParser.log.fine("Parsing '" + location + "' from byte-array, applying only the generic parser");
+            AbstractParser.log.fine("event=parse.plan subsystem=parser source=byte-array mode=generic-only " + locationLogMeta(location, mimeType));
         }
         mimeType = normalizeMimeType(mimeType);
         final Set<Parser> idioms = new HashSet<>();
@@ -286,14 +293,14 @@ public final class TextParser {
             final long maxBytes,
             final Date lastModified
             ) throws Parser.Failure {
-        if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
+        if (AbstractParser.log.isFine()) AbstractParser.log.fine("event=parse.plan subsystem=parser source=stream contentLength=" + contentLength + " maxLinks=" + maxLinks + " maxBytes=" + maxBytes + " " + locationLogMeta(location, mimeType));
         mimeType = normalizeMimeType(mimeType);
         Set<Parser> idioms = null;
         try {
             idioms = parsers(location, mimeType);
         } catch (final Parser.Failure e) {
             final String errorMsg = "Parser Failure for extension '" + MultiProtocolURL.getFileExtension(location.getFileName()) + "' or mimetype '" + mimeType + "': " + e.getMessage();
-            AbstractParser.log.warn(errorMsg);
+            AbstractParser.log.warn("event=parse.select subsystem=parser result=failure reason=unsupported " + locationLogMeta(location, mimeType));
             throw new Parser.Failure(errorMsg, location);
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
@@ -334,6 +341,7 @@ public final class TextParser {
 
                 /* Loop on parser : they are supposed to be sorted in order to start with the most specific and end with the most generic */
                 for(final Parser parser : idioms) {
+                    final long parserStart = System.currentTimeMillis();
                     /* Wrap in a CloseShieldInputStream to prevent SAX parsers closing the sourceStream
                      * and so let us eventually reuse the same opened stream with other parsers on parser failure */
                     CloseShieldInputStream nonCloseInputStream = CloseShieldInputStream.wrap(markableStream);
@@ -342,6 +350,9 @@ public final class TextParser {
                         return parseSource(location, mimeType, parser, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset,
                                 nonCloseInputStream, maxLinks, maxBytes, lastModified);
                     } catch (final Parser.Failure e) {
+                        AbstractParser.log.warn("event=parse.parser subsystem=parser result=fallback parser=\"" + parser.getName() +
+                                "\" reason=" + e.getMessage() + " durationMs=" + (System.currentTimeMillis() - parserStart) +
+                                " " + locationLogMeta(location, mimeType));
                         /* Try to reset the marked stream. If the failed parser has consumed too many bytes :
                          * too bad, the marks is invalid and process fails now with an IOException */
                         markableStream.reset();
@@ -362,12 +373,15 @@ public final class TextParser {
                             final Document maindoc = gzipParser.createMainDocument(location, mimeType, charset, gzParser);
 
                             try {
+                                final long gzipFallbackStart = System.currentTimeMillis();
                                 final Document[] docs = gzParser.parseCompressedInputStream(location,
                                         charset, timezoneOffset, depth,
                                         nonCloseInputStream, maxLinks, maxBytes);
                                 if (docs != null) {
                                     maindoc.addSubDocuments(docs);
                                 }
+                                AbstractParser.log.info("event=parse.parser subsystem=parser result=gzip-fallback-success parser=\"" + parser.getName() +
+                                        "\" durationMs=" + (System.currentTimeMillis() - gzipFallbackStart) + " " + locationLogMeta(location, mimeType));
                                 return new Document[] { maindoc };
                             } catch(final Exception e1) {
                                 /* Try again to reset the marked stream if the failed parser has not consumed too many bytes */
@@ -566,7 +580,7 @@ public final class TextParser {
             final Date lastModified
             ) throws Parser.Failure {
         final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
-        if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "' from byte[]");
+        if (AbstractParser.log.isFine()) AbstractParser.log.fine("event=parse.plan subsystem=parser source=byte-array parserCount=" + parsers.size() + " bytes=" + sourceArray.length + " maxLinks=" + maxLinks + " maxBytes=" + maxBytes + " " + locationLogMeta(location, mimeType));
         final String documentCharset = htmlParser.patchCharsetEncoding(charset);
         assert !parsers.isEmpty();
 
@@ -576,6 +590,7 @@ public final class TextParser {
         Thread.currentThread().setName("parsing + " + location.toString()); // set a name to get the address in Thread Dump
         for (final Parser parser: parsers) {
             if (MemoryControl.request(sourceArray.length * 6, false)) {
+                final long parserStart = System.currentTimeMillis();
                 ByteArrayInputStream bis;
                 if (mimeType.equals("text/plain") && parser.getName().equals("HTML Parser")) {
                     // a hack to simulate html files .. is needed for NOLOAD queues. This throws their data into virtual text/plain messages.
@@ -594,6 +609,9 @@ public final class TextParser {
                         docs = parser.parse(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, bis);
                     }
                 } catch (final Parser.Failure e) {
+                    AbstractParser.log.warn("event=parse.parser subsystem=parser result=fallback parser=\"" + parser.getName() +
+                            "\" reason=" + e.getMessage() + " durationMs=" + (System.currentTimeMillis() - parserStart) +
+                            " " + locationLogMeta(location, mimeType));
                     if(parser instanceof gzipParser && e.getCause() instanceof GZIPOpeningStreamException &&
                             (parsers.size() == 1 || (parsers.size() == 2 && parsers.contains(genericIdiom)))) {
                         /* The gzip parser failed directly when opening the content stream : before falling back to the generic parser,
@@ -610,6 +628,7 @@ public final class TextParser {
                         final Document maindoc = gzipParser.createMainDocument(location, mimeType, charset, gzParser);
 
                         try {
+                            final long gzipFallbackStart = System.currentTimeMillis();
                             docs = gzParser.parseCompressedInputStream(location,
                                     charset, timezoneOffset, depth,
                                     bis, maxLinks, maxBytes);
@@ -617,6 +636,8 @@ public final class TextParser {
                                 maindoc.addSubDocuments(docs);
                             }
                             docs = new Document[] { maindoc };
+                            AbstractParser.log.info("event=parse.parser subsystem=parser result=gzip-fallback-success parser=\"" + parser.getName() +
+                                    "\" durationMs=" + (System.currentTimeMillis() - gzipFallbackStart) + " " + locationLogMeta(location, mimeType));
                             break;
                         } catch(final Parser.Failure e1) {
                             failedParser.put(parser, e1);
@@ -627,6 +648,9 @@ public final class TextParser {
                         failedParser.put(parser, e);
                     }
                 } catch (final Exception e) {
+                    AbstractParser.log.warn("event=parse.parser subsystem=parser result=fallback parser=\"" + parser.getName() +
+                            "\" reason=" + e.getMessage() + " durationMs=" + (System.currentTimeMillis() - parserStart) +
+                            " " + locationLogMeta(location, mimeType));
                     failedParser.put(parser, new Parser.Failure(e.getMessage(), location));
                     //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
                 } finally {
@@ -649,7 +673,8 @@ public final class TextParser {
             }
             String failedParsers = "";
             for (final Map.Entry<Parser, Parser.Failure> error: failedParser.entrySet()) {
-                AbstractParser.log.warn("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true) + " but failed: " + error.getValue().getMessage(), error.getValue());
+                AbstractParser.log.warn("event=parse.parser subsystem=parser result=failure parser=\"" + error.getKey().getName() +
+                        "\" reason=" + error.getValue().getMessage() + " " + locationLogMeta(location, mimeType), error.getValue());
                 failedParsers += error.getKey().getName() + " ";
             }
             throw new Parser.Failure("All parser failed: " + failedParsers, location);

@@ -103,6 +103,16 @@ public final class LoaderDispatcher {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
 
+    private static String requestLogMeta(final Request request, final DigestURL url) {
+        final String profile = request == null ? null : request.profileHandle();
+        return "protocol=" + (url == null ? "unknown" : url.getProtocol()) +
+                " host=" + (url == null ? "unknown" : url.getHost()) +
+                " url=" + (url == null ? "unknown" : url.toNormalform(true)) +
+                " ext=" + (url == null ? "" : net.yacy.cora.document.id.MultiProtocolURL.getFileExtension(url.getFileName())) +
+                " depth=" + (request == null ? -1 : request.depth()) +
+                " profile=" + (profile == null ? "" : profile);
+    }
+
     /**
      * generate a request object
      * @param url the target url
@@ -171,7 +181,7 @@ public final class LoaderDispatcher {
             //ConcurrentLog.info("LoaderDispatcher", "waiting for " + request.url().toNormalform(true));
             final long t = System.currentTimeMillis();
             try { check.tryAcquire(5, TimeUnit.SECONDS);} catch (final InterruptedException e) {}
-            ConcurrentLog.info("LoaderDispatcher", "waited " + (System.currentTimeMillis() - t) + " ms for " + request.url().toNormalform(true));
+            ConcurrentLog.info("LoaderDispatcher", "event=loader.wait subsystem=crawler durationMs=" + (System.currentTimeMillis() - t) + " " + requestLogMeta(request, request.url()));
             // now the process may have terminated and we run a normal loading
             // which may be successful faster because of a cache hit
         }
@@ -210,6 +220,7 @@ public final class LoaderDispatcher {
 
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
+            LoaderDispatcher.log.warn("event=loader.reject subsystem=crawler reason=blacklist blacklistType=" + blacklistType + " " + requestLogMeta(request, url));
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
@@ -223,6 +234,7 @@ public final class LoaderDispatcher {
         // check case where we want results from the cache exclusively, and never from the Internet (offline mode)
         if (cacheStrategy == CacheStrategy.CACHEONLY) {
             // we had a chance to get the content from the cache .. its over. We don't have it.
+            LoaderDispatcher.log.info("event=loader.reject subsystem=crawler reason=cacheonly-miss cacheStrategy=" + cacheStrategy + " " + requestLogMeta(request, url));
             throw new IOException("cache only strategy");
         }
 
@@ -251,9 +263,13 @@ public final class LoaderDispatcher {
             throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
         }
         if (response == null) {
+            LoaderDispatcher.log.warn("event=loader.response subsystem=crawler result=null " + requestLogMeta(request, url));
             throw new IOException("no response (NULL) for url " + url);
         }
         if (response.getContent() == null) {
+            final ResponseHeader responseHeader = response.getResponseHeader();
+            LoaderDispatcher.log.warn("event=loader.response subsystem=crawler result=empty status=" +
+                    (responseHeader == null ? -1 : responseHeader.getStatusCode()) + " " + requestLogMeta(request, url));
             throw new IOException("empty response (code " + response.getStatus() + ") for url " + url.toNormalform(true));
         }
 
@@ -322,7 +338,7 @@ public final class LoaderDispatcher {
                     // well, just take the cache and don't care about freshness of the content
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
-                        LoaderDispatcher.log.info("cache hit/useall for: " + url.toNormalform(true));
+                        LoaderDispatcher.log.info("event=loader.cache subsystem=crawler result=hit mode=useall bytes=" + content.length + " " + requestLogMeta(request, url));
                         response.setContent(content);
                         return response;
                     }
@@ -333,16 +349,16 @@ public final class LoaderDispatcher {
                 if (response.isFreshForProxy()) {
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
-                        LoaderDispatcher.log.info("cache hit/fresh for: " + url.toNormalform(true));
+                        LoaderDispatcher.log.info("event=loader.cache subsystem=crawler result=hit mode=fresh bytes=" + content.length + " " + requestLogMeta(request, url));
                         response.setContent(content);
                         return response;
                     }
                 }
-                LoaderDispatcher.log.info("cache hit/stale for: " + url.toNormalform(true));
+                LoaderDispatcher.log.info("event=loader.cache subsystem=crawler result=stale " + requestLogMeta(request, url));
                 /* Cached content can not be used : we return a null response to ensure callers will detect no cache response is available */
                 response = null;
             } else if (cachedResponse != null) {
-                LoaderDispatcher.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
+                LoaderDispatcher.log.warn("event=loader.cache subsystem=crawler result=header-without-content " + requestLogMeta(request, url));
             }
         }
 		return response;
@@ -368,6 +384,7 @@ public final class LoaderDispatcher {
 
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
+            LoaderDispatcher.log.warn("event=loader.reject subsystem=crawler reason=blacklist blacklistType=" + blacklistType + " stream=true " + requestLogMeta(request, url));
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
@@ -381,6 +398,7 @@ public final class LoaderDispatcher {
         // check case where we want results from the cache exclusively, and never from the Internet (offline mode)
         if (cacheStrategy == CacheStrategy.CACHEONLY) {
             // we had a chance to get the content from the cache .. its over. We don't have it.
+            LoaderDispatcher.log.info("event=loader.reject subsystem=crawler reason=cacheonly-miss stream=true cacheStrategy=" + cacheStrategy + " " + requestLogMeta(request, url));
             throw new IOException("cache only strategy");
         }
 
@@ -505,7 +523,7 @@ public final class LoaderDispatcher {
 			} catch (final InterruptedException e) {
 			}
 			ConcurrentLog.info("LoaderDispatcher",
-					"waited " + (System.currentTimeMillis() - t) + " ms for " + request.url().toNormalform(true));
+					"event=loader.wait subsystem=crawler stream=true durationMs=" + (System.currentTimeMillis() - t) + " " + requestLogMeta(request, request.url()));
 			// now the process may have terminated and we run a normal loading
 			// which may be successful faster because of a cache hit
 		}

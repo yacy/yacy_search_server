@@ -170,7 +170,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 this._resourceBase = Resource.newResource(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
             }
         } catch (final IOException e) {
-            ConcurrentLog.severe("FILEHANDLER", "YaCyDefaultServlet: resource base (htRootPath) missing");
+            ConcurrentLog.severe("FILEHANDLER", "event=http.resource subsystem=http result=missing-resource-base reason=" + e.getMessage());
             ConcurrentLog.logException(e);
             throw new UnavailableException(e.toString());
         }
@@ -352,7 +352,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             }
         } catch (final IllegalArgumentException e) {
-            ConcurrentLog.logException(e);
+            ConcurrentLog.warn("FILEHANDLER", "event=http.resource subsystem=http result=illegal-argument path=" + pathInContext +
+                    " reason=" + e.getMessage());
             if (!response.isCommitted()) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             }
@@ -406,7 +407,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
             return buffer.toString(StandardCharsets.UTF_8.name());
         } catch (final IOException e) {
-            ConcurrentLog.warn("FILEHANDLER", "Failed to read POST body: " + e.getMessage());
+            ConcurrentLog.warn("FILEHANDLER", "event=http.request subsystem=http result=body-read-failure method=" + request.getMethod() +
+                    " contentType=" + request.getContentType() + " contentLength=" + request.getContentLengthLong() +
+                    " reason=" + e.getMessage());
             return null;
         }
     }

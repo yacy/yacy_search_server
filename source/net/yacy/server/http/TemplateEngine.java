@@ -270,7 +270,8 @@ public final class TemplateEngine {
                             try{
                                 num=Integer.parseInt(pattern.get(patternKey)); // Key contains the iteration number as string
                             }catch(final NumberFormatException e){
-                                ConcurrentLog.logException(e);
+                                ConcurrentLog.warn("TEMPLATE", "event=template.pattern subsystem=http result=invalid-number servlet=" + servletname +
+                                        " patternKey=" + patternKey + " reason=" + e.getMessage());
                                 num=0;
                             }
                         }
@@ -288,7 +289,8 @@ public final class TemplateEngine {
                         }//for
                         structure.append(open_endtag).append(multi_key).append(close_tagn);
                     } else {//transferUntil
-                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#" + " in " + servletname); //prefix here?
+                        ConcurrentLog.severe("TEMPLATE", "event=template.pattern subsystem=http result=missing-close type=multi servlet=" + servletname +
+                                " key=" + UTF8.String(multi_key)); //prefix here?
                     }
                 }
 
@@ -331,7 +333,8 @@ public final class TemplateEngine {
                 if (byName) {
                     transferUntil(pis, keyStream, appendBytes(PP, patternName, null, null));
                     if(pis.available()==0){
-                        ConcurrentLog.severe("TEMPLATE", "Bad Key-Value pair in #()# construct: key=\"" + patternKey + "\", value=\"" + UTF8.String(patternName) + "\" in " + servletname);
+                        ConcurrentLog.severe("TEMPLATE", "event=template.pattern subsystem=http result=bad-key-value type=alternative servlet=" + servletname +
+                                " key=" + patternKey + " value=" + UTF8.String(patternName));
                         final byte[] sb = structure.getBytes();
                         structure.close();
                         text.close();
@@ -343,7 +346,8 @@ public final class TemplateEngine {
                     structure.append(writeTemplate(servletname, pis2, out, pattern, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes(hash_brackopen_slash, key, brackclose_hash, null));
                     if(pis.available()==0){
-                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name) in " + servletname);
+                        ConcurrentLog.severe("TEMPLATE", "event=template.pattern subsystem=http result=missing-close type=alternative-by-name servlet=" + servletname +
+                                " key=" + UTF8.String(key));
                     }
                 } else {
                     while(!found){
@@ -452,10 +456,12 @@ public final class TemplateEngine {
                             }
                         } catch (final IOException e) {
                             //file not found?
-                            ConcurrentLog.severe("FILEHANDLER","Include Error with file " + UTF8.String(filename) + ": " + e.getMessage());
+                            ConcurrentLog.severe("FILEHANDLER","event=template.include subsystem=http result=failure servlet=" + servletname +
+                                    " file=" + UTF8.String(filename) + " reason=" + e.getMessage());
                         } finally {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {
-                            	ConcurrentLog.warn("FILEHANDLER","Could not close buffered reader on file " + UTF8.String(filename));
+                                ConcurrentLog.warn("FILEHANDLER","event=template.include subsystem=http result=close-failure servlet=" + servletname +
+                                        " file=" + UTF8.String(filename) + " reason=" + e.getMessage());
                             }
                         }
                         final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));

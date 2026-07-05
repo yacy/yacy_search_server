@@ -244,7 +244,12 @@ public class Transmission {
             // get possibly newer target Info
             final Seed newTarget = Transmission.this.seeds.get(this.dhtTarget.hash);
             if (newTarget != null) {
-                if (this.dhtTarget.clash(newTarget.getIPs())) {
+                final boolean targetStillMatches = this.dhtTarget.clash(newTarget.getIPs());
+                Transmission.this.log.info("Transfer failed target address comparison target=" + this.dhtTarget.hash
+                        + "/" + this.dhtTarget.getName() + ", oldAddressProfile="
+                        + Seed.addressProfile(this.dhtTarget.getIPs()) + ", currentAddressProfile="
+                        + Seed.addressProfile(newTarget.getIPs()) + ", targetStillMatches=" + targetStillMatches);
+                if (targetStillMatches) {
                     newTarget.setFlagAcceptRemoteIndex(false);
                     Transmission.this.seeds.updateConnected(newTarget);
                 } else {

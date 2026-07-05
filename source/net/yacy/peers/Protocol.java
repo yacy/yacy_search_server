@@ -519,10 +519,17 @@ public final class Protocol {
         final long timestamp = System.currentTimeMillis();
         event.addExpectedRemoteReferences(count);
         SearchResult result = null;
+        final boolean localClash = target.clash(event.peers.mySeed().getIPs());
+        if (localClash) {
+            Network.log.info("remote search: target peer '" + target.getName() + "'/" + target.hash
+                    + " clashes with local peer addresses; using localhost, targetAddressProfile="
+                    + Seed.addressProfile(target.getIPs()) + ", localAddressProfile="
+                    + Seed.addressProfile(event.peers.mySeed().getIPs()));
+        }
         for (String ip: target.getIPs()) {
             //if (ip.indexOf(':') >= 0) System.out.println("Search target: IPv6: " + ip);
             final String targetBaseURL;
-            if (target.clash(event.peers.mySeed().getIPs())) {
+            if (localClash) {
                 targetBaseURL = "http://localhost:" + event.peers.mySeed().getPort();
             } else {
                 targetBaseURL = target.getPublicURL(ip,

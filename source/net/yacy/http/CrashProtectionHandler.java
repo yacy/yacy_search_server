@@ -13,6 +13,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 public class CrashProtectionHandler extends HandlerWrapper implements Handler, HandlerContainer {
 	
 	public CrashProtectionHandler() {
@@ -32,6 +34,8 @@ public class CrashProtectionHandler extends HandlerWrapper implements Handler, H
 		try {
 			super.handle(target, baseRequest, request, response);
 		} catch (Exception e) {
+			ConcurrentLog.severe("HTTP", "event=http.request subsystem=http result=exception method=" + request.getMethod() +
+					" target=" + target + " status=500 reason=" + e.getMessage());
 			// handle all we can
 			writeResponse(request, response, e);
                         baseRequest.setHandled(true);

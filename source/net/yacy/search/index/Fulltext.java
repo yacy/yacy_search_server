@@ -325,8 +325,11 @@ public final class Fulltext {
         final long t = System.currentTimeMillis();
         if (this.lastCommit + 10000 > t) return;
         this.lastCommit = t;
+        final long start = System.currentTimeMillis();
         this.getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) this.getWebgraphConnector().commit(softCommit);
+        ConcurrentLog.info("Fulltext", "event=solr.commit subsystem=index softCommit=" + softCommit +
+                " writeWebgraph=" + this.writeWebgraph + " durationMs=" + (System.currentTimeMillis() - start));
     }
 
     /**
@@ -375,24 +378,36 @@ public final class Fulltext {
         if (connector == null || connector.isClosed()) return;
         final String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         final String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+        final String host = (String) doc.getFieldValue(CollectionSchema.host_s.getSolrFieldName());
+        final Object httpStatus = doc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName());
         assert url != null && url.length() < 30000;
-        ConcurrentLog.info("Fulltext", "indexing: " + id + " " + url);
+        final long start = System.currentTimeMillis();
         try {
             connector.add(doc);
         } catch (final SolrException e) {
+            ConcurrentLog.warn("Fulltext", "event=index.document subsystem=index result=failure id=" + id +
+                    " url=" + url + " host=" + host + " status=" + httpStatus + " reason=" + e.getMessage() +
+                    " durationMs=" + (System.currentTimeMillis() - start));
             throw new IOException(e.getMessage(), e);
         }
+        ConcurrentLog.info("Fulltext", "event=index.document subsystem=index result=queued id=" + id +
+                " url=" + url + " host=" + host + " status=" + httpStatus + " durationMs=" + (System.currentTimeMillis() - start));
         if (MemoryControl.shortStatus()) this.clearCaches();
     }
 
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
         if (!this.useWebgraph()) return;
         if (edges == null || edges.size() == 0) return;
+        final long start = System.currentTimeMillis();
         try {
             this.getWebgraphConnector().add(edges);
         } catch (final SolrException e) {
+            ConcurrentLog.warn("Fulltext", "event=index.webgraph subsystem=index result=failure count=" + edges.size() +
+                    " reason=" + e.getMessage() + " durationMs=" + (System.currentTimeMillis() - start));
             throw new IOException(e.getMessage(), e);
         }
+        ConcurrentLog.info("Fulltext", "event=index.webgraph subsystem=index result=queued count=" + edges.size() +
+                " durationMs=" + (System.currentTimeMillis() - start));
         if (MemoryControl.shortStatus()) this.clearCaches();
     }
 

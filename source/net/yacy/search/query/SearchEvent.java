@@ -700,6 +700,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             this.remote_rwi_stored.addAndGet(fullResource);
             this.remote_rwi_peerCount.incrementAndGet();
         }
+        final String queryString = this.query.getQueryGoal().getQueryString(false);
         long timer = System.currentTimeMillis();
 
         // normalize entries
@@ -729,12 +730,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
-                    ConcurrentLog.warn("SearchEvent", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    ConcurrentLog.warn("SearchEvent", "event=search.rwi.add subsystem=search result=timeout phase=before-poll local=" + local +
+                            " queryId=" + this.query.id(true) + " contentDomain=" + this.query.contentdom +
+                            " query=\"" + queryString + "\"" +
+                            " remainingMs=" + remaining + " decodedQueueSize=" + decodedEntries.size() +
+                            " fullResource=" + fullResource + " maxtimeMs=" + maxtime);
                     break;
                 }
                 iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
                 if (iEntry == null) {
-                    ConcurrentLog.warn("SearchEvent", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    ConcurrentLog.warn("SearchEvent", "event=search.rwi.add subsystem=search result=timeout phase=poll local=" + local +
+                            " queryId=" + this.query.id(true) + " contentDomain=" + this.query.contentdom +
+                            " query=\"" + queryString + "\"" +
+                            " remainingMs=" + remaining + " decodedQueueSize=" + decodedEntries.size() +
+                            " fullResource=" + fullResource + " maxtimeMs=" + maxtime);
                     break pollloop;
                 }
                 if (iEntry == WordReferenceVars.poison) {
@@ -829,9 +838,16 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
                 successcounter++;
             }
-            if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
+            if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "event=search.rwi.normalization subsystem=search result=timeout local=" + local +
+                    " queryId=" + this.query.id(true) + " contentDomain=" + this.query.contentdom +
+                    " query=\"" + queryString + "\"" +
+                    " count=" + successcounter + " fullResource=" + fullResource + " maxtimeMs=" + maxtime);
 
         } catch (final InterruptedException e ) {
+            ConcurrentLog.warn("SearchEvent", "event=search.rwi.add subsystem=search result=interrupted local=" + local +
+                    " queryId=" + this.query.id(true) + " contentDomain=" + this.query.contentdom +
+                    " query=\"" + queryString + "\"" +
+                    " count=" + successcounter + " fullResource=" + fullResource + " maxtimeMs=" + maxtime);
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);

@@ -117,6 +117,17 @@ public final class hello {
         sb.peers.peerActions.setUserAgent(clientip, userAgent);
         final Set<String> reportedips = remoteSeed.getIPs();
         final String reportedPeerType = remoteSeed.get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
+        final boolean reportedIPv4 = Seed.hasIPv4(reportedips);
+        final boolean reportedIPv6 = Seed.hasIPv6(reportedips);
+        if (reportedIPv6 && !reportedIPv4) {
+            Network.log.info("hello/server: ipv6-only remote seed observed peer='" + remoteSeed.getName()
+                    + "', hash=" + remoteSeed.hash + ", clientAddressFamily=" + Seed.addressFamily(clientip)
+                    + ", reportedAddressProfile=" + Seed.addressProfile(reportedips));
+        } else if (reportedIPv6 && Network.log.isFine()) {
+            Network.log.fine("hello/server: dual-stack remote seed observed peer='" + remoteSeed.getName()
+                    + "', hash=" + remoteSeed.hash + ", clientAddressFamily=" + Seed.addressFamily(clientip)
+                    + ", reportedAddressProfile=" + Seed.addressProfile(reportedips));
+        }
         //final double clientversion = remoteSeed.getVersion();
 
         if (remoteSeed.getPort() == sb.peers.mySeed().getPort()) {
@@ -169,6 +180,9 @@ public final class hello {
                 if (partialtimeout <= 0) break;
                 //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " is handled");
                 if (Seed.isProperIP(reportedip)) {
+                    if (Network.log.isFine()) Network.log.fine("hello/server: backping candidate peer='" + remoteSeed.getName()
+                            + "', address=" + reportedip + ", addressFamily=" + Seed.addressFamily(reportedip)
+                            + ", remainingCandidates=" + callbackRemain);
                     //ConcurrentLog.info("**hello-DEBUG**", "starting callback to reportedip = " + reportedip + ", timeout = " + partialtimeout);
                     prop.put("yourip", reportedip);
                     remoteSeed.setIP(reportedip);
