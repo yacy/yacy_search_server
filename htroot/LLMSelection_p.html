@@ -97,23 +97,20 @@
       let persistedModelCapabilities = {};
 
       const RECOMMENDED_MODELS = [
-        //["hf.co/tiiuae/Falcon-H1-0.5B-Instruct-GGUF:Q4_K_M",  " 0.50","0.5GB", "english-only minimalistic model for small devices", "Technology Innovation Institute, Dubai", "falcon-llm-license"],
-        //["llama3.2:1b-instruct-q4_K_M",                       " 0.10",  "2GB", "A good 1B model", "Meta", "llama3.2"],
-        ["qwen2.5:1.5b-instruct-q4_K_M",                      " 0.88",  "2GB", "Good small model for 1GB RAM", "Alibaba", "apache-2.0"],
-        ["llama3.2:3b-instruct-q4_K_M",                       " 0.66",  "3GB", "A good 3B model", "Meta", "llama3.2"],
-        //["qwen3-vl:2b-instruct-q4_K_M",                       " 0.73",  "3GB", "A very small vision-model, can understand what is sees in images"],
+        ["qwen2.5:1.5b-instruct-q4_K_M",                      " 0.88",  "1GB", "Good small model for 2GB RAM", "Alibaba", "apache-2.0"],
+        ["llama3.2:3b-instruct-q4_K_M",                       " 0.66",  "2GB", "A good 3B model", "Meta", "llama3.2"],
+        ["qwen3:4b-instruct-2507-q4_K_M",                     " 7.70",  "3GB", "a good 4B model", "Alibaba", "apache-2.0"],
+        ["hf.co/janhq/Jan-v3-4B-base-instruct-gguf:Q4_K_M",   " 8.19",  "3GB", "a brilliant 4B model, post-trained with large teacher from qwen3:4b", "jan.ai", "apache-2.0"],
         ["hf.co/unsloth/medgemma-4b-it-GGUF:Q4_K_M",          " 0.60",  "4GB", "Medical Knowledge and Vision", "Google", "health-ai-developer-foundations"],
-        ["olmo-3:7b-instruct-q4_K_M",                         " 2.22",  "4GB", "open and accessible training data, open-source training code", "allenai.org", "apache-2.0"],
-		["qwen3:4b-instruct-2507-q4_K_M",                     " 7.70",  "3GB", "a good 4B model", "Alibaba", "apache-2.0"],
-		["hf.co/janhq/Jan-v3-4B-base-instruct-gguf:Q4_K_M",   " 8.19", "6GB", "a brilliant 4B model, post-trained with large teacher from qwen3:4b", "jan.ai", "apache-2.0"],
-		["ministral-3:14b-instruct-2512-q4_K_M",              " 8.55", "10GB", "European flagship model, strong multilangual, vision, agentic", "mistral.ai", "apache-2.0"],
-		["olmo-3.1:32b-instruct-q4_K_M",                      "10.25",  "20GB", "open and accessible training data, open-source training code", "allenai.org", "apache-2.0"],
-		//["phi4:14b-q4_K_M",                                   " 5.24", "10GB", "Strong, made with synthetic data", "Microsoft", "mit"],
-		//["gemma3:27b-it-q4_K_M",                              " 4.81", "20GB", "Strong content safety, multilingual support in over 140 languages", "google.com", "gemma"],
-        //["qwen3-vl:30b-a3b-instruct-q4_K_M",                  "17.33", "22GB", "Very fast, exceptional good 30B model, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"],
-		["qwen3.5:9b-q4_K_M",                                 "18.37", "14GB", "multimodal, outstanding for its size, long-context 256K Tokens, strong instruction following model", "Alibaba", "apache-2.0"],
-		["hf.co/mradermacher/Ling-mini-2.0-GGUF:Q4_K_M",      "20.00", "20GB", "very fast 16B MoE model with 1.4B activated parameters per expert", "InclusionAI", "mit"],
-		["qwen3.6:27b-mtp-q4_K_M",                            "80", "17GB", "Exceptional good 27B model with vision, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"]
+        ["frob/qwen3.5-instruct:4b",                          " 8.52",  "4GB", "best model for its size, non-thinking version", "Alibaba", "apache-2.0"],
+        ["olmo-3:7b-instruct-q4_K_M",                         " 2.22",  "5GB", "open and accessible training data, open-source training code", "allenai.org", "apache-2.0"],
+        ["qwen3.5:9b-q4_K_M",                                 "18.37",  "7GB", "multimodal, outstanding for its size, long-context 256K Tokens, strong instruction following model", "Alibaba", "apache-2.0"],
+        ["gemma4:12b-it-qat",                                 "47.09",  "8GB", "Very mighty, very small model from Google", "Google", "apache-2.0"],
+        ["ministral-3:14b-instruct-2512-q4_K_M",              " 8.55", "10GB", "European flagship model, strong multilangual, vision, agentic", "mistral.ai", "apache-2.0"],
+        ["hf.co/mradermacher/Ling-mini-2.0-GGUF:Q4_K_M",      "20.00", "10GB", "very fast 16B MoE model with 1.4B activated parameters per expert", "InclusionAI", "mit"],
+        ["olmo-3.1:32b-instruct-q4_K_M",                      "10.25", "19GB", "open and accessible training data, open-source training code", "allenai.org", "apache-2.0"],
+		["qwen3.6:27b-mtp-q4_K_M",                            "70.84", "17GB", "Exceptional good 27B model with vision, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"],
+        ["qwen3.6:35b-a3b-mtp-q4_K_M",                        "63.03", "22GB", "Almost as good as the 27B model, but much faster", "Alibaba", "apache-2.0"]
       ];
 	  
       const MODEL_TABLE_HEADERS = ["Model", "Ranking", "Size", "Description", "Provider", "License", "Actions"];
@@ -248,25 +245,55 @@
         }
       }
 
-      async function downloadOllamaModel(hoststub, modelName) {
+      async function downloadOllamaModel(hoststub, modelName, onProgress) {
+        // stream: true keeps bytes flowing so no idle timeout in the proxy chain
+        // kills the connection during long pulls; ollama continues a pull
+        // server-side even if this connection drops, so leaving the page is safe
         const response = await fetch(proxyUrl(hoststub, "/api/pull"), {
           method: "POST",
-          headers: {"Accept": "application/json", "Content-Type": "application/json"},
-          body: JSON.stringify({ model: modelName, stream: false })
+          headers: {"Accept": "application/x-ndjson", "Content-Type": "application/json"},
+          body: JSON.stringify({ model: modelName, stream: true })
         });
         if (response.status !== 200) {
           const error = new Error(`Failed to download model ${modelName}`);
           error.status = response.status;
           throw error;
         }
-        const payload = await response.json().catch(() => null);
-        if (payload && payload.error) {
-          const error = new Error(payload.error);
-          error.status = response.status;
-          error.payload = payload;
-          throw error;
+        // the body is NDJSON: one progress object per line; errors arrive
+        // mid-stream as {"error": ...} lines even though the HTTP status is 200
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffered = "";
+        let lastPayload = null;
+        const consumeLine = (line) => {
+          const trimmed = line.trim();
+          if (!trimmed) return;
+          let payload = null;
+          try {
+            payload = JSON.parse(trimmed);
+          } catch (parseError) {
+            return; // ignore malformed progress lines
+          }
+          if (payload.error) {
+            const error = new Error(payload.error);
+            error.status = response.status;
+            error.payload = payload;
+            throw error;
+          }
+          lastPayload = payload;
+          if (onProgress) onProgress(payload);
+        };
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffered += decoder.decode(value, { stream: true });
+          const lines = buffered.split("\n");
+          buffered = lines.pop();
+          for (const line of lines) consumeLine(line);
         }
-        return payload;
+        buffered += decoder.decode();
+        consumeLine(buffered);
+        return lastPayload;
       }
 
       async function requestModelsForService(service, hoststub) {
@@ -480,6 +507,28 @@
         activeDownloadCount = downloadActivities.size;
         updateBeforeUnloadGuard();
         return activityId;
+      }
+
+      function updateDownloadActivity(activityId, payload) {
+        const wrapper = downloadActivities.get(activityId);
+        if (!wrapper || !payload) return;
+        const progress = wrapper.querySelector("progress");
+        const subtitle = wrapper.querySelector(".download-activity-subtitle");
+        const status = payload.status || "";
+        if (progress && typeof payload.total === "number" && payload.total > 0
+            && typeof payload.completed === "number") {
+          progress.value = Math.min(100, (payload.completed / payload.total) * 100);
+        }
+        if (subtitle) {
+          let text = status || "Download in progress…";
+          if (typeof payload.total === "number" && payload.total > 0
+              && typeof payload.completed === "number") {
+            const percent = Math.min(100, (payload.completed / payload.total) * 100);
+            const mb = (bytes) => (bytes / (1024 * 1024)).toFixed(0);
+            text = `${status} — ${percent.toFixed(1)}% (${mb(payload.completed)} / ${mb(payload.total)} MB)`;
+          }
+          subtitle.textContent = text;
+        }
       }
 
       function removeDownloadActivity(activityId) {
@@ -1749,37 +1798,108 @@
         });
       }
 
+      /*** pending pulls are remembered in localStorage so that a reloaded page
+       *** can re-attach to downloads which are still running on the ollama server
+       *** (a second /api/pull for the same model joins the running download) ***/
+
+      const PENDING_PULLS_STORAGE_KEY = "yacy.llm.pendingPulls";
+      const PENDING_PULL_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+      function readPendingPulls() {
+        try {
+          const parsed = JSON.parse(window.localStorage.getItem(PENDING_PULLS_STORAGE_KEY) || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (storageError) {
+          return [];
+        }
+      }
+
+      function writePendingPulls(entries) {
+        try {
+          if (entries.length === 0) {
+            window.localStorage.removeItem(PENDING_PULLS_STORAGE_KEY);
+          } else {
+            window.localStorage.setItem(PENDING_PULLS_STORAGE_KEY, JSON.stringify(entries));
+          }
+        } catch (storageError) {
+          // storage unavailable: downloads still work, they just cannot be re-attached
+        }
+      }
+
+      function addPendingPull(hoststub, modelName) {
+        const entries = readPendingPulls().filter(e => !(e.hoststub === hoststub && e.model === modelName));
+        entries.push({ hoststub, model: modelName, startedAt: Date.now() });
+        writePendingPulls(entries);
+      }
+
+      function removePendingPull(hoststub, modelName) {
+        writePendingPulls(readPendingPulls().filter(e => !(e.hoststub === hoststub && e.model === modelName)));
+      }
+
+      async function performModelDownload(hoststub, modelName, downloadBtn) {
+        const activityId = addDownloadActivity(modelName);
+        if (downloadBtn) downloadBtn.disabled = true;
+        addPendingPull(hoststub, modelName);
+        let downloadError = null;
+        try {
+          await downloadOllamaModel(hoststub, modelName, (payload) => {
+            if (activityId) updateDownloadActivity(activityId, payload);
+          });
+          console.log(`Model ${modelName} is now available on server ${hoststub}.`);
+        } catch (err) {
+          downloadError = err;
+          console.error("Error during model pull request:", err);
+        } finally {
+          if (downloadBtn) downloadBtn.disabled = false;
+          if (activityId) {
+            removeDownloadActivity(activityId);
+          }
+          try {
+            await loadModelList();
+          } catch (refreshError) {
+            console.error("Failed to refresh models after download:", refreshError);
+          }
+          // a dropped connection is not necessarily a failed pull: ollama keeps
+          // pulling server-side, so only report an error if the model is still missing
+          const stillMissing = downloadError && !availableModels.includes(modelName);
+          const connectionLost = stillMissing && !downloadError.payload
+              && !(typeof downloadError.status === "number" && downloadError.status !== 200);
+          if (connectionLost) {
+            // keep the pending entry: a page reload will re-attach to the running pull
+            alert(`Connection lost while pulling model ${modelName} from server ${hoststub}. The download continues on the server; reload this page to re-attach to its progress.`);
+          } else {
+            removePendingPull(hoststub, modelName);
+            if (stillMissing) {
+              const status = typeof downloadError.status === "number" ? downloadError.status : null;
+              const message = downloadError.payload
+                ? `Failed to download model ${modelName}: ${downloadError.message}`
+                : `Failed to download model ${modelName}. HTTP status: ${status}`;
+              alert(message);
+            }
+          }
+        }
+      }
+
+      function resumePendingPulls() {
+        const now = Date.now();
+        const entries = readPendingPulls().filter(e => e && e.hoststub && e.model
+            && (typeof e.startedAt !== "number" || now - e.startedAt < PENDING_PULL_MAX_AGE_MS));
+        writePendingPulls(entries);
+        entries.forEach(entry => {
+          // re-issuing the pull joins the running download and streams its progress;
+          // if the pull already finished it returns success almost immediately
+          performModelDownload(entry.hoststub, entry.model, null)
+            .catch(resumeError => console.error("Failed to resume model download:", resumeError));
+        });
+      }
+
       function createDownloadButton(hoststub, modelName) {
         const downloadBtn = document.createElement("button");
         downloadBtn.type = "button";
         downloadBtn.className = "btn btn-primary btn-sm";
         downloadBtn.textContent = "Download";
         styleActionButton(downloadBtn);
-        downloadBtn.addEventListener("click", async () => {
-          const activityId = addDownloadActivity(modelName);
-          downloadBtn.disabled = true;
-          try {
-            await downloadOllamaModel(hoststub, modelName);
-            console.log(`Model ${modelName} is now available on server ${hoststub}.`);
-          } catch (err) {
-            const status = err && typeof err.status === "number" ? err.status : null;
-            const message = status
-              ? `Failed to download model ${modelName}. HTTP status: ${status}`
-              : `Error pulling model ${modelName} from server ${hoststub}. Check the console for details.`;
-            alert(message);
-            console.error("Error during model pull request:", err);
-          } finally {
-            downloadBtn.disabled = false;
-            if (activityId) {
-              removeDownloadActivity(activityId);
-            }
-            try {
-              await loadModelList();
-            } catch (refreshError) {
-              console.error("Failed to refresh models after download:", refreshError);
-            }
-          }
-        });
+        downloadBtn.addEventListener("click", () => performModelDownload(hoststub, modelName, downloadBtn));
         return downloadBtn;
       }
 
@@ -1788,6 +1908,7 @@
           persistedModelCapabilities = readPersistedModelCapabilities();
           normalizeProductionModelRows();
           applyPresetInference();
+          resumePendingPulls();
           // auto-show available models if a preset inference exists
           const body = document.body;
           const presetService = (body.getAttribute("data-llm-service") || "").trim();
