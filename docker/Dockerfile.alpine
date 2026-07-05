@@ -35,18 +35,10 @@ RUN apk add --no-cache \
 	fontconfig \
 	freetype \
 	ttf-dejavu \
-	ttf-droid \
-	ttf-freefont \
-	ttf-liberation \
-	# more fonts
-	&& apk add --no-cache --virtual .build-deps \
-	msttcorefonts-installer \
-	# Install microsoft fonts
-	&& update-ms-fonts \
-	&& fc-cache -f \
-	# Clean up when done
-	&& rm -rf /tmp/* \
-	&& apk del .build-deps
+	# fontconfig, freetype and a single font are required for server-side
+	# AWT/Graphics2D text rendering (e.g. NetworkGraph.drawPeerLoadPicture);
+	# the Alpine JRE ships none of these by default.
+	&& fc-cache -f
 
 # copy YaCy to app image
 RUN addgroup yacy && adduser -S -G yacy -H -D yacy
