@@ -306,7 +306,7 @@ Set Configuration==Establecer configuración
 What you should do next:==Lo que debes hacer a continuación:
 Your basic configuration is complete! You can now (for example)==¡Su configuración básica está completa! Ahora puedes (por ejemplo)
 You did not open a port in your firewall or your router does not forward the server port to your peer==No abrió un puerto en su firewall o su enrutador no reenvía el puerto del servidor a su par
-You can also use your peer without opening it, but this is not recomended==También puede usar su nodo sin abrirlo, pero no se recomienda
+You can also use your peer without opening it, but this is not recommended==También puede usar su nodo sin abrirlo, pero no se recomienda
 just <==simplemente <
 start an uncensored search==iniciar una búsqueda sin censura
 monitor at the network page</a> what the other peers are doing==monitorear en la página de la red </a> lo que hacen los otros compañeros
@@ -356,16 +356,6 @@ Unable to get URL:==No se puede obtener la URL:
 Error saving the language file.==Error al guardar el archivo de idioma.
 Simple Editor==Editor simple
 to add untranslated text==agregar texto sin traducir
-#-----------------------------
-
-#File: ConfigLiveSearch.html
-#---------------------------
-Advantages:==Ventajas:
-Disadvantages:==Desventajas:
-"Search"=="Buscar"
-Defaults<==Valores predeterminados<
-url<==url<
->Themes<==>Tema<
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -1503,7 +1493,7 @@ Index Export/Import==Importar/Exportar Índice
 Target Analysis==Análisis target
 Process Scheduler==Procesador de Procesos
 ### ADMINISTRATION ###
-System Admiistration==Administración del Sistema
+System Administration==Administración del Sistema
 Index Administration==Administración del Índice
 Filter &amp; Blacklists==Filtro &amp; Blacklists
 Content Semantic==Contenido Semántico
@@ -1558,12 +1548,6 @@ Advanced Settings==Configuración Avanzada
 Advanced Properties==Propiedades Avanzadas
 #-----------------------------
 
-#File: env/templates/submenuContentIntegration.template
-#---------------------------
-Import phpBB3 forum==Importar forum phpBB3
-Import Mediawiki dumps==Importar dump Mediawiki
-#-----------------------------
-
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Overview</a>==Resumen</a>
@@ -1612,12 +1596,6 @@ Remote Crawling==Crawling Remoto
 >Autocrawl<==>Autocrawl<
 #-----------------------------
 
-#File: env/templates/submenuPortalIntegration.template
-#---------------------------
-Search Portal Integration==Integración del portal de búsqueda
-Generic Search Portal==Portal de búsqueda genérico
-#-----------------------------
-
 #File: env/templates/submenuPublication.template
 #---------------------------
 Wiki==Wiki
@@ -1630,10 +1608,6 @@ File Hosting==File hosting
 Ranking and Heuristics==Ranking y Heurísticas
 >Heuristics<==>Heurísticas<
 #---------------------------
-
-#File: env/templates/submenuSearchIntegration.template
-#---------------------------
-#-----------------------------
 
 #File: env/templates/submenuSemantic.template
 #---------------------------
@@ -1651,11 +1625,6 @@ Use Case &amp; Accounts==Modo de uso &amp; Cuenta
 Basic Configuration==Configuración Básica
 >Accounts<==>Cuentas<
 Network Configuration==Configuración de la Red
-#-----------------------------
-
-#File: env/templates/submenuViewLog.template
-#---------------------------
-Server Log==Log del server
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
@@ -1687,10 +1656,6 @@ could not be found.==no se ha podido encontrar.
 Did you mean:==Quizás quizo decir:
 #-----------------------------
 
-#File: www/welcome.html
-#---------------------------
-#-----------------------------
-
 #File: js/Crawler.js
 #---------------------------
 #-----------------------------
@@ -1703,18 +1668,3 @@ Did you mean:==Quizás quizo decir:
 >Date==>Fecha
 #-----------------------------
 
-#File: js/jquery-flexigrid.js
-#---------------------------
-#-----------------------------
-
-#File: js/jquery-ui-1.7.2.min.js
-#---------------------------
-Loading&#8230;==Cargando&#8230;
-#-----------------------------
-
-#File: js/jquery.ui.all.min.js
-#---------------------------
-Loading&#8230;==Cargando&#8230;
-#-----------------------------
-
-# EOF

@@ -424,7 +424,7 @@ You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</
 Your Peer name is a default name; please set an individual peer name.== Le nom de votre noeud est un nom par d&eacute;faut. Veuillez lui donner un nom individuel.
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Vous n'avez pas ouvert de port sur votre pare-feu ou votre routeur ne fournit pas le port serveur &agrave; votre pair.
 This is needed if you want to fully participate in the YaCy network.==Cela est n&eacute;cessaire pour participer pleinement au r&eacute;seau YaCy.
-You can also use your peer without opening it, but this is not recomended.==Vous pouvez aussi utiliser votre pair sans l'ouvrir, mais cela n'est pas recommand&eacute;.
+You can also use your peer without opening it, but this is not recommended.==Vous pouvez aussi utiliser votre pair sans l'ouvrir, mais cela n'est pas recommand&eacute;.
 Deutsch==Allemand
 #-----------------------------
 
@@ -458,7 +458,7 @@ Default is to add the links to the local crawl queue (your peer crawls the linke
 add as global crawl job==Ajouter en tant que tâche d'indexation globale
 opensearch load external search result list from active systems below==Rechercher sur les hôtes OpenSearch actifs ci-dessous
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Lorsque vous utilisez cette heuristique, toute nouvelle requête de recherche est également transmise aux hôtes OpenSearch actifs.
-20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 résultats sont récupérés depuis les machines distantes et simultanément chargés, analysés et immédiatement indexés.
+20 results are taken from remote system and loaded simultaneously, parsed and indexed immediately.==20 résultats sont récupérés depuis les machines distantes et simultanément chargés, analysés et immédiatement indexés.
 To find out more about OpenSearch see==Pour en savoir plus sur OpenSearch, voir
 Available/Active Opensearch System==Systèmes OpenSearch disponibles/actifs
 >Active<==>Actif<
@@ -599,27 +599,12 @@ Add Navigators==Ajout de groupes de navigation
 >append==>Ajouter
 #-----------------------------
 
-#File: ConfigSkins_p.html
-#---------------------------
-Skin Selection==Choix de th&egrave;me
-You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vous pouvez changer l'apparence de YaCy avec des th&egrave;mes. Choisissez un des th&egrave;mes par d&eacute;faut, t&eacute;l&eacute;chargez de nouveaux th&egrave;me, ou cr&eacute;ez votre propre th&egrave;me.
-Current skin:==th&egrave;me actuel:
-Available Skins:==Th&egrave;me disponibles:
-"Use"=="Utiliser"
-"Delete"=="Supprimer"
-Install new skin from URL:==Installer un nouveau th&egrave;me depuis l'URL suivante:
-Use this skin==Utiliser ce th&egrave;me
-"install"=="installer"
-Unable to get URL:==Impossible d'obtenir l'url:
-Error saving the skin.==Erreur en sauvegardant le th&egrave;me.
-#-----------------------------
-
 #File: ConfigUpdate_p.html
 #---------------------------
 : System Update==: Mise &agrave; jour du syst&egrave;me
 >System Update<==>Mise &agrave; jour du syst&egrave;me<
 Release will be installed. Please wait.==La version va &ecirc;tre install&eacute;e. Veuillez patienter.
-This servlet can only be used on operation systems that are currently supported for deploy functions.==Cette servlet ne peut &ecirc;tre utilis&eacute;e que sur les syst&egrave;mes d'exploitation actuellement support&eacute;s pour les fonctions de d&eacute;ploiement.
+This servlet can only be used on operating systems that are currently supported for deploy functions.==Cette servlet ne peut &ecirc;tre utilis&eacute;e que sur les syst&egrave;mes d'exploitation actuellement support&eacute;s pour les fonctions de d&eacute;ploiement.
 If you see this message this means that your operation system is not supported.==Si vous voyez ce message, &ccedil;a signifie que votre syst&egrave;me d'exploitation n'est pas support&eacute;.
 Manual System Update==Mise &agrave; jour manuelle du syst&egrave;me
 Current installed Release==Version actuellement install&eacute;e
@@ -737,7 +722,7 @@ only urls with the &lt;phrase&gt; in the url==uniquement les urls contenant la &
 only urls with the &lt;phrase&gt; within outbound links of the document==uniquement les urls dont le document a un lien contenant la &lt;phrase&gt;
 only urls with extension &lt;ext&gt;==uniquement les urls avec l'extension &lt;ext&gt;
 only urls from host &lt;host&gt;==uniquement les urls de l'h&ocirc;te &lt;host&gt;
-only pages with as-author-anotated &lt;author&gt;==uniquement les pages avec l'auteur &lt;author&gt; indiqu&eacute;
+only pages with as-author-annotated &lt;author&gt;==uniquement les pages avec l'auteur &lt;author&gt; indiqu&eacute;
 only pages from top-level-domains &lt;tld&gt;==uniquement les pages des domaines de premier niveau &lt;tld&gt;
 only resources from http or https servers==uniquement les ressources de serveurs http ou https
 only resources from ftp servers==uniquement les ressources de serveurs ftp
@@ -772,63 +757,6 @@ click on the red icon in the upper right after a search. this works good in comb
 example==exemple
 json search results==r&eacute;sultats de recherche json
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==pour les d&eacute;veloppeurs ajax: rechercher comme flux RSS et dans l'URL de r&eacute;sultat remplacer l'extension '.rss' par '.json'
-#-----------------------------
-
-#File: IndexCleaner_p.html
-#---------------------------
-Index Cleaner==Nettoyeur d'index
-#ThreadAlive:
-#ThreadToString:
-Total URLs searched:==URLs totales recherch&eacute;es:
-Blacklisted URLs found:==URLS en liste noire trouv&eacute;es:
-Percentage blacklisted:==Pourcentage en liste noire:
-last searched URL:==derni&egrave;re URL recherch&eacute;e:
-last blacklisted URL found:==derni&egrave;re URL trouv&eacute;e en liste noire:
-RWIs at Start:==RWIs au d&eacute;part:
-RWIs now:==RWIs maintenant:
-wordHash in Progress:==Mots-Hash en cours:
-last wordHash with deleted URLs:==dernier mot-hash avec URLs supprim&eacute;es:
-Number of deleted URLs in on this Hash:==Nombre d'URLs supprim&eacute;s sur ce hachage:
-UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - Nettoie la base de donn&eacute;es en supprimant les URLs en liste noire:
-Start/Resume==D&eacute;part/Reprise
-Stop==Arr&ecirc;t
-Pause==Pause
-RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - Nettoie la base de donn&eacute;es en supprimant les mots r&eacute;f&eacute;rençants les URLs en liste noire:
-#-----------------------------
-
-#File: IndexControl_p.html
-#---------------------------
-Index Control==Contr&ocirc;le d'index
-Index Administration==Administration d'index
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references==Pour l'instant, l'index local consiste en #[wcount]# mots et ##[ucount]# URLs.
-"Show URL Entries for Word"=="Montrer les entr&eacute;es URL pour les mots"
-"Generate List"=="G&eacute;n&eacute;rer une liste"
-"Show URL Entries for Word-Hash"=="Montrer les entr&eacute;es URL pour les Word-Hash"
-"Transfer to other peer"=="Transf&eacute;rer &agrave; un autre pair"
-#URL:==URL:
-"Show Details for URL"=="Montrer les d&eacute;tails pour l'URL"
-#URL-Hash:==URL-Hash:
-"Show Details for URL-Hash"=="Montrer les d&eacute;tails pour l'URL-hash"
-DHT Transmission control:==Contr&ocirc;le de transmission DHT:
-The transmission is necessary for the functionality of global search on other peers.==Le partage est n&eacute;cessaire, pour que la recherche globale fonctionne avec les autres noeuds.
-If you switch off distribution or receipt of RWIs you will be banned from global search.==Si vous d&eacute;sactivez la transmission ou la reception des RWIs, vous serez bannis de la recherche globale.
-Index Distribution:==Partage d'index:
-This enables automated, DHT-ruled Index Transmission to other peers.==Cela permet le partage automatique des index &agrave; base de DHT avec les autres noeuds.
-If checked, DHT-Transmission is enabled even during crawling.==Si activ&eacute;, le partage des DHT est autoris&eacute; pendant les crawls.
-Index Receive:==R&eacute;ception d'index:
-Accept remote Index Transmissions. This works only if you are a senior peer.==Accepte la transmission d'index distant. Cela ne fonctionne que si vous &ecirc;tes un noeud senior.
-The DHT-rules do not work without this function.==Les r&egrave;gles DHT ne fonctionnent pas sans l'activation de cette fonction.
-If checked, your peer silently ignores transmitted URLs that match your blacklist==Si activ&eacute;, votre noeud ignore silencieusement les URLs qui correspondent &agrave; votre blacklist.
-#Noeud Tags:==Noeud Tags:
-If your peer runs in 'Robinson Mode' (Distribution and Receive off), you probably run YaCy as a search engine==Si votre noeud fonctionne en 'Robinson Mode' (&eacute;mission et reception d&eacute;sactiv&eacute;es), alors vous l'utilisez peut-&ecirc;tre comme moteur de recherche
-for your own search portal. Please describe your search portal with some keywords (comma-separated).==Pour votre propre portail de recherche. Pri&egrave;re de d&eacute;crire votre portail par quelques mots-cl&eacute;s (s&eacute;par&eacute;s par des virgules).
-This will help to use your peer as search target even if you do not distribute your web index by==Cela aidera &agrave; utiliser votre noeud comme cible de recherche m&ecirc;me si vous ne partagez pas votre index web par
-DHT distribution.==distribution DHT.
-"set"=="Enregistrer"
-Changes will take effect immediately==Les changements prendrons effet imm&eacute;diatement
-#Let this translation here to avoid errors.
-Word:</td>==Mot:</td>
-Word-Hash:</td>==Mot-Hash:</td>
 #-----------------------------
 
 #File: CrawlStartExpert.html
@@ -1047,31 +975,6 @@ from index==de l'index
 "Delete Load Errors"=="Supprimer"
 #-----------------------------
 
-#File: IndexCreateIndexingQueue_p.html
-#---------------------------
-Index Creation/Indexing Queue==Cr&eacute;ation d'index/File d'indexation
-Index Creation: Indexing Queue==Cr&eacute;ation d'index: File d'indexation
-The indexing queue is empty==La file d'indexatoin est vide.
-"clear indexing queue"=="Effacer la file d'indexation"
-There are <strong>#[num]#</strong> entries in the indexing queue. Showing <strong>#[show]#</strong> entries with a total size of <strong>#[totalSize]#</strong>.==Il y a <strong>#[num]#</strong> entr&eacute;es dans la file d'indexation. <strong>#[show]#</strong> entr&eacute;es d'une taille totale de <strong>#[totalSize]#</strong>.
-Show last==Montrer la derni&egrave;re.
-</a> entries.==</a> entr&eacute;e.
-Initiator==Initiateur
-Depth==Profondeur
-Modified Date==Date de modfication
-Anchor Name==Nom de l'ancre
-#URL==URL
-Size</th>==Taille</th>
-Delete==Supprimer
-Rejected URL List:</strong> There are #[num]# entries in the rejected-urls list.==Liste des URLs rejet&eacute;es:</strong> Il y a #[num]# entr&eacute;es dans la liste des URLs rejet&eacute;es. 
-Showing latest #[num]# entries.==Voir les #[num]# derni&egrave;res entr&eacute;es.
-"show more"=="En voir plus"
-"clear list"=="Effacer la liste"
-There are #[num]# entries in the rejected-queue:==Il y a #[num]# entr&eacute;es dans la file des URLs rejet&eacute;es:
-Executor==Ex&eacute;cuteur
-Fail-Reason==Raison de l'&eacute;chec
-#-----------------------------
-
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
 Index Creation / Loader Queue==Cr&eacute;ation d'index / file de chargement
@@ -1096,167 +999,6 @@ Delete Entries:==Entr&eacute;es supprim&eacute;es:
 >Depth<==>Profondeur<
 Modified Date==Date de modification
 Anchor Name==Nom d'ancre
-#-----------------------------
-
-#File: IndexCreateWWWGlobalQueue_p.html
-#---------------------------
-Index Creation: WWW Global Crawl Queue==Cr&eacute;ation d'index: file de crawl WWW globale
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Cette file stocke les URLs qui doivent &ecirc;tre envoy&eacute;es aux autre noeuds pour &ecirc;tre crawl&eacute;es &agrave; distance.
-If there is no peer for remote crawling available, the links are crawled locally.==Si aucun noeud distant n'est disponible pour crawler le lien, alors il est crawl&eacute; localement.
-The global crawler queue is empty==La file de crawl globale est vide.
-"clear global crawl queue"=="Effacer la file de crawl globale"
-There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Il y a <strong>#[num]#</strong> entr&eacute;es dans la file de crawl globale. Voir les <strong>#[show-num]#</strong> nouvelles entr&eacute;es. 
-Show last==Voir les derni&egrave;res
-</a> entries.==</a> entr&eacute;es.
-Initiator==Initiateur
-Profile==Profil
-Depth==Profondeur
-Modified Date==Date de modification
-Anchor Name==Nom d'ancre
-#URL==URL
-#-----------------------------
-
-#File: IndexCreateWWWLocalQueue_p.html
-#---------------------------
-YaCy '#[clientname]#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Cr&eacute;ation d'index / file de crawl WWW local
-Index Creation: WWW Local Crawl Queue==Cr&eacute;ation d'index: file de crawl WWW local
-This queue stores the urls that shall be crawled localy by this peer.==Cette file stocke les URLs qui seront crawl&eacute;es localement par ce noeud.
-It may also contain urls that are computed by the proxy-prefetch.==Elle stocke aussi les URLs qui sont trait&eacute;es par le proxy.
-The local crawler queue is empty==La file de crawl local est vide.
-There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Il y a <strong>#[num]#</strong> entr&eacute;es dans la file de crawl local. Voir les <strong>#[show-num]#</strong> nouvelles entr&eacute;es.
-Show last==Voir les derni&egrave;res
-</a> entries.==</a> Entr&eacute;es.
-Initiator==Initiateur
-Profile==Profil
-Depth==Profondeur
-Modified Date==Date de modification
-Anchor Name==Nom d'ancre
-#URL==URL
-[Delete]==[Supprimer]
-Delete Entries:==Entr&eacute;es supprim&eacute;es:
-"Delete"=="Supprimer"
-This may take a quite long time.==Cela peut prendre un peu de temps.
-#-----------------------------
-
-#File: IndexImport_p.html
-#---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Importation d'index
-Index DB Import==Importation base d'index
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==L'index local est constitu&eacute;s (au moins) de #[wcount]# index de mots invers&eacute;s et de #[ucount]# URLs.
-Import Job with the same path already started.==Une importation avec le m&ecirc;me chemin est d&eacute;j&agrave; lanc&eacute;e.
-Starting new Job==D&eacute;marrer une nouvelle importation
-Import Type:==Type d'importation:
-Cache Size==Taille du cache
-Usage Examples==Exemples d'utilisation
-"Path to the PLASMADB directory of the foreign peer"=="Chemin du dossier PLASMADB du Verzeichnis des fremden Noeud"
-Import Path:==Import-Pfad:
-"Start Import"=="Demarrer l'importation"
-Attention:==Attention:
-Always do a backup of your source and destination database before starting to use this import function.==Toujours faire une sauvegarde de vos bases source et destination avant de lancer cette fonction d'importation.
-Currently running jobs==T&acirc;ches actuellement en cours
-Job Type==Type de t&acirc;che
->Path==>Chemin
-Status==Etat
-Elapsed<br />Time==Temps<br />&eacute;coul&eacute;
-Time<br />Left==Temps<br />restant
-Abort Import==Importation int&eacute;rompue
-Pause Import==Importation suspendue
-Finished::Running::Paused==Termin&eacute;::En cours::Suspendu
-"Abort"=="Int&eacute;rompre"
-#"Pause"=="Pause"
-"Continue"=="Reprendre"
-Finished jobs==Importations termin&eacute;es
-"Clear List"=="Effacer la liste"
-Last Refresh:==Derni&egrave;re actualisation:
-Example Path:==Exemple de chemin:
-Requirements:==Pr&eacute;requis:
-You need to have at least the following directories and files in this path:==Vous devez avoir au moins les dossiers et fichiers suivants dans ce chemin:
->Type==>Type
->Writeable==>Inscriptible
->Description==>Decription
->File==>Fichier
->Directory==>Dossier
->Yes<==>Oui<
->No<==>Non<
-The LoadedURL Database containing all loaded and indexed URLs==La base de donn&eacute;es des URLs charg&eacute;s contient toutes les URLs charg&eacute;es et index&eacute;es.
-The assortment directory containing parts of the word index.==Le dossier assortiment contient des parties de l'index de mots.
-The words directory containing parts of the word index.==Le dossier mots contient des parties de l'index de mots. 
-The assortment file that should be imported.==Le fichier des assortiment qui doit &ecirc;tre import&eacute;.
-The assortment file must have the postfix==Le dossier assortiment doit avoir le suffixe
-.db".==.db"
-If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==Si vous voulez importer un fichier d'assortiment depuis <tt>PLASMADBACLUSTERABKP</tt>
-you have to rename it first.==vous devez d'abord le renommer .
->Notes:==>Remarques:
-Please note that the imported words are useless if the destination peer doesn't know==Notez que les mots import&eacute;s sont inutiles si le noeud destination ne connait pas
-the URLs the imported words belongs to.==&agrave; quelles URLs ils appartiennent.
-Crawling Queue Import:==Importation de file de crawl:
-Contains data about the crawljob an URL belongs to==Contient des donn&eacute;es &agrave; propos des crawls auxquels une URL appartient
-The crawling queue==La file de crawl
-Various stack files that belong to the crawling queue==Divers fichiers de pile qui appartiennent &agrave; la file de crawl
-#-----------------------------
-
-#File: IndexMonitor.html
-#---------------------------
-#YaCy '#[clientname]#': Index Monitor
-Index Monitor Menu==Menu moniteur d'index;
-Index Monitor Overview==Aperçu moniteur d'index
-Receipts</a>==R&eacute;ception</a>
-Queries</a>==Requ&ecirc;te</a>
-DHT Transfer==partage de DHT
-Proxy Use==Utilisaton du Proxy
-Local Crawling==Crawl local
-Global Crawling==Crawl global
-Indexing Queues Monitor Overview==Aperçu du moniteur des files d'indexation
-These are monitoring pages for the different indexing queues.==Ce sont les pages de monitoring des diff&eacute;rentes files d'indexation.
-YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy connait cinq diff&eacute;rentes mani&egrave;res pour acqu&eacute;rir des index web. Les d&eacute;tails de ces processus (1-5) sont d&eacute;scrits dans le sous-menu
-above which also will show you a table with indexing results so far. The information in these tables is considered as private,==ci-dessus qui vous montreront aussi une table des r&eacute;sultats d'indxation. Les informations de ces tables sont consid&eacute;r&eacute;es comme priv&eacute;es,
-so you need to log-in with your administration password.==vous devez donc vous authentifier avec votre mot de passe.
-Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==Le cas (6) est un moniteur du g&eacute;n&eacute;rateur des r&eacute;ceptions locales, le cas oppos&eacute; du (1). Il contient aussi un moniteur des r&eacute;sultats d'indexation mais n'est pas consid&eacute;r&eacute; comme priv&eacute;  
-since it shows crawl requests from other peers.==puisqu'il montre les requ&ecirc;tes de crawl des autres noeuds.
-The image above illustrates the data flow initiated by web index acquisition.==L'image ci-dessus illustre le flux de donn&eacute;es initi&eacute; par l'acquisition des index web.
-Some processes occur double to document the complex index migration structure.==Certains processus apparaissent en double, pour expliquer la complexit&eacute; de la structure des index partag&eacute;s.
-(1) Index Monitor of Remote Crawl Receipts==(1) Moniteur d'index pour les retours de crawl distants
-This is the list of web pages that this peer initiated to crawl,==C'est une liste de pages internet dont le crawl a &eacute;t&eacute; initi&eacute; par votre noeud,
-but had been crawled by <em>other</em> peers.==mais a &eacute;t&eacute; crawl&eacute; par d'<em>autre</em> noeuds.
-This is the 'mirror'-case of process (6).==C'est le processus oppos&eacute; du (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Cas d'utilisation:</em> Vous obtenez des entr&eacute;es ici, si vous d&eacute;marrez un crawl local sur la page 'Cr&eacute;ation d'index' et activez  
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==l'indexation &agrave; distance. Chaque page, qui sera index&eacute;e par un noeud distant &agrave; votre demande,  
-is reported back and can be monitored here.==sera rapport&eacute;e et peut &ecirc;tre monitor&eacute;e ici.
-(2) Index Monitor for Result of Search Queries==(2) Moniteur d'index des r&eacute;sultats de requ&ecirc;tes de recherche.
-This index transfer was initiated by your peer by doing a search query.==Ce transfert d'index a &eacute;t&eacute; initi&eacute; par votre noeud en lançant une  requ&ecirc;te de recherche.
-The index was crawled and contributed by other peers.==Cet index a &eacute;t&eacute; crawl&eacute; par d'autres noeud qui y ont contribu&eacute;.
-<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Cas d'utilisation:</em> Cette liste se remplit si vous lancez une requ&ecirc;te sur la 'page de recherche'
-(3) Index Monitor for Index Transfer.==(3) Moniteur d'index pour le partage de DHT.
-The url fetch was initiated and executed by other peers.==L'indexation d'URL a &eacute;t&eacute; initi&eacute;e et effectu&eacute;e par d'autres noeuds.
-These links here have been transmitted to you because your peer is the most appropriate for storage according to==Ces liens vous ont &eacute;t&eacute; transmis car votre noeud est le plus appropri&eacute; pour le stockage selon  
-the logic of the Global Distributed Hash Table.==la logique de la table de hachage distribu&eacute;e globale
-<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Cas d'utilisation:</em> Cette liste se remplira si l'option 'Reception d'index' de la page 'Contr&ocirc;le d'index'
-(4) Index Monitor for Proxy Indexing==(4) Moniteur d'index pour le proxy d'indexation
-These web pages had been indexed as result of your proxy usage.==Ces pages web ont &eacute;t&eacute; index&eacute;es lors de l'utilisation de votre proxy d'indexation.
-No personal or protected page is indexed==Aucune page personelle ou prot&eacute;g&eacute;e n'est index&eacute;e
-such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)==De telles pages sont d&eacute;tect&eacute;es par l'usage des cookies ou des param&egrave;tres POST (dans l'URL ou le protocole HTTP)
-and automatically excluded from indexing.==et exclus automatiquement de l'indexation.
-<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Cas d'utilisation:</em> Vous devez utiliser YaCy comme proxy pour remplir cette table.
-Set the proxy settings of your browser to the same port as given==Configurez les param&egrave;tres de proxy de votre brower avec le m&ecirc;me port que celui
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==du champ 'Port de proxy et d'administration' de la page de 'Configuration'. 
-(5) Index Monitor for Local Crawling.==(5) Moniteur d'index pour le crawl local
-These web pages had been crawled by your own crawl task.==Cette page web a &eacute;t&eacute; crawl&eacute;e par votre propre t&acirc;che de crawl. 
-<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Cas d'utilisation:</em> Lancer un crawl en param&egrave;trant un point de d&eacute;part sur la page 'Cr&eacute;ation d'index'.
-(6) Index Monitor for Global Crawling==(6) Moniteur d'index pour le crawl global
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Ces pages ont &eacute;t&eacute; index&eacute;es par votre noeud, mais le crawl &eacute;tait initi&eacute; par un noeud distant.
-This is the 'mirror'-case of process (1).==C'est le processus oppos&eacute; du cas (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Cas d'application:</em> Cette liste se remplira si vous cochez l'option 'Accepter les requ&ecirc;tes de crawl distantes' sur la page 'cr&eacute;arion d'index'
-The stack is empty.==La liste est vide.
-Showing all #[all]# entries in this stack.==Voir les #[all]# entr&eacute;es de cette pile.
-Showing latest #[count]# lines from a stack of #[all]# entries.==Voir les #[count]# derni&egrave;res lignes d'une pile de #[all]# entr&eacute;es.
-"clear list"=="Vider la liste"
-Initiator==Initiateur
-Executor==Executeur
-Modified Date==Date de modification
-Words==Mots
-Title==Titre
-#URL==URL
-"delete"=="Supprimer"
 #-----------------------------
 
 #File: IndexReIndexMonitor_p.html
@@ -1314,35 +1056,6 @@ URLs rejected for some reason by the crawl stacker or the crawler queue. Please 
 >Malformed URLs<==>URLs mal formées<
 "#[malformedUrlsDeletedCount]# deleted from the index"=="#[malformedUrlsDeletedCount]# supprimées de l'index"
 > Refresh<==> Rafraîchir<
-#-----------------------------
-
-#File: IndexTransfer_p.html
-#---------------------------
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==L'index local consiste actuellement en (au moins) #[wcount]# mots et #[ucount]# URLs.
-Chunk Size<br />(Word Entries)==Taille de chunk<br />(Entr&eacute;es de mots)
-Words Range==plage de mots
-Transfered Words==Mots transf&eacute;r&eacute;s
-Delete<br />Index==Supprimer<br /> Index
-true==oui
-false==non
-Selection==Choix
-words<==Mots<
-Last Refresh:==Dernier rafraîchissement:
-Overwrite IP==Ecraser l'IP
-blank for defaultip==vide pour l'IP standart.
-Start/Stop Transfer==D&eacute;marrer/Arreter le transfert
-"Start Index Transfer"=="D&eacute;marrer le transfert d'index"
-"Stop Index Transfer"=="Arreter le transfert d'index"
-"Start New Index Transfer"=="D&eacute;marrer un nouveau transfert d'index"
-#-----------------------------
-
-#File: Lab.html
-#---------------------------
-
-The YaCy Lab==Le labo YaCy
-This is the place where we try new functions of the YaCy search engine.==C'est l'endroit ou nous testons les nouvelles fonctions du moteur de recherche YaCy.
-All these things here are to be considered as probably unstable, and/or experimental.==Toutes ces nouvelles fonctions sont encore instables et sont en phase d'exp&eacute;rimentation.
-You may try out these things but please do not care about bugs.==Vous pouvez essayer ces nouvelles fonctions, mais ne prettez pas attention aux erreurs.
 #-----------------------------
 
 #File: Messages_p.html
@@ -1500,7 +1213,7 @@ A table with recently started crawls is presented on the Index Create - page==Un
 A change in the personal profile will create a news entry. You can see recently made changes of==Une modification du profil personnel cr&eacute;ra une nouvelle. Vous pouvez les changements r&eacute;cent des 
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==Entr&eacute;es du profil sur la page r&eacute;seau, ou la modification du profil est indiqu&eacute;e avec un '*' contre le selecteur 'P'.
 More news services will follow.==D'autres nouvelles vont suivre.
-Above you can see four menues:==Vous pouvez voir ces quatre menus:
+Above you can see four menus:==Vous pouvez voir ces quatre menus:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>Nouvelles entrantes(#[insize]#)</strong>:Les derni&egrave;res nouvelles qui ont atteint votre noeud. 
 Only these news will be used to display specific news services as explained above.==Seules ces nouvelles seront utilis&eacute;es pour afficher des services de nouvelles sp&eacute;cifiques.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Vous pouvez traiter ces nouvelles avec un bouton sur la page pour &eacute;viter leurs apparitions sur les pages R&eacute;seau et IndexCreate.
@@ -1586,7 +1299,7 @@ This shall improve performance of the affected process (proxy or search).==Cela 
 (current delta is==Les temps actuels sont respectivement de
 seconds since last proxy/local-search/remote-search access.)==secondes depuis le dernier accès au proxy, à la recherche locale et à la recherche distante.
 Online Caution Case==Fonctionnalité
-indexer delay (milliseconds) after case occurency==Temps de pause de l'indexeur (en ms)
+indexer delay (milliseconds) after case occurrence==Temps de pause de l'indexeur (en ms)
 Local Search:==Recherche locale :
 Remote Search:==Recherche distante :
 "Enter New Parameters"=="Appliquer"
@@ -1912,27 +1625,6 @@ Message Forwarding (optional)==Redirection de messages (optionel)
 #Changes will take effect immediately.==Änderungen sind sofort wirksam.
 #-----------------------------
 
-#File: Settings_PortForwarding.inc
-#---------------------------
-# check for logical mistakes, unsure about some translations
-#Port Forwarding==Port Weiterleitung
-#You can use a remote server running a ssh demon to forward your server/proxy port.==Sie können einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
-#This is useful if you want to tunnel throug a NAT/router.==Dies ist nützlich, wenn Sie durch einen NAT/Router tunneln wollen.
-#Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ können Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Außerhalb zu ermöglichen.
-#Enable port forwarding:==Aktiviere Port Weiterleitung:
-#Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung über sicheren Kanal.
-#Forwarding via proxy:==Weiterleitung über Proxy:
-#Function not available at the moment.==Funktion im Moment nicht verfügbar.
-#You need to install libx to use this feature==Sie müssen die libx installieren, um diese Funktionen benutzen zu können
-#Forwarding port:==Weiterleitender Port
-#The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
-#Forwarding host:==Weiterleitender Host
-#Forwarding host port:==Weiterleitender Host Port
-#Forwarding host user:==Weiterleitender Host Nutzer
-Forwarding host password:==Weiterleitender Host mot de passe
-#Changes will take effect immediately.==Änderungen sind sofort wirksam.
-#-----------------------------
-
 #File: Settings_ServerAccess.inc
 #---------------------------
 #Server Access Settings==Serverzugangs Einstellungen 
@@ -1975,30 +1667,6 @@ Forwarding host password:==Weiterleitender Host mot de passe
 #Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
 #The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
 #-----------------------------
-#File: yacy/seedUpload/yacySeedUploadFtp.html
-#---------------------------
-#Uploading via FTP:==Upload per FTP:
-#This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account für einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen können.
-#If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie zum Principal-Noeud.
-#Your peer will then upload the seed-bootstrap information periodically,==Ihr Noeud wird dann die Seed-Bootstrap Informationen periodisch hochladen,
-#but only if there had been changes to the seed-list.==jedoch nur wenn Änderungen an der Seed-Liste existieren.
-#The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
-#Path:==Pfad:
-#The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
-#Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
-#Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
-Password:==mot de passe:
-The password==Das mot de passe
-#-----------------------------
-
-#File: yacy/seedUpload/yacySeedUploadFile.html
-#---------------------------
-#Store into filesystem:==Ablegen im Fichiersystem:
-#You must configure this if you want to store the seed-list file onto the file system.==Sie müssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Fichiersystem ablegen wollen.
-#File Location:==Speicherort:
-#Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier können Sie den Pfad im Fichiersystem festlegen, in dem die Seed-Liste abgelegt werden soll.
-#-----------------------------
-
 #File: Settings_MessageForwarding.inc
 #---------------------------
 #Message Forwarding==Nachrichten Weiterleitung
@@ -2010,15 +1678,6 @@ The password==Das mot de passe
 #Forwarding To:==Weiterleiten An:
 #The recipient email-address.<br /> e.g.:==Die E-Mail Adresse des Empfängers.<br />z.B.:
 #Changes will take effect immediately.==Änderungen sind sofort wirksam.
-#-----------------------------
-
-#File: Settings_Parser.inc
-#---------------------------
-#Content Parser Settings==Inhalt Parser Einstellungen
-#With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Fichiertypen basierend auf ihren MIME-Typen ermöglichen.
-#For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
-#http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-#Changes take effect immediately==Änderungen sind sofort wirksam
 #-----------------------------
 
 #File: Settings_Crawler.inc
@@ -2105,16 +1764,6 @@ The password==Das mot de passe
 #Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
 #Port rebinding will be done in a few seconds==Der neue Port wird in ein paar Sekunden übernommen.
 #You can reach your YaCy server under the new location==Dieser YaCy-Noeud kann nun unter seiner neuen Adresse erreicht werden: 
-#-----------------------------
-
-#File: Settings_Admin.inc
-#---------------------------
-#Administration Account Settings==Administrator Konto Einstellungen
-#This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst geschützte "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
-#Account Name:==Konto Name:
-Password:==mot de passe:
-Password (repeat same as above):==mot de passe (bitte zur Sicherheit erneut eingeben):
-#value="submit">==value="Speichern">
 #-----------------------------
 
 #File: Status.html
@@ -2351,28 +2000,6 @@ Hide surftips==Surftipps cach&eacute;s
 #>Result of API execution==>Ergebnis der API Ausführung
 #>Status<==>Status>
 #>URL<==>URL<
-#-----------------------------
-
-#File: User_p.html
-#---------------------------
-new User==nouvel utilisateur
-Edit User==Modifier l'utilisateur
-Delete User==Supprimer l'utilisateur
-Current User:==Utilisateur courrant:
-Password:==mot de passe:
-Password(repeat):==mot de passe(confirmer):
-First Name:==Pr&eacute;nom:
-Last Name:==Nom:
-Address:==Adresse:
-Rights==Droits
-Timelimit:==Limite de temps:
-Time used:==Temps utilis&eacute;:
-Save User==Enregistrer l'utilisateur 
-User created:==Utilisateur cr&eacute;&eacute;:
-User changed:==Utilisateur modifi&eacute;:
-Passwords do not match.==Le mot de passe est incorrect.
-If you want to manage more Users, return to the==Si vous voulez g&eacute;rer d'autres utilisateurs, retournez &agrave; la page
-user</a> page.==Utilisateur</a>.
 #-----------------------------
 
 #File: ViewFile.html
@@ -2782,14 +2409,6 @@ Crawl Start==D&eacute;marrer le crawl
 >Music==>Musique
 #-----------------------------
 
-#File: env/templates/submenuPerformance.template
-#---------------------------
-Performance Menu==Menu Performance
-Queues Performance Settings==Param&egrave;tres de performance des files d'attente
-Memory Settings for Database Caches==Param&egrave;tres de la m&eacute;moire cache de la base de donn&eacute;es
-Timing Settings for Search Sequence==Param&egrave;tres temporels la recherche
-#-----------------------------
-
 #File: env/templates/submenuRanking.template
 #---------------------------
 Ranking and Heuristics==Classement et heuristique
@@ -2811,22 +2430,3 @@ Network Configuration==Configuration r&eacute;seau
 Index Browser==Explorateur d'index
 #-----------------------------
 
-#File: htdocsdefault/dir.html
-#---------------------------
-YaCy: Public Files==YaCy: Fichiers publics
-Public File Directory==Dossier des fichiers publics
-value="#[peername]#'s Console"==value="Console de #[peername]#"
-Welcome! You are identified and authorized as==Bienvenue! Vous &ecirc;tes identifi&eacute; et autoris&eacute; comme
-#-----------------------------
-
-#File: www/welcome.html
-#---------------------------
-YACY: Default Page for Individual Noeud Content==YACY: Page standard pour contenue du noeud individuel
-Individual Web Page==Page web individuelle
-Welcome to your own web page<br />in the <strong>YaCy Network==Bienvenue sur votre page personnelle<br />sur le <strong>R&eacute;seau YaCy
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==CECI EST UNE PAGE DE DEMONSTRATION POUR VOTRE PROPRE SERVEUR WEB PERSONNEL!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==REMPLACEZ CETTE PAGE EN AJOUTANT UN FICHIER index.html DANS LE DOSSIER
-<YaCy-application-home><strong>#[wwwpath]#</strong>==<YaCy-Application-Home><strong>#[wwwpath]#</strong> ABLEGEN.
-#-----------------------------
-
-# EOF

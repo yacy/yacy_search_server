@@ -418,7 +418,7 @@ Some pages are protected by passwords.==Деякі сторінки захище
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Ви повинні вказати пароль в <a href="ConfigAccounts_p.html">меню облікових записів</a> для захисту вашого вузла YaCy.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Ви не відкрили порт у фаєрволі, або ж маршрутизатор не прокидає серверний порт до вашого вузла.
 This is needed if you want to fully participate in the YaCy network.==Тим не менш, це необхідно, якщо ви хочете в повній мірі брати участь у мережі YaCy.
-You can also use your peer without opening it, but this is not recomended.==Ви також можете використовувати ваш вузол, не відкриваючи його, але це не рекомендується.
+You can also use your peer without opening it, but this is not recommended.==Ви також можете використовувати ваш вузол, не відкриваючи його, але це не рекомендується.
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -441,7 +441,7 @@ That means: right after the search request the portal page of the host is loaded
 Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Під час цього "миттєвого сканування" сканується також robots.txt і мінімальний час доступу до цих сторінок робить евристичний пошук надто повільним - але можна знайти всі бажані результати під час другого пошуку (після паузи в декілька секунд).
 load external search result list from==завантажити зовнішній список пошукових результатів з
 When using this heuristic, then every search request line is used for a call to blekko.==Ця евристика використовує кожен рядок пошуку для виклику Blekko.
-20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==20 результатів витягуються з Blekko, одночасно завантажуються, аналізуються і негайно індексуються.
+20 results are taken from blekko and loaded simultaneously, parsed and indexed immediately.==20 результатів витягуються з Blekko, одночасно завантажуються, аналізуються і негайно індексуються.
 #-----------------------------
 
 #File: ConfigHTCache_p.html
@@ -480,66 +480,6 @@ Unable to get URL:==Неможливо встановити вказаний ф�
 Error saving the language file.==Помилка при збереженні мовного файлу.
 Make sure that you only download data from trustworthy sources. The new language file==Переконайтеся, що ви завантажуєте файли тільки з надійних джерел.
 might overwrite existing data if a file of the same name exists already.==Увага, якщо файл з таким ім'ям вже існує, він буде замінений !
-#-----------------------------
-
-#File: ConfigLiveSearch.html
-#---------------------------
-Integration of a Search Field for Live Search==Інтегрування пошукового поля для Живого Пошуку
-Integration of Live Search with YaCy Search Widget==Вбудовування Живого Пошуку
-A 'Live-Search' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Поле "Живого пошуку" показує рухливі результати при введенні тексту в спливаючому вікні і може легко бути включене в будь-який існуючий веб-сайт
-This is the same function as can be seen on all pages of the YaCy online-interface (look at the window in the upper right corner)==Це та ж сама функція, яку можна побачити на всіх сторінках веб-оболонки YaCy (наприклад, у правому верхньому куті вікна)
-Just use the code snippet below to integrate that in your own web pages==Просто використовуйте поданий нижче фрагмент коду, щоб встановити вікно пошуку на ваш сайт.
-Please check if the address, as given in the example '#[ip]#:#[port]#' here is correct and replace it with more appropriate values if necessary==Будь ласка, переконайтеся, що адреса правильна, як в прикладі '#[ip]#:#[порт]#', і при необхідності замініть адресу на правильну
-Code Snippet:==Уривок коду:
-YaCy Portal Search==Пошуковий портал YaCy
-"Search"=="Пошук"
-Configuration options and defaults for 'yconf':==Параметри і налаштування для "yconf":
-Defaults<==За замовчуванням<
-url<==URL<
-is a mandatory property - no default<==повинен бути зазначений<
-YaCy P2P Web Search==YaCy P2P Веб-пошук
-Size and position (width | height | position)==Розмір і положення (width | height | position)
-Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==Вказує, де повинен бути відображений діалог. Можливі значення для позиції: 'center', 'left', 'right', 'top', 'bottom', або масив що містить пари координат (у пікселях як зсув від лівого верхнього кута перегляду) або можливий рядокова змінна (наприклад, ['right','top'] для правого верхнього кута)
-Animation effects (show | hide)==Анімаційні ефекти (show | hide)
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==Ефект, який повинен бути застосований. Можливі значення: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
-Interaction (modal | resizable)==Взаємодія (modal | resizable)
-If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==Якщо модальність виставлена в істину, діалог матиме модальну поведінку, а інші елементи на сторінці будуть відключені. (тобто з ними не можна взаємодіяти)
-Modal dialogs create an overlay below the dialog but above other page elements.==Модальні діалоги створюють накладення діалогу і знаходяться приблизно над половиною інших елементів сторінки.
-If resizable is set to true, the dialog will be resizeable.==Якщо зміна розміру має значення істина, ви можете змінити розмір діалогового вікна.
-Load JavaScript load_js==Завантаження JavaScript load_js
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Якщо load_js встановлений ​​в брехню, ви повинні вручну завантажити JavaScript на вашій сторінці порталу.
-This can help to avoid timing problems or double loading.==Це може допомогти запобігти проблемам з синхронізацією чи подвійному завантаженню.
-Load Stylesheets load_css==Завантаження таблиці стилів load_css
-If load_css is set to false, you have to manually load the needed CSS on your portal page.==Якщо load_css встановлена ​​в брехню, ви повинні вручну завантажити необхідні CSS до вашої сторінки порталу.
-Themes<==Теми<
-You can <==Ви можете <
-download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a>==завантажити готові теми</a> чи <a href="http://jqueryui.com/themeroller/" target="_blank">виставити</a>
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==власну тему. <br/>Теми встановлені в каталог: DATA/HTDOCS/yacy/ui/css/themes/
-
-There are basically two methods for integrating the YaCy Search Widget with your web site==Вцілому існує 2 способи вкладення Пошукової штучки YaCy на ваш веб-сайт
-Static hosting of widget on own HTTP server==Постійне розміщення штучки на вашому власному HTTP-сервері
-Remote access through selected YaCy Peer==Віддалений доступ до вибраного вузла YaCy
-Advantages:==Переваги:
-Disadvantages:==Недоліки:
-Installing:==Установка:
-faster connection speed==краща швидкість з’єднання
-possibility for local adaptions==можливість пристосування до місця
-No automatic update to future releases of YaCy Search Widget==Немає самооновлення до наступних випусків Пошукової штучки YaCy
-Ajax/JSONP cross domain requests needed to query remote YaCy Peer==Для звернення до віддаленого вузла YaCy необхідні міждоменні запити Ajax/JSONP
-download yacy-portalsearch.tar.gz from==завантажте yacy-portalsearch.tar.gz з
-unpack within your HTTP servers path==розпакуйте в шлях вашого HTTP-сервера
-use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==використовуйте ./yacy/portalsearch/yacy-portalsearch.html в якості посилання для вбудовування у вашу власну сторінку порталу
-Always latest version of YaCy Search Widget==Завжди остання версія Пошукової штучки YaCy
-No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Без міждоменних запитів Ajax/JSONP, так-як Пошукова штучка та вузол YaCy розміщені на одному й тому ж домені
-Under certain cirumstances slower than static hosting==При певних обставинах повільніше, ніж постійний хостинг
-Just use the code snippet below and paste it any place in your own portal page==Просто використовуйте фрагмент коду і вставте його в будь-якому місці у вашу власну сторінку порталу
-Please check if '#[ip]#:#[port]#' is appropriate or replace it with address of the YaCy Peer holding your index==Будь-ласка, перевірте чи "#[ip]#:#[port]#" підходить або замініть його на адресу вузла YaCy, що містить ваш індекс
-'YaCy Search Widget'=='Пошукова штучка YaCy'
-Live Search &lt;==Живий Пошук &lt;
-This parameter is used for static hosting only.==Ця властивість використовується тільки для постійного хостингу.
-You can download standard jquery-ui themes or create your own custom themes on==Ви можете завантажити стандартні теми jquery-ui або створити свої власні теми на
-Themes are installed in ./yacy/jquery/themes/ (static hosting) or in DATA/HTDOCS/jquery/themes/ on remote YaCy Peer.==Теми встановлені в ./yacy/jquery/themes/ (постійний хостінг) або в DATA/HTDOCS/jquery/themes/ на віддаленому вузлі YaCy.
-YaCy ships with 'start' and 'smoothness' themes pre-installed.==YaCy поставляється з передвстановленими темами "початок" і "гладкість".
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -699,7 +639,7 @@ For a search page with a small header, use this code:==Для сторінки �
 A third option is the interactive search. Use this code:==Як третій варіант, живий пошук. Використовуйте наступний код:
 Enable Search for Everyone==Дозволити пошук для всіх
 Search is available for everyone==пошук доступний для кожного
-Only the administator is allowed to search==тільки адміністратор може шукати
+Only the administrator is allowed to search==тільки адміністратор може шукати
 Show Media Search Options==Показувати варіанти пошуку
 Text==Текст
 Images==Зображення
@@ -1146,24 +1086,6 @@ no country code restriction==Без обмеження по коду країн�
 Must-Match List for Country Codes==Список повинно-співпадати для кодів країн
 #-----------------------------
 
-#File: CrawlStartIntranet_p.html
-#---------------------------
-Intranet Crawl Start==Запуск сканування внутрішньої мережі
-When an index domain is configured to contain intranet links,==Якщо індексний домен настроєний містити посилання з внутрішньої мережі,
-the intranet may be scanned for available servers.==ця внутрішня мережа може бути перевірена на наявність доступних серверів.
-Please select below the servers in your intranet that you want to fetch into the search index.==Будь ласка, виберіть з наведеного нижче списку сервер з вашої мережі, який ви хочете долучити в пошуковий індекс.
-This network definition does not allow intranet links.==Налаштування цієї мережі не дозволяють посилань з внутрішньої мережі.
-A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Список серверів з внутрішньої мережі доступний, тільки якщо ви налаштували YaCy індексувати внутрішню мережу.
-To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==Щоб змінити цю настройку, виберіть на сторінці <a href="ConfigBasic.html">початкового налаштування</a> використання "індексування внутрішньої мережі".
-Available Intranet Server==Доступний сервер внутрішньої мережі
-#>IP<==>IP<
-#>URL<==>URL<
->Process<==>Стан<
->not in index<==>Не в індексі<
->indexed<==>Проіндексовано<
-"Add Selected Servers to Crawler"=="Додати виділені сервери до сканувача"
-#-----------------------------
-
 #File: CrawlStartScanner_p.html
 #---------------------------
 Network Scanner==Сканувач внутрішньої мережі
@@ -1317,7 +1239,7 @@ restrictions==обмеження
 only urls with the &lt;phrase&gt; in the url==тільки URL, які містять &lt;phrase&gt;
 only urls with extension==тільки URL з розширенням
 only urls from host==тільки URL із сервера
-only pages with as-author-anotated==тільки сторінки з вказаним автором
+only pages with as-author-annotated==тільки сторінки з вказаним автором
 only pages from top-level-domains==тільки сторінки з домену верхнього рівня
 only resources from http or https servers==тільки ресурси з HTTP- чи HTTPS-серверів
 only resources from ftp servers==тільки ресурси з FTP-серверів
@@ -1347,30 +1269,6 @@ click on the red icon in the upper right after a search. this works good in comb
 >example==>приклад
 json search results==результати json
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Для розробників ajax: викличте rss і замініть ".rss" на ".json"
-#-----------------------------
-
-#File: IndexCleaner_p.html
-#---------------------------
-Index Cleaner==Очисник індексу
->URL-DB-Cleaner==>URL-БД-Очищувач
-#ThreadAlive:
-#ThreadToString:
-Total URLs searched:==Всього шуканих URL:
-Blacklisted URLs found:==Виявлено URL з чорного списку:
-Percentage blacklisted:==Відсоток з ЧС:
-last searched URL:==останні шукані URL:
-last blacklisted URL found:==останні виявлені URL з ЧС:
->RWI-DB-Cleaner==>RWI-БД-Очисник
-RWIs at Start:==RWI на початку:
-RWIs now:==RWI зараз:
-wordHash in Progress:==контр.сума слів у використанні:
-last wordHash with deleted URLs:==остання к.сума слів з видаленими URL:
-Number of deleted URLs in on this Hash:==кількість видалених URL в цій контр.сумі:
-URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-БД-Очисник - Очистіть свою БД, шляхом видалення URL-адрес, які знаходяться у вашому чорному списку:
-Start/Resume==Розпочати/Продовжити
-Stop==Зупинити
-Pause==Призупинити
-RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-БД-Очисник - Очистіть свою БД, видаливши слова, пов’язані з вашим чорним списком:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
@@ -1641,122 +1539,6 @@ Modified Date==Дата зміни
 Anchor Name==Ім’я якоря
 #-----------------------------
 
-#File: IndexCreateWWWGlobalQueue_p.html
-#---------------------------
-Global Crawl Queue==Загальна черга сканування
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Ця черга містить URL, що повинні бути надіслані на інші вузли для здійснення віддаленого сканування.
-If there is no peer for remote crawling available, the links are crawled locally.==Якщо вузлів, доступних для віддаленого сканування, немає, посилання будуть проскановані на місці.
-The global crawler queue is empty==Загальна черга сканування порожня.
-"clear global crawl queue"=="Очистити загальну чергу сканування"
-There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==В загальній черзі сканування <strong>#[num]#</strong> записів. Показано <strong>#[show-num]#</strong> найновіших записів.
-Show last==Показати останні
-</a> entries.==</a> записів.
-Initiator==Зачинщик
-Profile==Профіль
-Depth==Глибина
-Modified Date==Дата зміни
-Anchor Name==Ім’я якоря
-#URL==URL
-#-----------------------------
-
-#File: IndexCreateWWWLocalQueue_p.html
-#---------------------------
-Local Crawl Queue==Місцева черга сканування
-This queue stores the urls that shall be crawled localy by this peer.==Ця черга містить URL, що повинні бути проскановані на цьому вузлі.
-It may also contain urls that are computed by the proxy-prefetch.==Вона також містить URL, надані проксі з використанням глибини індексування.
-The local crawler queue is empty==Місцева черга сканування порожня.
-There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==В місцевій черзі сканування <strong>#[num]#</strong> записів. Показано <strong>#[show-num]#</strong> найновіших записів.
-Show last==Показати останні
-</a> entries.==</a> записів.
-Initiator==Зачинщик
-Profile==Профіль
-Depth==Глибина
-Modified Date==Дата зміни
-Anchor Name==Ім’я якоря
-#URL==URL
-[Delete]==[Видалити]
-Delete Entries:==Видалити записи:
-"Delete"=="Видалити"
-This may take a quite long time.==Це може зайняти деякий час.
-#-----------------------------
-
-#File: IndexCreateWWWRemoteQueue_p.html
-#---------------------------
-Remote Crawl Queue==Віддалена черга сканування
-This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==Ця черга містить URL, надіслані вашому вузлу іншими вузлами для проведення віддаленого сканування.
-The remote crawler queue is empty==Віддалена черга сканування порожня.
-"clear remote crawl queue"=="Очистити віддалену чергу сканування"
-There are <strong>#[num]#</strong> entries in the remote crawler queue.==У віддаленій черзі сканування <strong>#[num]#</strong> записів.
-Showing <strong>#[show-num]#</strong> most recent entries.==Показано <strong>#[show-num]#</strong> найновіших записів.
-Show last==Показати останні
-</a> entries.==</a> записів.
-Initiator==Зачинщик
-Profile==Профіль
-Depth==Глибина
-Modified Date==Дата зміни
-Anchor Name==Ім’я якоря
-#URL==URL
-Delete==Видалити
-#-----------------------------
-
-#File: IndexImport_p.html
-#---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Імпорт індексу
-#Crawling Queue Import==Імпорт черги сканування
-Index DB Import==Імпорт бази даних індексу
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==Місцевий індекс складається на даний момент з (щонайменше) #[wcount]# слів та #[ucount]# URL.
-Import Job with the same path already started.==Імпортування з тим же шляхом вже запущене.
-Starting new Job==Запустити нове імпортування
-Import&nbsp;Type:==Тип імпорту:
-Cache Size==Розмір кешу
-Usage Examples==Приклади<br />використання
-"Path to the PLASMADB directory of the foreign peer"=="Шлях до каталогу PLASMADB чужого вузла"
-Import&nbsp;Path:==Шлях імпорту:
-"Start Import"=="Запустити імпортування"
-Attention:==Увага:
-Always do a backup of your source and destination database before starting to use this import function.==Завжди використовуйте резервну копію вихідної і цільової баз даних перед імпортуванням.
-Currently running jobs==Працюючі завдання
-Job Type==Тип завдання
->Path==>Шлях
-Status==Стан
-Elapsed<br />Time==Часу<br />пройшло
-Time<br />Left==Часу<br />залишилось
-Abort Import==Скасувати імпортування
-Pause Import==Призупинити імпортування
-Finished::Running::Paused==Готово::Працює::Призупинено
-"Abort"=="Перервати"
-"Pause"=="Призупинити"
-"Continue"=="Продовжити"
-Finished jobs==Завершені завдання
-"Clear List"=="Очистити список"
-Last Refresh:==Останнє оновлення:
-Example Path:==Приклад шляху:
-Requirements:==Вимоги:
-You need to have at least the following directories and files in this path:==Ви повинні мати, принаймні, такі файли і папки в цьому шляху:
->Type==>Тип
->Writeable==>Записувані
->Description==>Опис
->File==>Файл
->Directory==>Каталог
->Yes<==>Так<
->No<==>Ні<
-The LoadedURL Database containing all loaded and indexed URLs==База даних "завантажених URL" містить всі завантажені і проіндексовані URL
-The assortment directory containing parts of the word index.==Каталог наборів містить частини індексу слів.
-The words directory containing parts of the word index.==Каталог слів містить частини індексу слів.
-The assortment file that should be imported.==Файл набору, що повинен бути імпортований.
-The assortment file must have the postfix==Файл набору повинен мати закінчення
-#.db".==.db".
-If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==Якщо ви хочете імпортувати файл набору з <tt>PLASMADBACLUSTERABKP</tt>,
-you have to rename it first.==ви повинні спочатку його перейменувати.
->Notes:==>Примітки:
-Please note that the imported words are useless if the destination peer doesn't know==Зверніть увагу, що імпортовані слова марні, якщо цільовий вузол не знає,
-the URLs the imported words belongs to.==до яких URL-адрес вони належать.
-Crawling Queue Import:==Імпорт черги сканувача:
-Contains data about the crawljob an URL belongs to==Містить дані про завдання сканування, що належить до URL
-The crawling queue==Черга сканування
-Various stack files that belong to the crawling queue==Різноманітні файли-купи, що належать до черги сканування
-#-----------------------------
-
 #File: IndexImportMediawiki_p.html
 #---------------------------
 MediaWiki Dump Import==Імпорт Dump'у MediaWiki
@@ -1879,7 +1661,7 @@ To integrate a search window into phpBB3, you must insert some code into a forum
 There are several templates that can be used for phpBB3, but in this guide we consider that==Є кілька шаблонів, які можуть бути використані для форуму phpBB3. Але в цьому посібнику, ми припускаємо, що
 you are using the default template, 'prosilver'==ви використовуєте стандартний шаблон, "prosilver".
 open styles/prosilver/template/overall_header.html==Відкрийте файл styles/prosilver/template/overall_header.html
-find the line where the default search window is displayed, thats right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==Знайдіть рядок, що використовується для показу пошукового вікна за замовчуванням, яке йде відразу за <pre>&lt;div id="search-box"&gt;</pre>
+find the line where the default search window is displayed, that's right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==Знайдіть рядок, що використовується для показу пошукового вікна за замовчуванням, яке йде відразу за <pre>&lt;div id="search-box"&gt;</pre>
 Insert the following code right behind the div tag==Вставте наступний код зразу за тегом div
 YaCy Forum Search==Пошук YaCy по форуму
 ;YaCy Search==;Пошук YaCy
@@ -2145,7 +1927,7 @@ A change in the personal profile will create a news entry. You can see recently 
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==Зміни профілю на мережній сторінці відзначаються з "*" поруч з "P" (профілем).
 More news services will follow.==Пізніше буде більше служб новин.
 
-Above you can see four menues:==Ви можете бачити ці чотири вкладки:
+Above you can see four menus:==Ви можете бачити ці чотири вкладки:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>Вхідні новини (#[insize]#)</strong>: Останні новини, що досягли вашого вузла.
 Only these news will be used to display specific news services as explained above.==Тільки ці новини будуть використовуватися для відображення конкретної служби новин.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Ви можете обробити їх натисненням кнопки на сторінці (відмітити як "прочитані"). Потім ці повідомлення більше не будуть з’являтися на сторінках мережі та створення індексу.
@@ -2199,7 +1981,7 @@ This shall improve performance of the affected process (proxy or search).==Це 
 (current delta is==(З останнього доступу до проксі/місцевого пошуку/глобального пошуку пройшло
 seconds since last proxy/local-search/remote-search access.)==секунд.)
 Online Caution Case==Мережний тип доступу
-indexer delay (milliseconds) after case occurency==затримка індексатора (в мілісекундах) для мережного доступу
+indexer delay (milliseconds) after case occurrence==затримка індексатора (в мілісекундах) для мережного доступу
 Proxy:==Проксі:
 Local Search:==Місцевий пошук:
 Remote Search:==Віддалений пошук:
@@ -2353,7 +2135,7 @@ Thread==Потік
 Queue Size<br />Current==Поточний<br />розмір черги
 Queue Size<br />Maximum==Найбільший<br />розмір черги
 Concurrency:<br />Number of Threads==Одночасність:<br />Кількість потоків
-Childs==Дочірні процеси
+Children==Дочірні процеси
 Average<br />Block Time<br />Reading==Середнє<br />читання
 Average<br />Exec Time==Середнє виконання
 Average<br />Block Time<br />Writing==Середній<br />запис
@@ -2452,32 +2234,6 @@ Quick Crawl Link==Швидке сканування посилання
 #Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
 #Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
 #-----------------------------
-
-#File: Ranking_p.html
-#---------------------------
-Ranking Configuration==Настройка ранжування
-The document ranking influences the order of the search result entities.==Ранжування документів впливає на порядок відображення результатів пошуку.
-A ranking is computed using a number of attributes from the documents that match with the search word.==Ранг розраховується за низкою ознак документів, що містять дане слово.
-The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.==Ознаки спочатку вирівнюються по всіх результатах пошуку, а потім перемножуються на множники, розраховані з цього списку.
-The ranking coefficient grows exponentially with the ranking levels given in the following table.==Множник ранжування зростає експоненціально зі зростанням значень рангу, які наведені в наступній таблиці.
-If you increase a single value by one, then the strength of the parameter doubles.==Якщо ви збільшуєте одиночне значення на одиницю, сила властивості збільшується в два рази.
-Pre-Ranking==Передранжування
-
-There are two ranking stages:==Є дві фази ранжування.
-first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Спочатку всі результати ранжуються з передранжуванням, а з отриманого списку документи сортуються знову з післяранжуванням.
-The two stages are separated because they need statistical information from the result of the pre-ranking.==Поділ на дві частини через необхідність отримання статистичної інформації з результатів попереднього ранжування.
-
-Post-Ranking==Післяранжування
-
-"Set as Default Ranking"=="Зберегти як ранжування за замовчуванням"
-"Re-Set to Built-In Ranking"=="Повернення до початкових значень"
-
-<span>==<span class="info_extra">
-<dd style="width:3ddpx"==<dd style="width:400px"
-
-</body>==<script>window.onload = function () {$("label:contains('Prefer Pattern')").text('Застосування кращого зразка'); $("span.info_extra:contains('pattern given in a search request')").text('вищий рівень надає перевагу документам, у яких URL краще відповідає шаблону пошукового запиту.'); $("label:contains('Date')").text('Дата'); $("span.info_extra:contains('The age of a document')").text('вищий рівень надає перевагу молодшим документам. Вік документа вимірюється за допомогою дати, наданої віддаленим сервером в якості дати документу'); $("label:contains('Appearance In Emphasized Text')").text('Поява у виділеному тексті'); $("span.info_extra:contains('search word is emphasized')").text('вищий рівень надає перевагу документам, в яких шукане слово підкреслюється'); $("label:contains('Appearance In URL')").text('Поява в URL'); $("span.info_extra:contains('urls that match')").text('вищий рівень надає перевагу документам з URL-адресами, які відповідають шуканому слову'); $("label:contains('Appearance In Author')").text('Поява в авторстві'); $("span.info_extra:contains('documents with authors')").text('вищий рівень надає перевагу документам з авторами, які відповідають шуканому слову'); $("label:contains('Appearance In Reference/Anchor Name')").text('Поява в примітці/імені якоря'); $("span.info_extra:contains('in the description text')").text('вищий рівень надає перевагу документам, в яких шукане слово міститься в тексті опису'); $("label:contains('Appearance In Tags')").text('Поява в тега'); $("span.info_extra:contains('subject tags')").text('вищий рівень надає перевагу документам, де шукане слово є частиною значення тега'); $("label:contains('Appearance In Title')").text('Поява в заголовку'); $("span.info_extra:contains('documents with titles')").text('вищий рівень надає перевагу документам з заголовками, які відповідають шуканому слову'); $("label:contains('Authority of Domain')").text('Наповнення домену'); $("span.info_extra:contains('of matching documents')").text('вищий рівень надає перевагу документам з доменів з більшою кількістю співпадаючих документів'); $("label:contains('App, Appearance')").text('Поява в додатках'); $("span.info_extra:contains('to applications')").text('вищий рівень надає перевагу документам з вбудованими посиланнями на додатки'); $("label:contains('Audio Appearance')").text('Поява в звуках'); $("span.info_extra:contains('to audio content')").text('вищий рівень надає перевагу документам з вбудованими посиланнями на звуковий вміст'); $("label:contains('Image Appearance')").text('Поява в зображеннях'); $("span.info_extra:contains('with embedded images')").text('вищий рівень надає перевагу документам з вбудованими зображеннями'); $("label:contains('Video Appearance')").text('Поява в відео'); $("span.info_extra:contains('links to video files')").text('вищий рівень надає перевагу документам з вбудованими посиланнями на відео-файли'); $("label:contains('Category Index Page')").text('Індексні сторінки'); $("span.info_extra:contains('directory listings')").text('вищий рівень віддає перевагу сторінкам "index of" (спискам каталогів)'); $("label:contains('Domain Length')").text('Довжина домену'); $("span.info_extra:contains('short domain name')").text('вищий рівень надає перевагу документам з короткими іменами доменів'); $("label:contains('Hit Count')").text('Кількість входжень'); $("span.info_extra:contains('matchings for the search word')").text('вищий рівень надає перевагу документам з більшим числом співпадінь для шуканих слів'); $("label:contains('Preferred Language')").text('Бажана мова'); $("span.info_extra:contains('matches the browser language')").text('вищий рівень надає перевагу документам мовою, що співпадає з мовою переглядача тенет'); $("label:contains('Links To Local Domain')").text('Посилання на місцевий домен'); $("span.info_extra:contains('hyperlinks to the same domain')").text('вищий рівень надає перевагу документам з великою кількістю гіперпосилань на домен розміщення документу.'); $("label:contains('Links To Other Domain')").text('Посилання на інші домени'); $("span.info_extra:contains('hyperlinks to domains')").text('вищий рівень надає перевагу документам з великою кількістю гіперпосилань на домени, відмінні від домену документа'); $("label:contains('Phrases In Text')").text('Вирази в документі'); $("span.info_extra:contains('large number of phrases')").text('вищий рівень надає перевагу документам з великою кількістю виразів (пропозицій) у знайденому документі.'); $("label:contains('Position In Phrase')").text('Місце у виразі'); $("span.info_extra:contains('word match position high in the matching phrase')").text('вищий рівень надає перевагу документам з місцем збігу слів високо у відповідному виразі. Співпадаваний вираз це фраза (пропозиція), де відповідне слово з’являється в першим.'); $("label:contains('Position In Text')").text('Місце в тексті'); $("span.info_extra:contains('word match position high in the document')").text('вищий рівень надає перевагу документам з місцем збігу слів високо в документі. Це надає перевагу документам, в яких шукане слово на початку тексту.'); $("label:contains('Position Of Phrase')").text('Місце виразу'); $("span.info_extra:contains('phrase match position')").text('вищий рівень надає перевагу документам з місцем співпадання виразу високо в документі. Співпадаваний вираз це фраза (пропозиція), де відповідне слово з’являється в першим. Це надає перевагу документам, в яких шукане слово на початку тексту.'); $("label:contains('Term Frequency')").text('Частота терміну'); $("span.info_extra:contains('in lucene')").text('вищий рівень надає перевагу документам з високим відношенням (число співпадаючих слів)/(кількість слів у документі). Це те ж ранжування, що використовується в Lucene і старих пошукових системах, які були до 2000 року.'); $("label:contains('URL Components')").text('Складові URL'); $("span.info_extra:contains('short number of url components')").text('вищий рівень надає перевагу документам з малим числом складових URL. Число складових URL це кількість (під-)доменів + кількість (під-)шляхів складових в шляху до файлу.'); $("label:contains('URL Length')").text('Довжина URL'); $("span.info_extra:contains('with a short url')").text('вищий рівень надає перевагу документам з коротким url (домен + шлях)'); $("label:contains('Word Distance')").text('Відстань між словами'); $("span.info_extra:contains('words appear close together')").text('вищий рівень надає перевагу документам, в яких шукані слова з’являються близько один до одного. Ця властивість ранжування працює як оператор NEAR при пошуку більш, ніж одного слова.'); $("label:contains('Words In Text')").text('Слів у тексті'); $("span.info_extra:contains('large number of words. Be')").text('вищий рівень надає перевагу документам з великою кількістю слів. Майте на увазі, що це зрівноваження властивості частоти виразу.'); $("label:contains('Words In Title')").text('Слів у заголовкові'); $("span.info_extra:contains('in the document title')").text('вищий рівень надає перевагу документам з великою кількістю слів у назві документу.'); $("label:contains('Block Rank')").text('Ранг блоку YaCy'); $("span.info_extra:contains('ranking value on domains')").text('вищий рівень надає перевагу документам з більш високим, постійно призначеним значенням рейтингу на домени. Це як "кероване ранжування". Рейтинг по доменах(блоках) обчислений за допомогою аналізу посилань на великих графах посилань.'); $("label:contains('URL Component Appears')").text('Поширена складова URL'); $("span.info_extra:contains('url path that')").text('вищий рівень надає перевагу документам зі словами в шляху URL, які відповідають словам зі списку найпоширеніших. Цей список створюється з результатів пошуку за допомогою статистики з найбільш часто використовуваних слів. Це список верхніх-10 найбільш використовуваних слів в URL-адресах та назвах документів.'); $("label:contains('Description Comp')").text('Поширений опис'); $("span.info_extra:contains('description that')").text('вищий рівень надає перевагу документам зі словами в описі документа, які відповідають словам зі списку найпоширеніших. Цей список створюється з результатів пошуку за допомогою статистики з найбільш часто використовуваних слів. Це список верхніх-10 найбільш використовуваних слів в URL-адресах та назвах документів.');}</script></body>
-#-----------------------------
-
 
 #File: RemoteCrawl_p.html
 #---------------------------
@@ -2589,7 +2345,7 @@ Remote proxy port==Порт віддаленого проксі
 the port of the remote proxy==Порт віддаленого проксі
 Remote proxy user==Користувач віддаленого проксі
 Remote proxy password==Пароль віддаленого проксі
-No-proxy adresses==Адреси повз проксі
+No-proxy addresses==Адреси повз проксі
 IP addresses for which the remote proxy should not be used==IP-адреси, що не повинні використовуватись через віддалений проксі
 "Submit"=="Зберегти"
 Changes will take effect immediately.==Зміни набирають чинності негайно.
@@ -2599,7 +2355,7 @@ Changes will take effect immediately.==Зміни набирають чинно�
 #---------------------------
 Proxy Access Settings==Установки доступу до проксі
 These settings configure the access method to your own http proxy and server.==Ці параметри впливають на доступ до вашого HTTP-проксі і -сервера.
-All traffic is routed throug one single port, for both proxy and server.==Всі з’єднання здійснюються через один порт для обох (проксі і сервера).
+All traffic is routed through one single port, for both proxy and server.==Всі з’єднання здійснюються через один порт для обох (проксі і сервера).
 Server/Proxy Port Configuration==Налаштування порту сервера/проксі
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Адреси сокетів, де YaCy чекає на вхідні з’єднання від інших вузлів YaCy або HTTP-клієнтів.
 You have four possibilities to specify the address:==У вас є чотири способи вказати адресу:
@@ -2727,7 +2483,7 @@ Error with submitted information.==Виникла помилка у переда
 Nothing changed.</p>==Нічого не змінилося.</p>
 The user name must be given.==Ім’я користувача повинно бути вказано.
 Your request cannot be processed.==Ваш запит не може бути оброблений.
-The password redundancy check failed. You have probably misstyped your password.==Перевірка пароля не вдалася. Ви, напевно, помилилися.
+The password redundancy check failed. You have probably mistyped your password.==Перевірка пароля не вдалася. Ви, напевно, помилилися.
 Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Завершення роботи.</strong><br />Додаток буде закрито після обробки всіх сканувань.
 Your administration account setting has been made.==Ваші налаштування облікового запису адміністратора були збережені.
 Your new administration account name is #[user]#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ваше нове ім’я облікового запису адміністратора #[user]#. Пароль був прийнятий.<br />Якщо ви хочете повернутися до налаштувань, необхідно увійти заново.
@@ -2973,7 +2729,7 @@ YaCy Supporters<==Постачальники YaCy<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==автоматично надається через загальнодоступні закладки, голоси і початкові точки сканування вузлів YaCy
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="Будь ласка, введіть коментар для вашої рекомендації посилання. (Ваш голос може бути прийнято без коментарів.)"
 "authentication required"=="необхідний вхід"
-Hide surftips for users without autorization==Приховати поради для користувачів без дозволу
+Hide surftips for users without authorization==Приховати поради для користувачів без дозволу
 Show surftips to everyone==Показувати поради для всіх
 #-----------------------------
 
@@ -3310,8 +3066,8 @@ These tags create headlines. If a page has three or more headlines, a table of c
 Headlines of level 1 will be ignored in the table of content.==Заголовки в першому рівні ігноруються в каталозі вмісту.
 text==текст
 These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),==Ці коди генерують виділений текст. Перша пара підкреслює текст (більшість переглядачів відображають текст курсивом),
-the second one emphazises it more strongly (i.e. bold) and the last tags create a combination of both.==друга підкреслює текст сильніше (наприклад, виділення жирним шрифтом), а остання є сумішшю того й іншого.
-Text will be displayed <span class="strike">stricken through</span>.==Текст буде відображатись <span class="strike">перекресленим</span>.
+the second one emphasizes it more strongly (i.e. bold) and the last tags create a combination of both.==друга підкреслює текст сильніше (наприклад, виділення жирним шрифтом), а остання є сумішшю того й іншого.
+Text will be displayed <span class="strike">struck through</span>.==Текст буде відображатись <span class="strike">перекресленим</span>.
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Відображає відступ тексту. Ця команда служить для виділення цитат, але також використовується для проектування.
 point==Punkt
 These tags create a numbered list.==Ці коданди створюють номерований список.
@@ -3567,14 +3323,6 @@ Advanced Properties==Розширені властивості
 Thread Dump==Dump потоку
 #-----------------------------
 
-#File: env/templates/submenuContentIntegration.template
-#---------------------------
-External Content Integration==Включення зовнішнього вмісту
-Import phpBB3 forum==Імпорт форуму phpBB3
-Import Mediawiki dumps==Імпорт Mediawiki Dumps
-Import OAI-PMH Sources==Імпорт джерел OAI-PMH
-#-----------------------------
-
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Web Crawler==Сканер мережі
@@ -3656,18 +3404,6 @@ RSS Feed<br/>Importer==Імпорт<br/>RSS Feed
 OAI-PMH<br/>Importer==Імпорт<br/>OAI-PMH
 #-----------------------------
 
-#File: env/templates/submenuPortalIntegration.template
-#---------------------------
->Search Portal Integration==>Вбудовування пошукового порталу
->Live Search Anywhere==>Живий пошук всюди
->Generic Search Portal==>Загальний пошуковий портал
->Search Box Anywhere==>Поле пошуку всюди
->Appearance==>Зовнішній вигляд
->User Profile==>Профіль користувача
->Language==>Мова
->Ranking Config==>Настройка ранжування
-#-----------------------------
-
 #File: env/templates/submenuPublication.template
 #---------------------------
 Publication==Публікація
@@ -3682,12 +3418,6 @@ File Hosting==Загальний доступ до файлів
 Basic Configuration==Початкове налаштування
 >Accounts<==>Облікові записи<
 Network Configuration==Настройка мережі
-#-----------------------------
-
-#File: env/templates/submenuViewLog.template
-#---------------------------
-Server Log Menu==Меню журналу сервера
-#Server Log==Журнал сервера
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
@@ -3732,33 +3462,6 @@ could not be found.==не знайдений.
 Did you mean:==Ви мали на увазі:
 #-----------------------------
 
-#File: www/welcome.html
-#---------------------------
-YaCy: Default Page for Individual Peer Content==YACY: Сторінка за замовчуванням для вмісту власного вузла
-Individual&nbsp;Web&nbsp;Page==Власна веб-сторінка
-Welcome to your own web page<br />in the <strong>YaCy Network==Вітаємо на вашій власній веб-сторінці <br /> в <strong> мережі YaCy
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==<h4>Це показова сторінка вашого власного веб-сервера!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==Будь-ласка, замініть цю сторінку шляхом розміщення файлу index.html в каталозі
-&lt;YaCy-application-home&gt;<strong>#[wwwpath]#</strong>==&lt;YaCy&gt;<strong>#[wwwpath]#</strong>.</h4>
-"/env/grafics/yacy.gif"=="/env/grafics/yacy.png"
-&lt;b&gt;==<b>
-&lt;/b&gt;==</b>
-This is peer '<strong>#[peername]#</strong>', running on host <strong>#[hostname]#</strong>==Це вузол "<strong>#[peername]#</strong>", запущений на <strong>#[hostname]#</strong>
-Your are accessing this page from the host '#[clientip]#'==Ви звертаєтеся до цієї сторінки з вузла "#[clientip]#"
-Every user of YaCy #[couldcan]# access this page==Кожен користувач YaCy #[couldcan]# досягти цю сторінку
-using the URL==використовуючи URL
-or <a==або <a
-from within the YaCy network==з мережі YaCy
-We integrated an easy mechanism for web page authoring==Ми вбудували простий механізм для засвідчення творця веб-сторінки
-which can also be used for simple file-sharing==який може також бути використаний для простого файлообміну
-Please open the sample page==Будь-ласка, відкрийте зразок сторінки
-and set upload/download accounts to author and access content on this peer==та виставте відвантажувальні/завантажувальні облікові записи для творця, і вміст цього вузла буде доступним
-"#[peername]#'s Console"=="Консоль #[peername]#"
-
-#Nobody can access your peer from the outside of your intranet==Ніхто не має доступу до вашого вузла ззовні вашої внутрішньої мережі
-#You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below==Вам потрібно відкрити фаєрвол і/або виставити "віртуальний сервер" в настройках вашого маршрутизатора для ввімкнення доступу до адрес, які показані нижче
-#-----------------------------
-
 #File: js/Crawler.js
 #---------------------------
 "Continue this queue"=="Відновити обробку цієї черги"
@@ -3779,24 +3482,6 @@ and set upload/download accounts to author and access content on this peer==та
 >no results<==>безрезультатно<
 loading from local index==Завантаження з місцевого індексу
 #-----------------------------
-
-#File: js/jquery-flexigrid.js
-#---------------------------
-'Displaying {from} to {to} of {total} items'=='Показано {from} до {to} з {total} записів'
-'Processing, please wait ...'=='В обробці. Будь-ласка, зачекайте ...'
-'No items'=='Результати відсутні'
-#-----------------------------
-
-#File: js/jquery-ui-1.7.2.min.js
-#---------------------------
-Loading&#8230;==Завантаження&#8230;
-#-----------------------------
-
-#File: js/jquery.ui.all.min.js
-#---------------------------
-Loading&#8230;==Завантаження&#8230;
-#-----------------------------
-
 
 #File: AccessGrid_p.html
 #---------------------------

@@ -43,7 +43,7 @@
 <fieldset><legend id="ProxyAccess">Proxy Access Settings</legend>
 <p>
   These settings configure the access method to your own http proxy and server.
-  All traffic is routed throug one single port, for both proxy and server.<br />
+  All traffic is routed through one single port, for both proxy and server.<br />
 </p>
 <table border="0" cellspacing="5">
   <tr>

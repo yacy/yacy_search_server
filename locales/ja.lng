@@ -91,37 +91,6 @@ Enables or disables augmented browsing. If enabled, all websites will be modifie
 #"Submit"=="確定する"
 #-----------------------------
 
-#File: AugmentedBrowsingFilters_p.html
-#---------------------------
-Augmented Browsing - Filters and Modules==増強されたブラウジング - フィルターとモジュール
-Augmented Browsing Filters<==増強されたブラウジングのフィルター<
-Select the desired functionality.==所望の機能を選択する.
-External REFLECT:<==外部REFLECT:<
->Enabled<==>有効<
-Send webpages to REFLECT (==ウェブページをREFLECTへ送信する (
-Select the desired inbuilt functionality==所望の備え付けの機能を選択する
-Add DOCTYPE:==DOCTYPEを追加する:
-Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==DOCTYPE情報が与えられていないならば追加する. これはIEが絶対正確に位置をレンダーする為に要求されます.
-Reparse webpage:==ウェブページを再解析する:
-Put webpage back into schema (htmlparser document) to allow node by node manipulation.==ノード操作によりノードを許可する為にスキーマ(htmlparser ドキュメント)をウェブページに戻す.
-Show overlay interaction buttons:==オーヴァーレイ インタラクション ボタンを表示する:
-Show overlay interaction buttons.==オーヴァーレイ インタラクション ボタンを表示する.
-"Submit"=="確定する"
-#-----------------------------
-
-#File: AugmentedParsing_p.html
-#---------------------------
-Augmented Parsing<==増強された構文解析<
-Global Status==グローバル ステータス
-With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources (tags etc.).==この設定であなたは外部ソースからの情報(タグ等)とドキュメントを組み合わせた増強された構文解析を有効化または無効化できます.
-Augmented Parser:==増強された構文解析器:
->Enabled<==>有効<
-Globally enables or disables the augmented parser. This setting requires a restart.==増強された構文解析をグローバルに有効化または無効化する. この設定は再起動を要求します.
-Augmented Parser - RDFa:==増強された構文解析 - RDFa:
-Globally enables or disables the RDFa parser. This setting requires a restart.==RDFa構文解析器をグローバルに有効化または無効化する.
-"Submit"=="確定する"
-#-----------------------------
-
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==ブラックリスト管理
@@ -481,7 +450,7 @@ Some pages are protected by passwords.==幾つかのページはパスワード�
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==あなたはあなたのYaCy ピアの安全の為に<a href="ConfigAccounts_p.html">アカウント メニュー</a>でパスワードを設定するべきです.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==あなたはあなたのファイアーウォールのポートを開いていないか、またはあなたのルーターがあなたのピアへサーヴァーのポートを転送しません.
 This is needed if you want to fully participate in the YaCy network.==あなたがYaCyのネットワークに完全に参加したい場合はこれが必要とされます.
-You can also use your peer without opening it, but this is not recomended.==あなたはあなたのピアをポートの開放をせずに使用する事もできます, ですがこれは推奨されません.
+You can also use your peer without opening it, but this is not recommended.==あなたはあなたのピアをポートの開放をせずに使用する事もできます, ですがこれは推奨されません.
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -519,14 +488,6 @@ Unable to get URL:==次のURLを取得できません:
 Error saving the language file.==言語ファイルの保存時のエラー.
 Make sure that you only download data from trustworthy sources. The new language file==あなたは信頼できる提供元からのみデータをダウンロードするようにして下さい.
 might overwrite existing data if a file of the same name exists already.== 新しい言語ファイルは既に同名のファイルが存在する場合には既存のデータを上書きするかもしれません.
-#-----------------------------
-
-#File: ConfigLiveSearch.html
-#---------------------------
-Integration of a Search Field for Live Search==ライヴ検索の為の検索フィールドの統合
-Integration of Live Search with YaCy Search Widget==YaCyの検索ウィジェットによるライヴ検索の統合
-Advantages:==利点:
-#Advantages:==利点:
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -783,11 +744,6 @@ Maximum Pages per Domain==ドメイン毎の最大のページ数
 "Start New Crawl Job"=="新たなクロールのジョブを開始する"
 #-----------------------------
 
-#File: CrawlStartIntranet_p.html
-#---------------------------
-#Intranet Crawl Start==イントラネット クロールの開始
-#-----------------------------
-
 #File: CrawlStartScanner_p.html
 #---------------------------
 Network Scanner==ネットワーク スキャナー
@@ -852,11 +808,6 @@ global==グローバル
 #>local==>ローカル
 #-----------------------------
 
-#File: IndexCleaner_p.html
-#---------------------------
-Index Cleaner==索引クリーナー
-#-----------------------------
-
 #File: IndexControlRWIs_p.html
 #---------------------------
 Reverse Word Index Administration==逆引き単語索引の管理
@@ -902,31 +853,9 @@ Content Integration: Retrieval from phpBB3 Databases==コンテントの統合: 
 Knowledge Loader==ナレッジ ローダー
 #-----------------------------
 
-#File: IndexCreateWWWGlobalQueue_p.html
-#---------------------------
-Global Crawl Queue==グローバル クロールのキュー
-#-----------------------------
-
-#File: IndexCreateWWWLocalQueue_p.html
-#---------------------------
-Local Crawl Queue==ローカル クロールのキュー
-#-----------------------------
-
-#File: IndexCreateWWWRemoteQueue_p.html
-#---------------------------
-Remote Crawl Queue==リモート クロールのキュー
-#-----------------------------
-
 #File: IndexDeletion_p.html
 #---------------------------
 Index Deletion<==索引の削除<
-#-----------------------------
-
-#File: IndexImport_p.html
-#---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': 索引の取り込み
-#Crawling Queue Import==クローリング キューの取り込み
-Index DB Import==索引データベースの取り込み
 #-----------------------------
 
 #File: IndexImportMediawiki_p.html
@@ -1041,11 +970,6 @@ Indexing with Proxy==プロキシでの索引付け
 Quick Crawl Link==簡便なクロールのリンク
 #-----------------------------
 
-#File: Ranking_p.html
-#---------------------------
-Ranking Configuration==順位付けの構成
-#-----------------------------
-
 #File: RankingRWI_p.html
 #---------------------------
 RWI Ranking Configuration<==RWIの順位付けの構成<
@@ -1082,11 +1006,6 @@ Advanced Settings==高度な設定
 #File: Settings_Crawler.inc
 #---------------------------
 Generic Crawler Settings==一般的なクローラーの設定
-#-----------------------------
-
-#File: Settings_Http.inc
-#---------------------------
-HTTP Networking==HTTPのネットワーキング
 #-----------------------------
 
 #File: Settings_Proxy.inc
@@ -1622,11 +1541,6 @@ Advanced Properties==高度な属性
 #>Thread Dump<==>スレッドのダンプ<
 #-----------------------------
 
-#File: env/templates/submenuContentIntegration.template
-#---------------------------
-External Content Integration==外部コンテントの統合
-#-----------------------------
-
 #File: env/templates/submenuCrawler.template
 #---------------------------
 Load Web Pages==ウェブページを読み込む
@@ -1705,42 +1619,12 @@ Dump Reader for==次のもののダンプ リーダー
 #MediaWiki dumps==メディアウィキ ダンプ
 #-----------------------------
 
-#File: env/templates/submenuPerformance.template
-#---------------------------
-Performance Menu==パフォーマンスのメニュー
-#-----------------------------
-
-#File: env/templates/submenuPortalIntegration.template
-#---------------------------
-Search Portal Integration==検索ポータルの統合
-#-----------------------------
-
 #File: env/templates/submenuPublication.template
 #---------------------------
 Publication==公開
 #Wiki==ウィキ
 #Blog==ブログ
 File Hosting==ファイルのホスティング
-#-----------------------------
-
-#File: env/templates/submenuSearchConfiguration.template
-#---------------------------
-Integrated Search Configuration==統合された検索の構成
-Generic Search Portal==ジェネリック検索ポータル
-Search Page Layout==検索ページのレイアウト
->Appearance<==>外観<
->Language<==>言語<
-User Profile==ユーザーのプロファイル
->Heuristics<==>ヒューリスティクス<
-Solr Ranking Config==Solrの順位付けの構成
-RWI Ranking Config==RWIの順位付けの構成
-#-----------------------------
-
-#File: env/templates/submenuSearchIntegration.template
-#---------------------------
-Search Integration into External Sites==外部のサイトへの検索の統合
-Live Search Anywhere==どこでもライヴ検索
-Search Box Anywhere==どこでも検索ボックス
 #-----------------------------
 
 #File: env/templates/submenuSemantic.template
@@ -1773,25 +1657,11 @@ Basic Configuration==基本的な構成
 Network Configuration==ネットワークの構成
 #-----------------------------
 
-#File: env/templates/submenuViewLog.template
-#---------------------------
-Server Log Menu==サーヴァーのログのメニュー
-#Server Log==サーヴァーのログ
-#-----------------------------
-
 #File: env/templates/submenuWebStructure.template
 #---------------------------
 Web Visualization==ウェブの視覚化
 Web Structure==ウェブの構造
 Image Collage==画像のコラージュ
-#-----------------------------
-
-#File: htdocsdefault/dir.html
-#---------------------------
-YaCy: Public Files==YaCy: パブリック ファイル
-Public File Directory==パブリック ファイルのディレクトリー
-value="#[peername]#'s Console"==value="#[peername]#のコンソール"
-Welcome! You are identified and authorized as==ようこそ! あなたは次のものとして識別と認定をされました
 #-----------------------------
 
 #File: proxymsg/authfail.inc
@@ -1827,11 +1697,6 @@ could not be found.==見つかりませんでした.
 Did you mean:==もしかして:
 #-----------------------------
 
-#File: www/welcome.html
-#---------------------------
-YaCy: Default Page for Individual Peer Content==YaCy: 個別のピアのコンテントの為の既定のページ
-#-----------------------------
-
 #File: js/Crawler.js
 #---------------------------
 "Continue this queue"=="このキューを続ける"
@@ -1847,21 +1712,3 @@ YaCy: Default Page for Individual Peer Content==YaCy: 個別のピアのコン�
 >Date==>日時
 #-----------------------------
 
-#File: js/jquery-flexigrid.js
-#---------------------------
-'Displaying {from} to {to} of {total} items'=='{total} の内の {from} から {to} までの項目を表示しています'
-'Processing, please wait ...'=='処理しています, どうぞお待ち下さい...'
-'No items'=='項目がありません'
-#-----------------------------
-
-#File: js/jquery-ui-1.7.2.min.js
-#---------------------------
-Loading&#8230;==読み込み&#8230;
-#-----------------------------
-
-#File: js/jquery.ui.all.min.js
-#---------------------------
-Loading&#8230;==読み込み&#8230;
-#-----------------------------
-
-# EOF

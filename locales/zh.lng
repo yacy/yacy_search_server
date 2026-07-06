@@ -495,7 +495,7 @@ Some pages are protected by passwords.==一些页面受密码保护。
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==你可以在 <a href="ConfigAccounts_p.html">账户菜单</a> 设置密码, 从而加强你的YaCy节点安全性。</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==你未在防火墙中打开端口，或者你的路由器不能与服务器端口建立有效链接。
 This is needed if you want to fully participate in the YaCy network.==如果你想完全加入YaCy网络, 此项是必须的。
-You can also use your peer without opening it, but this is not recomended.==不开放端口你也能使用你的节点, 但是不推荐。
+You can also use your peer without opening it, but this is not recommended.==不开放端口你也能使用你的节点, 但是不推荐。
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -514,7 +514,7 @@ When a search is made then all displayed result links are crawled with a depth-1
 >copy &amp; paste a example config file<==>复制&amp; 粘贴一个示例配置文件<
 Alternatively you may==或者你可以
 To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
-20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远端系统中获取并同时加载,立即解析并创建索引.
+20 results are taken from remote system and loaded simultaneously, parsed and indexed immediately.==20个结果从远端系统中获取并同时加载,立即解析并创建索引.
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载结果的每个页面及每个页面上的链接。
 If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中'添加为全球爬取作业'，则要爬取的页面将被添加到全球爬取队列中（其他远端YaCy节点可能会帮助爬取这些页面）。
@@ -533,7 +533,7 @@ The task is started in the background. It may take some minutes before new entri
 ('modify Solr Schema')==（'修改Solr模式'）
 located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==位于DATA / SETTINGS目录的<i> defaults / heuristicopensearch.conf </i>中。
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==对于发现功能，Web结构索引的<i> web图表</i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </i>必须在<a href="IndexSchema_p.html?core=webgraph">webgraph Solr模式</a>。
-20 results are taken from remote system and loaded simultanously==20个结果从远端系统中获取，并同时加载，立即解析并索引
+20 results are taken from remote system and loaded simultaneously==20个结果从远端系统中获取，并同时加载，立即解析并索引
 >copy ==>复制＆amp; 粘贴一个示例配置文件<
 When using this heuristic==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
@@ -711,7 +711,7 @@ URL of a Large Corporate Image<==企业形象大图地址<
 Alternative text for Corporate Images<==企业形象代替文字<
 Enable Search for Everyone==对任何人开启搜索
 Search is available for everyone==任何人可用搜索
-Only the administator is allowed to search==只有管理员可以搜索
+Only the administrator is allowed to search==只有管理员可以搜索
 Show Navigation Bar on Search Page==显示导航栏和搜索页
 Show Navigation Top-Menu==显示顶级导航菜单
 no link to YaCy Menu (admin must navigate to /Status.html manually)==没有到YaCy菜单的链接(管理页面必须手动指向 /Status.html)
@@ -1104,22 +1104,6 @@ Sending Client==发送中的客户端
 >Cookie<==>Cookie<
 "Enable Cookie Monitoring"=="开启Cookie监控"
 "Disable Cookie Monitoring"=="关闭Cookie监控"
-#-----------------------------
-
-#File: CookieTest_p.html
-#---------------------------
-Cookie - Test Page==缓存 - 测试页
-Here is a cookie test page.==这是一个缓存测试页.
-Just clean it==Just clean it
-Name:==Name:
-Value:==Value:
-Dear server, set this cookie for me!==Dear server, set this cookie for me!
-Cookies at this browser:==Cookies at this browser:
-Cookies coming to server:==Cookies coming to server:
-Cookies server sent:==Cookies server sent:
-YaCy is a GPL'ed project==YaCy is a GPL'ed project
-with the target of implementing a P2P-based global search engine.==with the target of implementing a P2P-based global search engine.
-Architecture (C) by==Architecture (C) by
 #-----------------------------
 
 #File: CrawlCheck_p.html
@@ -1645,7 +1629,7 @@ only urls with the &lt;phrase&gt; in the url==仅包含词组&lt;phrase&gt;的�
 only urls with the &lt;phrase&gt; within outbound links of the document==仅在文档的出站链接中包含带有词组&lt;phrase&gt;的网址
 only urls with extension &lt;ext&gt;==仅包含拓展名为&lt;ext&gt;的网址
 only urls from host &lt;host&gt;==仅服务器为&lt;host&gt;的网址
-only pages with as-author-anotated &lt;author&gt;==仅包含作者为&lt;author&gt;的页面
+only pages with as-author-annotated &lt;author&gt;==仅包含作者为&lt;author&gt;的页面
 only pages from top-level-domains &lt;tld&gt;==仅来自顶级域&lt;tld&gt;的页面
 only pages with &lt;date&gt; in content==仅内容包含&lt;date&gt;的页面
 only pages with a date between &lt;date1&gt; and &lt;date2&gt; in content==内容中只有日期介于&lt;date1&gt;和&lt;date2&gt;之间的页面
@@ -1892,30 +1876,6 @@ There are #[num]# entries in the loader set:==加载器中有 #[num]# 个词条:
 >URL<==>地址<
 #-----------------------------
 
-#File: IndexCleaner_p.html
-#---------------------------
-Index Cleaner==索引整理
->URL-DB-Cleaner==>URL-DB-清理
-#ThreadAlive:
-#ThreadToString:
-Total URLs searched:==搜索到的全部地址:
-Blacklisted URLs found:==搜索到的黑名单地址:
-Percentage blacklisted:==黑名单占百分比:
-last searched URL:==最近搜索到的地址: 
-last blacklisted URL found:==最近搜索到的黑名单地址:
->RWI-DB-Cleaner==>RWI-DB-清理
-RWIs at Start:==启动时RWIs:
-RWIs now:==当前反向词索引: 
-wordHash in Progress:==处理中的Hash值:
-last wordHash with deleted URLs:==已删除网址的Hash值:
-Number of deleted URLs in on this Hash:==此Hash中已删除的地址数:
-URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-清理 - 清理数据库, 会删除黑名单地址:
-Start/Resume==开始/继续
-Stop==停止
-Pause==暂停
-RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-数据库-清理 - 清理数据库, 会删除与黑名单URL相关的信息:
-#-----------------------------
-
 #File: IndexCreateParserErrors_p.html
 #---------------------------
 >Rejected URLs<==>被拒绝地址<
@@ -2027,13 +1987,13 @@ Solr stores the main search index. It is the home of two cores, the default 'col
 >Lazy Value Initialization&nbsp;<==>惰性值初始化&nbsp;<
 If checked, only non-zero values and non-empty strings are written to Solr fields.==如果选中，则仅将非零值和非空字符串写入 Solr 字段。
 >Use deep-embedded local Solr&nbsp;<==>使用深度嵌入的本地Solr&nbsp;<
-This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.==这将写入存储在YaCy的DATA目录下的 YaCy嵌入式Solr索引。
+This will write the YaCy-embedded Solr index which is stored within the YaCy DATA directory.==这将写入存储在YaCy的DATA目录下的 YaCy嵌入式Solr索引。
 >Use remote Solr server(s)&nbsp;<==>使用远程Solr服务器&nbsp;<
 >Allow self-signed certificates <==>允许自签名证书 <
 write-enabled (if unchecked, the remote server(s) will only be used as search peers)==启用写入（如果未选中，远程服务器将仅用作搜索节点）
 value="Set"==value="设置"
 Web Structure Index==网络结构图索引
-The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about fourty times more links from loaded pages as in documents of the main search index). ==网页结构索引用于服务器浏览（发现内部文件/文件夹结构）、排名（计算引用次数）和文件搜索（加载页面的链接大约是主搜索索引的文档中的40倍）。
+The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about forty times more links from loaded pages than in documents of the main search index). ==网页结构索引用于服务器浏览（发现内部文件/文件夹结构）、排名（计算引用次数）和文件搜索（加载页面的链接大约是主搜索索引的文档中的40倍）。
 use citation reference index (lightweight and fast)==使用引文参考索引（轻量且快速）
 use webgraph search index (rich information in second Solr core)==使用网图搜索索引（第二个Solr核心中的丰富信息）
 Peer-to-Peer Operation==P2P运行
@@ -2275,7 +2235,7 @@ To integrate a search window into phpBB3, you must insert some code into a forum
 There are several templates that can be used for phpBB3, but in this guide we consider that==phpBB3中有多种模板,
 you are using the default template, 'prosilver'==在此我们使用默认模板 'prosilver'.
 open styles/prosilver/template/overall_header.html==打开 styles/prosilver/template/overall_header.html
-find the line where the default search window is displayed, thats right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==找到搜索框显示代码部分, 它们在 <pre>&lt;div id="search-box"&gt;</pre> 下面
+find the line where the default search window is displayed, that's right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==找到搜索框显示代码部分, 它们在 <pre>&lt;div id="search-box"&gt;</pre> 下面
 Insert the following code right behind the div tag==在div标签后插入以下代码
 YaCy Forum Search==YaCy论坛搜索
 ;YaCy Search==;YaCy搜索
@@ -2523,7 +2483,7 @@ To publish a translation, use the integrated==要发布新的翻译，请用
 translation editor==翻译编辑器
 to add a translation and publish it afterwards.==来添加翻译并发布。 
 More news services will follow.==接下来会有更多的新闻服务.
-Above you can see four menues:==上面四个菜单选项分别为:
+Above you can see four menus:==上面四个菜单选项分别为:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>传入的新闻(#[insize]#)</strong>: 发送至你节点的新闻.
 Only these news will be used to display specific news services as explained above.==这些消息含有上述的特定新闻服务.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==你可以使用'创建首页'和'网络'页面的设置隐藏它们.
@@ -2614,7 +2574,7 @@ This shall improve performance of the affected process (proxy or search).==从�
 (current delta is==(当前设置为
 seconds since last proxy/local-search/remote-search access.)==秒.)
 Online Caution Case==触发事件
-indexer delay (milliseconds) after case occurency==事件触发后的索引延时(毫秒)
+indexer delay (milliseconds) after case occurrence==事件触发后的索引延时(毫秒)
 Proxy:==代理:
 Local Search:==本地搜索:
 Remote Search:==远端搜索:
@@ -2940,7 +2900,7 @@ URLs for<br/>Remote<br/>Crawl==来自远端爬取的地址
 #------------------------------
 Local Search access rate limitations==本地搜索访问率限制
 You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==你可以在此处配置未经验证的用户和没有扩展搜索权限的用户对该节点搜索界面的访问速率限制
-(see the <a href="ConfigAccounts_p.html">Accounts</a> configuration page for details on users rights).==(有关用户权限详情请参见<a href="ConfigAccounts_p.html">账户</a>配置页面)。
+(see the <a href="ConfigAccounts_p.html">Accounts</a> configuration page for details on users' rights).==(有关用户权限详情请参见<a href="ConfigAccounts_p.html">账户</a>配置页面)。
 YaCy search==YaCy搜索
 Access rate limitations to this peer search interface.==本节点搜索界面访问率限制。
 When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，搜索阻塞。
@@ -3066,7 +3026,7 @@ Remote proxy port==远端代理端口
 the port of the remote proxy==远端代理使用的端口
 Remote proxy user==远端代理用户
 Remote proxy password==远端代理用户密码
-No-proxy adresses==无代理地址
+No-proxy addresses==无代理地址
 IP addresses for which the remote proxy should not be used==指定不使用代理的IP地址
 "Submit"=="提交"
 Changes will take effect immediately.==改变立即生效.
@@ -3076,7 +3036,7 @@ Changes will take effect immediately.==改变立即生效.
 #---------------------------
 Proxy Access Settings==代理访问设置
 These settings configure the access method to your own http proxy and server.==设定http代理和服务器的访问方式.
-All traffic is routed throug one single port, for both proxy and server.==代理和服务器流量均从同一端口流过.
+All traffic is routed through one single port, for both proxy and server.==代理和服务器流量均从同一端口流过.
 Server/Proxy Port Configuration==服务器/代理 端口设置
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==指定YaCy需要监听的socket地址.
 You have four possibilities to specify the address:==可以设置以下四个地址:
@@ -3247,7 +3207,7 @@ Error with submitted information.==提交信息发生错误.
 Nothing changed.</p>==无任何改变.</p>
 The user name must be given.==必须给出用户名.
 Your request cannot be processed.==不能响应请求.
-The password redundancy check failed. You have probably misstyped your password.==密码冗余检查错误.
+The password redundancy check failed. You have probably mistyped your password.==密码冗余检查错误.
 Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==正在关闭</strong><br />所有crawl任务完成后程序会关闭.
 Your administration account setting has been made.==已创建管理账户设置.
 Your new administration account name is #[user]#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==新帐户名是 #[user]#. 密码输入正确.<br />如果返回设置页面, 需要再次输入密码.
@@ -3494,7 +3454,7 @@ YaCy Supporters<==YaCy参与者<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==由使用公共书签, 网址评价和爬取起始点的节点提供
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="输入推荐链接备注. (可留空.)"
 "authentication required"=="需要认证"
-Hide surftips for users without autorization==隐藏非认证用户的建议功能
+Hide surftips for users without authorization==隐藏非认证用户的建议功能
 Show surftips to everyone==所有人均可使用建议
 #-----------------------------
 
@@ -3560,40 +3520,6 @@ To see a list of all APIs, please visit the==要查看所有API的列表，请�
 >robots.txt table<==>robots.txt列表<
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==表格查看
-YMark Table Administration==YMark表格管理
-Table Editor: showing table==表格编辑器: 显示表格
-"Edit Selected Row"=="编辑选中行"
-"Add a new Row"=="添加新行"
-"Delete Selected Rows"=="删除选中行"
-"Delete Table"=="删除表格"
-"Rebuild Index"=="重建索引"
-Primary Key==主键
->Row Editor<==>行编辑器<
-"Commit"=="备注"
-Table Selection==选择表格
-Select Table:==选择表格:
-show max. entries==显示最多词条
->all<==>所有<
-Display columns:==显示列:
-"load"=="载入"
-Search/Filter Table==搜索/过滤表格
-search rows for==搜索
-"Search"=="搜索"
-#>Tags<==>Tags<
->select a tag<==>选择标签<
->Folders<==>目录<
->select a folder<==>选择目录<
->Import Bookmarks<==>导入书签<
-#Importer:==Importer:
-#>XBEL Importer<==>XBEL Importer<
-#>Netscape HTML Importer<==>Netscape HTML Importer<
-"import"=="导入"
-#-----------------------------
-
-### This Tables section is removed in current SVN Versions
 #File: Tables_p.html
 #---------------------------
 Table Viewer==表查看器
@@ -3652,7 +3578,7 @@ Threaddump<==线程Dump<
 Translation News for Language==语言翻译新闻
 Translation News==翻译新闻
 You can share your local addition to translations and distribute it to other peers.==你可以分享你的本地翻译，并分发给其他节点。
-The remote peer can vote on your translation and add it to the own local translation.==远端节点可以对你的翻译进行投票并将其添加到他们的本地翻译中。
+The remote peer can vote on your translation and add it to its own local translation.==远端节点可以对你的翻译进行投票并将其添加到他们的本地翻译中。
 entries available==可用的词条
 "Publish"=="发布"
 You can check your outgoing messages==你可以检查你的传出消息
@@ -3794,7 +3720,7 @@ The object can be denoted by a url stub that, combined with the term, becomes th
  Empty Vocabulary== 空词汇
 >Auto-Discover<==>自动发现<
 > from file name==> 来自文件名
-> from page title (splitted)==> 来自页面标题(拆分)
+> from page title (split)==> 来自页面标题(拆分)
 > from page title==> 来自页面标题
 > from page author==> 来自页面作者
 >Objectspace<==>对象空间<
@@ -3903,8 +3829,8 @@ These tags create headlines. If a page has three or more headlines, a table of c
 Headlines of level 1 will be ignored in the table of content.==一级标题.
 #text==Text
 These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),==这些标记标识文本内容. 第一对中为强调内容(多数浏览器用斜体表示),
-the second one emphazises it more strongly (i.e. bold) and the last tags create a combination of both.==第二对用粗体表示, 第三对为两者的联合.
-Text will be displayed <span class="strike">stricken through</span>.==文本内容以<span class="strike">删除线</span>表示.
+the second one emphasizes it more strongly (i.e. bold) and the last tags create a combination of both.==第二对用粗体表示, 第三对为两者的联合.
+Text will be displayed <span class="strike">struck through</span>.==文本内容以<span class="strike">删除线</span>表示.
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==缩进内容, 此标记主要用于引用, 也能用于标识样式.
 #point==point
 These tags create a numbered list.==此标记用于有序列表.
@@ -4023,24 +3949,6 @@ Images==图片
 >Images==>图片
 #-----------------------------
 
-#File: YMarks.html
-#---------------------------
-"Import"=="导入"
-documents=="文件"
-days==天
-hours==小时
-minutes==分钟
-for new documents automatically==自动地对新文件
-run this crawl once==爬取一次
->Query<==>查询<
-Query Type==查询类型
->Import<==>导入<
-Tag Manager==标签管理器
-Bookmarks (user: #[user]# size: #[size]#)==书签(用户: #[user]# 大小: #[size]#)
-"Replace"=="替换"
-#-----------------------------
-
-### Subdirectory api ###
 #File: api/citation.html
 #---------------------------
 Document Citations for==文档引用
@@ -4479,21 +4387,3 @@ could not be found.==未找到.
 Did you mean:==是不是:
 #-----------------------------
 
-#File: js/jquery-flexigrid.js
-#---------------------------
-'Displaying {from} to {to} of {total} items'=='显示 {from} 到 {to}, 总共 {total} 个词条'
-'Processing, please wait ...'=='正在处理, 请稍候...'
-'No items'=='无词条'
-#-----------------------------
-
-#File: js/jquery-ui-1.7.2.min.js
-#---------------------------
-Loading&#8230;==正在加载&#8230;
-#-----------------------------
-
-#File: js/jquery.ui.all.min.js
-#---------------------------
-Loading&#8230;==正在加载&#8230;
-#-----------------------------
-
-# EOF

@@ -52,7 +52,6 @@
  values '#['<value>']#'.
  A single value in repetitions/enumerations in the template has
  the property key '_'<enumname><count>'_'<value>
- Please see also the example files 'test.html' and 'test.java'
  */
 
 package net.yacy.server.http;

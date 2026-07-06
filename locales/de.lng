@@ -470,7 +470,7 @@ Some pages are protected by passwords.==Einige Seiten sind passwortgeschützt.
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy Peer abzusichern.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
 This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
-You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
+You can also use your peer without opening it, but this is not recommended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -500,7 +500,7 @@ add as global crawl job==als globaler Crawl hinzufügen
 
 opensearch load external search result list from active systems below==Lade externe Suchergebnisse von den gelisteten aktiven OpenSearch Systemen
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Wenn diese Heuristik genutzt wird, dann wird jede neue Suchanfragezeile für einen Aufruf der aufgelisteten OpenSearch Systeme verwendet.
-20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 Resultate werden vom remote System genommen und simultan geladen, geparsed und sofort indexiert.
+20 results are taken from remote system and loaded simultaneously, parsed and indexed immediately.==20 Resultate werden vom remote System genommen und simultan geladen, geparsed und sofort indexiert.
 To find out more about OpenSearch see==Um mehr über OpenSearch zu erfahren besuche
 Available/Active Opensearch System==Verfügbare/Aktive OpenSearch Systeme
 >Active<==>Aktiv<
@@ -565,58 +565,6 @@ Make sure that you only download data from trustworthy sources. The new language
 might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
 Simple Editor==Einfacher Editor
 to add untranslated text==zum bearbeiten unübersetzter Texte
-#-----------------------------
-
-#File: ConfigLiveSearch.html
-#---------------------------
-Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
-Integration of Live Search with YaCy Search Widget==Integration der Livesuche mit dem YaCy Such-Widget
-There are basically two methods for integrating the YaCy Search Widget with your web site.==Es gibt zwei Methoden, um das YaCy Such-Widget mit Ihrer Webseite zu integrieren.
-Static hosting of widget on own HTTP server==Statisches Hosten des Widgets auf Ihrem eigenen HTTP Server
-Remote access through selected YaCy Peer==Remote Access durch ausgewähltes YaCy Peer
-Advantages:==Vorteile:
-faster connection speed==Schnellere Verbindungsgeschwindigkeit
-possibility for local adaptions==Möglichkeit von lokalen Anpassungen
-Disadvantages:==Nachteile:
-No automatic update to future releases of YaCy Search Widget==Kein automatisches Update auf zukünftige YaCy Suchwidgets
-Ajax/JSONP cross domain requests needed to query remote YaCy Peer==AJAX/JSON Cross Domain Anfragen müssen den remote YaCy Peer abfragen
-Installing:==Installieren:
-download yacy-portalsearch.tar.gz from==Downloaden von yacy-portalsearch.tar.gz von
-unpack within your HTTP servers path==Entpacken in das HTTP Server Verzeichnis
-use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==Verwenden von ./yacy/portalsearch/yacy-portalsearch.html als Referenz für eine Integration mit Ihrem bestehenen Portal
-Always latest version of YaCy Search Widget==Immer die aktuellste Version des YaCy Suchwidgets
-No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Keine AJAX/JSON cross Domainanfragen, da Suchwidget und YaCy auf derselben Domäne gehostet werden.
-Under certain cirumstances slower than static hosting==Unter bestimmten Umständen langsamer als statisches Hosting
-Just use the code snippet below and paste it any place in your own portal page==Vewenden Sie einfach das Codesnippet unten und kopieren Sie es in Ihr eigenes Suchportal
-Please check if '#[ip]#:#[port]#' is appropriate or replace it with address of the YaCy Peer holding your index==Bitte prüfen Sie, ob '#[ip]#:#[port]#' korrekt ist und ersetzen Sie es mit der Adresse des YaCy Peers dass die Konfiguration hat.
-A 'Live-Search' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
-This is the same function as can be seen on all pages of the YaCy online-interface (look at the window in the upper right corner)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
-#Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
-Just use the code snippet below and paste it any place in your own portal page==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld auf Ihrem eigenen Webportal zu verwenden.
-#Please check if the address, as given in the example '#[ip]#:#[port]#' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-#Code Snippet:==Code Ausschnitt:
-#YaCy Portal Search==YaCy Portal Suche
-"Search"=="Suche"
-Configuration options and defaults for 'yconf':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
-Defaults<==Standardeinstellungen<
-url<==URL<
-#is a mandatory property - no default<==muss angegeben werden<
-#YaCy P2P Web Search==YaCy P2P Web Suche
-Size and position (width | height | position)==Größe und Position (Breite | Höhe | Position)
-Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
-Animation effects (show | hide)==Animationseffekte (show | hide)
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
-Interaction (modal | resizable)==Interaktion (modal | resizable)
-If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
-Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
-If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
-Load JavaScript load_js==JavaScript laden load_js
-Load Stylesheets load_css==Stylesheets laden load_css
-This parameter is used for static hosting only.==Dieser Parameter wird nur für das statische Hosting verwendet.
->Themes<==>Themen<
-You can download standard jquery-ui themes or create your own custom themes on==Sie können Standard jQuery UI Themen herunterladen oder generieren Sie Ihr eigenes Thema auf
-Themes are installed in ./yacy/jquery/themes/ (static hosting) or in DATA/HTDOCS/jquery/themes/ on remote YaCy Peer.==Themen sind installiert in ./yacy/jquery/themes/ (statisches Hosting) oder in DATA/HTDOCS/jquery/themes/ beim remote YaCy Peer.
-YaCy ships with 'start' and 'smoothness' themes pre-installed.==YaCy kommt vorinstalliert mit 'start' und 'smoothness' Themen.
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -722,7 +670,7 @@ URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
 URL of a Large Corporate Image<==URL des großen Corporate Identity Bildes<
 Enable Search for Everyone?==Suche für Jedermann aktivieren?
 Search is available for everyone==Suche steht für Jedermann zur Verfügung
-Only the administator is allowed to search==Nur der Administrator darf suchen
+Only the administrator is allowed to search==Nur der Administrator darf suchen
 Show additional interaction features in footer==Zeige zusätzliche Features zur Interaktion in der Fußzeile
 Snippet Fetch Strategy &amp; Link Verification==Snippet Fetch Strategie &amp; Link Verifikation
 Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==Beschleunige die Suchergebnisse mit dieser Option! (Verwende CACHEONLY oder FALSE, um die Verifikation abzuschalten)
@@ -1281,7 +1229,7 @@ Never load any page that is already known. Only the start-url may be loaded agai
 Robot Behaviour==Robot Verhalten
 Use Special User Agent and robot identification==Verwende speziellen User-Agent und Robot Verifizierung
 You are running YaCy in non-p2p mode and because YaCy can be used as replacement for commercial search appliances==Sie verwenden YaCy im Nicht-P2P Modus und weil YaCy sich als Ersatz für kommerzielle Suchanwendungen benutzen lässt.
-(like the GSA) the user must be able to crawl all web pages that are granted to such commercial plattforms.==(wie z.B. die GSA) der Benutzer muss alle Webseiten die solchen kommerziellen Platformen verfügbar sind crawlen können.
+(like the Google Search Appliance aka GSA) the user must be able to crawl all web pages that are granted to such commercial platforms.==(wie z.B. die GSA) der Benutzer muss alle Webseiten die solchen kommerziellen Platformen verfügbar sind crawlen können.
 Not having this option would be a strong handicap for professional usage of this software. Therefore you are able to select==Diese Option nicht zu haben könnte ein starkes Handicap für die professionelle Nutzung dieser Software darstellen. Darum können Sie hier
 alternative user agents here which have different crawl timings and also identify itself with another user agent and obey the corresponding robots rule.==alternative User-Agents auswählen, die verschiedene Craw Timings haben und sich selbst auch mit einem anderen User-Agent ausweisen und die jeweiligen robots Regeln anwenden.
 
@@ -1492,7 +1440,7 @@ only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; en
 only urls with the &lt;phrase&gt; within outbound links of the document==Nur URLs, die &lt;phrase&gt; in einem Link enthalten
 only urls with extension==Nur URLs mit der Dateinamenserweiterung
 only urls from host==Nur URLs vom Server
-only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
+only pages with as-author-annotated==Nur Seiten mit dem angegebenen Autor
 only pages from top-level-domains==Nur Seiten aus der Top-Level-Domain
 only resources from http or https servers==Nur Ressources auf HTTP- oder HTTPS-Servern
 only resources from ftp servers==Nur Ressourcen auf FTP-Servern
@@ -1523,30 +1471,6 @@ See an==siehe
 >example==>Beispiel
 json search results==JSON-Suchergebnisse
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
-#-----------------------------
-
-#File: IndexCleaner_p.html
-#---------------------------
-Index Cleaner==Index Aufräumer
->URL-DB-Cleaner==>URL-DB-Aufräumer
-#ThreadAlive:
-#ThreadToString:
-Total URLs searched:==Insgesamt durchsuchte URLs:
-Blacklisted URLs found:==URLS auf Blacklist gefunden:
-Percentage blacklisted:==Prozent auf Blacklist:
-last searched URL:==zuletzt durchsuchte URL: 
-last blacklisted URL found:==zuletzt gefundene URL auf Blacklist:
->RWI-DB-Cleaner==>RWI-DB-Aufräumer
-RWIs at Start:==RWIs beim Start:
-RWIs now:==RWIs jetzt: 
-wordHash in Progress:==Wort-Hash in Benutzung:
-last wordHash with deleted URLs:==letzter Wort-Hash mit gelöschten URLs:
-Number of deleted URLs in on this Hash:==Anzahl an gelöschten URLs in diesem Hash:
-URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-Aufräumer - Räumen Sie Ihre Datenbank auf, indem Sie URLs, die auf Ihrer Blacklist stehen, löschen:
-Start/Resume==Start/Fortsetzen
-Stop==Stopp
-Pause==Anhalten
-RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-DB-Aufräumer - Räumen Sie Ihre Datenbank auf, indem Sie Wörter, die mit Ihrer Blacklist verbunden sind, löschen:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
@@ -1917,64 +1841,6 @@ Delete by Solr Query<==Löschen durch Solr Abfrage<
 This is the most generic option: select a set of documents using a solr query.==Dies ist die allgemeinste Option: Wählen Sie einen Satz Dokumente anhand einer Solr Abfrage aus.
 #-----------------------------
 
-#File: IndexImport_p.html
-#---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Index Import
-#Crawling Queue Import==Crawling Puffer Import
-Index DB Import==Index Datenbank Import
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# Wörtern und #[ucount]# URLs.
-Import Job with the same path already started.==Ein Import mit dem selben Pfad ist bereits gestartet.
-Starting new Job==Neuen Import starten
-Import&nbsp;Type:==Import-Typ:
-Cache Size==Cachegröße
-Usage Examples==Benutzungs-<br />beispiele
-"Path to the PLASMADB directory of the foreign peer"=="Pfad zum PLASMADB Verzeichnis des fremden Peer"
-Import&nbsp;Path:==Import-Pfad:
-"Start Import"=="Import starten"
-Attention:==Achtung:
-Always do a backup of your source and destination database before starting to use this import function.==Machen Sie immer ein Backup von Ihrer Quell- und Zieldatenbank, bevor Sie die Import-Funktion nutzen.
-Currently running jobs==Gerade laufende Aufgaben
-Job Type==Job-Typ
->Path==>Pfad
-Status==Status
-Elapsed<br />Time==Verstrichene<br />Zeit
-Time<br />Left==verbl.<br />Zeit
-Abort Import==Import abbrechen
-Pause Import==Import pausieren
-Finished::Running::Paused==Fertig::Laufend::Pausiert
-"Abort"=="Abbrechen"
-#"Pause"=="Pause"
-"Continue"=="Fortsetzen"
-Finished jobs==Fertige Importierungen
-"Clear List"=="Liste löschen"
-Last Refresh:==Letzte Aktualisierung:
-Example Path:==Beispielpfad:
-Requirements:==Voraussetzungen:
-You need to have at least the following directories and files in this path:==Sie müssen mindestens die folgenden Dateien und Ordner in diesem Pfad haben:
->Type==>Typ
->Writeable==>Schreibrechte
->Description==>Beschreibung
->File==>Datei
->Directory==>Verzeichnis
->Yes<==>Ja<
->No<==>Nein<
-The LoadedURL Database containing all loaded and indexed URLs==Die 'geladene URLs'-Datenbank, enthält alle geladenen und indexierten URLs
-The assortment directory containing parts of the word index.==Das Assortment-Verzeichnis, enthält Teile des Wort-Index.
-The words directory containing parts of the word index.==Das Wort-Verzeichnis, enthält Teile des Wort-Index.
-The assortment file that should be imported.==Die Assortment-Datei die importiert werden soll.
-The assortment file must have the postfix==Die Assortment-Datei muss den Suffix
-.db".==.db" haben.
-If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>== Wenn Sie eine Assortment-Datei aus <tt>PLASMADBACLUSTERABKP</tt> importieren wollen,
-you have to rename it first.==müssen Sie sie zuerst umbenennen.
->Notes:==>Anmerkung:
-Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten Wörter nutzlos sind, wenn der Ziel-Peer nicht weiß,
-the URLs the imported words belongs to.==zu welchen URLs sie gehören.
-Crawling Queue Import:==Crawler-Puffer-Import:
-Contains data about the crawljob an URL belongs to==Enthält Daten über den Crawljob, zu dem eine URL gehört
-The crawling queue==Der Crawler-Puffer
-Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer gehören
-#-----------------------------
-
 #File: IndexImportMediawiki_p.html
 #---------------------------
 #MediaWiki Dump Import==MediaWiki Dump Import
@@ -2129,7 +1995,7 @@ To integrate a search window into phpBB3, you must insert some code into a forum
 There are several templates that can be used for phpBB3, but in this guide we consider that==Da es viele verschiedene Templates für phpBB3 Foren gibt, gehen wir in dieser Anleitung davon aus, dass
 you are using the default template, 'prosilver'==Sie das Standard Template 'prosilver' verwenden.
 open styles/prosilver/template/overall_header.html==Öffnen Sie die Datei styles/prosilver/template/overall_header.html
-find the line where the default search window is displayed, thats right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==Finden Sie die Zeile in der das Standard Suchfeld angezeigt wird, das sich gleich hinter der Anweisung <pre>&lt;div id="search-box"&gt;</pre> befindet
+find the line where the default search window is displayed, that's right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==Finden Sie die Zeile in der das Standard Suchfeld angezeigt wird, das sich gleich hinter der Anweisung <pre>&lt;div id="search-box"&gt;</pre> befindet
 Insert the following code right behind the div tag==Fügen Sie folgenden Code gleich nach dem div Tag ein
 YaCy Forum Search==YaCy Foren Suche
 ;YaCy Search==;YaCy Suche
@@ -2378,7 +2244,7 @@ A change in the personal profile will create a news entry. You can see recently 
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==Profil Einträge auf der Netzwerk Seite werden nach einer Änderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
 More news services will follow.==Mehr News Services werden folgen.
 
-Above you can see four menues:==Sie können diese vier Menüs sehen:
+Above you can see four menus:==Sie können diese vier Menüs sehen:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>Eingehende News(#[insize]#)</strong>: Die neuesten News, die Ihren Peer erreicht haben.
 Only these news will be used to display specific news services as explained above.==Nur diese News werden benutzt, um spezifische News Services anzuzeigen.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie können diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
@@ -2431,7 +2297,7 @@ This shall improve performance of the affected process (proxy or search).==Dies 
 (current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
 seconds since last proxy/local-search/remote-search access.)==Sekunden vergangen.)
 Online Caution Case==Onlinezugriff Typ
-indexer delay (milliseconds) after case occurency==Indexierer Verzögerung (Millisekunden) nach Onlinezugriff
+indexer delay (milliseconds) after case occurrence==Indexierer Verzögerung (Millisekunden) nach Onlinezugriff
 #Proxy:==Proxy:
 Local Search:==Lokale Suche:
 Remote Search:==Remote Suche:
@@ -2566,7 +2432,7 @@ Queue Size<br />Current==Größe der Warteschlange<br />Aktuell
 Queue Size<br />Maximum==Größe der Warteschlange<br />Maximum
 Executors:<br />Current Number of Threads==Executors:<br />Aktuelle Anzahl der Threads
 Concurrency:<br />Maximum Number of Threads==Concurrency:<br />Maximale Anzahl der Threads
-Childs==Kindprozesse
+Children==Kindprozesse
 Average<br />Block Time<br />Reading==Durchschnittlich<br />reservierte Zeit<br />lesend
 Average<br />Exec Time==Durchschnittliche Ausführungszeit
 Average<br />Block Time<br />Writing==Durchschnittlich<br />reservierte Zeit<br />schreibend
@@ -2853,7 +2719,7 @@ Remote proxy port==Remote Proxy Port
 the port of the remote proxy==Der Port des Remote Proxy
 Remote proxy user==Remote Proxy Benutzer
 Remote proxy password==Remote Proxy Passwort
-No-proxy adresses==Proxylose Adressen
+No-proxy addresses==Proxylose Adressen
 IP addresses for which the remote proxy should not be used==IP-Adressen für die der Remote Proxy nicht genutzt werden soll
 "Submit"=="Speichern"
 Changes will take effect immediately.==Änderungen sind sofort wirksam.
@@ -2863,7 +2729,7 @@ Changes will take effect immediately.==Änderungen sind sofort wirksam.
 #---------------------------
 Proxy Access Settings==Proxyzugangs Einstellungen
 These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
-All traffic is routed throug one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, für beides (Proxy und Server).
+All traffic is routed through one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, für beides (Proxy und Server).
 Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier Möglichkeiten die Adresse anzugeben:
@@ -2989,7 +2855,7 @@ Error with submitted information.==Es gab einen Fehler bei der Übertragung der 
 Nothing changed.</p>==Nichts wurde verändert.</p>
 The user name must be given.==Der User Name muss angegeben werden
 Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
-The password redundancy check failed. You have probably misstyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
+The password redundancy check failed. You have probably mistyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
 Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
 Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
 Your new administration account name is #[user]#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
@@ -3244,7 +3110,7 @@ YaCy Supporters<==YaCy Unterstützer<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
 #"authentication required"=="Autorisierung erforderlich"
-Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
+Hide surftips for users without authorization==Verberge Surftipps für Benutzer ohne Autorisierung
 Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 
@@ -3517,7 +3383,7 @@ Discover Terms:==Entdecke Bedeutungen:
 no auto-discovery (empty vocabulary)==Kein Auto-Erkennen (leere Vokabelliste)
 from file name==von Dateiname
 from page title&nbsp;==vom Seitentitel&nbsp;
-from page title (splitted)==vom Seitentitel (gesplittet)
+from page title (split)==vom Seitentitel (gesplittet)
 from page author==vom Seitenautor
 "Create"=="Erzeugen"
 Vocabulary Editor==Vokabellisten Editor
@@ -3614,8 +3480,8 @@ These tags create headlines. If a page has three or more headlines, a table of c
 Headlines of level 1 will be ignored in the table of content.==Überschriften im ersten Level werden beim Erstellen des Inhaltsverzeichnisses ignoriert.
 #text==Text
 These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meisten Browser zeigen die Texte kursiv),
-the second one emphazises it more strongly (i.e. bold) and the last tags create a combination of both.==das Zweite betont den Text stärker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
-Text will be displayed <span class="strike">stricken through</span>.==Text wird <span class="strike">durchgestrichen</span> angezeigt.
+the second one emphasizes it more strongly (i.e. bold) and the last tags create a combination of both.==das Zweite betont den Text stärker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
+Text will be displayed <span class="strike">struck through</span>.==Text wird <span class="strike">durchgestrichen</span> angezeigt.
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eignet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
 point==Punkt
 These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
@@ -3780,7 +3646,7 @@ Index Export/Import==Daten Export / Import
 Target Analysis==Ziel Analyse
 Process Scheduler==Prozess Planer
 ### ADMINISTRATION ###
-System Admiistration==Systemverwaltung
+System Administration==Systemverwaltung
 Index Administration==Indexverwaltung
 Filter &amp; Blacklists==Filter &amp; Sperrlisten
 Content Semantic==Inhalt Semantik
@@ -3861,14 +3727,6 @@ Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweiterte Konfiguration
 #-----------------------------
 
-#File: env/templates/submenuContentIntegration.template
-#---------------------------
-External Content Integration==Integration von externen Inhalten
-Import phpBB3 forum==Importiere phpBB3 Forum
-Import Mediawiki dumps==Importiere Mediawiki Dumps
-Import OAI-PMH Sources==Importiere OAI-PMH Quellen
-#-----------------------------
-
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Overview</a>==Überblick</a>
@@ -3933,14 +3791,6 @@ Scraping Proxy==Scraping Proxy
 #Autocrawl==Autocrawler
 #-----------------------------
 
-#File: env/templates/submenuPortalIntegration.template
-#---------------------------
-Search Portal Integration==Suchportal Integration
-Live Search Anywhere==Live Suche Überall
-Generic Search Portal==Generisches Suchportal
-Search Box Anywhere==Such-Box Überall
-#-----------------------------
-
 #File: env/templates/submenuPublication.template
 #---------------------------
 Publication==Veröffentlichung
@@ -3956,13 +3806,6 @@ Solr Ranking Config==Solr Ranking Konfiguration
 RWI Ranking Config==RWI Ranking Konfiguration
 >Heuristics<==>Heuristiken<
 #---------------------------
-
-#File: env/templates/submenuSearchIntegration.template
-#---------------------------
-Search Integration into External Sites==Integration der Suche in Externe Seiten
-Live Search Anywhere==Live Suche Überall
-Search Box Anywhere==Suchbox Überall
-#-----------------------------
 
 #File: env/templates/submenuSemantic.template
 #---------------------------
@@ -3987,12 +3830,6 @@ Use Case &amp; Accounts==Anwendungsfall &amp; Zugangsdaten
 Basic Configuration==Grundkonfiguration
 >Accounts<==>Benutzerverwaltung<
 Network Configuration==Netzwerk Einstellungen
-#-----------------------------
-
-#File: env/templates/submenuViewLog.template
-#---------------------------
-Server Log Menu==Server Log Menü
-#Server Log==Server Log
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
@@ -4035,16 +3872,6 @@ could not be found.==wurde nicht gefunden.
 Did you mean:==Meinten Sie vielleicht:
 #-----------------------------
 
-#File: www/welcome.html
-#---------------------------
-YaCy: Default Page for Individual Peer Content==YACY: Standardseite für eigene Peer-Inhalte
-Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<strong>#[wwwpath]#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
-#-----------------------------
-
 #File: js/Crawler.js
 #---------------------------
 "Continue this queue"=="Diese Queue weiter abarbeiten"
@@ -4060,21 +3887,710 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 >Date==>Datum
 #-----------------------------
 
-#File: js/jquery-flexigrid.js
+
+#File: env/templates/submenuAI.template
 #---------------------------
-'Displaying {from} to {to} of {total} items'=='Zeige {from} bis {to} von {total} Elementen'
-'Processing, please wait ...'=='In Bearbeitung. Bitte warten ...'
-'No items'=='Keine Elemente'
+LLM Selection==LLM-Auswahl
+Tools Config==Werkzeug-Konfiguration
+Log Reports==Log-Berichte
+RAG Config==RAG-Konfiguration
+AI Shield==KI-Schutzschild
+AI Lab==KI-Labor
+Chat==Chat
 #-----------------------------
 
-#File: js/jquery-ui-1.7.2.min.js
+#File: env/templates/submenuIndexImport.template
 #---------------------------
-Loading&#8230;==Lade&#8230;
+Content Export / Import==Inhalt Export / Import
+Solr Dump Export/Import==Solr-Dump Export/Import
+Pack Downloader==Paket-Downloader
+Database Reader==Datenbank-Leser
+phpBB3 Database==phpBB3-Datenbank
+Pack Generator==Paket-Generator
+MediaWiki Dump==MediaWiki-Dump
+Pack Manager==Paket-Manager
+Index Export==Index-Export
+YaCy Packs==YaCy-Pakete
+Export==Export
+Import==Import
 #-----------------------------
 
-#File: js/jquery.ui.all.min.js
+#File: env/templates/submenuMaintenance.template
 #---------------------------
-Loading&#8230;==Lade&#8230;
+RAM/Disk Usage &amp; Updates==RAM-/Festplatten-Nutzung &amp; Updates
+Download System Update==System-Update herunterladen
+Performance==Performance
+Web Cache==Web-Cache
 #-----------------------------
 
-# EOF
+#File: env/templates/submenuPortalConfiguration.template
+#---------------------------
+Generic Search Portal==Generisches Suchportal
+Portal Configuration==Portal-Konfiguration
+Search Box Anywhere==Suchbox überall
+Local robots.txt==Lokale robots.txt
+User Profile==Benutzerprofil
+#-----------------------------
+
+#File: Settings_Debug.inc
+#---------------------------
+When checked, the remote <abbr title="Distributed Hash Table">DHT</abbr> peers selection is overridden and only the local peer is selected to provide remote DHT search results.==Wenn aktiviert, wird die Auswahl der entfernten <abbr title="Distributed Hash Table">DHT</abbr>-Peers überschrieben und nur der lokale Peer wird ausgewählt, um entfernte DHT-Suchergebnisse zu liefern.
+When checked, statistics are collected on text snippets generation for search results. They are summarized in the <a href="ConfigPortal_p.html">Portal Configuration</a> page.==Wenn aktiviert, werden Statistiken über die Erzeugung von Text-Snippets für Suchergebnisse gesammelt. Sie werden auf der Seite <a href="ConfigPortal_p.html">Portal-Konfiguration</a> zusammengefasst.
+Be careful with these advanced settings, they can deeply affect the search process! You probably don't need to modify them for normal use.==Seien Sie mit diesen erweiterten Einstellungen vorsichtig, sie können den Suchprozess stark beeinflussen! Für den normalen Gebrauch müssen Sie sie wahrscheinlich nicht ändern.
+When checked, the remote Solr peers selection is overridden and only this peer is selected to provide remote Solr search results.==Wenn aktiviert, wird die Auswahl der entfernten Solr-Peers überschrieben und nur dieser Peer wird ausgewählt, um entfernte Solr-Suchergebnisse zu liefern.
+When checked (default), responses from remote Solr index instances are transferred using an efficient binary data format.==Wenn aktiviert (Standard), werden Antworten von entfernten Solr-Index-Instanzen in einem effizienten Binärdatenformat übertragen.
+When checked, the raw ranking score value is displayed for each text search result in the HTML results page.==Wenn aktiviert, wird der rohe Ranking-Bewertungswert für jedes Text-Suchergebnis auf der HTML-Ergebnisseite angezeigt.
+Remote <abbr title="Distributed Hash Table">DHT</abbr>/<abbr title="Reverse Word Index">RWI</abbr>==Entfernt <abbr title="Distributed Hash Table">DHT</abbr>/<abbr title="Reverse Word Index">RWI</abbr>
+When unchecked, responses are transferred as <abbr title="Extensible Markup Language">XML</abbr>,==Wenn deaktiviert, werden Antworten als <abbr title="Extensible Markup Language">XML</abbr> übertragen,
+Local <abbr title="Distributed Hash Table">DHT</abbr>/<abbr title="Reverse Word Index">RWI</abbr>==Lokal <abbr title="Distributed Hash Table">DHT</abbr>/<abbr title="Reverse Word Index">RWI</abbr>
+Override <abbr title="Distributed Hash Table">DHT</abbr> peers selection by local only==<abbr title="Distributed Hash Table">DHT</abbr>-Peer-Auswahl auf nur lokal überschreiben
+which can be captured and parsed by any external XML aware tool for debug/analysis.==was von jedem externen XML-fähigen Werkzeug zur Fehlersuche/Analyse erfasst und verarbeitet werden kann.
+but you can here disable one or more ones to check the behavior of the process.==aber Sie können hier eine oder mehrere deaktivieren, um das Verhalten des Prozesses zu überprüfen.
+By default all data sources are enabled to obtain search results,==Standardmäßig sind alle Datenquellen aktiviert, um Suchergebnisse zu erhalten,
+<em id="submitInfo">Changes will take effect immediately.</em>==<em id="submitInfo">Änderungen werden sofort wirksam.</em>
+Override Solr peers selection by local only==Solr-Peer-Auswahl auf nur lokal überschreiben
+Enable remote Solr binary responses==Binäre Antworten von entfernten Solr-Instanzen aktivieren
+Enable text snippets statistics==Statistik der Text-Snippets aktivieren
+Show search results scores==Bewertungspunkte der Suchergebnisse anzeigen
+Text snippets statistics==Statistik der Text-Snippets
+Debug/Analysis Settings==Debug-/Analyse-Einstellungen
+Search testing tweaks==Such-Test-Feineinstellungen
+Search data sources==Such-Datenquellen
+Remote Solr indexes==Entfernte Solr-Indizes
+Ranking information==Ranking-Informationen
+Solr communication==Solr-Kommunikation
+Local Solr index==Lokaler Solr-Index
+#-----------------------------
+
+#File: Settings_HttpClient.inc
+#---------------------------
+this extension to the <abbr title="Transport Layer Security">TLS</abbr> protocol must be enabled to load some https URLs (for websites deployed with different certificates and host names on the same shared IP address), otherwise loading fails with errors such as <samp>Received fatal alert: handshake_failure</samp>.==diese Erweiterung des <abbr title="Transport Layer Security">TLS</abbr>-Protokolls muss aktiviert sein, um manche https-URLs zu laden (für Websites, die mit unterschiedlichen Zertifikaten und Hostnamen auf derselben gemeinsam genutzten IP-Adresse betrieben werden), andernfalls schlägt das Laden mit Fehlern wie <samp>Received fatal alert: handshake_failure</samp> fehl.
+Controlling <abbr title="Server Name Indication">SNI</abbr> extension activation can also be done with the JVM option <var>jsse.enableSNIExtension</var>, but in that case a server restart is required when you want to modify the setting and it is not customizable per http client (general or for remote Solr).==Die Aktivierung der <abbr title="Server Name Indication">SNI</abbr>-Erweiterung kann auch über die JVM-Option <var>jsse.enableSNIExtension</var> gesteuert werden, aber in diesem Fall ist ein Server-Neustart erforderlich, wenn Sie die Einstellung ändern möchten, und sie ist nicht pro HTTP-Client (allgemein oder für entfernte Solr) anpassbar.
+But it can be necessary to disable it in order to load some https URLs served by old and misconfigured web servers, otherwise loading fails with the exception <samp>javax.net.ssl.SSLProtocolException: "handshake alert:  unrecognized_name"</samp>.==Es kann jedoch nötig sein, sie zu deaktivieren, um manche https-URLs von alten und falsch konfigurierten Webservern zu laden, andernfalls schlägt das Laden mit der Ausnahme <samp>javax.net.ssl.SSLProtocolException: "handshake alert:  unrecognized_name"</samp> fehl.
+Configuration settings for the specific HTTP client dedicated to communications with remote Solr servers (located on other YaCy peers or eventually owned by this one when it is configured to use a remote Solr index).==Konfigurationseinstellungen für den speziellen HTTP-Client, der der Kommunikation mit entfernten Solr-Servern dient (die sich auf anderen YaCy-Peers befinden oder ggf. diesem Peer gehören, wenn er für die Nutzung eines entfernten Solr-Index konfiguriert ist).
+SNI extension support can not be defined here as it is currently configured by the JVM option <code>-Djsse.enableSNIExtension===Die Unterstützung der SNI-Erweiterung kann hier nicht festgelegt werden, da sie derzeit über die JVM-Option konfiguriert wird: <code>-Djsse.enableSNIExtension=
+Configuration settings for the main HTTP client, used notably to crawl websites and communicate with other YaCy peers.==Konfigurationseinstellungen für den Haupt-HTTP-Client, der insbesondere zum Crawlen von Websites und zur Kommunikation mit anderen YaCy-Peers verwendet wird.
+Enable <abbr title="Server Name Indication">SNI</abbr> extension to <abbr title="Transport Layer Security">TLS</abbr>==<abbr title="Server Name Indication">SNI</abbr>-Erweiterung für <abbr title="Transport Layer Security">TLS</abbr> aktivieren
+You can configure here some advanced settings of the clients used by YaCy to handle outgoing HTTP connections.==Hier können Sie einige erweiterte Einstellungen der Clients konfigurieren, die YaCy für ausgehende HTTP-Verbindungen verwendet.
+<em id="submitInfo">Changes will take effect immediately.</em>==<em id="submitInfo">Änderungen werden sofort wirksam.</em>
+About Server Name Indication (SNI):==Über Server Name Indication (SNI):
+Remote Solr HTTP client==Entfernter Solr-HTTP-Client
+HTTP client settings==HTTP-Client-Einstellungen
+General HTTP client==Allgemeiner HTTP-Client
+#-----------------------------
+
+#File: Settings_Referrer.inc
+#---------------------------
+If you are really concerned about privacy, please check what is really sent by your browser by using its embedded developer tools network console, or with the network traffic analyzer of your choice.==Wenn Sie wirklich um Ihren Datenschutz besorgt sind, überprüfen Sie bitte mit der eingebauten Netzwerk-Konsole der Entwicklerwerkzeuge Ihres Browsers oder mit dem Netzwerk-Analysewerkzeug Ihrer Wahl, was tatsächlich gesendet wird.
+Visited websites can process this information as they wish, so this can become a privacy concern, for example when coming from a page which contains searched terms in its URL.==Besuchte Websites können diese Informationen nach Belieben verarbeiten, was zu einem Datenschutzproblem werden kann, zum Beispiel wenn man von einer Seite kommt, deren URL die gesuchten Begriffe enthält.
+<a href="https://www.w3.org/TR/html/links.html#allowed-keywords-and-their-meanings" title="Link types section at W3C HTML specification">link type</a> to search results links,==<a href="https://www.w3.org/TR/html/links.html#allowed-keywords-and-their-meanings" title="Link types section at W3C HTML specification">Link-Typ</a> zu Links in Suchergebnissen hinzu,
+Restriction: when an external link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http), no referrer information at all should be sent.==Einschränkung: wenn ein externer Link von einer TLS-gesicherten Verbindung (https) auf diesem Peer zu einem ungesicherten Ziel (http) herabgestuft wird, sollten überhaupt keine Referrer-Informationen gesendet werden.
+by filling the <a href="https://tools.ietf.org/html/rfc7231#section-5.5.2" title="'Referer' section from the standard IETF specification">"Referer"</a> HTTP header.==indem er den <a href="https://tools.ietf.org/html/rfc7231#section-5.5.2" title="'Referer' section from the standard IETF specification">"Referer"</a>-HTTP-Header ausfüllt.
+Restriction: when a link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http), no referrer information at all should be sent.==Einschränkung: wenn ein Link von einer TLS-gesicherten Verbindung (https) auf diesem Peer zu einem ungesicherten Ziel (http) herabgestuft wird, sollten überhaupt keine Referrer-Informationen gesendet werden.
+Referrer information should contain full URLs, except when a link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http).==Referrer-Informationen sollten vollständige URLs enthalten, außer wenn ein Link von einer TLS-gesicherten Verbindung (https) auf diesem Peer zu einem ungesicherten Ziel (http) herabgestuft wird.
+Note: this value is also compatible with legacy values from the older <a href="https://wiki.whatwg.org/wiki/Meta_referrer">specification draft</a>.==Hinweis: dieser Wert ist auch mit älteren Werten aus dem früheren <a href="https://wiki.whatwg.org/wiki/Meta_referrer">Spezifikationsentwurf</a> kompatibel.
+See the related <a href="https://www.w3.org/TR/referrer-policy/#referrer-policies">W3C recommendation</a> for full details and available values.==Siehe die zugehörige <a href="https://www.w3.org/TR/referrer-policy/#referrer-policies">W3C-Empfehlung</a> für alle Details und verfügbaren Werte.
+Peer internal and external links: referrer information should be stripped from any private data and contain only this peer host name.<br/>==Interne und externe Links des Peers: Referrer-Informationen sollten von allen privaten Daten befreit werden und nur den Hostnamen dieses Peers enthalten.<br/>
+Beware that every browser behaves differently: some settings may be unsupported by your particular browser and therefore ignored.==Beachten Sie, dass sich jeder Browser anders verhält: einige Einstellungen werden von Ihrem speziellen Browser möglicherweise nicht unterstützt und daher ignoriert.
+supported by many more browsers than the meta tag: if you want a higher level of privacy but use an old or incompatible browser,==der von viel mehr Browsern unterstützt wird als das meta-Tag: wenn Sie ein höheres Datenschutzniveau wünschen, aber einen alten oder inkompatiblen Browser verwenden,
+Peer internal links: referrer information should be stripped from any private data and contain only this peer host name.<br/>==Interne Links des Peers: Referrer-Informationen sollten von allen privaten Daten befreit werden und nur den Hostnamen dieses Peers enthalten.<br/>
+External links: referrer information should be stripped from any private data and contain only this peer host name.<br/>==Externe Links: Referrer-Informationen sollten von allen privaten Daten befreit werden und nur den Hostnamen dieses Peers enthalten.<br/>
+When loading pages and navigating through links, a web browser sends some information about the origin of the request,==Beim Laden von Seiten und beim Navigieren über Links sendet ein Webbrowser einige Informationen über den Ursprung der Anfrage,
+Highest privacy setting: referrer information should never be sent, even when navigating on this peer internal links.==Höchste Datenschutzeinstellung: Referrer-Informationen sollten niemals gesendet werden, auch nicht beim Navigieren über interne Links dieses Peers.
+This page offers some configuration settings to instruct your browser how it should fill this referrer information.==Diese Seite bietet einige Konfigurationseinstellungen, um Ihrem Browser mitzuteilen, wie er diese Referrer-Informationen ausfüllen soll.
+External links: referrer information should be stripped from any private data and contain only this peer host name.==Externe Links: Referrer-Informationen sollten von allen privaten Daten befreit werden und nur den Hostnamen dieses Peers enthalten.
+thus instructing the browser that it should not send any referrer information at all when visiting them.==und weist so den Browser an, beim Besuch dieser Links überhaupt keine Referrer-Informationen zu senden.
+This referrer policy applies for every page on this peer. It is set by the "meta" HTML tag.==Diese Referrer-Richtlinie gilt für jede Seite auf diesem Peer. Sie wird über das "meta"-HTML-Tag gesetzt.
+When checked, this overrides the global referrer policy and adds the standard "noreferrer"==Wenn aktiviert, überschreibt dies die globale Referrer-Richtlinie und fügt den Standard-"noreferrer"
+Custom setting: probably manually edited, be sure this value is the desired one.==Benutzerdefinierte Einstellung: wahrscheinlich manuell bearbeitet, stellen Sie sicher, dass dies der gewünschte Wert ist.
+Default browser behavior: it should correspond to "no-referrer-when-downgrade".==Standard-Browserverhalten: sollte "no-referrer-when-downgrade" entsprechen.
+Be careful with this: some websites might reject requests with no referrer.==Seien Sie damit vorsichtig: einige Websites weisen Anfragen ohne Referrer möglicherweise zurück.
+Peer internal links: referrer information should contain full URLs.<br/>==Interne Links des Peers: Referrer-Informationen sollten vollständige URLs enthalten.<br/>
+Unsafe setting: referrer information should always contain full URLs.==Unsichere Einstellung: Referrer-Informationen enthalten immer vollständige URLs.
+<em id="submitInfo">Changes will take effect immediately.</em>==<em id="submitInfo">Änderungen werden sofort wirksam.</em>
+External links: referrer information should never be sent.==Externe Links: Referrer-Informationen sollten niemals gesendet werden.
+Add the "noreferrer" link type to search results links==Den Link-Typ "noreferrer" zu Links in Suchergebnissen hinzufügen
+Values are sorted by decreasing privacy level.==Die Werte sind nach abnehmendem Datenschutzniveau sortiert.
+It is a standard HTML5 attribute value,==Es ist ein Standard-HTML5-Attributwert,
+this can be a valuable option.==kann dies eine wertvolle Option sein.
+Referrer Policy Settings==Referrer-Richtlinien-Einstellungen
+Search results links==Links in Suchergebnissen
+Global policy==Globale Richtlinie
+empty value==leerer Wert
+#-----------------------------
+
+#File: AILab.html
+#---------------------------
+Complete the quests below to unlock YaCy's AI sidekick: bind an inference engine, load production models, feed it with your index, then wire RAG and shields.==Erledigen Sie die folgenden Aufgaben, um YaCys KI-Helfer freizuschalten: eine Inferenz-Engine anbinden, Produktionsmodelle laden, ihn mit Ihrem Index füttern und dann RAG und Schutzschilde verdrahten.
+<span class="quest-note">Store your shield directives (system prompts, stop words) as properties, then exercise them in chat.</span>==<span class="quest-note">Speichern Sie Ihre Schutzschild-Direktiven (System-Prompts, Stoppwörter) als Eigenschaften und erproben Sie sie dann im Chat.</span>
+Add guardrails: access rates, grant or deny non-localhost access. Activate the front page link for chat to complete this quest.==Fügen Sie Schutzmaßnahmen hinzu: Zugriffsraten, Nicht-localhost-Zugriff erlauben oder verweigern. Aktivieren Sie den Startseiten-Link für den Chat, um diese Aufgabe abzuschließen.
+<span class="quest-note">Report generation stays inactive until a production model is assigned to the log-report role.</span>==<span class="quest-note">Die Berichtserzeugung bleibt inaktiv, bis der Log-Report-Rolle ein Produktionsmodell zugewiesen ist.</span>
+<span class="quest-note">Deploy at least one model, then assign capabilities (chat, search-query, tooling, vision).</span>==<span class="quest-note">Stellen Sie mindestens ein Modell bereit und weisen Sie dann Fähigkeiten zu (chat, search-query, tooling, vision).</span>
+<a class="btn btn-info btn-sm" href="LLMSelection_p.html#availableModels">Go to Production Models Matrix</a><br />==<a class="btn btn-info btn-sm" href="LLMSelection_p.html#availableModels">Zur Produktionsmodell-Matrix</a><br />
+<span class="quest-note">Set the search-query and qapairs columns to connect retrieval to your chat flow.</span>==<span class="quest-note">Setzen Sie die Spalten search-query und qapairs, um das Retrieval mit Ihrem Chat-Ablauf zu verbinden.</span>
+<a class="btn btn-info btn-sm" href="LLMSelection_p.html#availableModels">Assign log-report model</a><br />==<a class="btn btn-info btn-sm" href="LLMSelection_p.html#availableModels">Log-Report-Modell zuweisen</a><br />
+Map which production models answer search-query and Q/A pairs so the RAG proxy can mix search with chat.==Legen Sie fest, welche Produktionsmodelle search-query und Frage/Antwort-Paare beantworten, damit der RAG-Proxy Suche mit Chat verbinden kann.
+<span class="quest-note">Tune descriptions and set maxCallsPerTurn per tool (0 disables a tool).</span>==<span class="quest-note">Passen Sie die Beschreibungen an und setzen Sie maxCallsPerTurn pro Werkzeug (0 deaktiviert ein Werkzeug).</span>
+Create a local index for grounding: crawl a site or import a pack to give your AI facts to cite.==Erstellen Sie einen lokalen Index als Faktenbasis: crawlen Sie eine Website oder importieren Sie ein Paket, damit Ihre KI Fakten zitieren kann.
+<a class="btn btn-info btn-sm" href="IndexPackDownloader_p.html">Import an index pack</a><br />==<a class="btn btn-info btn-sm" href="IndexPackDownloader_p.html">Ein Index-Paket importieren</a><br />
+Pick your host (Ollama, LM Studio, OpenAI-compatible) and give YaCy a place to send prompts.==Wählen Sie Ihren Host (Ollama, LM Studio, OpenAI-kompatibel) und geben Sie YaCy einen Ort, an den es Prompts senden kann.
+<a class="btn btn-info btn-sm" href="ToolsConfig_p.html">Open tools configuration</a><br />==<a class="btn btn-info btn-sm" href="ToolsConfig_p.html">Werkzeug-Konfiguration öffnen</a><br />
+Assign a log-report model, then review generated hourly and daily self-enhancement reports.==Weisen Sie ein Log-Report-Modell zu und prüfen Sie dann die stündlich und täglich erzeugten Selbstverbesserungs-Berichte.
+<span class="quest-note">Set hoststub, API keys, and defaults to unlock downloads.</span>==<span class="quest-note">Setzen Sie Hoststub, API-Schlüssel und Standardwerte, um Downloads freizuschalten.</span>
+<a class="btn btn-info btn-sm" href="LLMSelection_p.html">Open engine setup</a><br />==<a class="btn btn-info btn-sm" href="LLMSelection_p.html">Engine-Einrichtung öffnen</a><br />
+<a class="btn btn-info btn-sm" href="AIShield_p.html">Open shield settings</a><br />==<a class="btn btn-info btn-sm" href="AIShield_p.html">Schutzschild-Einstellungen öffnen</a><br />
+Assign models for chat, search, translation, and more. This is your loadout bench.==Weisen Sie Modelle für Chat, Suche, Übersetzung und mehr zu. Das ist Ihre Ausrüstungsbank.
+<a class="btn btn-info btn-sm" href="yacychat.html">Test in Chat</a><br />==<a class="btn btn-info btn-sm" href="yacychat.html">Im Chat testen</a><br />
+</span> required to unlock (need at least 1000 documents).==</span> zum Freischalten erforderlich (mindestens 1000 Dokumente nötig).
+<span class="label label-warning">Mandatory</span>==<span class="label label-warning">Erforderlich</span>
+<span class="label label-info">Optional</span>==<span class="label label-info">Optional</span>
+<span class="status-pill">Needs setup</span>==<span class="status-pill">Einrichtung nötig</span>
+Indexed documents: <span class="count">==Indexierte Dokumente: <span class="count">
+Populate the Production Models Matrix==Die Produktionsmodell-Matrix befüllen
+Superpowers for the YaCy Chat==Superkräfte für den YaCy-Chat
+Bind an inference engine==Eine Inferenz-Engine anbinden
+Craft your AI toolkit==Bauen Sie Ihr KI-Werkzeugset
+Enable/Disable Tools==Werkzeuge aktivieren/deaktivieren
+AI Lab Build System==KI-Labor Baukasten
+Grow a search index==Einen Suchindex aufbauen
+Monitor log reports==Log-Berichte überwachen
+Wire RAG retrieval==RAG-Retrieval verdrahten
+Wire RAG prompts==RAG-Prompts verdrahten
+Open log reports==Log-Berichte öffnen
+Define a shield==Einen Schutzschild definieren
+0 / 6 unlocked==0 / 6 freigeschaltet
+Start a crawl==Einen Crawl starten
+': AI Lab==': KI-Labor
+#-----------------------------
+
+#File: AIShield_p.html
+#---------------------------
+Control who can access the chat interface and rate-limit non-localhost clients to protect your peer and LLM backends from overload.==Steuern Sie, wer auf die Chat-Oberfläche zugreifen darf, und begrenzen Sie die Rate von Nicht-localhost-Clients, um Ihren Peer und die LLM-Backends vor Überlastung zu schützen.
+Recent access volume across all clients (localhost included). You can enforce global limits here to protect the host.==Aktuelles Zugriffsvolumen über alle Clients (localhost eingeschlossen). Hier können Sie globale Grenzen durchsetzen, um den Host zu schützen.
+By default only localhost may reach the chat UI. Enable non-localhost access and throttle requests to reduce abuse.==Standardmäßig darf nur localhost die Chat-Oberfläche erreichen. Aktivieren Sie den Nicht-localhost-Zugriff und drosseln Sie Anfragen, um Missbrauch zu verringern.
+Expose a shortcut to the chat UI on the search front page if you want users to discover it.==Zeigen Sie eine Verknüpfung zur Chat-Oberfläche auf der Suchstartseite an, wenn Benutzer sie entdecken sollen.
+Requests from non-localhost will be throttled using these caps:==Anfragen von Nicht-localhost werden mit diesen Obergrenzen gedrosselt:
+Allow non-localhost clients to access the chat interface==Nicht-localhost-Clients den Zugriff auf die Chat-Oberfläche erlauben
+Show a link to yacychat.html on the search front page==Einen Link zu yacychat.html auf der Suchstartseite anzeigen
+Limit for all requests, including localhost==Grenze für alle Anfragen, einschließlich localhost
+Guest Access Control & Rate Limits==Gastzugriffssteuerung & Ratenbegrenzung
+Wire RAG Retrieval Shield==RAG-Retrieval-Schutzschild verdrahten
+Overall Load Protection==Gesamter Überlastschutz
+Save Shield Settings==Schutzschild-Einstellungen speichern
+Requests / minute==Anfragen / Minute
+Requests / hour==Anfragen / Stunde
+Front Page Link==Startseiten-Link
+Requests / day==Anfragen / Tag
+': AI Shield==': KI-Schutzschild
+Per minute:==Pro Minute:
+Per hour:==Pro Stunde:
+Per day:==Pro Tag:
+#-----------------------------
+
+#File: ToolsConfig_p.html
+#---------------------------
+Add superpowers to the YaCy Chat. Tools may be disabled by setting maxCallsPerTurn to 0.==Verleihen Sie dem YaCy-Chat Superkräfte. Werkzeuge können deaktiviert werden, indem maxCallsPerTurn auf 0 gesetzt wird.
+invalid maxCallsPerTurn value(s) were reset to the previous values.==ungültige maxCallsPerTurn-Werte wurden auf die vorherigen Werte zurückgesetzt.
+Save Tools Configuration==Werkzeug-Konfiguration speichern
+Data Retrieval Tools==Datenabruf-Werkzeuge
+Visualization Tools==Visualisierungs-Werkzeuge
+': Tools Config==': Werkzeug-Konfiguration
+Basic Tools==Basis-Werkzeuge
+disable==deaktivieren
+Tools==Werkzeuge
+#-----------------------------
+
+#File: RAGConfig_p.html
+#---------------------------
+Maximum character length of the virtual search document used as RAG attachment and as the `search` tool result. Content beyond this limit is cut off. Default: 30000.==Maximale Zeichenlänge des virtuellen Suchdokuments, das als RAG-Anhang und als Ergebnis des `search`-Werkzeugs verwendet wird. Inhalt über dieser Grenze wird abgeschnitten. Standard: 30000.
+Tune how YaCy constructs prompts and search queries for Retrieval Augmented Generation.==Stellen Sie ein, wie YaCy Prompts und Suchanfragen für Retrieval Augmented Generation aufbaut.
+Prepended before attached search snippets in RAG mode to tell the LLM how to use them.==Wird im RAG-Modus vor die angehängten Such-Snippets gesetzt, um dem LLM mitzuteilen, wie es sie verwenden soll.
+This is sent as the system message for chats. Keep it concise and friendly.==Dies wird als Systemnachricht für Chats gesendet. Halten Sie es knapp und freundlich.
+Prompt given to the model that generates search queries from user requests.==Prompt für das Modell, das aus Benutzeranfragen Suchanfragen erzeugt.
+Search Document Max Length==Maximale Länge des Suchdokuments
+Query Generator Prefix==Anfragegenerator-Präfix
+': Wire RAG Retrieval==': RAG-Retrieval verdrahten
+User Retrieval Prefix==Benutzer-Retrieval-Präfix
+Wire RAG Retrieval==RAG-Retrieval verdrahten
+Save RAG Settings==RAG-Einstellungen speichern
+System Prompt==System-Prompt
+#-----------------------------
+
+#File: LLMSelection_p.html
+#---------------------------
+<b>Install your local LLM service!</b> You need either a local <a href="https://ollama.com/">ollama</a> or <a href="https://lmstudio.ai/">LM Studio</a> instance running on your local host or inside the intranet.==<b>Installieren Sie Ihren lokalen LLM-Dienst!</b> Sie benötigen entweder eine lokale <a href="https://ollama.com/">ollama</a>- oder <a href="https://lmstudio.ai/">LM Studio</a>-Instanz, die auf Ihrem lokalen Host oder im Intranet läuft.
+qa-pairs<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to produce query-answer pairs which enhance search from chat prompts</span></span>==qa-pairs<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell kann Frage-Antwort-Paare erzeugen, die die Suche aus Chat-Prompts verbessern</span></span>
+thinking<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>we detect thinking only to be able to suppress thinking. thinking is not used in YaCy</span></span>==thinking<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Wir erkennen Thinking nur, um Thinking unterdrücken zu können. Thinking wird in YaCy nicht verwendet</span></span>
+search-query<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model produces search queries to YaCy search from prompts in RAG or chat</span></span>==search-query<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell erzeugt aus Prompts in RAG oder Chat Suchanfragen an die YaCy-Suche</span></span>
+log-report<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model evaluates YaCy runtime logs and creates self-enhancement reports</span></span>==log-report<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell wertet YaCy-Laufzeitprotokolle aus und erstellt Selbstverbesserungs-Berichte</span></span>
+classification<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to classify prompts to find out what they demand</span></span>==classification<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell wird verwendet, um Prompts zu klassifizieren und herauszufinden, was sie verlangen</span></span>
+chat<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used in the chat interface and as default for the RAG proxy</span></span>==chat<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell wird in der Chat-Oberfläche und als Standard für den RAG-Proxy verwendet</span></span>
+translation<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model can be used to make translations of the web UI</span></span>==translation<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell kann zum Übersetzen der Web-Oberfläche verwendet werden</span></span>
+tldr-shortener<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model is used to make summaries from web content</span></span>==tldr-shortener<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell wird verwendet, um Zusammenfassungen aus Webinhalten zu erstellen</span></span>
+search-answers<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>This model creates answers for search requests</span></span>==search-answers<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dieses Modell erstellt Antworten für Suchanfragen</span></span>
+tooling<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>tooling is required for agentic abilities.</span></span>==tooling<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Tooling ist für agentische Fähigkeiten erforderlich.</span></span>
+vision<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>this enables image recognition in the chat</span></span>==vision<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dies aktiviert die Bilderkennung im Chat</span></span>
+format<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>this is required for classification</span></span>==format<br/><span class="info"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>Dies ist für die Klassifizierung erforderlich</span></span>
+<a href="#services">Services</a> table below. A model's generated-token cap (<code>max_tokens</code> ===<a href="#services">Dienste</a>-Tabelle unten. Die Obergrenze für erzeugte Tokens eines Modells (<code>max_tokens</code> =
+In the "Production Models Matrix" you can then assign each selected model a function inside YaCy==In der "Produktionsmodell-Matrix" können Sie dann jedem ausgewählten Modell eine Funktion innerhalb von YaCy zuweisen
+<b>num_ctx</b> is the context window (in tokens) of the inference service &mdash; a per-service==<b>num_ctx</b> ist das Kontextfenster (in Tokens) des Inferenzdienstes &mdash; ein dienstspezifischer
+(Ollama: <code>OLLAMA_CONTEXT_LENGTH</code>, a Modelfile <code>PARAMETER num_ctx</code>, or the==(Ollama: <code>OLLAMA_CONTEXT_LENGTH</code>, ein Modelfile <code>PARAMETER num_ctx</code> oder die
+generated output; YaCy uses it to size prompts so they leave room to generate. The row for the==erzeugte Ausgabe; YaCy nutzt es, um Prompts so zu dimensionieren, dass Platz zum Generieren bleibt. Die Zeile für den
+value, shared by all models on that endpoint. It is the total budget for prompt <i>plus</i>==Wert, der von allen Modellen an diesem Endpunkt gemeinsam genutzt wird. Es ist das Gesamtbudget für Prompt <i>plus</i>
+The selected service's context window (<code>num_ctx</code>) is shown and editable in the==Das Kontextfenster (<code>num_ctx</code>) des ausgewählten Dienstes wird angezeigt und ist editierbar in der
+Here you can pick models from an LLM model service to select them as production model.==Hier können Sie Modelle aus einem LLM-Modelldienst auswählen, um sie als Produktionsmodell festzulegen.
+service selected above appears here automatically with its stored (or default) window.==oben ausgewählten Dienst erscheint hier automatisch mit seinem gespeicherten (oder Standard-)Fenster.
+This value is <b>advisory</b>: set it to match the window your backend actually serves==Dieser Wert ist <b>ein Richtwert</b>: setzen Sie ihn passend zum Fenster, das Ihr Backend tatsächlich bereitstellt
+Ollama <code>num_predict</code>) is set per model in the Production Models Matrix.==Ollama <code>num_predict</code>) wird pro Modell in der Produktionsmodell-Matrix festgelegt.
+Context Length setting). YaCy does not enforce it on the backend.==Context-Length-Einstellung). YaCy erzwingt ihn nicht im Backend.
+<a name="productionModels"></a><legend>Production Models Matrix==<a name="productionModels"></a><legend>Produktionsmodell-Matrix
+&nbsp; you can probably leave this to the default value==&nbsp; Sie können dies wahrscheinlich auf dem Standardwert belassen
+&nbsp; This makes a preset to the Hoststub value==&nbsp; Dies erstellt eine Voreinstellung für den Hoststub-Wert
+&nbsp; (not required for Ollama or LMStudio)==&nbsp; (für Ollama oder LMStudio nicht erforderlich)
+<a name="services"></a><legend>Services==<a name="services"></a><legend>Dienste
+Service Selection==Dienst-Auswahl
+': LLM Selection==': LLM-Auswahl
+Model Downloads==Modell-Downloads
+LLM Selection==LLM-Auswahl
+service==Dienst
+Actions==Aktionen
+model==Modell
+#-----------------------------
+
+#File: LogReports_p.html
+#---------------------------
+The report directory does not exist yet. Reports will appear here after the scheduler has generated the first completed hourly report.==Das Berichtsverzeichnis existiert noch nicht. Berichte erscheinen hier, nachdem der Scheduler den ersten vollständigen Stundenbericht erzeugt hat.
+No production model is configured for the log-report role. Log report generation stays inactive until a model is assigned in the==Für die Log-Report-Rolle ist kein Produktionsmodell konfiguriert. Die Erzeugung von Log-Berichten bleibt inaktiv, bis ein Modell zugewiesen wird in der
+Generating report from the current-hour log lines &mdash; the LLM call can take a while &hellip;==Bericht wird aus den Log-Zeilen der aktuellen Stunde erzeugt &mdash; der LLM-Aufruf kann eine Weile dauern &hellip;
+No production model is configured for the log-report role. Assign one in the==Für die Log-Report-Rolle ist kein Produktionsmodell konfiguriert. Weisen Sie eines zu in der
+<a href="LLMSelection_p.html#availableModels">Production Models Matrix</a>.==<a href="LLMSelection_p.html#availableModels">Produktionsmodell-Matrix</a>.
+the report below is completed live while the model is writing==der Bericht unten wird live vervollständigt, während das Modell schreibt
+No log lines were found for the current hour.==Für die aktuelle Stunde wurden keine Log-Zeilen gefunden.
+Report generation in progress &hellip;==Berichtserzeugung läuft &hellip;
+No generated log reports were found.==Es wurden keine erzeugten Log-Berichte gefunden.
+Report generation failed after==Berichtserzeugung fehlgeschlagen nach
+Current-hour report written:==Bericht der aktuellen Stunde geschrieben:
+</span> seconds elapsed==</span> Sekunden vergangen
+seconds elapsed==Sekunden vergangen
+': Log Reports==': Log-Berichte
+run report now==Bericht jetzt erstellen
+Reports found:==Berichte gefunden:
+Log Reports==Log-Berichte
+Directory:==Verzeichnis:
+characters==Zeichen
+seconds)==Sekunden)
+seconds:==Sekunden:
+report -==Bericht -
+report==Bericht
+#-----------------------------
+
+#File: IndexFederated_p.html
+#---------------------------
+Tick this when the remote Solr server is password protected and is requested over HTTPS but provides only a self-signed certificate (not a validated one by an official Certificate Authority). The Solr URL could be for example something like <i>https://user:password@localhost:8984/solr</i>.==Aktivieren Sie dies, wenn der entfernte Solr-Server passwortgeschützt ist und über HTTPS angesprochen wird, aber nur ein selbstsigniertes Zertifikat bereitstellt (kein von einer offiziellen Zertifizierungsstelle validiertes). Die Solr-URL könnte zum Beispiel etwa so aussehen: <i>https://user:password@localhost:8984/solr</i>.
+Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="IndexSchema_p.html">Schema Editor</a>.==Solr speichert den Hauptsuchindex. Es beherbergt zwei Cores, den Standard-Core 'collection1' für Dokumente und den 'webgraph'-Core für einen Web-Strukturgraphen. Detaillierte Informationen über die verwendeten Solr-Felder können im <a href="IndexSchema_p.html">Schema-Editor</a> bearbeitet werden.
+The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about forty times more links from loaded pages than in documents of the main search index).==Der Web-Struktur-Index wird für die Host-Navigation (zum Entdecken der internen Datei-/Ordnerstruktur), das Ranking (Zählen der Anzahl der Referenzen) und die Dateisuche verwendet (es gibt etwa vierzigmal mehr Links von geladenen Seiten als in Dokumenten des Hauptsuchindex).
+The set of remote targets are used as shards of a complete index. The host part of the url is used as key for a hash function which selects one of the shards (one of your remote servers).==Die Menge der entfernten Ziele wird als Shards eines vollständigen Index verwendet. Der Host-Teil der URL dient als Schlüssel für eine Hash-Funktion, die einen der Shards (einen Ihrer entfernten Server) auswählt.
+This external Solr can be used instead of the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored.==Dieses externe Solr kann anstelle des internen Solr verwendet werden. Es kann auch zusätzlich zum internen Solr verwendet werden, dann werden beide Solr-Indizes gespiegelt.
+<a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a> for the webgraph core.<br/>==<a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a> für den webgraph-Core.<br/>
+The 'RWI' (Reverse Word Index) is necessary for index transmission in distributed mode. For portal or intranet mode this must be switched off.==Der 'RWI' (Reverse Word Index) ist für die Indexübertragung im verteilten Modus notwendig. Für den Portal- oder Intranet-Modus muss dies abgeschaltet werden.
+You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.==Sie können hier ein oder mehrere Solr-Ziele festlegen, die als Shard angesprochen werden. Listen Sie bei mehreren Zielen diese mit einem ',' (Komma) als Trennzeichen auf.
+As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==Als interne Indexierungsdatenbank wird ein tief eingebettetes Multi-Core-Solr verwendet, und es ist möglich, zusätzlich ein entferntes Solr anzubinden.
+It's easy to <a href="https://wiki.yacy.net/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.==Es ist einfach, <a href="https://wiki.yacy.net/index.php/Dev:Solr" target="_blank">ein externes Solr an YaCy anzubinden</a>.
+This will write the YaCy-embedded Solr index which is stored within the YaCy DATA directory.<br/>==Dies schreibt den in YaCy eingebetteten Solr-Index, der im YaCy-DATA-Verzeichnis gespeichert wird.<br/>
+When a search request is made, all servers are accessed synchronously and the result is combined.==Wenn eine Suchanfrage gestellt wird, werden alle Server synchron angesprochen und das Ergebnis zusammengeführt.
+write-enabled (if unchecked, the remote server(s) will only be used as search peers)==schreibaktiviert (wenn deaktiviert, werden die entfernten Server nur als Such-Peers verwendet)
+If checked, only non-zero values and non-empty strings are written to Solr fields.==Wenn aktiviert, werden nur Werte ungleich null und nicht-leere Zeichenketten in Solr-Felder geschrieben.
+Reject URLs/RWIs with known errors from peers. Disable to opt out.==URLs/RWIs mit bekannten Fehlern von Peers ablehnen. Deaktivieren, um abzuschalten.
+use webgraph search index (rich information in second Solr core)==Webgraph-Suchindex verwenden (reichhaltige Informationen im zweiten Solr-Core)
+If you switch off this index, a remote Solr must be activated.==Wenn Sie diesen Index abschalten, muss ein entferntes Solr aktiviert werden.
+for the default search index (core: collection1) and at<br/>==für den Standard-Suchindex (Core: collection1) und unter<br/>
+comma-separated (default: 404,410,-1; -1=DNS/network errors)==kommagetrennt (Standard: 404,410,-1; -1=DNS-/Netzwerkfehler)
+<strong>Solr Host Administration Interface</strong><br/>==<strong>Solr-Host-Verwaltungsschnittstelle</strong><br/>
+support peer-to-peer index transmission (DHT RWI index)==Peer-to-Peer-Indexübertragung unterstützen (DHT-RWI-Index)
+The Solr native search interface is accessible at<br/>==Die native Solr-Suchschnittstelle ist erreichbar unter<br/>
+for temporary errors; permanent errors stay blocked.==für temporäre Fehler; permanente Fehler bleiben blockiert.
+use citation reference index (lightweight and fast)==Zitations-Referenzindex verwenden (leichtgewichtig und schnell)
+YaCy supports multiple index storage locations.==YaCy unterstützt mehrere Index-Speicherorte.
+Block known error URLs in DHT&nbsp;==Bekannte Fehler-URLs im DHT blockieren&nbsp;
+Use deep-embedded local Solr&nbsp;==Tief eingebettetes lokales Solr verwenden&nbsp;
+Lazy Value Initialization&nbsp;==Verzögerte Wert-Initialisierung&nbsp;
+Use remote Solr server(s)&nbsp;==Entfernte(n) Solr-Server verwenden&nbsp;
+': Index Sources &amp; Targets==': Index-Quellen &amp; -Ziele
+Allow self-signed certificates==Selbstsignierte Zertifikate erlauben
+Index Sources &amp; Targets==Index-Quellen &amp; -Ziele
+<strong>Index Size</strong>==<strong>Indexgröße</strong>
+Permanent error statuses==Permanente Fehlerstatus
+Peer-to-Peer Operation==Peer-to-Peer-Betrieb
+Sharding Method<br/>==Sharding-Methode<br/>
+Web Structure Index==Web-Struktur-Index
+Retry after (days)==Erneut versuchen nach (Tage)
+Solr Search Index==Solr-Suchindex
+Solr URL(s)<br/>==Solr-URL(s)<br/>
+Solr Hosts<br/>==Solr-Hosts<br/>
+#-----------------------------
+
+#File: IndexSchema_p.html
+#---------------------------
+<span>The solr schema can also be retrieved as xml here. Click the API icon to see the xml. Just copy this xml to solr/conf/schema.xml to configure solr.</span>==<span>Das Solr-Schema kann hier auch als XML abgerufen werden. Klicken Sie auf das API-Symbol, um das XML zu sehen. Kopieren Sie dieses XML einfach nach solr/conf/schema.xml, um Solr zu konfigurieren.</span>
+If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name==Wenn Sie ein eigenes Solr-Schema verwenden, können Sie in der Spalte 'Custom Solr Field Name' einen anderen Feldnamen für den YaCy-Standard-Attributnamen eingeben
+You may monitor progress (or stop the job) under <a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a>==Sie können den Fortschritt überwachen (oder den Job stoppen) unter <a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a>
+If you unselected some fields, old documents in the index still contain the unselected fields.==Wenn Sie einige Felder abgewählt haben, enthalten alte Dokumente im Index weiterhin die abgewählten Felder.
+To physically remove them from the index you need to reindex the documents.==Um sie physisch aus dem Index zu entfernen, müssen Sie die Dokumente neu indexieren.
+Here you can reindex all documents with inactive fields.==Hier können Sie alle Dokumente mit inaktiven Feldern neu indexieren.
+&nbsp;&nbsp;&nbsp;... the core can be searched at==&nbsp;&nbsp;&nbsp;... der Core kann durchsucht werden unter
+Custom Solr Field Name==Eigener Solr-Feldname
+': Solr Schema Editor==': Solr-Schema-Editor
+Solr Schema Editor==Solr-Schema-Editor
+show all available==alle verfügbaren anzeigen
+Reindex documents==Dokumente neu indexieren
+Select a core:==Einen Core auswählen:
+show disabled==deaktivierte anzeigen
+show active==aktive anzeigen
+Attribute==Attribut
+Comment==Kommentar
+Active==Aktiv
+#-----------------------------
+
+#File: IndexShare_p.html
+#---------------------------
+The local index currently consists of (at least)==Der lokale Index besteht derzeit aus (mindestens)
+&nbsp;&nbsp;&nbsp;receive grant default: <br />==&nbsp;&nbsp;&nbsp;Empfangs-Erlaubnis Standard: <br />
+&nbsp;&nbsp;&nbsp;for each remote peer&nbsp;==&nbsp;&nbsp;&nbsp;für jeden entfernten Peer&nbsp;
+&nbsp;links/minute&nbsp;<br />==&nbsp;Links/Minute&nbsp;<br />
+reverse word indexes and==Reverse-Word-Indizes und
+&nbsp;words/minute&nbsp;==&nbsp;Wörter/Minute&nbsp;
+distribute&nbsp;<br />==verteilen&nbsp;<br />
+': Index Sharing==': Index-Freigabe
+URL references==URL-Referenzen
+Index Sharing==Index-Freigabe
+receive==empfangen
+#-----------------------------
+
+#File: IndexPackDownloader_p.html
+#---------------------------
+Source</th><th width="360">Repo ID</th><th width="720">File</th><th width="360">Process==Quelle</th><th width="360">Repo-ID</th><th width="720">Datei</th><th width="360">Prozess
+': Index Pack Downloader==': Index-Paket-Downloader
+YaCy Pack Downloader==YaCy-Paket-Downloader
+Available Packs==Verfügbare Pakete
+#-----------------------------
+
+#File: IndexPackManager_p.html
+#---------------------------
+Packs: Loaded List</th><th width="180">Size (KB)</th><th>Process==Pakete: Geladen-Liste</th><th width="180">Größe (KB)</th><th>Prozess
+Packs: Hold List</th><th width="180">Size (KB)</th><th>Process==Pakete: Halteliste</th><th width="180">Größe (KB)</th><th>Prozess
+Packs: Load List</th><th width="180">Size (KB)</th><th>Process==Pakete: Ladeliste</th><th width="180">Größe (KB)</th><th>Prozess
+': Index Pack Manager==': Index-Paket-Manager
+YaCy Pack Manager==YaCy-Paket-Manager
+Pack Folders==Paket-Ordner
+#-----------------------------
+
+#File: IndexPackGenerator_p.html
+#---------------------------
+&nbsp; the collection name is used as part of the filename to describe the content. Exception: if the collection is "user", then you can name the content with a slug.==&nbsp; der Collection-Name wird als Teil des Dateinamens verwendet, um den Inhalt zu beschreiben. Ausnahme: wenn die Collection "user" ist, können Sie den Inhalt mit einem Slug benennen.
+echo – micro-content (tweets, toots, short headlines, SMS corpora), podcasts, radio archives, audio lectures, spoken-word datasets, logs, incidents, telemetry==echo – Mikro-Inhalte (Tweets, Toots, kurze Schlagzeilen, SMS-Korpora), Podcasts, Radioarchive, Audio-Vorträge, Spoken-Word-Datensätze, Logs, Vorfälle, Telemetrie
+scroll - non-technical documents: knowledge, encyclopedia, linguistic corpora, dictionaries, translation memories, texts, non-fiction books, historical books==scroll - nicht-technische Dokumente: Wissen, Enzyklopädie, Sprachkorpora, Wörterbücher, Übersetzungsspeicher, Texte, Sachbücher, historische Bücher
+&nbsp;This will become a part of the filename, spaces will be replaced by "-"; must not be empty; should end with a language description, e.g. "-en"==&nbsp;Dies wird Teil des Dateinamens, Leerzeichen werden durch "-" ersetzt; darf nicht leer sein; sollte mit einer Sprachangabe enden, z.B. "-en"
+This JSON is an elasticsearch index dump format and can be bulk-imported to elasticsearch. Here is an example for opensearch, using docker:<br />==Dieses JSON ist ein Elasticsearch-Index-Dump-Format und kann per Bulk in Elasticsearch importiert werden. Hier ist ein Beispiel für OpenSearch mit Docker:<br />
+spirit – related to non-textual data (possibly only metadata): art, music, game assets, creative-commons media (non-text culture loot)==spirit – bezogen auf nicht-textuelle Daten (möglicherweise nur Metadaten): Kunst, Musik, Spiel-Assets, Creative-Commons-Medien (nicht-textuelle Kulturbeute)
+core - technical documentation, operating systems, computer hardware, open source and free software, manuals, protocol standards==core - technische Dokumentation, Betriebssysteme, Computer-Hardware, Open Source und freie Software, Handbücher, Protokollstandards
+Make a search, get 10 results, search in fields text_t, title, description with boosts:<br />==Eine Suche durchführen, 10 Ergebnisse erhalten, in den Feldern text_t, title, description mit Boosts suchen:<br />
+JSON (Rich and full-text Elasticsearch data, one document per line in one flat JSON file)==JSON (reichhaltige und Volltext-Elasticsearch-Daten, ein Dokument pro Zeile in einer flachen JSON-Datei)
+fiction - fictional documents: movies, stories, series, books (fiction, science-fiction)==fiction - fiktionale Dokumente: Filme, Geschichten, Serien, Bücher (Belletristik, Science-Fiction)
+vault - sensitive data: secrets, leaks, non-public documents, security advisories==vault - sensible Daten: Geheimnisse, Leaks, nicht-öffentliche Dokumente, Sicherheitshinweise
+XML (Rich and full-text Solr data, one document per line in one large xml file,==XML (reichhaltige und Volltext-Solr-Daten, ein Dokument pro Zeile in einer großen XML-Datei,
+regula - non-technical standards: industry standards, laws, rules, compliance==regula - nicht-technische Standards: Industriestandards, Gesetze, Regeln, Compliance
+can be processed with shell tools, can be imported with DATA/PACKS/load/)==kann mit Shell-Werkzeugen verarbeitet und mit DATA/PACKS/load/ importiert werden)
+exportable with status code 200 - the remaining are error documents.==exportierbar mit Statuscode 200 - die übrigen sind Fehlerdokumente.
+map - geological data, geolocation-data, earth/world information==map - geologische Daten, Geolokalisierungsdaten, Erd-/Weltinformationen
+mix - a mix of document types, for content from wide web crawls==mix - eine Mischung von Dokumenttypen, für Inhalte aus breiten Web-Crawls
+Slug - describe the content<br>(only if collection is "user")==Slug - beschreiben Sie den Inhalt<br>(nur wenn die Collection "user" ist)
+&nbsp;*:* (default) is a catch-all; format: <field-name>:==&nbsp;*:* (Standard) ist ein Auffangmuster; Format: <field-name>:
+gem - research, papers, university publications, science==gem - Forschung, Fachartikel, Universitätspublikationen, Wissenschaft
+&nbsp;.*.* (default) is a catch-all; format: java regex==&nbsp;.*.* (Standard) ist ein Auffangmuster; Format: Java-Regex
+Set a Category (this goes into the filename)==Legen Sie eine Kategorie fest (diese wird Teil des Dateinamens)
+Start docker container of opensearch:<br />==Docker-Container von OpenSearch starten:<br />
+Pack</td><td>Process</td><td>Size (KB)==Paket</td><td>Prozess</td><td>Größe (KB)
+The local index currently contains==Der lokale Index enthält derzeit
+Bulk-upload the index file:<br />==Die Index-Datei per Bulk hochladen:<br />
+Create the search index:<br />==Den Suchindex erstellen:<br />
+Unblock index creation:<br />==Index-Erstellung freigeben:<br />
+': Index Pack Generator==': Index-Paket-Generator
+Index Pack Generator==Index-Paket-Generator
+YaCy Pack Generator==YaCy-Paket-Generator
+Finished export of==Export abgeschlossen von
+Documents to file==Dokumenten in Datei
+Index Collection==Index-Collection
+documents, only==Dokumente, nur
+Search Query -==Suchanfrage -
+Export to file==In Datei exportieren
+Export Format==Export-Format
+is running ..==läuft ..
+URL Filter==URL-Filter
+XML (RSS)==XML (RSS)
+Pack List==Paketliste
+failed:==fehlgeschlagen:
+#-----------------------------
+
+#File: IndexExportImportSolr_p.html
+#---------------------------
+(This may take several minutes. Please be patient and wait until the page reloads.)==(Dies kann einige Minuten dauern. Bitte haben Sie Geduld und warten Sie, bis die Seite neu lädt.)
+An error occurred while trying to restore the Solr dump.==Beim Wiederherstellen des Solr-Dumps ist ein Fehler aufgetreten.
+An error occurred while trying to create the Solr dump.==Beim Erstellen des Solr-Dumps ist ein Fehler aufgetreten.
+documents (including non-http-200 error pages).==Dokumente (einschließlich Fehlerseiten mit einem anderen Status als HTTP 200).
+The local index currently contains==Der lokale Index enthält derzeit
+': URL Database Administration==': URL-Datenbank-Verwaltung
+Dump and Restore of Solr Index==Dump und Wiederherstellung des Solr-Index
+Stored a solr dump to file==Ein Solr-Dump wurde in eine Datei gespeichert
+Solr Index Export/Import==Solr-Index Export/Import
+Dump File (full path)==Dump-Datei (vollständiger Pfad)
+#-----------------------------
+
+#File: IndexImportJsonList_p.html
+#---------------------------
+You can download jsonlist archives from the <a href="https://searchlab.eu" target="_blank">YaCy Searchlab</a> portal.==Sie können jsonlist-Archive vom <a href="https://searchlab.eu" target="_blank">YaCy Searchlab</a>-Portal herunterladen.
+JsonList File Selection: select an jsonlist file (which may be gz compressed)==JsonList-Dateiauswahl: wählen Sie eine jsonlist-Datei (die gz-komprimiert sein kann)
+No import thread is running, you can start a new thread here==Es läuft kein Import-Thread, Sie können hier einen neuen Thread starten
+JSON List Index Dump File Import==Import einer JSON-List-Index-Dump-Datei
+': JsonList Import==': JsonList-Import
+pages per second==Seiten pro Sekunde
+Remaining Time:==Verbleibende Zeit:
+Import Process==Import-Vorgang
+JsonList File:==JsonList-Datei:
+Running Time:==Laufzeit:
+Processed:==Verarbeitet:
+Entries==Einträge
+minutes==Minuten
+Speed:==Geschwindigkeit:
+hours,==Stunden,
+File:==Datei:
+Url:==URL:
+or==oder
+#-----------------------------
+
+#File: IndexImportWarc_p.html
+#---------------------------
+Warc File Selection: select an warc file (which may be gz compressed)==Warc-Dateiauswahl: wählen Sie eine warc-Datei (die gz-komprimiert sein kann)
+No import thread is running, you can start a new thread here==Es läuft kein Import-Thread, Sie können hier einen neuen Thread starten
+You can download warc archives for example here==Warc-Archive können Sie zum Beispiel hier herunterladen
+Web Archive File Import==Import einer Web-Archiv-Datei
+pages per second==Seiten pro Sekunde
+Remaining Time:==Verbleibende Zeit:
+Import Process==Import-Vorgang
+': Warc Import==': Warc-Import
+Running Time:==Laufzeit:
+Collection:==Sammlung:
+Processed:==Verarbeitet:
+Warc File:==Warc-Datei:
+Entries==Einträge
+minutes==Minuten
+Speed:==Geschwindigkeit:
+hours,==Stunden,
+File:==Datei:
+Url:==URL:
+or==oder
+#-----------------------------
+
+#File: IndexImportZim_p.html
+#---------------------------
+No import thread is running, you can start a new thread here==Es läuft kein Import-Thread, Sie können hier einen neuen Thread starten
+You can download ZIM files for example here==ZIM-Dateien können Sie zum Beispiel hier herunterladen
+Zim File Selection: select a '.zim' file==Zim-Dateiauswahl: wählen Sie eine '.zim'-Datei
+': ZIM File Import==': ZIM-Datei-Import
+pages per second==Seiten pro Sekunde
+Remaining Time:==Verbleibende Zeit:
+ZIM File Import==ZIM-Datei-Import
+Import Process==Import-Vorgang
+Running Time:==Laufzeit:
+Collection:==Sammlung:
+Processed:==Verarbeitet:
+ZIM File:==ZIM-Datei:
+Entries==Einträge
+minutes==Minuten
+Speed:==Geschwindigkeit:
+hours,==Stunden,
+File:==Datei:
+#-----------------------------
+
+#File: ConfigAccountList_p.html
+#---------------------------
+User</th><th>First name</th><th>Last name</th><th>Address</th><th>Last Access</th><th>Rights</th><th>Time</th><th>Traffic==Benutzer</th><th>Vorname</th><th>Nachname</th><th>Adresse</th><th>Letzter Zugriff</th><th>Rechte</th><th>Zeit</th><th>Traffic
+': User Accounts==': Benutzerkonten
+User Accounts==Benutzerkonten
+User List==Benutzerliste
+#-----------------------------
+
+#File: ConfigUser_p.html
+#---------------------------
+Username too short. Username must be &gt;= 4 Characters.==Benutzername zu kurz. Benutzername muss &gt;= 4 Zeichen lang sein.
+Username already used (not allowed).==Benutzername bereits vergeben (nicht erlaubt).
+Repeat password</label>:==Passwort wiederholen</label>:
+Passwords do not match.==Passwörter stimmen nicht überein.
+User Account Editor==Benutzerkonten-Editor
+First name</label>:==Vorname</label>:
+right</label><br />==Recht</label><br />
+Edit current user:==Aktuellen Benutzer bearbeiten:
+Last name</label>:==Nachname</label>:
+Timelimit</label>:==Zeitlimit</label>:
+Time used</label>:==Verbrauchte Zeit</label>:
+Username</label>:==Benutzername</label>:
+Password</label>:==Passwort</label>:
+back to user list==zurück zur Benutzerliste
+Address</label>:==Adresse</label>:
+': User Editor==': Benutzer-Editor
+Generic error.==Allgemeiner Fehler.
+User created:==Benutzer erstellt:
+User changed:==Benutzer geändert:
+Rights:==Rechte:
+#-----------------------------
+
+#File: ContentAnalysis_p.html
+#---------------------------
+This field is set during parsing and is influenced by two attributes for the <a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">TextProfileSignature</a> class.==Dieses Feld wird beim Parsen gesetzt und wird von zwei Attributen der Klasse <a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">TextProfileSignature</a> beeinflusst.
+Double Content Detection</legend><p>Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==Doppelte-Inhalte-Erkennung</legend><p>Die Doppelte-Inhalte-Erkennung erfolgt über ein Ranking auf einem 'unique'-Feld namens 'fuzzy_signature_unique_b'.
+The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==Die quantRate ist ein Maß für die Anzahl der Wörter, die an einer Signaturberechnung teilnehmen. Je höher die Zahl, desto weniger
+For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.==Für minTokenLen = 2 sollte der quantRate-Wert nicht unter 0,24 liegen; für minTokenLen = 3 darf der quantRate-Wert nicht unter 0,5 liegen.
+This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==Dies ist die minimale Länge eines Wortes, das als Element der Signatur betrachtet werden soll. Sollte entweder 2 oder 3 sein.
+These are document analysis attributes.==Dies sind Attribute der Dokumentanalyse.
+words are used for the signature.==Wörter werden für die Signatur verwendet.
+': Content Analysis==': Inhaltsanalyse
+Content Analysis==Inhaltsanalyse
+#-----------------------------
+
+#File: CrawlMonitorRemoteStart.html
+#---------------------------
+<strong>Remote crawl start points, crawl is ongoing</strong>==<strong>Entfernte Crawl-Startpunkte, Crawl läuft</strong>
+<strong>Remote crawl start points, finished:</strong>==<strong>Entfernte Crawl-Startpunkte, abgeschlossen:</strong>
+': Monitor for remotely started global crawls==': Monitor für entfernt gestartete globale Crawls
+Recently started remote crawls in progress==Kürzlich gestartete entfernte Crawls in Bearbeitung
+<strong>Intention/Description</strong>==<strong>Absicht/Beschreibung</strong>
+<strong>Accept '?' URLs</strong>==<strong>'?'-URLs akzeptieren</strong>
+<strong>Start Time</strong>==<strong>Startzeit</strong>
+<strong>Peer Name</strong>==<strong>Peer-Name</strong>
+<strong>Start URL</strong>==<strong>Start-URL</strong>
+<strong>Depth</strong>==<strong>Tiefe</strong>
+#-----------------------------
+
+#File: SearchAccessRate_p.html
+#---------------------------
+When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, ist die Ergebnis-Neusortierung nur noch auf Anfrage, serverseitig verfügbar.
+When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, wird der Suchbereich auf nur diesen lokalen Peer-Index zurückgesetzt.
+When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, wird die Snippet-Abrufstrategie auf 'CACHEONLY' zurückgesetzt
+You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Hier können Sie Beschränkungen der Zugriffsrate auf die Suchschnittstelle dieses Peers für nicht authentifizierte Benutzer und Benutzer ohne erweitertes Suchrecht konfigurieren
+When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, wird die Suche blockiert.
+(check the 'Remote results resorting' section in the <a href="ConfigPortal_p.html">Search Portal</a> configuration page).==(siehe den Abschnitt 'Remote results resorting' auf der Konfigurationsseite <a href="ConfigPortal_p.html">Suchportal</a>.)
+(check the default Snippet Fetch Strategy on the <a	href="ConfigPortal_p.html">Search Portal</a> configuration page).==(siehe die Standard-Snippet-Abrufstrategie auf der Konfigurationsseite <a href="ConfigPortal_p.html">Suchportal</a>.)
+Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Zugriffsraten-Beschränkungen für den Peer-to-Peer-Suchmodus mit aktivierter browserseitiger JavaScript-Ergebnis-Neusortierung
+(see the <a href="ConfigAccounts_p.html">Accounts</a> configuration page for details on users' rights).==(Details zu den Benutzerrechten finden Sie auf der Konfigurationsseite <a href="ConfigAccounts_p.html">Konten</a>.)
+<em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Änderungen werden sofort wirksam.</em>
+Access rate limitations to the peer-to-peer search mode.==Zugriffsraten-Beschränkungen für den Peer-to-Peer-Suchmodus.
+Access rate limitations to this peer search interface.==Zugriffsraten-Beschränkungen für die Suchschnittstelle dieses Peers.
+Peer-to-peer search with JavaScript results	resorting==Peer-to-Peer-Suche mit JavaScript-Ergebnis-Neusortierung
+Limitations on snippet loading from remote websites.==Beschränkungen beim Laden von Snippets von entfernten Websites.
+Local Search access rate limitations==Beschränkungen der lokalen Suchzugriffsrate
+': Local Search access rate==': Lokale Suchzugriffsrate
+Max searches in 10mn==Max. Suchen in 10min
+Max searches in	10mn==Max. Suchen in 10min
+Max searches in 1mn==Max. Suchen in 1min
+Peer-to-peer search==Peer-to-Peer-Suche
+Remote snippet load==Entferntes Snippet-Laden
+Max searches in 3s==Max. Suchen in 3s
+Max	searches in 3s==Max. Suchen in 3s
+limitations==Beschränkungen
+YaCy search==YaCy-Suche
+#-----------------------------
+
+#File: Trails.html
+#---------------------------
+CyTag Trails==CyTag-Spuren
+#-----------------------------
+
+#File: TransNews_p.html
+#---------------------------
+&nbsp;&nbsp;<small>Vote on this translation. If you vote positive the translation is added to your local translation list.</small>==&nbsp;&nbsp;<small>Stimmen Sie über diese Übersetzung ab. Wenn Sie positiv abstimmen, wird die Übersetzung Ihrer lokalen Übersetzungsliste hinzugefügt.</small>
+&nbsp;&nbsp;<small>You can check your outgoing messages <a href="News.html?page=3">here</a>.</small>==&nbsp;&nbsp;<small>Ihre ausgehenden Nachrichten können Sie <a href="News.html?page=3">hier</a> prüfen.</small>
+To edit or add local translations you can use <a href="Translator_p.html">Translator_p.html</a>.==Zum Bearbeiten oder Hinzufügen lokaler Übersetzungen können Sie <a href="Translator_p.html">Translator_p.html</a> verwenden.
+The remote peer can vote on your translation and add it to its own local translation.<br>==Der entfernte Peer kann über Ihre Übersetzung abstimmen und sie zu seiner eigenen lokalen Übersetzung hinzufügen.<br>
+You can share your local addition to translations and distribute it to other peers.==Sie können Ihre lokale Ergänzung zu Übersetzungen teilen und an andere Peers verteilen.
+entries available)&nbsp;&nbsp;==Einträge verfügbar)&nbsp;&nbsp;
+Translation News for Language==Übersetzungs-News für Sprache
+</a></th><th>Originator==</a></th><th>Urheber
+': Translation News==': Übersetzungs-News
+File:</th><th>==Datei:</th><th>
+Translation:==Übersetzung:
+English:==Englisch:
+existing==vorhanden
+score==Bewertung
+#-----------------------------
+
+#File: VFS.html
+#---------------------------
+User storage in the browser cache with file-system-like navigation.==Benutzerspeicher im Browser-Cache mit dateisystemartiger Navigation.
+Select a <code>.txt</code> or <code>.md</code> file to preview.==Wählen Sie eine <code>.txt</code>- oder <code>.md</code>-Datei für die Vorschau.
+No files yet. Upload a file or create a folder.==Noch keine Dateien. Laden Sie eine Datei hoch oder erstellen Sie einen Ordner.
+': Virtual File System==': Virtuelles Dateisystem
+Virtual File System==Virtuelles Dateisystem
+Upload File==Datei hochladen
+New Folder==Neuer Ordner
+Edit file==Datei bearbeiten
+Preview==Vorschau
+Discard==Verwerfen
+Save==Speichern
+#-----------------------------
+
+#File: api/citation.html
+#---------------------------
+Similar documents from different hosts:==Ähnliche Dokumente von verschiedenen Hosts:
+List of other web pages with citations==Liste anderer Webseiten mit Zitaten
+': Document Citations for url==': Dokument-Zitate für URL
+Document Citations for<br>==Dokument-Zitate für<br>
+Sentences in==Sätzen in
+List of==Liste von
+#-----------------------------
+
+#File: YaCySearchPluginFF.html
+#---------------------------
+In Mozilla Firefox, you can the Search-Plugin via the search box on the toolbar.<br />In Mozilla (Seamonkey) you can access the Search-Plugin via the Sidebar or the Location Bar.==In Mozilla Firefox können Sie das Suchplugin über das Suchfeld in der Symbolleiste aufrufen.<br />In Mozilla (Seamonkey) können Sie das Suchplugin über die Seitenleiste oder die Adressleiste aufrufen.
+Simply click on the link shown below to integrate the YaCy Firefox Search-Plugin into your browser.==Klicken Sie einfach auf den unten gezeigten Link, um das YaCy Firefox-Suchplugin in Ihren Browser zu integrieren.
+<b>YaCy Firefox Search-Plugin Installation:</b>==<b>YaCy Firefox-Suchplugin-Installation:</b>
+<b>Install the YaCy search plugin.</b>==<b>Installieren Sie das YaCy-Suchplugin.</b>
+: Firefox Search Plugin==: Firefox-Suchplugin
+': Quick Crawl Link==': Schnell-Crawl-Link
+#-----------------------------
+
+#File: env/templates/simpleSearchHeader.template
+#---------------------------
+<span class="hidden-sm">Search Interfaces<b class="caret"></b></span>==<span class="hidden-sm">Suchschnittstellen<b class="caret"></b></span>
+<i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)==<i>extern</i>&nbsp;&nbsp;&nbsp;Community (Web-Foren)
+<i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON==<i>API</i>&nbsp;&nbsp;&nbsp;Solr Standard-Core / JSON
+&nbsp;&nbsp;<i>Example Calls to the Search API:</i>==&nbsp;&nbsp;<i>Beispielaufrufe der Such-API:</i>
+<i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML==<i>API</i>&nbsp;&nbsp;&nbsp;Solr Standard-Core / XML
+<i>external</i>&nbsp;&nbsp;&nbsp;Git Repository==<i>extern</i>&nbsp;&nbsp;&nbsp;Git-Repository
+<span class="sr-only">Toggle navigation</span>==<span class="sr-only">Navigation umschalten</span>
+<i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy==<i>extern</i>&nbsp;&nbsp;&nbsp;YaCy herunterladen
+<i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker==<i>extern</i>&nbsp;&nbsp;&nbsp;Bugtracker
+JavaScript information==JavaScript-Informationen
+<span>Log in</span>==<span>Anmelden</span>
+About This Page==Über diese Seite
+Compare Search==Vergleichssuche
+YaCy Tutorials==YaCy-Tutorials
+File Search==Datei-Suche
+Web Search==Web-Suche
+URL Viewer==URL-Betrachter
+#-----------------------------
+
+#File: yacychat.html
+#---------------------------
+This Chat is private. YaCy does not keep any history — only your browser remembers the current conversation.==Dieser Chat ist privat. YaCy speichert keinen Verlauf — nur Ihr Browser merkt sich die aktuelle Unterhaltung.
+<span class="attachment-filename" id="attachmentFilename">Attach PNG/JPG or text (.txt/.md/.tex)</span>==<span class="attachment-filename" id="attachmentFilename">PNG/JPG oder Text anhängen (.txt/.md/.tex)</span>
+<span class="search-hint" id="searchHint">Attach Search Results</span>==<span class="search-hint" id="searchHint">Suchergebnisse anhängen</span>
+<span class="toggle-label">Show System</span>==<span class="toggle-label">System anzeigen</span>
+<span>Default Dialog Augmentation:</span>==<span>Standard-Dialog-Augmentierung:</span>
+no search, allow attachments==keine Suche, Anhänge erlauben
+use global search==globale Suche verwenden
+use local search==lokale Suche verwenden
+Download Chat==Chat herunterladen
+Upload Chat==Chat hochladen
+Clear Chat==Chat leeren
+YaCy Chat==YaCy-Chat
+User==Benutzer
+#-----------------------------

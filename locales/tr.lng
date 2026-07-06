@@ -570,58 +570,6 @@ Simple Editor==Basit Düzenleyici
 to add untranslated text==çevrilmemiş metin eklemek için
 #-----------------------------
 
-#File: ConfigLiveSearch.html
-#---------------------------
-Integration of a Search Field for Live Search==Canlı Arama için Arama Alanının Entegrasyonu
-Integration of Live Search with YaCy Search Widget==YaCy Arama Widget'ı ile Canlı Arama Entegrasyonu
-There are basically two methods for integrating the YaCy Search Widget with your web site.==YaCy Arama Widget'ını web sitenizle entegre etmek için temelde iki yöntem bulunmaktadır.
-Static hosting of widget on own HTTP server==Widget'ın kendi HTTP sunucunuzda statik olarak barındırılması
-Remote access through selected YaCy Peer==Seçili YaCy Peer üzerinden uzaktan erişim
-Advantages:==Avantajlar:
-faster connection speed==daha hızlı bağlantı hızı
-possibility for local adaptations==yerel adaptasyon olanakları
-Disadvantages:==Dezavantajlar:
-No automatic update to future releases of YaCy Search Widget==YaCy Arama Widget'ının gelecekteki sürümlerine otomatik güncelleme yok
-Ajax/JSONP cross domain requests needed to query remote YaCy Peer==Uzak YaCy Peer sorgulamak için Ajax/JSONP çapraz etki alanı istekleri gerekiyor
-Installing:==Kurulum:
-download yacy-portalsearch.tar.gz from==yacy-portalsearch.tar.gz dosyasını şuradan indirin:
-unpack within your HTTP servers path==HTTP sunucunuzun dizini içinde açın
-use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==Kendi portal sayfanızla entegrasyon için referans olarak ./yacy/portalsearch/yacy-portalsearch.html'i kullanın
-Always latest version of YaCy Search Widget==Her zaman en son YaCy Arama Widget'ı sürümü
-No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Arama Widget'ı ve YaCy Peer aynı alan üzerinde barındırıldığından Ajax/JSONP çapraz etki alanı istekleri gerekmez.
-Under certain circumstances slower than static hosting==Bazı durumlarda statik barındırmadan daha yavaş olabilir
-Just use the code snippet below and paste it any place in your own portal page==Aşağıdaki kod parçasını kullanın ve kendi portal sayfanızın herhangi bir yerine yapıştırın
-Please check if '#[ip]#:#[port]#' is appropriate or replace it with the address of the YaCy Peer holding your index==Lütfen '#[ip]#:#[port]#' adresinin uygun olup olmadığını kontrol edin veya gerekiyorsa dizininizi tutan YaCy Peer'ın adresi ile değiştirin.
-A 'Live-Search' input field that reacts as search-as-you-type in a pop-up window can easily be integrated into any web page==Pop-up pencerede yazarken arama yapan bir 'Canlı Arama' giriş alanı kolayca herhangi bir web sayfasına entegre edilebilir
-This is the same function as can be seen on all pages of the YaCy online-interface (look at the window in the upper right corner)==Bu, YaCy çevrimiçi arayüzünün tüm sayfalarında görülebilen aynı işlevdir (sağ üst köşedeki pencereye bakın)
-#Just use the code snippet below to integrate that into your own web pages==Bu kod parçasını kullanarak bunu kendi web sayfalarınıza entegre edin
-Just use the code snippet below and paste it any place in your own portal page==Aşağıdaki kod parçasını kullanın ve kendi portal sayfanızın herhangi bir yerine yapıştırın
-#Please check if the address, as given in the example '#[ip]#:#[port]#' here is correct and replace it with more appropriate values if necessary==Lütfen örnekte verilen '#[ip]#:#[port]#' adresinin doğru olup olmadığını kontrol edin ve gerekiyorsa daha uygun değerlerle değiştirin
-#Code Snippet:==Kod Parçası:
-#YaCy Portal Search==YaCy Portal Arama
-"Search"=="Ara"
-Configuration options and defaults for 'yconf':=='Yconf' için Yapılandırma seçenekleri ve varsayılanlar:
-Defaults<==Varsayılanlar<
-url<==URL<
-#is a mandatory property - no default<==zorunlu bir özelliktir - varsayılan yok<
-#YaCy P2P Web Search==YaCy P2P Web Araması
-Size and position (width | height | position)==Boyut ve konum (genişlik | yükseklik | konum)
-Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==Diyalogun nerede görüntüleneceğini belirtir. Konum için olası değerler: 'center', 'left', 'right', 'top', 'bottom', veya bir koordinat çifti içeren bir dizi (viewport'ın sol üstünden piksel ofset) veya olası string değerler (örneğin sağ üst köşe için ['right','top'])
-Animation effects (show | hide)==Animasyon efektleri (göster | gizle)
-Kullanılacak efekt. Olası değerler: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==Kullanılacak efekt. Olası değerler: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
-Interaction (modal | resizable)==Etkileşim (modal | resizable)
-Eğer modal true olarak ayarlanırsa, diyalogun modal davranışa sahip olacaktır; sayfadaki diğer öğeler devre dışı bırakılacaktır (yani etkileşime girilemez).==Eğer modal true olarak ayarlanırsa, diyalogun modal davranışa sahip olacaktır; sayfadaki diğer öğeler devre dışı bırakılacaktır (yani etkileşime girilemez).
-Modal dialogs create an overlay below the dialog but above other page elements.==Modal diyaloglar, diyalogun altında ancak diğer sayfa öğelerinin üzerinde bir örtü oluşturur.
-If resizable is set to true, the dialog will be resizeable.==Eğer resizable true olarak ayarlanırsa, diyalog boyutlandırılabilir olacaktır.
-Load JavaScript load_js==JavaScript yükle load_js
-Load Stylesheets load_css==Stil sayfalarını yükle load_css
-This parameter is used for static hosting only.==Bu parametre sadece statik barındırma için kullanılır.
->Themes<==>Temalar<
-You can download standard jquery-ui themes or create your own custom themes on==Standart jquery-ui temalarını indirebilir veya kendi özel temalarınızı oluşturabilirsiniz:
-Themes are installed in ./yacy/jquery/themes/ (static hosting) or in DATA/HTDOCS/jquery/themes/ on remote YaCy Peer.==Temalar, ./yacy/jquery/themes/ (statik barındırma) veya uzaktaki YaCy Peer üzerindeki DATA/HTDOCS/jquery/themes/ dizininde kurulur.
-YaCy ships with 'start' and 'smoothness' themes pre-installed.==YaCy, 'start' ve 'smoothness' temaları önceden yüklenmiş olarak gelir.
-#----------------------------- 
-
 #File: ConfigNetwork_p.html
 #---------------------------
 <html lang="en">==<html lang="tr">
@@ -726,7 +674,7 @@ URL of a Small Corporate Image<==Küçük bir Kurumsal Resmin URL'si<
 URL of a Large Corporate Image<==Büyük bir Kurumsal Resmin URL'si<
 Enable Search for Everyone?==Herkes İçin Aramayı Etkinleştir?
 Search is available for everyone==Arama herkes için kullanılabilir
-Only the administator is allowed to search==Sadece yönetici arama yapabilir
+Only the administrator is allowed to search==Sadece yönetici arama yapabilir
 Show additional interaction features in footer==Altbilgide ek etkileşim özelliklerini göster
 Snippet Fetch Strategy &amp; Link Verification==Snippet Alma Stratejisi &amp; Bağlantı Doğrulama
 Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==Bu seçenekle arama sonuçlarını hızlandırın! (Doğrulamayı kapatmak için CACHEONLY veya FALSE kullanın)
@@ -758,26 +706,6 @@ Target for Click on Search Results==Arama Sonuçlarına Tıklama Hedefi
 "_parent" (the parent frame of a frameset)=="_parent" (çerçeve setinin ana çerçevesi)
 "_top" (top of all frames)=="_top" (tüm çerçevelerin üstü)
 "searchresult" (a default custom page name for search results)=="searchresult" (arama sonuçları için varsayılan özel sayfa adı)
-
-#Dosya: ConfigTargeting_p.html
-#---------------------------
-Special Target as Exception for an URL-Pattern==URL-Paterni İstisna Olarak Belirleme
-Pattern:<==Desen:<
->Exclude Hosts<==>Hostları Hariç Tut<
-List of hosts that shall be excluded from search results by default but can be included using the site:&lt;host&gt; operator:==Varsayılan olarak arama sonuçlarından hariç tutulacak hostların listesi, ancak site:&lt;host&gt; operatörünü kullanarak dahil edilebilir:
-'About' Column<br/>(shown in a column alongside<br/>with the search result page)=='Hakkında' Sütunu<br/>(arama sonuç sayfasının yanında bir sütunda gösterilir)
-(Başlık)==(Başlık)
-(İçerik)==(İçerik)
-"Change Search Page"=="Arama Sayfasını Değiştir"
-"Set to Default Values"=="Varsayılan Değerlere Ayarla"
-You have ==Şu ayarları değiştirmek için
-set a remote user/password==uzak bir kullanıcı/şifre belirlemelisiniz
-to change this options.==. 
-The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Arama sayfasını kendi web sayfalarınıza bir iframe ile entegre edebilirsiniz. Sadece şu kodu kullanın:
-This would look like:==Şuna benzer görünecek:
-For a search page with a small header, use this code:==Küçük bir başlıkla bir arama sayfası için bu kodu kullanın:
-A third option is the interactive search. Use this code:==Üçüncü bir seçenek etkileşimli aramadır. Bu kodu kullanın:
-#-----------------------------
 
 #Dosya: ConfigProfile_p.html
 #---------------------------
@@ -1290,7 +1218,7 @@ Never load any page that is already known. Only the start-url may be loaded agai
 Robot Behaviour==Robot Davranışı
 Use Special User Agent and robot identification==Özel Kullanıcı Aracı ve robot kimliğini kullan
 You are running YaCy in non-p2p mode and because YaCy can be used as a replacement for commercial search appliances==YaCy'yi p2p modunda çalıştırmıyorsunuz ve çünkü YaCy, ticari arama cihazları için bir alternatif olarak kullanılabilir,
-(like the GSA) the user must be able to crawl all web pages that are granted to such commercial platforms.==(örneğin GSA gibi) kullanıcı, bu tür ticari platformlara verilen tüm web sayfalarını tarama yeteneğine sahip olmalıdır.
+(like the Google Search Appliance aka GSA) the user must be able to crawl all web pages that are granted to such commercial platforms.==(örneğin GSA gibi) kullanıcı, bu tür ticari platformlara verilen tüm web sayfalarını tarama yeteneğine sahip olmalıdır.
 Not having this option would be a strong handicap for professional usage of this software. Therefore you are able to select==Bu seçeneğin olmaması, bu yazılımın profesyonel kullanımı için güçlü bir engel olurdu. Bu nedenle seçebilirsiniz
 alternative user agents here which have different crawl timings and also identify itself with another user agent and obey the corresponding robots rule.==farklı tarama sürelerine sahip olan ve aynı zamanda başka bir kullanıcı aracıyla kendini tanıyan ve ilgili robot kuralına uyan alternatif kullanıcı araçları.
 
@@ -1501,7 +1429,7 @@ only urls with the &lt;phrase&gt; in the url==URL'de &lt;phrase&gt; bulunanları
 only urls with the &lt;phrase&gt; within outbound links of the document==Belgenin çıkış bağlantılarında &lt;phrase&gt; bulunanları göster
 only urls with extension==Uzantıya sahip URL'leri göster
 only urls from host==Sunucudan gelen URL'leri göster
-only pages with as-author-anotated==Yazar tarafından belirlenen sayfaları göster
+only pages with as-author-annotated==Yazar tarafından belirlenen sayfaları göster
 only pages from top-level-domains==Üst düzey alan adlarından gelen sayfaları göster
 only resources from http or https servers==Sadece HTTP veya HTTPS sunuculardan kaynakları göster
 only resources from ftp servers==Sadece FTP sunuculardan kaynakları göster
@@ -1532,30 +1460,6 @@ See an==Bkz
 >example==>örnek
 json search results==JSON arama sonuçları
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Ajax geliştiricileri için: arama RSS beslemesini alın ve arama sonucu URL'sindeki '.rss' uzantısını '.json' ile değiştirin
-#-----------------------------
-
-#File: IndexCleaner_p.html
-#---------------------------
-Index Cleaner==İndeks Temizleyici
->URL-DB-Cleaner==>URL-DB-Temizleyici
-#ThreadAlive:
-#ThreadToString:
-Total URLs searched:==Toplam aranan URL'ler:
-Blacklisted URLs found:==Kara listeye alınan URL'ler bulundu:
-Percentage blacklisted:==Yüzde kara listeli:
-last searched URL:==Son aranan URL:
-last blacklisted URL found:==Son kara listeye alınan URL bulundu:
->RWI-DB-Cleaner==>RWI-DB-Temizleyici
-RWIs at Start:==Başlangıçta RWI'lar:
-RWIs now:==Şu anki RWI'lar: 
-wordHash in Progress:==Devam eden kelime hash'i:
-last wordHash with deleted URLs:==Silinen URL'lerle son kelime hash'i:
-Number of deleted URLs in on this Hash:==Bu hash'teki silinen URL'lerin sayısı:
-URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-Temizleyici - Kara listeye alınan URL'leri silerek veritabanını temizleyin:
-Start/Resume==Başlat/Devam et
-Stop==Durdur
-Pause==Duraklat
-RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-DB-Temizleyici - Kara listeye alınan URL'lere referans içeren kelimeleri silerek veritabanını temizleyin:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
@@ -1925,64 +1829,6 @@ Delete by Solr Query<==Solr Sorgusu ile Sil<
 This is the most generic option: select a set of documents using a solr query.==Bu en genel seçenektir: Bir Solr sorgusu kullanarak bir belge kümesini seçin.
 #-----------------------------
 
-#File: IndexImport_p.html
-#---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': İndeks İçe Aktarma
-#Crawling Queue Import==Tarama Kuyruğu İçe Aktarma
-Index DB Import==İndeks Veritabanı İçe Aktarma
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==Yerel indeks şu anda en azından #[wcount]# ters kelime indeksi ve #[ucount]# URL başvurusundan oluşmaktadır.
-Import Job with the same path already started.==Aynı yolda başlatılmış olan bir İçe Aktarma Görevi zaten var.
-Starting new Job==Yeni Görevi Başlatma
-Import&nbsp;Type:==İçe Aktarma Türü:
-Cache Size==Önbellek Boyutu
-Usage Examples==Kullanım Örnekleri
-"Path to the PLASMADB directory of the foreign peer"=="Yabancı eşin PLASMADB dizini yolunu"
-Import&nbsp;Path:==İçe Aktarma Yolu:
-"Start Import"=="İçe Aktarmayı Başlat"
-Attention:==Dikkat:
-Always do a backup of your source and destination database before starting to use this import function.==Bu içe aktarma işlevini kullanmaya başlamadan önce kaynak ve hedef veritabanınızın her zaman yedeğini alın.
-Currently running jobs==Şu anda çalışan görevler
-Job Type==Görev Türü
->Path==>Yol
-Status==Durum
-Elapsed<br />Time==Geçen<br />Zaman
-Time<br />Left==Kalan<br />Zaman
-Abort Import==İçe Aktarmayı İptal Et
-Pause Import==İçe Aktarmayı Durdur
-Finished::Running::Paused==Tamamlandı::Çalışıyor::Duraklatıldı
-"Abort"=="İptal"
-#"Pause"=="Durdur"
-"Continue"=="Devam Et"
-Finished jobs==Tamamlanan İçe Aktarmalar
-"Clear List"=="Listeyi Temizle"
-Last Refresh:==Son Yenileme:
-Example Path:==Örnek Yol:
-Requirements:==Gereksinimler:
-You need to have at least the following directories and files in this path:==Bu yol üzerinde en az aşağıdaki dizinlere ve dosyalara ihtiyacınız var:
->Type==>Tür
->Writeable==>Yazılabilir
->Description==>Açıklama
->File==>Dosya
->Directory==>Dizin
->Yes<==>Evet<
->No<==>Hayır<
-The LoadedURL Database containing all loaded and indexed URLs==Tüm yüklenen ve dizine eklenen URL'leri içeren LoadedURL Veritabanı
-The assortment directory containing parts of the word index.==Kelime indeksinin parçalarını içeren assortment dizini.
-The words directory containing parts of the word index.==Kelime indeksinin parçalarını içeren words dizini.
-The assortment file that should be imported.==İçe aktarılması gereken assortment dosyası.
-The assortment file must have the postfix==Assortment dosyasının postfix'e sahip olması gerekir.
-.db".==.db".
-If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==Eğer bir assortment dosyasını <tt>PLASMADBACLUSTERABKP</tt>'den içe aktarmak istiyorsanız,
-you have to rename it first.==Önce onu yeniden adlandırmalısınız.
->Notes:==>Notlar:
-Please note that the imported words are useless if the destination peer doesn't know==Lütfen dikkat edin ki içe aktarılan kelimeler, hedef eş bilmiyorsa kullanışsızdır.
-the URLs the imported words belongs to.==İçe aktarılan kelimelerin hangi URL'lere ait olduğunu.
-Crawling Queue Import:==Tarama Kuyruğu İçe Aktarma:
-Contains data about the crawljob an URL belongs to==Bir URL'nin hangi tarama görevine ait olduğu hakkında veri içerir
-The crawling queue==Tarama kuyruğu
-Various stack files that belong to the crawling queue==Tarama kuyruğuna ait çeşitli yığın dosyaları
-#-----------------------------```
-
 #File: IndexImportMediawiki_p.html
 #---------------------------
 #MediaWiki Dump Import==MediaWiki Döküm İçe Aktarma
@@ -2137,7 +1983,7 @@ To integrate a search window into phpBB3, you must insert some code into a forum
 There are several templates that can be used for phpBB3, but in this guide we consider that==phpBB3 için kullanılabilecek birkaç şablon bulunmaktadır, ancak bu kılavuzda varsayılan şablon 'prosilver' kullanıldığı kabul edilir
 you are using the default template, 'prosilver'==varsayılan şablon 'prosilver' kullanıldığı kabul edilir
 open styles/prosilver/template/overall_header.html==styles/prosilver/template/overall_header.html dosyasını açın
-find the line where the default search window is displayed, thats right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==varsayılan arama penceresinin görüntülendiği satırı bulun, bu <pre>&lt;div id="search-box"&gt;</pre> ifadesinin hemen arkasındadır
+find the line where the default search window is displayed, that's right behind the <pre>&lt;div id="search-box"&gt;</pre> statement==varsayılan arama penceresinin görüntülendiği satırı bulun, bu <pre>&lt;div id="search-box"&gt;</pre> ifadesinin hemen arkasındadır
 Insert the following code right behind the div tag==Aşağıdaki kodu div etiketinin hemen arkasına ekleyin
 YaCy Forum Search==YaCy Forum Araması
 ;YaCy Search==;YaCy Arama
@@ -2387,7 +2233,7 @@ A change in the personal profile will create a news entry. You can see recently 
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==Profil değişikliği 'P' (profil) - seçici yanındaki '*' ile görselleştirilen Ağ sayfasındaki profil girişlerinde görselleştirilir.
 More news services will follow.==Daha fazla haber servisi izleyecek.
 
-Above you can see four menues:==Yukarıda dört menüyü görebilirsiniz:
+Above you can see four menus:==Yukarıda dört menüyü görebilirsiniz:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>Gelen Haberler(#[insize]#)</strong>: Eşinize ulaşan en son haberler.
 Only these news will be used to display specific news services as explained above.==Yalnızca bu haberler, yukarıda açıklandığı gibi belirli haber servislerini görüntülemek için kullanılacaktır.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Bu haberleri sayfadaki bir düğme ile işleyebilir ve görünümlerini IndexCreate ve Network sayfalarından kaldırabilirsiniz.
@@ -2440,7 +2286,7 @@ This shall improve performance of the affected process (proxy or search).==Bu, e
 (current delta is==(Son proxy/yerel arama/uzak arama erişiminden bu yana geçen süre.)
 seconds since last proxy/local-search/remote-search access.)==saniye)
 Online Caution Case==Çevrimiçi Dikkat Durumu
-indexer delay (milliseconds) after case occurency==Olay oluşumundan sonra indexleme gecikmesi (milisaniye)
+indexer delay (milliseconds) after case occurrence==Olay oluşumundan sonra indexleme gecikmesi (milisaniye)
 #Proxy:==Proxy:
 Local Search:==Yerel Arama:
 Remote Search:==Uzak Arama:
@@ -2858,7 +2704,7 @@ Remote proxy port==Uzak Proxy Port
 the port of the remote proxy==Uzak proxy'nin portu
 Remote proxy user==Uzak Proxy Kullanıcı
 Remote proxy password==Uzak Proxy Şifre
-No-proxy adresses==Proxy Olmayan Adresler
+No-proxy addresses==Proxy Olmayan Adresler
 IP addresses for which the remote proxy should not be used==Uzak proxy'nin kullanılmaması gereken IP adresleri
 "Submit"=="Gönder"
 Changes will take effect immediately.==Değişiklikler hemen yürürlüğe girecek.
@@ -2869,7 +2715,7 @@ Changes will take effect immediately.==Değişiklikler hemen yürürlüğe girec
 #---------------------------
 Proxy Access Settings==Proxy Erişim Ayarları
 These settings configure the access method to your own http proxy and server.==Bu ayarlar, kendi HTTP proxy'nize ve sunucunuza erişim yöntemini yapılandırır.
-All traffic is routed throug one single port, for both proxy and server.==Tüm trafiğin, hem proxy hem de sunucu için tek bir port üzerinden yönlendirildiği.
+All traffic is routed through one single port, for both proxy and server.==Tüm trafiğin, hem proxy hem de sunucu için tek bir port üzerinden yönlendirildiği.
 Server/Proxy Port Configuration==Sunucu/Proxy Port Yapılandırması
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==YaCy'nin diğer YaCy eşlerinden veya HTTP istemcilerinden gelen giriş bağlantıları için dinlemesi gereken soket adresleri.
 You have four possibilities to specify the address:==Adresi belirtmek için dört seçeneğiniz var:
@@ -2996,7 +2842,7 @@ Error with submitted information.==Gönderilen bilgide hata.
 Nothing changed.</p>==Hiçbir şey değişmedi.</p>
 The user name must be given.==Kullanıcı adı verilmelidir.
 Your request cannot be processed.==İsteğiniz işlenemiyor.
-The password redundancy check failed. You have probably misstyped your password.==Şifre tekrar kontrolü başarısız oldu. Muhtemelen şifrenizi yanlış yazdınız.
+The password redundancy check failed. You have probably mistyped your password.==Şifre tekrar kontrolü başarısız oldu. Muhtemelen şifrenizi yanlış yazdınız.
 Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Kapatılıyor.</strong><br />Uygulama, tüm tarama görevlerini çalıştırdıktan sonra sona erecek.
 Your administration account setting has been made.==Yönetici hesap ayarınız yapıldı.
 Your new administration account name is #[user]#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Yeni yönetici hesap adınız #[user]#. Şifre kabul edildi.<br />Ayarlar sayfasına geri dönerseniz, yeniden giriş yapmalısınız.
@@ -3254,7 +3100,7 @@ YaCy Supporters<==YaCy Destekçileri<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==YaCy eşleri tarafından kullanılan genel yer işaretleri, bağlantı oyları ve tarama başlangıç noktaları kullanılarak oluşturulan
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="Lütfen link öneriniz için bir yorum girin. (Oy vermeseniz bile düşünülür.)"
 #"authentication required"=="Kimlik doğrulama gerekli"
-Hide surftips for users without autorization==Yetkisi olmayan kullanıcılar için surf ipuçlarını gizle
+Hide surftips for users without authorization==Yetkisi olmayan kullanıcılar için surf ipuçlarını gizle
 Show surftips to everyone==Herkese surf ipuçları göster
 #-----------------------------```
 
@@ -3527,7 +3373,7 @@ Discover Terms:==Bulunan Terimler:
 no auto-discovery (empty vocabulary)==Otomatik bulma yok (boş kelime dağarcığı)
 from file name==Dosya adından
 from page title&nbsp;==Sayfa başlığından&nbsp;
-from page title (splitted)==Sayfa başlığından (bölünmüş)
+from page title (split)==Sayfa başlığından (bölünmüş)
 from page author==Sayfa yazarından
 "Create"=="Oluştur"
 Vocabulary Editor==Kelime Dağarcığı Düzenleyici
@@ -3626,7 +3472,7 @@ Headlines of level 1 will be ignored in the table of content.==1. düzey başlı
 #text==Metin
 These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),==Bu etiketler vurgulu metinler oluşturur. İlk çift metni vurgular (çoğu tarayıcı bunu italik olarak gösterir),
 the second one emphasizes it more strongly (i.e. bold) and the last tags create a combination of both.==ikincisi daha güçlü bir vurgu yapar (yani kalın) ve son etiketler her ikisinin bir kombinasyonunu oluşturur.
-Text will be displayed <span class="strike">stricken through</span>.==Metin <span class="strike">üzerinden çizilmiş</span> olarak görüntülenecektir.
+Text will be displayed <span class="strike">struck through</span>.==Metin <span class="strike">üzerinden çizilmiş</span> olarak görüntülenecektir.
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Satırlar içeri alınır. Bu etiket, alıntıları işaretlemek için kullanılır, ancak aynı zamanda stil amaçları için de kullanılabilir.
 point==Nokta
 These tags create a numbered list.==Bu etiketler numaralı bir liste oluşturur.
@@ -3791,7 +3637,7 @@ Index Export/Import==İndeks Dışa/İçe Aktar
 Target Analysis==Hedef Analizi
 Process Scheduler==İşlem Zamanlayıcı
 ### YÖNETİM ###
-System Admiistration==Sistem Yönetimi
+System Administration==Sistem Yönetimi
 Index Administration==İndeks Yönetimi
 Filter &amp; Blacklists==Filtre &amp; Kara Listeler
 Content Semantic==İçerik Semantiği
@@ -3873,14 +3719,6 @@ Advanced Settings==Gelişmiş Ayarlar
 Advanced Properties==Gelişmiş Özellikler
 #-----------------------------
 
-#Dosya: env/templates/submenuContentIntegration.template
-#---------------------------
-External Content Integration==Dış İçerik Entegrasyonu
-Import phpBB3 forum==phpBB3 Forum İçe Aktar
-Import Mediawiki dumps==Mediawiki Dumps İçe Aktar
-Import OAI-PMH Sources==OAI-PMH Kaynaklarını İçe Aktar
-#-----------------------------
-
 #Dosya: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Overview</a>==Genel Bakış</a>
@@ -3945,14 +3783,6 @@ Scraping Proxy==Scraping Proxy
 #Autocrawl==Otomatik Tarama
 #-----------------------------
 
-#Dosya: env/templates/submenuPortalIntegration.template
-#---------------------------
-Search Portal Integration==Arama Portalı Entegrasyonu
-Live Search Anywhere==Her Yerde Canlı Arama
-Generic Search Portal==Genel Arama Portalı
-Search Box Anywhere==Her Yerde Arama Kutusu
-#-----------------------------
-
 #Dosya: env/templates/submenuPublication.template
 #---------------------------
 Publication==Yayın
@@ -3969,13 +3799,6 @@ Solr Ranking Config==Solr Sıralama Konfigürasyonu
 RWI Ranking Config==RWI Sıralama Konfigürasyonu
 >Heuristics<==>Heuristikler<
 #---------------------------
-
-#Dosya: env/templates/submenuSearchIntegration.template
-#---------------------------
-Search Integration into External Sites==Dış Sitelere Arama Entegrasyonu
-Live Search Anywhere==Her Yerde Canlı Arama
-Search Box Anywhere==Her Yerde Arama Kutusu
-#-----------------------------
 
 #Dosya: env/templates/submenuSemantic.template
 #---------------------------
@@ -4000,12 +3823,6 @@ Kullanım Senaryosu &amp; Hesaplar==Kullanım Senaryosu &amp; Hesaplar
 Temel Konfigürasyon==Temel Konfigürasyon
 >Hesaplar<==>Kullanıcı Hesapları<
 Ağ Konfigürasyonu==Ağ Konfigürasyonu
-#-----------------------------
-
-#Dosya: env/templates/submenuViewLog.template
-#---------------------------
-Sunucu Günlüğü Menüsü==Sunucu Günlüğü Menüsü
-#Server Log==Sunucu Günlüğü
 #-----------------------------
 
 #Dosya: env/templates/submenuWebStructure.template
@@ -4048,16 +3865,6 @@ could not be found.==bulunamadı.
 Did you mean:==Şunu mu demek istediniz:
 #-----------------------------
 
-#Dosya: www/welcome.html
-#---------------------------
-YaCy: Default Page for Individual Peer Content==YaCy: Bireysel Peer İçeriği için Varsayılan Sayfa
-Individual&nbsp;Web&nbsp;Page==Bireysel&nbsp;Web&nbsp;Sayfası
-Welcome to your own web page<br />in the <strong>YaCy Network==Kendi web sayfanıza hoş geldiniz<br />şu <strong>YaCy-Ağı'nda
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==BU, KENDİ BİREYSEL WEB SUNUCUNUZ İÇİN BİR DEMONSTRASYON SAYFASIDIR!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==LÜTFEN BU SAYFAYI, index.html ADLI BİR DOSYAYI
-&lt;YaCy-application-home&gt;<strong>#[wwwpath]#</strong>==&lt;YaCy-uygulama-yolu&gt;<strong>#[wwwpath]#</strong> YOLUNA KOYARAK DEĞİŞTİRİN.
-#-----------------------------
-
 #Dosya: js/Crawler.js
 #---------------------------
 "Continue this queue"=="Bu sırayı devam ettir"
@@ -4073,21 +3880,3 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==LÜTFEN BU 
 >Date==>Tarih
 #-----------------------------
 
-#Dosya: js/jquery-flexigrid.js
-#---------------------------
-'Displaying {from} to {to} of {total} items'=='{total} öğeden {from} ile {to} arasını göster'
-'Processing, please wait ...'=='İşleniyor, lütfen bekleyin ...'
-'No items'=='Öğe bulunamadı'
-#-----------------------------
-
-#Dosya: js/jquery-ui-1.7.2.min.js
-#---------------------------
-Loading&#8230;==Yükleniyor&#8230;
-#-----------------------------
-
-#Dosya: js/jquery.ui.all.min.js
-#---------------------------
-Loading&#8230;==Yükleniyor&#8230;
-#-----------------------------
-
-# EOF

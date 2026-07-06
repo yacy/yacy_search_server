@@ -21,7 +21,7 @@
 				</div>
 			</div>
 			<div class="col-sm-8" id="solrBinaryResponseInfo">
-	 			When checked (default), responses from remote Solr index instances are transfered using an efficient binary data format.
+	 			When checked (default), responses from remote Solr index instances are transferred using an efficient binary data format.
 	 			When unchecked, responses are transferred as <abbr title="Extensible Markup Language">XML</abbr>, 
 	 			which can be captured and parsed by any external XML aware tool for debug/analysis.
             </div>
@@ -97,7 +97,7 @@
 				</div>
 			</div>
 			<div class="col-sm-8" id="searchTestLocalDHTInfo">
-	 			When checked, the remote <abbr title="Distributed Hash Table">DHT</abbr> peers selection is overriden and only the local peer is selected to provide remote DHT search results.
+	 			When checked, the remote <abbr title="Distributed Hash Table">DHT</abbr> peers selection is overridden and only the local peer is selected to provide remote DHT search results.
             </div>
 		</div>
 		
@@ -113,7 +113,7 @@
 				</div>
 			</div>
 			<div class="col-sm-8" id="searchTestLocalSolrInfo">
-	 			When checked, the remote Solr peers selection is overriden and only this peer is selected to provide remote Solr search results.
+	 			When checked, the remote Solr peers selection is overridden and only this peer is selected to provide remote Solr search results.
             </div>
 		</div>
   
@@ -154,7 +154,7 @@
 				</div>
 			</div>
 			<div class="col-sm-8" id="snippetStatisticsInfo">
-	 			When checked, statistics are collected on text snippets generation for search results. The are resumed in the <a href="ConfigPortal_p.html">Portal Configuration</a> page.
+	 			When checked, statistics are collected on text snippets generation for search results. They are summarized in the <a href="ConfigPortal_p.html">Portal Configuration</a> page.
             </div>
 		</div>
 	</fieldset>

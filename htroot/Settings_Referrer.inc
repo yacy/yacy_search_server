@@ -3,13 +3,13 @@
 <p>
 	When loading pages and navigating through links, a web browser sends some information about the origin of the request, 
 by filling the <a href="https://tools.ietf.org/html/rfc7231#section-5.5.2" title="'Referer' section from the standard IETF specification">"Referer"</a> HTTP header.
-Visited websites can process this information as they whish, so this can become a privacy concern, for example when coming from a page which contains searched terms in its URL.
+Visited websites can process this information as they wish, so this can become a privacy concern, for example when coming from a page which contains searched terms in its URL.
 </p>
 
 <p>
 	This page offers some configuration settings to instruct your browser how it should fill this referrer information. 
-	Beware that every browser behaves differently : some settings may be unsupported by your particular browser and therefore ignored. 
-	If you are really concerned about privacy, please check what is really sent by your browser by using its embedded developers tools network console, or with the network traffic analyzer of your choice. 
+	Beware that every browser behaves differently: some settings may be unsupported by your particular browser and therefore ignored. 
+	If you are really concerned about privacy, please check what is really sent by your browser by using its embedded developer tools network console, or with the network traffic analyzer of your choice. 
 </p>
 
 <form action="SettingsAck_p.html" method="post" class="form-horizontal">
@@ -36,8 +36,8 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyNoReferrerInfo">
-	 			Highest privacy setting : referrer information should never be sent, even when navigating on this peer internal links. 
-	 			Be careful with this : some websites might reject requests with no referrer.
+	 			Highest privacy setting: referrer information should never be sent, even when navigating on this peer internal links. 
+	 			Be careful with this: some websites might reject requests with no referrer.
             </div>
 		</div>
 		<div class="form-group">
@@ -52,8 +52,8 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicySameOriginInfo">
-	 			Peer internal links : referrer information should be stripped from any private data and contain only this peer host name.<br/>
-	 			External links : referrer information should never be sent.
+	 			Peer internal links: referrer information should be stripped from any private data and contain only this peer host name.<br/>
+	 			External links: referrer information should never be sent.
             </div>
 		</div>
 		<div class="form-group">
@@ -68,8 +68,8 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyStrictOriginInfo">
-	 			Peer internal and external links : referrer information should be stripped from any private data and contain only this peer host name.<br/>
-	 			Restriction : when a link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http), no referrer information at all should be sent.
+	 			Peer internal and external links: referrer information should be stripped from any private data and contain only this peer host name.<br/>
+	 			Restriction: when a link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http), no referrer information at all should be sent.
             </div>
 		</div>
 		<div class="form-group">
@@ -84,8 +84,8 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyOriginInfo">
-	 			Peer internal and external links : referrer information should be stripped from any private data and contain only this peer host name.<br/>
-	 			Note : this value is also compatible with legacy values from the older <a href="https://wiki.whatwg.org/wiki/Meta_referrer">specification draft</a>.
+	 			Peer internal and external links: referrer information should be stripped from any private data and contain only this peer host name.<br/>
+	 			Note: this value is also compatible with legacy values from the older <a href="https://wiki.whatwg.org/wiki/Meta_referrer">specification draft</a>.
             </div>
 		</div>
 		<div class="form-group">
@@ -100,9 +100,9 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyStrictOriginWhenCrossOriginInfo">
-	 			Peer internal links : referrer information should contain full URLs.<br/>
-	 			External links : referrer information should be stripped from any private data and contain only this peer host name.<br/>
-	 			Restriction : when an external link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http), no referrer information at all should be sent.
+	 			Peer internal links: referrer information should contain full URLs.<br/>
+	 			External links: referrer information should be stripped from any private data and contain only this peer host name.<br/>
+	 			Restriction: when an external link downgrades from a TLS secured connection (https) on this peer to an unsecured target (http), no referrer information at all should be sent.
             </div>
 		</div>
 		<div class="form-group">
@@ -117,8 +117,8 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyOriginWhenCrossOriginInfo">
-	 			Peer internal links : referrer information should contain full URLs.<br/>
-	 			External links : referrer information should be stripped from any private data and contain only this peer host name.
+	 			Peer internal links: referrer information should contain full URLs.<br/>
+	 			External links: referrer information should be stripped from any private data and contain only this peer host name.
             </div>
 		</div>
 		<div class="form-group">
@@ -148,7 +148,7 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyEmptyInfo">
-	 			Default browser behavior : it should corresponds to "no-referrer-when-downgrade".
+	 			Default browser behavior: it should correspond to "no-referrer-when-downgrade".
             </div>
 		</div>
 		<div class="form-group">
@@ -163,7 +163,7 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-8" id="metaPolicyUnsafeUrlInfo">
-	 			Unsafe setting : referrer information should always contain full URLs. 
+	 			Unsafe setting: referrer information should always contain full URLs. 
             </div>
 		</div>
 		#(metaPolicyCustom)#::
@@ -179,7 +179,7 @@ Visited websites can process this information as they whish, so this can become 
 				</div>
 			</div>
 			<div class="col-sm-7 alert alert-warning" id="metaPolicyCustomInfo" role="alert">
-	 			Custom setting : probably manually edited, be sure this value is the desired one.
+	 			Custom setting: probably manually edited, be sure this value is the desired one.
             </div>
 		</div>
 		#(/metaPolicyCustom)#
@@ -203,9 +203,9 @@ Visited websites can process this information as they whish, so this can become 
 	 			<p>When checked, this overrides the global referrer policy and adds the standard "noreferrer" 
 	 			<a href="https://www.w3.org/TR/html/links.html#allowed-keywords-and-their-meanings" title="Link types section at W3C HTML specification">link type</a> to search results links, 
 	 			thus instructing the browser that it should not send any referrer information at all when visiting them.</p> 
-	 			<p>Be careful with this : some websites might reject requests with no referrer.</p>
+	 			<p>Be careful with this: some websites might reject requests with no referrer.</p>
 	 			<p>It is a standard HTML5 attribute value, 
-	 			supported by much more browsers than the meta tag : if you want a higher level of privacy but use an old or incompatible browser, 
+	 			supported by many more browsers than the meta tag: if you want a higher level of privacy but use an old or incompatible browser, 
 	 			this can be a valuable option.</p>
             </div>
 		</div>

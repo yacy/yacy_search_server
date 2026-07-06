@@ -338,16 +338,6 @@ Simple Editor==Editor di base
 to add untranslated text==per aggiungere testo non tradotto
 #-----------------------------
 
-#File: ConfigLiveSearch.html
-#---------------------------
-Advantages:==Vantaggi:
-Disadvantages:==Svantaggi:
-"Search"=="Cerca"
-Defaults<==Default<
-url<==url<
->Themes<==>Temi<
-#-----------------------------
-
 #File: ConfigNetwork_p.html
 #---------------------------
 Network Configuration==Impostazioni di rete
@@ -378,7 +368,7 @@ Greeting Line<==Messaggio di benvenuto<
 URL of Home Page<==URL della homepage<
 Enable Search for Everyone?==Ricerca permessa a tutti?
 Search is available for everyone==Ricerca permessa a tutti
-Only the administator is allowed to search==Ricerca permessa solo all'admin
+Only the administrator is allowed to search==Ricerca permessa solo all'admin
 Pattern:<==Pattern:<
 >Exclude Hosts<==>Escludi host<
 #-----------------------------
@@ -1482,7 +1472,7 @@ Index Export/Import==Import/export indice
 Target Analysis==Analisi target
 Process Scheduler==Scheduler processi
 ### ADMINISTRATION ###
-System Admiistration==Amministrazione sistema
+System Administration==Amministrazione sistema
 Index Administration==Amministrazione indice
 Filter &amp; Blacklists==Filtro &amp; Blacklist
 Content Semantic==Semantica contenuti
@@ -1537,12 +1527,6 @@ Advanced Settings==Impostazioni avanzate
 Advanced Properties==Proprietà avanzate
 #-----------------------------
 
-#File: env/templates/submenuContentIntegration.template
-#---------------------------
-Import phpBB3 forum==Importa forum phpBB3
-Import Mediawiki dumps==Importa dump Mediawiki
-#-----------------------------
-
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Overview</a>==Panoramica</a>
@@ -1591,12 +1575,6 @@ Remote Crawling==Crawling remoto
 >Autocrawl<==>Autocrawler<
 #-----------------------------
 
-#File: env/templates/submenuPortalIntegration.template
-#---------------------------
-Search Portal Integration==Integrazione Portale ricerca
-Generic Search Portal==Portale di ricerca generico
-#-----------------------------
-
 #File: env/templates/submenuPublication.template
 #---------------------------
 Wiki==Wiki
@@ -1609,10 +1587,6 @@ File Hosting==File hosting
 Ranking and Heuristics==Ranking ed euristiche
 >Heuristics<==>Euristiche<
 #---------------------------
-
-#File: env/templates/submenuSearchIntegration.template
-#---------------------------
-#-----------------------------
 
 #File: env/templates/submenuSemantic.template
 #---------------------------
@@ -1630,11 +1604,6 @@ Use Case &amp; Accounts==Modi d'uso &amp; Account
 Basic Configuration==Configurazione minima
 >Accounts<==>Account<
 Network Configuration==Configurazione rete
-#-----------------------------
-
-#File: env/templates/submenuViewLog.template
-#---------------------------
-Server Log==Log del server
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
@@ -1666,10 +1635,6 @@ could not be found.==non può essere trovato.
 Did you mean:==Forse intendevi cercare:
 #-----------------------------
 
-#File: www/welcome.html
-#---------------------------
-#-----------------------------
-
 #File: js/Crawler.js
 #---------------------------
 #-----------------------------
@@ -1682,18 +1647,3 @@ Did you mean:==Forse intendevi cercare:
 >Date==>Data
 #-----------------------------
 
-#File: js/jquery-flexigrid.js
-#---------------------------
-#-----------------------------
-
-#File: js/jquery-ui-1.7.2.min.js
-#---------------------------
-Loading&#8230;==Caricamento in corso&#8230;
-#-----------------------------
-
-#File: js/jquery.ui.all.min.js
-#---------------------------
-Loading&#8230;==Caricamento in corso&#8230;
-#-----------------------------
-
-# EOF

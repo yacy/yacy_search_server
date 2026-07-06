@@ -402,7 +402,7 @@ Some pages are protected by passwords.==कुछ पेजेज पासव�
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==अपने याची पीर की सुरक्षा के लिए आपको इस मार्ग पर अपना पासवर्ड सेट करना चाइये <a href="ConfigAccounts_p.html">Accounts Menu</a>
 You did not open a port in your firewall or your router does not forward the server port to your peer.==आपने अपने फ़ायरवॉल में पोर्ट नहीं खोला हे या फिर  आपके राऊटर ने सर्वर पोर्ट को याची पीर की तरफ नहीं बढाया हे 
 This is needed if you want to fully participate in the YaCy network.==अगर आप पूरी तरह से याची नेटवर्क में भाग लेना चाहते हे तो यह जुरुरी होगा 
-You can also use your peer without opening it, but this is not recomended.==आप बिना खोले पीर का इस्तमाल कर सकते हे पर इस बात की सलाह उचित नहीं हे 
+You can also use your peer without opening it, but this is not recommended.==आप बिना खोले पीर का इस्तमाल कर सकते हे पर इस बात की सलाह उचित नहीं हे 
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -431,7 +431,7 @@ Default is to add the links to the local crawl queue (your peer crawls the linke
 add as global crawl job==ग्लोबल क्रॉल जॉब के हिसाब से जोडीये 
 blekko: load external search result list from==blekko: एक्सटर्नल खोज के नतीजे की लिस्ट यहा से लीजिये 
 When using this heuristic, then every search request line is used for a call to blekko.==इस स्वनुभाविक को इस्तमाल करते समय खोज की विनती की सारी लाइन ब्लेक्को को कॉल के लिए इस्तमाल की जाएगी
-20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==करीबन २० नतीजे ब्लेक्को से लिए जाते हे और साथ ही साथ उनकी चटाई की जाती हे 
+20 results are taken from blekko and loaded simultaneously, parsed and indexed immediately.==करीबन २० नतीजे ब्लेक्को से लिए जाते हे और साथ ही साथ उनकी चटाई की जाती हे 
 #-----------------------------
 #File: ConfigHTCache_p.html
 #---------------------------
@@ -468,40 +468,6 @@ Unable to get URL:==यूआरएल पाने में असमर्थ
 Error saving the language file.==भाषा फाइल सहेजने में त्रुटि
 Make sure that you only download data from trustworthy sources. The new language file==आप भरोसेमंद सूत्रों से डेटा केवल डाउनलोड करें. नई भाषा फाइल
 might overwrite existing data if a file of the same name exists already.==एक ही नाम की एक फ़ाइल पहले से मौजूद है तो मौजूदा डेटा अधिलेखित हो सकता है.
-#-----------------------------
-
-#File: ConfigLiveSearch.html
-#---------------------------
-Integration of a Search Field for Live Search==लाइव खोज के लिए एक खोज क्षेत्र की एकता
-A 'Live-Search' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==एक पॉप अप विंडो में खोज के रूप में तुम प्रकार के रूप में प्रतिक्रिया करता है कि एक  'लाइव खोज ' इनपुट क्षेत्र आसानी से किसी भी वेब पेज में एकीकृत किया जा सकता है
-This is the same function as can be seen on all pages of the YaCy online-interface (look at the window in the upper right corner)==यह (ऊपरी दायें कोने में खिड़की पर नज़र ) याची ऑनलाइन इंटरफ़ेस  के सभी पृष्ठों पर देखा जा सकता है के रूप में एक ही समारोह है
-Just use the code snippet below to integrate that in your own web pages==बस अपने खुद के वेब पन्नों में है कि एकीकृत करने के लिए नीचे दिए गए कोड स्निपेट का उपयोग
-Please check if the address, as given in the example '#[ip]#:#[port]#' here is correct and replace it with more appropriate values if necessary==पता अगर उदाहरण के रूप में दिया, जाँच  ' #  [आईपी ]  #   #  [पोर्ट ]  # ' कृपया यहां सही है और अधिक उचित मूल्यों के साथ की जगह यदि आवश्यक
-Code Snippet:==कोड स्निपेट
-YaCy Portal Search==YaCy पोर्टल खोज
-"Search"=="खोज"
-Configuration options and defaults for 'yconf':== 'Yconf ' के लिए विन्यास विकल्प और चूक
-Defaults<==चूक<
-url<==URL<
-is a mandatory property - no default<==कोई डिफ़ॉल्ट - एक अनिवार्य संपत्ति है<
-YaCy P2P Web Search== पी 2 पी वेब खोज
-Size and position (width | height | position)==आकार और स्थिति  (चौड़ाई  | ऊंचाई  | स्थिति )
-Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==निर्दिष्ट करता है जहाँ संवाद प्रदर्शित किया जाना चाहिए. पद के लिए संभावित मान:  'केंद्र '  ​​'बाएँ ',  'ठीक '  ​​'शीर्ष '  ​​'नीचे ', या एक समन्वय जोड़ी  (पिक्सेल में शीर्ष बाएँ से ऑफसेट युक्त सरणी के व्यूपोर्ट ) या संभव स्ट्रिंग मूल्यों  (जैसे  [ 'ठीक '  ​​'शीर्ष ' ] ऊपरी दाएँ कोने के लिए )
-Animation effects (show | hide)==एनिमेशन प्रभाव  (शो | छिपाने )
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==रभाव इस्तेमाल किया जाएगा. संभावित मान:  'अंधा '  ​​'क्लिप '  ​​'ड्रॉप '  ​​'विस्फोट '  ​​'गुना '  ​​'कश '  ​​'स्लाइड '  ​​'पैमाने ' ,  'आकार '  ​​'धड़कना '
-Interaction (modal | resizable)==इंटरेक्शन  (मोडल  | बदलने योग्य )
-If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==मोडल सही पर सेट किया जाता है, तो संवाद मोडल व्यवहार होगा; पेज पर अन्य मदों (यानी  के साथ बातचीत नहीं कर सकते हैं)  निष्क्रिय किया जाएगा
-Modal dialogs create an overlay below the dialog but above other page elements.==मोडल संवाद संवाद नीचे लेकिन अन्य पृष्ठ तत्वों ऊपर ओवरले बना
-If resizable is set to true, the dialog will be resizeable.==बदलने योग्य सत्य पर नियत किया जाता है, तो संवाद resizeable होगा
-Load JavaScript load_js==जावास्क्रिप्ट load_js लोड
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==लोड गलत पर सेट कर दिया जाता है, तो आप मैन्युअल रूप से अपने पोर्टल पेज पर जरूरत जावास्क्रिप्ट लोड है
-This can help to avoid timing problems or double loading.==यह समय की समस्याओं या डबल लोड से बचने में मदद कर सकते हैं
-Load Stylesheets load_css==Stylesheets load_css लोड
-If load_css is set to false, you have to manually load the needed CSS on your portal page.==लोड सीएसएस गलत पर सेट है, तो आप स्वयं अपने पोर्टल पेज पर जरूरत सीएसएस लोड करने के लिए है 
-#Themes==विषयों
-You can <==आप कर सकते हैं <
-download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a>==डाउनलोड </ a> के लिए तैयार किए गए विषयों या <a href="http://jqueryui.com/themeroller/" target="_blank"> बनाएँ </ a>
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==अपने स्वयं के कस्टम विषय. <br/> विषयों में स्थापित कर रहे हैं: आंकड़े / htdocs / yacy / यूआई / सीएसएस / विषयों /
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -1050,24 +1016,6 @@ check this box.== इस बॉक्स को चेक करो.
 "Start New Crawl"==" नई क्रॉल प्रारंभ "
 
 
-#-----------------------------
-
-#File: CrawlStartIntranet_p.html
-#---------------------------
-#Intranet Crawl Start==इंट्रानेट क्रॉल प्रारंभ
-When an index domain is configured to contain intranet links,==एक सूचकांक डोमेन इंट्रानेट लिंक शामिल करने के लिए कॉन्फ़िगर किया गया है,
-the intranet may be scanned for available servers.==इंट्रानेट उपलब्ध सर्वरों के लिए स्कैन किया जा सकता है.
-Please select below the servers in your intranet that you want to fetch into the search index.==आप खोज सूचकांक में लाने के लिए चाहते हैं कि आपके इंट्रानेट में सर्वर नीचे का चयन करें.
-This network definition does not allow intranet links.==इस नेटवर्क परिभाषा इंट्रानेट लिंक की अनुमति नहीं है.
-A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==आप सूचकांक इंट्रानेट लक्ष्य को YaCy confiugure अगर इंट्रानेट सर्वर की एक सूची ही उपलब्ध है.
-To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==ऐसा करने के लिए, <a href="ConfigBasic.html"> मूल विन्यास </ a> सर्वलेट खुला और  'इंट्रानेट इंडेक्सिंग ' उपयोग के मामले का चयन करें.
-Available Intranet Server==उपलब्ध इंट्रानेट सर्वर
-#>IP<==>आईपी<
-#>URL<==>यूआरएल<
->Process<==>प्रक्रिया<
->not in index<==>नहीं सूचकांक में<
->indexed<==>अनुक्रमित<
-"Add Selected Servers to Crawler"=="ट्रेक के लिए चयनित सर्वर जोड़ें"
 #-----------------------------
 
 #File: CrawlStartScanner_p.html

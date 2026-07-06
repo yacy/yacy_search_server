@@ -26,7 +26,7 @@
       <dt>&nbsp;</dt><dd>&nbsp;</dd>
       <dt>Use deep-embedded local Solr&nbsp;<input type="checkbox" name="core.service.fulltext" id="core_service_fulltext" #(core.service.fulltext.checked)#:: checked="checked"#(/core.service.fulltext.checked)# onclick="if(!document.getElementById('config').core_service_fulltext.checked) {document.getElementById('config').solr_indexing_solrremote.checked = true;}"/></dt>
       <dd>
-      This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.<br/>
+      This will write the YaCy-embedded Solr index which is stored within the YaCy DATA directory.<br/>
       The Solr native search interface is accessible at<br/>
       <a href="solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>
       for the default search index (core: collection1) and at<br/>
@@ -35,7 +35,7 @@
       
       <dt>Use remote Solr server(s)&nbsp;<input type="checkbox" name="solr.indexing.solrremote" id="solr_indexing_solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# onclick="if(!document.getElementById('config').solr_indexing_solrremote.checked) {document.getElementById('config').core_service_fulltext.checked = true;}"/></dt>
       <dd>It's easy to <a href="https://wiki.yacy.net/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.
-      This external Solr can be used instead the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored. 
+      This external Solr can be used instead of the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored. 
       </dd>
       
       <dt>Allow self-signed certificates <input type="checkbox" name="federated.service.solr.indexing.authenticated.allowSelfSigned" #(federated.service.solr.indexing.authenticated.allowSelfSigned.checked)#:: checked="checked"#(/federated.service.solr.indexing.authenticated.allowSelfSigned.checked)#/></dt>
@@ -65,7 +65,7 @@
       <dt class="TableCellDark"></dt>
       <dd>Solr URL(s)<br/><textarea rows="2" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea><br/>
       You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.
-      The set of remote targets are used as shard of a complete index. The host part of the url is used as key for a hash function which selects one of the shards (one of your remote servers).
+      The set of remote targets are used as shards of a complete index. The host part of the url is used as key for a hash function which selects one of the shards (one of your remote servers).
       When a search request is made, all servers are accessed synchronously and the result is combined.</dd>
         
       <dt class="TableCellDark"></dt>
@@ -92,7 +92,7 @@
       <legend>
         Web Structure Index
       </legend>
-      The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about fourty times more links from loaded pages as in documents of the main search index). 
+      The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about forty times more links from loaded pages than in documents of the main search index). 
       <dl>
       
       <dt><input type="checkbox" name="core.service.citation.tmp" id="core_service_citation" #(core.service.citation.tmp.checked)#:: checked="checked"#(/core.service.citation.tmp.checked)# /></dt>
