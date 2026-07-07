@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -67,6 +68,10 @@ import net.yacy.utils.translation.ExtensionsFileFilter;
 public class Translator {
 
     public final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
+
+    private static final Pattern TECHNICAL_TARGET_PATTERN = Pattern.compile(
+            "^(?:https?://.*|[A-Za-z0-9_./:%?#=&;,+~@!$'()\\[\\]-]+\\.(?:html|inc|json|xml|rss|css|js|pac)(?:[?#].*)?)$",
+            Pattern.CASE_INSENSITIVE);
 
     /**
      * Translate source using entries in translationTable
@@ -112,8 +117,12 @@ public class Translator {
                         }
 
                         if (boundary) { // boundary check ok -> translate
-                            builder.replace(index, index + key.length(), translation);
-                            index = builder.indexOf(key, index + translation.length());
+                            if (isInsideTechnicalTarget(builder, index, key.length())) {
+                                index = builder.indexOf(key, index + key.length());
+                            } else {
+                                builder.replace(index, index + key.length(), translation);
+                                index = builder.indexOf(key, index + translation.length());
+                            }
                         } else { // otherwise just skip to next occurence
                             index = builder.indexOf(key, index + key.length());
                         }
@@ -122,6 +131,35 @@ public class Translator {
             }
         }
         return builder.toString();
+    }
+
+    private static boolean isInsideTechnicalTarget(final CharSequence content, final int index, final int length) {
+        int start = index;
+        while (start > 0 && isTechnicalTargetCharacter(content.charAt(start - 1))) {
+            start--;
+        }
+
+        int end = index + length;
+        while (end < content.length() && isTechnicalTargetCharacter(content.charAt(end))) {
+            end++;
+        }
+
+        if (start == index && end == index + length) {
+            return false;
+        }
+
+        final String token = content.subSequence(start, end).toString();
+        return TECHNICAL_TARGET_PATTERN.matcher(token).matches();
+    }
+
+    private static boolean isTechnicalTargetCharacter(final char c) {
+        return Character.isLetterOrDigit(c)
+                || c == '_' || c == '-' || c == '.' || c == '/'
+                || c == ':' || c == '%' || c == '?' || c == '#'
+                || c == '=' || c == '&' || c == ';' || c == ','
+                || c == '+' || c == '~' || c == '@' || c == '!'
+                || c == '$' || c == '\'' || c == '(' || c == ')'
+                || c == '[' || c == ']';
     }
 
     /**
@@ -300,6 +338,7 @@ public class Translator {
             final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut .lng
             final File translationFile = new File(langPath, lang);
 
+            FileUtils.deletedelete(destDir);
             if (translateFilesRecursive(sourceDir, destDir, translationFile, "html,template,inc", "locale")) {
                 env.setConfig("locale.language", lang.substring(0, lang.length() - 4));
                 Formatter.setLocale(env.getConfig("locale.language", "en"));

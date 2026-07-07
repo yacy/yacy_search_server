@@ -60,4 +60,21 @@ public class TranslatorTest {
         }
     }
 
+    @Test
+    public void testTranslateSkipsTechnicalTargets() {
+        final Translator translator = new Translator();
+        final Map<String, String> translationTable = new HashMap<String, String>();
+        translationTable.put("Network", "Réseau");
+        translationTable.put("share", "partager");
+        translationTable.put("localhost", "hôte-local");
+
+        assertEquals("Réseau", translator.translate(new StringBuilder("Network"), translationTable));
+        assertEquals("<a href=\"Network.html\">Réseau</a>",
+                translator.translate(new StringBuilder("<a href=\"Network.html\">Network</a>"), translationTable));
+        assertEquals("servlet share.json",
+                translator.translate(new StringBuilder("servlet share.json"), translationTable));
+        assertEquals("http://localhost:8090/Network.html",
+                translator.translate(new StringBuilder("http://localhost:8090/Network.html"), translationTable));
+    }
+
 }

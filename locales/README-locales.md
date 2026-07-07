@@ -70,12 +70,18 @@ Wichtig:
   englische Text auf mehreren Seiten vorkommt, braucht **jede** Seite ihren
   eigenen Abschnitt mit diesem Eintrag (Übersetzung ist pro Datei-Abschnitt).
 
-### Lokalisierter Abschnitts-Header (`#Dosya:`)
-Ausnahme: `tr.lng` verwendet für viele Abschnitte das türkische Schlüsselwort
-**`#Dosya:`** statt `#File:`. Werkzeuge, die Abschnitte parsen, müssen **beide**
-erkennen, z. B. per Regex `^#(?:File|Dosya):\s*(.*)$`. Andere `#Xxx:`-Präfixe
-(`#YaCy:`, `#Subject:`, `#URL:` …) sind **keine** Header, sondern Übersetzungs-
-schlüssel, die zufällig mit `#` beginnen.
+### Abschnitts-Header: nur `#File:`
+Der Runtime-Loader (`Translator.loadTranslationsLists`) erkennt derzeit **nur**
+`#File:` als Abschnitts-Header. Zeilen mit anderen Präfixen, z. B. `#Dosya:`,
+werden wie normale Kommentarzeilen behandelt; die folgenden Einträge landen dann
+nicht im beabsichtigten Dateiabschnitt und greifen zur Laufzeit nicht korrekt.
+
+Hinweis: Ältere oder importierte Dateien können lokalisierte Header wie
+`#Dosya:` enthalten. Solche Header müssen vor einem Runtime-Test nach `#File:`
+normalisiert werden (oder der Java-Loader muss explizit erweitert werden).
+Andere `#Xxx:`-Präfixe (`#YaCy:`, `#Subject:`, `#URL:` …) sind ebenfalls keine
+Header. Da alle Zeilen mit `#` ignoriert werden, sind auch `#key==wert`-Zeilen
+auskommentierte Einträge und keine aktiven Übersetzungen.
 
 ---
 
@@ -136,6 +142,17 @@ Ablauf (`Translator.translate` / `translateFilesRecursive`):
 **exakter Teilstring** im Dateiinhalt vorkommt und an Wortgrenzen liegt.
 Es gibt **keinen** automatischen Extraktor, der „übersetzbare Strings“
 erkennt — die Schlüssel werden von Hand gepflegt.
+
+Wichtig: Beim Erzeugen der lokalisierten Dateien werden nur Quelldateien
+geschrieben, für die in der Sprachdatei ein passender `#File:`-Abschnitt
+existiert. Fehlt der Abschnitt, wird diese Datei nicht als lokalisierte Kopie
+erzeugt.
+
+Die erzeugten Seiten liegen zur Laufzeit unter `DATA/LOCALE/htroot/<sprache>`.
+Beim Umschalten oder automatischen Refresh einer Sprache muss dieser Ordner
+vorher gelöscht werden; sonst können nicht mehr erzeugte Altdateien weiterhin
+ausgeliefert werden. Aktuelle YaCy-Versionen erledigen das beim Sprachwechsel
+und beim versionsbedingten Startup-Refresh automatisch.
 
 ---
 
@@ -206,21 +223,70 @@ Leerzeichen, bis zum `#[path]#`), **nicht** die ganze Zeile inkl. `#[path]#`.
   JSON-Snippets) — nur die umgebende Prosa übersetzen.
 - **Test-/Demo-Dateien** und rein technische Bezeichner (Feldnamen wie
   `num_ctx`, `max_tokens`, Rollennamen wie `search-query`).
+- **Technische Link-Ziele, Pfade, Servlets und URLs** bleiben literal. Nicht
+  übersetzen oder durch Leerzeichen beschädigen: `Network.html` bleibt
+  `Network.html`, `sharedBlacklist.html` bleibt `sharedBlacklist.html`,
+  `share.json` bleibt `share.json`, `styles/prosilver/template/overall_header.html`
+  bleibt unverändert und URLs wie `http://localhost:8090/proxy.html?...`
+  dürfen nicht lokalisiert werden.
+
+Prüfung aus dem Repository-Root:
+
+```bash
+python3 locales/validate-locale-links.py --exclude pl.lng
+```
+
+`--exclude` ist nützlich, wenn eine Sprache parallel in einem anderen Arbeitszweig
+bearbeitet wird. Für einzelne Sprachen kann `--include de.lng --include fr.lng`
+verwendet werden. Ein sauberer Lauf endet mit `OK: ... no link target issues found.`
 
 ---
 
 ## 8. `master.lng.xlf`
 
-`master.lng.xlf` ist eine XLIFF-Datei, die den **Gesamtbestand** aller
-übersetzbaren Strings pro Datei als `<source>`-Elemente führt.
+`master.lng.xlf` ist die source-basierte XLIFF-Referenz der übersetzbaren
+Strings pro Datei. Die Wahrheit für diesen Master liegt in den Quellen unter
+`htroot`, nicht in bereits vorhandenen `.lng`-Dateien.
 
-- Sie wird **generiert** (`TranslationManager.createMasterTranslationLists`):
-  Grundlage sind die vorhandenen `.lng`-Schlüssel, gefiltert danach, ob sie noch
-  als Teilstring in der jeweiligen Quelldatei vorkommen (`content.indexOf >= 0`).
+- Sie wird mit `GenerateSourceMasterXliff` aus sichtbaren Textknoten und
+  ausgewählten UI-Attributen (`alt`, `title`, `placeholder`, `aria-label`,
+  Button-`value`) erzeugt.
+- Jeder Kandidat wird gegen den Roh-Quelltext und die Runtime-Wortgrenzen der
+  Übersetzung geprüft. Nicht darstellbare `.lng`-Keys, z. B. Keys mit `==` oder
+  einem abschließenden `=`, werden verworfen.
 - **Nicht** von Hand mit Hash-/Zeilen-IDs pflegen — nach Änderungen an Quellen
-  oder `.lng`-Dateien besser über das YaCy-Tooling neu erzeugen. Ein kompletter
-  `<file>…</file>`-Block darf jedoch sauber entfernt werden (z. B. wenn die
-  zugehörige Seite gelöscht wurde).
+  über das YaCy-Tooling neu erzeugen und das Delta prüfen.
+- Beim Refresh wird die Zieldatei ersetzt. Stale Master-Einträge fallen dadurch
+  weg, auch wenn sie noch in alten `.lng`-Dateien stehen.
+
+Refresh aus dem Repository-Root:
+
+```bash
+java -cp 'build/classes/java/main:lib/*' \
+  net.yacy.utils.translation.GenerateSourceMasterXliff \
+  htroot locales/master.lng.xlf
+```
+
+Falls die Klassen noch nicht kompiliert sind, vorher `ant compile` ausführen.
+Das zweite Argument ist wichtig: ohne `locales/master.lng.xlf` schreibt das Tool
+standardmäßig nach `./source-master.lng.xlf` im Repository-Root. Existiert die
+Zieldatei bereits, wird sie ersetzt.
+
+### Legacy: bestandbasierter Master
+
+`GenerateMasterXliff` erzeugt nur einen bestandbasierten Master aus vorhandenen
+`.lng`-Schlüsseln, gefiltert danach, ob sie noch als Teilstring in der
+jeweiligen Quelldatei vorkommen (`content.indexOf >= 0`):
+
+```bash
+java -cp 'build/classes/java/main:lib/*' \
+  net.yacy.utils.translation.GenerateMasterXliff \
+  locales /tmp/master-from-lng.lng.xlf
+```
+
+Dieses Tool ist nützlich zur Diagnose von Altbestand, aber nicht als
+Vollständigkeitsreferenz: englische UI-Texte, die noch in keiner `.lng`-Datei als
+Schlüssel vorkommen, erscheinen dort nicht.
 
 ---
 
@@ -240,7 +306,14 @@ Leerzeichen, bis zum `#[path]#`), **nicht** die ganze Zeile inkl. `#[path]#`.
 5. **Einordnen:** neuen `#File:`-Abschnitt anlegen; Einträge längster-zuerst
    sortieren (Abschnitt 6, Regel 5). Neue Abschnitte können am Dateiende
    angehängt werden (die Datei ist nicht streng sortiert).
-6. **Zeilenenden beachten** (Abschnitt 10).
+6. **Vollständigkeit beidseitig prüfen:**
+   - `master.lng.xlf -> <sprache>.lng`: fehlende Source-Schlüssel ergänzen.
+   - `<sprache>.lng -> master.lng.xlf`: Extras prüfen und in der Regel entfernen;
+     sie sind stale oder stammen aus einem nicht frisch generierten Master.
+   - Für jeden aktiven Sprach-Key prüfen: `key in htroot/<#File>`.
+   - Doppelte Schlüssel und auskommentierte `#...==...`-Einträge entfernen oder
+     bewusst reaktivieren.
+7. **Zeilenenden beachten** (Abschnitt 10).
 
 ---
 

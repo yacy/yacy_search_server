@@ -227,7 +227,7 @@ public class TranslatorXliff extends Translator {
             final OutputStreamWriter output = new OutputStreamWriter(fileOutStream, StandardCharsets.UTF_8.name());
         ) {
             output.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            output.write("<xliff version='1.2' xmlns='urn:oasis:names:tc:xliff:document:1.2'> \n");
+            output.write("<xliff version='1.2' xmlns='urn:oasis:names:tc:xliff:document:1.2'>\n");
             for (String afilemap : lng.keySet()) {
                 output.write("<file original=\"" + afilemap + "\" " // original required in xliff 1.2
                         + " source-language=\"" + sourceLanguage + "\" "); // required in xliff 1.2

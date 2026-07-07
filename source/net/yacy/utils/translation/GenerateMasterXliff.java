@@ -39,8 +39,8 @@ public class GenerateMasterXliff {
 	/**
 	 * Read all translation files in YaCy custom lng format from a given folder
 	 * (locales/ as default), and convert them to a single master xliff file
-	 * containing entries to translate. When the ouput master file already exists,
-	 * it is updated with new entries from the lng files.
+	 * containing entries to translate. When the output master file already exists,
+	 * it is replaced with the currently valid entries from the lng files.
 	 * 
 	 * @param args
 	 *            runtime optional arguments<br/>
@@ -74,7 +74,7 @@ public class GenerateMasterXliff {
 				masterXlf = new File("master.lng.xlf");
 			}
 			if (masterXlf.exists()) {
-				System.out.println("Updating master xliff file at " + masterXlf.getAbsolutePath());
+				System.out.println("Replacing master xliff file at " + masterXlf.getAbsolutePath());
 			} else {
 				System.out.println("Generating a new master xliff file at " + masterXlf.getAbsolutePath());
 			}

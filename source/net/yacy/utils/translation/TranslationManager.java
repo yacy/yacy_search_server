@@ -162,17 +162,16 @@ public class TranslationManager extends TranslatorXliff {
 
     /**
      * Create a master translation list by reading all translation files
-     * If a masterOutputFile exists, content is preserved (loaded first)
+     * Existing masterOutputFile content is replaced. This keeps the generated
+     * master list in sync with strings that still occur in the current source
+     * files and avoids carrying stale source entries forward.
      *
      * @param localesFolder folder containing *.lng translation files
      * @param masterOutputFile output file (xliff format). Must not be null.
      * @throws IOException
      */
     public void createMasterTranslationLists(final File localesFolder, final File masterOutputFile) throws IOException {
-        if (masterOutputFile.exists()) // if file exists, conserve existing master content (may be updated by external tool)
-            mainTransLists = loadTranslationsListsFromXliff(masterOutputFile);
-        else
-            mainTransLists = new TreeMap<String, Map<String, String>>();
+        mainTransLists = new TreeMap<String, Map<String, String>>();
 
         List<String> lngFiles = Translator.langFiles(localesFolder);
         for (String filename : lngFiles) {
