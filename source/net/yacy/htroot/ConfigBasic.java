@@ -331,15 +331,20 @@ public class ConfigBasic {
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         prop.put("lang_browser", "0"); // for client browser language dependent
         prop.put("lang_de", "0");
-        prop.put("lang_fr", "0");
-        prop.put("lang_zh", "0");
-        prop.put("lang_ru", "0");
-        prop.put("lang_uk", "0");
-        prop.put("lang_en", "0");
-        prop.put("lang_ja", "0");
         prop.put("lang_el", "0");
-        prop.put("lang_it", "0");
         prop.put("lang_es", "0");
+        prop.put("lang_fr", "0");
+        prop.put("lang_hi", "0");
+        prop.put("lang_it", "0");
+        prop.put("lang_ja", "0");
+        prop.put("lang_ko", "0");
+        prop.put("lang_pl", "0");
+        prop.put("lang_ru", "0");
+        prop.put("lang_sk", "0");
+        prop.put("lang_tr", "0");
+        prop.put("lang_uk", "0");
+        prop.put("lang_zh", "0");
+        prop.put("lang_en", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {
@@ -348,30 +353,38 @@ public class ConfigBasic {
         // set label class (green background) for active translation
         if (lang.equals("browser")) {
             final List<String> l = Translator.activeTranslations();
-            prop.put("active_zh", l.contains("zh") ? "2" : "1");
             prop.put("active_de", l.contains("de") ? "2" : "1");
+            prop.put("active_el", l.contains("el") ? "2" : "1");
+            prop.put("active_es", l.contains("es") ? "2" : "1");
             prop.put("active_fr", l.contains("fr") ? "2" : "1");
             prop.put("active_hi", l.contains("hi") ? "2" : "1");
-            prop.put("active_ja", l.contains("ja") ? "2" : "1");
-            prop.put("active_el", l.contains("el") ? "2" : "1");
             prop.put("active_it", l.contains("it") ? "2" : "1");
+            prop.put("active_ja", l.contains("ja") ? "2" : "1");
+            prop.put("active_ko", l.contains("ko") ? "2" : "1");
+            prop.put("active_pl", l.contains("pl") ? "2" : "1");
             prop.put("active_ru", l.contains("ru") ? "2" : "1");
+            prop.put("active_sk", l.contains("sk") ? "2" : "1");
+            prop.put("active_tr", l.contains("tr") ? "2" : "1");
             prop.put("active_uk", l.contains("uk") ? "2" : "1");
-            prop.put("active_es", l.contains("es") ? "2" : "1");
+            prop.put("active_zh", l.contains("zh") ? "2" : "1");
             prop.put("active_en", "2");
 
         } else {
             prop.put("active_de", "0");
+            prop.put("active_el", "0");
+            prop.put("active_es", "0");
             prop.put("active_fr", "0");
             prop.put("active_hi", "0");
-            prop.put("active_zh", "0");
-            prop.put("active_ru", "0");
-            prop.put("active_uk", "0");
-            prop.put("active_en", "0");
-            prop.put("active_ja", "0");
-            prop.put("active_el", "0");
             prop.put("active_it", "0");
-            prop.put("active_es", "0");
+            prop.put("active_ja", "0");
+            prop.put("active_ko", "0");
+            prop.put("active_pl", "0");
+            prop.put("active_ru", "0");
+            prop.put("active_sk", "0");
+            prop.put("active_tr", "0");
+            prop.put("active_uk", "0");
+            prop.put("active_zh", "0");
+            prop.put("active_en", "0");
         }
         return prop;
     }

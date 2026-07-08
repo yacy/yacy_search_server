@@ -1,4 +1,4 @@
-﻿#fr.lng
+#fr.lng
 # English-->French
 # -----------------------
 # part of YaCy
@@ -420,8 +420,10 @@ Can not leave from Intranet Indexing : one or more remote Solr instances are att
 Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;==Créer un portail de recherche pour votre intranet, vos pages web ou votre système de fichiers partagé. Les URLs peuvent utiliser http/https/ftp avec un nom de domaine ou une adresse IP locale, ou une URL de la forme file:///&lt;path&gt; ou smb://&lt;server&gt;/&lt;path&gt;
 English==English
 Español==Español
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Fran&ccedil;ais==Fran &ccedil; ais
-Greek==Greek
 Italiano==Italiano
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Une ou plusieurs instances Solr distantes sont jointes et peuvent contenir des documents publics indexés non pertinents à votre domaine local.
 One or more remote Solr instances are attached.==Une ou plusieurs instances Solr distantes sont jointes.

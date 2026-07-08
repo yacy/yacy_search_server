@@ -570,9 +570,11 @@ Browser==Przeglądarka
 English==Angielski
 Deutsch==Niemiecki
 Fran&ccedil;ais==Francuski
-Greek==Grecki
 Italiano==Włoski
 Español==Hiszpański
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Use Case: what do you want to do with YaCy:==Przypadek użycia: co chcesz robić z YaCy:
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==Nie można opuścić indeksowania intranetu: podłączona jest jedna lub więcej zdalnych instancji Solr, które mogą zawierać zindeksowane prywatne dokumenty.
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Podłączona jest jedna lub więcej zdalnych instancji Solr, które mogą zawierać zindeksowane publiczne dokumenty nieistotne dla Twojej lokalnej domeny.

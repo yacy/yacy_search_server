@@ -467,7 +467,9 @@ Your Peer name is a default name; please set an individual peer name.==Il nome d
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==Impossibile uscire dall'indicizzazione intranet: una o piu istanze Solr remote sono collegate e possono contenere documenti privati indicizzati.
 Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;==Crea un portale di ricerca per le tue pagine intranet o web o il tuo file system (condiviso). URL possono essere utilizzato con http/https/ftpe un nome di dominio locale o IP, o conURL del modulofile:///&lt; path&gt; osmb://&lt; server&gt;/&lt; path&gt;
 Español==Español
-Greek==Greco
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Italiano==Italiano
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Una o più istanze Solr remote sono allegate e possono contenere documenti pubblici indicizzati irrilevanti per il dominio locale.
 One or more remote Solr instances are attached.==Sono allegate una o più istanze Solr remote.

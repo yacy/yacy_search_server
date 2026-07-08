@@ -389,9 +389,11 @@ Browser==Браузер
 English==англійська
 Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
-Greek==грецька
 Italiano==Italiano
 Español==Español
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==Неможливо вийти з індексування інтрамережі: один або кілька віддалених екземплярів Solr вкладено та можуть містити приватні документи, проіндексовані.
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Один або кілька віддалених екземплярів Solr вкладено та можуть містити проіндексовані загальнодоступні документи, які не стосуються вашого локального домену.
 One or more remote Solr instances are attached.==Долучено один або кілька віддалених екземплярів Solr.

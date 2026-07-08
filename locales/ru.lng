@@ -1,4 +1,4 @@
-﻿# ru.lng
+# ru.lng
 # Английский/Немецкий-->Русский
 # -----------------------
 # This is a part of YaCy, a peer-to-peer based web search engine
@@ -428,9 +428,11 @@ Browser==Браузер
 English==Английский
 Deutsch==немецкий
 Fran&ccedil;ais==Франция
-Greek==Греческий
 Italiano==Итальяно
 Español==испанский
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==Невозможно выйти из индексирования в интрасети: один или несколько удаленных экземпляров Solr прикреплены и могут содержать проиндексированные частные документы.
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Один или несколько удаленных экземпляров Solr прикреплены и могут содержать проиндексированные общедоступные документы, не имеющие отношения к вашему локальному домену.
 One or more remote Solr instances are attached.==Подключен один или несколько удаленных экземпляров Solr.

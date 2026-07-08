@@ -572,9 +572,11 @@ Browser==Tarayıcı
 English==İngilizce
 Deutsch==Almanca
 Fran&ccedil;ais==Fransızca
-Greek==Yunan
 Italiano==İtalyan
 Español==İspanyolca
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Use Case: what do you want to do with YaCy:==Kullanım Senaryosu: YaCy ile ne yapmak istiyorsunuz:
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==İntranet Dizine Ekleme'den çıkılamıyor: bir veya daha fazla uzak Solr örneği eklenmiştir ve dizine eklenmiş özel belgeler içerebilir.
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Bir veya daha fazla uzak Solr örneği eklenmiştir ve yerel alanınızla ilgisi olmayan, dizine alınmış genel dokümanlar içerebilir.

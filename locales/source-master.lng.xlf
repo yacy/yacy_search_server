@@ -1533,20 +1533,14 @@
     <trans-unit id="1c8e797f" xml:space="preserve" approved="no" translate="yes">
        <source>Fran&amp;ccedil;ais</source>
     </trans-unit>
-    <trans-unit id="8ed2b7c4" xml:space="preserve" approved="no" translate="yes">
-       <source>Polski</source>
+    <trans-unit id="41ddee0" xml:space="preserve" approved="no" translate="yes">
+       <source>Greek</source>
     </trans-unit>
     <trans-unit id="4331d88f" xml:space="preserve" approved="no" translate="yes">
        <source>Italiano</source>
     </trans-unit>
     <trans-unit id="ca53eef" xml:space="preserve" approved="no" translate="yes">
        <source>Español</source>
-    </trans-unit>
-    <trans-unit id="f0896e6f" xml:space="preserve" approved="no" translate="yes">
-       <source>T&amp;uuml;rk&amp;ccedil;e</source>
-    </trans-unit>
-    <trans-unit id="27e35b0" xml:space="preserve" approved="no" translate="yes">
-       <source>Sloven&amp;#269;ina</source>
     </trans-unit>
     <trans-unit id="9a6fa219" xml:space="preserve" approved="no" translate="yes">
        <source>Use Case: what do you want to do with YaCy:</source>

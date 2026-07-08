@@ -565,9 +565,11 @@ Browser==Πρόγραμμα περιήγησης
 English==αγγλικός
 Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
-Greek==ελληνικά
 Italiano==ιταλικό
 Español==Español
+Polski==Polski
+T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
+Sloven&#269;ina==Sloven&#269;ina
 Use Case: what do you want to do with YaCy:==Περίπτωση χρήσης: τι θέλετε να κάνετε με YaCy:
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==Δεν είναι δυνατή η έξοδος από την Ευρετηρίαση Intranet : επισυνάπτονται μία ή περισσότερες απομακρυσμένες περιπτώσεις Solr και ενδέχεται να περιέχουν ιδιωτικά έγγραφα ευρετηριασμένα.
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Επισυνάπτονται μία ή περισσότερες απομακρυσμένες περιπτώσεις Solr και ενδέχεται να περιέχουν δημόσια έγγραφα με ευρετήριο που δεν σχετίζονται με τον τοπικό σας τομέα.
