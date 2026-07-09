@@ -37,13 +37,17 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+
 /** draw a picture of the yacy network */
 public class NetworkPicture {
 
     private static final ConcurrentLog log = new ConcurrentLog("NetworkPicture");
     private static final Semaphore sync = new Semaphore(1, true);
-    private static long lastAccessSeconds = 0;
 
+    private static final int  NETWORK_PICTURE_CACHE_MAX_SIZE = 20;
+    private static final long NETWORK_PICTURE_CACHE_MAX_AGE_MILLIS = 10000;
+    public static final NetworkGraph.Cache cache = new NetworkGraph.Cache(NETWORK_PICTURE_CACHE_MAX_AGE_MILLIS, NETWORK_PICTURE_CACHE_MAX_SIZE);
+    
     public static EncodedImage respond(
         final RequestHeader header,
         final serverObjects post,
@@ -51,34 +55,7 @@ public class NetworkPicture {
         final Switchboard sb = (Switchboard) env;
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
 
-        final long timeSeconds = System.currentTimeMillis() / 1000;
-        if (NetworkGraph.buffer != null && timeSeconds - lastAccessSeconds < 2) {
-            if (log.isFine()) log.fine("cache hit (1); authorized = "
-                + authorized
-                + ", timeSeconds - lastAccessSeconds = "
-                + (timeSeconds - lastAccessSeconds));
-            return NetworkGraph.buffer;
-        }
-
-        boolean lockAcquired = sync.tryAcquire();
-        if (!lockAcquired) {
-            if (NetworkGraph.buffer != null) {
-                return NetworkGraph.buffer;
-            }
-            sync.acquireUninterruptibly();
-            lockAcquired = true;
-        }
-        try {
-            final long refreshCheckSeconds = System.currentTimeMillis() / 1000;
-            if (NetworkGraph.buffer != null && refreshCheckSeconds - lastAccessSeconds < 2) {
-                if (log.isFine()) log.fine("cache hit (2); authorized = "
-                    + authorized
-                    + ", timeSeconds - lastAccessSeconds = "
-                    + (refreshCheckSeconds - lastAccessSeconds));
-                return NetworkGraph.buffer;
-            }
-
-            int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
+        int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
         int height = 720;
         int passiveLimit = 1440; // minutes; 1440 = 1 day; 720 = 12 hours; 1440 = 24 hours, 10080 = 1 week;
         int potentialLimit = 1440;
@@ -115,7 +92,30 @@ public class NetworkPicture {
             maxCount = 10000;
         }
 
-            NetworkGraph.buffer =
+        EncodedImage cachedPicture = cache.getFresh(width, height, coronaangle);
+        if (cachedPicture != null) {
+            if (log.isFine()) log.fine("cache hit (1); authorized = " + authorized + ", width = " + width + ", height = " + height);
+            return cachedPicture;
+        }
+
+        boolean lockAcquired = sync.tryAcquire();
+        if (!lockAcquired) {
+            /* A stale picture is preferable to waiting, but only for a matching variant. */
+            cachedPicture = cache.getCached(width, height, coronaangle);
+            if (cachedPicture != null) {
+                return cachedPicture;
+            }
+            sync.acquireUninterruptibly();
+            lockAcquired = true;
+        }
+        try {
+            cachedPicture = cache.getFresh(width, height, coronaangle);
+            if (cachedPicture != null) {
+                if (log.isFine()) log.fine("cache hit (2); authorized = " + authorized + ", width = " + width + ", height = " + height);
+                return cachedPicture;
+            }
+
+            final EncodedImage networkPicture =
                 new EncodedImage(NetworkGraph.getNetworkPicture(
                     sb.peers,
                     width,
@@ -130,24 +130,8 @@ public class NetworkPicture {
                     Long.parseLong(bgcolor, 16),
                     cyc), "png", false);
 
-        /*
-        NetworkGraph.buffer =
-            new EncodedImage(NetworkSkylineGraph.getNetworkSkylinePicture(
-                sb.peers,
-                width,
-                height,
-                passiveLimit,
-                potentialLimit,
-                maxCount,
-                coronaangle,
-                communicationTimeout,
-                env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
-                env.getConfig("network.unit.description", "unspecified"),
-                Long.parseLong(bgcolor, 16),
-                cyc), "png", false);
-         */
-            lastAccessSeconds = System.currentTimeMillis() / 1000;
-            return NetworkGraph.buffer;
+            cache.put(width, height, coronaangle, networkPicture);
+            return networkPicture;
         } finally {
             if (lockAcquired) {
                 sync.release();

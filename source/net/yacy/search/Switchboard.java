@@ -182,6 +182,7 @@ import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Audio;
 import net.yacy.gui.Tray;
+import net.yacy.htroot.NetworkPicture;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BEncodedHeap;
@@ -2445,7 +2446,7 @@ public final class Switchboard extends serverSwitch {
 
         // clear graphics caches
         CircleTool.clearcache();
-        NetworkGraph.clearcache();
+        NetworkPicture.cache.clear();;
     }
 
     public int schedulerJobSize() {

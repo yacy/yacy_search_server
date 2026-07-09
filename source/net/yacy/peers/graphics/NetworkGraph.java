@@ -30,9 +30,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -52,10 +55,9 @@ import net.yacy.visualization.RasterPlotter;
 
 public class NetworkGraph {
 
-    private final static double DOUBLE_LONG_MAX_VALUE = Long.MAX_VALUE;
     
-    public static EncodedImage buffer = null;
-
+    private static final double DOUBLE_LONG_MAX_VALUE = Long.MAX_VALUE;
+    
     private static int shortestName = 10;
     private static int longestName = 30;
 
@@ -81,12 +83,61 @@ public class NetworkGraph {
     private static final long COL_NORMAL_TEXT    = 0x000000;
     private static final long COL_LOAD_BG        = 0xF7F7F7;
 
+    
+    public static class Cache {
+        
+        private final Map<String, Map.Entry<Long, EncodedImage>> cache;
+        private final long maxAge;
+        private final int maxSize;
+        
+        public Cache(long maxAge, int maxSize) {
+            this.maxAge = maxAge;
+            this.maxSize = maxSize;
+            this.cache = new ConcurrentHashMap<>();
+        }
+        
+        private String cacheKey(final int width, final int height, final int coronaangle) {
+            return "key-" + width + "-" + height + "-" + coronaangle;
+        }
+        
+        public EncodedImage getCached(final int width, final int height, final int coronaangle) {
+            final Map.Entry<Long, EncodedImage> cached = cache.get(cacheKey(width, height, coronaangle));
+            return cached == null ? null : cached.getValue();
+        }
+        
+        public EncodedImage getFresh(final int width, final int height, final int coronaangle) {
+            final String key = cacheKey(width, height, coronaangle);
+            final Map.Entry<Long, EncodedImage> cached = this.cache.get(key);
+            if (cached == null) return null;
+            if (System.currentTimeMillis() - cached.getKey() >= this.maxAge) return null;
+            return cached.getValue();
+        }
+        
+        public synchronized void put(final int width, final int height, final int coronaangle, final EncodedImage image) {
+            final String key = cacheKey(width, height, coronaangle);
+            if (!this.cache.containsKey(key) && this.cache.size() >= this.maxSize) {
+                String oldestKey = null;
+                long oldestCreationTime = Long.MAX_VALUE;
+                for (final Map.Entry<String, Map.Entry<Long, EncodedImage>> entry: this.cache.entrySet()) {
+                    if (entry.getValue().getKey() < oldestCreationTime) {
+                        oldestKey = entry.getKey();
+                        oldestCreationTime = entry.getValue().getKey();
+                    }
+                }
+                if (oldestKey != null) {
+                    this.cache.remove(oldestKey);
+                }
+            }
+            this.cache.put(key, new AbstractMap.SimpleEntry<Long, EncodedImage>(System.currentTimeMillis(), image));
+        }
+        
+        public void clear() {
+            this.cache.clear();
+        }
+    }
+
     /** Private constructor to avoid instantiation of utility class. */
     private NetworkGraph() { }
-    
-    public static void clearcache() {
-        buffer = null;
-    }
 
     public static class CircleThreadPiece {
         private final String pieceName;
@@ -147,19 +198,6 @@ public class NetworkGraph {
             angle = cyc + (360.0d * ((Distribution.horizontalDHTPosition(UTF8.getBytes(primarySearche.target().hash))) / DOUBLE_LONG_MAX_VALUE));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
         }
-
-        // draw in the secondary search peers
-        /*
-        if (secondarySearches != null) {
-            for (final Thread secondarySearche : secondarySearches) {
-                if (secondarySearche == null) continue;
-                eventPicture.setColor((secondarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-                angle = cyc + (360.0d * ((FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / DOUBLE_LONG_MAX_VALUE));
-                eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1.0, true, null, null, -1, -1, -1, false);
-                eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1.0, true, null, null, -1, -1, -1, false);
-            }
-        }
-        */
 
         // draw in the search target
         final Iterator<byte[]> i = event.query.getQueryGoal().getIncludeHashes().iterator();
