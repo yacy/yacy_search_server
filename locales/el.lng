@@ -548,7 +548,6 @@ Error saving the skin.==Σφάλμα αποθήκευσης του δέρματ�
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="Εντάξει"
-"Use the browser preferred language if available"=="Χρησιμοποιήστε την προτιμώμενη γλώσσα του προγράμματος περιήγησης, εάν είναι διαθέσιμη"
 "Click to generate translated pages"=="Κάντε κλικ για να δημιουργήσετε μεταφρασμένες σελίδες"
 "Active : translated pages are available"=="Ενεργό: μεταφρασμένες σελίδες είναι διαθέσιμες"
 "Usecase Freeworld"=="Usecase Freeworld"
@@ -561,11 +560,10 @@ Your port has changed. Please wait 10 seconds.==Η θύρα σας άλλαξε.
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Αυτή η περίπτωση YaCy μπορεί να διαχειρίζεται με τον λογαριασμό "admin" και τον προεπιλεγμένο κωδικό πρόσβασης "yacy".
 Your YaCy Peer needs some basic information to operate properly==Ο ομότιμος YaCy σας χρειάζεται κάποιες βασικές πληροφορίες για να λειτουργήσει σωστά
 Select a language for the interface:==Επιλέξτε μια γλώσσα για τη διεπαφή:
-Browser==Πρόγραμμα περιήγησης
-English==αγγλικός
+English==English
 Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
-Italiano==ιταλικό
+Italiano==Italiano
 Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e

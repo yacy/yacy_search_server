@@ -434,11 +434,10 @@ Select one of the default skins. <b>After selection it might be required to relo
 #---------------------------
 Your port has changed. Please wait 10 seconds.==La porta e stata modificata. Attendi 10 secondi.
 Deutsch==Deutsch
-Browser==Browser
 Basic Configuration==Configurazione di base
 Your YaCy Peer needs some basic information to operate properly==Il tuo nodo YaCy ha bisogno di una semplice configurazione per poter funzionare correttamente
-English==Inglese
-Fran&ccedil;ais==Francese
+English==English
+Fran&ccedil;ais==Fran&ccedil;ais
 Use Case: what do you want to do with YaCy:==Modo d'uso: come userai YaCy
 Community-based web search==Ricerca web comunitaria
 Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==Unisciti e supporta la rete globale 'freeworld', cerca nel web con una rete di ricerca non censurata di proprietà dell'utente
@@ -457,7 +456,6 @@ Your Peer name is a default name; please set an individual peer name.==Il nome d
 "Active : translated pages are available"=="Attivo: le pagine tradotte sono disponibili"
 "Click to generate translated pages"=="Clicca per generare pagine tradotte"
 "Set Configuration"=="Configurazione di set"
-"Use the browser preferred language if available"=="Usare la lingua preferita del browser se disponibile"
 "Usecase Freeworld"=="Usecase Freeworld"
 "Usecase Intranet"=="Usecase Intranet"
 "Usecase Portal"=="Portale delle maiuscole"

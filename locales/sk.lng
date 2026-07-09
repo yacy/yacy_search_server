@@ -547,7 +547,6 @@ Error saving the skin.==Chyba pri ukladaní vzhľadu.
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="ok"
-"Use the browser preferred language if available"=="Použite preferovaný jazyk prehliadača, ak je k dispozícii"
 "Click to generate translated pages"=="Kliknutím vygenerujete preložené stránky"
 "Active : translated pages are available"=="Aktívne: k dispozícii sú preložené stránky"
 "Usecase Freeworld"=="Usecase Freeworld"
@@ -560,12 +559,11 @@ Your port has changed. Please wait 10 seconds.==Váš port sa zmenil. Počkajte 
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Túto inštanciu YaCy možno spravovať pomocou účtu „admin“ a predvoleného hesla „yacy“.
 Your YaCy Peer needs some basic information to operate properly==Vase YaCy vyzaduje pre spravne fungovanie niekolko zakladnych udajov
 Select a language for the interface:==Vyberte jazyk rozhrania:
-Browser==Prehliadač
-English==angličtina
+English==English
 Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
 Italiano==Italiano
-Español==Španielčina
+Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina

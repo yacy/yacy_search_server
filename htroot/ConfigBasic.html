@@ -40,7 +40,6 @@
         <li>
           <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
           <fieldset>
-            <input type="radio" name="language" value="browser" id="lang_browser" onchange="this.form.submit()" #(lang_browser)#::checked="checked"#(/lang_browser)# /><label for="lang_browser" title="Use the browser preferred language if available">Browser</label>&nbsp;
             <input type="radio" name="language" value="default" id="lang_en" onchange="this.form.submit()" #(lang_en)#::checked="checked"#(/lang_en)# /><label for="lang_en" #(active_en)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_en)#>English</label>&nbsp;    
             <input type="radio" name="language" value="de" id="lang_de" onchange="this.form.submit()" #(lang_de)#::checked="checked"#(/lang_de)# /><label for="lang_de" #(active_de)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_de)#>Deutsch</label>&nbsp;
             <input type="radio" name="language" value="fr" id="lang_fr" onchange="this.form.submit()" #(lang_fr)#::checked="checked"#(/lang_fr)# /><label for="lang_fr" #(active_fr)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_fr)#>Fran&ccedil;ais</label>&nbsp;

@@ -33,13 +33,11 @@ package net.yacy.htroot;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.TransactionManager;
-import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.peers.OnePeerPingBusyThread;
@@ -60,6 +58,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERNAME  = 2;
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
+    private static final Pattern CONFIG_BASIC_LANGUAGE_PATTERN = Pattern.compile("default|de|el|es|fr|hi|it|ja|ko|pl|ru|sk|tr|uk|zh");
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
 
@@ -67,7 +66,7 @@ public class ConfigBasic {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
-        String lang = env.getConfig("locale.language", "browser");
+        String lang = env.getConfig("locale.language", "default");
 
         /* For authenticated users only : acquire a transaction token for the next POST form submission */
         try {
@@ -105,8 +104,9 @@ public class ConfigBasic {
             }
 
             // language settings
-            if(post.containsKey("language")  && !lang.equals(post.get("language", "default"))) {
-                if(new TranslatorXliff().changeLang(env, langPath, post.get("language", "default") + ".lng")) {
+            final String postLanguage = post.get("language", "default");
+            if(post.containsKey("language") && CONFIG_BASIC_LANGUAGE_PATTERN.matcher(postLanguage).matches() && !lang.equals(postLanguage)) {
+                if(new TranslatorXliff().changeLang(env, langPath, postLanguage + ".lng")) {
                     prop.put("changedLanguage", "1");
                 }
             }
@@ -329,7 +329,6 @@ public class ConfigBasic {
         prop.put("defaultPort", env.getLocalPort());
         prop.put("withsslenabled", env.getConfigBool("server.https", false) ? 1 : 0);
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
-        prop.put("lang_browser", "0"); // for client browser language dependent
         prop.put("lang_de", "0");
         prop.put("lang_el", "0");
         prop.put("lang_es", "0");
@@ -345,47 +344,30 @@ public class ConfigBasic {
         prop.put("lang_uk", "0");
         prop.put("lang_zh", "0");
         prop.put("lang_en", "0");
+        if (!CONFIG_BASIC_LANGUAGE_PATTERN.matcher(lang).matches()) {
+            lang = "default";
+        }
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {
             prop.put("lang_" + lang, "1");
         }
         // set label class (green background) for active translation
-        if (lang.equals("browser")) {
-            final List<String> l = Translator.activeTranslations();
-            prop.put("active_de", l.contains("de") ? "2" : "1");
-            prop.put("active_el", l.contains("el") ? "2" : "1");
-            prop.put("active_es", l.contains("es") ? "2" : "1");
-            prop.put("active_fr", l.contains("fr") ? "2" : "1");
-            prop.put("active_hi", l.contains("hi") ? "2" : "1");
-            prop.put("active_it", l.contains("it") ? "2" : "1");
-            prop.put("active_ja", l.contains("ja") ? "2" : "1");
-            prop.put("active_ko", l.contains("ko") ? "2" : "1");
-            prop.put("active_pl", l.contains("pl") ? "2" : "1");
-            prop.put("active_ru", l.contains("ru") ? "2" : "1");
-            prop.put("active_sk", l.contains("sk") ? "2" : "1");
-            prop.put("active_tr", l.contains("tr") ? "2" : "1");
-            prop.put("active_uk", l.contains("uk") ? "2" : "1");
-            prop.put("active_zh", l.contains("zh") ? "2" : "1");
-            prop.put("active_en", "2");
-
-        } else {
-            prop.put("active_de", "0");
-            prop.put("active_el", "0");
-            prop.put("active_es", "0");
-            prop.put("active_fr", "0");
-            prop.put("active_hi", "0");
-            prop.put("active_it", "0");
-            prop.put("active_ja", "0");
-            prop.put("active_ko", "0");
-            prop.put("active_pl", "0");
-            prop.put("active_ru", "0");
-            prop.put("active_sk", "0");
-            prop.put("active_tr", "0");
-            prop.put("active_uk", "0");
-            prop.put("active_zh", "0");
-            prop.put("active_en", "0");
-        }
+        prop.put("active_de", "0");
+        prop.put("active_el", "0");
+        prop.put("active_es", "0");
+        prop.put("active_fr", "0");
+        prop.put("active_hi", "0");
+        prop.put("active_it", "0");
+        prop.put("active_ja", "0");
+        prop.put("active_ko", "0");
+        prop.put("active_pl", "0");
+        prop.put("active_ru", "0");
+        prop.put("active_sk", "0");
+        prop.put("active_tr", "0");
+        prop.put("active_uk", "0");
+        prop.put("active_zh", "0");
+        prop.put("active_en", "0");
         return prop;
     }
 }

@@ -404,18 +404,16 @@ Configure your router for YaCy using UPnP:==Configurer votre routeur pour YaCy e
 Configuration was not successful. This may take a moment.== &Eacute;chec de la configuration. Cela peut prendre un moment.
 What you should do next:==Ce que vous devriez faire ensuite:
 Your Peer name is a default name; please set an individual peer name.== Le nom de votre noeud est un nom par d&eacute;faut. Veuillez lui donner un nom individuel.
-Deutsch==Allemand
+Deutsch==Deutsch
 "Active : translated pages are available"=="Active: les pages traduites sont disponibles"
 "Click to generate translated pages"=="Cliquez pour générer des pages traduites"
 "Set Configuration"=="Définir la configuration"
-"Use the browser preferred language if available"=="Utilisez la langue préférée du navigateur si disponible"
 "Usecase Freeworld"=="Cas d'utilisation Freeworld"
 "Usecase Intranet"=="Intranet Usecase"
 "Usecase Portal"=="Portail Usecase"
 "ok"=="ok"
 "warning"=="avertissement"
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>AVERTISSEMENT</b> Cette instance YaCy peut être administrée avec le compte "admin" et le mot de passe par défaut "yacy".
-Browser==Navigateur
 Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.==Impossible de quitter l'Intranet Indexing: une ou plusieurs instances Solr distantes sont jointes et peuvent contenir des documents privés indexés.
 Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;==Créer un portail de recherche pour votre intranet, vos pages web ou votre système de fichiers partagé. Les URLs peuvent utiliser http/https/ftp avec un nom de domaine ou une adresse IP locale, ou une URL de la forme file:///&lt;path&gt; ou smb://&lt;server&gt;/&lt;path&gt;
 English==English
@@ -423,7 +421,7 @@ Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina
-Fran&ccedil;ais==Fran &ccedil; ais
+Fran&ccedil;ais==Fran&ccedil;ais
 Italiano==Italiano
 One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.==Une ou plusieurs instances Solr distantes sont jointes et peuvent contenir des documents publics indexés non pertinents à votre domaine local.
 One or more remote Solr instances are attached.==Une ou plusieurs instances Solr distantes sont jointes.

@@ -548,7 +548,6 @@ Error saving the skin.==保存皮肤时出错.
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="好的"
-"Use the browser preferred language if available"=="使用浏览器首选语言（如果可用）"
 "Click to generate translated pages"=="点击生成翻译页面"
 "Active : translated pages are available"=="活动：已翻译的页面可用"
 "Usecase Freeworld"=="用例自由世界"
@@ -561,12 +560,11 @@ Your port has changed. Please wait 10 seconds.==你的端口已更改。 请等�
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>警告</b> 此 YaCy 实例可以使用帐户“admin”和默认密码“yacy”进行管理。
 Your YaCy Peer needs some basic information to operate properly==你的YaCy节点需要一些基本信息才能有效工作
 Select a language for the interface:==选择界面语言：
-Browser==浏览器
-English==英语
-Deutsch==德语
-Fran&ccedil;ais==弗朗&ccedil;ais
-Italiano==意大利人
-Español==西班牙语
+English==English
+Deutsch==Deutsch
+Fran&ccedil;ais==Fran&ccedil;ais
+Italiano==Italiano
+Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina

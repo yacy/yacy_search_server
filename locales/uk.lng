@@ -374,7 +374,6 @@ Your Peer name is a default name; please set an individual peer name.==Ім’я
 #-----------------------------
 
 "ok"=="добре"
-"Use the browser preferred language if available"=="Використовуйте бажану мову браузера, якщо вона доступна"
 "Click to generate translated pages"=="Натисніть, щоб створити перекладені сторінки"
 "Active : translated pages are available"=="Активний : доступні перекладені сторінки"
 "Usecase Freeworld"=="Випадок використання Freeworld"
@@ -385,8 +384,7 @@ Your Peer name is a default name; please set an individual peer name.==Ім’я
 Your port has changed. Please wait 10 seconds.==Ваш порт змінився. Зачекайте 10 секунд.
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Цим екземпляром YaCy можна керувати за допомогою облікового запису «admin» і пароля за умовчанням «yacy».
 Select a language for the interface:==Виберіть мову для інтерфейсу:
-Browser==Браузер
-English==англійська
+English==English
 Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
 Italiano==Italiano

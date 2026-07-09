@@ -538,7 +538,6 @@ Error saving the skin.==스킨을 저장하는 중에 오류가 발생했습니�
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="좋아요"
-"Use the browser preferred language if available"=="가능한 경우 브라우저 기본 언어를 사용하세요."
 "Click to generate translated pages"=="번역된 페이지를 생성하려면 클릭하세요."
 "Active : translated pages are available"=="활성: 번역된 페이지를 사용할 수 있습니다."
 "Usecase Freeworld"=="사용 사례 Freeworld"
@@ -551,12 +550,11 @@ Your port has changed. Please wait 10 seconds.==포트가 변경되었습니다.
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> 이 YaCy 인스턴스는 "admin" 계정과 기본 비밀번호 "yacy"로 관리할 수 있습니다.
 Your YaCy Peer needs some basic information to operate properly==YaCy 피어가 제대로 작동하려면 몇 가지 기본 정보가 필요합니다.
 Select a language for the interface:==인터페이스 언어를 선택하세요:
-Browser==브라우저
-English==영어
-Deutsch==독일어
+English==English
+Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
-Italiano==이탈리아노
-Español==스페인어
+Italiano==Italiano
+Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina

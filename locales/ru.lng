@@ -414,7 +414,6 @@ Your Peer name is a default name; please set an individual peer name.==Ваше 
 #-----------------------------
 
 "ok"=="хорошо"
-"Use the browser preferred language if available"=="Используйте предпочитаемый язык браузера, если он доступен."
 "Click to generate translated pages"=="Нажмите, чтобы создать переведенные страницы"
 "Active : translated pages are available"=="Активно: доступны переведенные страницы."
 "Usecase Freeworld"=="Вариант использования «Свободный мир"
@@ -424,12 +423,11 @@ Your Peer name is a default name; please set an individual peer name.==Ваше 
 "Set Configuration"=="Установить конфигурацию"
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Этот экземпляр YaCy можно администрировать с помощью учетной записи «admin» и пароля по умолчанию «yacy».
 Select a language for the interface:==Выберите язык интерфейса:
-Browser==Браузер
-English==Английский
-Deutsch==немецкий
-Fran&ccedil;ais==Франция
-Italiano==Итальяно
-Español==испанский
+English==English
+Deutsch==Deutsch
+Fran&ccedil;ais==Fran&ccedil;ais
+Italiano==Italiano
+Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina

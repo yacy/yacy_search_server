@@ -553,7 +553,6 @@ Error saving the skin.==Błąd podczas zapisywania skórki.
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="ok"
-"Use the browser preferred language if available"=="Użyj preferowanego języka przeglądarki, jeśli jest dostępny"
 "Click to generate translated pages"=="Kliknij, aby wygenerować przetłumaczone strony"
 "Active : translated pages are available"=="Aktywne: przetłumaczone strony są dostępne"
 "Usecase Freeworld"=="Przypadek użycia Freeworld"
@@ -566,12 +565,11 @@ Your port has changed. Please wait 10 seconds.==Twój port został zmieniony. Po
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>OSTRZEŻENIE</b> Tą instancją YaCy można administrować za pomocą konta "admin" i domyślnego hasła "yacy".
 Your YaCy Peer needs some basic information to operate properly==Twój peer YaCy potrzebuje kilku podstawowych informacji, aby działać poprawnie
 Select a language for the interface:==Wybierz język interfejsu:
-Browser==Przeglądarka
-English==Angielski
-Deutsch==Niemiecki
-Fran&ccedil;ais==Francuski
-Italiano==Włoski
-Español==Hiszpański
+English==English
+Deutsch==Deutsch
+Fran&ccedil;ais==Fran&ccedil;ais
+Italiano==Italiano
+Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina

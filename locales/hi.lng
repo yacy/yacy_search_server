@@ -538,7 +538,6 @@ Error saving the skin.==एरर सेविंग स्किन्स.
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="ठीक है"
-"Use the browser preferred language if available"=="यदि उपलब्ध हो तो ब्राउज़र की पसंदीदा भाषा का उपयोग करें"
 "Click to generate translated pages"=="अनुवादित पृष्ठ बनाने के लिए क्लिक करें"
 "Active : translated pages are available"=="सक्रिय : अनुवादित पृष्ठ उपलब्ध हैं"
 "Usecase Freeworld"=="यूज़केस फ्रीवर्ल्ड"
@@ -551,9 +550,8 @@ Your port has changed. Please wait 10 seconds.==आपका पोर्ट ब
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> इस YaCy उदाहरण को खाता "एडमिन" और डिफ़ॉल्ट पासवर्ड "yacy" के साथ प्रशासित किया जा सकता है।
 Your YaCy Peer needs some basic information to operate properly==आपकी YaCy पीअर को ठीक से संचालित करने के लिए कुछ बुनियादी जानकारी की जरूरत है
 Select a language for the interface:==इंटरफ़ेस के लिए एक भाषा चुनें:
-Browser==ब्राउज़र
-English==अंग्रेज़ी
-Deutsch==deutsch
+English==English
+Deutsch==Deutsch
 Fran&ccedil;ais==Fran&ccedil;ais
 Italiano==Italiano
 Español==Español

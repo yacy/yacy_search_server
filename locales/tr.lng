@@ -555,7 +555,6 @@ Error saving the skin.==Tema kaydedilirken hata oluştu.
 #File: ConfigBasic.html
 #---------------------------
 "ok"=="Tamam"
-"Use the browser preferred language if available"=="Varsa tarayıcının tercih ettiği dili kullanın"
 "Click to generate translated pages"=="Çevrilmiş sayfalar oluşturmak için tıklayın"
 "Active : translated pages are available"=="Aktif: çevrilmiş sayfalar mevcut"
 "Usecase Freeworld"=="Kullanım Örneği Freeworld"
@@ -568,12 +567,11 @@ Your port has changed. Please wait 10 seconds.==Bağlantı noktanız değişti. 
 <b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Bu YaCy örneği "admin" hesabı ve varsayılan şifre "yacy" ile yönetilebilir.
 Your YaCy Peer needs some basic information to operate properly==YaCy Eşinizin düzgün çalışabilmesi için bazı temel bilgilere ihtiyacı vardır
 Select a language for the interface:==Arayüz için bir dil seçin:
-Browser==Tarayıcı
-English==İngilizce
-Deutsch==Almanca
-Fran&ccedil;ais==Fransızca
-Italiano==İtalyan
-Español==İspanyolca
+English==English
+Deutsch==Deutsch
+Fran&ccedil;ais==Fran&ccedil;ais
+Italiano==Italiano
+Español==Español
 Polski==Polski
 T&uuml;rk&ccedil;e==T&uuml;rk&ccedil;e
 Sloven&#269;ina==Sloven&#269;ina

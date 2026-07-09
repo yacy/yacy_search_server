@@ -1482,9 +1482,6 @@
     <trans-unit id="112264" xml:space="preserve" approved="no" translate="yes">
        <source>"ok"</source>
     </trans-unit>
-    <trans-unit id="fe8f5c15" xml:space="preserve" approved="no" translate="yes">
-       <source>"Use the browser preferred language if available"</source>
-    </trans-unit>
     <trans-unit id="6708b628" xml:space="preserve" approved="no" translate="yes">
        <source>"Click to generate translated pages"</source>
     </trans-unit>
@@ -1520,9 +1517,6 @@
     </trans-unit>
     <trans-unit id="4ae2f3ec" xml:space="preserve" approved="no" translate="yes">
        <source>Select a language for the interface:</source>
-    </trans-unit>
-    <trans-unit id="6c37c308" xml:space="preserve" approved="no" translate="yes">
-       <source>Browser</source>
     </trans-unit>
     <trans-unit id="3a13250" xml:space="preserve" approved="no" translate="yes">
        <source>English</source>
