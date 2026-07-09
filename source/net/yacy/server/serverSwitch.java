@@ -227,15 +227,27 @@ public class serverSwitch {
      *
      * @see #getLocalPort()
      */
-    public int getPublicPort(final String key, final int dflt) {
-
-        if (this.isConnectedViaUpnp && this.upnpPortMap.containsKey(key)) {
-            return this.upnpPortMap.get(key).intValue();
+    public int getPublicPort(final boolean useSSL) {
+        int publicPort = this.getConfigInt(SwitchboardConstants.SERVER_PORT_PUBLIC, -1);
+        if (publicPort > 0) {
+            return publicPort;
         }
-
-        // TODO: add way of setting and retrieving port for manual NAT
-
-        return this.getConfigInt(key, dflt);
+        else {
+            String portKey = "";
+            int portDefault = 0;
+            if (useSSL) {
+                portKey = SwitchboardConstants.SERVER_SSLPORT;
+                portDefault = 8443;
+            }
+            else {
+                portKey = SwitchboardConstants.SERVER_PORT;
+                portDefault = 8443;
+            }
+            if (this.isConnectedViaUpnp && this.upnpPortMap.containsKey(portKey)) {
+                return this.upnpPortMap.get(portKey).intValue();
+            }
+            return this.getConfigInt(portKey, portDefault);
+        }
     }
 
     /**
