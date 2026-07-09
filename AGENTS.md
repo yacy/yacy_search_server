@@ -1,0 +1,10 @@
+# Repository Instructions
+
+## Web UI, API, Help, And Localization
+
+When changing YaCy web pages or API endpoints, update all matching user-facing and tool-facing artifacts in the same change.
+
+- For `htroot/**/*.html` changes, update the corresponding localization files under `locales/` when visible text, labels, form controls, messages, or navigation text changes.
+- For `htroot/**/*.html` changes, update the corresponding Markdown help file under `help/`.
+- For API or servlet behavior changes under `source/net/yacy/htroot/**`, update the related `help/**/*.md` file with changed endpoints, access requirements, parameters, side effects, response fields, and automation guidance.
+- Treat `locales` and `help` updates as required checklist items for HTML, servlet, and API changes. Do not leave them for a follow-up unless the change is explicitly internal and has no user-visible page, request parameter, response, or behavior impact.
