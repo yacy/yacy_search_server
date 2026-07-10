@@ -31,7 +31,7 @@
       <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
       <dependency org="javax.servlet" name="javax.servlet-api" rev="4.0.1"/>
       <dependency org="javainetlocator" name="inetaddresslocator" rev="2.18" />
-      <dependency org="jcifs" name="jcifs" rev="1.3.17"  conf="compile->master" />
+      <dependency org="eu.agno3.jcifs" name="jcifs-ng" rev="2.1.10" />
       <dependency org="net.arnx" name="jsonic" rev="1.3.10"/>
       <dependency org="net.jthink" name="jaudiotagger" rev="3.0.1"/>
       <dependency org="net.sourceforge.jchardet" name="jchardet" rev="1.0"/>
@@ -44,7 +44,8 @@
       <dependency org="org.apache.commons" name="commons-lang3" rev="3.20.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.14"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.14"/>
-      <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
+      <dependency org="org.apache.james" name="apache-mime4j-core" rev="0.8.14"/>
+      <dependency org="org.apache.james" name="apache-mime4j-dom" rev="0.8.14"/>
       <dependency org="org.apache.lucene" name="lucene-analysis-common" rev="9.0.0"/>
       <dependency org="org.apache.lucene" name="lucene-backward-codecs" rev="9.0.0" />
       <dependency org="org.apache.lucene" name="lucene-classification" rev="9.0.0" />

@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jcifs.CIFSContext;
+import jcifs.context.SingletonContext;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
@@ -60,6 +62,7 @@ import net.yacy.search.Switchboard;
 public class SMBLoader {
 
     public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
+    private static final CIFSContext SMB_CONTEXT = SingletonContext.getInstance();
 
     private final Switchboard sb;
     private final ConcurrentLog log;
@@ -120,8 +123,9 @@ public class SMBLoader {
                 s = MultiProtocolURL.escape(s).toString();
                 if (!s.endsWith("/") && !s.endsWith("\\")) {
                     // check if this is a directory
-                    SmbFile sf = new SmbFile(u + s);
-                    if (sf.isDirectory()) s = s + "/";
+                    try (final SmbFile sf = new SmbFile(u + s, SMB_CONTEXT)) {
+                        if (sf.isDirectory()) s = s + "/";
+                    }
                 }
                 list.add(u + s);
             }
@@ -198,20 +202,17 @@ public class SMBLoader {
     }
 
     public static void main(String[] args) {
-        //jcifs.Config.setProperty( "jcifs.netbios.wins", "192.168.1.220" );
-        //NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("domain", "username", "password");
-        SmbFileInputStream in;
-        try {
-            SmbFile sf = new SmbFile(args[0]);
+        try (final SmbFile sf = new SmbFile(args[0], SMB_CONTEXT)) {
             if (sf.isDirectory()) {
                 String[] s = sf.list();
                 for (String t: s) System.out.println(t);
             } else {
-                in = new SmbFileInputStream(sf);
-                byte[] b = new byte[8192];
-                int n;
-                while(( n = in.read( b )) > 0 ) {
-                    System.out.write( b, 0, n );
+                try (final SmbFileInputStream in = new SmbFileInputStream(sf)) {
+                    byte[] b = new byte[8192];
+                    int n;
+                    while(( n = in.read( b )) > 0 ) {
+                        System.out.write( b, 0, n );
+                    }
                 }
             }
         } catch (final SmbException e) {

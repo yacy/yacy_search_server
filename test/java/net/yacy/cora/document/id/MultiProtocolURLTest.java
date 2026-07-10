@@ -1,6 +1,7 @@
 package net.yacy.cora.document.id;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -15,10 +16,21 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
+import jcifs.context.SingletonContext;
+import jcifs.smb.SmbFile;
+
 /**
  * Automated unit tests for the {@link MultiProtocolURL} class.
  */
 public class MultiProtocolURLTest {
+
+    @Test
+    public void testSmbFileUsesSharedContext() throws MalformedURLException {
+        final MultiProtocolURL url = new MultiProtocolURL("smb://example.test/share/file.txt");
+        try (final SmbFile smbFile = url.getSmbFile()) {
+            assertSame(SingletonContext.getInstance(), smbFile.getContext());
+        }
+    }
 	
     @Test
     public void testSessionIdRemoval() throws MalformedURLException {
@@ -509,6 +521,5 @@ public class MultiProtocolURLTest {
 	}
     
 }
-
 
 

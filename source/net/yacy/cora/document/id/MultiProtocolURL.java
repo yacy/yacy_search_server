@@ -52,6 +52,8 @@ import java.util.regex.Pattern;
 
 import org.apache.http.HttpStatus;
 
+import jcifs.CIFSContext;
+import jcifs.context.SingletonContext;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
@@ -77,6 +79,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     private static final long serialVersionUID = -1173233022912141884L;
     private static final long SMB_TIMEOUT = 5000;
+    private static final CIFSContext SMB_CONTEXT = SingletonContext.getInstance();
 
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
@@ -2393,7 +2396,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public SmbFile getSmbFile() throws MalformedURLException {
         if (!isSMB()) throw new MalformedURLException();
         final String url = unescape(this.toNormalform(true));
-        return new SmbFile(url);
+        return new SmbFile(url, SMB_CONTEXT);
     }
 
     // some methods that let the MultiProtocolURI look like a java.io.File object
@@ -2401,8 +2404,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public boolean exists() throws IOException {
         if (isFile()) return getFSFile().exists();
-        if (isSMB()) try {
-            return TimeoutRequest.exists(getSmbFile(), SMB_TIMEOUT);
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return TimeoutRequest.exists(smbFile, SMB_TIMEOUT);
         } catch (final SmbException e) {
             throw new IOException("SMB.exists SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
@@ -2413,8 +2416,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public boolean canRead() throws IOException {
         if (isFile()) return getFSFile().canRead();
-        if (isSMB()) try {
-            return TimeoutRequest.canRead(getSmbFile(), SMB_TIMEOUT);
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return TimeoutRequest.canRead(smbFile, SMB_TIMEOUT);
         } catch (final SmbException e) {
             throw new IOException("SMB.canRead SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
@@ -2425,8 +2428,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public boolean canWrite() throws IOException {
         if (isFile()) return getFSFile().canWrite();
-        if (isSMB()) try {
-            return TimeoutRequest.canWrite(getSmbFile(), SMB_TIMEOUT);
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return TimeoutRequest.canWrite(smbFile, SMB_TIMEOUT);
         } catch (final SmbException e) {
             throw new IOException("SMB.canWrite SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
@@ -2437,8 +2440,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public boolean isHidden() throws IOException {
         if (isFile()) return getFSFile().isHidden();
-        if (isSMB()) try {
-            return TimeoutRequest.isHidden(getSmbFile(), SMB_TIMEOUT);
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return TimeoutRequest.isHidden(smbFile, SMB_TIMEOUT);
         } catch (final SmbException e) {
             throw new IOException("SMB.isHidden SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
@@ -2449,8 +2452,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public boolean isDirectory() throws IOException {
         if (isFile()) return getFSFile().isDirectory();
-        if (isSMB()) try {
-            return TimeoutRequest.isDirectory(getSmbFile(), SMB_TIMEOUT);
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return TimeoutRequest.isDirectory(smbFile, SMB_TIMEOUT);
         } catch (final SmbException e) {
             throw new IOException("SMB.isDirectory SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
@@ -2466,8 +2469,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             ConcurrentLog.logException(e);
             return -1;
         }
-        if (isSMB()) try {
-            return getSmbFile().length();
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return smbFile.length();
             //return TimeoutRequest.length(getSmbFile(), SMB_TIMEOUT); // a timeout request is a bad idea, that will create a lot of concurrent threads during crawling
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
@@ -2478,8 +2481,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public long lastModified() throws IOException {
         if (isFile()) return getFSFile().lastModified();
-        if (isSMB()) try {
-            return getSmbFile().lastModified();
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return smbFile.lastModified();
             // return TimeoutRequest.lastModified(getSmbFile(), SMB_TIMEOUT); // a timeout request is a bad idea, that will create a lot of concurrent threads during crawling
         } catch (final SmbException e) {
             throw new IOException("SMB.lastModified SmbException (" + e.getMessage() + ") for " + toNormalform(false));
@@ -2491,8 +2494,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public String getName() throws IOException {
         if (isFile()) return getFSFile().getName();
-        if (isSMB()) try {
-            return getSmbFile().getName();
+        if (isSMB()) try (final SmbFile smbFile = getSmbFile()) {
+            return smbFile.getName();
         } catch (final MalformedURLException e) {
             throw new IOException("SMB.getName MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false) );
         }
@@ -2511,8 +2514,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public String[] list() throws IOException {
         if (isFile() && !isHidden()) return getFSFile().list();
-        if (isSMB()) try {
-            final SmbFile sf = getSmbFile();
+        if (isSMB()) try (final SmbFile sf = getSmbFile()) {
             if (!sf.isDirectory() || sf.isHidden()) return null;
             try {
                 return TimeoutRequest.list(sf, SMB_TIMEOUT);
@@ -2589,7 +2591,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 return getFSFile().exists();
             }
             if (isSMB()) {
-                return getSmbFile().exists();
+                try (final SmbFile smbFile = getSmbFile()) {
+                    return smbFile.exists();
+                }
             }
             if (isFTP()) {
                 final FTPClient client = new FTPClient();
