@@ -67,9 +67,9 @@ SetCompressor /SOLID LZMA
 
 !insertmacro MUI_LANGUAGE "English"
 
-LangString javaMissing 0 "Java 11 or newer is required to run YaCy. Download and install the latest Temurin JRE now?"
-LangString javaDownloadFail 0 "Java download failed. Please install Java 11+ manually."
-LangString javaInstallFail 0 "Java 11+ was not found after installation. YaCy may not start until Java is installed."
+LangString javaMissing 0 "Java 17 or newer is required to run YaCy. Download and install the latest Temurin JRE now?"
+LangString javaDownloadFail 0 "Java download failed. Please install Java 17+ manually."
+LangString javaInstallFail 0 "Java 17+ was not found after installation. YaCy may not start until Java is installed."
 LangString keepData 0 "Remove YaCy user data as well?"
 
 Var JavaVersion
@@ -150,7 +150,9 @@ Function EnsureJava
     Call GetJavaVersion
     Push "Java detection: found=$JavaFound version='$JavaVersion' major=$JavaMajor"
     Call LogLine
-    StrCmp $JavaFound "1" JavaOk JavaMissing
+    StrCmp $JavaFound "1" JavaVersionCheck JavaMissing
+    JavaVersionCheck:
+        IntCmp $JavaMajor 17 JavaOk JavaMissing JavaOk
     JavaMissing:
         Push "Java detection: no Java found"
         Call LogLine
@@ -171,6 +173,7 @@ Function EnsureJava
         Push "Java detection (post-install): found=$JavaFound version='$JavaVersion' major=$JavaMajor"
         Call LogLine
         StrCmp $JavaFound "1" 0 JavaStillLow
+        IntCmp $JavaMajor 17 JavaContinue JavaStillLow JavaContinue
         JavaStillLow:
             MessageBox MB_ICONEXCLAMATION "$(javaInstallFail)"
     JavaContinue:
@@ -203,8 +206,8 @@ Function GetJavaVersion
     Call FindJavaFromPath
     ${If} $JavaFound == "1"
         ${If} $JavaMajor == "0"
-            StrCpy $JavaMajor "11"
-            Push "Java detection: version unknown, assuming >=11"
+            StrCpy $JavaMajor "17"
+            Push "Java detection: version unknown, assuming >=17"
             Call LogLine
         ${EndIf}
     ${EndIf}

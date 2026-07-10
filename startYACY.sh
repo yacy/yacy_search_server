@@ -38,6 +38,21 @@ then
     exit 1
 fi
 
+JAVA_SPECIFICATION_VERSION="`"$JAVA" -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java.specification.version = //p' | head -n 1`"
+JAVA_MAJOR_VERSION="${JAVA_SPECIFICATION_VERSION#1.}"
+JAVA_MAJOR_VERSION="${JAVA_MAJOR_VERSION%%.*}"
+case "$JAVA_MAJOR_VERSION" in
+    ''|*[!0-9]*)
+        echo "Unable to determine the Java version reported by $JAVA."
+        exit 1
+        ;;
+esac
+if [ "$JAVA_MAJOR_VERSION" -lt 17 ]
+then
+    echo "Java 17 or newer is required to run YaCy (found Java $JAVA_SPECIFICATION_VERSION)."
+    exit 1
+fi
+
 
 usage() {
     cat - <<USAGE

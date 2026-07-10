@@ -45,7 +45,7 @@ parts:
       - dist
     source: https://github.com/yacy/yacy_search_server.git
     build-packages:
-      - openjdk-8-jdk
+      - openjdk-17-jdk
     override-build: |
       snapcraftctl build
       tar -xzf RELEASE/yacy*.tar.gz -C "$SNAPCRAFT_PART_INSTALL/"

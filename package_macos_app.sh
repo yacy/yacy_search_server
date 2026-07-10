@@ -311,7 +311,19 @@ elif command -v /usr/libexec/java_home >/dev/null 2>&1; then
 fi
 
 if [[ -z "${JAVA_BIN}" ]]; then
-  echo "Unable to find a Java runtime. Please install Java (JDK 11+) and try again." >&2
+  echo "Unable to find a Java runtime. Please install Java (JDK 17+) and try again." >&2
+  exit 1
+fi
+
+JAVA_SPEC_VERSION="$("${JAVA_BIN}" -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java.specification.version = //p' | head -n 1)"
+JAVA_MAJOR_VERSION="${JAVA_SPEC_VERSION#1.}"
+JAVA_MAJOR_VERSION="${JAVA_MAJOR_VERSION%%.*}"
+if [[ ! "${JAVA_MAJOR_VERSION}" =~ ^[0-9]+$ ]]; then
+  echo "Unable to determine the Java version reported by ${JAVA_BIN}." >&2
+  exit 1
+fi
+if (( JAVA_MAJOR_VERSION < 17 )); then
+  echo "Java 17 or newer is required to run YaCy (found Java ${JAVA_SPEC_VERSION})." >&2
   exit 1
 fi
 

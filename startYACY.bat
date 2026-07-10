@@ -1,6 +1,23 @@
 @Echo Off
 title YaCy
 
+where java >nul 2>&1
+if errorlevel 1 (
+    Echo Java was not found. Java 17 or newer is required to run YaCy.
+    GoTo :END
+)
+set "JAVA_SPEC_VERSION="
+for /F "tokens=3" %%v in ('java -XshowSettings:properties -version 2^>^&1 ^| findstr /C:"java.specification.version ="') do set "JAVA_SPEC_VERSION=%%v"
+if not defined JAVA_SPEC_VERSION (
+    Echo Unable to determine the installed Java version. Java 17 or newer is required.
+    GoTo :END
+)
+for /F "tokens=1 delims=." %%v in ("%JAVA_SPEC_VERSION%") do set "JAVA_MAJOR_VERSION=%%v"
+if %JAVA_MAJOR_VERSION% LSS 17 (
+    Echo Java 17 or newer is required to run YaCy. Found Java %JAVA_SPEC_VERSION%.
+    GoTo :END
+)
+
 REM setting startup type for proper restart
 if "%YACY_DATA%"=="" set "YACY_DATA=%LOCALAPPDATA%\YaCy"
 set "YACY_DATA_DIR=%YACY_DATA%\DATA"

@@ -55,11 +55,11 @@ To get a ready-to-run production package, run YaCy from Docker.
 
 ### Compile and run YaCy from git sources
 
-You need Java 11 or later to run YaCy and ant to build YaCy.
+You need Java 17 or later to run YaCy and ant to build YaCy.
 This would install the requirements on debian:
 
 ```
-sudo apt-get install openjdk-11-jdk-headless ant
+sudo apt-get install openjdk-17-jdk-headless ant
 ```
 
 Then clone the repository and build the application:

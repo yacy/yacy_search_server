@@ -11,7 +11,7 @@
    	<property name="parserArchive" location="${release}/${addonLongName}_${addonVersion}.tgz"/>	    	
     	
     <target name="compile">
-  	  <javac srcdir="${src}/net/yacy/peers/operation/" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
+      <javac srcdir="${src}/net/yacy/peers/operation/" destdir="${build}" release="${javacRelease}" debug="true" debuglevel="lines,vars,source" includeantruntime="false">
   	    <include name="yacySeedUpload${addonShortName}.java"/>
   	  	<classpath>
   	  	  <pathelement location="${build}" />	
@@ -70,4 +70,3 @@
 	
 	
 </project>
-

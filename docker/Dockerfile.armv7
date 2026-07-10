@@ -7,28 +7,21 @@
 # docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:armv7
 
 
-# Base image : latest Debian stable official jdk 11 image from Docker
-FROM arm32v7/openjdk:11-jdk as builder
+# Java 17 is installed from Debian's ARMv7 packages.
+FROM arm32v7/debian:bookworm-slim
 
 # Install needed packages not in base image
-RUN apt-get update && apt-get install -yq curl && \
+RUN apt-get update && apt-get install -yq ant curl openjdk-17-jdk-headless && \
   rm -rf /var/lib/apt/lists/*
 
 # set current working dir & copy sources
 WORKDIR /opt
 COPY . /opt/yacy_search_server/
 
-# .git dir deleted here because .git is needed during the build to deterime the version,
+# .git dir is deleted after the build because it is needed to determine the version,
 # but isn't required at runtime
-RUN ant compile -f /opt/yacy_search_server/build.xml \
-RUN rm -rf /opt/yacy_search_server/.git && \
-    apt-get update && \
-	apt-get install -yq ant && \
-	ant compile -f /opt/yacy_search_server/build.xml && \
-	apt-get purge -yq --auto-remove ant && \
-	apt-get clean && \
-  rm -fr /opt/yacy_search_server/.git && \
-	rm -rf /var/lib/apt/lists/*
+RUN ant compile -f /opt/yacy_search_server/build.xml && \
+    rm -rf /opt/yacy_search_server/.git
 
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
