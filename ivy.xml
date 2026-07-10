@@ -91,7 +91,6 @@
         <exclude module="bcprov-jdk15to18" />
       </dependency>
       <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.8"/>
-      <!--NOT FOUND dependency org="org.restlet.jee" name="org.restlet" rev="2.2.1" / -->
       <dependency org="org.rrd4j" name="rrd4j" rev="3.10"/>
       <!-- Solr 9.0.0 directly references the SLF4J 1.7 StaticLoggerBinder API. -->
       <dependency org="org.slf4j" name="slf4j-api" rev="1.7.36" force="true"/>
