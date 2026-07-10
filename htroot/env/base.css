@@ -76,7 +76,7 @@ dl {
 }
 
 body, table, textarea {
-  font-size: 12px;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-smooth: always;
@@ -595,7 +595,7 @@ a.MenuItemLink {
   margin-top:1px;
   margin-bottom:1px;
   padding:4px 10px 3px 18px;
-  font-size:1.1em;
+  font-size:14px;
 }
 
 a.MenuItemLink.lock {

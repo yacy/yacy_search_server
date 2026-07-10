@@ -4,6 +4,38 @@
     <meta charset="UTF-8" />
     <title>YaCy '#[clientname]#': Access Configuration</title>
     #%env/templates/metas.template%#
+    <style type="text/css">
+      .usecase-options {
+        border-collapse: separate;
+        border-spacing: 8px 0;
+        margin: 8px -8px 0;
+      }
+      .usecase-option {
+        background-color: #384757;
+        color: #ffffff;
+        vertical-align: top;
+        width: 374px;
+      }
+      .usecase-option label {
+        color: inherit;
+        cursor: pointer;
+      }
+      .usecase-option-heading {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0;
+        padding: 12px;
+      }
+      .usecase-option-image,
+      .usecase-option-image img {
+        display: block;
+        margin: 0;
+      }
+      .usecase-option-description {
+        display: block;
+        padding: 12px;
+      }
+    </style>
     <script type="text/javascript">
       <!--
       function element_clicked(element){
@@ -74,23 +106,24 @@
           ::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached.</p> 
           <p>Please be sure you want to expose the indexed documents in this new mode. You may want to disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
           #(/switchWarning)#
-          <table border="0">
-          <tr>
-            <td style="width: 256px;"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
-              <td style="width: 256px;"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
-              <td><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
-          </tr>
-          <tr>
-            <td><label for="usecaseFreeworld"><img src="env/grafics/usecase_freeworld.png" alt="Usecase Freeworld" /></label></td>
-            <td><label for="usecasePortal"><img src="env/grafics/usecase_webportal.png" alt="Usecase Portal" /></label></td>
-            <td><label for="usecaseIntranet"><img src="env/grafics/usecase_intranet.png" alt="Usecase Intranet" /></label></td>
-          </tr>
-          <tr>
-            <td valign="top"><label for="usecaseFreeworld">Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
-            <td valign="top"><label for="usecasePortal">Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label></td>
-            <td valign="top"><label for="usecaseIntranet">Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;<br/>            
-            </td>
-          </tr>
+          <table class="usecase-options" border="0">
+            <tr>
+              <td class="usecase-option">
+                <div class="usecase-option-heading"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /> <label for="usecaseFreeworld">Community-based web search</label></div>
+                <label class="usecase-option-image" for="usecaseFreeworld"><img src="env/grafics/usecase_freeworld.png" width="374" height="350" alt="Usecase Freeworld" /></label>
+                <label class="usecase-option-description" for="usecaseFreeworld">Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label>
+              </td>
+              <td class="usecase-option">
+                <div class="usecase-option-heading"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /> <label for="usecasePortal">Search portal for your own web pages</label></div>
+                <label class="usecase-option-image" for="usecasePortal"><img src="env/grafics/usecase_webportal.png" width="374" height="350" alt="Usecase Portal" /></label>
+                <label class="usecase-option-description" for="usecasePortal">Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label>
+              </td>
+              <td class="usecase-option">
+                <div class="usecase-option-heading"><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /> <label for="usecaseIntranet">Intranet Indexing</label></div>
+                <label class="usecase-option-image" for="usecaseIntranet"><img src="env/grafics/usecase_intranet.png" width="374" height="350" alt="Usecase Intranet" /></label>
+                <label class="usecase-option-description" for="usecaseIntranet">Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;</label>
+              </td>
+            </tr>
           </table>
           </fieldset>
         </li>

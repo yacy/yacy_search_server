@@ -27,7 +27,7 @@ The language selector shows that YaCy is built for an international audience. Th
 
 ## Page Architecture
 
-The page is organized as a setup checklist. Language is first because it affects the whole user interface. Use case comes next because it changes YaCy's network and index-sharing behavior. Peer name and port define how this peer identifies itself and how it is reached.
+The page is organized as a setup checklist. Language is first because it affects the whole user interface. Use case comes next because it changes YaCy's network and index-sharing behavior. Each use-case option is shown as a card containing its radio button, name, illustration, and description. Peer name and port define how this peer identifies itself and how it is reached.
 
 | Control | Meaning | Valid values |
 | --- | --- | --- |
