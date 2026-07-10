@@ -8,40 +8,40 @@
   </configurations>
     <dependencies defaultconf="compile->default">
       <dependency org="commons-fileupload" name="commons-fileupload" rev="1.6.0" conf="compile->master" />
-      <dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0">
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.20.0">
         <exclude module="junit"/>
       </dependency>
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
-      <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.19.0"  />
-      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.18.2"/>
-      <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.1.8"/>
-      <dependency org="com.google.guava" name="guava" rev="33.4.8-jre" conf="compile->master"/>
-      <dependency org="com.google.guava" name="failureaccess" rev="1.0.2" />
-      <dependency org="com.ibm.icu" name="icu4j" rev="76.1"/>
-      <dependency org="com.github.mwiede" name="jsch" rev="0.2.21" />
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.12.0"/>
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.12.0" />
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.12.0"/>
-      <dependency org="commons-codec" name="commons-codec" rev="1.17.1" />
-      <dependency org="commons-io" name="commons-io" rev="2.19.0" />
-      <dependency org="commons-logging" name="commons-logging" rev="1.3.3" />
-      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="4.1.5"/>
-      <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.1.5" conf="compile->master"/>
+      <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.20.0"  />
+      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.22.1"/>
+      <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.2.4"/>
+      <dependency org="com.google.guava" name="guava" rev="33.6.0-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="failureaccess" rev="1.0.3" />
+      <dependency org="com.ibm.icu" name="icu4j" rev="78.3"/>
+      <dependency org="com.github.mwiede" name="jsch" rev="2.28.4" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.13.1"/>
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.13.1" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.13.1"/>
+      <dependency org="commons-codec" name="commons-codec" rev="1.22.0" />
+      <dependency org="commons-io" name="commons-io" rev="2.22.0" />
+      <dependency org="commons-logging" name="commons-logging" rev="1.4.0" />
+      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="4.2.39"/>
+      <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.2.39" conf="compile->master"/>
       <dependency org="io.opentracing" name="opentracing-noop" rev="0.33.0"/>
       <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
       <dependency org="javax.servlet" name="javax.servlet-api" rev="4.0.1"/>
       <dependency org="javainetlocator" name="inetaddresslocator" rev="2.18" />
       <dependency org="jcifs" name="jcifs" rev="1.3.17"  conf="compile->master" />
       <dependency org="net.arnx" name="jsonic" rev="1.3.10"/>
-      <dependency org="net.jthink" name="jaudiotagger" rev="2.2.5"/>
+      <dependency org="net.jthink" name="jaudiotagger" rev="3.0.1"/>
       <dependency org="net.sourceforge.jchardet" name="jchardet" rev="1.0"/>
-      <dependency org="org.apache.commons" name="commons-collections4" rev="4.4" />
-      <dependency org="org.apache.commons" name="commons-compress" rev="1.27.1" />
-      <dependency org="org.apache.calcite.avatica" name="avatica-core" rev="1.13.0" conf="compile->master"/>
-      <dependency org="org.apache.calcite" name="calcite-core" rev="1.18.0" conf="compile->master"/>
-      <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.18.0" conf="compile->master"/>
+      <dependency org="org.apache.commons" name="commons-collections4" rev="4.5.0" />
+      <dependency org="org.apache.commons" name="commons-compress" rev="1.28.0" />
+      <dependency org="org.apache.calcite.avatica" name="avatica-core" rev="1.28.0" conf="compile->master"/>
+      <dependency org="org.apache.calcite" name="calcite-core" rev="1.42.0" conf="compile->master"/>
+      <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.42.0" conf="compile->master"/>
       <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" />
-      <dependency org="org.apache.commons" name="commons-lang3" rev="3.18.0" />
+      <dependency org="org.apache.commons" name="commons-lang3" rev="3.20.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.14"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.14"/>
       <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
@@ -59,48 +59,52 @@
       <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-suggest" rev="9.0.0"/>
       
-      <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.3" />
-      <dependency org="org.apache.poi" name="poi" rev="5.3.0" />
-      <dependency org="org.apache.poi" name="poi-scratchpad" rev="5.3.0" />
+      <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.7" />
+      <dependency org="org.apache.poi" name="poi" rev="5.5.1" />
+      <dependency org="org.apache.poi" name="poi-scratchpad" rev="5.5.1" />
       
       <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="compile->master"/>
       <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
-      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.7.0" conf="compile->master" />
+      <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.9.5" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
-      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.81" />
-      <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="6.2.8" />
-      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.57.v20241219" />
-      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.57.v20241219" conf="compile->master" />
-      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.57.v20241219" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.57.v20241219"/>
-      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.57.v20241219"/>
-      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.57.v20241219"/>
-      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.57.v20241219"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.57.v20241219"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.57.v20241219">
+      <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.84" />
+      <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="7.2.1" />
+      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.58.v20250814" />
+      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.58.v20250814" conf="compile->master" />
+      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.58.v20250814" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.58.v20250814"/>
+      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.58.v20250814"/>
+      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.58.v20250814"/>
+      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.58.v20250814"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.58.v20250814"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.58.v20250814">
         <exclude module="jetty-util-ajax" />
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.57.v20241219"  />
-      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.57.v20241219"  />
-      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.57.v20241219" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.57.v20241219" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.57.v20241219" conf="compile->master"/>
-      <dependency org="org.jsoup" name="jsoup" rev="1.15.3"  />
-      <dependency org="org.jwat" name="jwat-warc" rev="1.1.3"  />
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.58.v20250814"  />
+      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.58.v20250814"  />
+      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.58.v20250814" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.58.v20250814" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.58.v20250814" conf="compile->master"/>
+      <dependency org="org.jsoup" name="jsoup" rev="1.22.2"  />
+      <dependency org="org.jwat" name="jwat-warc" rev="1.2.1">
+        <exclude module="bcprov-jdk15to18" />
+      </dependency>
       <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.8"/>
       <!--NOT FOUND dependency org="org.restlet.jee" name="org.restlet" rev="2.2.1" / -->
-      <dependency org="org.rrd4j" name="rrd4j" rev="3.2"/>
+      <dependency org="org.rrd4j" name="rrd4j" rev="3.10"/>
+      <!-- Solr 9.0.0 directly references the SLF4J 1.7 StaticLoggerBinder API. -->
+      <dependency org="org.slf4j" name="slf4j-api" rev="1.7.36" force="true"/>
       <dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.36"/>
       <dependency org="org.slf4j" name="log4j-over-slf4j" rev="1.7.36"/>
       <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.7.36"/>
       <!-- This does not match langdetect.jar from pre-ivy -->
-      <dependency org="org.tukaani" name="xz" rev="1.8"/>
+      <dependency org="org.tukaani" name="xz" rev="1.12"/>
       <dependency org="oro" name="oro" rev="2.0.8"/>
 
       <dependency org="junit" name="junit" rev="4.13.2" conf="test->default"/>
-      <dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" conf="test->default"/>
-      <dependency org="com.github.luben" name="zstd-jni" rev="1.5.5-6"></dependency>
-      <dependency org="ai.djl" name ="api" rev="0.27.0"></dependency>
+      <dependency org="org.hamcrest" name="hamcrest-core" rev="3.0" conf="test->default"/>
+      <dependency org="com.github.luben" name="zstd-jni" rev="1.5.7-11"></dependency>
+      <dependency org="ai.djl" name ="api" rev="0.36.0"></dependency>
     </dependencies>
 </ivy-module>
