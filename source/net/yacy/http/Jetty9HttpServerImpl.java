@@ -24,14 +24,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import java.util.EnumSet;
 import java.util.StringTokenizer;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -46,13 +50,16 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.servlets.MonitorFilter;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -74,6 +81,21 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
         this.server = new Server();
 
+        // remove the ConnectionInfo tracking entry (added per request by the MonitorFilter)
+        // when the tcp connection closes; added as bean to each connector below
+        final Connection.Listener connectionCloseMonitor = new Connection.Listener() {
+            @Override
+            public void onOpened(final Connection connection) {
+            }
+            @Override
+            public void onClosed(final Connection connection) {
+                final InetSocketAddress remote = connection.getEndPoint().getRemoteAddress();
+                if (remote != null) {
+                    ConnectionInfo.removeServerConnection(MonitorFilter.connectionId(remote.getAddress().getHostAddress(), remote.getPort()));
+                }
+            }
+        };
+
         final int cores = Runtime.getRuntime().availableProcessors();
         final int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
 
@@ -86,7 +108,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         connector.setName("httpd-" + host + ":" + Integer.toString(port));
         connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
         connector.setAcceptQueueSize(128);
-
+        connector.addBean(connectionCloseMonitor);
 
         this.server.addConnector(connector);
 
@@ -113,6 +135,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                 sslConnector.setPort(sslport);
                 sslConnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
                 sslConnector.setIdleTimeout(9000); // timout in ms when no bytes send / received
+                sslConnector.addBean(connectionCloseMonitor);
 
                 this.server.addConnector(sslConnector);
                 ConcurrentLog.info("SERVER", "SSL support initialized successfully on port " + sslport);
@@ -156,6 +179,12 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder, "/*");
 
+        // as fundamental component this filter is hardcoded too: it feeds the
+        // Connections_p.html monitoring and rejects requests above the connection limit
+        final FilterHolder monitorFilter = new FilterHolder(MonitorFilter.class);
+        monitorFilter.setAsyncSupported(true);
+        htrootContext.addFilter(monitorFilter, "/*", EnumSet.of(DispatcherType.REQUEST));
+
         final GzipHandler gzipHandler = new GzipHandler();
         /*
          * Decompression of incoming requests body is required for index distribution
@@ -198,9 +227,9 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         if (sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false)) {
             // Proxyhandlers are only needed if feature activated (save resources if not used)
             ConcurrentLog.info("SERVER", "load Jetty handler for transparent proxy");
-            handlers.setHandlers(new Handler[]{new MonitorHandler(), domainHandler, new ProxyCacheHandler(), new ProxyHandler()});
+            handlers.setHandlers(new Handler[]{domainHandler, new ProxyCacheHandler(), new ProxyHandler()});
         } else {
-            handlers.setHandlers(new Handler[]{new MonitorHandler(), domainHandler});
+            handlers.setHandlers(new Handler[]{domainHandler});
         }
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         final ContextHandler context = new ContextHandler();

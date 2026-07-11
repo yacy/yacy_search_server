@@ -46,6 +46,12 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 /**
  * handling of request to virtual ".yacy" domain determines public adress from
  * seedlist and forwards modified/wrapped request to it
+ *
+ * Note for servlet container migration: this must stay a container level
+ * handler (it can not become a servlet filter), because it cooperates with the
+ * ProxyHandler chain: the re-dispatched request with the rewritten (remote)
+ * host is picked up and forwarded to the peer by the transparent proxy
+ * handlers, before the local servlet context would handle it.
  */
 public class YacyDomainHandler extends AbstractHandler implements Handler {
 

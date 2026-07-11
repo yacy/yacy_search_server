@@ -38,6 +38,9 @@ import org.eclipse.jetty.util.component.DumpableCollection;
  * previously available in the deprecated IPAccessHandler.
  * </p>
  *
+ * Note for servlet container migration: the InetAccessHandler of Jetty 10 and
+ * later supports path patterns natively ("addr|path" syntax), this class can
+ * then be removed.
  */
 public class InetPathAccessHandler extends InetAccessHandler {
 

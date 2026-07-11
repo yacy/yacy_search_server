@@ -15,6 +15,16 @@ import org.eclipse.jetty.server.handler.HandlerWrapper;
 
 import net.yacy.cora.util.ConcurrentLog;
 
+/**
+ * Last-resort exception barrier wrapped around the complete handler chain.
+ *
+ * Note for servlet container migration: this must stay a container level
+ * handler (it can not become a servlet filter): inside the servlet context a
+ * filter would catch servlet exceptions before the containers error dispatch
+ * and thereby replace the YaCyErrorHandler error page with a plain text stack
+ * trace. Its purpose is to catch failures outside the servlet context, e.g.
+ * in the transparent proxy handlers.
+ */
 public class CrashProtectionHandler extends HandlerWrapper implements Handler, HandlerContainer {
 	
 	public CrashProtectionHandler() {
