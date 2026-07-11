@@ -49,7 +49,6 @@ import net.yacy.cora.federate.solr.responsewriter.SolrjResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
@@ -130,7 +129,7 @@ public class SolrSelectServlet extends HttpServlet {
 
             Switchboard sb = Switchboard.getSwitchboard();
             // TODO: isUserInRole needs a login to jetty container (not done automatically on admin from localhost)
-            boolean authenticated = hrequest.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString());
+            boolean authenticated = hrequest.isUserInRole(SwitchboardConstants.ADMIN_ACCOUNT_ROLE);
 
             // count remote searches if this was part of a p2p search
             if (mmsp.getMap().containsKey("partitions")) {

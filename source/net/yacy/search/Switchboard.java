@@ -151,16 +151,11 @@ import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxt;
-import net.yacy.data.BlogBoard;
-import net.yacy.data.BlogBoardComments;
 import net.yacy.data.BookmarkHelper;
 import net.yacy.data.BookmarksDB;
 import net.yacy.data.ListManager;
 import net.yacy.data.MessageBoard;
-import net.yacy.data.UserDB;
-import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.WorkTables;
-import net.yacy.data.wiki.WikiBoard;
 import net.yacy.data.wiki.WikiCode;
 import net.yacy.data.wiki.WikiParser;
 import net.yacy.document.Condenser;
@@ -278,15 +273,11 @@ public final class Switchboard extends serverSwitch {
     public CrawlQueues crawlQueues;
     public CrawlStacker crawlStacker;
     public MessageBoard messageDB;
-    public WikiBoard wikiDB;
-    public BlogBoard blogDB;
-    public BlogBoardComments blogCommentDB;
     public RobotsTxt robots;
     public Map<String, Object[]> outgoingCookies, incomingCookies;
     public volatile long proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess, adminAuthenticationLastAccess, optimizeLastRun;
     public Network yc;
     public ResourceObserver observer;
-    public UserDB userDB;
     public BookmarksDB bookmarksDB;
     public WebStructureGraph webStructure;
     public ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
@@ -830,36 +821,6 @@ public final class Switchboard extends serverSwitch {
             ConcurrentLog.logException(e);
         }
 
-        // starting wiki
-        try {
-            this.initWiki();
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-
-        //starting blog
-        try {
-            this.initBlog();
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-
-        // init User DB
-        this.log.config("Loading User DB");
-        final File userDbFile = new File(this.getDataPath(), "DATA/SETTINGS/user.heap");
-        try {
-            this.userDB = new UserDB(userDbFile);
-            this.log.config("Loaded User DB from file "
-                    + userDbFile.getName()
-                    + ", "
-                    + this.userDB.size()
-                    + " entries"
-                    + ", "
-                    + ppRamString(userDbFile.length() / 1024));
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-
         // init html parser evaluation scheme
         File parserPropertiesPath = new File(appPath, "defaults/");
         String[] settingsList = parserPropertiesPath.list();
@@ -996,7 +957,7 @@ public final class Switchboard extends serverSwitch {
         TextSnippet.statistics.setEnabled(this.getConfigBool(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
                 SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT));
 
-        // init the wiki
+        // Initialize the reusable WikiCode formatter used outside the retired local Wiki application.
         wikiParser = new WikiCode();
 
         // initializing the resourceObserver
@@ -1724,42 +1685,6 @@ public final class Switchboard extends serverSwitch {
                 + ppRamString(messageDbFile.length() / 1024));
     }
 
-    public void initWiki() throws IOException {
-        this.log.config("Starting Wiki Board");
-        final File wikiDbFile = new File(this.workPath, "wiki.heap");
-        this.wikiDB = new WikiBoard(wikiDbFile, new File(this.workPath, "wiki-bkp.heap"));
-        this.log.config("Loaded Wiki Board DB from file "
-                + wikiDbFile.getName()
-                + ", "
-                + this.wikiDB.size()
-                + " entries"
-                + ", "
-                + ppRamString(wikiDbFile.length() / 1024));
-    }
-
-    public void initBlog() throws IOException {
-        this.log.config("Starting Blog");
-        final File blogDbFile = new File(this.workPath, "blog.heap");
-        this.blogDB = new BlogBoard(blogDbFile);
-        this.log.config("Loaded Blog DB from file "
-                + blogDbFile.getName()
-                + ", "
-                + this.blogDB.size()
-                + " entries"
-                + ", "
-                + ppRamString(blogDbFile.length() / 1024));
-
-        final File blogCommentDbFile = new File(this.workPath, "blogComment.heap");
-        this.blogCommentDB = new BlogBoardComments(blogCommentDbFile);
-        this.log.config("Loaded Blog-Comment DB from file "
-                + blogCommentDbFile.getName()
-                + ", "
-                + this.blogCommentDB.size()
-                + " entries"
-                + ", "
-                + ppRamString(blogCommentDbFile.length() / 1024));
-    }
-
     public void initBookmarks() throws IOException {
         this.log.config("Loading Bookmarks DB");
         final File bookmarksFile = new File(this.workPath, "bookmarks.heap");
@@ -2014,10 +1939,6 @@ public final class Switchboard extends serverSwitch {
             this.dhtDispatcher.close();
         }
         //        de.anomic.http.client.Client.closeAllConnections();
-        this.wikiDB.close();
-        this.blogDB.close();
-        this.blogCommentDB.close();
-        this.userDB.close();
         if ( this.bookmarksDB != null ) {
             this.bookmarksDB.close(); // may null if concurrent initialization was not finished
         }
@@ -3978,7 +3899,7 @@ public final class Switchboard extends serverSwitch {
         // authorization (earlier) by servlet container with username/password
         // as this stays true as long as authenticated browser is open (even after restart of YaCy) add a timeout check to look at credentials again
         // TODO: same is true for credential checks below (at least with BASIC auth -> login should expire at least on restart
-        if (requestHeader.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
+        if (requestHeader.isUserInRole(SwitchboardConstants.ADMIN_ACCOUNT_ROLE)) {
             if (this.adminAuthenticationLastAccess + 60000 > System.currentTimeMillis()) // 1 minute
                 return 4; // hard-authenticated, quick return
         }
@@ -4007,11 +3928,8 @@ public final class Switchboard extends serverSwitch {
         } else {
             // handle DIGEST auth by servlet container
             if (requestHeader.getUserPrincipal() != null) { // user is authenticated (by Servlet container)
-                if (requestHeader.isUserInRole(AccessRight.ADMIN_RIGHT.toString())) {
+                if (requestHeader.isUserInRole(SwitchboardConstants.ADMIN_ACCOUNT_ROLE)) {
                     // we could double check admin right (but we trust embedded container)
-                    // String username = requestHeader.getUserPrincipal().getName();
-                    // if ((username.equalsIgnoreCase(sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin")))
-                    //        || (sb.userDB.getEntry(username).hasRight(AccessRight.ADMIN_RIGHT)))
                     this.adminAuthenticationLastAccess = System.currentTimeMillis();
                     return 4; // has admin right
                 }
@@ -4025,12 +3943,6 @@ public final class Switchboard extends serverSwitch {
         if ( accessFromLocalhost && (pass.equals(realmValue)) ) { // assume realmValue as is in cfg
             this.adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
-        }
-
-        // authorization by hit in userDB (authtype username:encodedpassword - handed over by DefaultServlet)
-        if ( this.userDB.hasAdminRight(requestHeader, requestHeader.getCookies()) ) {
-            this.adminAuthenticationLastAccess = System.currentTimeMillis();
-            return 4; //return, because 4=max
         }
 
         // athorization by BASIC auth (realmValue = "adminname:password")

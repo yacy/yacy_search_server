@@ -327,54 +327,6 @@ An error occurred while editing the following entries. Please check syntax.==न
 Activate this list for ...==इस सूची को सक्रिय करें...
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="सबमिट "
-"Preview"=="प्रीव्यू "
-"Discard"=="दिस्कार्द "
-"Yes, delete it."=="हाँ, इसे हटा दें."
-"No, leave it."=="नहीं, छोड़ो."
-"Import"=="आयात"
-&lt;&lt; previous entries==&lt;&lt; पिछली प्रविष्टियाँ
-next entries &gt;&gt;==अगली प्रविष्टियाँ &gt;&gt;
-Blog-Home==ब्लॉग घर
-Edit==एडिट
-Author:==लेखक:
-Subject:==विषय:
-Text:==मूलपाठ:
-Comments:==टिप्पणी:
-deactivated==निष्क्रिय
-activated==सक्रिय
-moderated==मॉडरेटेड
-Preview==पूर्व दर्शन
-No changes have been submitted so far!==अभी तक कोई चनगेस सबमिट नहीं हुआ !
-Access denied==ऐक्सेस डिनाइड
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==यदि आप नया ब्लॉग या एडिट करना चाहते है तो आपको एडमिन से लॉग इन होना होगा  या यूजर जिसके पास ब्लॉग राईट हो
-Are you sure...==क्या आपको यकीन है...
-Confirm deletion==हटाने की पुष्टि
-XML-Import==XML-आयात
-Import was successful!==इम्पोर्ट सफल रहा !
-Import failed, maybe the supplied file was no valid blog-backup?==इम्पोर्ट असफल रहा ! शायद यह फाइल सही नहीं है ?
-Please select the XML-file you want to import:==क्स्म्ल फाइल सेलेक्ट करे जो आपको इम्पोर्ट करनी है :
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="सबमिट"
-"Preview"=="प्रीव्यू"
-"Discard"=="दिस्कार्द"
-Blog-Home==ब्लॉग घर
-Comments:==टिप्पणी:
-&lt;&lt; previous entries==&lt;&lt; पिछली प्रविष्टियाँ
-next entries &gt;&gt;==अगली प्रविष्टियाँ &gt;&gt;
-Comments are not allowed for this posting!==इस पोस्टिंग के लिए टिप्पणियों की अनुमति नहीं है!
-Comment on this Blog==इस ब्लॉग पर टिप्पणी करें
-Author:==लेखक:
-Subject:==विषय:
-Text:==मूलपाठ:
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -442,58 +394,10 @@ Private Queue==निजी कतार
 Public Queue==सार्वजनिक कतार
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==उपयोगकर्ता सूची
-User Accounts==उपयोगकर्ता खातों
-User==उपयोगकर्ता
-First name==पहला नाम
-Last name==पिछला नाम
-Address==पता
-Last Access==अंतिम पहुंच
-Rights==अधिकार
-Time==समय
-Traffic==ट्रैफ़िक
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="एडमिनिस्ट्रेशन को परिभाषित करे"
-"Set Access Rules"=="प्रवेश नियम निर्धारित करें"
-"Edit User"=="यूजर को संपादित करो"
-"Delete User"=="उपयोगकर्ता हटाएँ"
-"Save User"=="उपयोगकर्ता सहेजें"
-User Administration==उपयोगकर्ता एडमिनिस्ट्रेशन
-Generic error.==सामान्य एरर .
 Passwords do not match.==पासवर्ड मेल नहीं खाते.
-Username too short. Username must be &gt;= 4 Characters.==उपयोक्तानाम बहुत छोटा है. उपयोगकर्ता नाम &gt;= 4 अक्षर होना चाहिए।
-Username already used (not allowed).==उपयोगकर्ता नाम पहले ही उपयोग किया जा चुका है (अनुमति नहीं है)।
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> इस YaCy उदाहरण को खाता "एडमिन" और डिफ़ॉल्ट पासवर्ड "yacy" के साथ प्रशासित किया जा सकता है।
-Change the password as soon as possible!==जितनी जल्दी हो सके पासवर्ड बदलें!
 Admin Account==एडमिनिस्ट्रेशन खाता
-Access from localhost without account==खाते के बिना लोकलहोस्ट से एक्सेस करे.
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==आपके अपने कंप्यूटर से आपके सहकर्मी तक पहुंच (लोकलहोस्ट एक्सेस) प्रशासकीय अधिकारों के साथ प्रदान की जाती है। प्रशासन खाते को कॉन्फ़िगर करने की कोई आवश्यकता नहीं है.
-This setting is convenient but less secure than using a qualified admin account.==यह सेटिंग सुविधाजनक है लेकिन किसी योग्य व्यवस्थापक खाते का उपयोग करने की तुलना में कम सुरक्षित है।
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==कृपया सावधानी से उपयोग करें, विशेष रूप से जब आप उसी कंप्यूटर पर अपना YaCy सहकर्मी चलाते समय अविश्वसनीय और संभावित रूप से दुर्भावनापूर्ण वेबसाइट ब्राउज़ करते हैं।
-Access only with qualified account==योग्य खाते के साथ ही प्रवेश है .
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==यदि आप अपने सहकर्मी तक दूरस्थ पहुंच चाहते हैं तो यह आवश्यक है, लेकिन यह आपके सहकर्मी के प्रशासन संचालन पर पहुंच नियंत्रण को भी सख्त कर देता है।
-Peer User:==पीयर यूज़र:
-New Peer Password:==नया पीयर पासवर्ड :
-Repeat Peer Password:==पीयर पासवर्ड दोहराएँ :
-Access Rules==प्रवेश नियम
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==सभी पृष्ठों की सुरक्षा: यदि चालू पर सेट है, तो सभी पृष्ठों तक पहुंच के लिए प्राधिकरण की आवश्यकता होती है; यदि बंद है, तो केवल "_p" एक्सटेंशन वाले पृष्ठ सुरक्षित हैं।
-User Accounts==उपयोगकर्ता खातों
-Select user==उपयोगकर्ता का चयन करें
-New user==नया उपयोगकर्ता
-Username==उपयोगकर्ता नाम
-Password==पासवर्ड
-Repeat password==पासवर्ड दोहराएँ
-First name==पहला नाम
-Last name==पिछला नाम
-Address==पता
-Rights:==अधिकार:
-Timelimit==समय सीमा
-Time used==समय का इस्तेमाल
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -871,8 +775,6 @@ Status page==स्थिति पेज
 Network pages==नेटवर्क पृष्ठों
 Surftips==der Surftipps
 News pages==समाचार पृष्ठों
-Blog==ब्लॉग
-Wiki==विकि
 Public bookmarks==ीलोक बुकमार्क्स
 Home Page==मुख पृष्ठ
 File Share==फ़ाइल शेयर
@@ -1030,28 +932,6 @@ Last Deploy== आखरी डेप्लोय
 You installed YaCy with a package manager. To update YaCy, use the package manager:==आपने पैकेज प्रबंधक के साथ YaCy स्थापित किया है। YaCy को अपडेट करने के लिए, पैकेज मैनेजर का उपयोग करें:
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==मैन्युअल अपडेट:<br/>apt-अपडेट प्राप्त करें &amp;&amp; उपयुक्त-इंस्टॉल करें yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==स्वचालित अद्यतन: निम्न पंक्ति को /etc/crontab<br/>0 6 * * * रूट apt-get update &amp;&amp; apt-get -y --force-yes install yacy में जोड़ें
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="उपयोगकर्ता सहेजें"
-"Delete User"=="उपयोगकर्ता हटाएँ"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==उपयोगकर्ता खाता संपादक
-Generic error.==सामान्य एरर .
-Passwords do not match.==पासवर्ड मेल नहीं खाते.
-Username too short. Username must be &gt;= 4 Characters.==उपयोक्तानाम बहुत छोटा है. उपयोगकर्ता नाम &gt;= 4 अक्षर होना चाहिए।
-Username already used (not allowed).==उपयोगकर्ता नाम पहले ही उपयोग किया जा चुका है (अनुमति नहीं है)।
-Username==उपयोगकर्ता नाम
-Password==पासवर्ड
-Repeat password==पासवर्ड दोहराएँ
-First name==पहला नाम
-Last name==पिछला नाम
-Address==पता
-Rights:==अधिकार:
-Timelimit==समय सीमा
-Time used==समय का इस्तेमाल
-back to user list==उपयोगकर्ता सूची पर वापस जाएँ
 #-----------------------------
 
 #File: Connections_p.html
@@ -2460,8 +2340,6 @@ inbox==इनबॉक्स
 "DHT Receive: yes"=="DHT प्राप्त करें: हाँ"
 "DHT receive enabled"=="DHT सक्षम प्राप्त करें"
 "Profile updated"=="प्रोफाइल अद्यतन किया गया"
-"Wiki updated"=="विकी अद्यतन किया गया"
-"Blog updated"=="ब्लॉग अपडेट किया गया"
 "Crawl"=="घुटनों के बल चलना"
 "The YaCy Network"=="YaCy नेटवर्क"
 "Type: Virgin"=="प्रकार: वर्जिन"
@@ -2507,7 +2385,6 @@ Received DHT<br/>Word Chunks==DHT<br/>शब्द खंड प्राप्�
 Received<br/>URLs==प्राप्त<br/>URL
 Location==जगह
 user agent<br/>==उपयोगकर्ता एजेंट<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==भेजें&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>संपादित करें&nbsp;<strong>W</strong>iki/<br/>ब्राउज़ करें&nbsp;<strong>B</strong>लॉग
 Network==नेटवर्क
 Online Peers==ऑनलाइन सहकर्मी
 Number of<br/>Documents==<br/>दस्तावेज़ों की संख्या
@@ -2578,7 +2455,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==हाल ही में शुरू किए गए क्रॉल वाली एक तालिका इंडेक्स क्रिएट - पेज पर प्रस्तुत की गई है
 A change in the personal profile will create a news entry. You can see recently made changes of==व्यक्तिगत प्रोफ़ाइल में परिवर्तन से एक समाचार प्रविष्टि बनेगी. आप हाल ही में किए गए परिवर्तन देख सकते हैं
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==नेटवर्क पेज पर प्रोफ़ाइल प्रविष्टियाँ, जहाँ उस प्रोफ़ाइल परिवर्तन को 'पी' (प्रोफ़ाइल) - चयनकर्ता के बगल में '*' के साथ देखा जाता है।
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==उपयोगकर्ता इंटरफ़ेस के लिए जोड़े गए या संशोधित अनुवाद का प्रकाशन। अन्य साथी इसे अपनी स्थानीय अनुवाद सूची में शामिल कर सकते हैं।
 More news services will follow.==अधिक समाचार सेवाएँ अनुसरण करेंगी।
 Above you can see four menus:==ऊपर आप चार मेनू देख सकते हैं:
 Only these news will be used to display specific news services as explained above.==जैसा कि ऊपर बताया गया है, केवल इन समाचारों का उपयोग विशिष्ट समाचार सेवाओं को प्रदर्शित करने के लिए किया जाएगा।
@@ -2984,23 +2860,18 @@ Age==आयु
 "Reset to defaults settings"=="डिफ़ॉल्ट सेटिंग्स पर रीसेट करें"
 limitations==सीमाएँ
 Local Search access rate limitations==स्थानीय खोज पहुंच दर सीमाएँ
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==आप यहां अप्रमाणित उपयोगकर्ताओं और विस्तारित खोज अधिकार के बिना उपयोगकर्ताओं द्वारा इस सहकर्मी खोज इंटरफ़ेस तक पहुंच दर पर सीमाएं कॉन्फ़िगर कर सकते हैं
 YaCy search==YaCy खोजें
 Access rate limitations to this peer search interface.==इस सहकर्मी खोज इंटरफ़ेस तक पहुंच दर की सीमाएं।
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==जब सीमित अधिकारों (अप्रमाणित या विस्तारित खोज अधिकार के बिना) वाला उपयोगकर्ता एक सीमा से अधिक हो जाता है, तो खोज अवरुद्ध हो जाती है।
 Max searches in 3s==अधिकतम 3s में खोज करता है
 Max searches in 1mn==अधिकतम 1 मिलियन में खोजें
 Max searches in 10mn==अधिकतम 10 मिलियन में खोज
 Peer-to-peer search==सहकर्मी से सहकर्मी खोज
 Access rate limitations to the peer-to-peer search mode.==पीयर-टू-पीयर खोज मोड तक पहुंच दर सीमाएं।
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==जब सीमित अधिकारों (अप्रमाणित या विस्तारित खोज अधिकार के बिना) वाला कोई उपयोगकर्ता एक सीमा से अधिक हो जाता है, तो खोज का दायरा केवल इस स्थानीय सहकर्मी सूचकांक पर वापस आ जाता है।
 Max searches in	10mn==अधिकतम 10 मिलियन में खोज
 Peer-to-peer search with JavaScript results	resorting==JavaScript परिणामों के साथ पीयर-टू-पीयर खोज का सहारा लेना
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==ब्राउज़र-साइड JavaScript परिणामों के सक्षम होने के साथ पीयर-टू-पीयर खोज मोड तक पहुंच दर सीमाएं
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==जब सीमित अधिकारों (अप्रमाणित या विस्तारित खोज अधिकार के बिना) वाला कोई उपयोगकर्ता एक सीमा से अधिक हो जाता है, तो सहारा लेने वाले परिणाम केवल मांग, सर्वर-साइड पर लागू होते हैं।
 Remote snippet load==रिमोट स्निपेट लोड
 Limitations on snippet loading from remote websites.==दूरस्थ वेबसाइटों से स्निपेट लोड करने की सीमाएँ।
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==जब सीमित अधिकारों (अप्रमाणित या विस्तारित खोज अधिकार के बिना) वाला कोई उपयोगकर्ता एक सीमा से अधिक हो जाता है, तो स्निपेट लाने की रणनीति 'CACHEONLY' पर वापस आ जाती है।
 Max	searches in 3s==अधिकतम 3s में खोज करता है
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">परिवर्तन तुरंत प्रभावी होंगे।</em>
 #-----------------------------
@@ -3225,14 +3096,9 @@ These settings configure the access method to your own http proxy and server.==�
 All traffic is routed through one single port, for both proxy and server.==प्रॉक्सी और सर्वर दोनों के लिए सभी ट्रैफ़िक को एक ही पोर्ट के माध्यम से रूट किया जाता है।
 HTTPS Server Port:==HTTPS सर्वर पोर्ट:
 Server Access Restrictions==सर्वर पहुंच प्रतिबंध
-You can restrict the access to this proxy/server using a two-stage security barrier:==आप दो-चरणीय सुरक्षा अवरोध का उपयोग करके इस प्रॉक्सी/server तक पहुंच को प्रतिबंधित कर सकते हैं:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==<em>एक्सेस डोमेन</em> को स्वीकृत क्लाइंट IP-नंबरों की सूची या वाइल्डकार्ड के साथ परिभाषित करें
-define an <em>user account</em> with an user:password - pair==एक उपयोगकर्ता के साथ एक <em>उपयोगकर्ता खाता</em> परिभाषित करें: पासवर्ड - जोड़ी
-This is the account that restricts access to the proxy function.==यह वह खाता है जो प्रॉक्सी फ़ंक्शन तक पहुंच को प्रतिबंधित करता है।
 You probably don't want to share the proxy to the internet, so you should set the==आप शायद प्रॉक्सी को इंटरनेट पर साझा नहीं करना चाहते हैं, इसलिए आपको इसे सेट करना चाहिए
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP-नंबर एक्सेस डोमेन एक पैटर्न पर जो आपके स्थानीय इंट्रानेट से मेल खाता है।
-The default setting should be right in most cases. If you want, you can also set a proxy account==अधिकांश मामलों में डिफ़ॉल्ट सेटिंग सही होनी चाहिए. आप चाहें तो प्रॉक्सी अकाउंट भी सेट कर सकते हैं
-so that every proxy user must authenticate first, but this is rather unusual.==ताकि प्रत्येक प्रॉक्सी उपयोगकर्ता को पहले प्रमाणित करना पड़े, लेकिन यह असामान्य है।
 IP-Number filter==IP-संख्या फ़िल्टर
 Accounts==हिसाब किताब
 #-----------------------------
@@ -3623,59 +3489,6 @@ Save Tools Configuration==उपकरण कॉन्फ़िगरेशन �
 CyTag Trails==साइटैग ट्रेल्स
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="प्रकाशित करना"
-"negative vote"=="नकारात्मक वोट"
-"positive vote"=="सकारात्मक वोट"
-You can share your local addition to translations and distribute it to other peers.==आप अनुवादों में अपना स्थानीय जोड़ साझा कर सकते हैं और इसे अन्य साथियों को वितरित कर सकते हैं।
-The remote peer can vote on your translation and add it to its own local translation.==दूरस्थ सहकर्मी आपके अनुवाद पर वोट कर सकता है और इसे अपने स्थानीय अनुवाद में जोड़ सकता है।
-File:==फाइल :
-Originator==लेखक
-English:==अंग्रेज़ी:
-existing==मौजूदा
-Translation:==अनुवाद:
-Vote on this translation. If you vote positive the translation is added to your local translation list.==इस अनुवाद पर वोट करें. यदि आप सकारात्मक वोट करते हैं तो अनुवाद आपकी स्थानीय अनुवाद सूची में जोड़ दिया जाता है।
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="अनुवाद सहेजें"
-Translation Editor==अनुवाद संपादक
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==उपयोगकर्ता इंटरफ़ेस (वर्तमान भाषा) के अअनुवादित पाठ का अनुवाद करें। संशोधित अनुवाद फ़ाइल DATA/LOCALE निर्देशिका में संग्रहीत है।
-UI Translation==यूआई अनुवाद
-Source File==स्रोत दस्तावेज
-view it==उसे देखें
-filter untranslated==अनअनुवादित फ़िल्टर करें
-Source Text==स्रोत इबारत
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="लॉग इन करें"
-"logout"=="लॉग आउट"
-"red bar"=="लाल पट्टी"
-"green bar"=="हरी पट्टी"
-"Change"=="परिवर्तन"
-User Page==उपयोगकर्ता पृष्ठ
-You are not logged in.==आपने लॉग - इन नहीं किया।
-Username:==उपयोगकर्ता नाम:
-Password:==पासवर्ड:
-(Identified by==(द्वारा पहचाना गया
-IP==IP
-Username/Password==उपयोगकर्ता नाम/Password
-Cookie==कुकी
-old Password==पुराना पासवर्ड
-new Password==नया पासवर्ड
-new Password(repetition)==नया पासवर्ड (पुनरावृत्ति)
-You are currently logged in as admin.==आप वर्तमान में व्यवस्थापक के रूप में लॉग इन हैं।
-(after logout you will be prompted for your password again. simply click "cancel")==(लॉगआउट के बाद आपसे दोबारा पासवर्ड मांगा जाएगा। बस "रद्द करें" पर क्लिक करें)
-Password was changed.==पासवर्ड बदल दिया गया था.
-Old Password is wrong.==पुराना पासवर्ड ग़लत है.
-New Password and its repetition do not match.==नया पासवर्ड और उसकी पुनरावृत्ति मेल नहीं खाती.
-New Password is empty.==नया पासवर्ड खाली है.
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="फ़ाइल सिस्टम ब्राउज़र"
@@ -3879,40 +3692,9 @@ Other Dot==अन्य बिंदु
 Dot-end==बिंदु-अंत
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="सभी"
-"admin"=="व्यवस्थापक"
-"Submit"=="सबमिट "
-"Preview"=="प्रीव्यू "
-"Discard"=="दिस्कार्द "
-"Show"=="दिखाओ"
-"Compare"=="तुलना करें"
-(only granted to admin)==(केवल व्यवस्थापक को दिया गया)
-Index -==अनुक्रमणिका -
-Grant Write Access to==लिखने तक पहुंच प्रदान करें
-Edit==एडिट
-Author:==लेखक:
-Text:==मूलपाठ:
-Preview==पूर्व दर्शन
-No changes have been submitted so far!==अभी तक कोई चनगेस सबमिट नहीं हुआ !
-Index==अनुक्रमणिका
-Subject==विषय
-Change Date==बदलाव दिनांक
-Last Author==अंतिम लेखक
-Start Page==पृष्ठ आरंभ करें
-Versions==संस्करणों
-Compare version from==से संस्करण की तुलना करें
-with version from==से संस्करण के साथ
-Error==गलती
-You can use==आप उपयोग कर सकते हैं
-Changes will be published as announcement on YaCyNews==परिवर्तन YaCyNews पर घोषणा के रूप में प्रकाशित किए जाएंगे
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==विकी-कोड
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==इस तालिका में उन टैगों का संक्षिप्त विवरण है जिनका उपयोग विकी और कई अन्य सर्वलेट्स में किया जा सकता है
 of YaCy. For a more detailed description visit the==YaCy का. अधिक विस्तृत विवरण के लिए यहां जाएं
 Code==कोड
 Description==विवरण
@@ -3937,7 +3719,6 @@ These tags create a definition list.==ये टैग एक परिभाष
 This tag creates a horizontal line.==यह टैग एक क्षैतिज रेखा बनाता है.
 [[pagename]]==[[पेजनाम]]
 [[pagename|description]]==[[पेजनाम|विवरण]]
-This tag creates links to other pages of the wiki.==यह टैग विकी के अन्य पेजों के लिए लिंक बनाता है।
 [url]==[यूआरएल]
 [url description]==[यूआरएल विवरण]
 This tag creates links to external websites.==यह टैग बाहरी वेबसाइटों के लिए लिंक बनाता है।
@@ -4262,7 +4043,6 @@ Outgoing&nbsp;News==निवर्तमान&nbsp;समाचार
 Published&nbsp;News==प्रकाशित&nbsp;समाचार
 Community Data==सामुदायिक डेटा
 Surftips==सर्फ टिप्स
-Local Peer Wiki==स्थानीय सहकर्मी विकी
 Bookmarks==बुकमार्क
 #-----------------------------
 
@@ -4273,7 +4053,6 @@ Advanced Settings==एडवांस सेटिंग
 Performance Settings of Busy Queues==व्यस्त कतारों की प्रदर्शन सेटिंग्स
 Viewer and administration for database tables==डेटाबेस तालिकाओं के लिए दर्शक और प्रशासन
 Advanced Properties==उन्नत गुण
-UI Translations==यूआई अनुवाद
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4379,13 +4158,6 @@ Generic Search Portal==सामान्य खोज पोर्टल
 Search Box Anywhere==कहीं भी खोजें बॉक्स
 User Profile==उपयोगकर्ता रूपरेखा
 Local robots.txt==स्थानीय robots.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==प्रकाशन
-Wiki==विकि
-Blog==ब्लॉग
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4532,14 +4304,6 @@ domaingraph : Built with Processing==डोमेनग्राफ: प्र�
 This browser does not have a Java Plug-in.==इस ब्राउज़र में Java प्लग-इन नहीं है।
 Get the latest Java Plug-in here.==नवीनतम Java प्लग-इन यहां प्राप्त करें।
 Built with Processing==प्रसंस्करण के साथ निर्मित
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="लॉग इन करें"
-Your Username/Password is wrong.==आपका उपयोक्तानाम/Password ग़लत है.
-Username==उपयोगकर्ता नाम
-Password==पासवर्ड
 #-----------------------------
 
 #File: proxymsg/error.html

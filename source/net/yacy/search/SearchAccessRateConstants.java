@@ -31,88 +31,79 @@ public enum SearchAccessRateConstants {
 
 	/**
 	 * Configuration for the maximum number of accesses within three seconds to the
-	 * search interface for unauthenticated users and authenticated users with no
-	 * extended search right
+	 * search interface for unauthenticated users
 	 */
 	PUBLIC_MAX_ACCESS_3S("search.public.max.access.3s", 60),
 
 	/**
 	 * Configuration for the maximum number of accesses within one minute to the
-	 * search interface for unauthenticated users and authenticated users with no
-	 * extended search right
+	 * search interface for unauthenticated users
 	 */
 	PUBLIC_MAX_ACCESS_1MN("search.public.max.access.1mn", 600),
 
 	/**
 	 * Configuration for the maximum number of accesses within ten minutes to the
-	 * search interface for unauthenticated users and authenticated users with no
-	 * extended search right
+	 * search interface for unauthenticated users
 	 */
 	PUBLIC_MAX_ACCESS_10MN("search.public.max.access.10mn", 3000),
 
 	/**
 	 * Configuration for the maximum number of accesses within three seconds to the
-	 * search interface in P2P mode for unauthenticated users and authenticated
-	 * users with no extended search right
+	 * search interface in P2P mode for unauthenticated users
 	 */
 	PUBLIC_MAX_P2P_ACCESS_3S("search.public.max.p2p.access.3s", 1),
 
 	/**
 	 * Configuration for the maximum number of accesses within one minute to the
-	 * search interface in P2P mode for unauthenticated users and authenticated
-	 * users with no extended search right
+	 * search interface in P2P mode for unauthenticated users
 	 */
 	PUBLIC_MAX_P2P_ACCESS_1MN("search.public.max.p2p.access.1mn", 6),
 
 	/**
 	 * Configuration for the maximum number of accesses within ten minutes to the
-	 * search interface in P2P mode for unauthenticated users and authenticated
-	 * users with no extended search right
+	 * search interface in P2P mode for unauthenticated users
 	 */
 	PUBLIC_MAX_P2P_ACCESS_10MN("search.public.max.p2p.access.10mn", 60),
 
 	/**
 	 * Configuration for the maximum number of accesses within three seconds to the
 	 * search interface in P2P mode with browser-side JavaScript results resorting
-	 * enabled for unauthenticated users and authenticated users with no extended
-	 * search right
+	 * enabled for unauthenticated users
 	 */
 	PUBLIC_MAX_P2P_JSRESORT_ACCESS_3S("search.public.max.p2p.jsresort.access.3s", 1),
 
 	/**
 	 * Configuration for the maximum number of accesses within one minute to the
 	 * search interface in P2P mode with browser-side JavaScript results resorting
-	 * enabled for unauthenticated users and authenticated users with no extended
-	 * search right
+	 * enabled for unauthenticated users
 	 */
 	PUBLIC_MAX_P2P_JSRESORT_ACCESS_1MN("search.public.max.p2p.jsresort.access.1mn", 1),
 
 	/**
 	 * Configuration for the maximum number of accesses within ten minutes to the
 	 * search interface in P2P mode with browser-side JavaScript results resorting
-	 * enabled for unauthenticated users and authenticated users with no extended
-	 * search right
+	 * enabled for unauthenticated users
 	 */
 	PUBLIC_MAX_P2P_JSRESORT_ACCESS_10MN("search.public.max.p2p.jsresort.access.10mn", 10),
 
 	/**
 	 * Configuration for the maximum number of accesses within three seconds to the
 	 * search interface to support fetching remote results snippets for
-	 * unauthenticated users and authenticated users with no extended search right
+	 * unauthenticated users
 	 */
 	PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_3S("search.public.max.remoteSnippet.access.3s", 1),
 
 	/**
 	 * Configuration for the maximum number of accesses within one minute to the
 	 * search interface to support fetching remote results snippets for
-	 * unauthenticated users and authenticated users with no extended search right
+	 * unauthenticated users
 	 */
 	PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_1MN("search.public.max.remoteSnippet.access.1mn", 4),
 
 	/**
 	 * Configuration for the maximum number of accesses within ten minutes to the
 	 * search interface to support fetching remote results snippets mode for
-	 * unauthenticated users and authenticated users with no extended search right
+	 * unauthenticated users
 	 */
 	PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_10MN("search.public.max.remoteSnippet.access.10mn", 20);
 

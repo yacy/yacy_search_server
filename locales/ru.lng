@@ -186,54 +186,6 @@ DHT==DHT
 News==Новости
 Proxy==Прокси
 The tested URL was not valid.==Протестированный URL недействителен.
-#File: Blog.html
-Edit==Изменить
-Text:==Текст:
-#---------------------------
-Blog-Home==Домашняя страница блога
-Author:==Автор:
-Subject:==Тема:
-Comments:==Комментарии:
-deactivated==отключить
-moderated==проверено
-"Submit"=="Отправить"
-"Preview"=="Предварительный просмотр"
-"Discard"=="Отменить"
-No changes have been submitted so far!==Изменения не были произведены!
-Access denied==Доступ запрещен
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Чтобы изменить или создать блог, вы должны быть зарегистрированы в качестве администратора или пользователя, который имеет необходимые права.
-Confirm deletion==Подтвердить удаление
-Import was successful!==Импорт завершен успешно!
-Import failed, maybe the supplied file was no valid blog-backup?==Не удалось импортировать, может быть, поставляемый файл не был резервной копией?
-Please select the XML-file you want to import:==Пожалуйста, выберите XML-фаил, который вы импортируете:
-#-----------------------------
-
-"RSS"=="RSS"
-"Yes, delete it."=="Да, удалите."
-"No, leave it."=="Нет, оставить."
-"Import"=="Импорт"
-&lt;&lt; previous entries==&lt;&lt; предыдущие записи
-next entries &gt;&gt;==следующие записи &gt;&gt;
-activated==активирован
-Preview==Предварительный просмотр
-Are you sure...==Вы уверены...
-XML-Import==XML-Импорт
-#File: BlogComments.html
-Comments:==Комментарии:
-Text:==Текст:
-#---------------------------
-Blog-Home==Домашняя страница блога
-Author:==Автор:
-Subject:==Тема:
-"Submit"=="Отправить"
-"Preview"=="Предварительный просмотр"
-"Discard"=="Отменить"
-#-----------------------------
-
-&lt;&lt; previous entries==&lt;&lt; предыдущие записи
-next entries &gt;&gt;==следующие записи &gt;&gt;
-Comments are not allowed for this posting!==Комментарии к этой публикации запрещены!
-Comment on this Blog==Комментировать этот блог
 #File: Bookmarks.html
 "Save"=="Сохранить"
 URL:==по ссылке:
@@ -314,45 +266,11 @@ Search Result==Результат поиска
 
 loading....==загрузка....
 #File: ConfigAccounts_p.html
-Username==Имя пользователя
 #---------------------------
-User Accounts==Учётные записи пользователей
-User Administration==Учётные записи
-Generic error.==Общая ошибка.
 Passwords do not match.==Пароли не совпадают.
-Username too short. Username must be &gt;= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше 4 символов.
 Admin Account==Учётная запись администратора
-Access from localhost without account==Доступ со своего компьютера возможен без учётной записи.
-Access only with qualified account==Доступ только с квалифицированной учётной записи
-Peer User:==Пользователь узла:
-New Peer Password:==Новый пароль узла:
-Repeat Peer Password:==Повторите пароль узла:
-"Define Administrator"=="Назначить администратором"
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Защита всех страниц: если включено, то для доступа ко всем страницам требуется авторизация; если выключено, то защищены только страницы с префиксом "_p".
-Select user==Выбрать пользователя
-New user==Новый пользователь
-Repeat password==Повторите пароль
-First name==Имя
-Last name==Фамилия
-Address==Адрес
-Timelimit==Лимит времени
-Time used==Время использования
 #-----------------------------
 
-"Set Access Rules"=="Установить правила доступа"
-"Edit User"=="Изменить пользователя"
-"Delete User"=="Удалить пользователя"
-"Save User"=="Сохранить пользователя"
-Username already used (not allowed).==Имя пользователя уже использовано (не разрешено).
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Этот экземпляр YaCy можно администрировать с помощью учетной записи «admin» и пароля по умолчанию «yacy».
-Change the password as soon as possible!==Смените пароль как можно скорее!
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Доступ к вашему узлу с вашего собственного компьютера (доступ локального хоста) предоставляется с правами администратора. Нет необходимости настраивать учетную запись администратора.
-This setting is convenient but less secure than using a qualified admin account.==Этот параметр удобен, но менее безопасен, чем использование квалифицированной учетной записи администратора.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Используйте его с осторожностью, особенно при просмотре ненадежных и потенциально вредоносных веб-сайтов при запуске узла YaCy на том же компьютере.
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Это необходимо, если вам нужен удаленный доступ к вашему узлу, но это также ужесточает контроль доступа к административным операциям вашего узла.
-Access Rules==Правила доступа
-Password==Пароль
-Rights:==Права:
 #File: ConfigAppearance_p.html
 Text==Текст
 #---------------------------
@@ -798,7 +716,6 @@ Status page==Состоянию страницы
 Network pages==Страницам сети
 Surftips==Подсказкам
 News pages==Страницам новостей
-Blog==Блогу
 Public bookmarks==Публичным закладкам
 Home Page==Домашней странице
 File Share==Общим файлам
@@ -812,7 +729,6 @@ Unable to access the local file:==Невозможно получить дост
 Deletion of==Удаление
 htroot/robots.txt==htroot/robots.txt
 failed==неуспешный
-Wiki==Вики
 #File: ConfigSearchBox.html
 #---------------------------
 Integration of a Search Box==Интеграция поиска
@@ -2042,7 +1958,6 @@ Network History==История сети
 <b>Count of all Active Peers Per Week</b> in the last 30d, scale = 7d==<b>Число всех активных узлов в неделю</b> за последние 30 дней, масштаб = 7 дней
 <b>Count of all Active Peers Per Month</b> in the last 365d, scale = 30d==<b>Число всех активных узлов в месяц</b> за последний год, масштаб = 30 дней
 Manually contacting Peer==Ручное подключение узла
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==Отправить сообщение (<strong>m</strong>)/<br/>Смотреть профиль (<strong>p</strong>)/<br/>Читать Wiki (<strong>w</strong>)/<br/>Блог (<strong>b</strong>)
 Search for a peername (RegExp allowed)==Поиск узла по имени (разрешены регулярные выражения)
 "Search"=="Поиск"
 Name==Имя
@@ -2097,8 +2012,6 @@ this peer==Ваш узел
 "Type: Principal | Contact: offline | Seed download: ?"=="Тип: Директор | Контакт: оффлайн | Загрузка семян: ?"
 "Principal offline"=="Директор оффлайн"
 "Profile updated"=="Профиль обновлен"
-"Wiki updated"=="Вики обновлена"
-"Blog updated"=="Блог обновлен"
 "Crawl"=="Сканировать"
 "Type: Virgin"=="Тип: Девственница"
 "Virgin"=="Девственник"
@@ -2191,7 +2104,6 @@ Attributes==Аттрибуты
 "Processed News"=="Обработанные новости"
 "Outgoing News"=="Исходящие новости"
 "Published News"=="Опубликованные новости"
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==Публикация добавленного или измененного перевода пользовательского интерфейса. Другие узлы могут включить его в свой локальный список переводов.
 More news services will follow.==За этим последуют и другие новостные службы.
 #File: Performance_p.html
 "Save"=="Сохранить"
@@ -2659,14 +2571,9 @@ Proxy Access Settings==Настройки доступа к прокси
 These settings configure the access method to your own http proxy and server.==Здесь вы можете настроить доступ к вашему http-прокси и серверу.
 All traffic is routed through one single port, for both proxy and server.==Весь трафик направляется на один порт для прокси и сервера.
 Server Access Restrictions==Ограничения доступа к серверу
-You can restrict the access to this proxy/server using a two-stage security barrier:==Вы можете ограничить доступ к своему прокси/серверу используя двухуровневый барьер:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==установить <em>доступ к домену</em> списком предоставленных клиенту IP-адреса или символов
-define an <em>user account</em> with an user:password - pair==установить <em>учётную запись пользователя</em> с логином и паролем
-This is the account that restricts access to the proxy function.==Такая учётная запись будет иметь ограниченный доступ к функциям прокси.
 You probably don't want to share the proxy to the internet, so you should set the==Если вы не желаете использовать общий прокси для интернета, вы можете указать
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP-адрес вашей локальной сети в фильтре ниже.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Настройки по-умолчанию подходят в большинстве случаев. Вы также можете установить учётную запись прокси
-so that every proxy user must authenticate first, but this is rather unusual.==, чтобы сначала авторизовывался каждый пользователь прокси. Обычно это не практикуется.
 IP-Number filter==Фильтр IP-адресов
 
 #-----------------------------
@@ -3181,32 +3088,6 @@ YaCy Debugging: Thread Dump==Oтладка YaCy: Дамп потока
 #-----------------------------
 
 Threaddump==Треддамп
-#File: User.html
-#---------------------------
-User Page==Страница пользователя
-Username:==Имя пользователя:
-"login"=="логин"
-old Password==старый пароль
-new Password(repetition)==новый пароль повторно
-"Change"=="Изменить"
-You are currently logged in as admin.==Вы зашли как администратор.
-(after logout you will be prompted for your password again. simply click "cancel")==(после выхода необходимо ввести пароль повторно.)
-Password was changed.==Пароль был изменен.
-Old Password is wrong.==Старый пароль неправильный.
-New Password and its repetition do not match.==Новый пароль не совпадает с повтором.
-New Password is empty.==Новый пароль пустой.
-#-----------------------------
-
-"logout"=="выход из системы"
-"red bar"=="красная полоса"
-"green bar"=="зеленая полоса"
-You are not logged in.==Вы не вошли в систему.
-Password:==Пароль:
-(Identified by==(Идентифицировано
-IP==IP
-Username/Password==Имя пользователя/Password
-Cookie==печенье
-new Password==Новый пароль
 #File: ViewFile.html
 Description:==Описание:
 URL:==по ссылке:
@@ -3454,41 +3335,9 @@ Line==Линия
 Pivot Dot==Поворотная точка
 Other Dot==Другая точка
 Dot-end==точка-конец
-#File: Wiki.html
-Edit==Изменить
-Text:==Текст:
-#---------------------------
-Grant Write Access to==Разрешено вести запись
-# !!! Do not translate the input buttons because that breaks the function to switch rights !!!
-Start Page==Стартовая страница
-Index==Индекс
-Versions==Версии
-Author:==Автор:
-You can use==Вы можете использовать
-"Submit"=="Сохранить"
-"Preview"=="Предпросмотр"
-"Discard"=="Отменить"
-No changes have been submitted so far!==Изменения не были произведены!
-Subject==Тема
-Change Date==Дата изменения
-Last Author==Последний автор
-Compare version from==Сравнить версию из
-"Show"=="Показать"
-with version from==с версией из
-"Compare"=="Сравнить"
-Changes will be published as announcement on YaCyNews==Изменения будут опубликованы в виде сообщений YaCy.
-#-----------------------------
-
-"all"=="все"
-"admin"=="администратор"
-(only granted to admin)==(предоставлено только администратору)
-Index -==Индекс -
-Preview==Предварительный просмотр
-Error==Ошибка
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki-код
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Эта таблица содержит короткое описание тэгов, которые могут быть использованы в wiki и в некоторых других сервлетах
 of YaCy. For a more detailed description visit the==в YaCy. Если вам необходимо более детальное описание тэгов, то посетите
 Code==Код
 Description==Описание
@@ -3499,7 +3348,6 @@ These tags create a numbered list.==Эти тэги создают пронум�
 These tags create an unnumbered list.==Эти тэги создают ненумерованный список.
 These tags create a definition list.==Эти тэги создают список определений.
 This tag creates a horizontal line.==Этот тэг создаёт горизонтальную линию.
-This tag creates links to other pages of the wiki.==Этот тэг создаёт ссылки на другие страницы Wiki.
 This tag displays an image, it can be aligned left, right or center.==Этот тэг служит для показа изображения, которое может быть выровнено по правую сторону, по левую или по центру.
 This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.==Этот тэг служит для добавления видео с Youtube или Vimeo с заданным идентификатором и заданной шириной 425 пикселей и высотой 350 пикселей.
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Эти тэги создают таблицу, где первые знаки начинают таблицу, вторые начинают
@@ -3788,7 +3636,6 @@ Search Sequence==Последовательность поиска
 Messages==Сообщения
 Community Data==Данные сообщества
 Surftips==Советы
-Local Peer Wiki==Локальный пир вики
 Bookmarks==Закладки
 #File: env/templates/submenuCrawler.template
 #-----------------------------
@@ -3807,7 +3654,6 @@ Viewer and administration for database tables==Просмотр и управл�
 Performance Settings of Busy Queues==Настройки производительности
 #-----------------------------
 
-UI Translations==Переводы пользовательского интерфейса
 #File: env/templates/submenuDesign.template
 #---------------------------
 Search Page Layout==Макет страницы поиска
@@ -3915,13 +3761,6 @@ Mass Crawl Check==Массовая проверка индексирования
 Regex Test==Тест регулярного выражения
 #-----------------------------
 
-#File: env/templates/submenuPublication.template
-Blog==Блогу
-#---------------------------
-Publication==Публикации
-#-----------------------------
-
-Wiki==Вики
 #File: env/templates/submenuWebStructure.template
 #---------------------------
 Web Visualization==Просмотр индекса
@@ -3930,14 +3769,6 @@ Image Collage==Коллаж изображений
 Index Browser==Просмотр хостов
 #-----------------------------
 
-#File: proxymsg/authfail.inc
-Username==Имя пользователя
-#---------------------------
-Your Username/Password is wrong.==Логин и/или пароль неверный.
-"login"=="логин"
-#-----------------------------
-
-Password==Пароль
 #File: proxymsg/error.html
 #---------------------------
 YaCy: Error Message==YaCy: Сообщение об ошибке
@@ -3993,42 +3824,6 @@ Shallow crawl depth (0 to 2):==Малая глубина сканировани�
 Deep crawl depth (1 to 5):==Глубина глубокого сканирования (от 1 до 5):
 Index text:==Индексный текст:
 Index media:==Индексные СМИ:
-#File: ConfigAccountList_p.html
-#---------------------------
-Address==Адрес
-First name==Имя
-Last name==Фамилия
-Time==Дата и время
-User Accounts==Учётные записи пользователей
-#-----------------------------
-
-User List==Список пользователей
-User==Пользователь
-Last Access==Последний доступ
-Rights==Права
-Traffic==Трафик
-#File: ConfigUser_p.html
-#---------------------------
-Address==Адрес
-First name==Имя
-Generic error.==Общая ошибка.
-Last name==Фамилия
-Passwords do not match.==Пароли не совпадают.
-Repeat password==Повторите пароль
-Time used==Время использования
-Timelimit==Лимит времени
-Username==Имя пользователя
-Username too short. Username must be &gt;= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше 4 символов.
-#-----------------------------
-
-"Save User"=="Сохранить пользователя"
-"Delete User"=="Удалить пользователя"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==Редактор учетных записей пользователей
-Username already used (not allowed).==Имя пользователя уже использовано (не разрешено).
-Password==Пароль
-Rights:==Права:
-back to user list==вернуться к списку пользователей
 #File: CrawlMonitorRemoteStart.html
 #---------------------------
 Depth==Глубина
@@ -4127,14 +3922,6 @@ Date:==Дата:
 Message:==Сообщение:
 Action:==Действие:
 inbox==входящие
-#File: TransNews_p.html
-#---------------------------
-"negative vote"=="Не понравилось"
-"positive vote"=="Понравилось"
-File:==Файл:
-Originator==Инициатор
-#-----------------------------
-
 "Publish"=="Публиковать"
 You can share your local addition to translations and distribute it to other peers.==Вы можете поделиться своим локальным дополнением к переводам и распространить его среди других коллег.
 The remote peer can vote on your translation and add it to its own local translation.==Удаленный узел может проголосовать за ваш перевод и добавить его к своему локальному переводу.
@@ -4530,23 +4317,18 @@ Save RAG Settings==Сохраните настройки RAG
 "Reset to defaults settings"=="Сброс к настройкам по умолчанию"
 limitations==ограничения
 Local Search access rate limitations==Ограничения скорости доступа к локальному поиску
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Здесь вы можете настроить ограничения на скорость доступа к этому интерфейсу однорангового поиска для неаутентифицированных пользователей и пользователей без права расширенного поиска.
 YaCy search==YaCy поиск
 Access rate limitations to this peer search interface.==Ограничения скорости доступа к этому интерфейсу поиска одноранговых узлов.
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Когда пользователь с ограниченными правами (не прошедший аутентификацию или не имеющий права расширенного поиска) превышает лимит, поиск блокируется.
 Max searches in 3s==Макс. поиск за 3 с.
 Max searches in 1mn==Максимальное количество поисков за 1 минуту
 Max searches in 10mn==Макс. поиск за 10 минут
 Peer-to-peer search==Одноранговый поиск
 Access rate limitations to the peer-to-peer search mode.==Ограничения скорости доступа в режиме однорангового поиска.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Когда пользователь с ограниченными правами (не прошедший проверку подлинности или без права расширенного поиска) превышает ограничение, область поиска возвращается только к этому локальному индексу узла.
 Max searches in	10mn==Макс. поиск за 10 минут
 Peer-to-peer search with JavaScript results	resorting==Одноранговый поиск с сортировкой результатов JavaScript
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Ограничения скорости доступа в режиме однорангового поиска с включенной сортировкой результатов JavaScript на стороне браузера
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Когда пользователь с ограниченными правами (не прошедший аутентификацию или не имеющий права расширенного поиска) превышает лимит, сортировка результатов становится применимой только по запросу на стороне сервера.
 Remote snippet load==Удаленная загрузка фрагмента
 Limitations on snippet loading from remote websites.==Ограничения на загрузку фрагментов с удаленных сайтов.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Когда пользователь с ограниченными правами (не прошедший проверку подлинности или без права расширенного поиска) превышает лимит, стратегия выборки фрагментов возвращается к «CACHEONLY».
 Max	searches in 3s==Макс. поиск за 3 с.
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Изменения вступят в силу немедленно.</em>
 #-----------------------------
@@ -4669,18 +4451,6 @@ Save Tools Configuration==Сохранить конфигурацию инстр
 #File: Trails.html
 #---------------------------
 CyTag Trails==CyTag Тропы
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="Сохранить перевод"
-Translation Editor==Редактор перевода
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==Перевести непереведенный текст пользовательского интерфейса (текущий язык). Модифицированный файл перевода хранится в каталоге DATA/LOCALE.
-UI Translation==Перевод пользовательского интерфейса
-Source File==Исходный файл
-view it==просмотреть это
-filter untranslated==фильтровать непереведенные
-Source Text==Исходный текст
 #-----------------------------
 
 #File: VFS.html

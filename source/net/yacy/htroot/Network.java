@@ -303,8 +303,6 @@ public class Network {
 
                     // find updated Information using YaCyNews
                     final HashSet<String> updatedProfile = new HashSet<>();
-                    final HashMap<String, Map<String, String>> updatedWiki = new HashMap<>();
-                    final HashMap<String, Map<String, String>> updatedBlog = new HashMap<>();
                     final HashMap<String, String> isCrawling = new HashMap<>();
                     NewsDB.Record record;
                     final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
@@ -314,10 +312,6 @@ public class Network {
                             continue;
                         } else if (record.category().equals(NewsPool.CATEGORY_PROFILE_UPDATE)) {
                             updatedProfile.add(record.originator());
-                        } else if (record.category().equals(NewsPool.CATEGORY_WIKI_UPDATE)) {
-                            updatedWiki.put(record.originator(), record.attributes());
-                        } else if (record.category().equals(NewsPool.CATEGORY_BLOG_ADD)) {
-                            updatedBlog.put(record.originator(), record.attributes());
                         } else if (record.category().equals(NewsPool.CATEGORY_CRAWL_START)) {
                             isCrawling.put(record.originator(), record.attributes().get("startURL"));
                         }
@@ -340,8 +334,6 @@ public class Network {
                         default: break;
                     }
                     String startURL;
-                    Map<String, String> wikiMap;
-                    Map<String, String> blogMap;
                     String userAgent, location;
                     int PPM;
                     double QPM;
@@ -382,8 +374,6 @@ public class Network {
                             	continue;
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 0);
-                            prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
-                            prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             final String ip = ips.iterator().next();
                             if (conCount >= maxCount) { break; }
@@ -395,21 +385,6 @@ public class Network {
                             if (updatedProfile.contains(seed.hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile_hash", seed.hash);
-                            }
-                            if ((wikiMap = updatedWiki.get(seed.hash)) == null) {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 0);
-                            } else {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 1);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedWiki_page", wikiMap.get("page"));
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getPublicAddress(ip));
-                            }
-                            if ((blogMap = updatedBlog.get(seed.hash)) == null) {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
-                            } else {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_page", blogMap.get("page"));
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_subject", blogMap.get("subject"));
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getPublicAddress(ip));
                             }
                             PPM = seed.getPPM();
                             QPM = seed.getQPM();

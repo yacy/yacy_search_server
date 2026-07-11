@@ -10,10 +10,10 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarkHelper;
 import net.yacy.data.BookmarksDB;
-import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -21,7 +21,6 @@ public class get_bookmarks {
 
     private static final serverObjects prop = new serverObjects();
     private static Switchboard sb = null;
-    private static UserDB.Entry user = null;
     private static boolean isAdmin = false;
 
     private static int R = 1; // TODO: solve the recursion problem an remove global variable
@@ -59,13 +58,11 @@ public class get_bookmarks {
 
         prop.clear();
         sb = (Switchboard) env;
-        user = sb.userDB.getUser(header);
-        isAdmin = (sb.verifyAuthentication(header) || user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
+        isAdmin = sb.verifyAuthentication(header);
 
         // set user name
         final String username;
-        if(user != null) username=user.getUserName();
-        else if(isAdmin) username="admin";
+        if(isAdmin) username=sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
         else username = "unknown";
         prop.putHTML("display_user", username);
 

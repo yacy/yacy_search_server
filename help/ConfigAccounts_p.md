@@ -1,61 +1,59 @@
 ---
 page: htroot/ConfigAccounts_p.html
 help: help/ConfigAccounts_p.md
-title: User Accounts
+title: Admin Account
 package: configuration-administration
 access: admin
 kind: admin-page
 backend_java: source/net/yacy/htroot/ConfigAccounts_p.java
 ---
 
-# User Accounts
+# Admin Account
 
 ## Purpose
 
-User Accounts defines administrator and user credentials.
+This page configures YaCy's single built-in administrator account and page-protection policy.
 
 Use it early, especially before the peer is reachable from another machine.
 
 ## What You Can Do Here
 
-- User Accounts defines administrator and user credentials.
+- Configure the built-in administrator username and password used by HTTP BASIC or DIGEST authentication.
+- Choose whether trusted localhost requests are granted administrator access without credentials.
+- Choose whether authentication protects only `_p` pages or all applicable pages.
 - Read the current value before changing it.
 - Verify the effect on the public page, status page, or related administration page.
 
 ## Page Architecture
 
-Configuration pages usually contain persistent settings. A visible form writes values into YaCy configuration, while the backend may reload subsystems such as language files, network listeners, cache handling, or search presentation.
+The page separates administrator credentials from access rules. The two access-rule switches share one form and are saved automatically whenever either switch changes. Each switch selects its own existing backend action, so changing one rule does not rewrite the other.
 
 | Control | Meaning | Values or examples |
 | --- | --- | --- |
-| `access` | Access from localhost without account / Access only with qualified account. Options: `localhost` = Access from localhost without account, `account` = Access only with qualified account. | `localhost` = Access from localhost without account, `account` = Access only with qualified account |
-| `adminuser` | Peer User. | Text value; use the page label and surrounding context to choose the exact content. |
-| `adminpw1` | New Peer Password. | Text value; use the page label and surrounding context to choose the exact content. |
-| `adminpw2` | Repeat Peer Password. | Text value; use the page label and surrounding context to choose the exact content. |
-| `setAdmin` | Peer User. | `Define Administrator` |
-| `adminAccountAllPages` | Access from localhost without account. | Access from localhost without account |
-| `setAccess` | Access from localhost without account. | `Set Access Rules` |
-| `user` | Select user. | `newuser` = New user |
-| `change_user` | Select user. | `Edit User` |
-| `delete_user` | Select user. | `Delete User` |
-| `username` | Username. | Checkbox/boolean; present usually means enabled. |
-| `password` | Password. | Text value; use the page label and surrounding context to choose the exact content. |
-| `password2` | Repeat password. | Text value; use the page label and surrounding context to choose the exact content. |
-| `firstname` | First name. | Text value; use the page label and surrounding context to choose the exact content. |
-| `lastname` | Last name. | Text value; use the page label and surrounding context to choose the exact content. |
-| `address` | Address. | Text value; use the page label and surrounding context to choose the exact content. |
-| `#[name]#` | right. | right |
-| `timelimit` | Timelimit. | Text value; use the page label and surrounding context to choose the exact content. |
-| `timeused` | Time used. | Text value; use the page label and surrounding context to choose the exact content. |
-| `change` | Username. | `Save User` |
+| `adminuser` | Username of the built-in administrator. | Non-empty text, up to 32 characters. |
+| `adminpw1` | New administrator password. | Non-empty password. |
+| `adminpw2` | Confirmation of the new administrator password. | Must equal `adminpw1`. |
+| `setAdmin` | Saves only the administrator username and password. | Submit action. |
+| `adminAccountForLocalhost` | Grants administrator authority to eligible localhost requests without authentication. | Checkbox: present = on, absent = off. Default: on. |
+| `setLocalhostAccess` | Saves only the localhost-access policy. | Submitted automatically when `adminAccountForLocalhost` changes. |
+| `adminAccountAllPages` | Extends administrator authorization from `_p` administration pages to all applicable pages. | Checkbox: present = on, absent = off. Default: off. |
+| `setAccess` | Saves only the page-protection policy. | Submitted automatically when `adminAccountAllPages` changes. |
 
 ## Correct Use
 
-Read the current value before changing it. Configuration changes often persist beyond the current request and may affect later crawling, search, network contact, authentication, or resource use. Change one operational idea at a time and verify the result.
+Replace the default `admin` / `yacy` credentials even when localhost access remains enabled. The warning is displayed directly above the credential form while the default password hash is active.
+
+If the administrator password must be reset from the console, run `bin/passwd.sh` from the YaCy installation directory. With no password argument, the script prompts for the new password without echoing it. It supports both a running peer, through the account configuration endpoint, and a stopped peer, through the local configuration file.
+
+Turning off localhost access means that local browser requests also need the configured administrator credentials. Turning on protection for all pages broadens the authentication requirement. Changing either switch automatically reloads the page after saving that rule; it does not change the other rule or the administrator credentials.
 
 ## Access And Safety
 
 Administrator access is required. YaCy protects `_p` pages as administration pages.
+
+There are no secondary YaCy users or per-feature roles. Privileged actions use the built-in administrator authority only. When localhost access without an account is enabled, eligible local requests receive that same authority without credentials.
+
+Legacy `DATA/SETTINGS/user.heap` files are no longer loaded or modified. Keep or remove such a file according to your own backup policy.
 
 Protected related endpoint(s): `/ConfigAccounts_p.html`.
 
@@ -75,41 +73,38 @@ The table explains values that an agent or script must set deliberately. Paramet
 
 | Parameter | Meaning and valid values | Care |
 | --- | --- | --- |
-| `access` | Access from localhost without account / Access only with qualified account. Options: `localhost` = Access from localhost without account, `account` = Access only with qualified account. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `adminuser` | Peer User. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `adminpw1` | New Peer Password. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `adminpw2` | Repeat Peer Password. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `setAdmin` | Peer User. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
-| `adminAccountAllPages` | Access from localhost without account. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
-| `setAccess` | Access from localhost without account. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
-| `user` | Select user. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `change_user` | Select user. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `delete_user` | Select user. | Can remove data, stop work, expose access, or make a broad operational change. Use only with explicit confirmation and an exact target. |
-| `username` | Username. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `password` | Password. | Can remove data, stop work, expose access, or make a broad operational change. Use only with explicit confirmation and an exact target. |
-| `password2` | Repeat password. | Can remove data, stop work, expose access, or make a broad operational change. Use only with explicit confirmation and an exact target. |
-| `firstname` | First name. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `lastname` | Last name. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `address` | Address. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
-| `#[name]#` | right. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `timelimit` | Timelimit. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `timeused` | Time used. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `change` | Username. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `current_user` | Username. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
+| `adminuser` | Non-empty built-in administrator username. | Send only with `setAdmin`. Changing it invalidates the previous username. |
+| `adminpw1` | Non-empty new administrator password. | Send only with `setAdmin`; YaCy stores its DIGEST-compatible hash, not the clear text. |
+| `adminpw2` | Repetition of `adminpw1`. | Must match exactly. |
+| `setAdmin` | Selects the credential-change action. | Does not change either access-policy switch. |
+| `adminAccountForLocalhost` | Enables unauthenticated administrator access for eligible localhost requests when present. | Omit the checkbox to disable it; send only with `setLocalhostAccess`. |
+| `setLocalhostAccess` | Selects the localhost-policy action. | Does not change credentials or page-protection scope. |
+| `adminAccountAllPages` | Enables protection of all applicable pages when present. | Omit the checkbox to disable it; send only with `setAccess`. `_p` administration pages remain protected in both states. |
+| `setAccess` | Selects the page-protection action. | Does not change credentials or localhost policy. |
 
-Example request shape:
+Example request shapes (each also requires a valid `transactionToken`):
 
 ```http
 POST /ConfigAccounts_p.html
 Content-Type: application/x-www-form-urlencoded
 
-access=...&adminuser=...&adminpw1=...&adminpw2=...&setAdmin=...
+transactionToken=...&adminuser=admin&adminpw1=new-secret&adminpw2=new-secret&setAdmin=
+
+POST /ConfigAccounts_p.html
+Content-Type: application/x-www-form-urlencoded
+
+transactionToken=...&adminAccountForLocalhost=on&setLocalhostAccess=1
+
+POST /ConfigAccounts_p.html
+Content-Type: application/x-www-form-urlencoded
+
+transactionToken=...&adminAccountAllPages=on&setAccess=1
 ```
 
 ## What To Expect
 
-A successful change is visible as a saved value, a confirmation, or changed behavior on a related page. Some settings take effect immediately; others require reconnecting, reloading translations, restarting services, or watching the status page.
+Access-rule changes take effect immediately when a switch is changed. After changing the username or password, the HTTP server's cached administrator identity is reset. A browser may continue sending cached BASIC credentials until its authentication cache is cleared or the browser session is closed.
 
 ## Related Pages
 
-- `ConfigAccountList_p.html`
+- `Status.html`

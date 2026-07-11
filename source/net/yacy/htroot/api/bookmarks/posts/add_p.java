@@ -9,9 +9,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarkHelper;
 import net.yacy.data.BookmarksDB;
 import net.yacy.data.ListManager;
-import net.yacy.data.UserDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -20,19 +20,16 @@ public class add_p {
 
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
-	private static UserDB.Entry user = null;
 	private static boolean isAdmin = false;
 
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         sb = (Switchboard) env;
         isAdmin=sb.verifyAuthentication(header);
-        user = sb.userDB.getUser(header);
 
         // set user name
-        String username="";
-        if(user != null) username=user.getUserName();
-    	else if(isAdmin) username="admin";
+        final String username = isAdmin
+                ? sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin") : "";
 
         if (post != null) {
             if (!isAdmin) {
@@ -53,9 +50,6 @@ public class add_p {
             if(bookmark != null){
                 bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
-                if(user!=null){
-                    bookmark.setOwner(user.getUserName());
-                }
                 if("public".equals(post.get("public"))){
                     bookmark.setPublic(true);
                     publishNews(url, title, description, tagsString);

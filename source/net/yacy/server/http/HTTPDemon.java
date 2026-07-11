@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
@@ -262,14 +261,6 @@ public final class HTTPDemon {
                     !responseHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
                     responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0");
 
-                //read custom headers
-                if (responseHeader.getCookiesEntries() != null) {
-                    for (Cookie c : responseHeader.getCookiesEntries()) {
-                        //Append user properties to the main String
-                        //TODO: Should we check for user properites. What if they intersect properties that are already in header?
-                        header.append(HeaderFramework.SET_COOKIE+": "+c.getName()).append("=").append(c.getValue()).append(";\r\n");
-                    }
-                }
                 // write header
                 final Iterator<String> i = responseHeader.keySet().iterator();
                 String key;

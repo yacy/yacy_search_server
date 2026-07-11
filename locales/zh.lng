@@ -337,54 +337,6 @@ An error occurred while editing the following entries. Please check syntax.==编
 Activate this list for ...==激活此列表...
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="提交"
-"Preview"=="预览"
-"Discard"=="取消"
-"Yes, delete it."=="是的，删除它。"
-"No, leave it."=="不，留下吧。"
-"Import"=="进口"
-&lt;&lt; previous entries==&lt;&lt; 之前的条目
-next entries &gt;&gt;==下一个条目 &gt;&gt;
-Blog-Home==博客主页
-Edit==编辑
-Author:==作者:
-Subject:==标题:
-Text:==文本:
-Comments:==评论:
-deactivated==无效
-activated==活性
-moderated==改变
-Preview==预览
-No changes have been submitted so far!==未提交任何改变!
-Access denied==拒绝访问
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==如果编辑或者创建博客内容，你需要登录.
-Are you sure...==你确定吗...
-Confirm deletion==确定删除
-XML-Import==XML-导入
-Import was successful!==导入成功!
-Import failed, maybe the supplied file was no valid blog-backup?==导入失败, 可能提供的文件不是有效的博客备份?
-Please select the XML-file you want to import:==请选择你想导入的XML文件:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="提交"
-"Preview"=="预览"
-"Discard"=="取消"
-Blog-Home==博客主页
-Comments:==评论:
-&lt;&lt; previous entries==&lt;&lt; 之前的条目
-next entries &gt;&gt;==下一个条目 &gt;&gt;
-Comments are not allowed for this posting!==此帖子不允许发表评论！
-Comment on this Blog==对此博客发表评论
-Author:==作者:
-Subject:==标题:
-Text:==文本:
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -452,58 +404,10 @@ Private Queue==私有
 Public Queue==公共
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==用户列表
-User Accounts==用户账户
-User==用户
-First name==名字
-Last name==姓氏
-Address==地址
-Last Access==最近访问
-Rights==权限
-Time==时间
-Traffic==流量
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="设置管理员账户"
-"Set Access Rules"=="设置访问规则"
-"Edit User"=="编辑用户"
-"Delete User"=="删除用户"
-"Save User"=="保存用户"
-User Administration==用户管理
-Generic error.==一般性错误。
 Passwords do not match.==密码不匹配。
-Username too short. Username must be &gt;= 4 Characters.==用户名太短。 用户名必须&gt;= 4 个字符.
-Username already used (not allowed).==用户名已被使用（不允许）.
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>警告</b> 此 YaCy 实例可以使用帐户“admin”和默认密码“yacy”进行管理。
-Change the password as soon as possible!==尽快更改密码！
 Admin Account==管理员
-Access from localhost without account==本地匿名访问
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==通过管理员权限授予从你自己的计算机访问你的节点（localhost访问权限）.无需配置管理帐户.
-This setting is convenient but less secure than using a qualified admin account.==此设置很方便，但比使用合格的管理员帐户安全性低.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==请谨慎使用，尤其是在计算机上运行YaCy节点并浏览不受信任和可能有恶意的网站时.
-Access only with qualified account==只允许授权用户访问
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==如果你希望远端访问你的节点,则这是必需的,但它也会加强节点管理操作的访问控制.
-Peer User:==节点用户:
-New Peer Password:==新节点密码:
-Repeat Peer Password:==重复节点密码:
-Access Rules==访问规则
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==所有页面保护：如果设置为开启，则访问所有页面都需要授权；如果关闭，则仅保护带有“_p”扩展名的页面。
-User Accounts==用户账户
-Select user==选择用户
-New user==新用户
-Username==用户名
-Password==密码
-Repeat password==重复密码
-First name==名
-Last name==姓
-Address==地址
-Rights:==权限:
-Timelimit==时限
-Time used==已用时
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -881,8 +785,6 @@ Status page==状态页面
 Network pages==网络页面
 Surftips==上网技巧
 News pages==新页面
-Blog==博客
-Wiki==维基
 Public bookmarks==公共书签
 Home Page==首页
 File Share==文件共享
@@ -1040,28 +942,6 @@ Last Deploy==最近一次应用更新
 You installed YaCy with a package manager. To update YaCy, use the package manager:==您使用包管理器安装了 YaCy。要更新 YaCy，请使用包管理器：
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==手动更新：<br/>apt-get update &amp;&amp; apt-get install yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==自动更新：将以下行添加到 /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="保存用户"
-"Delete User"=="删除用户"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==用户账户编辑器
-Generic error.==一般性错误。
-Passwords do not match.==密码不匹配。
-Username too short. Username must be &gt;= 4 Characters.==用户名太短。用户名至少 &gt;= 4 字符。
-Username already used (not allowed).==用户名已存在（不允许）。
-Username==用户名
-Password==密码
-Repeat password==重复密码
-First name==名字
-Last name==姓氏
-Address==地址
-Rights:==权限:
-Timelimit==时间限制
-Time used==已用时间
-back to user list==返回用户列表
 #-----------------------------
 
 #File: Connections_p.html
@@ -2470,8 +2350,6 @@ inbox==收件箱
 "DHT Receive: yes"=="接收DHT: 是"
 "DHT receive enabled"=="打开DHT接收"
 "Profile updated"=="个人资料已更新"
-"Wiki updated"=="维基更新"
-"Blog updated"=="博客已更新"
 "Crawl"=="爬行"
 "The YaCy Network"=="YaCy网络"
 "Type: Virgin"=="类型：处女"
@@ -2517,7 +2395,6 @@ Received DHT<br/>Word Chunks==已收到 DHT<br/>Word 块
 Received<br/>URLs==已接收<br/>网址
 Location==位置
 user agent<br/>==用户代理<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==发送消息(<strong>m</strong>)/<br/>显示资料(<strong>p</strong>)/<br/>编辑百科(<strong>w</strong>)/<br/>浏览博客(<strong>b</strong>)
 Network==网络
 Online Peers==在线节点
 Number of<br/>Documents==<br/>文件数量
@@ -2588,7 +2465,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page=="索引创建"-页面会显示最近启动的爬取.
 A change in the personal profile will create a news entry. You can see recently made changes of==个人信息的改变会创建一个新闻词条, 可以在网络个人信息页面查看,
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==以带有 '*' 的 'P' (资料)标记出.
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==发布用户界面添加或修改的翻译。其他同行可能会将其包含在其本地翻译列表中。
 More news services will follow.==接下来会有更多的新闻服务.
 Above you can see four menus:==上面四个菜单选项分别为:
 Only these news will be used to display specific news services as explained above.==这些消息含有上述的特定新闻服务.
@@ -2994,23 +2870,18 @@ Age==年龄
 "Reset to defaults settings"=="重置为默认设置"
 limitations==局限性
 Local Search access rate limitations==本地搜索访问率限制
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==你可以在此处配置未经验证的用户和没有扩展搜索权限的用户对该节点搜索界面的访问速率限制
 YaCy search==YaCy搜索
 Access rate limitations to this peer search interface.==本节点搜索界面访问率限制。
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，搜索阻塞。
 Max searches in 3s==3秒内最大搜索次数
 Max searches in 1mn==1分钟内最大搜索次数
 Max searches in 10mn==10分钟内最大搜索次数
 Peer-to-peer search==点对点搜索
 Access rate limitations to the peer-to-peer search mode.==P2P搜索模式下访问率限制。
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，搜索范围缩小为本地索引。
 Max searches in	10mn==10分钟内最大搜索次数
 Peer-to-peer search with JavaScript results	resorting==带有结果排序的P2P搜索
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==对启用了浏览器端JavaScript结果重新排序的P2P搜索模式的访问率限制
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，搜索结果重排仅可用于服务器侧搜索。
 Remote snippet load==远端摘录加载
 Limitations on snippet loading from remote websites.==对从远程网站加载摘录的限制。
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，摘录获取策略缩小为'CACHEONLY'。
 Max	searches in 3s==3秒内最大搜索次数
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">更改将立即生效。</em>
 #-----------------------------
@@ -3235,14 +3106,9 @@ These settings configure the access method to your own http proxy and server.==�
 All traffic is routed through one single port, for both proxy and server.==代理和服务器流量均从同一端口流过.
 HTTPS Server Port:==HTTPS 服务器端口：
 Server Access Restrictions==服务器访问限制
-You can restrict the access to this proxy/server using a two-stage security barrier:==使用两层安全屏障限制到此代理/服务器的访问:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==定义一个带有授权IP名单或者通配符的<em>访问域</em>
-define an <em>user account</em> with an user:password - pair==创建一个需要密码的<em>用户账户</em>
-This is the account that restricts access to the proxy function.==这是一个限制代理访问功能的账户.
 You probably don't want to share the proxy to the internet, so you should set the==如果不想在互联网上共享代理,
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==请定义一个对应本地局域网的IP访问域表达式.
-The default setting should be right in most cases. If you want, you can also set a proxy account==默认设置适用于大多数情况. 如果需要共享代理,
-so that every proxy user must authenticate first, but this is rather unusual.==请先设置需要授权的代理账户.
 IP-Number filter==IP地址过滤
 Accounts==账户
 #-----------------------------
@@ -3633,59 +3499,6 @@ Save Tools Configuration==保存工具配置
 CyTag Trails==CyTag 轨迹
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="发布"
-"negative vote"=="差评"
-"positive vote"=="好评"
-You can share your local addition to translations and distribute it to other peers.==你可以分享你的本地翻译，并分发给其他节点。
-The remote peer can vote on your translation and add it to its own local translation.==远端节点可以对你的翻译进行投票并将其添加到他们的本地翻译中。
-File:==文件:
-Originator==拥有者
-English:==英语：
-existing==现存的
-Translation:==翻译:
-Vote on this translation. If you vote positive the translation is added to your local translation list.==对此翻译进行投票。如果您投票赞成，翻译将添加到您的本地翻译列表中。
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="保存翻译"
-Translation Editor==翻译编辑器
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==翻译用户界面的未翻译文本（当前语言）。修改后的翻译文件存储在 DATA/LOCALE 目录中。
-UI Translation==界面翻译
-Source File==源文件
-view it==查看
-filter untranslated==列出未翻译项
-Source Text==源文
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="登录"
-"logout"=="注销"
-"red bar"=="红条"
-"green bar"=="绿条"
-"Change"=="改变"
-User Page==用户页面
-You are not logged in.==您尚未登录。
-Username:==用户名:
-Password:==密码：
-(Identified by==（识别为
-IP==IP
-Username/Password==用户名/Password
-Cookie==曲奇饼
-old Password==旧密码
-new Password==新密码
-new Password(repetition)==新密码(重复)
-You are currently logged in as admin.==当前作为管理员登录.
-(after logout you will be prompted for your password again. simply click "cancel")==(注销后需要重新输入密码)
-Password was changed.==密码已改变.
-Old Password is wrong.==密码输入错误.
-New Password and its repetition do not match.==新密码两次输入不匹配.
-New Password is empty.==新密码为空.
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="文件系统浏览器"
@@ -3889,40 +3702,9 @@ Other Dot==其他点
 Dot-end==点尾
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="全部"
-"admin"=="行政"
-"Submit"=="提交"
-"Preview"=="预览"
-"Discard"=="取消"
-"Show"=="显示"
-"Compare"=="对比"
-(only granted to admin)==（仅授予管理员）
-Index -==指数 -
-Grant Write Access to==授予写权限
-Edit==编辑
-Author:==作者:
-Text:==文本:
-Preview==预览
-No changes have been submitted so far!==未提交任何改变!
-Index==索引
-Subject==主题
-Change Date==改变日期
-Last Author==最后作者
-Start Page==开始页面
-Versions==版本
-Compare version from==原始版本
-with version from==对比版本
-Error==错误
-You can use==你可以在这使用
-Changes will be published as announcement on YaCyNews==改变会被发布在YaCy新闻中.
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki代码
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==此表列出了用于Wiki和几个插件代码标签简述,
 of YaCy. For a more detailed description visit the==详情请见
 Code==代码
 Description==描述
@@ -3947,7 +3729,6 @@ These tags create a definition list.==用于创建定义列表.
 This tag creates a horizontal line.==创建水平线.
 [[pagename]]==[[页面名称]]
 [[pagename|description]]==[[页面名称|描述]]
-This tag creates links to other pages of the wiki.==创建到其他wiki页面的链接.
 [url]==[网址]
 [url description]==[网址描述]
 This tag creates links to external websites.==此标记创建外部网站链接.
@@ -4272,7 +4053,6 @@ Outgoing&nbsp;News==传出&nbsp;新闻
 Published&nbsp;News==已发布&nbsp;新闻
 Community Data==社区数据
 Surftips==建议
-Local Peer Wiki==本地同行维基
 Bookmarks==书签
 #-----------------------------
 
@@ -4283,7 +4063,6 @@ Advanced Settings==高级设置
 Performance Settings of Busy Queues==繁忙队列的性能设置
 Viewer and administration for database tables==数据库表的查看与管理
 Advanced Properties==高级设置
-UI Translations==用户界面翻译
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4389,13 +4168,6 @@ Generic Search Portal==通用搜索门户
 Search Box Anywhere==随处搜索框
 User Profile==用户资料
 Local robots.txt==本地robots.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==发布
-Wiki==百科
-Blog==博客
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4542,14 +4314,6 @@ domaingraph : Built with Processing==域图：通过处理构建
 This browser does not have a Java Plug-in.==此浏览器没有安装Java插件.
 Get the latest Java Plug-in here.==在此获取.
 Built with Processing==通过处理构建
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="登录"
-Your Username/Password is wrong.==用户名/密码输入错误.
-Username==用户名
-Password==密码
 #-----------------------------
 
 #File: proxymsg/error.html

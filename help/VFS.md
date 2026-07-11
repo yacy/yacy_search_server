@@ -24,7 +24,7 @@ Use it to inspect or manage stored file-like content.
 
 ## Page Architecture
 
-Content application pages store and render peer-local objects such as bookmarks, messages, wiki text, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
+Content application pages store and render peer-local objects such as bookmarks, messages, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
 
 ## Correct Use
 
@@ -46,4 +46,4 @@ Expect stored or rendered content: a message, page, table row, bookmark, profile
 
 ## Related Pages
 
-- Related content work usually continues on the matching wiki, blog, bookmark, message, table, translation, vocabulary, or file page.
+- Related content work usually continues on the matching bookmark, message, table, translation, vocabulary, or file page.

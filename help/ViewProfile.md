@@ -24,7 +24,7 @@ Use it to understand who operates a peer and what information it publishes.
 
 ## Page Architecture
 
-Content application pages store and render peer-local objects such as bookmarks, messages, wiki text, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
+Content application pages store and render peer-local objects such as bookmarks, messages, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
 
 ## Correct Use
 

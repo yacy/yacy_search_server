@@ -33,8 +33,6 @@ Configuration pages usually contain persistent settings. A visible form writes v
 | `network` | Network pages. | Network pages |
 | `surftips` | Surftips. | Surftips |
 | `news` | News pages. | News pages |
-| `blog` | Blog. | Blog |
-| `wiki` | Wiki. | Wiki |
 | `bookmarks` | Public bookmarks. | Public bookmarks |
 | `homepage` | Home Page. | Home Page |
 | `fileshare` | File Share. | File Share |
@@ -70,8 +68,6 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `network` | Network pages. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `surftips` | Surftips. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `news` | News pages. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
-| `blog` | Blog. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `wiki` | Wiki. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `bookmarks` | Public bookmarks. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `homepage` | Home Page. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `fileshare` | File Share. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |

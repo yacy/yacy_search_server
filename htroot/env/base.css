@@ -939,23 +939,10 @@ body#QuickCrawlLink p, body#QuickCrawlLink h4 {
   padding:0 5%;
 }
 
-body#Wiki form fieldset p.help{
-	clear:both;
-}
 /* Crawler_p.html */
 body#watchCrawler table.watchCrawler {float:left; margin: 0px 5px 5px 0px;}
 body#watchCrawler p.watchCrawler {clear:both;}
 body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}
-
-/* BlogComments.html */
-div.BlogCommentPost {
-margin: 0px 30px 0px 30px;
-background-color:#eeeeee;
-}
-
-div.BlogCommentPrevNext {
-text-align: center;
-}
 
 /* other ------------------------------------*/
 ul#menu {

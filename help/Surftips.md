@@ -14,6 +14,8 @@ backend_java: source/net/yacy/htroot/Surftips.java
 
 Surftips displays shared or suggested links.
 
+Retired Blog and Wiki peer announcements are no longer converted into surftips.
+
 Use it to browse peer-provided recommendations when the feature is enabled.
 
 ## What You Can Do Here

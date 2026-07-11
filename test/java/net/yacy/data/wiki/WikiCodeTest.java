@@ -140,25 +140,24 @@ public class WikiCodeTest {
      * Test internal link markup processing
      */
     @Test
-    public void testInternalLink() {
+    public void testRetiredInternalLinkRendersLabelOnly() {
         WikiCode wc = new WikiCode();
-        
-        /* Link to another wiki article */
+
+        /* Internal links no longer target the retired local Wiki application. */
         String result = wc.transform("http://wiki:8080", "[[article]]");
-        assertTrue(result.contains("<a"));
-        assertTrue(result.contains("href=\"Wiki.html?page=article\""));
-        
+        assertFalse(result.contains("<a"));
+        assertTrue(result.contains("article"));
+
         /* Renamed link */
         result = wc.transform("http://wiki:8080", "[[article|renamed article]]");
-        assertTrue(result.contains("<a"));
-        assertTrue(result.contains("href=\"Wiki.html?page=article\""));
-        assertTrue(result.contains(">renamed article<"));
-        
+        assertFalse(result.contains("<a"));
+        assertTrue(result.contains("renamed article"));
+
         /* Multiple links on the same line */
         result = wc.transform("http://wiki:8080", "[[article1]] [[article2]]");
-        assertTrue(result.contains("<a"));
-        assertTrue(result.contains("href=\"Wiki.html?page=article1\""));
-        assertTrue(result.contains("href=\"Wiki.html?page=article2\""));
+        assertFalse(result.contains("<a"));
+        assertTrue(result.contains("article1"));
+        assertTrue(result.contains("article2"));
     }
     
     /**

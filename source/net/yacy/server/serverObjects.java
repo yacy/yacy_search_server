@@ -362,7 +362,7 @@ public class serverObjects implements Serializable, Cloneable {
 
     /**
      * Add a String to the map. The content of the String is first parsed and interpreted as Wiki code.
-     * @param hostport (optional) peer host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param hostport (optional) peer host and port, added when not empty as the base of relative media URLs.
      * @param key key name as String.
      * @param wikiCode wiki code content as String.
      */
@@ -381,7 +381,7 @@ public class serverObjects implements Serializable, Cloneable {
 
     /**
      * Add a byte array to the map. The content of the array is first parsed and interpreted as Wiki code.
-     * @param hostport (optional) peer host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param hostport (optional) peer host and port, added when not empty as the base of relative media URLs.
      * @param key key name as String.
      * @param wikiCode wiki code content as byte array.
      */

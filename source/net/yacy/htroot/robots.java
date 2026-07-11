@@ -27,7 +27,6 @@ public class robots {
         if (rbc.isAllDisallowed()) {
             prop.put(RobotsTxtConfig.ALL, 1);
         } else {
-            if (rbc.isBlogDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.BLOG, "1");
             if (rbc.isBookmarksDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.BOOKMARKS, "1");
             if (rbc.isFileshareDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.FILESHARE, "1");
             if (rbc.isHomepageDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.HOMEPAGE, "1");
@@ -35,7 +34,6 @@ public class robots {
             if (rbc.isNewsDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.NEWS, "1");
             if (rbc.isStatusDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.STATUS, "1");
             if (rbc.isSurftipsDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.SURFTIPS, "1");
-            if (rbc.isWikiDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.WIKI, "1");
             if (rbc.isProfileDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.PROFILE, "1");
 
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {

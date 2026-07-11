@@ -48,7 +48,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -1070,12 +1069,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
                             if (!response.containsHeader(hdrkey) && val != null) { // to be on the safe side, add only new hdr (mainly used for CORS_ALLOW_ORIGIN)
                                 response.setHeader(hdrkey, tmpouthdr.get(hdrkey));
                             }
-                        }
-                    }
-                    // handle login cookie
-                    if (tmpouthdr.getCookiesEntries() != null) {
-                        for (final Cookie c : tmpouthdr.getCookiesEntries()) {
-                            response.addCookie(c);
                         }
                     }
                 }

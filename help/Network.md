@@ -14,6 +14,8 @@ backend_java: source/net/yacy/htroot/Network.java
 
 YaCy Search Network shows known peers and network state.
 
+Peer rows no longer expose links to the retired peer-local Blog or Wiki applications, and their former update announcements are not displayed.
+
 Use it to understand whether this peer is isolated, connected, senior, junior, or participating normally.
 
 ## What You Can Do Here

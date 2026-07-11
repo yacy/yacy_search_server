@@ -30,7 +30,6 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverAccessTracker;
@@ -104,7 +103,7 @@ public class YaCySecurityHandler extends ConstraintSecurityHandler {
             }
             RoleInfo roleinfo = new RoleInfo();
             roleinfo.setChecked(true); // RoleInfo.setChecked() : in Jetty this means - marked to have any security constraint
-            roleinfo.addRole(AccessRight.ADMIN_RIGHT.toString()); // use AccessRights as role
+            roleinfo.addRole(SwitchboardConstants.ADMIN_ACCOUNT_ROLE);
             return roleinfo; 
         }
         return super.prepareConstraintInfo(pathInContext, request);

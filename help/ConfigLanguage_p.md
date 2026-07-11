@@ -73,7 +73,3 @@ GET /ConfigLanguage_p.html?language=...&url=...&use_button=...&delete=...&use_la
 ## What To Expect
 
 A successful change is visible as a saved value, a confirmation, or changed behavior on a related page. Some settings take effect immediately; others require reconnecting, reloading translations, restarting services, or watching the status page.
-
-## Related Pages
-
-- `Translator_p.html`

@@ -344,54 +344,6 @@ An error occurred while editing the following entries. Please check syntax.==Aş
 Activate this list for ...==Bu listeyi şunun için etkinleştirin:
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="Gönder"
-"Preview"=="Önizleme"
-"Discard"=="Reddet"
-"Yes, delete it."=="Evet, silin."
-"No, leave it."=="Hayır, bırak gitsin."
-"Import"=="İçe aktarmak"
-&lt;&lt; previous entries==&lt;&lt; önceki girişler
-next entries &gt;&gt;==sonraki girişler &gt;&gt;
-Blog-Home==Blog Ana Sayfası
-Edit==Düzenle
-Author:==Yazar:
-Subject:==Başlık:
-Text:==Metin:
-Comments:==Yorumlar:
-deactivated==devre dışı
-activated==etkinleştirildi
-moderated==modere edilmiş
-Preview==Önizleme
-No changes have been submitted so far!==Şimdiye kadar hiçbir değişiklik gönderilmedi!
-Access denied==Erişim reddedildi
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Blog girişlerini düzenlemek veya oluşturmak için Admin veya Blog haklarına sahip bir kullanıcı olarak giriş yapmalısınız.
-Are you sure...==Emin misin...
-Confirm deletion==Silme işlemini onayla
-XML-Import==XML-İçe Aktarma
-Import was successful!==İçe aktarma başarılı!
-Import failed, maybe the supplied file was no valid blog-backup?==İçe aktarma başarısız, belki sağlanan dosya geçerli bir blog yedekleme dosyası değil?
-Please select the XML-file you want to import:==Lütfen içe aktarmak istediğiniz XML dosyasını seçin:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="Gönder"
-"Preview"=="Önizleme"
-"Discard"=="Reddet"
-Blog-Home==Blog Ana Sayfası
-Comments:==Yorumlar:
-&lt;&lt; previous entries==&lt;&lt; önceki girişler
-next entries &gt;&gt;==sonraki girişler &gt;&gt;
-Comments are not allowed for this posting!==Bu gönderiye yorum yapılmasına izin verilmiyor!
-Comment on this Blog==Bu Bloga yorum yapın
-Author:==Yazar:
-Subject:==Başlık:
-Text:==Metin:
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -459,58 +411,10 @@ Private Queue==Özel Sıra
 Public Queue==Genel Sıra
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==Kullanıcı Listesi
-User Accounts==Kullanıcı Hesapları
-User==Kullanıcı
-First name==Ad
-Last name==Soyad
-Address==Adres
-Last Access==Son Erişim
-Rights==Haklar
-Time==Zaman
-Traffic==Trafik
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="Yönetici Belirle"
-"Set Access Rules"=="Erişim Kurallarını Ayarlayın"
-"Edit User"=="Kullanıcıyı Düzenle"
-"Delete User"=="Kullanıcıyı Sil"
-"Save User"=="Kullanıcıyı Kaydet"
-User Administration==Kullanıcı Yönetimi
-Generic error.==Genel hata.
 Passwords do not match.==Parolalar uyuşmuyor.
-Username too short. Username must be &gt;= 4 Characters.==Kullanıcı adı çok kısa. Kullanıcı adı 4 veya daha fazla karakter olmalı.
-Username already used (not allowed).==Kullanıcı adı zaten kullanılıyor (izin verilmiyor).
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Bu YaCy örneği "admin" hesabı ve varsayılan şifre "yacy" ile yönetilebilir.
-Change the password as soon as possible!==Şifreyi mümkün olan en kısa sürede değiştirin!
 Admin Account==Yönetici Hesabı
-Access from localhost without account==Hesapsız localhost erişimi
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Kendi bilgisayarınızdan eşinize erişim (localhost erişimi), yönetici hakları ile verilmiştir. Bir yönetici hesabı yapılandırmaya gerek yok.
-This setting is convenient but less secure than using a qualified admin account.==Bu ayar kullanışlıdır ancak nitelikli bir yönetici hesabı kullanmaktan daha az güvenlidir.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Lütfen, özellikle güvenilmeyen ve potansiyel olarak kötü amaçlı web sitelerine göz atarken ve aynı bilgisayarda YaCy eşinizi çalıştırırken dikkatli kullanın.
-Access only with qualified account==Sadece yetkili hesap ile erişim
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Eşinize uzaktan erişim istiyorsanız bu gereklidir, ancak aynı zamanda eşinizin yönetim işlemlerine ilişkin erişim kontrollerini de güçlendirir.
-Peer User:==Eş Kullanıcısı:
-New Peer Password:==Yeni Eş Parolası:
-Repeat Peer Password:==Eş Parolasını Tekrarla:
-Access Rules==Erişim Kuralları
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Tüm sayfaların korunması: Açık olarak ayarlanırsa tüm sayfalara erişim için yetkilendirme gerekir; kapalıysa yalnızca "_p" uzantılı sayfalar korunur.
-User Accounts==Kullanıcı Hesapları
-Select user==Kullanıcı seç
-New user==Yeni kullanıcı
-Username==Kullanıcı Adı
-Password==Şifre
-Repeat password==Parolayı tekrarla
-First name==Ad
-Last name==Soyad
-Address==Adres
-Rights:==Haklar:
-Timelimit==Zaman sınırı
-Time used==Kullanılan zaman
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -888,8 +792,6 @@ Status page==Durum sayfası
 Network pages==Ağ sayfaları
 Surftips==Surf İpuçları
 News pages==Haber sayfaları
-Blog==Blog
-Wiki==Viki
 Public bookmarks==Genel yer imleri
 Home Page==Ana Sayfa
 File Share==Dosya Paylaşımı
@@ -1047,28 +949,6 @@ Last Deploy==Son Dağıtım
 You installed YaCy with a package manager. To update YaCy, use the package manager:==YaCy ürününü bir paket yöneticisiyle yüklediniz. YaCy'yi güncellemek için paket yöneticisini kullanın:
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==manuel güncelleme:<br/>apt-get güncelleme &amp;&amp; apt-get install yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==otomatik güncelleme: /etc/crontab<br/>0'a aşağıdaki satırı ekleyin 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="Kullanıcıyı Kaydet"
-"Delete User"=="Kullanıcıyı Sil"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==Kullanıcı Hesabı Düzenleyicisi
-Generic error.==Genel hata.
-Passwords do not match.==Parolalar uyuşmuyor.
-Username too short. Username must be &gt;= 4 Characters.==Kullanıcı adı çok kısa. Kullanıcı adı 4 veya daha fazla karakter olmalı.
-Username already used (not allowed).==Kullanıcı adı zaten kullanılıyor (izin verilmiyor).
-Username==Kullanıcı Adı
-Password==Şifre
-Repeat password==Parolayı tekrarla
-First name==Ad
-Last name==Soyad
-Address==Adres
-Rights:==Haklar:
-Timelimit==Zaman sınırı
-Time used==Kullanılan zaman
-back to user list==kullanıcı listesine geri dön
 #-----------------------------
 
 #File: Connections_p.html
@@ -2477,8 +2357,6 @@ inbox==Gelen Kutusu
 "DHT Receive: yes"=="DHT Alımı: evet"
 "DHT receive enabled"=="DHT alımı etkin"
 "Profile updated"=="Profil güncellendi"
-"Wiki updated"=="Wiki güncellendi"
-"Blog updated"=="Blog güncellendi"
 "Crawl"=="Sürünmek"
 "The YaCy Network"=="YaCy Ağı"
 "Type: Virgin"=="Tür: Bakire"
@@ -2524,7 +2402,6 @@ Received DHT<br/>Word Chunks==DHT<br/>Kelime Parçaları alındı
 Received<br/>URLs==Alınan<br/>URL'ler
 Location==Konum
 user agent<br/>==kullanıcı aracısı<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==Mesaj gönder (<strong>m</strong>)/<br/>Profil göster (<strong>p</strong>)/<br/>Wiki düzenle (<strong>w</strong>)/<br/>Blogu gözat (<strong>b</strong>)
 Network==Ağ
 Online Peers==Çevrimiçi Akranlar
 Number of<br/>Documents==<br/>Belge sayısı
@@ -2595,7 +2472,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==Yeni başlatılan taramaların bir tablosu Index Create sayfasında sunulmaktadır.
 A change in the personal profile will create a news entry. You can see recently made changes of==Kişisel profilde bir değişiklik bir haber girişi oluşturacaktır. Son zamanlarda yapılan değişiklikleri görebilirsiniz.
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==Profil değişikliği 'P' (profil) - seçici yanındaki '*' ile görselleştirilen Ağ sayfasındaki profil girişlerinde görselleştirilir.
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==Kullanıcı arayüzü için eklenen veya değiştirilen çevirinin yayınlanması. Diğer meslektaşları bunu kendi yerel çeviri listelerine ekleyebilirler.
 More news services will follow.==Daha fazla haber servisi izleyecek.
 Above you can see four menus:==Yukarıda dört menüyü görebilirsiniz:
 Only these news will be used to display specific news services as explained above.==Yalnızca bu haberler, yukarıda açıklandığı gibi belirli haber servislerini görüntülemek için kullanılacaktır.
@@ -3001,23 +2877,18 @@ Age==Yaş
 "Reset to defaults settings"=="Varsayılan ayarlara sıfırla"
 limitations==sınırlamalar
 Local Search access rate limitations==Yerel Arama erişim oranı sınırlamaları
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Kimliği doğrulanmamış kullanıcılar ve genişletilmiş arama hakkı olmayan kullanıcılar tarafından bu eş arama arayüzüne erişim hızına ilişkin sınırlamaları burada yapılandırabilirsiniz.
 YaCy search==YaCy arama
 Access rate limitations to this peer search interface.==Bu eş arama arayüzüne erişim hızı sınırlamaları.
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Sınırlı haklara sahip bir kullanıcı (kimliği doğrulanmamış veya genişletilmiş arama hakkı olmayan) bir sınırı aştığında arama engellenir.
 Max searches in 3s==3 saniyede maksimum arama
 Max searches in 1mn==1 dakikada maksimum arama
 Max searches in 10mn==10 dakika içinde maksimum arama sayısı
 Peer-to-peer search==Eşler arası arama
 Access rate limitations to the peer-to-peer search mode.==Eşler arası arama moduna erişim hızı sınırlamaları.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Sınırlı haklara sahip bir kullanıcı (kimliği doğrulanmamış veya genişletilmiş arama hakkı olmayan) bir sınırı aştığında, arama kapsamı yalnızca bu yerel eş dizinine düşer.
 Max searches in	10mn==10 dakikada maksimum arama
 Peer-to-peer search with JavaScript results	resorting==JavaScript sonuçlarının kullanıldığı eşler arası arama
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Tarayıcı tarafı JavaScript sonuçlarına başvurmanın etkin olduğu eşler arası arama moduna erişim hızı sınırlamaları
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Sınırlı haklara sahip bir kullanıcı (kimliği doğrulanmamış veya genişletilmiş arama hakkı olmayan) bir sınırı aştığında, sonuçlara başvurulması yalnızca talep üzerine, sunucu tarafında uygulanabilir hale gelir.
 Remote snippet load==Uzaktan snippet yükleme
 Limitations on snippet loading from remote websites.==Uzak web sitelerinden snippet yüklemeye ilişkin sınırlamalar.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Sınırlı haklara sahip (kimliği doğrulanmamış veya genişletilmiş arama hakkı olmayan) bir kullanıcı bir sınırı aştığında, snippet'leri getirme stratejisi 'YALNIZCA ÖNBELLEK' durumuna geri döner
 Max	searches in 3s==3 saniyede maksimum arama
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Değişiklikler hemen geçerli olacaktır.</em>
 #-----------------------------
@@ -3242,14 +3113,9 @@ These settings configure the access method to your own http proxy and server.==B
 All traffic is routed through one single port, for both proxy and server.==Tüm trafiğin, hem proxy hem de sunucu için tek bir port üzerinden yönlendirildiği.
 HTTPS Server Port:==HTTPS Sunucu Bağlantı Noktası:
 Server Access Restrictions==Sunucu Erişim Kısıtlamaları
-You can restrict the access to this proxy/server using a two-stage security barrier:==Bu proxy/sunucuya erişimi, iki aşamalı bir güvenlik bariyeri kullanarak sınırlayabilirsiniz:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==bir <em>erişim alanı</em> tanımlayın ve onaylanmış istemci IP numaraları listesi veya joker karakterlerle belirtin
-define an <em>user account</em> with an user:password - pair==bir <em>kullanıcı hesabı</em> belirtin ve bir kullanıcı:şifre çifti ile eşleştirin
-This is the account that restricts access to the proxy function.==Bu, proxy fonksiyonuna erişimi sınırlayan hesaptır.
 You probably don't want to share the proxy to the internet, so you should set the==Proxy'yi muhtemelen internetle paylaşmak istemezsiniz, bu yüzden
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP Numarası Erişim Alanınızı yerel intranetinize uygun bir desene ayarlamanız gerekir.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Varsayılan ayar çoğu durumda doğru olmalıdır. İsterseniz bir proxy hesabı da ayarlayabilirsiniz
-so that every proxy user must authenticate first, but this is rather unusual.==böylece her proxy kullanıcısının önce kimlik doğrulaması yapması gerekir, ancak bu pek alışılmış bir durum değildir.
 IP-Number filter==IP-Numarası Filtresi
 Accounts==Hesaplar
 #-----------------------------
@@ -3640,59 +3506,6 @@ Save Tools Configuration==Araç Yapılandırmasını Kaydet
 CyTag Trails==CyTag Parkurları
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="Yayınla"
-"negative vote"=="Negatif oy"
-"positive vote"=="Pozitif oy"
-You can share your local addition to translations and distribute it to other peers.==Yerel eklerinizi çevirilere paylaşabilir ve diğer meslektaşlarınıza dağıtabilirsiniz.
-The remote peer can vote on your translation and add it to its own local translation.==Uzaktaki eş, çevirinize oy verebilir ve onu kendi yerel çevirisine ekleyebilir.
-File:==Dosya:
-Originator==Başlatan
-English:==İngilizce:
-existing==mevcut
-Translation:==Çeviri:
-Vote on this translation. If you vote positive the translation is added to your local translation list.==Bu çeviriye oy verin. Olumlu oy verirseniz çeviri yerel çeviri listenize eklenir.
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="Çeviriyi kaydet"
-Translation Editor==Çeviri Düzenleyici
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==Kullanıcı arayüzünün çevrilmemiş metnini çevirin (geçerli dil). Değiştirilen çeviri dosyası DATA/LOCALE dizininde saklanır.
-UI Translation==UI Çevirisi
-Source File==Kaynak Dosya
-view it==onu görüntüle
-filter untranslated==çevrilmemiş olanı filtrele
-Source Text==Kaynak Metin
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="giriş"
-"logout"=="oturumu kapat"
-"red bar"=="kırmızı çubuk"
-"green bar"=="yeşil çubuk"
-"Change"=="Değiştir"
-User Page==Kullanıcı Sayfası
-You are not logged in.==Oturum açmadınız.
-Username:==Kullanıcı Adı:
-Password:==Şifre:
-(Identified by==(Tanımlayan
-IP==IP
-Username/Password==Kullanıcı adı/Password
-Cookie==Çerez
-old Password==eski Şifre
-new Password==Yeni Şifre
-new Password(repetition)==yeni Şifre (tekrar)
-You are currently logged in as admin.==Şu anda admin olarak giriş yaptınız.
-(after logout you will be prompted for your password again. simply click "cancel")==(çıkış yaptıktan sonra şifreniz tekrar istenecek. sadece "iptal"e tıklayın)
-Password was changed.==Şifre değiştirildi.
-Old Password is wrong.==Eski Şifre yanlış.
-New Password and its repetition do not match.==Yeni Şifre ve tekrarı uyuşmuyor.
-New Password is empty.==Yeni Şifre boş.
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="Dosya sistemi tarayıcısı"
@@ -3896,40 +3709,9 @@ Other Dot==Diğer Nokta
 Dot-end==Nokta sonu
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="Tümü"
-"admin"=="yönetici"
-"Submit"=="Gönder"
-"Preview"=="Önizleme"
-"Discard"=="Reddet"
-"Show"=="Göster"
-"Compare"=="Karşılaştır"
-(only granted to admin)==(yalnızca yöneticiye verilir)
-Index -==Dizin -
-Grant Write Access to==Wiki'yi düzenleme izni ver:
-Edit==Düzenle
-Author:==Yazar:
-Text:==Metin:
-Preview==Önizleme
-No changes have been submitted so far!==Şu ana kadar hiçbir değişiklik gönderilmedi!
-Index==Dizin
-Subject==Konu
-Change Date==Değiştirme Tarihi
-Last Author==Son Yazar
-Start Page==Başlangıç Sayfası
-Versions==Sürümler
-Compare version from==Şu sürümüyle karşılaştır
-with version from==şu sürümle
-Error==Hata
-You can use==Şunları kullanabilirsiniz
-Changes will be published as announcement on YaCyNews==Değişiklikler, YaCyNews'te bir duyuru olarak yayınlanacaktır.
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki Kodu
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Bu tablo Wiki'de ve diğer bazı sunucu uygulamalarında kullanılabilecek etiketlerin kısa bir açıklamasını içerir.
 of YaCy. For a more detailed description visit the==YaCy. Daha ayrıntılı bir açıklama için şu adresi ziyaret edin:
 Code==Kod
 Description==Açıklama
@@ -3954,7 +3736,6 @@ These tags create a definition list.==Bu etiketler bir tanım listesi oluşturur
 This tag creates a horizontal line.==Bu etiket yatay bir çizgi oluşturur.
 [[pagename]]==[[sayfa adı]]
 [[pagename|description]]==[[sayfa adı|açıklama]]
-This tag creates links to other pages of the wiki.==Bu etiket, wikinin diğer sayfalarına bağlantılar oluşturur.
 [url]==[URL'si]
 [url description]==[url açıklaması]
 This tag creates links to external websites.==Bu etiket, harici web sitelerine bağlantılar oluşturur.
@@ -4279,7 +4060,6 @@ Outgoing&nbsp;News==Giden Haberler
 Published&nbsp;News==Yayınlanan Haberler
 Community Data==Topluluk Verileri
 Surftips==Surf İpuçları
-Local Peer Wiki==Yerel Akran Wiki
 Bookmarks==Yer imleri
 #-----------------------------
 
@@ -4290,7 +4070,6 @@ Advanced Settings==Gelişmiş Ayarlar
 Performance Settings of Busy Queues==Meşgul Kuyrukların Performans Ayarları
 Viewer and administration for database tables==Veritabanı tabloları için görüntüleyici ve yönetim
 Advanced Properties==Gelişmiş Özellikler
-UI Translations==Kullanıcı Arayüzü Çevirileri
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4396,13 +4175,6 @@ Generic Search Portal==Genel Arama Portalı
 Search Box Anywhere==Her Yerdeki Arama Kutusu
 User Profile==Kullanıcı Profili
 Local robots.txt==Yerel robots.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==Yayın
-Wiki==Viki
-Blog==Blog
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4549,14 +4321,6 @@ domaingraph : Built with Processing==domaingraph : İşleme ile Oluşturuldu
 This browser does not have a Java Plug-in.==Bu tarayıcının Java Eklentisi yok.
 Get the latest Java Plug-in here.==En son Java Eklentisini buradan alın.
 Built with Processing==İşlemeyle Oluşturuldu
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="giriş"
-Your Username/Password is wrong.==Kullanıcı Adınız/Password yanlış.
-Username==Kullanıcı Adı
-Password==Şifre
 #-----------------------------
 
 #File: proxymsg/error.html

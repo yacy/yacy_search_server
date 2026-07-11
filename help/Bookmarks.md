@@ -12,19 +12,19 @@ backend_java: source/net/yacy/htroot/Bookmarks.java
 
 ## Purpose
 
-Bookmarks stores useful URLs known to the peer or user.
+Bookmarks stores useful URLs known to the peer.
 
 Use it to save, organize, and later re-use important search or crawl targets.
 
 ## What You Can Do Here
 
-- Bookmarks stores useful URLs known to the peer or user.
+- Bookmarks stores useful URLs known to the peer.
 - Edit or inspect the specific content object shown on the page.
 - Check whether the result is local-only, user-visible, or peer-visible before publishing.
 
 ## Page Architecture
 
-Content application pages store and render peer-local objects such as bookmarks, messages, wiki text, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
+Content application pages store and render peer-local objects such as bookmarks, messages, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
 
 | Control | Meaning | Values or examples |
 | --- | --- | --- |
@@ -52,7 +52,7 @@ Edit content deliberately and check the rendered page after saving. For shared o
 
 The page is normally public or read-only, unless the peer is configured to require authentication for all pages.
 
-Backend checks: user authentication.
+Public bookmarks can be read without authentication. Private bookmarks, imports, edits, and other write actions require built-in administrator authority: HTTP BASIC/DIGEST, or the configured localhost-without-account access.
 
 ## Automation And API
 
@@ -85,7 +85,6 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `startautosearch` | URL. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `agentName` | Crawler user-agent profile used for outgoing HTTP requests. Choose a profile that matches the desired identity and politeness behavior. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `delete` | Deletes the selected URL, path, or index scope. Confirm the scope first. | Can remove data, stop work, expose access, or make a broad operational change. Use only with explicit confirmation and an exact target. |
-| `user` | User or account value. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 
 Example request shape:
 

@@ -471,7 +471,6 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         }
 
         super.remove(AUTHORIZATION);
-        // TODO: take care of legacy login cookie (and possibly cached UserDB login status)
 
     }
 

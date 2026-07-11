@@ -220,8 +220,8 @@ public class YaCyHttpServer {
         allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler
 
         final YaCyLoginService loginService = new YaCyLoginService();
-        // this is very important (as it is part of the user password hash)
-        // changes will ivalidate all current existing user-password-hashes (from userDB)
+        // This is part of the built-in administrator's DIGEST password hash.
+        // Changing it invalidates the configured administrator password hash.
         loginService.setName(sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy"));
 
         final YaCySecurityHandler securityHandler = new YaCySecurityHandler();
@@ -375,8 +375,8 @@ public class YaCyHttpServer {
     }
 
     /**
-     * forces loginservice to reload user credentials
-     * (used after setting new pwd in cfg file/db)
+     * Forces the login service to reload the built-in administrator credentials
+     * after they were changed in the configuration.
      * @param username
      */
     public void resetUser(final String username) {
@@ -390,7 +390,7 @@ public class YaCyHttpServer {
     }
 
     /**
-     * removes user from knowuser cache of loginservice
+     * Removes the built-in administrator from the login service cache.
      * @param username
      */
     public void removeUser(final String username) {

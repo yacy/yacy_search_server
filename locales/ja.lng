@@ -332,54 +332,6 @@ An error occurred while editing the following entries. Please check syntax.==次
 Activate this list for ...==このリストをアクティブ化すると...
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="確定する"
-"Preview"=="プレヴュー"
-"Discard"=="廃棄する"
-"Yes, delete it."=="はい、削除します。"
-"No, leave it."=="いや、放っておいてください。"
-"Import"=="輸入"
-&lt;&lt; previous entries==&lt;&lt; 前のエントリ
-next entries &gt;&gt;==次のエントリ &gt;&gt;
-Blog-Home==ブログ-ホーム
-Edit==編集
-Author:==著者:
-Subject:==題名:
-Text:==文章：
-Comments:==コメント:
-deactivated==無効化されたもの
-activated==アクティブ化された
-moderated==変更されたもの
-Preview==プレビュー
-No changes have been submitted so far!==まだ変更が確定されていません!
-Access denied==アクセスが拒否されました
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==ブログ-エントリーを編集または作成する為にあなたはブログの権利を持つ管理者またはユーザーとしてログインする必要があります.
-Are you sure...==本気ですか...
-Confirm deletion==削除を確認する
-XML-Import==XML-インポート
-Import was successful!==取り込みは成功しました!
-Import failed, maybe the supplied file was no valid blog-backup?==取り込みは失敗しました。おそらく供給されたファイルは有効なブログ-バックアップではなかったのではないでしょうか?
-Please select the XML-file you want to import:==あなたが取り込みたいXML-ファイルを選択して下さい:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="確定する"
-"Preview"=="プレヴュー"
-"Discard"=="廃棄する"
-Blog-Home==ブログ-ホーム
-Comments:==コメント:
-&lt;&lt; previous entries==&lt;&lt; 前のエントリ
-next entries &gt;&gt;==次のエントリ &gt;&gt;
-Comments are not allowed for this posting!==この投稿へのコメントは禁止されています。
-Comment on this Blog==このブログにコメントする
-Author:==著者:
-Subject:==題名:
-Text:==文章：
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -447,58 +399,10 @@ Private Queue==プライヴェート キュー
 Public Queue==パブリック キュー
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==ユーザーリスト
-User Accounts==ユーザーのアカウント
-User==ユーザー
-First name==名
-Last name==姓
-Address==住所
-Last Access==最終アクセス
-Rights==権利
-Time==時間
-Traffic==渋滞
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="管理者を定義する"
-"Set Access Rules"=="アクセスルールを設定する"
-"Edit User"=="ユーザーの編集"
-"Delete User"=="ユーザーの削除"
-"Save User"=="ユーザーの保存"
-User Administration==ユーザーの管理
-Generic error.==一般的なエラー.
 Passwords do not match.==パスワードが一致しません.
-Username too short. Username must be &gt;= 4 Characters.==ユーザー名が短過ぎます. ユーザー名 &gt;= 4文字 でなければなりません.
-Username already used (not allowed).==ユーザー名はすでに使用されています (許可されていません)。
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> この YaCy インスタンスは、アカウント「admin」とデフォルトのパスワード「yacy」を使用して管理できます。
-Change the password as soon as possible!==できるだけ早くパスワードを変更してください。
 Admin Account==Admin Konto
-Access from localhost without account==アカウント無しでのローカルホストからのアクセス
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==あなたの自分のコンピュータ（ローカルホストアクセス）からピアへのアクセスは管理者権限を付与されています. 管理アカウントを構成する必要はありません.
-This setting is convenient but less secure than using a qualified admin account.==この設定は便利ですが、資格のある管理者アカウントを使用する場合よりも安全性が低くなります。
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==特に、同じコンピュータ上で YaCy ピアを実行しているときに、信頼できない、悪意のある可能性のある Web サイトを閲覧する場合は、注意して使用してください。
-Access only with qualified account==資格のあるアカウントでのみのアクセス
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==これはピアへのリモート アクセスが必要な場合に必要ですが、ピアの管理操作に対するアクセス制御も強化されます。
-Peer User:==ピア ユーザー:
-New Peer Password:==新規のピアのパスワード:
-Repeat Peer Password:==ピアのパスワードを繰り返して下さい:
-Access Rules==アクセスルール
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==すべてのページの保護: オンに設定すると、すべてのページへのアクセスには認証が必要になります。オフの場合、拡張子「_p」を持つページのみが保護されます。
-User Accounts==ユーザーのアカウント
-Select user==ユーザーを選択する
-New user==新規のユーザー
-Username==ユーザー名
-Password==パスワード
-Repeat password==パスワードを繰り返して下さい
-First name==名
-Last name==姓
-Address==住所
-Rights:==権利:
-Timelimit==期限
-Time used==使われた時間
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -876,8 +780,6 @@ Status page==状態のページ
 Network pages==ネットワーク ページ
 Surftips==サーフティップス
 News pages==ニューズ ページ
-Blog==ブログ
-Wiki==ウィキ
 Public bookmarks==公開ブックマーク
 Home Page==ホーム ページ
 File Share==ファイル共有
@@ -1035,28 +937,6 @@ Last Deploy==最後の展開
 You installed YaCy with a package manager. To update YaCy, use the package manager:==パッケージ マネージャーを使用して YaCy をインストールしました。 YaCy を更新するには、パッケージ マネージャーを使用します。
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==手動アップデート:<br/>apt-get update &amp;&amp; apt-get install yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==自動更新: 次の行を /etc/crontab<br/>0 に追加します 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="ユーザーの保存"
-"Delete User"=="ユーザーの削除"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==ユーザーアカウント編集者
-Generic error.==一般的なエラー.
-Passwords do not match.==パスワードが一致しません.
-Username too short. Username must be &gt;= 4 Characters.==ユーザー名が短過ぎます. ユーザー名 &gt;= 4文字 でなければなりません.
-Username already used (not allowed).==ユーザー名はすでに使用されています (許可されていません)。
-Username==ユーザー名
-Password==パスワード
-Repeat password==パスワードを繰り返して下さい
-First name==名
-Last name==姓
-Address==住所
-Rights:==権利:
-Timelimit==期限
-Time used==使われた時間
-back to user list==ユーザーリストに戻る
 #-----------------------------
 
 #File: Connections_p.html
@@ -2465,8 +2345,6 @@ inbox==受信箱
 "DHT Receive: yes"=="DHT 受信: はい"
 "DHT receive enabled"=="DHT 受信が有効になりました"
 "Profile updated"=="プロフィールを更新しました"
-"Wiki updated"=="ウィキが更新されました"
-"Blog updated"=="ブログを更新しました"
 "Crawl"=="クロール"
 "The YaCy Network"=="YaCy ネットワーク"
 "Type: Virgin"=="タイプ: 処女"
@@ -2512,7 +2390,6 @@ Received DHT<br/>Word Chunks==DHT<br/>ワード チャンクを受信しまし�
 Received<br/>URLs==受信した<br/>URL
 Location==位置
 user agent<br/>==ユーザーエージェント<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==send&nbsp;<strong>M</strong>メッセージ/<br/>show&nbsp;<strong>P</strong>rofile/<br/>編集&nbsp;<strong>W</strong>iki/<br/>閲覧&nbsp;<strong>B</strong>ログ
 Network==ネットワーク
 Online Peers==オンラインピア
 Number of<br/>Documents==<br/>ドキュメントの数
@@ -2583,7 +2460,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==最近開始されたクロールを含むテーブルが「インデックス作成 -」ページに表示されます。
 A change in the personal profile will create a news entry. You can see recently made changes of==個人プロフィールを変更すると、ニュース エントリが作成されます。最近行われた変更を確認できます
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==[ネットワーク] ページのプロファイル エントリ。プロファイルの変更は、「P」 (プロファイル) - セレクターの横にある「*」で視覚化されます。
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==ユーザー インターフェイスの追加または変更された翻訳の公開。他のピアは、ローカル変換リストにそれを含めることができます。
 More news services will follow.==さらに多くのニュースサービスが続きます。
 Above you can see four menus:==上には 4 つのメニューが表示されます。
 Only these news will be used to display specific news services as explained above.==上で説明したように、これらのニュースのみが特定のニュース サービスの表示に使用されます。
@@ -2989,23 +2865,18 @@ Age==年
 "Reset to defaults settings"=="デフォルト設定にリセットする"
 limitations==制限事項
 Local Search access rate limitations==ローカル検索のアクセス速度の制限
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==ここで、認証されていないユーザーおよび拡張検索権限のないユーザーによるこのピア検索インターフェイスへのアクセス レートの制限を構成できます。
 YaCy search==YaCy 検索
 Access rate limitations to this peer search interface.==このピア検索インターフェイスへのアクセス レート制限。
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==制限された権限を持つユーザー (認証されていない、または拡張検索権限がない) が制限を超えると、検索はブロックされます。
 Max searches in 3s==最大検索数は 3 秒以内
 Max searches in 1mn==100 万回の最大検索数
 Max searches in 10mn==10 分間の最大検索数
 Peer-to-peer search==ピアツーピア検索
 Access rate limitations to the peer-to-peer search mode.==ピアツーピア検索モードへのアクセス速度制限。
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==制限された権限を持つユーザー (認証されていない、または拡張検索権限がない) が制限を超えると、検索範囲はこのローカル ピア インデックスのみに戻ります。
 Max searches in	10mn==10 分間の最大検索数
 Peer-to-peer search with JavaScript results	resorting==JavaScript の結果を並べ替えるピアツーピア検索
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==ブラウザ側の JavaScript 結果の再ソートが有効になっている場合のピアツーピア検索モードへのアクセス レート制限
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==制限された権限を持つユーザー (認証されていない、または拡張検索権限がない) が制限を超えると、結果の再分類はサーバー側でオンデマンドでのみ適用されます。
 Remote snippet load==リモート スニペットのロード
 Limitations on snippet loading from remote websites.==リモート Web サイトからのスニペットの読み込みに関する制限。
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==制限された権限を持つユーザー (認証されていない、または拡張検索権限がない) が制限を超えると、スニペットのフェッチ戦略は「CACHEONLY」に戻ります。
 Max	searches in 3s==最大検索数は 3 秒以内
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">変更はすぐに有効になります。</em>
 #-----------------------------
@@ -3230,14 +3101,9 @@ These settings configure the access method to your own http proxy and server.==�
 All traffic is routed through one single port, for both proxy and server.==すべてのトラフィックは、プロキシとサーバーの両方に対して 1 つのポートを介してルーティングされます。
 HTTPS Server Port:==HTTPS サーバーポート:
 Server Access Restrictions==サーバーアクセス制限
-You can restrict the access to this proxy/server using a two-stage security barrier:==2 段階のセキュリティ バリアを使用して、このプロキシ/server へのアクセスを制限できます。
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==許可されたクライアント IP 番号のリストまたはワイルドカードを使用して、<em>アクセス ドメイン</em> を定義します
-define an <em>user account</em> with an user:password - pair==ユーザー:パスワードのペアで <em>ユーザー アカウント</em> を定義します
-This is the account that restricts access to the proxy function.==プロキシ機能へのアクセスを制限するアカウントです。
 You probably don't want to share the proxy to the internet, so you should set the==おそらくプロキシをインターネットに共有したくないので、
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP - ローカル イントラネットに対応するパターンへのアクセス ドメインの番号。
-The default setting should be right in most cases. If you want, you can also set a proxy account==ほとんどの場合、デフォルト設定が正しいはずです。必要に応じて、プロキシ アカウントを設定することもできます
-so that every proxy user must authenticate first, but this is rather unusual.==したがって、すべてのプロキシ ユーザーが最初に認証する必要がありますが、これはかなり珍しいことです。
 IP-Number filter==IP - 数値フィルター
 Accounts==アカウント
 #-----------------------------
@@ -3628,59 +3494,6 @@ Save Tools Configuration==ツール設定の保存
 CyTag Trails==CyTag トレイル
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="公開"
-"negative vote"=="ネガティヴな票"
-"positive vote"=="ポジティヴな票"
-You can share your local addition to translations and distribute it to other peers.==ローカルで追加した翻訳を共有し、他のピアに配布できます。
-The remote peer can vote on your translation and add it to its own local translation.==リモート ピアは、翻訳に投票して、それを独自のローカル翻訳に追加できます。
-File:==ファイル:
-Originator==発信者
-English:==英語：
-existing==既存
-Translation:==翻訳：
-Vote on this translation. If you vote positive the translation is added to your local translation list.==この翻訳に投票してください。肯定的に投票すると、その翻訳がローカルの翻訳リストに追加されます。
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="翻訳を保存する"
-Translation Editor==翻訳エディター
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==ユーザー インターフェイス (現在の言語) の未翻訳のテキストを翻訳します。変更された翻訳ファイルは DATA/LOCALE ディレクトリに保存されます。
-UI Translation==UIの翻訳
-Source File==ソースファイル
-view it==それを見る
-filter untranslated==未翻訳をフィルタリングする
-Source Text==ソーステキスト
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="ログイン"
-"logout"=="ログアウト"
-"red bar"=="赤いバー"
-"green bar"=="緑色のバー"
-"Change"=="変化"
-User Page==ユーザー ページ
-You are not logged in.==ログインしていません。
-Username:==ユーザー名:
-Password:==パスワード：
-(Identified by==(特定者
-IP==IP
-Username/Password==ユーザー名/Password
-Cookie==クッキー
-old Password==以前のパスワード
-new Password==新しいパスワード
-new Password(repetition)==新しいパスワード(繰り返し)
-You are currently logged in as admin.==現在、管理者としてログインしています。
-(after logout you will be prompted for your password again. simply click "cancel")==(ログアウト後、再度パスワードの入力を求められます。単に「キャンセル」をクリックしてください)
-Password was changed.==パスワードが変更されました。
-Old Password is wrong.==古いパスワードが間違っています。
-New Password and its repetition do not match.==新しいパスワードとその繰り返しが一致しません。
-New Password is empty.==新しいパスワードが空です。
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="ファイルシステムブラウザ"
@@ -3884,40 +3697,9 @@ Other Dot==その他のドット
 Dot-end==ドットエンド
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="全て"
-"admin"=="管理者"
-"Submit"=="確定する"
-"Preview"=="プレヴュー"
-"Discard"=="廃棄する"
-"Show"=="見せる"
-"Compare"=="比較"
-(only granted to admin)==(管理者にのみ許可されています)
-Index -==索引 -
-Grant Write Access to==への書き込みアクセスを許可する
-Edit==編集
-Author:==著者:
-Text:==文章：
-Preview==プレビュー
-No changes have been submitted so far!==まだ変更が確定されていません!
-Index==索引
-Subject==主題
-Change Date==変更日
-Last Author==最終著者
-Start Page==スタートページ
-Versions==バージョン
-Compare version from==からのバージョンを比較
-with version from==からのバージョン
-Error==エラー
-You can use==使用できます
-Changes will be published as announcement on YaCyNews==変更はYaCyNewsでのお知らせとして公開されます
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki-コード
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==この表には、Wiki および他のいくつかのサーブレットで使用できるタグの簡単な説明が含まれています
 of YaCy. For a more detailed description visit the==YaCy の。より詳細な説明については、次のサイトを参照してください。
 Code==コード
 Description==説明
@@ -3942,7 +3724,6 @@ These tags create a definition list.==これらのタグは定義リストを作
 This tag creates a horizontal line.==このタグは水平線を作成します。
 [[pagename]]==[[ページ名]]
 [[pagename|description]]==[[ページ名|説明]]
-This tag creates links to other pages of the wiki.==このタグは、Wiki の他のページへのリンクを作成します。
 [url]==[URL]
 [url description]==【URL説明】
 This tag creates links to external websites.==このタグは外部 Web サイトへのリンクを作成します。
@@ -4267,7 +4048,6 @@ Outgoing&nbsp;News==発信&nbsp;ニュース
 Published&nbsp;News==公開&nbsp;ニュース
 Community Data==コミュニティデータ
 Surftips==サーフティップス
-Local Peer Wiki==ローカルピアWiki
 Bookmarks==ブックマーク
 #-----------------------------
 
@@ -4278,7 +4058,6 @@ Advanced Settings==高度な設定
 Performance Settings of Busy Queues==ビジーキューのパフォーマンス設定
 Viewer and administration for database tables==データベーステーブルのビューアと管理
 Advanced Properties==高度な属性
-UI Translations==UIの翻訳
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4384,13 +4163,6 @@ Generic Search Portal==汎用検索ポータル
 Search Box Anywhere==どこでも検索ボックス
 User Profile==ユーザープロフィール
 Local robots.txt==ローカルロボット.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==公開
-Wiki==ウィキ
-Blog==ブログ
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4537,14 +4309,6 @@ domaingraph : Built with Processing==ドメイングラフ : 処理を使用し�
 This browser does not have a Java Plug-in.==このブラウザーはJavaのプラグ-インがありません.
 Get the latest Java Plug-in here.==ここで最新のJavaのプラグ-インを入手して下さい.
 Built with Processing==処理を使用して構築
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="ログイン"
-Your Username/Password is wrong.==あなたの ユーザー名/パスワード は間違っています.
-Username==ユーザー名
-Password==パスワード
 #-----------------------------
 
 #File: proxymsg/error.html

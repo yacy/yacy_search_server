@@ -38,7 +38,6 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
-import net.yacy.data.UserDB;
 import net.yacy.document.DateDetection;
 import net.yacy.document.LibraryProvider;
 import net.yacy.http.servlets.TemplateMissingParameterException;
@@ -75,9 +74,7 @@ public class yacysearchtrailer {
         final String eventID = post.get("eventID", "");
 
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
-
-        final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-        final boolean authenticated = adminAuthenticated || user != null;
+        final boolean authenticated = adminAuthenticated;
 
         if (post.containsKey("auth") && !authenticated) {
             /*

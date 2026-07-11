@@ -337,54 +337,6 @@ An error occurred while editing the following entries. Please check syntax.==Π�
 Activate this list for ...==Ενεργοποιήστε αυτήν τη λίστα για...
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="Υποτάσσομαι"
-"Preview"=="Πρεμιέρα"
-"Discard"=="Απορρίπτω"
-"Yes, delete it."=="Ναι, διαγράψτε το."
-"No, leave it."=="Όχι, αφήστε το."
-"Import"=="Εισαγωγή"
-&lt;&lt; previous entries==&lt;&lt; προηγούμενες εγγραφές
-next entries &gt;&gt;==επόμενες καταχωρήσεις &gt;&gt;
-Blog-Home==Blog-Home
-Edit==Τροποποίηση
-Author:==Συγγραφέας:
-Subject:==Θέμα:
-Text:==Κείμενο:
-Comments:==Σχόλια:
-deactivated==απενεργοποιημένο
-activated==ενεργοποιήθηκε
-moderated==μετριάζεται
-Preview==Πρεμιέρα
-No changes have been submitted so far!==Δεν έχουν υποβληθεί αλλαγές μέχρι στιγμής!
-Access denied==Δεν επιτρέπεται η πρόσβαση
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Για να επεξεργαστείτε ή να δημιουργήσετε καταχωρήσεις ιστολογίου, πρέπει να είστε συνδεδεμένοι ως Διαχειριστής ή Χρήστης που έχει δικαιώματα ιστολογίου.
-Are you sure...==Είσαι σίγουρος...
-Confirm deletion==Επιβεβαιώστε τη διαγραφή
-XML-Import==XML-Εισαγωγή
-Import was successful!==Η εισαγωγή ήταν επιτυχής!
-Import failed, maybe the supplied file was no valid blog-backup?==Η εισαγωγή απέτυχε, ίσως το παρεχόμενο αρχείο δεν ήταν έγκυρο αντίγραφο ασφαλείας ιστολογίου;
-Please select the XML-file you want to import:==Επιλέξτε το XML-αρχείο που θέλετε να εισαγάγετε:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="Υποτάσσομαι"
-"Preview"=="Πρεμιέρα"
-"Discard"=="Απορρίπτω"
-Blog-Home==Blog-Home
-Comments:==Σχόλια:
-&lt;&lt; previous entries==&lt;&lt; προηγούμενες εγγραφές
-next entries &gt;&gt;==επόμενες καταχωρήσεις &gt;&gt;
-Comments are not allowed for this posting!==Δεν επιτρέπονται σχόλια για αυτήν την ανάρτηση!
-Comment on this Blog==Σχολιάστε αυτό το ιστολόγιο
-Author:==Συγγραφέας:
-Subject:==Θέμα:
-Text:==Κείμενο:
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -452,58 +404,10 @@ Private Queue==Ιδιωτική ουρά
 Public Queue==Δημόσια ουρά
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==Λίστα χρηστών
-User Accounts==Λογαριασμοί χρηστών
-User==Μεταχειριζόμενος
-First name==Ονομα
-Last name==Επώνυμο
-Address==Διεύθυνση
-Last Access==Τελευταία Πρόσβαση
-Rights==Δικαιώματα
-Time==Φορά
-Traffic==Κυκλοφορία
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="Ορισμός Διαχειριστή"
-"Set Access Rules"=="Ορισμός κανόνων πρόσβασης"
-"Edit User"=="Επεξεργασία χρήστη"
-"Delete User"=="Διαγραφή χρήστη"
-"Save User"=="Αποθήκευση χρήστη"
-User Administration==Διαχείριση χρήστη
-Generic error.==Γενικό σφάλμα.
 Passwords do not match.==Οι κωδικοί πρόσβασης δεν ταιριάζουν.
-Username too short. Username must be &gt;= 4 Characters.==Το όνομα χρήστη είναι πολύ μικρό. Το όνομα χρήστη πρέπει να είναι &gt;= 4 χαρακτήρες.
-Username already used (not allowed).==Όνομα χρήστη που χρησιμοποιείται ήδη (δεν επιτρέπεται).
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Αυτή η περίπτωση YaCy μπορεί να διαχειρίζεται με τον λογαριασμό "admin" και τον προεπιλεγμένο κωδικό πρόσβασης "yacy".
-Change the password as soon as possible!==Αλλάξτε τον κωδικό πρόσβασης το συντομότερο δυνατό!
 Admin Account==Λογαριασμός διαχειριστή
-Access from localhost without account==Πρόσβαση από localhost χωρίς λογαριασμό
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Η πρόσβαση στο peer σας από τον δικό σας υπολογιστή (πρόσβαση τοπικού κεντρικού υπολογιστή) παρέχεται με δικαιώματα διαχειριστή. Δεν χρειάζεται να διαμορφώσετε έναν λογαριασμό διαχείρισης.
-This setting is convenient but less secure than using a qualified admin account.==Αυτή η ρύθμιση είναι βολική, αλλά λιγότερο ασφαλής από τη χρήση ενός αναγνωρισμένου λογαριασμού διαχειριστή.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Χρησιμοποιήστε το με προσοχή, ιδίως όταν περιηγείστε σε μη αξιόπιστους και δυνητικά κακόβουλους ιστότοπους ενώ εκτελείτε το YaCy ομότιμο σας στον ίδιο υπολογιστή.
-Access only with qualified account==Πρόσβαση μόνο με πιστοποιημένο λογαριασμό
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Αυτό απαιτείται εάν θέλετε απομακρυσμένη πρόσβαση στον ομότιμο σας, αλλά επίσης σκληραίνει τα στοιχεία ελέγχου πρόσβασης στις λειτουργίες διαχείρισης του ομοτίμου σας.
-Peer User:==Ομότιμος χρήστης:
-New Peer Password:==Νέος κωδικός πρόσβασης ομοτίμων:
-Repeat Peer Password:==Επαναλάβετε τον κωδικό πρόσβασης ομοτίμων:
-Access Rules==Κανόνες πρόσβασης
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Προστασία όλων των σελίδων: εάν είναι ενεργοποιημένη, η πρόσβαση σε όλες τις σελίδες χρειάζεται εξουσιοδότηση. Εάν είναι απενεργοποιημένη, προστατεύονται μόνο οι σελίδες με επέκταση "_p".
-User Accounts==Λογαριασμοί χρηστών
-Select user==Επιλέξτε χρήστη
-New user==Νέος χρήστης
-Username==Όνομα χρήστη
-Password==Σύνθημα
-Repeat password==Επαναλάβετε τον κωδικό πρόσβασης
-First name==Ονομα
-Last name==Επώνυμο
-Address==Διεύθυνση
-Rights:==Δικαιώματα:
-Timelimit==Χρονικό όριο
-Time used==Χρόνος που χρησιμοποιείται
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -881,8 +785,6 @@ Status page==Σελίδα κατάστασης
 Network pages==Σελίδες δικτύου
 Surftips==Surftips
 News pages==Σελίδες ειδήσεων
-Blog==Ιστολόγιο
-Wiki==Wiki
 Public bookmarks==Δημόσιοι σελιδοδείκτες
 Home Page==Αρχική Σελίδα
 File Share==Κοινή χρήση αρχείου
@@ -1040,28 +942,6 @@ Last Deploy==Τελευταία ανάπτυξη
 You installed YaCy with a package manager. To update YaCy, use the package manager:==Εγκαταστήσατε το YaCy με έναν διαχειριστή πακέτων. Για να ενημερώσετε το YaCy, χρησιμοποιήστε τη διαχείριση πακέτων:
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==μη αυτόματη ενημέρωση:<br/>apt-get update &amp;&amp; apt-get install yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==αυτόματη ενημέρωση: προσθέστε την ακόλουθη γραμμή στο /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="Αποθήκευση χρήστη"
-"Delete User"=="Διαγραφή χρήστη"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==Επεξεργαστής λογαριασμού χρήστη
-Generic error.==Γενικό σφάλμα.
-Passwords do not match.==Οι κωδικοί πρόσβασης δεν ταιριάζουν.
-Username too short. Username must be &gt;= 4 Characters.==Το όνομα χρήστη είναι πολύ μικρό. Το όνομα χρήστη πρέπει να είναι &gt;= 4 χαρακτήρες.
-Username already used (not allowed).==Όνομα χρήστη που χρησιμοποιείται ήδη (δεν επιτρέπεται).
-Username==Όνομα χρήστη
-Password==Σύνθημα
-Repeat password==Επαναλάβετε τον κωδικό πρόσβασης
-First name==Ονομα
-Last name==Επώνυμο
-Address==Διεύθυνση
-Rights:==Δικαιώματα:
-Timelimit==Χρονικό όριο
-Time used==Χρόνος που χρησιμοποιείται
-back to user list==επιστροφή στη λίστα χρηστών
 #-----------------------------
 
 #File: Connections_p.html
@@ -2470,8 +2350,6 @@ inbox==inbox
 "DHT Receive: yes"=="DHT Λήψη: ναι"
 "DHT receive enabled"=="Η λήψη DHT ενεργοποιήθηκε"
 "Profile updated"=="Το προφίλ ενημερώθηκε"
-"Wiki updated"=="Το Wiki ενημερώθηκε"
-"Blog updated"=="Το ιστολόγιο ενημερώθηκε"
 "Crawl"=="Αργή πορεία"
 "The YaCy Network"=="Το Δίκτυο YaCy"
 "Type: Virgin"=="Τύπος: Παρθένος"
@@ -2517,7 +2395,6 @@ Received DHT<br/>Word Chunks==Λήφθηκαν DHT<br/>Word Chunks
 Received<br/>URLs==Λήφθηκαν<br/>URL
 Location==Τοποθεσία
 user agent<br/>==πράκτορας χρήστη<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==αποστολή&nbsp;<strong>μ</strong>ηνύματος/<br/>εμφάνιση&nbsp;<strong>π</strong>ροφίλ/<br/>επεξεργασία&nbsp;<strong>W</strong>iki/<br/>περιήγηση&nbsp;<strong>ι</strong>στολογίου
 Network==Δίκτυο
 Online Peers==Online Peers
 Number of<br/>Documents==Αριθμός<br/>Εγγράφων
@@ -2588,7 +2465,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==Ένας πίνακας με ανιχνεύσεις που ξεκίνησαν πρόσφατα παρουσιάζεται στη σελίδα Δημιουργία ευρετηρίου
 A change in the personal profile will create a news entry. You can see recently made changes of==Μια αλλαγή στο προσωπικό προφίλ θα δημιουργήσει μια καταχώριση ειδήσεων. Μπορείτε να δείτε τις πρόσφατες αλλαγές του
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==καταχωρήσεις προφίλ στη σελίδα Δικτύου, όπου αυτή η αλλαγή προφίλ απεικονίζεται με ένα '*' δίπλα στον επιλογέα 'P' (προφίλ).
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==Δημοσίευση προστιθέμενης ή τροποποιημένης μετάφρασης για τη διεπαφή χρήστη. Άλλοι συνομήλικοι μπορεί να το συμπεριλάβουν στην τοπική λίστα μεταφράσεων τους.
 More news services will follow.==Θα ακολουθήσουν περισσότερες υπηρεσίες ειδήσεων.
 Above you can see four menus:==Παραπάνω μπορείτε να δείτε τέσσερα μενού:
 Only these news will be used to display specific news services as explained above.==Μόνο αυτές οι ειδήσεις θα χρησιμοποιηθούν για την εμφάνιση συγκεκριμένων υπηρεσιών ειδήσεων όπως εξηγείται παραπάνω.
@@ -2994,23 +2870,18 @@ Age==Ηλικία
 "Reset to defaults settings"=="Επαναφορά στις προεπιλεγμένες ρυθμίσεις"
 limitations==περιορισμούς
 Local Search access rate limitations==Περιορισμοί ποσοστού πρόσβασης τοπικής αναζήτησης
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Μπορείτε να διαμορφώσετε εδώ περιορισμούς στο ποσοστό πρόσβασης σε αυτήν τη διεπαφή ομότιμης αναζήτησης από μη πιστοποιημένους χρήστες και χρήστες χωρίς δικαίωμα εκτεταμένης αναζήτησης
 YaCy search==YaCy αναζήτηση
 Access rate limitations to this peer search interface.==Περιορισμοί ρυθμού πρόσβασης σε αυτήν τη διεπαφή ομότιμης αναζήτησης.
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Όταν ένας χρήστης με περιορισμένα δικαιώματα (χωρίς έλεγχο ταυτότητας ή χωρίς εκτεταμένο δικαίωμα αναζήτησης) υπερβαίνει ένα όριο, η αναζήτηση αποκλείεται.
 Max searches in 3s==Μέγιστη αναζήτηση σε 3 δευτερόλεπτα
 Max searches in 1mn==Μέγιστη αναζήτηση σε 1 λεπτό
 Max searches in 10mn==Μέγιστες αναζητήσεις σε 10 λεπτά
 Peer-to-peer search==Ομότιμη αναζήτηση
 Access rate limitations to the peer-to-peer search mode.==Πρόσβαση στους περιορισμούς ποσοστού στη λειτουργία αναζήτησης peer-to-peer.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Όταν ένας χρήστης με περιορισμένα δικαιώματα (χωρίς έλεγχο ταυτότητας ή χωρίς εκτεταμένο δικαίωμα αναζήτησης) υπερβαίνει ένα όριο, το εύρος αναζήτησης επανέρχεται μόνο σε αυτό το τοπικό ευρετήριο ομότιμων.
 Max searches in	10mn==Μέγιστες αναζητήσεις σε 10 λεπτά
 Peer-to-peer search with JavaScript results	resorting==Ομότιμη αναζήτηση με JavaScript καταφυγή αποτελεσμάτων
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Περιορισμοί ποσοστού πρόσβασης στη λειτουργία αναζήτησης peer-to-peer με ενεργοποιημένη την καταφυγή αποτελεσμάτων JavaScript από την πλευρά του προγράμματος περιήγησης
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Όταν ένας χρήστης με περιορισμένα δικαιώματα (χωρίς έλεγχο ταυτότητας ή εκτεταμένο δικαίωμα αναζήτησης) υπερβαίνει ένα όριο, η καταφυγή αποτελεσμάτων εφαρμόζεται μόνο κατ' απαίτηση, από την πλευρά του διακομιστή.
 Remote snippet load==Απομακρυσμένη φόρτωση αποσπάσματος
 Limitations on snippet loading from remote websites.==Περιορισμοί στη φόρτωση αποσπασμάτων από απομακρυσμένους ιστότοπους.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Όταν ένας χρήστης με περιορισμένα δικαιώματα (χωρίς έλεγχο ταυτότητας ή εκτεταμένο δικαίωμα αναζήτησης) υπερβαίνει ένα όριο, η στρατηγική ανάκτησης αποσπασμάτων επιστρέφει στο "CACHEONLY"
 Max	searches in 3s==Μέγιστη αναζήτηση σε 3 δευτερόλεπτα
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Οι αλλαγές θα τεθούν σε ισχύ αμέσως.</em>
 #-----------------------------
@@ -3235,14 +3106,9 @@ These settings configure the access method to your own http proxy and server.==�
 All traffic is routed through one single port, for both proxy and server.==Όλη η κίνηση δρομολογείται μέσω μιας ενιαίας θύρας, τόσο για διακομιστή μεσολάβησης όσο και για διακομιστή.
 HTTPS Server Port:==HTTPS Θύρα διακομιστή:
 Server Access Restrictions==Περιορισμοί πρόσβασης διακομιστή
-You can restrict the access to this proxy/server using a two-stage security barrier:==Μπορείτε να περιορίσετε την πρόσβαση σε αυτόν τον διακομιστή μεσολάβησης/server χρησιμοποιώντας ένα φράγμα ασφαλείας δύο σταδίων:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==ορίστε έναν τομέα <em>πρόσβασης</em> με μια λίστα παραχωρημένων IP-αριθμών πελάτη ή με χαρακτήρες μπαλαντέρ
-define an <em>user account</em> with an user:password - pair==ορίστε έναν <em>λογαριασμό χρήστη</em> με user:password - pair
-This is the account that restricts access to the proxy function.==Αυτός είναι ο λογαριασμός που περιορίζει την πρόσβαση στη λειτουργία διακομιστή μεσολάβησης.
 You probably don't want to share the proxy to the internet, so you should set the==Πιθανότατα δεν θέλετε να κάνετε κοινή χρήση του διακομιστή μεσολάβησης στο Διαδίκτυο, επομένως θα πρέπει να ρυθμίσετε το
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP-Αριθμήστε τον τομέα πρόσβασης σε ένα μοτίβο που αντιστοιχεί στο τοπικό σας intranet.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Η προεπιλεγμένη ρύθμιση θα πρέπει να είναι σωστή στις περισσότερες περιπτώσεις. Εάν θέλετε, μπορείτε επίσης να ορίσετε έναν λογαριασμό διακομιστή μεσολάβησης
-so that every proxy user must authenticate first, but this is rather unusual.==έτσι ώστε κάθε χρήστης μεσολάβησης πρέπει πρώτα να κάνει έλεγχο ταυτότητας, αλλά αυτό είναι μάλλον ασυνήθιστο.
 IP-Number filter==IP-Φίλτρο αριθμών
 Accounts==Λογαριασμοί
 #-----------------------------
@@ -3633,59 +3499,6 @@ Save Tools Configuration==Αποθήκευση διαμόρφωσης εργαλ
 CyTag Trails==Διαδρομές CyTag
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="Δημοσιεύω"
-"negative vote"=="αρνητική ψήφο"
-"positive vote"=="θετική ψήφο"
-You can share your local addition to translations and distribute it to other peers.==Μπορείτε να μοιραστείτε την τοπική σας προσθήκη σε μεταφράσεις και να τη διανείμετε σε άλλους συνομηλίκους.
-The remote peer can vote on your translation and add it to its own local translation.==Ο απομακρυσμένος ομότιμος μπορεί να ψηφίσει για τη μετάφρασή σας και να την προσθέσει στη δική του τοπική μετάφραση.
-File:==Αρχείο:
-Originator==Δημιουργός
-English:==Αγγλικός:
-existing==υπάρχον
-Translation:==Μετάφραση:
-Vote on this translation. If you vote positive the translation is added to your local translation list.==Ψηφίστε για αυτήν τη μετάφραση. Εάν ψηφίσετε θετικά, η μετάφραση προστίθεται στην τοπική σας λίστα μεταφράσεων.
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="Αποθήκευση μετάφρασης"
-Translation Editor==Επιμελητής μετάφρασης
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==Μετάφραση μη μεταφρασμένου κειμένου της διεπαφής χρήστη (τρέχουσα γλώσσα). Το τροποποιημένο αρχείο μετάφρασης αποθηκεύεται στον κατάλογο DATA/LOCALE.
-UI Translation==Μετάφραση διεπαφής χρήστη
-Source File==Αρχείο πηγής
-view it==δείτε το
-filter untranslated==φίλτρο αμετάφραστο
-Source Text==Πηγαίο Κείμενο
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="σύνδεση"
-"logout"=="αποσύνδεση"
-"red bar"=="κόκκινη μπάρα"
-"green bar"=="πράσινο μπαρ"
-"Change"=="Αλλαγή"
-User Page==Σελίδα χρήστη
-You are not logged in.==Δεν είστε συνδεδεμένοι.
-Username:==Όνομα χρήστη:
-Password:==Σύνθημα:
-(Identified by==(Προσδιορίστηκε από
-IP==IP
-Username/Password==Όνομα χρήστη/Password
-Cookie==Κουλουράκι
-old Password==παλιός κωδικός πρόσβασης
-new Password==νέος κωδικός πρόσβασης
-new Password(repetition)==νέος κωδικός πρόσβασης (επανάληψη)
-You are currently logged in as admin.==Αυτήν τη στιγμή είστε συνδεδεμένος ως διαχειριστής.
-(after logout you will be prompted for your password again. simply click "cancel")==(μετά την αποσύνδεση θα σας ζητηθεί ξανά ο κωδικός πρόσβασής σας. απλά κάντε κλικ στο "ακύρωση")
-Password was changed.==Ο κωδικός πρόσβασης άλλαξε.
-Old Password is wrong.==Ο παλιός κωδικός είναι λάθος.
-New Password and its repetition do not match.==Ο νέος κωδικός πρόσβασης και η επανάληψή του δεν ταιριάζουν.
-New Password is empty.==Ο νέος κωδικός πρόσβασης είναι κενός.
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="Πρόγραμμα περιήγησης συστήματος αρχείων"
@@ -3889,40 +3702,9 @@ Other Dot==Άλλο Dot
 Dot-end==Τελική άκρη
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="όλοι"
-"admin"=="διαχειριστής"
-"Submit"=="Υποτάσσομαι"
-"Preview"=="Πρεμιέρα"
-"Discard"=="Απορρίπτω"
-"Show"=="Επίδειξη"
-"Compare"=="Συγκρίνω"
-(only granted to admin)==(χορηγείται μόνο σε διαχειριστή)
-Index -==Ευρετήριο -
-Grant Write Access to==Παραχωρήστε πρόσβαση εγγραφής σε
-Edit==Τροποποίηση
-Author:==Συγγραφέας:
-Text:==Κείμενο:
-Preview==Πρεμιέρα
-No changes have been submitted so far!==Δεν έχουν υποβληθεί αλλαγές μέχρι στιγμής!
-Index==Δείκτης
-Subject==Θέμα
-Change Date==Αλλαγή ημερομηνίας
-Last Author==Τελευταίος συγγραφέας
-Start Page==Αρχική Σελίδα
-Versions==εκδόσεις
-Compare version from==Συγκρίνετε την έκδοση από
-with version from==με έκδοση από
-Error==Σφάλμα
-You can use==Μπορείτε να χρησιμοποιήσετε
-Changes will be published as announcement on YaCyNews==Οι αλλαγές θα δημοσιευτούν ως ανακοίνωση στο YaCyNews
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki-Code
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Αυτός ο πίνακας περιέχει μια σύντομη περιγραφή των ετικετών που μπορούν να χρησιμοποιηθούν στο Wiki και σε πολλούς άλλους servlets
 of YaCy. For a more detailed description visit the==από YaCy. Για πιο λεπτομερή περιγραφή επισκεφθείτε το
 Code==Κώδικας
 Description==Περιγραφή
@@ -3947,7 +3729,6 @@ These tags create a definition list.==Αυτές οι ετικέτες δημι�
 This tag creates a horizontal line.==Αυτή η ετικέτα δημιουργεί μια οριζόντια γραμμή.
 [[pagename]]==[[όνομα σελίδας]]
 [[pagename|description]]==[[όνομα σελίδας|περιγραφή]]
-This tag creates links to other pages of the wiki.==Αυτή η ετικέτα δημιουργεί συνδέσμους προς άλλες σελίδες του wiki.
 [url]==[url]
 [url description]==[περιγραφή url]
 This tag creates links to external websites.==Αυτή η ετικέτα δημιουργεί συνδέσμους προς εξωτερικούς ιστότοπους.
@@ -4272,7 +4053,6 @@ Outgoing&nbsp;News==Εξερχόμενες&nbsp;Ειδήσεις
 Published&nbsp;News==Δημοσιεύτηκαν&nbsp;Ειδήσεις
 Community Data==Δεδομένα Κοινότητας
 Surftips==Surftips
-Local Peer Wiki==Τοπικό ομότιμο Wiki
 Bookmarks==Σελιδοδείκτες
 #-----------------------------
 
@@ -4283,7 +4063,6 @@ Advanced Settings==Προηγμένες ρυθμίσεις
 Performance Settings of Busy Queues==Ρυθμίσεις απόδοσης των κατειλημμένων ουρών
 Viewer and administration for database tables==Προβολή και διαχείριση πινάκων βάσεων δεδομένων
 Advanced Properties==Προηγμένες ιδιότητες
-UI Translations==Μεταφράσεις διεπαφής χρήστη
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4389,13 +4168,6 @@ Generic Search Portal==Πύλη γενικής αναζήτησης
 Search Box Anywhere==Πλαίσιο αναζήτησης οπουδήποτε
 User Profile==Προφίλ χρήστη
 Local robots.txt==Τοπικά robots.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==Δημοσίευση
-Wiki==Wiki
-Blog==Ιστολόγιο
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4542,14 +4314,6 @@ domaingraph : Built with Processing==domaingraph : Κατασκευάστηκε 
 This browser does not have a Java Plug-in.==Αυτό το πρόγραμμα περιήγησης δεν διαθέτει Java Plug-in.
 Get the latest Java Plug-in here.==Αποκτήστε την πιο πρόσφατη προσθήκη Java εδώ.
 Built with Processing==Κατασκευάστηκε με Επεξεργασία
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="σύνδεση"
-Your Username/Password is wrong.==Το όνομα χρήστη σας/Password είναι λάθος.
-Username==Όνομα χρήστη
-Password==Σύνθημα
 #-----------------------------
 
 #File: proxymsg/error.html

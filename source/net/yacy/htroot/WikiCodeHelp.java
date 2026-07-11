@@ -1,4 +1,4 @@
-// WikiHelp.java
+// WikiCodeHelp.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // You must compile this file with
-// javac -classpath .:../classes WikiHelp.java
+// javac -classpath .:../classes WikiCodeHelp.java
 // if the shell's current path is HTROOT
 
 package net.yacy.htroot;
@@ -33,7 +33,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-public class WikiHelp {
+public class WikiCodeHelp {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         //final plasmaSwitchboard sb = (plasmaSwitchboard) env;

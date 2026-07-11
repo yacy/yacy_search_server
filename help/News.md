@@ -14,17 +14,19 @@ backend_java: source/net/yacy/htroot/News.java
 
 News Monitor shows YaCy network news and peer events.
 
+Blog and Wiki categories are retired and no longer rendered as linked news entries.
+
 Use it to understand what other peers announced or what the local peer received.
 
 ## What You Can Do Here
 
 - News Monitor shows YaCy network news and peer events.
-- Edit or inspect the specific content object shown on the page.
-- Check whether the result is local-only, user-visible, or peer-visible before publishing.
+- Inspect incoming, processed, outgoing, and published news queues.
+- Process received records, delete archived records, or stop selected outgoing publications.
 
 ## Page Architecture
 
-Content application pages store and render peer-local objects such as bookmarks, messages, wiki text, tables, profiles, or translations. They combine form editing with a rendered view of the stored object.
+The page renders records from the four peer-news queues. Each record includes its originator, category, timestamps, distribution count, and attributes.
 
 | Control | Meaning | Values or examples |
 | --- | --- | --- |
@@ -33,7 +35,7 @@ Content application pages store and render peer-local objects such as bookmarks,
 
 ## Correct Use
 
-Edit content deliberately and check the rendered page after saving. For shared or peer-visible features, assume written content may be read by someone else unless the page clearly says otherwise.
+Select only the records intended for processing or deletion. Stopping an outgoing publication prevents further distribution but does not retract copies already received by other peers.
 
 ## Access And Safety
 
@@ -71,8 +73,4 @@ deletespecific=...&deleteall=...&del_#[id]#=...&page=...
 
 ## What To Expect
 
-Expect stored or rendered content: a message, page, table row, bookmark, profile, translation, or file view. After changes, reload or revisit the object to confirm what was actually saved.
-
-## Related Pages
-
-- `Translator_p.html`
+After an action, reload the selected queue and confirm that the intended records moved, disappeared, or stopped publishing.

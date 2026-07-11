@@ -90,4 +90,4 @@ A successful change is visible as a saved value, a confirmation, or changed beha
 
 - `ViewProfile.html`
 - `Supporter.html`
-- `WikiHelp.html`
+- `WikiCodeHelp.html`

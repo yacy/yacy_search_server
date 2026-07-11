@@ -902,136 +902,6 @@
   </body>
 </file>
 
-<file original="Blog.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="205a752" xml:space="preserve" approved="no" translate="yes">
-       <source>"RSS"</source>
-    </trans-unit>
-    <trans-unit id="bfcc5088" xml:space="preserve" approved="no" translate="yes">
-       <source>"Submit"</source>
-    </trans-unit>
-    <trans-unit id="6904b79c" xml:space="preserve" approved="no" translate="yes">
-       <source>"Preview"</source>
-    </trans-unit>
-    <trans-unit id="c5332d86" xml:space="preserve" approved="no" translate="yes">
-       <source>"Discard"</source>
-    </trans-unit>
-    <trans-unit id="bad7983b" xml:space="preserve" approved="no" translate="yes">
-       <source>"Yes, delete it."</source>
-    </trans-unit>
-    <trans-unit id="1560d15f" xml:space="preserve" approved="no" translate="yes">
-       <source>"No, leave it."</source>
-    </trans-unit>
-    <trans-unit id="a1ed8e9b" xml:space="preserve" approved="no" translate="yes">
-       <source>"Import"</source>
-    </trans-unit>
-    <trans-unit id="f3226ad" xml:space="preserve" approved="no" translate="yes">
-       <source>&amp;lt;&amp;lt; previous entries</source>
-    </trans-unit>
-    <trans-unit id="2e69812d" xml:space="preserve" approved="no" translate="yes">
-       <source>next entries &amp;gt;&amp;gt;</source>
-    </trans-unit>
-    <trans-unit id="aed6f02a" xml:space="preserve" approved="no" translate="yes">
-       <source>Blog-Home</source>
-    </trans-unit>
-    <trans-unit id="20e22a" xml:space="preserve" approved="no" translate="yes">
-       <source>Edit</source>
-    </trans-unit>
-    <trans-unit id="3cafa7ef" xml:space="preserve" approved="no" translate="yes">
-       <source>Author:</source>
-    </trans-unit>
-    <trans-unit id="887ab4ae" xml:space="preserve" approved="no" translate="yes">
-       <source>Subject:</source>
-    </trans-unit>
-    <trans-unit id="4cf708d" xml:space="preserve" approved="no" translate="yes">
-       <source>Text:</source>
-    </trans-unit>
-    <trans-unit id="1e5600a6" xml:space="preserve" approved="no" translate="yes">
-       <source>Comments:</source>
-    </trans-unit>
-    <trans-unit id="967e3e70" xml:space="preserve" approved="no" translate="yes">
-       <source>deactivated</source>
-    </trans-unit>
-    <trans-unit id="c2ec9d1" xml:space="preserve" approved="no" translate="yes">
-       <source>activated</source>
-    </trans-unit>
-    <trans-unit id="8882a3c1" xml:space="preserve" approved="no" translate="yes">
-       <source>moderated</source>
-    </trans-unit>
-    <trans-unit id="50417ba8" xml:space="preserve" approved="no" translate="yes">
-       <source>Preview</source>
-    </trans-unit>
-    <trans-unit id="baf17931" xml:space="preserve" approved="no" translate="yes">
-       <source>No changes have been submitted so far!</source>
-    </trans-unit>
-    <trans-unit id="107645b7" xml:space="preserve" approved="no" translate="yes">
-       <source>Access denied</source>
-    </trans-unit>
-    <trans-unit id="eb8895dd" xml:space="preserve" approved="no" translate="yes">
-       <source>To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.</source>
-    </trans-unit>
-    <trans-unit id="1245934c" xml:space="preserve" approved="no" translate="yes">
-       <source>Are you sure...</source>
-    </trans-unit>
-    <trans-unit id="4734b94e" xml:space="preserve" approved="no" translate="yes">
-       <source>Confirm deletion</source>
-    </trans-unit>
-    <trans-unit id="37ec625b" xml:space="preserve" approved="no" translate="yes">
-       <source>XML-Import</source>
-    </trans-unit>
-    <trans-unit id="aea3fbb5" xml:space="preserve" approved="no" translate="yes">
-       <source>Import was successful!</source>
-    </trans-unit>
-    <trans-unit id="30d099a9" xml:space="preserve" approved="no" translate="yes">
-       <source>Import failed, maybe the supplied file was no valid blog-backup?</source>
-    </trans-unit>
-    <trans-unit id="824e78ee" xml:space="preserve" approved="no" translate="yes">
-       <source>Please select the XML-file you want to import:</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="BlogComments.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="bfcc5088" xml:space="preserve" approved="no" translate="yes">
-       <source>"Submit"</source>
-    </trans-unit>
-    <trans-unit id="6904b79c" xml:space="preserve" approved="no" translate="yes">
-       <source>"Preview"</source>
-    </trans-unit>
-    <trans-unit id="c5332d86" xml:space="preserve" approved="no" translate="yes">
-       <source>"Discard"</source>
-    </trans-unit>
-    <trans-unit id="aed6f02a" xml:space="preserve" approved="no" translate="yes">
-       <source>Blog-Home</source>
-    </trans-unit>
-    <trans-unit id="1e5600a6" xml:space="preserve" approved="no" translate="yes">
-       <source>Comments:</source>
-    </trans-unit>
-    <trans-unit id="f3226ad" xml:space="preserve" approved="no" translate="yes">
-       <source>&amp;lt;&amp;lt; previous entries</source>
-    </trans-unit>
-    <trans-unit id="2e69812d" xml:space="preserve" approved="no" translate="yes">
-       <source>next entries &amp;gt;&amp;gt;</source>
-    </trans-unit>
-    <trans-unit id="1250e9ed" xml:space="preserve" approved="no" translate="yes">
-       <source>Comments are not allowed for this posting!</source>
-    </trans-unit>
-    <trans-unit id="4ee50744" xml:space="preserve" approved="no" translate="yes">
-       <source>Comment on this Blog</source>
-    </trans-unit>
-    <trans-unit id="3cafa7ef" xml:space="preserve" approved="no" translate="yes">
-       <source>Author:</source>
-    </trans-unit>
-    <trans-unit id="887ab4ae" xml:space="preserve" approved="no" translate="yes">
-       <source>Subject:</source>
-    </trans-unit>
-    <trans-unit id="4cf708d" xml:space="preserve" approved="no" translate="yes">
-       <source>Text:</source>
-    </trans-unit>
-  </body>
-</file>
-
 <file original="Bookmarks.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="205a752" xml:space="preserve" approved="no" translate="yes">
@@ -1219,150 +1089,61 @@
   </body>
 </file>
 
-<file original="ConfigAccountList_p.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="8824efd3" xml:space="preserve" approved="no" translate="yes">
-       <source>User List</source>
-    </trans-unit>
-    <trans-unit id="3a43589b" xml:space="preserve" approved="no" translate="yes">
-       <source>User Accounts</source>
-    </trans-unit>
-    <trans-unit id="285feb" xml:space="preserve" approved="no" translate="yes">
-       <source>User</source>
-    </trans-unit>
-    <trans-unit id="69c1a21b" xml:space="preserve" approved="no" translate="yes">
-       <source>First name</source>
-    </trans-unit>
-    <trans-unit id="ebf825b5" xml:space="preserve" approved="no" translate="yes">
-       <source>Last name</source>
-    </trans-unit>
-    <trans-unit id="1ed033d4" xml:space="preserve" approved="no" translate="yes">
-       <source>Address</source>
-    </trans-unit>
-    <trans-unit id="81d32a2e" xml:space="preserve" approved="no" translate="yes">
-       <source>Last Access</source>
-    </trans-unit>
-    <trans-unit id="91e56df7" xml:space="preserve" approved="no" translate="yes">
-       <source>Rights</source>
-    </trans-unit>
-    <trans-unit id="27c6ed" xml:space="preserve" approved="no" translate="yes">
-       <source>Time</source>
-    </trans-unit>
-    <trans-unit id="239ab9dd" xml:space="preserve" approved="no" translate="yes">
-       <source>Traffic</source>
-    </trans-unit>
-  </body>
-</file>
-
 <file original="ConfigAccounts_p.html"  source-language="en"  datatype="html">
   <body>
-    <trans-unit id="1d0cdd18" xml:space="preserve" approved="no" translate="yes">
-       <source>"Define Administrator"</source>
-    </trans-unit>
-    <trans-unit id="26c47107" xml:space="preserve" approved="no" translate="yes">
-       <source>"Set Access Rules"</source>
-    </trans-unit>
-    <trans-unit id="581389c3" xml:space="preserve" approved="no" translate="yes">
-       <source>"Edit User"</source>
-    </trans-unit>
-    <trans-unit id="31293c24" xml:space="preserve" approved="no" translate="yes">
-       <source>"Delete User"</source>
-    </trans-unit>
-    <trans-unit id="243c3af6" xml:space="preserve" approved="no" translate="yes">
-       <source>"Save User"</source>
-    </trans-unit>
-    <trans-unit id="27a10153" xml:space="preserve" approved="no" translate="yes">
-       <source>User Administration</source>
-    </trans-unit>
-    <trans-unit id="df3b29af" xml:space="preserve" approved="no" translate="yes">
-       <source>Generic error.</source>
-    </trans-unit>
-    <trans-unit id="235692a3" xml:space="preserve" approved="no" translate="yes">
-       <source>Passwords do not match.</source>
-    </trans-unit>
-    <trans-unit id="6ad966f5" xml:space="preserve" approved="no" translate="yes">
-       <source>Username too short. Username must be &amp;gt;= 4 Characters.</source>
-    </trans-unit>
-    <trans-unit id="1bf77769" xml:space="preserve" approved="no" translate="yes">
-       <source>Username already used (not allowed).</source>
-    </trans-unit>
-    <trans-unit id="c16576fb" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;b&gt;WARNING&lt;/b&gt; This YaCy instance can be administered with the account "admin" and the default password "yacy".</source>
-    </trans-unit>
-    <trans-unit id="9f01155f" xml:space="preserve" approved="no" translate="yes">
-       <source>Change the password as soon as possible!</source>
+    <trans-unit id="3affb1c7" xml:space="preserve" approved="no" translate="yes">
+       <source>"Change Administrator Credentials"</source>
     </trans-unit>
     <trans-unit id="f6c2321c" xml:space="preserve" approved="no" translate="yes">
        <source>Admin Account</source>
     </trans-unit>
-    <trans-unit id="eccb4d6e" xml:space="preserve" approved="no" translate="yes">
-       <source>Access from localhost without account</source>
+    <trans-unit id="4afb638f" xml:space="preserve" approved="no" translate="yes">
+       <source>Invalid administrator settings.</source>
     </trans-unit>
-    <trans-unit id="70e6ab33" xml:space="preserve" approved="no" translate="yes">
-       <source>Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.</source>
+    <trans-unit id="235692a3" xml:space="preserve" approved="no" translate="yes">
+       <source>Passwords do not match.</source>
     </trans-unit>
-    <trans-unit id="b26b9832" xml:space="preserve" approved="no" translate="yes">
-       <source>This setting is convenient but less secure than using a qualified admin account.</source>
+    <trans-unit id="280fb6d0" xml:space="preserve" approved="no" translate="yes">
+       <source>Administrator username is required.</source>
     </trans-unit>
-    <trans-unit id="8db59370" xml:space="preserve" approved="no" translate="yes">
-       <source>Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.</source>
+    <trans-unit id="aef34d2b" xml:space="preserve" approved="no" translate="yes">
+       <source>Administrator password is required.</source>
     </trans-unit>
-    <trans-unit id="a5765027" xml:space="preserve" approved="no" translate="yes">
-       <source>Access only with qualified account</source>
+    <trans-unit id="fe30f85" xml:space="preserve" approved="no" translate="yes">
+       <source>Default administrator password is active.</source>
     </trans-unit>
-    <trans-unit id="28934bf" xml:space="preserve" approved="no" translate="yes">
-       <source>This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.</source>
+    <trans-unit id="a4facca" xml:space="preserve" approved="no" translate="yes">
+       <source>This YaCy instance can still be administered with the username "admin" and the default password "yacy". Replace these credentials using the form directly below.</source>
     </trans-unit>
-    <trans-unit id="9bceed91" xml:space="preserve" approved="no" translate="yes">
-       <source>Peer User:</source>
+    <trans-unit id="30f8253d" xml:space="preserve" approved="no" translate="yes">
+       <source>These credentials are used for remote administration and whenever administrative access from localhost without authentication is disabled.</source>
     </trans-unit>
-    <trans-unit id="9cef2e61" xml:space="preserve" approved="no" translate="yes">
-       <source>New Peer Password:</source>
+    <trans-unit id="986d1451" xml:space="preserve" approved="no" translate="yes">
+       <source>Administrator Username:</source>
     </trans-unit>
-    <trans-unit id="c51068c6" xml:space="preserve" approved="no" translate="yes">
-       <source>Repeat Peer Password:</source>
+    <trans-unit id="7029a88c" xml:space="preserve" approved="no" translate="yes">
+       <source>New Administrator Password:</source>
+    </trans-unit>
+    <trans-unit id="e1c34fc7" xml:space="preserve" approved="no" translate="yes">
+       <source>Repeat Administrator Password:</source>
+    </trans-unit>
+    <trans-unit id="35da07f9" xml:space="preserve" approved="no" translate="yes">
+       <source>If you need to reset the administrator password from the console, run bin/passwd.sh from the YaCy installation directory.</source>
     </trans-unit>
     <trans-unit id="28dbdb3b" xml:space="preserve" approved="no" translate="yes">
        <source>Access Rules</source>
     </trans-unit>
-    <trans-unit id="b878f3c" xml:space="preserve" approved="no" translate="yes">
-       <source>Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.</source>
+    <trans-unit id="13218532" xml:space="preserve" approved="no" translate="yes">
+       <source>Allow administrative access from localhost without authentication</source>
     </trans-unit>
-    <trans-unit id="3a43589b" xml:space="preserve" approved="no" translate="yes">
-       <source>User Accounts</source>
+    <trans-unit id="b0e1923b" xml:space="preserve" approved="no" translate="yes">
+       <source>When enabled, eligible requests from the same computer receive administrator rights without sending credentials.</source>
     </trans-unit>
-    <trans-unit id="6cca0c4f" xml:space="preserve" approved="no" translate="yes">
-       <source>Select user</source>
+    <trans-unit id="ef91160e" xml:space="preserve" approved="no" translate="yes">
+       <source>Require administrator authorization for all applicable pages</source>
     </trans-unit>
-    <trans-unit id="527b9a6b" xml:space="preserve" approved="no" translate="yes">
-       <source>New user</source>
-    </trans-unit>
-    <trans-unit id="f403ecf6" xml:space="preserve" approved="no" translate="yes">
-       <source>Username</source>
-    </trans-unit>
-    <trans-unit id="4c641ebb" xml:space="preserve" approved="no" translate="yes">
-       <source>Password</source>
-    </trans-unit>
-    <trans-unit id="34384360" xml:space="preserve" approved="no" translate="yes">
-       <source>Repeat password</source>
-    </trans-unit>
-    <trans-unit id="69c1a21b" xml:space="preserve" approved="no" translate="yes">
-       <source>First name</source>
-    </trans-unit>
-    <trans-unit id="ebf825b5" xml:space="preserve" approved="no" translate="yes">
-       <source>Last name</source>
-    </trans-unit>
-    <trans-unit id="1ed033d4" xml:space="preserve" approved="no" translate="yes">
-       <source>Address</source>
-    </trans-unit>
-    <trans-unit id="aac85123" xml:space="preserve" approved="no" translate="yes">
-       <source>Rights:</source>
-    </trans-unit>
-    <trans-unit id="7a53d0ee" xml:space="preserve" approved="no" translate="yes">
-       <source>Timelimit</source>
-    </trans-unit>
-    <trans-unit id="762a6110" xml:space="preserve" approved="no" translate="yes">
-       <source>Time used</source>
+    <trans-unit id="af6f4d91" xml:space="preserve" approved="no" translate="yes">
+       <source>When disabled, administration pages whose names contain "_p" remain protected. When enabled, all applicable pages require administrator authorization.</source>
     </trans-unit>
   </body>
 </file>
@@ -1557,17 +1338,17 @@
     <trans-unit id="ab37c405" xml:space="preserve" approved="no" translate="yes">
        <source>Community-based web search</source>
     </trans-unit>
-    <trans-unit id="487e8d44" xml:space="preserve" approved="no" translate="yes">
-       <source>Search portal for your own web pages</source>
-    </trans-unit>
-    <trans-unit id="e9e70a51" xml:space="preserve" approved="no" translate="yes">
-       <source>Intranet Indexing</source>
-    </trans-unit>
     <trans-unit id="b03f1f55" xml:space="preserve" approved="no" translate="yes">
        <source>Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</source>
     </trans-unit>
+    <trans-unit id="487e8d44" xml:space="preserve" approved="no" translate="yes">
+       <source>Search portal for your own web pages</source>
+    </trans-unit>
     <trans-unit id="94d59866" xml:space="preserve" approved="no" translate="yes">
        <source>Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</source>
+    </trans-unit>
+    <trans-unit id="e9e70a51" xml:space="preserve" approved="no" translate="yes">
+       <source>Intranet Indexing</source>
     </trans-unit>
     <trans-unit id="a3caa3ae" xml:space="preserve" approved="no" translate="yes">
        <source>Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&amp;lt;path&amp;gt; or smb://&amp;lt;server&amp;gt;/&amp;lt;path&amp;gt;</source>
@@ -2418,12 +2199,6 @@
     <trans-unit id="376bc057" xml:space="preserve" approved="no" translate="yes">
        <source>News pages</source>
     </trans-unit>
-    <trans-unit id="1fa3c2" xml:space="preserve" approved="no" translate="yes">
-       <source>Blog</source>
-    </trans-unit>
-    <trans-unit id="2923d0" xml:space="preserve" approved="no" translate="yes">
-       <source>Wiki</source>
-    </trans-unit>
     <trans-unit id="63f3ed26" xml:space="preserve" approved="no" translate="yes">
        <source>Public bookmarks</source>
     </trans-unit>
@@ -2873,65 +2648,6 @@
     </trans-unit>
     <trans-unit id="bb95f367" xml:space="preserve" approved="no" translate="yes">
        <source>automatic update: add the following line to /etc/crontab&lt;br/&gt;0 6 * * * root apt-get update &amp;amp;&amp;amp; apt-get -y --force-yes install yacy</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="ConfigUser_p.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="243c3af6" xml:space="preserve" approved="no" translate="yes">
-       <source>"Save User"</source>
-    </trans-unit>
-    <trans-unit id="31293c24" xml:space="preserve" approved="no" translate="yes">
-       <source>"Delete User"</source>
-    </trans-unit>
-    <trans-unit id="ae73b661" xml:space="preserve" approved="no" translate="yes">
-       <source>"ConfigAccountList_p.html"</source>
-    </trans-unit>
-    <trans-unit id="bc930fd5" xml:space="preserve" approved="no" translate="yes">
-       <source>User Account Editor</source>
-    </trans-unit>
-    <trans-unit id="df3b29af" xml:space="preserve" approved="no" translate="yes">
-       <source>Generic error.</source>
-    </trans-unit>
-    <trans-unit id="235692a3" xml:space="preserve" approved="no" translate="yes">
-       <source>Passwords do not match.</source>
-    </trans-unit>
-    <trans-unit id="6ad966f5" xml:space="preserve" approved="no" translate="yes">
-       <source>Username too short. Username must be &amp;gt;= 4 Characters.</source>
-    </trans-unit>
-    <trans-unit id="1bf77769" xml:space="preserve" approved="no" translate="yes">
-       <source>Username already used (not allowed).</source>
-    </trans-unit>
-    <trans-unit id="f403ecf6" xml:space="preserve" approved="no" translate="yes">
-       <source>Username</source>
-    </trans-unit>
-    <trans-unit id="4c641ebb" xml:space="preserve" approved="no" translate="yes">
-       <source>Password</source>
-    </trans-unit>
-    <trans-unit id="34384360" xml:space="preserve" approved="no" translate="yes">
-       <source>Repeat password</source>
-    </trans-unit>
-    <trans-unit id="69c1a21b" xml:space="preserve" approved="no" translate="yes">
-       <source>First name</source>
-    </trans-unit>
-    <trans-unit id="ebf825b5" xml:space="preserve" approved="no" translate="yes">
-       <source>Last name</source>
-    </trans-unit>
-    <trans-unit id="1ed033d4" xml:space="preserve" approved="no" translate="yes">
-       <source>Address</source>
-    </trans-unit>
-    <trans-unit id="aac85123" xml:space="preserve" approved="no" translate="yes">
-       <source>Rights:</source>
-    </trans-unit>
-    <trans-unit id="7a53d0ee" xml:space="preserve" approved="no" translate="yes">
-       <source>Timelimit</source>
-    </trans-unit>
-    <trans-unit id="762a6110" xml:space="preserve" approved="no" translate="yes">
-       <source>Time used</source>
-    </trans-unit>
-    <trans-unit id="f6d22b07" xml:space="preserve" approved="no" translate="yes">
-       <source>back to user list</source>
     </trans-unit>
   </body>
 </file>
@@ -6842,12 +6558,6 @@
     <trans-unit id="5fee1ba0" xml:space="preserve" approved="no" translate="yes">
        <source>"Profile updated"</source>
     </trans-unit>
-    <trans-unit id="7af20435" xml:space="preserve" approved="no" translate="yes">
-       <source>"Wiki updated"</source>
-    </trans-unit>
-    <trans-unit id="6c475483" xml:space="preserve" approved="no" translate="yes">
-       <source>"Blog updated"</source>
-    </trans-unit>
     <trans-unit id="7f5ceb9d" xml:space="preserve" approved="no" translate="yes">
        <source>"Crawl"</source>
     </trans-unit>
@@ -7188,9 +6898,6 @@
     </trans-unit>
     <trans-unit id="49006831" xml:space="preserve" approved="no" translate="yes">
        <source>profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.</source>
-    </trans-unit>
-    <trans-unit id="7dda44d" xml:space="preserve" approved="no" translate="yes">
-       <source>Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.</source>
     </trans-unit>
     <trans-unit id="c03a72cf" xml:space="preserve" approved="no" translate="yes">
        <source>More news services will follow.</source>
@@ -8316,8 +8023,8 @@
     <trans-unit id="28ba64b2" xml:space="preserve" approved="no" translate="yes">
        <source>Local Search access rate limitations</source>
     </trans-unit>
-    <trans-unit id="8ac0ff35" xml:space="preserve" approved="no" translate="yes">
-       <source>You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right</source>
+    <trans-unit id="978cbe02" xml:space="preserve" approved="no" translate="yes">
+       <source>You can configure here limitations on access rate to this peer search interface by unauthenticated users.</source>
     </trans-unit>
     <trans-unit id="a16f124a" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy search</source>
@@ -8325,8 +8032,8 @@
     <trans-unit id="167ae1f7" xml:space="preserve" approved="no" translate="yes">
        <source>Access rate limitations to this peer search interface.</source>
     </trans-unit>
-    <trans-unit id="b4df43e1" xml:space="preserve" approved="no" translate="yes">
-       <source>When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.</source>
+    <trans-unit id="a4ecad00" xml:space="preserve" approved="no" translate="yes">
+       <source>When an unauthenticated user exceeds a limit, the search is blocked.</source>
     </trans-unit>
     <trans-unit id="2092318d" xml:space="preserve" approved="no" translate="yes">
        <source>Max searches in 3s</source>
@@ -8343,8 +8050,8 @@
     <trans-unit id="c1c99ea1" xml:space="preserve" approved="no" translate="yes">
        <source>Access rate limitations to the peer-to-peer search mode.</source>
     </trans-unit>
-    <trans-unit id="36647360" xml:space="preserve" approved="no" translate="yes">
-       <source>When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.</source>
+    <trans-unit id="b9582d7f" xml:space="preserve" approved="no" translate="yes">
+       <source>When an unauthenticated user exceeds a limit, the search scope falls back to only this local peer index.</source>
     </trans-unit>
     <trans-unit id="43860f16" xml:space="preserve" approved="no" translate="yes">
        <source>Max searches in	10mn</source>
@@ -8355,8 +8062,8 @@
     <trans-unit id="f75569f2" xml:space="preserve" approved="no" translate="yes">
        <source>Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled</source>
     </trans-unit>
-    <trans-unit id="575d60f8" xml:space="preserve" approved="no" translate="yes">
-       <source>When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.</source>
+    <trans-unit id="1fc8bc2" xml:space="preserve" approved="no" translate="yes">
+       <source>When an unauthenticated user exceeds a limit, results resorting becomes only applicable on demand, server-side.</source>
     </trans-unit>
     <trans-unit id="d164af83" xml:space="preserve" approved="no" translate="yes">
        <source>Remote snippet load</source>
@@ -8364,8 +8071,8 @@
     <trans-unit id="3cf015f1" xml:space="preserve" approved="no" translate="yes">
        <source>Limitations on snippet loading from remote websites.</source>
     </trans-unit>
-    <trans-unit id="4784ce85" xml:space="preserve" approved="no" translate="yes">
-       <source>When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'</source>
+    <trans-unit id="82c04b3f" xml:space="preserve" approved="no" translate="yes">
+       <source>When an unauthenticated user exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'.</source>
     </trans-unit>
     <trans-unit id="ddba5b6" xml:space="preserve" approved="no" translate="yes">
        <source>Max	searches in 3s</source>
@@ -8983,17 +8690,11 @@
     <trans-unit id="a604d726" xml:space="preserve" approved="no" translate="yes">
        <source>Server Access Restrictions</source>
     </trans-unit>
-    <trans-unit id="50ee1b00" xml:space="preserve" approved="no" translate="yes">
-       <source>You can restrict the access to this proxy/server using a two-stage security barrier:</source>
+    <trans-unit id="30ced5a2" xml:space="preserve" approved="no" translate="yes">
+       <source>You can restrict access to this proxy/server with an IP-number filter:</source>
     </trans-unit>
     <trans-unit id="5a42a805" xml:space="preserve" approved="no" translate="yes">
        <source>define an &lt;em&gt;access domain&lt;/em&gt; with a list of granted client IP-numbers or with wildcards</source>
-    </trans-unit>
-    <trans-unit id="b42a1e39" xml:space="preserve" approved="no" translate="yes">
-       <source>define an &lt;em&gt;user account&lt;/em&gt; with an user:password - pair</source>
-    </trans-unit>
-    <trans-unit id="ab080820" xml:space="preserve" approved="no" translate="yes">
-       <source>This is the account that restricts access to the proxy function.</source>
     </trans-unit>
     <trans-unit id="19f92ae5" xml:space="preserve" approved="no" translate="yes">
        <source>You probably don't want to share the proxy to the internet, so you should set the</source>
@@ -9001,17 +8702,11 @@
     <trans-unit id="2753ee06" xml:space="preserve" approved="no" translate="yes">
        <source>IP-Number Access Domain to a pattern that corresponds to you local intranet.</source>
     </trans-unit>
-    <trans-unit id="2cee783d" xml:space="preserve" approved="no" translate="yes">
-       <source>The default setting should be right in most cases. If you want, you can also set a proxy account</source>
-    </trans-unit>
-    <trans-unit id="457ee6bb" xml:space="preserve" approved="no" translate="yes">
-       <source>so that every proxy user must authenticate first, but this is rather unusual.</source>
+    <trans-unit id="80f1b1f" xml:space="preserve" approved="no" translate="yes">
+       <source>The default setting should be right in most cases.</source>
     </trans-unit>
     <trans-unit id="46d5dde9" xml:space="preserve" approved="no" translate="yes">
        <source>IP-Number filter</source>
-    </trans-unit>
-    <trans-unit id="84782006" xml:space="preserve" approved="no" translate="yes">
-       <source>Accounts</source>
     </trans-unit>
   </body>
 </file>
@@ -10048,144 +9743,6 @@
   </body>
 </file>
 
-<file original="TransNews_p.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="20c2735" xml:space="preserve" approved="no" translate="yes">
-       <source>"Publish"</source>
-    </trans-unit>
-    <trans-unit id="188a8b6f" xml:space="preserve" approved="no" translate="yes">
-       <source>"negative vote"</source>
-    </trans-unit>
-    <trans-unit id="30ddb633" xml:space="preserve" approved="no" translate="yes">
-       <source>"positive vote"</source>
-    </trans-unit>
-    <trans-unit id="a8b87046" xml:space="preserve" approved="no" translate="yes">
-       <source>You can share your local addition to translations and distribute it to other peers.</source>
-    </trans-unit>
-    <trans-unit id="b26286aa" xml:space="preserve" approved="no" translate="yes">
-       <source>The remote peer can vote on your translation and add it to its own local translation.</source>
-    </trans-unit>
-    <trans-unit id="40bca1e" xml:space="preserve" approved="no" translate="yes">
-       <source>File:</source>
-    </trans-unit>
-    <trans-unit id="689619c" xml:space="preserve" approved="no" translate="yes">
-       <source>Originator</source>
-    </trans-unit>
-    <trans-unit id="708517ea" xml:space="preserve" approved="no" translate="yes">
-       <source>English:</source>
-    </trans-unit>
-    <trans-unit id="817a358b" xml:space="preserve" approved="no" translate="yes">
-       <source>existing</source>
-    </trans-unit>
-    <trans-unit id="c0bfb7c9" xml:space="preserve" approved="no" translate="yes">
-       <source>Translation:</source>
-    </trans-unit>
-    <trans-unit id="2deca215" xml:space="preserve" approved="no" translate="yes">
-       <source>Vote on this translation. If you vote positive the translation is added to your local translation list.</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="Translator_p.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="c9b0cd52" xml:space="preserve" approved="no" translate="yes">
-       <source>"Save translation"</source>
-    </trans-unit>
-    <trans-unit id="2eae05fc" xml:space="preserve" approved="no" translate="yes">
-       <source>Translation Editor</source>
-    </trans-unit>
-    <trans-unit id="9f3e9d5d" xml:space="preserve" approved="no" translate="yes">
-       <source>Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.</source>
-    </trans-unit>
-    <trans-unit id="ede91305" xml:space="preserve" approved="no" translate="yes">
-       <source>UI Translation</source>
-    </trans-unit>
-    <trans-unit id="5ad17261" xml:space="preserve" approved="no" translate="yes">
-       <source>Source File</source>
-    </trans-unit>
-    <trans-unit id="1b120c86" xml:space="preserve" approved="no" translate="yes">
-       <source>view it</source>
-    </trans-unit>
-    <trans-unit id="c00303d7" xml:space="preserve" approved="no" translate="yes">
-       <source>filter untranslated</source>
-    </trans-unit>
-    <trans-unit id="5ad7c212" xml:space="preserve" approved="no" translate="yes">
-       <source>Source Text</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="User.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="c52bdc7b" xml:space="preserve" approved="no" translate="yes">
-       <source>"login"</source>
-    </trans-unit>
-    <trans-unit id="e0529176" xml:space="preserve" approved="no" translate="yes">
-       <source>"logout"</source>
-    </trans-unit>
-    <trans-unit id="7ec7aec0" xml:space="preserve" approved="no" translate="yes">
-       <source>"red bar"</source>
-    </trans-unit>
-    <trans-unit id="aeb7cf0e" xml:space="preserve" approved="no" translate="yes">
-       <source>"green bar"</source>
-    </trans-unit>
-    <trans-unit id="5b2beff0" xml:space="preserve" approved="no" translate="yes">
-       <source>"Change"</source>
-    </trans-unit>
-    <trans-unit id="8826a1c4" xml:space="preserve" approved="no" translate="yes">
-       <source>User Page</source>
-    </trans-unit>
-    <trans-unit id="1df82485" xml:space="preserve" approved="no" translate="yes">
-       <source>You are not logged in.</source>
-    </trans-unit>
-    <trans-unit id="8c79b204" xml:space="preserve" approved="no" translate="yes">
-       <source>Username:</source>
-    </trans-unit>
-    <trans-unit id="401fb8df" xml:space="preserve" approved="no" translate="yes">
-       <source>Password:</source>
-    </trans-unit>
-    <trans-unit id="9c357eb4" xml:space="preserve" approved="no" translate="yes">
-       <source>(Identified by</source>
-    </trans-unit>
-    <trans-unit id="927" xml:space="preserve" approved="no" translate="yes">
-       <source>IP</source>
-    </trans-unit>
-    <trans-unit id="d72cc7b4" xml:space="preserve" approved="no" translate="yes">
-       <source>Username/Password</source>
-    </trans-unit>
-    <trans-unit id="78a4f684" xml:space="preserve" approved="no" translate="yes">
-       <source>Cookie</source>
-    </trans-unit>
-    <trans-unit id="68244c94" xml:space="preserve" approved="no" translate="yes">
-       <source>old Password</source>
-    </trans-unit>
-    <trans-unit id="6fa5293b" xml:space="preserve" approved="no" translate="yes">
-       <source>new Password</source>
-    </trans-unit>
-    <trans-unit id="82d0416b" xml:space="preserve" approved="no" translate="yes">
-       <source>new Password(repetition)</source>
-    </trans-unit>
-    <trans-unit id="240a6c09" xml:space="preserve" approved="no" translate="yes">
-       <source>You are currently logged in as admin.</source>
-    </trans-unit>
-    <trans-unit id="f2c13611" xml:space="preserve" approved="no" translate="yes">
-       <source>(after logout you will be prompted for your password again. simply click "cancel")</source>
-    </trans-unit>
-    <trans-unit id="5a47f896" xml:space="preserve" approved="no" translate="yes">
-       <source>Password was changed.</source>
-    </trans-unit>
-    <trans-unit id="256ed36b" xml:space="preserve" approved="no" translate="yes">
-       <source>Old Password is wrong.</source>
-    </trans-unit>
-    <trans-unit id="c6339e82" xml:space="preserve" approved="no" translate="yes">
-       <source>New Password and its repetition do not match.</source>
-    </trans-unit>
-    <trans-unit id="58c027b2" xml:space="preserve" approved="no" translate="yes">
-       <source>New Password is empty.</source>
-    </trans-unit>
-  </body>
-</file>
-
 <file original="VFS.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="71f2b569" xml:space="preserve" approved="no" translate="yes">
@@ -10753,99 +10310,16 @@
   </body>
 </file>
 
-<file original="Wiki.html"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="20cd9c3" xml:space="preserve" approved="no" translate="yes">
-       <source>"all"</source>
-    </trans-unit>
-    <trans-unit id="b1ce4555" xml:space="preserve" approved="no" translate="yes">
-       <source>"admin"</source>
-    </trans-unit>
-    <trans-unit id="bfcc5088" xml:space="preserve" approved="no" translate="yes">
-       <source>"Submit"</source>
-    </trans-unit>
-    <trans-unit id="6904b79c" xml:space="preserve" approved="no" translate="yes">
-       <source>"Preview"</source>
-    </trans-unit>
-    <trans-unit id="c5332d86" xml:space="preserve" approved="no" translate="yes">
-       <source>"Discard"</source>
-    </trans-unit>
-    <trans-unit id="3ec759c3" xml:space="preserve" approved="no" translate="yes">
-       <source>"Show"</source>
-    </trans-unit>
-    <trans-unit id="9131821f" xml:space="preserve" approved="no" translate="yes">
-       <source>"Compare"</source>
-    </trans-unit>
-    <trans-unit id="26dcff8e" xml:space="preserve" approved="no" translate="yes">
-       <source>(only granted to admin)</source>
-    </trans-unit>
-    <trans-unit id="d70cd83f" xml:space="preserve" approved="no" translate="yes">
-       <source>Index -</source>
-    </trans-unit>
-    <trans-unit id="774a8452" xml:space="preserve" approved="no" translate="yes">
-       <source>Grant Write Access to</source>
-    </trans-unit>
-    <trans-unit id="20e22a" xml:space="preserve" approved="no" translate="yes">
-       <source>Edit</source>
-    </trans-unit>
-    <trans-unit id="3cafa7ef" xml:space="preserve" approved="no" translate="yes">
-       <source>Author:</source>
-    </trans-unit>
-    <trans-unit id="4cf708d" xml:space="preserve" approved="no" translate="yes">
-       <source>Text:</source>
-    </trans-unit>
-    <trans-unit id="50417ba8" xml:space="preserve" approved="no" translate="yes">
-       <source>Preview</source>
-    </trans-unit>
-    <trans-unit id="baf17931" xml:space="preserve" approved="no" translate="yes">
-       <source>No changes have been submitted so far!</source>
-    </trans-unit>
-    <trans-unit id="43838b2" xml:space="preserve" approved="no" translate="yes">
-       <source>Index</source>
-    </trans-unit>
-    <trans-unit id="f3e2ed0c" xml:space="preserve" approved="no" translate="yes">
-       <source>Subject</source>
-    </trans-unit>
-    <trans-unit id="fd3eb61e" xml:space="preserve" approved="no" translate="yes">
-       <source>Change Date</source>
-    </trans-unit>
-    <trans-unit id="82d89655" xml:space="preserve" approved="no" translate="yes">
-       <source>Last Author</source>
-    </trans-unit>
-    <trans-unit id="15854bcd" xml:space="preserve" approved="no" translate="yes">
-       <source>Start Page</source>
-    </trans-unit>
-    <trans-unit id="8d88e2bb" xml:space="preserve" approved="no" translate="yes">
-       <source>Versions</source>
-    </trans-unit>
-    <trans-unit id="27ebd56d" xml:space="preserve" approved="no" translate="yes">
-       <source>Compare version from</source>
-    </trans-unit>
-    <trans-unit id="4417430c" xml:space="preserve" approved="no" translate="yes">
-       <source>with version from</source>
-    </trans-unit>
-    <trans-unit id="401e1e8" xml:space="preserve" approved="no" translate="yes">
-       <source>Error</source>
-    </trans-unit>
-    <trans-unit id="8f73f216" xml:space="preserve" approved="no" translate="yes">
-       <source>You can use</source>
-    </trans-unit>
-    <trans-unit id="624eee29" xml:space="preserve" approved="no" translate="yes">
-       <source>Changes will be published as announcement on YaCyNews</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="WikiHelp.html"  source-language="en"  datatype="html">
+<file original="WikiCodeHelp.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="d09f01ea" xml:space="preserve" approved="no" translate="yes">
        <source>Wiki-Code</source>
     </trans-unit>
-    <trans-unit id="6e34c0bd" xml:space="preserve" approved="no" translate="yes">
-       <source>This table contains a short description of the tags that can be used in the Wiki and several other servlets</source>
+    <trans-unit id="6f20d754" xml:space="preserve" approved="no" translate="yes">
+       <source>This table describes the WikiCode formatting supported in YaCy messages,</source>
     </trans-unit>
-    <trans-unit id="494c6704" xml:space="preserve" approved="no" translate="yes">
-       <source>of YaCy. For a more detailed description visit the</source>
+    <trans-unit id="ae0a0eb9" xml:space="preserve" approved="no" translate="yes">
+       <source>profiles, and MediaWiki dump imports.</source>
     </trans-unit>
     <trans-unit id="20220d" xml:space="preserve" approved="no" translate="yes">
        <source>Code</source>
@@ -10916,8 +10390,11 @@
     <trans-unit id="fa06951a" xml:space="preserve" approved="no" translate="yes">
        <source>[[pagename|description]]</source>
     </trans-unit>
-    <trans-unit id="18d4f13f" xml:space="preserve" approved="no" translate="yes">
-       <source>This tag creates links to other pages of the wiki.</source>
+    <trans-unit id="119bccd" xml:space="preserve" approved="no" translate="yes">
+       <source>Internal-link markup retains its visible label but no longer creates a link,</source>
+    </trans-unit>
+    <trans-unit id="7b083471" xml:space="preserve" approved="no" translate="yes">
+       <source>because the local Wiki application has been retired.</source>
     </trans-unit>
     <trans-unit id="53943a9" xml:space="preserve" approved="no" translate="yes">
        <source>[url]</source>
@@ -11786,9 +11263,6 @@
     <trans-unit id="a396c86e" xml:space="preserve" approved="no" translate="yes">
        <source>Surftips</source>
     </trans-unit>
-    <trans-unit id="11760119" xml:space="preserve" approved="no" translate="yes">
-       <source>Local Peer Wiki</source>
-    </trans-unit>
     <trans-unit id="f0df21dd" xml:space="preserve" approved="no" translate="yes">
        <source>Bookmarks</source>
     </trans-unit>
@@ -11811,9 +11285,6 @@
     </trans-unit>
     <trans-unit id="942917f1" xml:space="preserve" approved="no" translate="yes">
        <source>Advanced Properties</source>
-    </trans-unit>
-    <trans-unit id="cf394e0e" xml:space="preserve" approved="no" translate="yes">
-       <source>UI Translations</source>
     </trans-unit>
   </body>
 </file>
@@ -12073,20 +11544,6 @@
     </trans-unit>
     <trans-unit id="14283e40" xml:space="preserve" approved="no" translate="yes">
        <source>Local robots.txt</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="env/templates/submenuPublication.template"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="23254a0c" xml:space="preserve" approved="no" translate="yes">
-       <source>Publication</source>
-    </trans-unit>
-    <trans-unit id="2923d0" xml:space="preserve" approved="no" translate="yes">
-       <source>Wiki</source>
-    </trans-unit>
-    <trans-unit id="1fa3c2" xml:space="preserve" approved="no" translate="yes">
-       <source>Blog</source>
     </trans-unit>
   </body>
 </file>
@@ -12455,23 +11912,6 @@
     </trans-unit>
     <trans-unit id="ed1ab10b" xml:space="preserve" approved="no" translate="yes">
        <source>Built with Processing</source>
-    </trans-unit>
-  </body>
-</file>
-
-<file original="proxymsg/authfail.inc"  source-language="en"  datatype="html">
-  <body>
-    <trans-unit id="c52bdc7b" xml:space="preserve" approved="no" translate="yes">
-       <source>"login"</source>
-    </trans-unit>
-    <trans-unit id="f1fb601e" xml:space="preserve" approved="no" translate="yes">
-       <source>Your Username/Password is wrong.</source>
-    </trans-unit>
-    <trans-unit id="f403ecf6" xml:space="preserve" approved="no" translate="yes">
-       <source>Username</source>
-    </trans-unit>
-    <trans-unit id="4c641ebb" xml:space="preserve" approved="no" translate="yes">
-       <source>Password</source>
     </trans-unit>
   </body>
 </file>

@@ -47,7 +47,6 @@ import org.json.JSONTokener;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LogRedaction;
-import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
@@ -227,7 +226,7 @@ public class LLMAdminProxyServlet extends HttpServlet {
      */
     private static boolean requireAdmin(final HttpServletRequest hrequest, final HttpServletResponse hresponse) throws IOException {
         final Switchboard sb = Switchboard.getSwitchboard();
-        final String adminRole = UserDB.AccessRight.ADMIN_RIGHT.toString();
+        final String adminRole = SwitchboardConstants.ADMIN_ACCOUNT_ROLE;
         if (sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)
                 && Domains.isLocalhost(hrequest.getRemoteAddr())) return true;
         if (hrequest.isUserInRole(adminRole)) return true;

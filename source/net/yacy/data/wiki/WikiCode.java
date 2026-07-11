@@ -37,8 +37,7 @@ import java.util.regex.Pattern;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.server.serverCore;
 
-/** Provides methods to handle texts that have been posted in the yacyWiki or other
-  * parts of YaCy which use wiki code, like the blog or the profile.
+/** Provides methods to render WikiCode used by MediaWiki import, messages and profiles.
   *
   * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
   */
@@ -584,7 +583,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     /**
      * Processes tags which are connected to links and images.
      * @author [AS], [MN]
-     * @param hostport (optional) host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param hostport optional host and port used as the base of relative media URLs.
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
@@ -661,7 +660,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             	line = line.substring(0, positionOfOpeningTag) + "" + "<iframe src=\"http://player.vimeo.com/video/" + kl + "\" width=\"425\" height=\"350\" frameborder=\"0\" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";
             	break;
             }
-            // if it's no image, it might be an internal link
+            // Internal links used to target the retired local Wiki application. Keep
+            // their labels as plain rendered text instead of producing dead links.
             else {
                 if ((p = kl.indexOf(PIPE_ESCAPED)) > 0) {
                     kv = kl.substring(p + LEN_PIPE_ESCAPED);
@@ -669,8 +669,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 } else {
                     kv = kl;
                 }
-                line = line.substring(0, positionOfOpeningTag) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK); // oob exception in append() !
-                fromIndex = positionOfClosingTag + LEN_WIKI_CLOSE_LINK;
+                line = line.substring(0, positionOfOpeningTag) + kv + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK);
+                fromIndex = positionOfOpeningTag + kv.length();
             }
         }
         

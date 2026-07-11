@@ -143,55 +143,6 @@ DHT==DHT
 News==Новини
 Proxy==Проксі
 The tested URL was not valid.==Перевірений URL недійсний.
-#File: Blog.html
-Edit==Редагувати
-#---------------------------
-Blog-Home==Початкова сторінка блогу
-Author:==Автор:
-Subject:==Заголовок:
-Text:==Текст:
-Comments:==Коментарі:
-deactivated==вимкнені
-moderated==модеровані
-"Submit"=="Відправити"
-"Preview"=="Попередній перегляд"
-"Discard"=="Скасувати"
-No changes have been submitted so far!==Ще не було передано жодних змін!
-Access denied==В доступі відмовлено
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Для зміни або створення записів блогу ви повинні ввійти як Admin чи уповноважений користувач.
-Confirm deletion==Підтвердити видалення
-Import was successful!==Успішно імпортовано!
-Import failed, maybe the supplied file was no valid blog-backup?==Імпорт не вдався. Можливо, наданий файл не був правильною резервною копією блогу?
-Імпортування закінчилося невдачею, можливо поначений файл не був дійсною резервною копією блогу?
-Please select the XML-file you want to import:==Будь-ласка, виберіть XML-файл, який потрібно імпортувати:
-"Import"=="Імпорт"
-#-----------------------------
-
-"RSS"=="RSS"
-"Yes, delete it."=="Так, видалити."
-"No, leave it."=="Ні, залиште."
-&lt;&lt; previous entries==&lt;&lt; попередніх записів
-next entries &gt;&gt;==наступні записи &gt;&gt;
-activated==активовано
-Preview==Попередній перегляд
-Are you sure...==Ви впевнені...
-XML-Import==XML-Імпорт
-#File: BlogComments.html
-Comments:==Коментарі:
-#---------------------------
-Blog-Home==Початкова сторінка блогу
-Author:==Автор:
-Subject:==Заголовок:
-Text:==Текст:
-"Submit"=="Відправити"
-"Preview"=="Попередній перегляд"
-"Discard"=="Скасувати"
-#-----------------------------
-
-&lt;&lt; previous entries==&lt;&lt; попередніх записів
-next entries &gt;&gt;==наступні записи &gt;&gt;
-Comments are not allowed for this posting!==Коментарі до цієї публікації заборонені!
-Comment on this Blog==Прокоментуйте цей блог
 #File: Bookmarks.html
 "Save"=="Зберегти"
 #---------------------------
@@ -274,46 +225,11 @@ Search Result==Результати пошуку
 
 loading....==завантаження....
 #File: ConfigAccounts_p.html
-Username==Користувач
 #---------------------------
-User Accounts==Облікові записи користувачів
-User Administration==Керування користувачами
-Generic error.==Загальна помилка.
 Passwords do not match.==Паролі не збігаються.
 Admin Account==Обліковий запис адміністратора
-Access from localhost without account==Доступ з місцевого хосту без облікового запису
-Access only with qualified account==Доступ тільки з відповідного облікового запису
-Peer User:==Користувач вузла:
-New Peer Password:==Новий пароль:
-Repeat Peer Password:==Повтор паролю:
-"Define Administrator"=="Визначити адміністратора"
-Select user==Вибрати користувача
-New user==Новий користувач
-Repeat password==Повтор пароля
-First name==Ім’я
-Last name==Прізвище
-Address==Адреса
-Timelimit==Часове обмеження
-Time used==Часу використано
-
 #-----------------------------
 
-"Set Access Rules"=="Встановити правила доступу"
-"Edit User"=="Редагувати користувача"
-"Delete User"=="Видалити користувача"
-"Save User"=="Зберегти користувача"
-Username too short. Username must be &gt;= 4 Characters.==Ім'я користувача занадто коротке. Ім’я користувача має містити &gt;= 4 символи.
-Username already used (not allowed).==Ім'я користувача вже використано (не дозволено).
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Цим екземпляром YaCy можна керувати за допомогою облікового запису «admin» і пароля за умовчанням «yacy».
-Change the password as soon as possible!==Змініть пароль якнайшвидше!
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Доступ до вашого вузла з вашого власного комп’ютера (доступ до локального хосту) надається з правами адміністратора. Не потрібно налаштовувати обліковий запис адміністратора.
-This setting is convenient but less secure than using a qualified admin account.==Цей параметр зручний, але менш безпечний, ніж використання кваліфікованого облікового запису адміністратора.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Будь ласка, використовуйте обережно, особливо коли ви переглядаєте ненадійні та потенційно зловмисні веб-сайти під час роботи вашого однорангового YaCy на тому самому комп’ютері.
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Це потрібно, якщо вам потрібен віддалений доступ до вашого однорангового вузла, але це також посилює контроль доступу до операцій адміністрування вашого однорангового вузла.
-Access Rules==Правила доступу
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Захист усіх сторінок: якщо ввімкнено, для доступу до всіх сторінок потрібна авторизація; якщо вимкнено, захищені лише сторінки з розширенням "_p".
-Password==Пароль
-Rights:==права:
 #File: ConfigAppearance_p.html
 Text==Текст
 #---------------------------
@@ -691,7 +607,6 @@ Status page==Сторінки стану
 Network pages==Сторінки мережі
 Surftips==Порад по серфінгу
 News pages==Сторінки новин
-Blog==Блогу
 Public bookmarks==Публічних закладок
 Home Page==Домашньої сторінки
 File Share==Обміну файлами
@@ -706,7 +621,6 @@ Unable to access the local file:==Неможливо отримати досту
 Deletion of==Видалення
 htroot/robots.txt==htroot/robots.txt
 failed==не вдалося
-Wiki==Wiki
 #File: ConfigSearchBox.html
 #---------------------------
 Integration of a Search Box==Інтегрування рядка пошуку
@@ -1689,7 +1603,6 @@ The information that is presented on this page can also be retrieved as XML.==І
 Click the API icon to see the XML.==Натисніть значок API для відображення XML.
 Network Overview==Огляд мережі
 Manually contacting Peer==Ручний зв’язок
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==надіслати&nbsp;<strong>п</strong>овідомлення/<br/>показати&nbsp;<strong>п</strong>рофіль/<br/>редагувати&nbsp;<strong>W</strong>iki/<br/>переглянути&nbsp;<strong>б</strong>лог
 Search for a peername (RegExp allowed)==Пошук імені вузла (RegExp)
 "Search"=="Пошук"
 Last<br/>Seen==Востаннє<br/>відомий
@@ -1742,8 +1655,6 @@ this peer==ваш вузол
 "Type: Principal | Contact: offline | Seed download: ?"=="Тип: Головний | Контакт: офлайн | Завантаження початкового матеріалу: ?"
 "Principal offline"=="Директор офлайн"
 "Profile updated"=="Профіль оновлено"
-"Wiki updated"=="Wiki оновлено"
-"Blog updated"=="Блог оновлено"
 "Crawl"=="Сканувати"
 "Type: Virgin"=="Тип: Діва"
 "Virgin"=="Богородиця"
@@ -1849,7 +1760,6 @@ Attributes==Властивості
 "Processed News"=="Оброблені новини"
 "Outgoing News"=="Вихідні новини"
 "Published News"=="Опубліковані новини"
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==Публікація доданого або зміненого перекладу для інтерфейсу користувача. Інші однолітки можуть включити його до свого локального списку перекладів.
 #File: Performance_p.html
 "Save"=="Зберегти"
 #---------------------------
@@ -2205,14 +2115,9 @@ Proxy Access Settings==Налаштування доступу до проксі
 These settings configure the access method to your own http proxy and server.==Ці налаштування визначають спосіб доступу до вашого власного HTTP-проксі та сервера.
 All traffic is routed through one single port, for both proxy and server.==Увесь трафік проксі й сервера проходить через один порт.
 Server Access Restrictions==Обмеження доступу до сервера
-You can restrict the access to this proxy/server using a two-stage security barrier:==Ви можете обмежити доступ до цього проксі/сервера за допомогою двоступеневого захисту:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==визначити <em>домен доступу</em> зі списком дозволених IP-адрес клієнтів або шаблонів
-define an <em>user account</em> with an user:password - pair==визначити <em>обліковий запис користувача</em> з парою user:password
-This is the account that restricts access to the proxy function.==Цей обліковий запис обмежує доступ до функції проксі.
 You probably don't want to share the proxy to the internet, so you should set the==Ймовірно, ви не хочете відкривати проксі для інтернету, тому слід встановити
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==домен доступу IP-номерів на шаблон, що відповідає вашій локальній інтрамережі.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Типове налаштування підходить у більшості випадків. За потреби можна також задати обліковий запис проксі,
-so that every proxy user must authenticate first, but this is rather unusual.==щоб кожен користувач проксі спочатку проходив автентифікацію, але це досить незвично.
 IP-Number filter==Фільтр IP-номерів
 #---------------------------
 Transparent Proxy==Прозорий проксі
@@ -2756,32 +2661,6 @@ YaCy Debugging: Thread Dump==Відлагодження YaCy: Dump потоку
 #-----------------------------
 
 Threaddump==Дамп потоку
-#File: User.html
-#---------------------------
-User Page==Сторінка користувача
-Username:==Ім’я користувача:
-"login"=="ввійти"
-old Password==старий пароль
-new Password(repetition)==новий пароль (повтор)
-"Change"=="Змінити"
-You are currently logged in as admin.==В даний момент ви увійшли в систему як адміністратор.
-(after logout you will be prompted for your password again. simply click "cancel")==(після виходу вам буде запропоновано ввести пароль ще раз. Просто натисніть на "скасувати")
-Password was changed.==Пароль було змінено.
-Old Password is wrong.==Старий пароль неправильний.
-New Password and its repetition do not match.==Новий пароль і його повторення не збігаються.
-New Password is empty.==Новий пароль порожній.
-#-----------------------------
-
-"logout"=="вийти з системи"
-"red bar"=="червона смуга"
-"green bar"=="зелена смуга"
-You are not logged in.==Ви не ввійшли в систему.
-Password:==Пароль:
-(Identified by==(Ідентифіковано
-IP==IP
-Username/Password==Ім'я користувача/Password
-Cookie==Печиво
-new Password==новий пароль
 #File: ViewFile.html
 Description:==Опис:
 no==ні
@@ -2967,41 +2846,9 @@ Line==лінія
 Pivot Dot==Опорна точка
 Other Dot==Інша точка
 Dot-end==Крапка
-#File: Wiki.html
-Edit==Редагувати
-#---------------------------
-Grant Write Access to==Дозволити наступним користувачам змінювати Wiki
-# !!! Do not translate the input buttons because that breaks the function to switch rights !!!
-Start Page==Початкова сторінка
-Index==Індекс
-Versions==Версії
-Author:==Автор:
-Text:==Текст:
-You can use==Ви можете тут використовувати
-"Submit"=="Надіслати"
-"Preview"=="Попередній перегляд"
-"Discard"=="Відкинути"
-No changes have been submitted so far!==Поки-що не надіслано жодних змін!
-Subject==Назва
-Change Date==Дата зміни
-Last Author==Останній автор
-Compare version from==Порівняння версії
-"Show"=="Показати"
-with version from==з версією
-"Compare"=="Порівняти"
-Changes will be published as announcement on YaCyNews==Зміни будуть опубліковані у службі новин YaCy.
-#-----------------------------
-
-"all"=="все"
-"admin"=="адмін"
-(only granted to admin)==(надається лише адміністратору)
-Index -==Індекс -
-Preview==Попередній перегляд
-Error==Помилка
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Команди Wiki
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Ця таблиця містить короткий опис кодів, що можуть бути використані у YaCy-Wiki та інших місцях.
 of YaCy. For a more detailed description visit the==Детальний опис можна знайти на
 Description==Опис
 text==текст
@@ -3012,7 +2859,6 @@ These tags create a numbered list.==Ці коданди створюють но�
 These tags create an unnumbered list.==Ці коданди створюють неномерований список.
 These tags create a definition list.==Ці команди створюють список визначень.
 This tag creates a horizontal line.==Цей код створює горизонтальну лінію.
-This tag creates links to other pages of the wiki.==Цей код створює посилання на іншу сторінку у Wiki.
 This tag displays an image, it can be aligned left, right or center.==Це код вставки зображення, яке може бути залишено (left), вирівняно по правому краю (right) або виставлено посередині (center).
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Це команди створення таблиці, з яких перша визначає початок таблиці, другий починає
 a new line, the third and fourth each create a new cell in the line. The last displayed tag==новий рядок, а третя та четверта створюють нову клітинку в рядку. Останній код
@@ -3215,7 +3061,6 @@ Advanced Properties==Розширені властивості
 System Administration==Системне адміністрування
 Performance Settings of Busy Queues==Параметри продуктивності зайнятих черг
 Viewer and administration for database tables==Перегляд і адміністрування таблиць бази даних
-UI Translations==Переклади інтерфейсу користувача
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Web Crawler==Сканер мережі
@@ -3254,13 +3099,6 @@ Solr Schema Editor==Solr Редактор схем
 Field Re-Indexing==Переіндексація полів
 Reverse Word Index==Зворотний покажчик слів
 Content Analysis==Аналіз вмісту
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==Публікація
-Blog==Блог
-#-----------------------------
-
-Wiki==Wiki
 #File: env/templates/submenuUseCaseAccount.template
 #---------------------------
 Basic Configuration==Початкове налаштування
@@ -3277,14 +3115,6 @@ Web Structure==Структура інтернету
 Image Collage==Змішана картина
 #-----------------------------
 
-#File: proxymsg/authfail.inc
-Username==Користувач
-#---------------------------
-Your Username/Password is wrong.==Ім’я користувача/пароль неправильні.
-"login"=="ввійти"
-#-----------------------------
-
-Password==Пароль
 #File: proxymsg/error.html
 #---------------------------
 YaCy: Error Message==YaCy: Повідомлення про помилку
@@ -3356,7 +3186,6 @@ Log Reports==Журнал звітів
 Thread Dump==Дамп потоку
 Community Data==Дані спільноти
 Surftips==Поради для серфінгу
-Local Peer Wiki==Local Peer Wiki
 Bookmarks==Закладки
 #File: IndexFederated_p.html
 "Set"=="Виставити"
@@ -3423,20 +3252,6 @@ Shallow crawl depth (0 to 2):==Мала глибина сканування (в�
 Deep crawl depth (1 to 5):==Глибоке сканування (від 1 до 5):
 Index text:==Індексний текст:
 Index media:==Індекс медіа:
-#File: ConfigAccountList_p.html
-#---------------------------
-Address==Адреса
-First name==Ім’я
-Last name==Прізвище
-User Accounts==Облікові записи користувачів
-#-----------------------------
-
-User List==Список користувачів
-User==Користувач
-Last Access==Останній доступ
-Rights==права
-Time==час
-Traffic==трафік
 #File: ConfigSearchPage_p.html
 #---------------------------
 Applications==Додатки
@@ -3525,28 +3340,6 @@ Menu: System Administration > Advanced Settings > Debug/Analysis Settings==Ме�
 Add Navigators==Додати навігатори
 append==додавати
 max. items==макс. елементи
-#File: ConfigUser_p.html
-#---------------------------
-Address==Адреса
-First name==Ім’я
-Generic error.==Загальна помилка.
-Last name==Прізвище
-Passwords do not match.==Паролі не збігаються.
-Repeat password==Повтор пароля
-Time used==Часу використано
-Timelimit==Часове обмеження
-Username==Користувач
-#-----------------------------
-
-"Save User"=="Зберегти користувача"
-"Delete User"=="Видалити користувача"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==Редактор облікових записів користувачів
-Username too short. Username must be &gt;= 4 Characters.==Ім'я користувача занадто коротке. Ім’я користувача має містити &gt;= 4 символи.
-Username already used (not allowed).==Ім'я користувача вже використано (не дозволено).
-Password==Пароль
-Rights:==права:
-back to user list==повернутися до списку користувачів
 #File: ContentAnalysis_p.html
 #---------------------------
 "Set"=="Виставити"
@@ -3821,14 +3614,6 @@ Link:==Посилання:
 Status:==Статус:
 URL successfully added to Crawler Queue==URL успішно додано до черги сканера
 Malformed URL==Неправильний URL
-#File: TransNews_p.html
-#---------------------------
-"negative vote"=="негативний відгук"
-"positive vote"=="позитивний відгук"
-File:==Файл:
-Originator==Творець
-#-----------------------------
-
 "Publish"=="Опублікувати"
 You can share your local addition to translations and distribute it to other peers.==Ви можете поділитися своїм локальним доповненням до перекладів і розповсюдити його іншим колегам.
 The remote peer can vote on your translation and add it to its own local translation.==Віддалений партнер може проголосувати за ваш переклад і додати його до свого локального перекладу.
@@ -4389,23 +4174,18 @@ match==матч
 "Reset to defaults settings"=="Відновити налаштування за замовчуванням"
 limitations==обмеження
 Local Search access rate limitations==Обмеження швидкості доступу до локального пошуку
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Тут можна налаштувати обмеження на швидкість доступу до цього інтерфейсу однорангового пошуку для неавтентифікованих користувачів і користувачів без прав розширеного пошуку
 YaCy search==YaCy пошук
 Access rate limitations to this peer search interface.==Обмеження швидкості доступу до цього інтерфейсу однорангового пошуку.
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Коли користувач з обмеженими правами (неавтентифікований або без розширеного права пошуку) перевищує обмеження, пошук блокується.
 Max searches in 3s==Макс. пошук за 3 с
 Max searches in 1mn==Макс. пошук за 1 хв
 Max searches in 10mn==Макс шукає за 10 хв
 Peer-to-peer search==Одноранговий пошук
 Access rate limitations to the peer-to-peer search mode.==Обмеження швидкості доступу до режиму однорангового пошуку.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Коли користувач з обмеженими правами (неавтентифікований або без прав розширеного пошуку) перевищує ліміт, область пошуку повертається лише до цього локального однорангового індексу.
 Max searches in	10mn==Макс шукає за 10 хв
 Peer-to-peer search with JavaScript results	resorting==Рівноправний пошук із JavaScript результатами пошуку
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Обмеження швидкості доступу до режиму однорангового пошуку з увімкненим переглядом результатів JavaScript на стороні браузера
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Коли користувач з обмеженими правами (неавтентифікований або без розширеного права пошуку) перевищує обмеження, сортування результатів стає застосовним лише на вимогу на стороні сервера.
 Remote snippet load==Віддалене завантаження фрагмента
 Limitations on snippet loading from remote websites.==Обмеження на завантаження фрагментів із віддалених веб-сайтів.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Коли користувач з обмеженими правами (неавтентифікований або без прав розширеного пошуку) перевищує ліміт, стратегія отримання фрагментів повертається до «CACHEONLY»
 Max	searches in 3s==Макс. пошук за 3 с
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Зміни набудуть чинності негайно.</em>
 #-----------------------------
@@ -4548,18 +4328,6 @@ Save Tools Configuration==Зберегти конфігурацію інстру
 #File: Trails.html
 #---------------------------
 CyTag Trails==Стежки CyTag
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="Зберегти переклад"
-Translation Editor==Редактор перекладу
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==Перекласти неперекладений текст інтерфейсу користувача (поточна мова). Змінений файл перекладу зберігається в каталозі DATA/LOCALE.
-UI Translation==Переклад інтерфейсу користувача
-Source File==Вихідний файл
-view it==переглянути його
-filter untranslated==фільтр неперекладений
-Source Text==Вихідний текст
 #-----------------------------
 
 #File: VFS.html

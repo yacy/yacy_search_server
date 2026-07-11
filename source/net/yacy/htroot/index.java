@@ -33,7 +33,6 @@ package net.yacy.htroot;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
@@ -55,18 +54,10 @@ public class index {
         }
 
         // access control
-        String authenticatedUserName = null;
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
-
-        if(adminAuthenticated) {
-			authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-        } else {
-        	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-        	if(user != null) {
-                authenticatedUserName = user.getUserName();
-        	}
-        }
-        final boolean authenticated = adminAuthenticated || authenticatedUserName != null;
+        final String authenticatedUserName = adminAuthenticated
+                ? sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin") : null;
+        final boolean authenticated = adminAuthenticated;
 		if (post != null) {
 			if (post.containsKey("publicPage") && !adminAuthenticated) { // Old style parameter : still in use ?
 				prop.authenticationRequired();

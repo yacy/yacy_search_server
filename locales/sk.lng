@@ -336,54 +336,6 @@ An error occurred while editing the following entries. Please check syntax.==Pri
 Activate this list for ...==Aktivujte tento zoznam pre...
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="Odoslať"
-"Preview"=="Ukážka"
-"Discard"=="Zahodiť"
-"Yes, delete it."=="Áno, vymazať."
-"No, leave it."=="Nie, nechaj tak."
-"Import"=="Importovať"
-&lt;&lt; previous entries==&lt;&lt; predchádzajúce položky
-next entries &gt;&gt;==ďalšie záznamy &gt;&gt;
-Blog-Home==Blog-Domovska stranka
-Edit==Edituj
-Author:==Autor:
-Subject:==Titul:
-Text:==Text:
-Comments:==Komentáre:
-deactivated==deaktivovaný
-activated==aktivovaný
-moderated==moderované
-Preview==Ukážka
-No changes have been submitted so far!==Ziadne zmeny este neboli vytvorene!
-Access denied==Pristup zakazany
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Na editaciu alebo vytvorenie blogu musite byt prihlaseny ako Admin alebo ako User s blog-pravami.
-Are you sure...==Si si istý...
-Confirm deletion==Potvrďte vymazanie
-XML-Import==XML-Import
-Import was successful!==Import bol úspešný!
-Import failed, maybe the supplied file was no valid blog-backup?==Import zlyhal. Skutocne je importovany subor block-backup subor?
-Please select the XML-file you want to import:==Prosim zvolte XML subor ktory chcete importovat:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="Odoslať"
-"Preview"=="Ukážka"
-"Discard"=="Zahodiť"
-Blog-Home==Blog-Domovska stranka
-Comments:==Komentáre:
-&lt;&lt; previous entries==&lt;&lt; predchádzajúce položky
-next entries &gt;&gt;==ďalšie záznamy &gt;&gt;
-Comments are not allowed for this posting!==K tomuto príspevku nie sú povolené komentáre!
-Comment on this Blog==Komentujte tento blog
-Author:==Autor:
-Subject:==Titul:
-Text:==Text:
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -451,58 +403,10 @@ Private Queue==Súkromný rad
 Public Queue==Verejná fronta
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==Zoznam používateľov
-User Accounts==Používateľské účty
-User==Používateľ
-First name==Krstné meno
-Last name==Priezvisko
-Address==Adresa
-Last Access==Posledný prístup
-Rights==práva
-Time==Čas
-Traffic==Doprava
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="Definujte správcu"
-"Set Access Rules"=="Nastavte pravidlá prístupu"
-"Edit User"=="Upraviť používateľa"
-"Delete User"=="Odstrániť používateľa"
-"Save User"=="Uložiť používateľa"
-User Administration==Správa používateľov
-Generic error.==Všeobecná chyba.
 Passwords do not match.==Heslá sa nezhodujú.
-Username too short. Username must be &gt;= 4 Characters.==Používateľské meno je príliš krátke. Používateľské meno musí mať &gt;= 4 znaky.
-Username already used (not allowed).==Používateľské meno sa už používa (nie je povolené).
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> Túto inštanciu YaCy možno spravovať pomocou účtu „admin“ a predvoleného hesla „yacy“.
-Change the password as soon as possible!==Zmeňte heslo čo najskôr!
 Admin Account==Účet správcu
-Access from localhost without account==Prístup z localhost bez účtu
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Prístup k vášmu partnerovi z vášho vlastného počítača (lokálny prístup) je udelený s právami správcu. Nie je potrebné konfigurovať správcovský účet.
-This setting is convenient but less secure than using a qualified admin account.==Toto nastavenie je pohodlné, ale menej bezpečné ako používanie účtu kvalifikovaného správcu.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Používajte ho opatrne, najmä keď prehliadate nedôveryhodné a potenciálne škodlivé webové stránky a zároveň používate YaCy partnera na rovnakom počítači.
-Access only with qualified account==Prístup len s kvalifikovaným účtom
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Vyžaduje sa to, ak chcete vzdialený prístup k svojmu partnerovi, ale zároveň to sprísňuje riadenie prístupu k operáciám správy vášho partnera.
-Peer User:==Peer užívateľ:
-New Peer Password:==Nové heslo partnera:
-Repeat Peer Password:==Opakovať heslo partnera:
-Access Rules==Pravidlá prístupu
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Ochrana všetkých stránok: ak je zapnutá, prístup na všetky stránky vyžaduje autorizáciu; ak je vypnuté, chránené sú iba stránky s príponou „_p“.
-User Accounts==Používateľské účty
-Select user==Vyberte používateľa
-New user==Nový používateľ
-Username==Používateľské meno
-Password==heslo
-Repeat password==Zopakujte heslo
-First name==Krstné meno
-Last name==Priezvisko
-Address==Adresa
-Rights:==práva:
-Timelimit==Časový limit
-Time used==Využitý čas
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -880,8 +784,6 @@ Status page==Stavová stránka
 Network pages==Sieťové stránky
 Surftips==Tipy na surfovanie
 News pages==Spravodajské stránky
-Blog==Blog
-Wiki==Wiki
 Public bookmarks==Verejné záložky
 Home Page==Domovská stránka
 File Share==Zdieľanie súborov
@@ -1039,28 +941,6 @@ Last Deploy==Posledné nasadenie
 You installed YaCy with a package manager. To update YaCy, use the package manager:==Nainštalovali ste YaCy pomocou správcu balíkov. Ak chcete aktualizovať YaCy, použite správcu balíkov:
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==manuálna aktualizácia:<br/>apt-get update &amp;&amp; apt-get install yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==automatická aktualizácia: pridajte nasledujúci riadok do /etc/crontab<br/>0 6 * * * aktualizácia root apt-get &amp;&amp; apt-get -y --force-yes install yacy
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="Uložiť používateľa"
-"Delete User"=="Odstrániť používateľa"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==Editor používateľských účtov
-Generic error.==Všeobecná chyba.
-Passwords do not match.==Heslá sa nezhodujú.
-Username too short. Username must be &gt;= 4 Characters.==Používateľské meno je príliš krátke. Používateľské meno musí mať &gt;= 4 znaky.
-Username already used (not allowed).==Používateľské meno sa už používa (nie je povolené).
-Username==Používateľské meno
-Password==heslo
-Repeat password==Zopakujte heslo
-First name==Krstné meno
-Last name==Priezvisko
-Address==Adresa
-Rights:==práva:
-Timelimit==Časový limit
-Time used==Využitý čas
-back to user list==späť na zoznam používateľov
 #-----------------------------
 
 #File: Connections_p.html
@@ -2469,8 +2349,6 @@ inbox==doručenej pošty
 "DHT Receive: yes"=="DHT Príjem: áno"
 "DHT receive enabled"=="Príjem DHT je povolený"
 "Profile updated"=="Profil bol aktualizovaný"
-"Wiki updated"=="Wiki bola aktualizovaná"
-"Blog updated"=="Blog bol aktualizovaný"
 "Crawl"=="Prehľadávať"
 "The YaCy Network"=="Sieť YaCy"
 "Type: Virgin"=="Typ: panenský"
@@ -2516,7 +2394,6 @@ Received DHT<br/>Word Chunks==Prijaté časti DHT<br/>Word
 Received<br/>URLs==Prijaté <br/>URL adresy
 Location==Miesto
 user agent<br/>==používateľský agent<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==odoslať&nbsp;<strong>s</strong>právu/<br/>zobraziť&nbsp;<strong>p</strong>rofil/<br/>upraviť&nbsp;<strong>W</strong>iki/<br/>prehliadať&nbsp;<strong>b</strong>log
 Network==sieť
 Online Peers==Online rovesníci
 Number of<br/>Documents==Počet <br/>dokumentov
@@ -2587,7 +2464,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==Tabulka s prave odstartovanymi procesmi preliezania (crawls) je zobrazena na stranke "Vytvor index".
 A change in the personal profile will create a news entry. You can see recently made changes of==Zmena v profile sposobi vytvorenie zaznamu v spravach. Posledne vykonane zmeny
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==v profiloch mozete vidiet na stranke "Siet" kde su tieto profily oznacene hviezdickou '*' vedla 'P' (profil).
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==Publikovanie pridaného alebo upraveného prekladu pre používateľské rozhranie. Ostatní partneri ho môžu zahrnúť do svojho zoznamu miestnych prekladov.
 More news services will follow.==Dalsie sluzby pre spravy budu nasledovat.
 Above you can see four menus:==V menu mozete vidiet tieto styri zaznami:
 Only these news will be used to display specific news services as explained above.==Ako bolo vysvetlene vyzsie na zobrazenie specifickych sluzieb sprav budu pouzite len tieto spravy.
@@ -2993,23 +2869,18 @@ Age==Vek
 "Reset to defaults settings"=="Obnoviť predvolené nastavenia"
 limitations==obmedzenia
 Local Search access rate limitations==Obmedzenia rýchlosti prístupu miestneho vyhľadávania
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Tu môžete nakonfigurovať obmedzenia rýchlosti prístupu k tomuto rozhraniu partnerského vyhľadávania pre neoverených používateľov a používateľov bez rozšíreného práva na vyhľadávanie
 YaCy search==YaCy vyhľadávanie
 Access rate limitations to this peer search interface.==Obmedzenia rýchlosti prístupu k tomuto rozhraniu partnerského vyhľadávania.
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Keď používateľ s obmedzenými právami (neoverený alebo bez práva na rozšírené vyhľadávanie) prekročí limit, vyhľadávanie sa zablokuje.
 Max searches in 3s==Maximálny počet vyhľadávaní za 3 sekundy
 Max searches in 1mn==Maximálny počet vyhľadávaní za 1 min
 Max searches in 10mn==Maximálny počet vyhľadávaní za 10 minút
 Peer-to-peer search==Peer-to-peer vyhľadávanie
 Access rate limitations to the peer-to-peer search mode.==Obmedzenia rýchlosti prístupu do režimu vyhľadávania peer-to-peer.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Keď používateľ s obmedzenými právami (neautentizovaný alebo bez práva na rozšírené vyhľadávanie) prekročí limit, rozsah vyhľadávania sa vráti len na tento lokálny partnerský index.
 Max searches in	10mn==Maximálny počet vyhľadávaní za 10 minút
 Peer-to-peer search with JavaScript results	resorting==Vyhľadávanie typu peer-to-peer s JavaScript výsledkami
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Obmedzenia rýchlosti prístupu k režimu vyhľadávania peer-to-peer s povoleným uchyľovaním výsledkov JavaScript na strane prehliadača
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Keď používateľ s obmedzenými právami (neoverený alebo bez práva na rozšírené vyhľadávanie) prekročí limit, uchyľovanie výsledkov sa stáva použiteľným iba na požiadanie na strane servera.
 Remote snippet load==Vzdialené načítanie úryvku
 Limitations on snippet loading from remote websites.==Obmedzenia načítania úryvkov zo vzdialených webových stránok.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Keď používateľ s obmedzenými právami (neoverený alebo bez práva na rozšírené vyhľadávanie) prekročí limit, stratégia načítania úryvkov sa vráti späť na „CACHEONLY“
 Max	searches in 3s==Maximálny počet vyhľadávaní za 3 sekundy
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Zmeny sa prejavia okamžite.</em>
 #-----------------------------
@@ -3234,14 +3105,9 @@ These settings configure the access method to your own http proxy and server.==T
 All traffic is routed through one single port, for both proxy and server.==Všetka prevádzka je smerovaná cez jeden jediný port pre proxy aj server.
 HTTPS Server Port:==HTTPS Port servera:
 Server Access Restrictions==Obmedzenia pristupu k serveru
-You can restrict the access to this proxy/server using a two-stage security barrier:==Pristup k tomuto proxy resp. HTTP serveru mozete obmedzit pouzitym 2-stupnovej bezpecnostnej bariery:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==definujte <em>prístupovú doménu</em> pomocou zoznamu pridelených klientskych IP-čísel alebo pomocou zástupných znakov
-define an <em>user account</em> with an user:password - pair==definovať <em>používateľský účet</em> pomocou user:password - pair
-This is the account that restricts access to the proxy function.==Toto je účet, ktorý obmedzuje prístup k funkcii proxy.
 You probably don't want to share the proxy to the internet, so you should set the==Pravdepodobne nechcete zdieľať proxy na internet, takže by ste mali nastaviť
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP-Číslo prístupovej domény k vzoru, ktorý zodpovedá vášmu lokálnemu intranetu.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Predvolené nastavenie by malo byť vo väčšine prípadov správne. Ak chcete, môžete si nastaviť aj proxy účet
-so that every proxy user must authenticate first, but this is rather unusual.==takže každý používateľ proxy sa musí najprv overiť, ale je to dosť nezvyčajné.
 IP-Number filter==IP-Filter čísel
 Accounts==účty
 #-----------------------------
@@ -3632,59 +3498,6 @@ Save Tools Configuration==Uložiť konfiguráciu nástrojov
 CyTag Trails==CyTag Trails
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="Publikovať"
-"negative vote"=="negatívny hlas"
-"positive vote"=="kladné hlasovanie"
-You can share your local addition to translations and distribute it to other peers.==Svoj miestny doplnok môžete zdieľať s prekladmi a distribuovať ho ďalším kolegom.
-The remote peer can vote on your translation and add it to its own local translation.==Vzdialený partner môže hlasovať o vašom preklade a pridať ho do svojho vlastného lokálneho prekladu.
-File:==S&uacute;bor:
-Originator==Autor
-English:==angličtina:
-existing==existujúce
-Translation:==preklad:
-Vote on this translation. If you vote positive the translation is added to your local translation list.==Hlasujte za tento preklad. Ak zahlasujete kladne, preklad sa pridá do vášho miestneho zoznamu prekladov.
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="Uložiť preklad"
-Translation Editor==Editor prekladov
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==Preložiť nepreložený text používateľského rozhrania (aktuálny jazyk). Upravený prekladový súbor je uložený v adresári DATA/LOCALE.
-UI Translation==Preklad používateľského rozhrania
-Source File==Zdrojový súbor
-view it==pozri si to
-filter untranslated==filter nepreložený
-Source Text==Zdrojový text
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="prihlásenie"
-"logout"=="odhlásenie"
-"red bar"=="červený pruh"
-"green bar"=="zelený pruh"
-"Change"=="Zmeniť"
-User Page==Používateľská stránka
-You are not logged in.==Nie ste prihlásený.
-Username:==Používateľské meno:
-Password:==heslo:
-(Identified by==(Identifikované podľa
-IP==IP
-Username/Password==Používateľské meno/Password
-Cookie==Cookie
-old Password==staré heslo
-new Password==nové heslo
-new Password(repetition)==nové heslo (opakovanie)
-You are currently logged in as admin.==Momentálne ste prihlásený ako admin.
-(after logout you will be prompted for your password again. simply click "cancel")==(po odhlásení budete opäť vyzvaní na zadanie hesla. jednoducho kliknite na "zrušiť")
-Password was changed.==Heslo bolo zmenené.
-Old Password is wrong.==Staré heslo je nesprávne.
-New Password and its repetition do not match.==Nové heslo a jeho opakovanie sa nezhodujú.
-New Password is empty.==Nové heslo je prázdne.
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="Prehliadač súborového systému"
@@ -3888,40 +3701,9 @@ Other Dot==Iná bodka
 Dot-end==Dot-end
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="všetky"
-"admin"=="admin"
-"Submit"=="Odoslať"
-"Preview"=="Ukážka"
-"Discard"=="Zahodiť"
-"Show"=="Zobraziť"
-"Compare"=="Porovnaj"
-(only granted to admin)==(udelené iba správcovi)
-Index -==Index -
-Grant Write Access to==Udeliť prístup na zápis pre
-Edit==Edituj
-Author:==Autor:
-Text:==Text:
-Preview==Ukážka
-No changes have been submitted so far!==Ziadne zmeny este neboli vytvorene!
-Index==Index
-Subject==Predmet
-Change Date==Zmeniť dátum
-Last Author==Posledný autor
-Start Page==Úvodná stránka
-Versions==Verzie
-Compare version from==Porovnať verziu z
-with version from==s verziou od
-Error==Chyba
-You can use==Môžete použiť
-Changes will be published as announcement on YaCyNews==Zmeny budu zverejnene pomocou oznamov na YaCyNews-och
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki-kód
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Táto tabuľka obsahuje krátky popis značiek, ktoré možno použiť vo Wiki a niekoľkých ďalších servletoch
 of YaCy. For a more detailed description visit the==z YaCy. Pre podrobnejší popis navštívte
 Code==kód
 Description==Popis
@@ -3946,7 +3728,6 @@ These tags create a definition list.==Tieto značky vytvárajú zoznam definíci
 This tag creates a horizontal line.==Táto značka vytvára vodorovnú čiaru.
 [[pagename]]==[[názov stránky]]
 [[pagename|description]]==[[názov stránky|popis]]
-This tag creates links to other pages of the wiki.==Táto značka vytvára odkazy na iné stránky wiki.
 [url]==[url]
 [url description]==[popis adresy URL]
 This tag creates links to external websites.==Táto značka vytvára odkazy na externé webové stránky.
@@ -4271,7 +4052,6 @@ Outgoing&nbsp;News==Odchadzajuce spravy
 Published&nbsp;News==Zverejnene spravy
 Community Data==údaje komunity
 Surftips==Tipy na surfovanie
-Local Peer Wiki==Miestna rovesnícka Wiki
 Bookmarks==Záložky
 #-----------------------------
 
@@ -4282,7 +4062,6 @@ Advanced Settings==Pokrocil&eacute; nastavenia
 Performance Settings of Busy Queues==Nastavenia výkonu zaneprázdnených frontov
 Viewer and administration for database tables==Prehliadač a správa databázových tabuliek
 Advanced Properties==Rozšírené vlastnosti
-UI Translations==Preklady používateľského rozhrania
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4388,13 +4167,6 @@ Generic Search Portal==Portál všeobecného vyhľadávania
 Search Box Anywhere==Vyhľadávacie pole kdekoľvek
 User Profile==Používateľský profil
 Local robots.txt==Miestny súbor robots.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==Publikácia
-Wiki==Wiki
-Blog==Blog
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4541,14 +4313,6 @@ domaingraph : Built with Processing==domaingraph : Postavený so spracovaním
 This browser does not have a Java Plug-in.==Tento prehliadač nemá doplnok Java.
 Get the latest Java Plug-in here.==Získajte najnovší doplnok Java tu.
 Built with Processing==Postavené so spracovaním
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="prihlásenie"
-Your Username/Password is wrong.==Vaše používateľské meno/Password je nesprávne.
-Username==Používateľské meno
-Password==heslo
 #-----------------------------
 
 #File: proxymsg/error.html

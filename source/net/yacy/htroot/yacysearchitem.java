@@ -55,7 +55,6 @@ import net.yacy.cora.util.Memory;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.URLLicense;
-import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.IconEntry;
 import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -103,16 +102,13 @@ public class yacysearchitem {
         final String eventID = post.get("eventID", "");
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
 
-	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-	final boolean authenticated = adminAuthenticated || user != null;
-
-        final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-        //final boolean bookmarkRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
+        final boolean authenticated = adminAuthenticated;
+        final boolean extendedSearchRights = adminAuthenticated;
 
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
 
-		if (post.containsKey("auth") && !adminAuthenticated && user == null) {
+		if (post.containsKey("auth") && !adminAuthenticated) {
 			/*
 			 * Access to authentication protected features is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
@@ -188,20 +184,9 @@ public class yacysearchitem {
             prop.put("content", 1); // switch on specific content
             final String urlhash = ASCII.String(result.hash());
             if (adminAuthenticated) { // only needed if authorized
-                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash, null);
-            } else if (authenticated && user != null) {
-                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash, user);
+                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash);
             } else
                 prop.put("content_authorized", "0"); // disable for not authorized user
-// for testing only
-// result
-// if local Admin - no admin_right
-// if admin authent -> admin_right = true, bookmark_right = false
-            if (header.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
-                if (header.isUserInRole(UserDB.AccessRight.BOOKMARK_RIGHT.toString())) {
-                    System.out.println("booki");
-                }
-            }
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
@@ -677,17 +662,13 @@ public class yacysearchitem {
      * @param resource resource scope ("local" or "global")
      * @param origQ origin query terms
      * @param urlhash URL hash of the result item
-     * @param user current user or null if current user is admin
      */
     private static void addAuthorizedActions(final Switchboard sb, final serverObjects prop,
             final SearchEvent theSearch, final String resultUrlstring, final String resource, final String origQ,
-            final String urlhash, final UserDB.Entry user) {
+            final String urlhash) {
         // check if url exists in bookmarks
         final boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
-        if (user == null || user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT)) {
-            prop.put("content_authorized_bookmark", !bookmarkexists);
-        } else
-            prop.put("content_authorized_bookmark", "0");
+        prop.put("content_authorized_bookmark", !bookmarkexists);
 /*      boolean blacklistislisted = false;
         try {
             DigestURL durl = new DigestURL(resultUrlstring);
@@ -722,13 +703,8 @@ public class yacysearchitem {
         prop.put("content_authorized_recommend_deletelink", deleteLink);
         prop.put("content_authorized_recommend_recommendlink", recommendLink);
 
-        if (user == null || user.hasRight(UserDB.AccessRight.ADMIN_RIGHT)) {
-            prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-            prop.put("content_authorized_blacklist", "1");
-        } else {
-            prop.put("content_authorized_recommend", "0");
-            prop.put("content_authorized_blacklist", "0");
-        }
+        prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
+        prop.put("content_authorized_blacklist", "1");
         // prop.put("content_authorized_urlhash", urlhash); // not used 2022-02-09
         prop.put("content_authorized", "1"); // enable authorized icons/content
     }

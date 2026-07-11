@@ -52,7 +52,6 @@ public class ConfigRobotsTxt_p {
         if (post != null) {
             if (post.containsKey("save")) {
                 rbc.setAllDisallowed(post.containsKey(RobotsTxtConfig.ALL));
-                rbc.setBlogDisallowed(post.containsKey(RobotsTxtConfig.BLOG));
                 rbc.setBookmarksDisallowed(post.containsKey(RobotsTxtConfig.BOOKMARKS));
                 rbc.setDirsDisallowed(post.containsKey(RobotsTxtConfig.DIRS));
                 rbc.setFileshareDisallowed(post.containsKey(RobotsTxtConfig.FILESHARE));
@@ -62,14 +61,12 @@ public class ConfigRobotsTxt_p {
                 rbc.setNewsDisallowed(post.containsKey(RobotsTxtConfig.NEWS));
                 rbc.setStatusDisallowed(post.containsKey(RobotsTxtConfig.STATUS));
                 rbc.setSurftipsDisallowed(post.containsKey(RobotsTxtConfig.SURFTIPS));
-                rbc.setWikiDisallowed(post.containsKey(RobotsTxtConfig.WIKI));
                 rbc.setProfileDisallowed(post.containsKey(RobotsTxtConfig.PROFILE));
                 env.setConfig(SwitchboardConstants.ROBOTS_TXT, rbc.toString());
             }
         }
 
         prop.put(RobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? "1" : "0");
-        prop.put(RobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.DIRS + ".checked", (rbc.isDirsDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.FILESHARE + ".checked", (rbc.isFileshareDisallowed()) ? "1" : "0");
@@ -79,7 +76,6 @@ public class ConfigRobotsTxt_p {
         prop.put(RobotsTxtConfig.NEWS + ".checked", (rbc.isNewsDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? "1" : "0");
-        prop.put(RobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.PROFILE + ".checked", (rbc.isProfileDisallowed()) ? "1" : "0");
         return prop;
     }

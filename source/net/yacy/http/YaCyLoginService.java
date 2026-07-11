@@ -24,9 +24,6 @@
 
 package net.yacy.http;
 
-import java.util.ArrayList;
-import net.yacy.data.UserDB.AccessRight;
-import net.yacy.data.UserDB.Entry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import org.eclipse.jetty.security.AbstractLoginService;
@@ -37,8 +34,8 @@ import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.util.security.Credential;
 
 /**
- * jetty login service, provides admin and YaCy.UserDB users with role
- * assignment with DIGEST auth by default Jetty uses the name of the loginSevice
+ * Jetty login service for YaCy's built-in administrator account.
+ * With DIGEST auth Jetty uses the name of the login service
  * as realmname (which is part of all password hashes)
  */
 public class YaCyLoginService extends HashLoginService implements LoginService {
@@ -70,7 +67,7 @@ public class YaCyLoginService extends HashLoginService implements LoginService {
     }
 
     /**
-     * Load the user from cache (of authenticated users) or from the YaCy user db
+     * Load the built-in administrator from the authenticated-user cache or configuration.
      * @param username
      * @return known user or null
      */
@@ -83,7 +80,7 @@ public class YaCyLoginService extends HashLoginService implements LoginService {
         AbstractLoginService.UserPrincipal theUser = super.loadUserInfo(username); // load from cache (the internal _userStore)
         if (theUser == null) {
             final Switchboard sb = Switchboard.getSwitchboard();
-            String adminuser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+            final String adminuser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
             Credential credential = null;
             String[] roles = null;
             if (username.equals(adminuser)) {
@@ -94,22 +91,7 @@ public class YaCyLoginService extends HashLoginService implements LoginService {
                 credential = YaCyLegacyCredential.getCredentialForAdmin(username, adminAccountBase64MD5);
                 // TODO: YaCy user:pwd hashes should longterm likely be switched to separable username + pwd-hash entries
                 //       and/or the standard admin account username should be fix = "admin"
-                roles = new String[]{AccessRight.ADMIN_RIGHT.toString()};
-            } else {
-                Entry user = sb.userDB.getEntry(username);
-                if (user != null && user.getMD5EncodedUserPwd() != null) {
-                    // assigning roles from userDB
-                    ArrayList<String> roletmp = new ArrayList<String>();
-                    for (final AccessRight right : AccessRight.values()) {
-                        if (user.hasRight(right)) {
-                            roletmp.add(right.toString());
-                        }
-                    }
-                    if (roletmp.size() > 0) {
-                        roles = roletmp.toArray(new String[roletmp.size()]);
-                    }
-                    credential = YaCyLegacyCredential.getCredentialForUserDB(username, user.getMD5EncodedUserPwd());
-                }
+                roles = new String[]{SwitchboardConstants.ADMIN_ACCOUNT_ROLE};
             }
 
             if (credential != null) { // if credential exist, user is known, create or get info
@@ -123,8 +105,8 @@ public class YaCyLoginService extends HashLoginService implements LoginService {
     }
 
     /**
-     * Delete a user from the internal cache. If user found in cache user is
-     * loged out before delete.
+     * Delete the administrator identity from the internal cache. When present,
+     * the identity is logged out before removal.
      * @param username
      * @return true if user deleted, if not found in user cache false
      */

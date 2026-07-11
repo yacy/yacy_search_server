@@ -368,7 +368,7 @@ indexArchivePath=DATA/ARCHIVE
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
 
-# path to additional databases, like messages, blog data and bookmarks
+# path to additional databases, such as messages and bookmarks
 workPath=DATA/WORK
 
 # the path to the SKINS files.
@@ -445,10 +445,6 @@ YaCyHop=true
 # are blocked, but you will also be blocked from using others
 # search services.
 serverClient=*
-
-# use_proxyAccounts: set to true to restrict proxy-access to some identified users.
-#use User_p.html to create some Users.
-use_proxyAccounts=true
 
 # adminAccountBase64MD5: a encoded user:password - pair
 # For the administration of settings through the web interface.
@@ -963,22 +959,22 @@ search.result.show.vocabulary.omit =
 # when true, display the raw ranking score value
 search.result.show.ranking = false
 
-# Maximum numbers of accesses within a given time period to the search interface for unauthenticated users and authenticated users with no extended search right
+# Maximum numbers of accesses within a given time period to the search interface for unauthenticated users
 search.public.max.access.3s = 60
 search.public.max.access.1mn = 600
 search.public.max.access.10mn = 3000
 
-# Maximum numbers of accesses within a given time period to the search interface in P2P mode for unauthenticated users and authenticated users with no extended search right
+# Maximum numbers of accesses within a given time period to the search interface in P2P mode for unauthenticated users
 search.public.max.p2p.access.3s = 1
 search.public.max.p2p.access.1mn = 6
 search.public.max.p2p.access.10mn = 60
 
-# Maximum numbers of accesses within a given time period to the search interface in P2P mode with browser-side JavaScript remote results resorting for unauthenticated users and authenticated users with no extended search right
+# Maximum numbers of accesses within a given time period to the search interface in P2P mode with browser-side JavaScript remote results resorting for unauthenticated users
 search.public.max.p2p.jsresort.access.3s = 1
 search.public.max.p2p.jsresort.access.1mn = 1
 search.public.max.p2p.jsresort.access.10mn = 10
 
-# Maximum number of accesses within a given time period to the search interface to support fetching remote results snippets for unauthenticated users and authenticated users with no extended search right
+# Maximum number of accesses within a given time period to the search interface to support fetching remote results snippets for unauthenticated users
 search.public.max.remoteSnippet.access.3s = 1
 search.public.max.remoteSnippet.access.1mn = 4
 search.public.max.remoteSnippet.access.10mn = 20
@@ -1170,14 +1166,6 @@ publicTopmenu = true
 # set to true to include a login link/status in the search page public top navigation bar
 search.publicTopNavBar.login = true
 
-# Wiki access rights
-# the built-in wiki system allows by default only that the administrator is allowed to make changes
-# this can be changed. There are three options:
-# admin - only the admin has write right
-# all   - everybody has write right
-# user  - the admin and every user registered in the user db has write right
-WikiAccess = admin
-
 # Search Profiles
 # we will support different search profiles
 # If this profile setting is empty, a hard-coded profile is used to initialise the values
@@ -1226,7 +1214,6 @@ thumbnailProgram =
 # settings for the peer's local robots.txt
 # the following restrictions are possible (comma-separated):
 # - all       : entire domain is disallowed
-# - blog      : the blog-pages
 # - bookmarks : the bookmark-page
 # - dirs      : all directories in htroot (standard setting, as there is no usable information in)
 # - fileshare : all files in the peer's file share (DATA/HTDOCS/share)
@@ -1236,14 +1223,10 @@ thumbnailProgram =
 # - network   : the network-pages
 # - status    : peer's status page
 # - surftips  : the surftips-page
-# - wiki      : the wiki-page
 httpd.robots.txt = locked,dirs,bookmarks,network,news,status,profile
 
 # maximum number of robots.txt loading threads
 robots.txt.MaxActiveThreads = 40
-
-# class to use for parsing wikicode
-wikiParser.class = de.anomic.data.wikiCode
 
 # settings for automatic deletion of old entries in passive and potential seed-db
 # time means max time (in days) a peer may not have been seen before it is deleted

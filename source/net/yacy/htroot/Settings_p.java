@@ -122,21 +122,6 @@ public final class Settings_p {
         // proxy access filter
         prop.putHTML("proxyfilter", env.getConfig("proxyClient", "*"));
 
-        // proxy password
-        if (!env.getConfigBool("use_proxyAccounts", false)) {
-            // no password has been specified
-            prop.put("use_proxyAccounts", "0"); //unchecked
-        } else {
-            prop.put("use_proxyAccounts", "1"); //checked
-            /*s = env.getConfig("proxyAccount", "proxy:void");
-            pos = s.indexOf(':');
-            if (pos < 0) {
-                prop.put("proxyuser","proxy");
-            } else {
-                prop.put("proxyuser",s.substring(0, pos));
-            }*/
-        }
-
         // Url proxy settings
         prop.putHTML("urlproxyfilter", env.getConfig("proxyURL.access", "127.0.0.1,0:0:0:0:0:0:0:1"));
         prop.putHTML("urlproxydomains", env.getConfig("proxyURL.rewriteURLs", "domainlist"));

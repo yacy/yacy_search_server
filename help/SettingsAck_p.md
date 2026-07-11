@@ -58,7 +58,7 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `fileHost` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `msgForwardingEnabled` | Enables the named feature. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
 | `port` | HTTP port where YaCy listens. Values below 1024 are ignored by this form; changing the port triggers reconnect/redirect behavior. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
-| `proxyaccount` | User or account value. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
+| `proxyaccess` | Saves the proxy client IP-number filter. | Changes proxy access scope; verify the filter before submitting. |
 | `proxyfilter` | Filter expression. It decides which records are included, excluded, displayed, exported, or processed on this page. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
 | `remoteProxyHost` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `remoteProxyUser` | User or account value. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
@@ -68,7 +68,6 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `urlproxydomains` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `urlproxyenabled` | Enables the named feature. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
 | `urlproxyfilter` | Filter expression. It decides which records are included, excluded, displayed, exported, or processed on this page. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
-| `use_proxyaccounts` | User or account value. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
 
 Example request shape:
 

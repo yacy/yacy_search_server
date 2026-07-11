@@ -23,16 +23,6 @@ Disallow: /#[page]#
 # bookmarks
 Disallow: /Bookmarks.html#(/bookmarks)#
 
-#(wiki)#::
-# wiki
-Disallow: /Wiki.html#(/wiki)#
-
-#(blog)#::
-# blog
-Disallow: /Blog.html
-Disallow: /Blog.rss
-Disallow: /Blog.xml#(/blog)#
-
 #(news)#::
 # news
 Disallow: /News.html#(/news)#

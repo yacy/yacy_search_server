@@ -61,18 +61,15 @@
 <p>
   <strong>Server Access Restrictions</strong><br />
   <br />
-  You can restrict the access to this proxy/server using a two-stage security barrier:
+  You can restrict access to this proxy/server with an IP-number filter:
 </p>
 <ul>
   <li>define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards</li>
-  <li>define an <em>user account</em> with an user:password - pair</li>
 </ul>
 <p>
-  This is the account that restricts access to the proxy function.
   You probably don't want to share the proxy to the internet, so you should set the
   IP-Number Access Domain to a pattern that corresponds to you local intranet.
-  The default setting should be right in most cases. If you want, you can also set a proxy account
-  so that every proxy user must authenticate first, but this is rather unusual.
+  The default setting should be right in most cases.
 </p>
 <table border="0" cellspacing="5">
   <tr valign="top">
@@ -82,14 +79,7 @@
     </td>
   </tr>
   <tr valign="top">
-    <td><label for="accounts">Accounts</label>:</td>
-    <td>
-      <input name="use_proxyaccounts" id="accounts" type="checkbox" size="16" maxlength="16" value="on"#(use_proxyAccounts)#:: checked="checked"#(/use_proxyAccounts)# />
-      Use <a href="ConfigAccounts_p.html">Proxy Accounts</a>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td colspan="2"><input class="btn btn-primary btn-sm" type="submit" name="proxyaccount" value="Submit" /></td>
+    <td colspan="2"><input class="btn btn-primary btn-sm" type="submit" name="proxyaccess" value="Submit" /></td>
   </tr>
 </table>
 </fieldset>

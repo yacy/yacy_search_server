@@ -206,35 +206,8 @@ public class migration {
 			ConcurrentLog.warn("MIGRATION", "could not delete "+ filename);
 	}
     public static void migrateWorkFiles(final Switchboard sb){
-        File file=new File(sb.getDataPath(), "DATA/SETTINGS/wiki.db");
+        File file;
         File file2;
-        if (file.exists()) {
-            ConcurrentLog.info("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
-            sb.wikiDB.close();
-            file2 = new File(sb.workPath, "wiki.db");
-            try {
-                Files.copy(file, file2);
-                file.delete();
-            } catch (final IOException e) {
-            }
-
-            file = new File(sb.getDataPath(), "DATA/SETTINGS/wiki-bkp.db");
-            if (file.exists()) {
-                ConcurrentLog.info("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
-                file2 = new File(sb.workPath, "wiki-bkp.db");
-                try {
-                    Files.copy(file, file2);
-                    file.delete();
-                } catch (final IOException e) {}
-            }
-            try {
-                sb.initWiki();
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            }
-        }
-
-
         file=new File(sb.getDataPath(), "DATA/SETTINGS/message.db");
         if(file.exists()){
             ConcurrentLog.info("MIGRATION", "Migrating message.db to "+ sb.workPath);

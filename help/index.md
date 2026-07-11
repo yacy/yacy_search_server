@@ -48,7 +48,7 @@ The page may be visible, but the backend performs authentication checks for prot
 
 Protected related endpoint(s): `/yacysearch.html`, `/index.html`.
 
-Backend checks: administrator authentication, user authentication.
+Backend checks: built-in administrator authentication for protected search features.
 
 ## Automation And API
 

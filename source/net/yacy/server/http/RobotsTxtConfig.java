@@ -34,8 +34,6 @@ import net.yacy.server.serverSwitch;
 
 public final class RobotsTxtConfig {
     
-    public static final String WIKI = "wiki";
-    public static final String BLOG = "blog";
     public static final String BOOKMARKS = "bookmarks";
     public static final String HOMEPAGE = "homepage";
     public static final String FILESHARE = "fileshare";
@@ -51,8 +49,6 @@ public final class RobotsTxtConfig {
     private boolean allDisallowed = false;
     private boolean lockedDisallowed = true;
     private boolean dirsDisallowed = true;
-    private boolean wikiDisallowed = false;
-    private boolean blogDisallowed = false;
     private boolean fileshareDisallowed = false;
     private boolean homepageDisallowed = false;
     private boolean newsDisallowed = false;
@@ -68,8 +64,6 @@ public final class RobotsTxtConfig {
         if (active == null) return;
         for (int i=0; i<active.length; i++) {
             if (active[i] == null) continue;
-            if (active[i].equals(BLOG)) { this.blogDisallowed = true; continue; }
-            if (active[i].equals(WIKI)) { this.wikiDisallowed = true; continue; }
             if (active[i].equals(BOOKMARKS)) { this.bookmarksDisallowed = true; continue; }
             if (active[i].equals(HOMEPAGE)) { this.homepageDisallowed = true; continue; }
             if (active[i].equals(FILESHARE)) { this.fileshareDisallowed = true; continue; }
@@ -94,7 +88,6 @@ public final class RobotsTxtConfig {
     public String toString() {
         if (this.allDisallowed) return ALL;
         final StringBuilder sb = new StringBuilder(200);
-        if (this.blogDisallowed) sb.append(BLOG).append(",");
         if (this.bookmarksDisallowed) sb.append(BOOKMARKS).append(",");
         if (this.dirsDisallowed) sb.append(DIRS).append(",");
         if (this.fileshareDisallowed) sb.append(FILESHARE).append(",");
@@ -104,7 +97,6 @@ public final class RobotsTxtConfig {
         if (this.newsDisallowed) sb.append(NEWS).append(",");
         if (this.statusDisallowed) sb.append(STATUS).append(",");
         if (this.surftipsDisallowed) sb.append(SURFTIPS).append(",");
-        if (this.wikiDisallowed) sb.append(WIKI).append(",");
         if (this.profileDisallowed) sb.append(PROFILE).append(",");
         return sb.toString();
     }
@@ -131,14 +123,6 @@ public final class RobotsTxtConfig {
 
     public void setDirsDisallowed(final boolean dirsDisallowed) {
         this.dirsDisallowed = dirsDisallowed;
-    }
-
-    public boolean isBlogDisallowed() {
-        return blogDisallowed || this.allDisallowed;
-    }
-
-    public void setBlogDisallowed(final boolean blogDisallowed) {
-        this.blogDisallowed = blogDisallowed;
     }
 
     public boolean isBookmarksDisallowed() {
@@ -197,14 +181,6 @@ public final class RobotsTxtConfig {
         this.surftipsDisallowed = surftipsDisallowed;
     }
 
-    public boolean isWikiDisallowed() {
-        return wikiDisallowed || this.allDisallowed;
-    }
-
-    public void setWikiDisallowed(final boolean wikiDisallowed) {
-        this.wikiDisallowed = wikiDisallowed;
-    }
-    
     public boolean isProfileDisallowed() {
         return profileDisallowed || this.allDisallowed;
     }

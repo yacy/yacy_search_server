@@ -218,54 +218,6 @@ Crawling==Crawling
 DHT==DHT
 News==News
 Proxy==Proxy
-#File: Blog.html
-#---------------------------
-Blog-Home==Blog-Startseite
-Author:==Autor:
-Subject:==Titel:
-Comments:==Kommentare:
-deactivated==deaktiviert
-moderated==moderiert
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
-No changes have been submitted so far!==Es wurden noch keine Änderungen übertragen!
-Access denied==Zugriff verweigert
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeinträge zu verändern oder zu erstellen müssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
-Confirm deletion==Bestätige Löschung
-Import was successful!==Import war erfolgreich!
-Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umständen war die angegebene Datei keine gültige Blog-Sicherung?
-Please select the XML-file you want to import:==Bitte wählen Sie die XML-Datei die Sie importieren wollen:
-Edit==Bearbeiten
-Preview==Vorschau
-"RSS"=="RSS"
-"No, leave it."=="Nein, behalten."
-"Yes, delete it."=="Ja, löschen."
-&lt;&lt; previous entries==&lt;&lt; vorherige Einträge
-Are you sure...==Sind Sie sicher...
-XML-Import==XML-Import
-activated==aktiviert
-next entries &gt;&gt;==nächste Einträge &gt;&gt;
-#-----------------------------
-
-Text:==Text:
-"Import"=="Importieren"
-#File: BlogComments.html
-#---------------------------
-Blog-Home==Blog-Startseite
-Author:==Autor:
-Subject:==Titel:
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
-Comments:==Kommentare:
-&lt;&lt; previous entries==&lt;&lt; vorherige Einträge
-next entries &gt;&gt;==nächste Einträge &gt;&gt;
-Comment on this Blog==Kommentar zu diesem Blog
-Comments are not allowed for this posting!==Kommentare sind für diesen Beitrag nicht erlaubt!
-#-----------------------------
-
-Text:==Text:
 #File: Bookmarks.html
 #---------------------------
 
@@ -347,44 +299,26 @@ loading....==lade....
 
 #File: ConfigAccounts_p.html
 #---------------------------
-User Accounts==Benutzerkonten
-User Administration==Benutzerverwaltung
-Generic error.==Genereller Fehler.
+"Change Administrator Credentials"=="Administrator-Zugangsdaten ändern"
+Admin Account==Administratorkonto
+Invalid administrator settings.==Ungültige Administratoreinstellungen.
 Passwords do not match.==Passwörter stimmen nicht überein.
-Username too short. Username must be &gt;= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
-Admin Account==Admin Konto
-Access from localhost without account==Zugriff von localhost ohne Konto
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert mit Administratorrechten gewährt. Sie brauchen kein Administratorkonto erstellen.
-Access only with qualified account==Zugriff nur mit berechtigtem Konto
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Das ist erforderlich, wenn Sie Fernzugriff auf Ihren Peer haben wollen, aber es härtet auch aus die Zugriffskontrolle auf Ihre Peer-Administrations-Operationen.
-Peer User:==Peer Benutzer:
-New Peer Password:==Neues Peer Passwort:
-Repeat Peer Password:==Wiederhole Peer Passwort:
-"Define Administrator"=="Administrator festlegen"
-Select user==Benutzer wählen
-New user==Neuer Benutzer
-Repeat password==Passwort wiederholen
-First name==Vorname
-Last name==Nachname
-Address==Adresse
-Timelimit==Zeitlimit
-Time used==Verbrauchte Zeit
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNUNG</b> Diese YaCy-Instanz kann mit dem Konto "admin" und dem Standardpasswort "yacy" administriert werden.
-Password==Passwort
-Rights:==Rechte:
-Username==Benutzername
-"Delete User"=="Benutzer löschen"
-"Edit User"=="Benutzer bearbeiten"
-"Save User"=="Benutzer speichern"
-"Set Access Rules"=="Zugriffsregeln setzen"
+Administrator username is required.==Der Administrator-Benutzername ist erforderlich.
+Administrator password is required.==Das Administrator-Passwort ist erforderlich.
+Default administrator password is active.==Das Standardpasswort des Administrators ist aktiv.
+This YaCy instance can still be administered with the username "admin" and the default password "yacy". Replace these credentials using the form directly below.==Diese YaCy-Instanz kann weiterhin mit dem Benutzernamen "admin" und dem Standardpasswort "yacy" administriert werden. Ersetzen Sie diese Zugangsdaten mit dem direkt darunter stehenden Formular.
+These credentials are used for remote administration and whenever administrative access from localhost without authentication is disabled.==Diese Zugangsdaten werden für die Fernadministration und immer dann verwendet, wenn der administrative Zugriff von localhost ohne Authentifizierung deaktiviert ist.
+If you need to reset the administrator password from the console, run bin/passwd.sh from the YaCy installation directory.==Wenn Sie das Administrator-Passwort über die Konsole zurücksetzen müssen, führen Sie bin/passwd.sh im YaCy-Installationsverzeichnis aus.
+Administrator Username:==Administrator-Benutzername:
+New Administrator Password:==Neues Administrator-Passwort:
+Repeat Administrator Password:==Administrator-Passwort wiederholen:
 Access Rules==Zugriffsregeln
-Change the password as soon as possible!==Ändern Sie das Passwort so bald wie möglich!
+Allow administrative access from localhost without authentication==Administrativen Zugriff von localhost ohne Authentifizierung erlauben
+When enabled, eligible requests from the same computer receive administrator rights without sending credentials.==Wenn diese Option aktiviert ist, erhalten berechtigte Anfragen vom selben Computer Administratorrechte, ohne Zugangsdaten zu senden.
+Require administrator authorization for all applicable pages==Administrator-Autorisierung für alle anwendbaren Seiten verlangen
+When disabled, administration pages whose names contain "_p" remain protected. When enabled, all applicable pages require administrator authorization.==Wenn diese Option deaktiviert ist, bleiben Administrationsseiten geschützt, deren Namen "_p" enthalten. Wenn sie aktiviert ist, erfordern alle anwendbaren Seiten eine Administrator-Autorisierung.
 #-----------------------------
 
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Bitte mit Vorsicht verwenden, besonders wenn Sie nicht vertrauenswürdige und potenziell bösartige Webseiten besuchen, während Ihr YaCy-Peer auf demselben Computer läuft.
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Schutz aller Seiten: Wenn eingeschaltet, erfordert der Zugriff auf alle Seiten eine Autorisierung; wenn ausgeschaltet, sind nur Seiten mit der Erweiterung "_p" geschützt.
-This setting is convenient but less secure than using a qualified admin account.==Diese Einstellung ist bequem, aber weniger sicher als die Verwendung eines qualifizierten Administratorkontos.
-Username already used (not allowed).==Benutzername bereits verwendet (nicht erlaubt).
 #File: ConfigAppearance_p.html
 #---------------------------
 Appearance and Integration==Erscheinungsbild und Integration
@@ -757,8 +691,6 @@ Status page==der Statusseite
 Network pages==der Netzwerkseiten
 Surftips==der Surftipps
 News pages==der News-Seiten
-Blog==des Blogs
-Wiki==des Wikis
 Public bookmarks==der öffentlichen Lesezeichen
 Home Page==der Home-Page
 File Share==des File-Shares
@@ -2086,7 +2018,6 @@ The information that is presented on this page can also be retrieved as XML.==Di
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
 Network Overview==Netzwerkübersicht
 Manually contacting Peer==Kontaktiere Peer manuell
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==Sende Nachricht (<strong>m</strong>)/<br/>Zeige Profil (<strong>p</strong>)/<br/>Ändere Wiki (<strong>w</strong>)/<br/>Durchsuche Blog (<strong>b</strong>)
 Search for a peername (RegExp allowed)==Suche nach Peernamen (RegExp erlaubt)
 "Search"=="Suche"
 Name==Name
@@ -2147,10 +2078,8 @@ green lines==grüne Linien
 Network History==Netzwerk Historie
 #-----------------------------
 
-"Blog updated"=="Blog aktualisiert"
 "Profile updated"=="Profil aktualisiert"
 "Type: Virgin"=="Typ: Virgin"
-"Wiki updated"=="Wiki aktualisiert"
 "add Peer"=="Peer hinzufügen"
 <b>Count of Connected Senior Peers</b> in the last two days, scale = 1h==<b>Anzahl verbundener Senior-Peers</b> in den letzten zwei Tagen, Skalierung = 1h
 <b>Count of all Active Peers Per Day</b> in the last week, scale = 1d==<b>Anzahl aller aktiven Peers pro Tag</b> in der letzten Woche, Skalierung = 1d
@@ -2244,7 +2173,6 @@ Attributes==Attribute
 "Outgoing News"=="Ausgehende Nachrichten"
 "Processed News"=="Verarbeitete Nachrichten"
 "Published News"=="Veröffentlichte Nachrichten"
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==Veröffentlichung einer hinzugefügten oder geänderten Übersetzung der Benutzeroberfläche. Andere Peers können sie in ihre lokale Übersetzungsliste aufnehmen.
 #-----------------------------
 
 #File: Performance_p.html
@@ -2713,14 +2641,9 @@ Proxy Access Settings==Proxyzugangs Einstellungen
 These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
 All traffic is routed through one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, für beides (Proxy und Server).
 Server Access Restrictions==Server Zugangsbeschränkungen
-You can restrict the access to this proxy/server using a two-stage security barrier:==Sie können den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschränken:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==geben Sie einen <em>Netzwerkadressraum</em> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
-define an <em>user account</em> with an user:password - pair==geben Sie einen <em>Nutzeraccount</em> mit einem nutzer:passwort-Paar an
-This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gewährt wird.
 You probably don't want to share the proxy to the internet, so you should set the==Sie wollen den Proxy vermutlich nicht im Internet zur Verfügung stellen, deshalb sollten Sie
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Die Standardwerte sollten in den meisten Fällen richtig sein. Wenn Sie wollen können Sie auch Proxyaccounts erstellen
-so that every proxy user must authenticate first, but this is rather unusual.==, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher unüblich.
 IP-Number filter==IP-Adressen Filter
 #-----------------------------
 
@@ -3237,44 +3160,6 @@ YaCy Debugging: Thread Dump==YaCy Debug: Thread Dump
 Threaddump==Threaddump
 #-----------------------------
 
-#File: Translator_p.html
-#---------------------------
-Translation Editor==Übersetzungseditor
-UI Translation==Übersetzung Benutzeroberfläche
-Source File==Quelldatei
-view it==Datei anzeigen
-filter untranslated==filter unübersetztes
-Source Text==Quelltext
-"Save translation"=="Übersetzung speichern"
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==Unübersetzten Text der Benutzeroberfläche übersetzen (aktuelle Sprache). Die geänderte Übersetzungsdatei wird im Verzeichnis DATA/LOCALE gespeichert.
-#-----------------------------
-
-#File: User.html
-#---------------------------
-User Page==Benutzer Seite
-Username:==Benutzername:
-"login"=="anmelden"
-old Password==altes Passwort
-new Password(repetition)==neues Passwort (Wiederholung)
-"Change"=="Ändern"
-You are currently logged in as admin.==Sie sind derzeit als Administrator angemeldet.
-(after logout you will be prompted for your password again. simply click "cancel")==(nach dem Abmelden werden Sie erneut nach dem Passwort gefragt. Klicken Sie einfach auf abbrechen)
-Password was changed.==Das Passwort wurde gewechselt.
-Old Password is wrong.==Das alte Passwort ist falsch.
-New Password and its repetition do not match.==Das neue Passwort und die Wiederholung stimmen nicht überein.
-New Password is empty.==Das neue Passwort ist leer.
-Cookie==Cookie
-"green bar"=="grüner Balken"
-"logout"=="Abmelden"
-"red bar"=="roter Balken"
-(Identified by==(Identifiziert durch
-IP==IP
-Password:==Passwort:
-Username/Password==Benutzername/Passwort
-You are not logged in.==Sie sind nicht angemeldet.
-new Password==neues Passwort
-#-----------------------------
-
 #File: ViewFile.html
 #---------------------------
 View URL Content==Zeige URL Inhalte
@@ -3463,41 +3348,9 @@ size==Größe
 time==Zeit
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-Grant Write Access to==Erlaube es folgenden Benutzern das Wiki zu bearbeiten
-# !!! Do not translate the input buttons because that breaks the function to switch rights !!!
-"all"=="Allen"
-"admin"=="Administrator"
-Start Page==Startseite
-Versions==Versionen
-Author:==Autor:
-You can use==Sie können hier
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
-No changes have been submitted so far!==Es wurden noch keine Änderungen übertragen!
-Subject==Titel
-Change Date==Änderungsdatum
-Last Author==Letzter Autor
-Compare version from==Vergleiche Version vom
-"Show"=="Anzeigen"
-with version from==mit Version vom
-"Compare"=="Vergleichen"
-Changes will be published as announcement on YaCyNews==Änderungen werden über den YaCy News Service bekannt gegeben.
-Edit==Bearbeiten
-Preview==Vorschau
-(only granted to admin)==(nur für Admin erlaubt)
-Error==Fehler
-Index -==Index -
-#-----------------------------
-
-Index==Index
-Text:==Text:
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==Wiki-Befehle
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle enthält eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen
 of YaCy. For a more detailed description visit the==in YaCy benutzt werden können. Für eine detailliertere Beschreibung besuchen Sie bitte das
 Description==Beschreibung
 These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meisten Browser zeigen die Texte kursiv),
@@ -3507,7 +3360,6 @@ These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
 These tags create an unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
 These tags create a definition list.==Diese Tags erstellen eine definierte Liste.
 This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
-This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag fügt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
 This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.==Dieser Tag fügt ein Youtube oder Vimeo Video mit der angegeben id und einer fixen Höhe von 425 Pixeln und einer fixen Breite von 350 Pixeln ein.
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt
@@ -3826,7 +3678,6 @@ Processed&nbsp;News==Verarbeitete&nbsp;Nachrichten
 Outgoing&nbsp;News==Ausgehende&nbsp;Nachrichten
 Published&nbsp;News==Veröffentlichte&nbsp;Nachrichten
 Community Data==Community-Daten
-Local Peer Wiki==Lokales Peer-Wiki
 Processes==Prozesse
 Messages==Nachrichten
 Overview==Übersicht
@@ -3844,7 +3695,6 @@ Surftips==Surftipps
 System Administration==System Administration
 Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweiterte Konfiguration
-UI Translations==UI-Übersetzungen
 #-----------------------------
 
 Performance Settings of Busy Queues==Performance-Einstellungen beschäftigter Queues
@@ -3916,13 +3766,6 @@ Crawler/Spider==Crawler/Spider
 Network Harvesting==Network Harvesting
 #-----------------------------
 
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==Veröffentlichung
-#-----------------------------
-
-Blog==Blog
-Wiki==Wiki
 #File: env/templates/submenuRanking.template
 #---------------------------
 Ranking and Heuristics==Ranking und Heuristiken
@@ -3963,14 +3806,6 @@ Image Collage==Bilder Collage
 #-----------------------------
 
 Index Browser==Index-Browser
-#File: proxymsg/authfail.inc
-#---------------------------
-Your Username/Password is wrong.==Benutzername/Passwort waren falsch.
-"login"=="Anmelden"
-Password==Passwort
-Username==Benutzername
-#-----------------------------
-
 #File: proxymsg/error.html
 #---------------------------
 YaCy: Error Message==YaCy: Fehlermeldung
@@ -4539,42 +4374,6 @@ Thread:==Thread:
 "Stop"=="Stopp"
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User Accounts==Benutzerkonten
-User List==Benutzerliste
-#-----------------------------
-
-Address==Adresse
-First name==Vorname
-Last Access==Letzter Zugriff
-Last name==Nachname
-Rights==Rechte
-Time==Zeit
-Traffic==Traffic
-User==Benutzer
-#File: ConfigUser_p.html
-#---------------------------
-Username too short. Username must be &gt;= 4 Characters.==Benutzername zu kurz. Benutzername muss &gt;= 4 Zeichen lang sein.
-Username already used (not allowed).==Benutzername bereits vergeben (nicht erlaubt).
-Passwords do not match.==Passwörter stimmen nicht überein.
-User Account Editor==Benutzerkonten-Editor
-back to user list==zurück zur Benutzerliste
-Generic error.==Allgemeiner Fehler.
-Rights:==Rechte:
-"Delete User"=="Benutzer löschen"
-"Save User"=="Benutzer speichern"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-#-----------------------------
-
-Address==Adresse
-First name==Vorname
-Last name==Nachname
-Password==Passwort
-Repeat password==Passwort wiederholen
-Time used==Verbrauchte Zeit
-Timelimit==Zeitlimit
-Username==Benutzername
 #File: ContentAnalysis_p.html
 #---------------------------
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==Die quantRate ist ein Maß für die Anzahl der Wörter, die an einer Signaturberechnung teilnehmen. Je höher die Zahl, desto weniger
@@ -4608,11 +4407,6 @@ Start Time==Startzeit
 Start URL==Start-URL
 #File: SearchAccessRate_p.html
 #---------------------------
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, ist die Ergebnis-Neusortierung nur noch auf Anfrage, serverseitig verfügbar.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, wird der Suchbereich auf nur diesen lokalen Peer-Index zurückgesetzt.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, wird die Snippet-Abrufstrategie auf 'CACHEONLY' zurückgesetzt
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==Hier können Sie Beschränkungen der Zugriffsrate auf die Suchschnittstelle dieses Peers für nicht authentifizierte Benutzer und Benutzer ohne erweitertes Suchrecht konfigurieren
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==Wenn ein Benutzer mit eingeschränkten Rechten (nicht authentifiziert oder ohne erweitertes Suchrecht) ein Limit überschreitet, wird die Suche blockiert.
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==Zugriffsraten-Beschränkungen für den Peer-to-Peer-Suchmodus mit aktivierter browserseitiger JavaScript-Ergebnis-Neusortierung
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">Änderungen werden sofort wirksam.</em>
 Access rate limitations to the peer-to-peer search mode.==Zugriffsraten-Beschränkungen für den Peer-to-Peer-Suchmodus.
@@ -4637,18 +4431,6 @@ YaCy search==YaCy-Suche
 #File: Trails.html
 #---------------------------
 CyTag Trails==CyTag-Spuren
-#-----------------------------
-
-#File: TransNews_p.html
-#---------------------------
-You can share your local addition to translations and distribute it to other peers.==Sie können Ihre lokale Ergänzung zu Übersetzungen teilen und an andere Peers verteilen.
-Translation:==Übersetzung:
-English:==Englisch:
-existing==vorhanden
-"negative vote"=="Negative Bewertung"
-"positive vote"=="Positive Bewertung"
-Originator==Initiator
-Vote on this translation. If you vote positive the translation is added to your local translation list.==Über diese Übersetzung abstimmen. Wenn Sie positiv abstimmen, wird die Übersetzung zu Ihrer lokalen Übersetzungsliste hinzugefügt.
 #-----------------------------
 
 File:==Datei:

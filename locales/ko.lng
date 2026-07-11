@@ -327,54 +327,6 @@ An error occurred while editing the following entries. Please check syntax.==다
 Activate this list for ...==이 목록을 활성화하세요...
 #-----------------------------
 
-#File: Blog.html
-#---------------------------
-"RSS"=="RSS"
-"Submit"=="제출하다"
-"Preview"=="시사"
-"Discard"=="버리다"
-"Yes, delete it."=="예, 삭제하세요."
-"No, leave it."=="아니, 놔둬."
-"Import"=="수입"
-&lt;&lt; previous entries==&lt;&lt; 이전 항목
-next entries &gt;&gt;==다음 항목 &gt;&gt;
-Blog-Home==블로그 홈
-Edit==편집하다
-Author:==작가:
-Subject:==주제:
-Text:==텍스트:
-Comments:==댓글:
-deactivated==비활성화됨
-activated==활성화됨
-moderated==중재된
-Preview==시사
-No changes have been submitted so far!==지금까지 제출된 변경사항이 없습니다.
-Access denied==접근 불가
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==블로그 항목을 편집하거나 생성하려면 블로그 권한이 있는 관리자 또는 사용자로 로그인해야 합니다.
-Are you sure...==확실합니까?
-Confirm deletion==삭제 확인
-XML-Import==XML-가져오기
-Import was successful!==가져오기에 성공했습니다!
-Import failed, maybe the supplied file was no valid blog-backup?==가져오기에 실패했습니다. 제공된 파일이 유효한 블로그 백업이 아니었을까요?
-Please select the XML-file you want to import:==가져오려는 XML 파일을 선택하십시오:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-"Submit"=="제출하다"
-"Preview"=="시사"
-"Discard"=="버리다"
-Blog-Home==블로그 홈
-Comments:==댓글:
-&lt;&lt; previous entries==&lt;&lt; 이전 항목
-next entries &gt;&gt;==다음 항목 &gt;&gt;
-Comments are not allowed for this posting!==이 게시물에는 댓글을 달 수 없습니다!
-Comment on this Blog==이 블로그에 댓글 달기
-Author:==작가:
-Subject:==주제:
-Text:==텍스트:
-#-----------------------------
-
 #File: Bookmarks.html
 #---------------------------
 "RSS"=="RSS"
@@ -442,58 +394,10 @@ Private Queue==개인 대기열
 Public Queue==공개 대기열
 #-----------------------------
 
-#File: ConfigAccountList_p.html
-#---------------------------
-User List==사용자 목록
-User Accounts==사용자 계정
-User==사용자
-First name==이름
-Last name==성
-Address==주소
-Last Access==마지막 액세스
-Rights==진상
-Time==시간
-Traffic==교통
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
-"Define Administrator"=="관리자 정의"
-"Set Access Rules"=="액세스 규칙 설정"
-"Edit User"=="사용자 편집"
-"Delete User"=="사용자 삭제"
-"Save User"=="사용자 저장"
-User Administration==사용자 관리
-Generic error.==일반 오류입니다.
 Passwords do not match.==비밀번호가 일치하지 않습니다.
-Username too short. Username must be &gt;= 4 Characters.==사용자 이름이 너무 짧습니다. 사용자 이름은 &gt;= 4자여야 합니다.
-Username already used (not allowed).==사용자 이름이 이미 사용되었습니다(허용되지 않음).
-<b>WARNING</b> This YaCy instance can be administered with the account "admin" and the default password "yacy".==<b>WARNING</b> 이 YaCy 인스턴스는 "admin" 계정과 기본 비밀번호 "yacy"로 관리할 수 있습니다.
-Change the password as soon as possible!==최대한 빨리 비밀번호를 변경하세요!
 Admin Account==관리자 계정
-Access from localhost without account==계정 없이 localhost에서 액세스
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==자신의 컴퓨터에서 피어에 대한 액세스(localhost 액세스)는 관리자 권한으로 부여됩니다. 관리 계정을 구성할 필요가 없습니다.
-This setting is convenient but less secure than using a qualified admin account.==이 설정은 편리하지만 자격을 갖춘 관리자 계정을 사용하는 것보다 보안 수준이 낮습니다.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==특히 동일한 컴퓨터에서 YaCy 피어를 실행하는 동안 신뢰할 수 없고 잠재적으로 악의적인 웹 사이트를 탐색할 때는 주의해서 사용하십시오.
-Access only with qualified account==자격을 갖춘 계정으로만 액세스
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==이는 피어에 대한 원격 액세스를 원하는 경우에 필요하지만 피어의 관리 작업에 대한 액세스 제어도 강화됩니다.
-Peer User:==피어 사용자:
-New Peer Password:==새 피어 비밀번호:
-Repeat Peer Password:==피어 비밀번호 반복:
-Access Rules==액세스 규칙
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==모든 페이지 보호: 켜져 있는 경우 모든 페이지에 액세스하려면 승인이 필요합니다. 끄면 확장자가 "_p"인 페이지만 보호됩니다.
-User Accounts==사용자 계정
-Select user==사용자 선택
-New user==신규 사용자
-Username==사용자 이름
-Password==비밀번호
-Repeat password==비밀번호를 반복하세요
-First name==이름
-Last name==성
-Address==주소
-Rights:==진상:
-Timelimit==시간 제한
-Time used==사용시간
 #-----------------------------
 
 #File: ConfigAppearance_p.html
@@ -871,8 +775,6 @@ Status page==상태 페이지
 Network pages==네트워크 페이지
 Surftips==서핑 팁
 News pages==뉴스 페이지
-Blog==블로그
-Wiki==위키
 Public bookmarks==공개 북마크
 Home Page==홈 페이지
 File Share==파일 공유
@@ -1030,28 +932,6 @@ Last Deploy==마지막 배포
 You installed YaCy with a package manager. To update YaCy, use the package manager:==패키지 관리자를 사용하여 YaCy을 설치했습니다. YaCy을 업데이트하려면 패키지 관리자를 사용하세요.
 manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==수동 업데이트:<br/>apt-get 업데이트 &amp;&amp; apt-get install yacy
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==자동 업데이트: /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy에 다음 줄을 추가합니다.
-#-----------------------------
-
-#File: ConfigUser_p.html
-#---------------------------
-"Save User"=="사용자 저장"
-"Delete User"=="사용자 삭제"
-"ConfigAccountList_p.html"=="ConfigAccountList_p.html"
-User Account Editor==사용자 계정 편집자
-Generic error.==일반 오류입니다.
-Passwords do not match.==비밀번호가 일치하지 않습니다.
-Username too short. Username must be &gt;= 4 Characters.==사용자 이름이 너무 짧습니다. 사용자 이름은 &gt;= 4자여야 합니다.
-Username already used (not allowed).==사용자 이름이 이미 사용되었습니다(허용되지 않음).
-Username==사용자 이름
-Password==비밀번호
-Repeat password==비밀번호를 반복하세요
-First name==이름
-Last name==성
-Address==주소
-Rights:==진상:
-Timelimit==시간 제한
-Time used==사용시간
-back to user list==사용자 목록으로 돌아가기
 #-----------------------------
 
 #File: Connections_p.html
@@ -2460,8 +2340,6 @@ inbox==받은편지함
 "DHT Receive: yes"=="DHT 수신: 예"
 "DHT receive enabled"=="DHT 수신 활성화됨"
 "Profile updated"=="프로필이 업데이트되었습니다."
-"Wiki updated"=="위키가 업데이트되었습니다."
-"Blog updated"=="블로그가 업데이트되었습니다."
 "Crawl"=="크롤링"
 "The YaCy Network"=="YaCy 네트워크"
 "Type: Virgin"=="유형: 초기"
@@ -2507,7 +2385,6 @@ Received DHT<br/>Word Chunks==DHT<br/>단어 덩어리를 받았습니다.
 Received<br/>URLs==<br/>URL 수신됨
 Location==위치
 user agent<br/>==사용자 에이전트<br/>
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log
 Network==회로망
 Online Peers==온라인 동료
 Number of<br/>Documents==<br/>문서 수
@@ -2578,7 +2455,6 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==최근에 시작된 크롤링이 포함된 테이블이 색인 생성 페이지에 표시됩니다.
 A change in the personal profile will create a news entry. You can see recently made changes of==개인 프로필을 변경하면 뉴스 항목이 생성됩니다. 최근에 변경된 내용을 볼 수 있습니다.
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==네트워크 페이지의 프로필 항목에서 해당 프로필 변경 사항은 'P'(프로필) - 선택기 옆에 '*'로 시각화됩니다.
-Publishing of added or modified translation for the user interface. Other peers may include it in their local translation list.==사용자 인터페이스에 대한 추가 또는 수정된 번역을 게시합니다. 다른 동료는 이를 로컬 번역 목록에 포함할 수 있습니다.
 More news services will follow.==더 많은 뉴스 서비스가 이어질 것입니다.
 Above you can see four menus:==위에서는 4가지 메뉴를 볼 수 있습니다.
 Only these news will be used to display specific news services as explained above.==위에서 설명한 대로 특정 뉴스 서비스를 표시하는 데 이러한 뉴스만 사용됩니다.
@@ -2984,23 +2860,18 @@ Age==나이
 "Reset to defaults settings"=="기본 설정으로 재설정"
 limitations==한계
 Local Search access rate limitations==지역 검색 액세스 속도 제한
-You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right==인증되지 않은 사용자와 확장 검색 권한이 없는 사용자의 이 피어 검색 인터페이스에 대한 액세스 속도 제한을 여기에서 구성할 수 있습니다.
 YaCy search==YaCy 검색
 Access rate limitations to this peer search interface.==이 피어 검색 인터페이스에 대한 액세스 속도 제한입니다.
-When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.==제한된 권한을 가진 사용자(인증되지 않았거나 확장 검색 권한이 없는 사용자)가 한도를 초과하면 검색이 차단됩니다.
 Max searches in 3s==3초 만에 최대 검색
 Max searches in 1mn==최대 100만 검색
 Max searches in 10mn==1,000분 만에 최대 검색
 Peer-to-peer search==P2P 검색
 Access rate limitations to the peer-to-peer search mode.==P2P 검색 모드에 대한 액세스 속도 제한.
-When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.==제한된 권한(인증되지 않았거나 확장 검색 권한이 없음)을 가진 사용자가 제한을 초과하면 검색 범위는 이 로컬 피어 인덱스로만 대체됩니다.
 Max searches in	10mn==1,000분 만에 최대 검색
 Peer-to-peer search with JavaScript results	resorting==JavaScript 결과를 바탕으로 한 P2P 검색
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==브라우저 측 JavaScript 결과 재정렬이 활성화된 P2P 검색 모드에 대한 액세스 속도 제한
-When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==제한된 권한(인증되지 않았거나 확장된 검색 권한이 없음)을 가진 사용자가 한도를 초과하면 결과 정렬은 서버 측 요청 시에만 적용됩니다.
 Remote snippet load==원격 스니펫 로드
 Limitations on snippet loading from remote websites.==원격 웹사이트에서 스니펫 로딩에 대한 제한 사항.
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==제한된 권한(인증되지 않았거나 확장 검색 권한이 없음)을 가진 사용자가 한도를 초과하면 스니펫 가져오기 전략이 'CACHEONLY'로 대체됩니다.
 Max	searches in 3s==3초 만에 최대 검색
 <em id="changeInfo">Changes will take effect immediately.</em>==<em id="changeInfo">변경사항은 즉시 적용됩니다.</em>
 #-----------------------------
@@ -3225,14 +3096,9 @@ These settings configure the access method to your own http proxy and server.==�
 All traffic is routed through one single port, for both proxy and server.==모든 트래픽은 프록시와 서버 모두 하나의 단일 포트를 통해 라우팅됩니다.
 HTTPS Server Port:==HTTPS 서버 포트:
 Server Access Restrictions==서버 액세스 제한
-You can restrict the access to this proxy/server using a two-stage security barrier:==2단계 보안 장벽을 사용하여 이 프록시/server에 대한 액세스를 제한할 수 있습니다.
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==부여된 클라이언트 IP 번호 목록 또는 와일드카드를 사용하여 <em>액세스 도메인</em>을 정의합니다.
-define an <em>user account</em> with an user:password - pair==사용자:비밀번호 - 쌍으로 <em>사용자 계정</em>을 정의합니다.
-This is the account that restricts access to the proxy function.==프록시 기능에 대한 접근을 제한하는 계정입니다.
 You probably don't want to share the proxy to the internet, so you should set the==프록시를 인터넷에 공유하고 싶지 않을 수도 있으므로 다음을 설정해야 합니다.
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP-액세스 도메인 번호를 로컬 인트라넷에 해당하는 패턴으로 지정합니다.
-The default setting should be right in most cases. If you want, you can also set a proxy account==대부분의 경우 기본 설정이 정확해야 합니다. 원하는 경우 프록시 계정을 설정할 수도 있습니다.
-so that every proxy user must authenticate first, but this is rather unusual.==모든 프록시 사용자가 먼저 인증해야 하지만 이는 다소 드문 일입니다.
 IP-Number filter==IP-숫자 필터
 Accounts==계정
 #-----------------------------
@@ -3623,59 +3489,6 @@ Save Tools Configuration==도구 구성 저장
 CyTag Trails==CyTag 트레일
 #-----------------------------
 
-#File: TransNews_p.html
-#---------------------------
-"Publish"=="게시"
-"negative vote"=="반대 투표"
-"positive vote"=="긍정적인 투표"
-You can share your local addition to translations and distribute it to other peers.==번역에 대한 로컬 추가 내용을 공유하고 다른 동료에게 배포할 수 있습니다.
-The remote peer can vote on your translation and add it to its own local translation.==원격 피어는 귀하의 번역에 투표하고 이를 자체 로컬 번역에 추가할 수 있습니다.
-File:==파일:
-Originator==창작자
-English:==영어:
-existing==기존의
-Translation:==번역:
-Vote on this translation. If you vote positive the translation is added to your local translation list.==이 번역에 투표하세요. 긍정적으로 투표하시면 해당 번역이 로컬 번역 목록에 추가됩니다.
-#-----------------------------
-
-#File: Translator_p.html
-#---------------------------
-"Save translation"=="번역 저장"
-Translation Editor==번역 편집자
-Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.==사용자 인터페이스(현재 언어)의 번역되지 않은 텍스트를 번역합니다. 수정된 번역 파일은 DATA/LOCALE 디렉터리에 저장됩니다.
-UI Translation==UI 번역
-Source File==소스 파일
-view it==보기
-filter untranslated==번역되지 않은 필터
-Source Text==소스 텍스트
-#-----------------------------
-
-#File: User.html
-#---------------------------
-"login"=="로그인"
-"logout"=="로그아웃"
-"red bar"=="빨간색 막대"
-"green bar"=="녹색 바"
-"Change"=="변화"
-User Page==사용자 페이지
-You are not logged in.==로그인되어 있지 않습니다.
-Username:==사용자 이름:
-Password:==비밀번호:
-(Identified by==(식별자:
-IP==IP
-Username/Password==사용자 이름/Password
-Cookie==매력적인 여자
-old Password==이전 비밀번호
-new Password==새 비밀번호
-new Password(repetition)==새 비밀번호(반복)
-You are currently logged in as admin.==현재 관리자로 로그인되어 있습니다.
-(after logout you will be prompted for your password again. simply click "cancel")==(로그아웃하면 비밀번호를 다시 입력하라는 메시지가 표시됩니다. 간단히 "취소"를 클릭하세요)
-Password was changed.==비밀번호가 변경되었습니다.
-Old Password is wrong.==이전 비밀번호가 잘못되었습니다.
-New Password and its repetition do not match.==새 비밀번호와 반복된 비밀번호가 일치하지 않습니다.
-New Password is empty.==새 비밀번호가 비어 있습니다.
-#-----------------------------
-
 #File: VFS.html
 #---------------------------
 "File system browser"=="파일 시스템 브라우저"
@@ -3879,40 +3692,9 @@ Other Dot==기타 도트
 Dot-end==도트엔드
 #-----------------------------
 
-#File: Wiki.html
-#---------------------------
-"all"=="모두"
-"admin"=="관리자"
-"Submit"=="제출하다"
-"Preview"=="시사"
-"Discard"=="버리다"
-"Show"=="보여주다"
-"Compare"=="비교하다"
-(only granted to admin)==(관리자에게만 부여됨)
-Index -==색인 -
-Grant Write Access to==다음에 대한 쓰기 액세스 권한 부여
-Edit==편집하다
-Author:==작가:
-Text:==텍스트:
-Preview==시사
-No changes have been submitted so far!==지금까지 제출된 변경사항이 없습니다.
-Index==색인
-Subject==주제
-Change Date==날짜 변경
-Last Author==마지막 저자
-Start Page==시작 페이지
-Versions==버전
-Compare version from==버전 비교
-with version from==버전:
-Error==오류
-You can use==당신은 사용할 수 있습니다
-Changes will be published as announcement on YaCyNews==변경 사항은 YaCyNews에 공지로 게시됩니다.
-#-----------------------------
-
-#File: WikiHelp.html
+#File: WikiCodeHelp.html
 #---------------------------
 Wiki-Code==위키 코드
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==이 표에는 Wiki 및 기타 여러 서블릿에서 사용할 수 있는 태그에 대한 간단한 설명이 포함되어 있습니다.
 of YaCy. For a more detailed description visit the==YaCy 중. 더 자세한 설명을 보려면 다음을 방문하세요.
 Code==암호
 Description==설명
@@ -3937,7 +3719,6 @@ These tags create a definition list.==이러한 태그는 정의 목록을 생�
 This tag creates a horizontal line.==이 태그는 수평선을 생성합니다.
 [[pagename]]==[[페이지 이름]]
 [[pagename|description]]==[[페이지 이름|설명]]
-This tag creates links to other pages of the wiki.==이 태그는 위키의 다른 페이지에 대한 링크를 생성합니다.
 [url]==[URL]
 [url description]==[URL 설명]
 This tag creates links to external websites.==이 태그는 외부 웹사이트에 대한 링크를 생성합니다.
@@ -4262,7 +4043,6 @@ Outgoing&nbsp;News==발신&nbsp;뉴스
 Published&nbsp;News==게시됨&nbsp;뉴스
 Community Data==커뮤니티 데이터
 Surftips==서핑 팁
-Local Peer Wiki==로컬 피어 위키
 Bookmarks==북마크
 #-----------------------------
 
@@ -4273,7 +4053,6 @@ Advanced Settings==고급 설정
 Performance Settings of Busy Queues==사용 중인 대기열의 성능 설정
 Viewer and administration for database tables==데이터베이스 테이블 뷰어 및 관리
 Advanced Properties==고급 속성
-UI Translations==UI 번역
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4379,13 +4158,6 @@ Generic Search Portal==일반 검색 포털
 Search Box Anywhere==어디서나 검색창
 User Profile==사용자 프로필
 Local robots.txt==로컬 robots.txt
-#-----------------------------
-
-#File: env/templates/submenuPublication.template
-#---------------------------
-Publication==출판
-Wiki==위키
-Blog==블로그
 #-----------------------------
 
 #File: env/templates/submenuRanking.template
@@ -4532,14 +4304,6 @@ domaingraph : Built with Processing==domaingraph : 프로세싱으로 구축
 This browser does not have a Java Plug-in.==이 브라우저에는 Java 플러그인이 없습니다.
 Get the latest Java Plug-in here.==여기에서 최신 Java 플러그인을 다운로드하세요.
 Built with Processing==프로세싱으로 구축
-#-----------------------------
-
-#File: proxymsg/authfail.inc
-#---------------------------
-"login"=="로그인"
-Your Username/Password is wrong.==귀하의 사용자 이름/Password이(가) 잘못되었습니다.
-Username==사용자 이름
-Password==비밀번호
 #-----------------------------
 
 #File: proxymsg/error.html

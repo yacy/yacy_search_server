@@ -125,20 +125,4 @@ public class YaCyLegacyCredential extends Credential {
         return yc;
     }
 
-    /**
-     * create Credential object from password
-     *
-     * @param username
-     * @param configHash encodeMD5Hex("user:realm:pwd") as stored in UserDB
-     * @return
-     */
-    public static Credential getCredentialForUserDB(String username, String configHash) {
-        YaCyLegacyCredential yc = new YaCyLegacyCredential();
-        yc.c = Credential.getCredential(configHash); // creates a MD5 hash credential
-        yc.foruser = username;
-        yc.isBase64enc = false;
-        yc.hash = configHash;
-        return yc;
-    }
-
 }

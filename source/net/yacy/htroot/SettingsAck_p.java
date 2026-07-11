@@ -100,8 +100,8 @@ public class SettingsAck_p {
         }
 
 
-        // proxy password
-        if (post.containsKey("proxyaccount")) {
+        // proxy client access filter
+        if (post.containsKey("proxyaccess")) {
             // set backlink
             prop.put("needsRestart_referer", "Settings_p.html?page=ProxyAccess");
 
@@ -112,14 +112,8 @@ public class SettingsAck_p {
             prop.put("info_restart", "0");
 
             // read and process data
-            String filter = (post.get("proxyfilter")).trim();
-            final boolean useProxyAccounts = post.containsKey("use_proxyaccounts") && post.get("use_proxyaccounts").equals("on");
+            String filter = post.get("proxyfilter", "").trim();
             // do checks
-            if (filter == null) {
-                prop.put("info", "1");//error with submitted information
-                return prop;
-            }
-
             if (filter.isEmpty()) filter = "*";
             else if (!filter.equals("*")){
                 // testing proxy filter
@@ -142,17 +136,10 @@ public class SettingsAck_p {
                 }
             }
 
-            // check passed. set account:
+            // check passed: store the allowed proxy clients
             env.setConfig("proxyClient", filter);
-            env.setConfig("use_proxyAccounts", useProxyAccounts);
-            if (!useProxyAccounts){
-                prop.put("info", "6");//proxy account has changed(no pw)
-                prop.putHTML("info_filter", filter);
-			} else {
-                prop.put("info", "7");//proxy account has changed
-                //prop.put("info_user", user);
-                prop.putHTML("info_filter", filter);
-			}
+            prop.put("info", "6");
+            prop.putHTML("info_filter", filter);
             return prop;
         }
 

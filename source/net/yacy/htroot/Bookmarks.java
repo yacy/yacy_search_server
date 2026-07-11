@@ -53,7 +53,6 @@ import net.yacy.data.BookmarksDB;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.data.ListManager;
-import net.yacy.data.UserDB;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.http.servlets.YaCyDefaultServlet;
@@ -62,6 +61,7 @@ import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.AutoSearch;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -70,7 +70,6 @@ public class Bookmarks {
 
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
-	private static UserDB.Entry user = null;
 	private static boolean isAdmin = false;
 
 	final static int SORT_ALPHA = 1;
@@ -88,18 +87,15 @@ public class Bookmarks {
     	int start=0;
     	int display = 0;
     	String tagName = "";
-    	String username="";
+		String username="";
 
     	prop.clear();
     	sb = (Switchboard) env;
-    	user = sb.userDB.getUser(header);
-    	isAdmin = (sb.verifyAuthentication(header) || user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
+		isAdmin = sb.verifyAuthentication(header);
 
-    	// set user name
-    	if (user != null) {
-            username=user.getUserName();
-        } else if(isAdmin) {
-            username="admin";
+		// set user name
+		if(isAdmin) {
+            username=sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
         }
     	prop.putHTML("user", username);
 
@@ -163,10 +159,6 @@ public class Bookmarks {
                 if (bookmark != null) {
                     bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                     bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
-
-                    if (user!=null) {
-                        bookmark.setOwner(user.getUserName());
-                    }
 
                     if ("public".equals(post.get("public"))) {
                         bookmark.setPublic(true);

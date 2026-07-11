@@ -1,7 +1,6 @@
 package net.yacy.htroot;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.UserDB;
 import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.Formatter;
@@ -23,10 +22,7 @@ public class yacysearchlatestinfo {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        final boolean adminAuthenticated = sb.verifyAuthentication(header);
-		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-		final boolean authenticated = adminAuthenticated || userAuthenticated;
+        final boolean authenticated = sb.verifyAuthentication(header);
 
         // find search event
         final String eventID = post.get("eventID", "");

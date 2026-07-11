@@ -182,42 +182,6 @@ public class NewsPool {
 	 */
     public static final String CATEGORY_SURFTIPP_VOTE_ADD = "stippavt";
 
-    /* ------------------------------------------------------------------------
-     * WIKI related CATEGORIES
-     * ------------------------------------------------------------------------ */
-	/**
-	 * a wiki page was updated
-	 */
-	public static final String CATEGORY_WIKI_UPDATE = "wiki_upd";
-	/**
-	 * a wiki page das deleted
-	 */
-	private static final String CATEGORY_WIKI_DEL = "wiki_del";
-
-    /* ------------------------------------------------------------------------
-     * BLOG related CATEGORIES
-     * ------------------------------------------------------------------------ */
-	/**
-	 * a blog entry was added
-	 */
-	public static final String CATEGORY_BLOG_ADD = "blog_add";
-	/**
-	 * a blog page das deleted
-	 */
-	private static final String CATEGORY_BLOG_DEL = "blog_del";
-
-    /* ------------------------------------------------------------------------
-     * TRANSLATION related CATEGORIES
-     * ------------------------------------------------------------------------ */
-        /**
-        * a translation was added
-        */
-        public static final String CATEGORY_TRANSLATION_ADD = "transadd";
-        /**
-        * a vote on a translation
-        */
-        public static final String CATEGORY_TRANSLATION_VOTE_ADD = "transavt";
-
     /* ========================================================================
      * ARRAY of valid CATEGORIES
      * ======================================================================== */
@@ -253,20 +217,8 @@ public class NewsPool {
     	CATEGORY_BOOKMARK_VOTE_DEL,
 
     	// SURFTIPP related CATEGORIES
-    	CATEGORY_SURFTIPP_ADD,
-    	CATEGORY_SURFTIPP_VOTE_ADD,
-
-    	// WIKI related CATEGORIE
-    	CATEGORY_WIKI_UPDATE,
-    	CATEGORY_WIKI_DEL,
-
-    	// BLOG related CATEGORIES
-    	CATEGORY_BLOG_ADD,
-    	CATEGORY_BLOG_DEL,
-
-        // TRANSLATION related CATEGORIES
-        CATEGORY_TRANSLATION_ADD,
-        CATEGORY_TRANSLATION_VOTE_ADD
+        CATEGORY_SURFTIPP_ADD,
+        CATEGORY_SURFTIPP_VOTE_ADD
     };
     private static final Set<String> categories = new HashSet<String>();
     static {
@@ -447,8 +399,6 @@ public class NewsPool {
 
         String cat = record.category();
         switch (cat) {
-            case CATEGORY_WIKI_UPDATE:
-            case CATEGORY_BLOG_ADD:
             case CATEGORY_PROFILE_UPDATE:
                 if (duration > (3L * MILLISECONDS_PER_DAY)) {
                     return true;
@@ -463,12 +413,6 @@ public class NewsPool {
                     } catch (final NumberFormatException ee) {
                         return true;
                     }
-                }
-                break;
-            case CATEGORY_TRANSLATION_ADD:
-            case CATEGORY_TRANSLATION_VOTE_ADD:
-                if (duration > (7L * MILLISECONDS_PER_DAY)) {
-                    return true;
                 }
                 break;
             default:

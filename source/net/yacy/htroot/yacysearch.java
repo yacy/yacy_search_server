@@ -69,7 +69,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
-import net.yacy.data.UserDB;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Tokenizer;
 import net.yacy.http.servlets.TemplateProcessingException;
@@ -111,22 +110,11 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        String authenticatedUserName = null;
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
         final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || adminAuthenticated;
-
-        boolean extendedSearchRights = adminAuthenticated;
-        boolean bookmarkRights = false;
-        if (adminAuthenticated) {
-            authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-        } else {
-            final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-            if (user != null) {
-                extendedSearchRights = user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT);
-                authenticatedUserName = user.getUserName();
-                bookmarkRights = user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
-            }
-        }
+        final boolean extendedSearchRights = adminAuthenticated;
+        final String authenticatedUserName = adminAuthenticated
+                ? sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin") : null;
 
         final boolean localhostAccess = header.accessFromLocalhost();
         final String promoteSearchPageGreeting =
@@ -712,14 +700,14 @@ public class yacysearch {
 
           // if a bookmarks-button was hit, create new bookmark entry
             if (post != null && post.containsKey("bookmarkref")) {
-                if (!sb.verifyAuthentication(header) && !bookmarkRights) {
+                if (!adminAuthenticated) {
                     prop.authenticationRequired();
                     return prop;
                 }
                 //final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
                 final String urlstr = crypt.simpleDecode(post.get("bookmarkurl"));
                 if (urlstr != null) {
-                    final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, "admin");
+                    final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, authenticatedUserName);
                     if (bmk != null) {
                         bmk.setProperty(Bookmark.BOOKMARK_QUERY, querystring);
                         bmk.addTag("/search"); // add to bookmark folder

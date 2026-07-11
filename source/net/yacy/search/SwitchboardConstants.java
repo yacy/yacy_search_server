@@ -56,6 +56,8 @@ public final class SwitchboardConstants {
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
     public static final String ADMIN_ACCOUNT_All_PAGES      = "adminAccountAllPages";
     public static final String ADMIN_REALM                  = "adminRealm";
+    /** Servlet-container role assigned exclusively to the built-in administrator account. */
+    public static final String ADMIN_ACCOUNT_ROLE           = "adminRight";
 
     // server settings
     public static final String SERVER_PORT                  = "port"; // port for the http server
@@ -488,7 +490,7 @@ public final class SwitchboardConstants {
     /**
      * <p><code>public static final String <strong>WORK_PATH</strong> = "wordPath"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
-     * DBs containing "work" of the user are saved. Such include bookmarks, messages, wiki, blog</p>
+     * DBs containing "work" of the user are saved. Such include bookmarks and messages.</p>
      *
      */
     public static final String WORK_PATH                = "workPath";

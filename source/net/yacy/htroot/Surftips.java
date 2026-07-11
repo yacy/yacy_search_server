@@ -277,42 +277,6 @@ public class Surftips {
                 score = 5 + timeFactor(record.created());
             }
 
-            if (record.category().equals(NewsPool.CATEGORY_WIKI_UPDATE)) {
-                Seed seed = sb.peers.getConnected(record.originator());
-                if (seed == null) seed = sb.peers.getDisconnected(record.originator());
-                if (seed != null) {
-                	final Set<String> ips = seed.getIPs();
-                	if(!ips.isEmpty()) {
-                		url = seed.getPublicURL(ips.iterator().next(), false) + "/Wiki.html?page=" + record.attribute("page", "");
-                		entry = rowdef.newEntry(new byte[][]{
-                					UTF8.getBytes(url),
-                					UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
-                					UTF8.getBytes("Wiki Update: " + record.attribute("description", "")),
-                					UTF8.getBytes(record.id())
-                        	});
-                		score = 4 + timeFactor(record.created());
-                	}
-                }
-            }
-
-            if (record.category().equals(NewsPool.CATEGORY_BLOG_ADD)) {
-                Seed seed = sb.peers.getConnected(record.originator());
-                if (seed == null) seed = sb.peers.getDisconnected(record.originator());
-                if (seed != null) {
-                	final Set<String> ips = seed.getIPs();
-                	if(!ips.isEmpty()) {
-                		url = seed.getPublicURL(ips.iterator().next(), false) + "/Blog.html?page=" + record.attribute("page", "");
-                		entry = rowdef.newEntry(new byte[][]{
-                				UTF8.getBytes(url),
-                				UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
-                				UTF8.getBytes("Blog Entry: " + record.attribute("subject", "")),
-                				UTF8.getBytes(record.id())
-                        	});
-                		score = 4 + timeFactor(record.created());
-                	}
-                }
-            }
-
             // add/subtract votes and write record
             if (entry != null) {
                 try {
