@@ -12,5 +12,15 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/solr9-bridge-solr-core-9.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-solr-solrj-9.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-solr-scripting-9.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-jetty-client-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-jetty-http-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-jetty-io-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-jetty-util-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-http2-client-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-http2-common-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-http2-http-client-transport-9.4.58.v20250814.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

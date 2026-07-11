@@ -38,6 +38,10 @@
   <property name="lib" location="lib"/>
   <property name="libt" location="libt"/>
   <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
+  <property name="solr9.bridge.build" location="build/solr9-bridge"/>
+  <property name="solr9.bridge.input" location="${solr9.bridge.build}/input"/>
+  <property name="solr9.bridge.tool" location="${solr9.bridge.build}/tool"/>
+  <property name="solr9.bridge.tool.libs" location="${solr9.bridge.build}/tool-libs"/>
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
   <property name="test" location="test/java"/>
@@ -91,6 +95,8 @@
     -->
     <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="solr9-bridge" pathid="solr9.bridge.input.path" pattern="${solr9.bridge.input}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="solr9-bridge-tool" pathid="solr9.bridge.tool.path" pattern="${solr9.bridge.tool.libs}/[artifact]-[revision].[ext]" />
     <property name="target-resolve-already-run" value="true" />
   </target>
 
@@ -171,9 +177,36 @@
         <pathelement location="${build}" />
         <pathelement location="${lib}/J7Zip-modified-1.0.2.jar" />
         <path refid="compile.path" />
+        <fileset dir="${lib}" includes="solr9-bridge-*.jar" />
     </path>
 
-  <target name="compile-core" depends="init,resolve" description="compile YaCy core">
+  <target name="build-solr9-bridge" depends="init,resolve" description="build the private Solr 9.0 Jetty client island">
+    <delete dir="${solr9.bridge.tool}" failonerror="false"/>
+    <delete failonerror="false">
+      <fileset dir="${lib}" includes="solr9-bridge-*.jar,solr-core-9.0.0.jar,solr-solrj-9.0.0.jar,solr-scripting-9.0.0.jar,http2-*.jar" />
+    </delete>
+    <mkdir dir="${solr9.bridge.tool}"/>
+    <javac srcdir="test/jetty" destdir="${solr9.bridge.tool}"
+           includes="RelocateJettyPackages.java" includeantruntime="false"
+           release="${javacRelease}" encoding="UTF-8">
+      <classpath refid="solr9.bridge.tool.path"/>
+    </javac>
+    <path id="solr9.bridge.runtime.path">
+      <pathelement location="${solr9.bridge.tool}"/>
+      <path refid="solr9.bridge.tool.path"/>
+    </path>
+    <apply executable="${java.home}/bin/java" parallel="false" failonerror="true" dest="${lib}">
+      <arg value="-cp"/>
+      <arg pathref="solr9.bridge.runtime.path"/>
+      <arg value="net.yacy.test.jetty.RelocateJettyPackages"/>
+      <srcfile/>
+      <targetfile/>
+      <fileset dir="${solr9.bridge.input}" includes="*.jar"/>
+      <mapper type="glob" from="*" to="solr9-bridge-*"/>
+    </apply>
+  </target>
+
+  <target name="compile-core" depends="init,resolve,build-solr9-bridge" description="compile YaCy core">
     <!-- compile the core sources -->
     <echo message="project.class.path: ${toString:project.class.path}" />
     <javac srcdir="${src}/" destdir="${build}"
@@ -417,6 +450,7 @@
       <fileset dir="." includes="TEST-*" />
     </delete>
     <delete dir="test/DATA" failonerror="false"/>
+    <delete dir="${solr9.bridge.build}" failonerror="false"/>
   </target>
 
   <!-- run YaCy (needed for NetBeans4) -->

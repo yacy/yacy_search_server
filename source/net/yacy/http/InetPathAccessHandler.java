@@ -98,23 +98,14 @@ public class InetPathAccessHandler extends InetAccessHandler {
 	 */
 	protected void addPattern(final String pattern, final PathMappings<InetAddressSet> pathMappings)
 			throws IllegalArgumentException {
-		if (pattern != null && !pattern.isEmpty()) {
-			final int idx = pattern.indexOf('|');
-
-			final String addr = idx > 0 ? pattern.substring(0, idx) : pattern;
-			final String path = (idx > 0 && (pattern.length() > idx + 1)) ? pattern.substring(idx + 1) : "/*";
-
-			if (!addr.isEmpty()) {
-				final PathSpec pathSpec = PathSpec.from(path);
-				InetAddressSet addresses = pathMappings.get(pathSpec);
-				if (addresses == null) {
-					addresses = new InetAddressSet();
-					pathMappings.put(pathSpec, addresses);
-				}
-				addresses.add(addr);
-
-			}
+		final InetPathAccessRule rule = InetPathAccessRule.parse(pattern);
+		final PathSpec pathSpec = PathSpec.from(rule.pathPattern());
+		InetAddressSet addresses = pathMappings.get(pathSpec);
+		if (addresses == null) {
+			addresses = new InetAddressSet();
+			pathMappings.put(pathSpec, addresses);
 		}
+		addresses.add(rule.addressPattern());
 	}
 	
 	/**

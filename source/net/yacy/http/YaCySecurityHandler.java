@@ -25,13 +25,11 @@
 package net.yacy.http;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -47,7 +45,7 @@ import org.eclipse.jetty.server.Request;
  * and updates AccessTracker
  *
  * This is a thin adapter to the servlet container: the decision logic is in
- * the container neutral {@link AdminSecurity}.
+ * the container-neutral {@link AdminAccessPolicy} and {@link AdminSecurity}.
  */
 public class YaCySecurityHandler extends ConstraintSecurityHandler {
 
@@ -82,11 +80,11 @@ public class YaCySecurityHandler extends ConstraintSecurityHandler {
     public void handle(final String pathInContext, final Request baseRequest,
             final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
-        YaCyDigestCredential.setRequestClientIP(baseRequest.getRemoteAddr());
+        AdminAuthenticationContext.setSocketPeerIp(baseRequest.getRemoteAddr());
         try {
             super.handle(pathInContext, baseRequest, request, response);
         } finally {
-            YaCyDigestCredential.clearRequestClientIP();
+            AdminAuthenticationContext.clear();
         }
     }
 
@@ -109,30 +107,20 @@ public class YaCySecurityHandler extends ConstraintSecurityHandler {
         final String remoteip = request.getRemoteAddr();
         serverAccessTracker.track(remoteip, pathInContext);
 
-        final boolean protectedPage = AdminSecurity.isProtectedPath(pathInContext,
+        final AdminAccessPolicy policy = new AdminAccessPolicy(
                 sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false),
                 sb.isRobinsonMode() && !sb.isPublicRobinson(),
-                sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true));
-        if (!protectedPage) {
+                sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true),
+                sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false),
+                sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
+                sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+        final AdminAccessPolicy.Decision decision = policy.decide(pathInContext, remoteip,
+                request.getHeader(RequestHeader.REFERER), request.getHeader(RequestHeader.AUTHORIZATION));
+        if (decision == AdminAccessPolicy.Decision.PUBLIC) {
             return super.prepareConstraintInfo(pathInContext, request);
         }
-
-        String refererHost;
-        try {
-            refererHost = new MultiProtocolURL(request.getHeader(RequestHeader.REFERER)).getHost();
-        } catch (MalformedURLException e) {
-            refererHost = null;
-        }
-        if (AdminSecurity.isLocalhostAccess(remoteip, refererHost)) {
-            if (sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
-                return null;
-            }
-            // last chance to authorize using the admin from localhost
-            if (AdminSecurity.checkLocalhostLazyAuth(request.getHeader(RequestHeader.AUTHORIZATION),
-                    sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
-                    sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""))) {
-                return null;
-            }
+        if (decision == AdminAccessPolicy.Decision.LOCAL_BYPASS) {
+            return null;
         }
         RoleInfo roleinfo = new RoleInfo();
         roleinfo.setChecked(true); // RoleInfo.setChecked() : in Jetty this means - marked to have any security constraint

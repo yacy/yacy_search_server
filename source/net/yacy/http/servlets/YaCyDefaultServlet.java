@@ -29,6 +29,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
+import java.io.FilterOutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -57,15 +59,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.io.WriterOutputStream;
-import org.eclipse.jetty.server.InclusiveByteRange;
-import org.eclipse.jetty.util.MultiPartOutputStream;
-import org.eclipse.jetty.util.URIUtil;
-import org.eclipse.jetty.util.resource.Resource;
-
 import com.google.common.net.HttpHeaders;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -128,9 +121,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected ServletContext _servletContext;
     protected boolean _acceptRanges = true;
     protected boolean _dirAllowed = true;
-    protected Resource _resourceBase;
-    protected MimeTypes _mimeTypes;
+    protected ServletResource _resourceBase;
     protected String[] _welcomes;
+
+    private static final String METHOD_HEAD = "HEAD";
+    private static final String METHOD_POST = "POST";
+    private static final String HEADER_CONTENT_RANGE = "Content-Range";
+    private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+    private static final String HEADER_IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+    private static final String HEADER_REQUEST_RANGE = "Request-Range";
+    private static final String MIME_TEXT_HTML = "text/html";
+    private static final String MIME_TEXT_HTML_UTF8 = "text/html;charset=utf-8";
 
     protected File _htLocalePath;
     protected File _htDocsPath;
@@ -149,7 +150,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         this._servletContext = this.getServletContext();
 
-        this._mimeTypes = new MimeTypes();
         final String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
         if (tmpstr == null) {
             this._welcomes = HTTPDFileHandler.defaultFiles;
@@ -159,14 +159,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
         this._acceptRanges = this.getInitBoolean("acceptRanges", this._acceptRanges);
         this._dirAllowed = this.getInitBoolean("dirAllowed", this._dirAllowed);
 
-        Resource.setDefaultUseCaches(false); // caching is handled internally (prevent double caching)
+        Jetty9ServletResource.disableDefaultCaches(); // caching is handled internally (prevent double caching)
 
         final String rb = this.getInitParameter("resourceBase");
         try {
             if (rb != null) {
-                this._resourceBase = Resource.newResource(rb);
+                this._resourceBase = Jetty9ServletResource.from(rb);
             } else {
-                this._resourceBase = Resource.newResource(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
+                this._resourceBase = Jetty9ServletResource.from(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
             }
         } catch (final IOException e) {
             ConcurrentLog.severe("FILEHANDLER", "event=http.resource subsystem=http result=missing-resource-base reason=" + e.getMessage());
@@ -201,14 +201,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param pathInContext The path to find a resource for.
      * @return The resource to serve.
      */
-    public Resource getResource(final String pathInContext) {
-        Resource r = null;
+    public ServletResource getResource(final String pathInContext) {
+        ServletResource r = null;
         try {
             if (this._resourceBase != null) {
                 r = this._resourceBase.addPath(pathInContext);
             } else {
                 final URL u = this._servletContext.getResource(pathInContext);
-                r = Resource.newResource(u);
+                r = Jetty9ServletResource.from(u);
             }
 
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -249,10 +249,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
 
         String pathInContext =  pathInfo == null ? "/" : pathInfo; // this is the path of the resource in _resourceBase (= path within htroot respective htDocs)
-        final boolean endsWithSlash = pathInContext.endsWith(URIUtil.SLASH);
+        final boolean endsWithSlash = pathInContext.endsWith("/");
 
         // Find the resource
-        Resource resource = null;
+        ServletResource resource = null;
 
         try {
 
@@ -266,7 +266,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         hasClass = true;
                     } else {
                         final String pathofClass = pathInContext.substring(0, p) + ".class";
-                        final Resource classresource = this._resourceBase.addPath(pathofClass);
+                        final ServletResource classresource = this._resourceBase.addPath(pathofClass);
                         // Does a class resource exist?
                         if (classresource != null && classresource.exists() && !classresource.isDirectory()) {
                             hasClass = true;
@@ -281,7 +281,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
             	if (resource != null) resource.close();
-                resource = Resource.newResource(new File(this._htDocsPath, pathInContext));
+                resource = Jetty9ServletResource.from(new File(this._htDocsPath, pathInContext));
             }
 
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -301,7 +301,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     if (q != null && q.length() != 0) {
                         pathInContext += "?" + q;
                     }
-                    response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(this._servletContext.getContextPath(), pathInContext)));
+                    response.sendRedirect(response.encodeRedirectURL(addPaths(this._servletContext.getContextPath(), pathInContext)));
                 } else {
                     if (hasClass) { // this is a YaCy servlet, handle the template
                         this.handleTemplate(pathInfo, request, response);
@@ -379,7 +379,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
     private boolean shouldWrapBody(final HttpServletRequest request) {
         final String method = request.getMethod();
-        if (method == null || !HttpMethod.POST.asString().equalsIgnoreCase(method)) {
+        if (method == null || !METHOD_POST.equalsIgnoreCase(method)) {
             return false;
         }
         final String contentType = request.getContentType();
@@ -498,8 +498,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
             return null;
         }
         for (final String _welcome : this._welcomes) {
-            final String welcome_in_context = URIUtil.addPaths(pathInContext, _welcome);
-            final Resource welcome = this.getResource(welcome_in_context);
+            final String welcome_in_context = addPaths(pathInContext, _welcome);
+            final ServletResource welcome = this.getResource(welcome_in_context);
             if (welcome != null && welcome.exists()) {
                 return _welcome;
             }
@@ -510,15 +510,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* Check modification date headers.
      * send a 304 response instead of content if not modified since
      */
-    protected boolean passConditionalHeaders(final HttpServletRequest request, final HttpServletResponse response, final Resource resource)
+    protected boolean passConditionalHeaders(final HttpServletRequest request, final HttpServletResponse response, final ServletResource resource)
             throws IOException {
         try {
-            if (!request.getMethod().equals(HttpMethod.HEAD.asString())) {
+            if (!request.getMethod().equals(METHOD_HEAD)) {
 
-                final String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                final String ifms = request.getHeader(HEADER_IF_MODIFIED_SINCE);
                 if (ifms != null) {
 
-                    final long ifmsl = request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                    final long ifmsl = request.getDateHeader(HEADER_IF_MODIFIED_SINCE);
                     if (ifmsl != -1) {
                         if (resource.lastModified() / 1000 <= ifmsl / 1000) {
                             response.reset();
@@ -530,7 +530,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
                 // Parse the if[un]modified dates and compare to resource
-                final long date = request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
+                final long date = request.getDateHeader(HEADER_IF_UNMODIFIED_SINCE);
 
                 if (date != -1) {
                     if (resource.lastModified() / 1000 > date / 1000) {
@@ -552,7 +552,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------------- */
     protected void sendDirectory(final HttpServletRequest request,
             final HttpServletResponse response,
-            final Resource resource,
+            final ServletResource resource,
             final String pathInContext)
             throws IOException {
         if (!this._dirAllowed) {
@@ -560,7 +560,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             return;
         }
 
-        final String base = URIUtil.addEncodedPaths(request.getRequestURI(), URIUtil.SLASH);
+        final String base = addPaths(request.getRequestURI(), "/");
 
         final String dir = resource.getListHTML(base, pathInContext.length() > 1, request.getQueryString());
         if (dir == null) {
@@ -569,7 +569,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
 
         final byte[] data = dir.getBytes(StandardCharsets.UTF_8);
-        response.setContentType(MimeTypes.Type.TEXT_HTML_UTF_8.asString());
+        response.setContentType(MIME_TEXT_HTML_UTF8);
         response.setContentLength(data.length);
         response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
         response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 10000); // consider that directories are not modified that often
@@ -591,7 +591,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected void sendData(final HttpServletRequest request,
             final HttpServletResponse response,
             final boolean include,
-            final Resource resource,
+            final ServletResource resource,
             final Enumeration<String> reqRanges)
             throws IOException {
 
@@ -602,7 +602,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         try {
             out = response.getOutputStream();
         } catch (final IllegalStateException e) {
-            out = new WriterOutputStream(response.getWriter());
+            out = new CharacterOutputStream(response.getWriter());
         }
 
         // remove the last-modified field since caching otherwise does not work
@@ -629,14 +629,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         } else {
             // Parse the satisfiable ranges
-            final List<InclusiveByteRange> ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
+            final List<HttpByteRange> ranges = HttpByteRange.satisfiableRanges(reqRanges, content_length);
 
             //  if there are no satisfiable ranges, send 416 response
             if (ranges == null || ranges.isEmpty()) {
                 this.writeHeaders(response, resource, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
-                        InclusiveByteRange.to416HeaderRangeString(content_length));
+                response.setHeader(HEADER_CONTENT_RANGE,
+                        HttpByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out, 0, content_length);
                 out.close();
                 return;
@@ -645,11 +645,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
             //  if there is only a single valid range (must be satisfiable
             //  since were here now), send that range with a 216 response
             if (ranges.size() == 1) {
-                final InclusiveByteRange singleSatisfiableRange = ranges.iterator().next();
+                final HttpByteRange singleSatisfiableRange = ranges.iterator().next();
                 final long singleLength = singleSatisfiableRange.getSize();
                 this.writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
+                response.setHeader(HEADER_CONTENT_RANGE,
                         singleSatisfiableRange.toHeaderRangeString(content_length));
                 resource.writeTo(out, singleSatisfiableRange.getFirst(), singleLength);
                 out.close();
@@ -665,14 +665,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (mimetype == null) {
                 ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: Unknown mimetype for " + request.getRequestURI());
             }
-            final MultiPartOutputStream multi = new MultiPartOutputStream(out);
+            final MultipartByteRangeOutputStream multi = new MultipartByteRangeOutputStream(out);
             response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
             // If the request has a "Request-Range" header then we need to
             // send an old style multipart/x-byteranges Content-Type. This
             // keeps Netscape and acrobat happy. This is what Apache does.
             String ctp;
-            if (request.getHeader(HttpHeader.REQUEST_RANGE.asString()) != null) {
+            if (request.getHeader(HEADER_REQUEST_RANGE) != null) {
                 ctp = "multipart/x-byteranges; boundary=";
             } else {
                 ctp = "multipart/byteranges; boundary=";
@@ -686,7 +686,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             int length = 0;
             final String[] header = new String[ranges.size()];
             for (int i = 0; i < ranges.size(); i++) {
-                final InclusiveByteRange ibr = ranges.get(i);
+                final HttpByteRange ibr = ranges.get(i);
                 header[i] = ibr.toHeaderRangeString(content_length);
                 length +=
                         ((i > 0) ? 2 : 0)
@@ -700,7 +700,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setContentLength(length);
 
             for (int i = 0; i < ranges.size(); i++) {
-                final InclusiveByteRange ibr = ranges.get(i);
+                final HttpByteRange ibr = ranges.get(i);
                 multi.startPart(mimetype, new String[]{HeaderFramework.CONTENT_RANGE + ": " + header[i]});
 
                 final long start = ibr.getFirst();
@@ -731,10 +731,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     /* ------------------------------------------------------------ */
-    protected void writeHeaders(final HttpServletResponse response, final Resource resource, final long count) {
+    protected void writeHeaders(final HttpServletResponse response, final ServletResource resource, final long count) {
         if (response.getContentType() == null) {
             final String extensionmime;
-            if ((extensionmime = this._mimeTypes.getMimeByExtension(resource.getName())) != null) {
+            if ((extensionmime = this._servletContext.getMimeType(resource.getName())) != null) {
                 response.setContentType(extensionmime);
             }
         }
@@ -1035,7 +1035,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
                 this.updateRespHeadersForImages(target, response);
-                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
+                final String mimeType = Classification.ext2mime(targetExt, MIME_TEXT_HTML);
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -1150,7 +1150,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
                 templatePatterns.put("clientlanguage", localeSelection);
 
-                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
+                final String mimeType = Classification.ext2mime(targetExt, MIME_TEXT_HTML);
 
                 InputStream fis;
                 final long fileSize = targetLocalizedFile.length();
@@ -1239,7 +1239,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      */
     private void writeInputStream(final HttpServletResponse response, final String targetExt, final InputStream inStream)
             throws IOException {
-        final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
+        final String mimeType = Classification.ext2mime(targetExt, MIME_TEXT_HTML);
         response.setContentType(mimeType);
         response.setStatus(HttpServletResponse.SC_OK);
         final byte[] buffer = new byte[4096];
@@ -1369,6 +1369,179 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         } catch (final Exception ex) {
             ConcurrentLog.info("FILEHANDLER", ex.getMessage());
+        }
+    }
+
+    /** Join two servlet paths without depending on a container URI utility. */
+    private static String addPaths(final String first, final String second) {
+        if (first == null || first.isEmpty()) {
+            return second == null ? "" : second;
+        }
+        if (second == null || second.isEmpty()) {
+            return first;
+        }
+        final boolean firstEndsWithSlash = first.charAt(first.length() - 1) == '/';
+        final boolean secondStartsWithSlash = second.charAt(0) == '/';
+        if (firstEndsWithSlash && secondStartsWithSlash) {
+            return first + second.substring(1);
+        }
+        if (!firstEndsWithSlash && !secondStartsWithSlash) {
+            return first + '/' + second;
+        }
+        return first + second;
+    }
+
+    /** Equivalent of Jetty's WriterOutputStream default-charset behavior. */
+    private static final class CharacterOutputStream extends OutputStream {
+
+        private final Writer writer;
+        private final byte[] singleByte = new byte[1];
+
+        private CharacterOutputStream(final Writer writer) {
+            this.writer = writer;
+        }
+
+        @Override
+        public void write(final int value) throws IOException {
+            this.singleByte[0] = (byte) value;
+            this.write(this.singleByte);
+        }
+
+        @Override
+        public void write(final byte[] data, final int offset, final int length) throws IOException {
+            this.writer.write(new String(data, offset, length));
+        }
+
+        @Override
+        public void flush() throws IOException {
+            this.writer.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            this.writer.close();
+        }
+    }
+
+    /** Inclusive byte range parsed from an HTTP Range header. */
+    private static final class HttpByteRange {
+
+        private final long first;
+        private final long last;
+
+        private HttpByteRange(final long first, final long last) {
+            this.first = first;
+            this.last = last;
+        }
+
+        private long getFirst() {
+            return this.first;
+        }
+
+        private long getLast() {
+            return this.last;
+        }
+
+        private long getSize() {
+            return this.last - this.first + 1;
+        }
+
+        private String toHeaderRangeString(final long size) {
+            return "bytes " + this.first + '-' + this.last + '/' + size;
+        }
+
+        private static String to416HeaderRangeString(final long size) {
+            return "bytes */" + size;
+        }
+
+        private static List<HttpByteRange> satisfiableRanges(
+                final Enumeration<String> headers, final long size) {
+            final List<HttpByteRange> ranges = new java.util.ArrayList<>();
+            while (headers != null && headers.hasMoreElements()) {
+                final String header = headers.nextElement();
+                if (header == null || !header.regionMatches(true, 0, "bytes=", 0, 6)) {
+                    continue;
+                }
+                final String[] specifications = header.substring(6).split(",");
+                for (final String specification : specifications) {
+                    final HttpByteRange range = parse(specification.trim(), size);
+                    if (range != null) {
+                        ranges.add(range);
+                    }
+                }
+            }
+            return ranges;
+        }
+
+        private static HttpByteRange parse(final String specification, final long size) {
+            final int separator = specification.indexOf('-');
+            if (separator < 0 || size <= 0) {
+                return null;
+            }
+            try {
+                if (separator == 0) {
+                    final long suffixLength = Long.parseLong(specification.substring(1).trim());
+                    if (suffixLength <= 0) {
+                        return null;
+                    }
+                    return new HttpByteRange(Math.max(0, size - suffixLength), size - 1);
+                }
+                final long first = Long.parseLong(specification.substring(0, separator).trim());
+                if (first < 0 || first >= size) {
+                    return null;
+                }
+                final String lastText = specification.substring(separator + 1).trim();
+                final long last = lastText.isEmpty()
+                        ? size - 1
+                        : Math.min(Long.parseLong(lastText), size - 1);
+                return last < first ? null : new HttpByteRange(first, last);
+            } catch (final NumberFormatException e) {
+                return null;
+            }
+        }
+    }
+
+    /** Minimal multipart writer for HTTP byte-range responses. */
+    private static final class MultipartByteRangeOutputStream extends FilterOutputStream {
+
+        private static final byte[] CRLF = {'\r', '\n'};
+        private final String boundary = "yacy-" + java.util.UUID.randomUUID().toString();
+        private boolean firstPart = true;
+
+        private MultipartByteRangeOutputStream(final OutputStream output) {
+            super(output);
+        }
+
+        private String getBoundary() {
+            return this.boundary;
+        }
+
+        private void startPart(final String contentType, final String[] headers) throws IOException {
+            if (!this.firstPart) {
+                this.out.write(CRLF);
+            }
+            this.firstPart = false;
+            this.writeAscii("--" + this.boundary + "\r\n");
+            if (contentType != null) {
+                this.writeAscii(HeaderFramework.CONTENT_TYPE + ": " + contentType + "\r\n");
+            }
+            if (headers != null) {
+                for (final String header : headers) {
+                    this.writeAscii(header + "\r\n");
+                }
+            }
+            this.out.write(CRLF);
+        }
+
+        @Override
+        public void close() throws IOException {
+            this.out.write(CRLF);
+            this.writeAscii("--" + this.boundary + "--\r\n");
+            super.close();
+        }
+
+        private void writeAscii(final String value) throws IOException {
+            this.out.write(value.getBytes(StandardCharsets.ISO_8859_1));
         }
     }
 

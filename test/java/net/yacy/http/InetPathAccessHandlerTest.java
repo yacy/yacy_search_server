@@ -32,6 +32,18 @@ import org.junit.Test;
  */
 public class InetPathAccessHandlerTest {
 
+	@Test
+	public void testPortableRuleParsing() {
+		final InetPathAccessRule addressOnly = InetPathAccessRule.parse("192.168.1.0/24");
+		Assert.assertEquals("192.168.1.0/24", addressOnly.addressPattern());
+		Assert.assertEquals("/*", addressOnly.pathPattern());
+
+		final InetPathAccessRule addressAndPath = InetPathAccessRule.parse("127.0.0.1|/api/*");
+		Assert.assertEquals("127.0.0.1", addressAndPath.addressPattern());
+		Assert.assertEquals("/api/*", addressAndPath.pathPattern());
+		Assert.assertEquals("127.0.0.1|/api/*", addressAndPath.asJettyPattern());
+	}
+
 	/**
 	 * Check the handler allow the given ip/path pairs.
 	 *

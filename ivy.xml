@@ -4,6 +4,8 @@
     <!-- https://wrongnotes.blogspot.com/2014/02/simplest-explanation-of-ivy.html -->
     <conf name="compile" visibility="public"/>
     <conf name="test" visibility="public"/>
+    <conf name="solr9-bridge" visibility="private"/>
+    <conf name="solr9-bridge-tool" visibility="private"/>
   
   </configurations>
     <dependencies defaultconf="compile->default">
@@ -64,17 +66,31 @@
       <dependency org="org.apache.poi" name="poi" rev="5.5.1" />
       <dependency org="org.apache.poi" name="poi-scratchpad" rev="5.5.1" />
       
-      <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="compile->master"/>
-      <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="compile->master"/>
-      <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="compile->master" />
+      <!--
+        Solr is embedded and its Jetty-backed runner and HTTP/2 clients are not used directly by YaCy.
+        Keep Solr's Jetty 9 runtime family out of the embedded-server classpath so Jetty can
+        be migrated independently. The master configuration already omits transitives; the
+        explicit excludes preserve that boundary if the configuration mapping changes later.
+      -->
+      <dependency org="org.apache.solr" name="solr-core" rev="9.0.0" conf="solr9-bridge->master">
+        <exclude org="org.eclipse.jetty" module="*"/>
+        <exclude org="org.eclipse.jetty.http2" module="*"/>
+      </dependency>
+      <dependency org="org.apache.solr" name="solr-scripting" rev="9.0.0" conf="solr9-bridge->master">
+        <exclude org="org.eclipse.jetty" module="*"/>
+        <exclude org="org.eclipse.jetty.http2" module="*"/>
+      </dependency>
+      <dependency org="org.apache.solr" name="solr-solrj" rev="9.0.0" conf="solr9-bridge->master">
+        <exclude org="org.eclipse.jetty" module="*"/>
+        <exclude org="org.eclipse.jetty.http2" module="*"/>
+      </dependency>
       <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.9.5" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.84" />
       <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="7.2.1" />
-      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.58.v20250814" />
-      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.58.v20250814" conf="compile->master" />
-      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.58.v20250814" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.58.v20250814"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.58.v20250814" conf="compile->default;solr9-bridge->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-io" rev="9.4.58.v20250814" conf="compile->default;solr9-bridge->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
       <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.58.v20250814"/>
       <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.58.v20250814"/>
       <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.58.v20250814"/>
@@ -82,11 +98,17 @@
       <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.58.v20250814">
         <exclude module="jetty-util-ajax" />
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.58.v20250814"  />
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.58.v20250814" conf="compile->default;solr9-bridge->master" />
       <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.58.v20250814"  />
-      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.58.v20250814" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.58.v20250814" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.58.v20250814" conf="compile->master"/>
+      <!--
+        Temporary Solr 9.0 runtime bridge: CoreContainer eagerly constructs an
+        Http2SolrClient for its shard/update handlers even in standalone mode.
+        YaCy source must not use these clients. Remove this Jetty 9 island only
+        after the relocated Solr 9.0 bridge replaces these unrelocated jars.
+      -->
+      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
       <dependency org="org.jsoup" name="jsoup" rev="1.22.2"  />
       <dependency org="org.jwat" name="jwat-warc" rev="1.2.1">
         <exclude module="bcprov-jdk15to18" />
@@ -104,6 +126,9 @@
 
       <dependency org="junit" name="junit" rev="4.13.2" conf="test->default"/>
       <dependency org="org.hamcrest" name="hamcrest-core" rev="3.0" conf="test->default"/>
+      <!-- Build-time bytecode relocation for the private Solr 9.0 Jetty client island. -->
+      <dependency org="org.ow2.asm" name="asm" rev="9.9" conf="solr9-bridge-tool->master"/>
+      <dependency org="org.ow2.asm" name="asm-commons" rev="9.9" conf="solr9-bridge-tool->master"/>
       <dependency org="com.github.luben" name="zstd-jni" rev="1.5.7-11"></dependency>
       <dependency org="ai.djl" name ="api" rev="0.36.0"></dependency>
     </dependencies>

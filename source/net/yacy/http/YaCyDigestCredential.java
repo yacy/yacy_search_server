@@ -24,7 +24,6 @@
 
 package net.yacy.http;
 
-import net.yacy.cora.protocol.Domains;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
@@ -45,43 +44,6 @@ import org.eclipse.jetty.util.security.Credential;
 public class YaCyDigestCredential extends Credential {
 
     private static final long serialVersionUID = -3527894085562480001L;
-
-    /**
-     * True socket peer IP of the request currently being authenticated on this thread.
-     * <p>
-     * Jetty's {@link Credential#check(Object)} API does not hand over the request, so the
-     * credential can not tell on its own whether a request comes from localhost. The
-     * {@link YaCySecurityHandler} therefore publishes the request's socket peer IP here for
-     * the duration of the request (set at the start of handling, cleared in a finally block).
-     * This replaces the former global "recent localhost access" timestamp, which was a
-     * process-wide value not bound to the request being checked.
-     */
-    private static final ThreadLocal<String> REQUEST_CLIENT_IP = new ThreadLocal<String>();
-
-    /**
-     * Publish the socket peer IP of the request being authenticated on the current thread.
-     * Must be paired with {@link #clearRequestClientIP()} in a finally block.
-     * @param ip the true socket peer IP (never an X-Real-IP derived address)
-     */
-    public static void setRequestClientIP(final String ip) {
-        REQUEST_CLIENT_IP.set(ip);
-    }
-
-    /**
-     * Remove the request client IP published for the current thread.
-     */
-    public static void clearRequestClientIP() {
-        REQUEST_CLIENT_IP.remove();
-    }
-
-    /**
-     * @return true when the request currently authenticated on this thread comes from
-     *         localhost. Fails closed (returns false) when no request IP was published.
-     */
-    private static boolean isRequestFromLocalhost() {
-        final String ip = REQUEST_CLIENT_IP.get();
-        return ip != null && Domains.isLocalhost(ip);
-    }
 
     private String hash; // remember password hash, either MD5(Base64(user:pwd)) or with encryption prefix "MD5:" + MD5(user:realm:pwd)
     private String foruser; // remember the user as YaCy credential is username:pwd (not just pwd)
@@ -108,14 +70,11 @@ public class YaCyDigestCredential extends Credential {
             //
             // We must therefore know whether THIS request comes from localhost. Jetty's
             // Credential.check() is not given the request, so YaCySecurityHandler publishes
-            // the request's true socket peer IP into REQUEST_CLIENT_IP for the duration of the
-            // request (see the detailed rationale on YaCySecurityHandler.handle()); we read it
-            // back here. Using the socket peer - not the spoofable X-Real-IP header - keeps
-            // this exception restricted to genuine local callers.
+            // the true socket peer IP through AdminAuthenticationContext for this request.
             return AdminSecurity.checkAdminPassword(this.foruser, this.hash,
                     sb.getConfig(SwitchboardConstants.ADMIN_REALM, ""),
                     sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
-                    isRequestFromLocalhost(),
+                    AdminAuthenticationContext.isLocalhostRequest(),
                     (String) credentials);
         }
         throw new UnsupportedOperationException();

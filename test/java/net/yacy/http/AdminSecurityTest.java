@@ -106,4 +106,41 @@ public class AdminSecurityTest {
         // a request from localhost referred by a remote page is not a localhost access
         Assert.assertFalse(AdminSecurity.isLocalhostAccess("127.0.0.1", "example.org"));
     }
+
+    /** Test the complete request-level policy used by the container adapter. */
+    @Test
+    public void testAdminAccessPolicy() {
+        final String user = "admin";
+        final String hash = AdminSecurity.calcHash(user + ":secret");
+        final AdminAccessPolicy localAllowed = new AdminAccessPolicy(
+                false, false, true, true, user, hash);
+
+        Assert.assertEquals(AdminAccessPolicy.Decision.PUBLIC,
+                localAllowed.decide("/index.html", "192.0.2.1", null, null));
+        Assert.assertEquals(AdminAccessPolicy.Decision.ADMIN_REQUIRED,
+                localAllowed.decide("/Settings_p.html", "192.0.2.1", null, null));
+        Assert.assertEquals(AdminAccessPolicy.Decision.LOCAL_BYPASS,
+                localAllowed.decide("/Settings_p.html", "127.0.0.1", null, null));
+        Assert.assertEquals(AdminAccessPolicy.Decision.ADMIN_REQUIRED,
+                localAllowed.decide("/Settings_p.html", "127.0.0.1", "https://example.org/", null));
+
+        final AdminAccessPolicy loginRequired = new AdminAccessPolicy(
+                false, false, true, false, user, hash);
+        Assert.assertEquals(AdminAccessPolicy.Decision.ADMIN_REQUIRED,
+                loginRequired.decide("/Settings_p.html", "127.0.0.1", null, null));
+        final String lazyAuth = "Basic " + Base64Order.standardCoder.encodeString(user + ":" + hash);
+        Assert.assertEquals(AdminAccessPolicy.Decision.LOCAL_BYPASS,
+                loginRequired.decide("/Settings_p.html", "127.0.0.1", null, lazyAuth));
+    }
+
+    /** The credential context is request-bound and fails closed after cleanup. */
+    @Test
+    public void testAdminAuthenticationContext() {
+        AdminAuthenticationContext.clear();
+        Assert.assertFalse(AdminAuthenticationContext.isLocalhostRequest());
+        AdminAuthenticationContext.setSocketPeerIp("127.0.0.1");
+        Assert.assertTrue(AdminAuthenticationContext.isLocalhostRequest());
+        AdminAuthenticationContext.clear();
+        Assert.assertFalse(AdminAuthenticationContext.isLocalhostRequest());
+    }
 }
