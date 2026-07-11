@@ -21,7 +21,7 @@
 
 package net.yacy.http.servlets;
 
-import org.eclipse.jetty.http.HttpStatus;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Use this to indicates a required parameter is missing for a servlet template,
@@ -38,14 +38,14 @@ public class TemplateMissingParameterException extends TemplateProcessingExcepti
 	 * Default constructor : use generic message.
 	 */
 	public TemplateMissingParameterException() {
-		super("Missing required parameters", HttpStatus.BAD_REQUEST_400);
+		super("Missing required parameters", HttpServletResponse.SC_BAD_REQUEST);
 	}
 
 	/**
 	 * @param message detail message
 	 */
 	public TemplateMissingParameterException(final String message) {
-		super(message, HttpStatus.BAD_REQUEST_400);
+		super(message, HttpServletResponse.SC_BAD_REQUEST);
 	}
 
 }

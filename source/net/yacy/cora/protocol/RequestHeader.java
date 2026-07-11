@@ -25,9 +25,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.AsyncContext;
@@ -48,8 +50,6 @@ import javax.servlet.http.Part;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.NumberTools;
-import org.eclipse.jetty.server.CookieCutter;
-import org.eclipse.jetty.util.URIUtil;
 
 /**
  * YaCy servlet request header.
@@ -235,9 +235,22 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         }
 		String cstr = super.get(COOKIE);
 		if (cstr != null) {
-		    CookieCutter cc = new CookieCutter(); // reuse jetty cookie parser
-		    cc.addCookieField(cstr);
-		    return cc.getCookies();
+		    // parse the Cookie request header (RFC 6265: pairs separated by ';')
+		    final List<Cookie> cookies = new ArrayList<Cookie>();
+		    for (final String pair: cstr.split(";")) {
+		        final int eq = pair.indexOf('=');
+		        if (eq < 0) continue;
+		        final String name = pair.substring(0, eq).trim();
+		        String value = pair.substring(eq + 1).trim();
+		        if (value.length() > 1 && value.charAt(0) == '"' && value.endsWith("\"")) value = value.substring(1, value.length() - 1);
+		        if (name.isEmpty() || name.charAt(0) == '$') continue; // skip RFC 2965 attributes
+		        try {
+		            cookies.add(new Cookie(name, value));
+		        } catch (final IllegalArgumentException e) {
+		            // skip cookie with a name not accepted by the servlet API (reserved token)
+		        }
+		    }
+		    return cookies.isEmpty() ? null : cookies.toArray(new Cookie[cookies.size()]);
 		}
 		return null;
     }
@@ -377,7 +390,12 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
             return _request.getRequestURL();
         }
 		StringBuffer sbuf = new StringBuffer(32);
-		URIUtil.appendSchemeHostPort(sbuf, this.getScheme(), this.getServerName(), this.getServerPort());
+		final String scheme = this.getScheme();
+		final int port = this.getServerPort();
+		sbuf.append(scheme).append("://").append(this.getServerName());
+		if (port > 0 && !(("http".equals(scheme) && port == 80) || ("https".equals(scheme) && port == 443))) {
+		    sbuf.append(':').append(port);
+		}
 		sbuf.append(this.getRequestURI());
 		return sbuf;
     }

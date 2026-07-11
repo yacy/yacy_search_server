@@ -47,7 +47,6 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.ProcessorUtils;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -75,7 +74,7 @@ public class YaCyHttpServer {
 
         this.server = new Server();
 
-        final int cores = ProcessorUtils.availableProcessors();
+        final int cores = Runtime.getRuntime().availableProcessors();
         final int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
 
         final HttpConfiguration httpConfig = new HttpConfiguration();

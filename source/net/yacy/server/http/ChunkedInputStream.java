@@ -39,8 +39,6 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.eclipse.jetty.http.HttpMethod;
-
 
 /**
  * <p>Transparently coalesces chunks of a HTTP stream that uses
@@ -104,14 +102,11 @@ public class ChunkedInputStream extends InputStream {
      * is followed by a CRLF. The method returns -1 as soon as a chunksize of 0
      * is detected.</p>
      *
-     * <p> Trailer headers are read automcatically at the end of the stream and
-     * can be obtained with the getResponseFooters() method.</p>
+     * <p> Trailer headers are read automcatically at the end of the stream.</p>
      *
      * @return -1 of the end of the stream has been reached or the next data
      * byte
      * @throws IOException If an IO problem occurs
-     *
-     * @see HttpMethod#getResponseFooters()
      */
     @Override
     public int read() throws IOException {
