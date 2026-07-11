@@ -28,51 +28,48 @@ package net.yacy.http;
  */
 public interface YaCyHttpServer {
 
-    /**
-     * start the http server
-     */
+    /** Start all configured connectors and handlers before returning. */
     void startupServer() throws Exception;
 
-    /**
-     * stop the http server
-     */
+    /** Stop all connectors and handlers and wait for complete termination. */
     void stop() throws Exception;
 
     /**
-     * reconnect with new port settings (after waiting milsec) - routine returns immediately
-     * @param milsec wait time
+     * Apply current HTTP and HTTPS port settings asynchronously after a delay.
+     * Existing connectors are reused; implementations must not rebuild the handler graph.
+     * @param milsec non-negative delay before applying current configuration
      */
     void reconnect(int milsec);
 
     /**
-     * @return true if the server runs a ssl/https connector
+     * @return true when a usable HTTPS connector was configured
      */
     boolean withSSL();
 
     /**
-     * @return the ssl/https port or -1 if not active
+     * @return the bound HTTPS port, or -1 when HTTPS is not active
      */
     int getSslPort();
 
     /**
-     * forces loginservice to reload user credentials
+     * Evict and immediately reload the named administrator identity from configuration.
      * @param username
      */
     void resetUser(String username);
 
     /**
-     * removes user from the loginservice
+     * Evict the named administrator identity from the container login cache.
      * @param username
      */
     void removeUser(String username);
 
     /**
-     * @return version string of the servlet container
+     * @return human-readable name and version of the servlet container
      */
     String getVersion();
 
     /**
-     * @return the number of currently active (busy) server threads
+     * @return current number of non-idle container worker threads
      */
     int getServerThreads();
 }

@@ -38,6 +38,7 @@
   <property name="lib" location="lib"/>
   <property name="libt" location="libt"/>
   <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
+  <property name="ivy.compile.stage" location="build/ivy-retrieve/compile"/>
   <property name="solr9.bridge.build" location="build/solr9-bridge"/>
   <property name="solr9.bridge.input" location="${solr9.bridge.build}/input"/>
   <property name="solr9.bridge.tool" location="${solr9.bridge.build}/tool"/>
@@ -93,7 +94,23 @@
          We can move there in a following step.
          ${lib} just happens to be equal to ${ivy.lib.dir}.
     -->
-    <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
+    <!--
+      Ivy retrieve does not remove stale revisions or replaced coordinates.
+      Resolve the complete public classpath into staging before touching lib/;
+      a failed resolve therefore leaves the last usable runtime intact. Only
+      after staging succeeds are stale public Jetty/Servlet jars removed and
+      the resolved classpath published. Private Solr jars use the distinct
+      solr9-bridge-* prefix and are rebuilt by build-solr9-bridge.
+    -->
+    <delete dir="${ivy.compile.stage}" failonerror="false" />
+    <mkdir dir="${ivy.compile.stage}" />
+    <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.compile.stage}/[artifact]-[revision].[ext]" />
+    <delete failonerror="false">
+      <fileset dir="${lib}" includes="javax.servlet-api-*.jar,jetty-*.jar" />
+    </delete>
+    <copy todir="${ivy.lib.dir}" overwrite="true">
+      <fileset dir="${ivy.compile.stage}" includes="**/*" />
+    </copy>
     <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="solr9-bridge" pathid="solr9.bridge.input.path" pattern="${solr9.bridge.input}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="solr9-bridge-tool" pathid="solr9.bridge.tool.path" pattern="${solr9.bridge.tool.libs}/[artifact]-[revision].[ext]" />
@@ -180,10 +197,10 @@
         <fileset dir="${lib}" includes="solr9-bridge-*.jar" />
     </path>
 
-  <target name="build-solr9-bridge" depends="init,resolve" description="build the private Solr 9.0 Jetty client island">
+  <target name="build-solr9-bridge" depends="init,resolve" description="build the private Solr 9.0 Jetty and SLF4J 1.7 island">
     <delete dir="${solr9.bridge.tool}" failonerror="false"/>
     <delete failonerror="false">
-      <fileset dir="${lib}" includes="solr9-bridge-*.jar,solr-core-9.0.0.jar,solr-solrj-9.0.0.jar,solr-scripting-9.0.0.jar,http2-*.jar" />
+      <fileset dir="${lib}" includes="solr9-bridge-*.jar,solr-core-9.0.0.jar,solr-solrj-9.0.0.jar,solr-scripting-9.0.0.jar,http2-*.jar,slf4j-*-1.7.36.jar" />
     </delete>
     <mkdir dir="${solr9.bridge.tool}"/>
     <javac srcdir="test/jetty" destdir="${solr9.bridge.tool}"
@@ -450,6 +467,7 @@
       <fileset dir="." includes="TEST-*" />
     </delete>
     <delete dir="test/DATA" failonerror="false"/>
+    <delete dir="${ivy.compile.stage}" failonerror="false"/>
     <delete dir="${solr9.bridge.build}" failonerror="false"/>
   </target>
 

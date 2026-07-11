@@ -31,8 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
@@ -43,7 +41,7 @@ import net.yacy.crawler.retrieval.Response;
 /**
  * jetty http handler serves pages from cache if available and valid
  */
-public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler {
+public class ProxyCacheHandler extends AbstractRemoteHandler {
 
     private void handleRequestFromCache(@SuppressWarnings("unused") HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
 
@@ -57,7 +55,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
     }
     
     @Override
-    public void handleRemote(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public void handleRemote(String target, RequestCompletion completion, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         if (request.getMethod().equals("GET")) {
             String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
             DigestURL url = new DigestURL(request.getRequestURL().toString() + queryString);
@@ -86,7 +84,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
                 byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && cachedResponse.isFreshForProxy()) {
                     handleRequestFromCache(request, response, cachedResponseHeader, cacheContent);
-                    baseRequest.setHandled(true);
+                    completion.complete();
                 }
             }
 

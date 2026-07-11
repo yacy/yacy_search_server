@@ -26,10 +26,9 @@ package net.yacy.http;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,17 +41,16 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import org.eclipse.jetty.proxy.ConnectHandler;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 /**
  * abstract jetty http handler
  * only request to remote hosts (proxy requests) are processed by derived classes 
  */
-abstract public class AbstractRemoteHandler extends ConnectHandler implements Handler {
+abstract public class AbstractRemoteHandler extends ConnectHandler {
 	
     protected Switchboard sb = null;
-    private final Set<String> localVirtualHostNames = new HashSet<String>(); // list for quick check for req to local peer
+    private final Set<String> localVirtualHostNames = ConcurrentHashMap.newKeySet(); // updated by discovery thread and request threads
     
     @Override
     protected void doStart() throws Exception {
@@ -99,7 +97,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         }.start();
     }
 	
-    abstract public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
+    abstract public void handleRemote(String target, RequestCompletion completion, HttpServletRequest request,
             HttpServletResponse response) throws IOException, ServletException;
 
     @Override
@@ -135,7 +133,8 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         }
         
         final String remoteHost = request.getRemoteHost();
-        if (!proxyippatternmatch(remoteHost)) {
+        if (!ProxyAccessPolicy.isClientAllowed(
+                Switchboard.getSwitchboard().getConfig("proxyClient", "*"), remoteHost)) {
             // TODO: handle proxy account
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "proxy use not granted for IP " + remoteHost + " (see Advanced Settings -> Proxy Access Settings -> IP-Number filter).");
@@ -157,28 +156,8 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         	return;
         }
         
-        handleRemote(target, baseRequest, request, response);
+        handleRemote(target, () -> baseRequest.setHandled(true), request, response);
 
     }
     
-    /**
-     * helper for proxy IP config pattern check
-     */
-    private boolean proxyippatternmatch(final String key) {
-        // the cfgippattern is a comma-separated list of patterns
-        // each pattern may contain one wildcard-character '*' which matches anything
-        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyClient", "*");
-        if (cfgippattern.equals("*")) {
-            return true;
-        }
-        final StringTokenizer st = new StringTokenizer(cfgippattern, ",");
-        String pattern;
-        while (st.hasMoreTokens()) {
-            pattern = st.nextToken();
-            if (key.matches(pattern)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

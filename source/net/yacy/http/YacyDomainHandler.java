@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.server.http.AlternativeDomainNames;
 
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -53,7 +52,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  * host is picked up and forwarded to the peer by the transparent proxy
  * handlers, before the local servlet context would handle it.
  */
-public class YacyDomainHandler extends AbstractHandler implements Handler {
+public class YacyDomainHandler extends AbstractHandler {
 
     private AlternativeDomainNames alternativeResolvers;
 

@@ -1,5 +1,5 @@
 /**
- *  AdminAuthenticationContext
+ *  ProxyAccessPolicy
  *  Copyright 2026 by Michael Peter Christen
  *  First released 12.07.2026 at https://yacy.net
  *
@@ -20,26 +20,24 @@
 
 package net.yacy.http;
 
-import net.yacy.cora.protocol.Domains;
+/** Container-neutral checks for the configured transparent-proxy client list. */
+public final class ProxyAccessPolicy {
 
-/** Request-bound facts needed while the container verifies admin credentials. */
-public final class AdminAuthenticationContext {
-
-    private static final ThreadLocal<String> SOCKET_PEER_IP = new ThreadLocal<>();
-
-    private AdminAuthenticationContext() {
+    private ProxyAccessPolicy() {
     }
 
-    public static void setSocketPeerIp(final String ip) {
-        SOCKET_PEER_IP.set(ip);
-    }
-
-    public static void clear() {
-        SOCKET_PEER_IP.remove();
-    }
-
-    public static boolean isLocalhostRequest() {
-        final String ip = SOCKET_PEER_IP.get();
-        return ip != null && Domains.isLocalhost(ip);
+    public static boolean isClientAllowed(final String configuredPatterns, final String clientHost) {
+        if ("*".equals(configuredPatterns)) {
+            return true;
+        }
+        if (configuredPatterns == null || configuredPatterns.isEmpty() || clientHost == null) {
+            return false;
+        }
+        for (final String pattern : configuredPatterns.split(",")) {
+            if (!pattern.isEmpty() && clientHost.matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -31,7 +31,12 @@
       <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.2.39" conf="compile->master"/>
       <dependency org="io.opentracing" name="opentracing-noop" rev="0.33.0"/>
       <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
-      <dependency org="javax.servlet" name="javax.servlet-api" rev="4.0.1"/>
+      <!--
+        Jetty's EE8-compatible Servlet 4 API also contains the web.xml schemas
+        used by WebAppContext. Keep it as the single public javax.servlet API
+        before and after the Jetty 12 migration.
+      -->
+      <dependency org="org.eclipse.jetty.toolchain" name="jetty-servlet-api" rev="4.0.9" conf="compile->master"/>
       <dependency org="javainetlocator" name="inetaddresslocator" rev="2.18" />
       <dependency org="eu.agno3.jcifs" name="jcifs-ng" rev="2.1.10" />
       <dependency org="net.arnx" name="jsonic" rev="1.3.10"/>
@@ -115,11 +120,18 @@
       </dependency>
       <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.8"/>
       <dependency org="org.rrd4j" name="rrd4j" rev="3.10"/>
-      <!-- Solr 9.0.0 directly references the SLF4J 1.7 StaticLoggerBinder API. -->
-      <dependency org="org.slf4j" name="slf4j-api" rev="1.7.36" force="true"/>
-      <dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.36"/>
-      <dependency org="org.slf4j" name="log4j-over-slf4j" rev="1.7.36"/>
-      <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.7.36"/>
+      <!--
+        YaCy and the public Jetty runtime use SLF4J 2 with JUL as their single
+        provider. Solr 9.0.0 directly references the removed SLF4J 1.7
+        StaticLoggerBinder API, so its API and JUL binding are relocated into
+        the private Solr bridge instead of being exposed on this classpath.
+      -->
+      <dependency org="org.slf4j" name="slf4j-api" rev="2.0.17" conf="compile->master" force="true"/>
+      <dependency org="org.slf4j" name="jcl-over-slf4j" rev="2.0.17" conf="compile->master"/>
+      <dependency org="org.slf4j" name="log4j-over-slf4j" rev="2.0.17" conf="compile->master"/>
+      <dependency org="org.slf4j" name="slf4j-jdk14" rev="2.0.17" conf="compile->master"/>
+      <dependency org="org.slf4j" name="slf4j-api" rev="1.7.36" conf="solr9-bridge->master"/>
+      <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.7.36" conf="solr9-bridge->master"/>
       <!-- This does not match langdetect.jar from pre-ivy -->
       <dependency org="org.tukaani" name="xz" rev="1.12"/>
       <dependency org="oro" name="oro" rev="2.0.8"/>
@@ -131,5 +143,7 @@
       <dependency org="org.ow2.asm" name="asm-commons" rev="9.9" conf="solr9-bridge-tool->master"/>
       <dependency org="com.github.luben" name="zstd-jni" rev="1.5.7-11"></dependency>
       <dependency org="ai.djl" name ="api" rev="0.36.0"></dependency>
+      <!-- Different coordinates prevent Ivy from evicting duplicate Servlet API jars. -->
+      <exclude org="javax.servlet" module="javax.servlet-api"/>
     </dependencies>
 </ivy-module>

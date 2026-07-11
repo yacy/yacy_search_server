@@ -22,5 +22,7 @@
 	<classpathentry kind="lib" path="lib/solr9-bridge-http2-client-9.4.58.v20250814.jar"/>
 	<classpathentry kind="lib" path="lib/solr9-bridge-http2-common-9.4.58.v20250814.jar"/>
 	<classpathentry kind="lib" path="lib/solr9-bridge-http2-http-client-transport-9.4.58.v20250814.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-slf4j-api-1.7.36.jar"/>
+	<classpathentry kind="lib" path="lib/solr9-bridge-slf4j-jdk14-1.7.36.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

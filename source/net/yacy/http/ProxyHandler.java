@@ -52,14 +52,12 @@ import net.yacy.server.http.MultiOutputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
 
 /**
  * jetty http handler
  * proxies request, caches responses and adds urls to crawler
  */
-public class ProxyHandler extends AbstractRemoteHandler implements Handler {
+public class ProxyHandler extends AbstractRemoteHandler {
 
     protected int timeout = 10000;
 
@@ -124,7 +122,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
     }
 
 	@Override
-	public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
+	public void handleRemote(String target, RequestCompletion completion, HttpServletRequest request,
 		HttpServletResponse response) throws IOException, ServletException {
 		
 		sb.proxyLastAccess = System.currentTimeMillis();
@@ -222,7 +220,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         
         // we handled this request, break out of handler chain
         logProxyAccess(request);
-        baseRequest.setHandled(true);
+        completion.complete();
 	}
 
     /**

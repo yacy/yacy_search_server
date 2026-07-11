@@ -167,6 +167,51 @@ Jetty version on the resolved classpath and the private Solr island:
 6. Proxy traffic including CONNECT
 7. `test/jetty-smoke-test.sh`
 
+The live gates are split by the environment they require:
+
+- `test/jetty-smoke-test.sh` checks HTTP methods, ranges, conditional requests,
+  error dispatch, and gzip request/response handling against a running peer;
+- `test/jetty-auth-smoke-test.sh` checks localhost, `bin/apicall.sh`, optional
+  credentials, and an optional real non-loopback path;
+- `test/jetty-peer-start-smoke-test.sh` starts and stops an isolated peer through
+  explicit harness commands and queries its embedded Solr core;
+- `test/remote-solr-smoke-test.sh` queries an explicitly configured external
+  Solr instance through YaCy's Apache-HttpClient-backed `RemoteInstance`;
+- `test/proxy-smoke-test.sh` checks HTTP proxy traffic and an HTTPS CONNECT
+  tunnel against explicitly configured controlled targets.
+
+The environment-dependent gates exit with status 2 when their required target
+or isolated-peer harness has not been supplied. This is a reported skip, not a
+successful verification.
+
+The final migration acceptance must run the authentication gate with no skips:
+
+```sh
+YACY_SMOKE_REQUIRE_COMPLETE=true \
+YACY_SMOKE_ADMIN_USER=admin \
+YACY_SMOKE_ADMIN_PASSWORD='the configured password' \
+YACY_SMOKE_REMOTE_BASE_URL='http://a-real-non-loopback-peer-address:8090' \
+test/jetty-auth-smoke-test.sh
+```
+
+The HTTP range contract includes a single satisfiable range (`206`), multiple
+satisfiable ranges as `multipart/byteranges`, and an unsatisfiable range
+(`416`).
+
+### Switch-time logging tests
+
+`Slf4jJulBridgeTest` is version-neutral and must pass both before and after the
+server switch. It proves that the public SLF4J 2 provider routes the
+`org.eclipse.jetty` logger namespace into `java.util.logging` and therefore the
+YaCy logging configuration.
+
+`Jetty9LoggingFacadeTest` is deliberately a Jetty 9 baseline test. It imports
+Jetty 9's removed `org.eclipse.jetty.util.log.Log` API and asserts the old
+`Slf4jLog` facade. Remove it together with `Jetty9HttpServerImpl` during the
+switch and replace it with a Jetty 12 integration test that starts and stops a
+real server while capturing an `org.eclipse.jetty` record through JUL. The
+Jetty 12 test must not assert an internal logger implementation class.
+
 The following implementation phase may then replace `Jetty9HttpServerImpl` and
 the remaining Jetty adapter APIs without changing the Solr dependency graph.
 
@@ -201,3 +246,88 @@ The portable address/path syntax of `serverClient` is represented by
 `InetPathAccessRule`. `InetPathAccessHandler` remains the Jetty 9 matcher
 adapter; Jetty 12 can consume the normalized `address|path` rules with its
 native path-aware access handler.
+
+## P2.3 Handler Boundaries
+
+Proxy request processing and cache processing no longer receive Jetty's
+`Request`. `RequestCompletion` is the container-neutral signal that processing
+is complete; `AbstractRemoteHandler` adapts it to Jetty 9's
+`Request.setHandled(true)`. Consequently `ProxyHandler` and
+`ProxyCacheHandler` have no Jetty imports.
+
+The `proxyClient` regular-expression list is evaluated by the pure
+`ProxyAccessPolicy`. The local virtual-host cache used by proxy detection is a
+concurrent set because it is populated by both the discovery thread and
+request threads.
+
+The remaining Jetty handler classes now have explicit migration roles:
+
+| Jetty 9 adapter | Responsibility to reproduce with Jetty 12 |
+| --- | --- |
+| `AbstractRemoteHandler` | detect proxy traffic and delegate CONNECT tunnelling |
+| `CrashProtectionHandler` | outer exception barrier around proxy and servlet handlers |
+| `YacyDomainHandler` | rewrite `.yacy` destinations and redispatch into the proxy chain |
+| `YaCyErrorHandler` | render the container error page |
+| `YaCyQoSFilter` | optional request prioritization when enabled in `web.xml` |
+
+These classes intentionally remain container adapters. They must be ported
+against the corresponding Jetty 12 APIs rather than replaced with servlet-only
+approximations that would change CONNECT, error dispatch, or prioritization.
+
+## P2.4 Embedded Server Bootstrap Contract
+
+`HttpServerBootstrapConfig` is the common immutable input for Jetty 9 and the
+future Jetty 12 implementation. It fixes the following startup values:
+
+| Concern | Contract |
+| --- | --- |
+| HTTP binding | constructor host and port |
+| Acceptor threads | half the available processors, clamped to 1 through 4 |
+| Request header limit | 16,384 bytes |
+| Connector idle timeout | 9,000 ms |
+| HTTP accept queue | 128 |
+| HTTPS | `server.https`, configured SSL port, initialized SSL context only |
+| Web root | configured `htRootPath` below the application directory |
+| Descriptors | `defaults/web.xml`, optionally `DATA/SETTINGS/web.xml` |
+| Request decompression | Gzip inflate buffer of 4,096 bytes |
+| Response compression | controlled by `server.response.compress.gzip` |
+| Form limit | unlimited at the proxy-handler context boundary |
+| Proxy handlers | present only when transparent proxy is enabled |
+| Network access | configured `serverClient` address/path rules plus loopback |
+| Authentication realm | configured administrator realm, unchanged for DIGEST hashes |
+
+TLS preparation remains a YaCy bootstrap responsibility because it may import
+a configured PKCS#12 file, create/update the JKS file, clear the one-shot
+import settings, and construct the JDK `SSLContext`. The container adapter only
+attaches that context to its HTTPS connector.
+
+The request pipeline order is a behavioral requirement:
+
+1. optional server-client address/path gate;
+2. outer crash-protection barrier;
+3. `.yacy` domain rewrite;
+4. cached proxy response, when transparent proxy is enabled;
+5. live HTTP proxy and CONNECT tunnel, when enabled;
+6. root web application with monitor filter, admin security, gzip/inflate, and
+   `YaCyDefaultServlet`;
+7. container default handler for requests left unhandled.
+
+The connection-close listener must remove the matching `ConnectionInfo` entry
+created by `MonitorFilter`. The default servlet and monitor filter remain
+hard-coded mandatory components; additional servlet mappings come from the
+merged web descriptors.
+
+`YaCyHttpServer` defines the runtime contract used outside the adapter:
+
+- synchronous start;
+- synchronous stop followed by join;
+- asynchronous delayed port reconnect without rebuilding the handler graph;
+- HTTPS availability and bound-port reporting;
+- administrator identity eviction/reload after credential changes;
+- container version reporting;
+- current non-idle worker-thread count.
+
+A Jetty 12 implementation must first be added beside `Jetty9HttpServerImpl`
+and satisfy this complete contract before the construction site in `yacy.java`
+is switched. No caller outside the HTTP package should need a Jetty type or a
+Jetty-version condition.

@@ -52,7 +52,6 @@ import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -78,6 +77,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      */
     public Jetty9HttpServerImpl(final int port, final String host) {
         final Switchboard sb = Switchboard.getSwitchboard();
+        final HttpServerBootstrapConfig bootstrap = HttpServerBootstrapConfig.from(sb, port, host);
 
         this.server = new Server();
 
@@ -96,32 +96,29 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             }
         };
 
-        final int cores = Runtime.getRuntime().availableProcessors();
-        final int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
-
         final HttpConfiguration httpConfig = new HttpConfiguration();
-        httpConfig.setRequestHeaderSize(16384);
+        httpConfig.setRequestHeaderSize(HttpServerBootstrapConfig.REQUEST_HEADER_SIZE);
         final HttpConnectionFactory hcf = new HttpConnectionFactory(httpConfig);
-        final ServerConnector connector = new ServerConnector(this.server, null, null, null, acceptors, -1, hcf);
-        connector.setPort(port);
-        connector.setHost(host);
-        connector.setName("httpd-" + host + ":" + Integer.toString(port));
-        connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
-        connector.setAcceptQueueSize(128);
+        final ServerConnector connector = new ServerConnector(this.server, null, null, null, bootstrap.acceptorCount(), -1, hcf);
+        connector.setPort(bootstrap.httpPort());
+        connector.setHost(bootstrap.bindHost());
+        connector.setName("httpd-" + bootstrap.bindHost() + ":" + Integer.toString(bootstrap.httpPort()));
+        connector.setIdleTimeout(HttpServerBootstrapConfig.CONNECTOR_IDLE_TIMEOUT_MILLIS);
+        connector.setAcceptQueueSize(HttpServerBootstrapConfig.ACCEPT_QUEUE_SIZE);
         connector.addBean(connectionCloseMonitor);
 
         this.server.addConnector(connector);
 
 
         // add ssl/https connector
-        final boolean useSSL = sb.getConfigBool("server.https", false);
+        final boolean useSSL = bootstrap.httpsEnabled();
 
         if (useSSL) {
             final SslContextFactory sslContextFactory = new SslContextFactory.Server();
             final SSLContext sslContext = this.initSslContext(sb);
             if (sslContext != null) {
 
-                final int sslport = sb.getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
+                final int sslport = bootstrap.httpsPort();
                 sslContextFactory.setSslContext(sslContext);
 
                 // SSL HTTP Configuration
@@ -134,7 +131,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                         new HttpConnectionFactory(https_config));
                 sslConnector.setPort(sslport);
                 sslConnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
-                sslConnector.setIdleTimeout(9000); // timout in ms when no bytes send / received
+                sslConnector.setIdleTimeout(HttpServerBootstrapConfig.CONNECTOR_IDLE_TIMEOUT_MILLIS);
                 sslConnector.addBean(connectionCloseMonitor);
 
                 this.server.addConnector(sslConnector);
@@ -148,7 +145,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // configure root context
         final WebAppContext htrootContext = new WebAppContext();
         htrootContext.setContextPath("/");
-        final String htrootpath = sb.appPath + "/" + sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+        final String htrootpath = bootstrap.htrootPath();
         ConcurrentLog.info("Jetty9HttpServerImpl", "htrootpath = " + htrootpath);
         htrootContext.setErrorHandler(new YaCyErrorHandler()); // handler for custom error page
         try {
@@ -158,8 +155,8 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             // make use of Jetty feature to define web.xml other as default WEB-INF/web.xml
             // and to use a DefaultsDescriptor merged with a individual web.xml
             // use defaults/web.xml as default and look in DATA/SETTINGS for local addition/changes
-            htrootContext.setDefaultsDescriptor(sb.appPath + "/defaults/web.xml");
-            final Resource webxml = Resource.newResource(sb.dataPath + "/DATA/SETTINGS/web.xml");
+            htrootContext.setDefaultsDescriptor(bootstrap.defaultsWebXml());
+            final Resource webxml = Resource.newResource(bootstrap.overrideWebXml());
             if (webxml.exists()) {
                 htrootContext.setDescriptor(webxml.getName());
             }
@@ -191,10 +188,9 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
          * APIs /yacy/transferRWI.html and /yacy/transferURL.html This was previously
          * handled by a GZIPRequestWrapper in the YaCyDefaultServlet.
          */
-        gzipHandler.setInflateBufferSize(4096);
+        gzipHandler.setInflateBufferSize(HttpServerBootstrapConfig.REQUEST_INFLATE_BUFFER_SIZE);
 
-        if (!sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
-                SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT)) {
+        if (!bootstrap.gzipResponsesEnabled()) {
             /* Gzip compression of responses can be disabled by user configuration */
             gzipHandler.setExcludedMethods(HttpMethod.GET.asString(), HttpMethod.POST.asString());
         }
@@ -224,7 +220,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
         // define list of YaCy specific general handlers
         final HandlerList handlers = new HandlerList();
-        if (sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false)) {
+        if (bootstrap.transparentProxyEnabled()) {
             // Proxyhandlers are only needed if feature activated (save resources if not used)
             ConcurrentLog.info("SERVER", "load Jetty handler for transparent proxy");
             handlers.setHandlers(new Handler[]{domainHandler, new ProxyCacheHandler(), new ProxyHandler()});
@@ -236,9 +232,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         context.setServer(this.server);
         context.setContextPath("/");
         context.setHandler(handlers);
-        context.setMaxFormContentSize(-1);
-        final org.eclipse.jetty.util.log.Logger log = Log.getRootLogger();
-        context.setLogger(log);
+        context.setMaxFormContentSize(HttpServerBootstrapConfig.MAX_FORM_CONTENT_SIZE);
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         final ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
@@ -250,7 +244,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         final YaCyLoginService loginService = new YaCyLoginService();
         // This is part of the built-in administrator's DIGEST password hash.
         // Changing it invalidates the configured administrator password hash.
-        loginService.setName(sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy"));
+        loginService.setName(bootstrap.adminRealm());
 
         final YaCySecurityHandler securityHandler = new YaCySecurityHandler();
         securityHandler.setLoginService(loginService);
@@ -261,7 +255,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         final Handler crashHandler = new CrashProtectionHandler(this.server, allrequesthandlers);
         // check server access restriction and add InetAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
-        final String white = sb.getConfig("serverClient", "*");
+        final String white = bootstrap.serverClientRules();
         if (!white.equals("*")) { // full ip (allowed ranges 0-255 or prefix  10.0-255,0,0-100  or CIDR notation 192.168.1.0/24)
             final StringTokenizer st = new StringTokenizer(white, ",");
             final InetAccessHandler whiteListHandler;

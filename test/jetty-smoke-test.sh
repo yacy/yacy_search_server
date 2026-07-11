@@ -53,21 +53,35 @@ fail() {
 request() {
     method=$1
     path=$2
-    shift 2
+    expected_status=$3
+    shift 3
 
     : > "$response_headers"
     : > "$response_body"
 
-    status=$(curl --silent --show-error \
-        --max-time "$curl_timeout" \
-        --request "$method" \
-        --dump-header "$response_headers" \
-        --output "$response_body" \
-        --write-out '%{http_code}' \
-        "$@" \
-        "$base_url$path") || fail "$method $path could not be requested"
+    if [ "$method" = HEAD ]; then
+        status=$(curl --silent --show-error \
+            --max-time "$curl_timeout" \
+            --head \
+            --dump-header "$response_headers" \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            "$@" \
+            "$base_url$path") || fail "$method $path could not be requested"
+        : > "$response_body"
+    else
+        status=$(curl --silent --show-error \
+            --max-time "$curl_timeout" \
+            --request "$method" \
+            --dump-header "$response_headers" \
+            --output "$response_body" \
+            --write-out '%{http_code}' \
+            "$@" \
+            "$base_url$path") || fail "$method $path could not be requested"
+    fi
 
-    [ "$status" = "200" ] || fail "$method $path returned HTTP $status"
+    [ "$status" = "$expected_status" ] || \
+        fail "$method $path returned HTTP $status (expected $expected_status)"
 }
 
 assert_header_contains() {
@@ -109,38 +123,101 @@ while [ "$attempt" -lt 30 ]; do
 done
 [ "$attempt" -lt 30 ] || fail "YaCy did not become ready within 30 seconds"
 
-request GET /api/version.xml
+request GET /api/version.xml 200
 assert_header_contains Content-Type text/xml
 assert_body_contains '<version>'
 assert_body_contains '<buildVersion>'
 pass "reflection-backed XML endpoint"
 
-request GET /env/grafics/YaCyLogo2012.svg
+request GET /env/grafics/YaCyLogo2012.svg 200
 assert_header_contains Content-Type image/svg+xml
 assert_body_contains '<svg'
 pass "static resource"
 
-request GET /index.html
+cp "$response_body" "$work_dir/static-full"
+static_length=$(wc -c < "$work_dir/static-full" | tr -d ' ')
+request HEAD /env/grafics/YaCyLogo2012.svg 200
+assert_header_contains Content-Type image/svg+xml
+assert_header_contains Content-Length "$static_length"
+[ ! -s "$response_body" ] || fail "HEAD response contains a body"
+pass "HEAD without response body"
+
+request GET /env/grafics/YaCyLogo2012.svg 206 --header 'Range: bytes=0-9'
+assert_header_contains Content-Range "bytes 0-9/$static_length"
+[ "$(wc -c < "$response_body" | tr -d ' ')" -eq 10 ] || fail "range body is not 10 bytes"
+head -c 10 "$work_dir/static-full" > "$work_dir/static-prefix"
+cmp "$work_dir/static-prefix" "$response_body" >/dev/null 2>&1 || fail "range body has unexpected bytes"
+pass "single byte range"
+
+request GET /env/grafics/YaCyLogo2012.svg 206 --header 'Range: bytes=0-4,48-51'
+assert_header_contains Content-Type 'multipart/byteranges; boundary='
+assert_body_contains "Content-Range: bytes 0-4/$static_length"
+assert_body_contains "Content-Range: bytes 48-51/$static_length"
+assert_body_contains '<?xml'
+assert_body_contains 'YaCy'
+multipart_boundary=$(tr -d '\r' < "$response_headers" | awk -F 'boundary=' '
+    tolower($0) ~ /^content-type: multipart\/byteranges/ { print $2 }
+' | tail -n 1)
+[ -n "$multipart_boundary" ] || fail "multipart range response has no boundary"
+tail -c 80 "$response_body" | grep -F -- "--$multipart_boundary--" >/dev/null 2>&1 || \
+    fail "multipart range response has no closing boundary"
+pass "multipart byte ranges"
+
+request GET /env/grafics/YaCyLogo2012.svg 416 --header "Range: bytes=$static_length-"
+assert_header_contains Content-Range "bytes */$static_length"
+pass "unsatisfiable byte range"
+
+# YaCy deliberately suppresses Last-Modified on static responses to control its
+# cache policy, but still implements If-Modified-Since against the resource.
+request GET /env/grafics/YaCyLogo2012.svg 304 \
+    --header 'If-Modified-Since: Thu, 31 Dec 2099 23:59:59 GMT'
+[ ! -s "$response_body" ] || fail "304 response contains a body"
+pass "If-Modified-Since"
+
+request GET /index.html 200
 assert_header_contains Content-Type text/html
 assert_body_contains '<!DOCTYPE html>'
 assert_body_contains '<html'
 pass "rendered HTML template"
 
-request GET '/suggest.json?q=jetty-smoke'
+request GET '/suggest.json?q=jetty-smoke' 200
 assert_header_contains Content-Type application/json
 assert_header_contains Access-Control-Allow-Origin '*'
 assert_body_contains '["jetty-smoke",['
 pass "reflection-backed JSON endpoint and CORS header"
 
-request POST /api/version.xml \
+request POST /api/version.xml 200 \
     --header 'Content-Type: application/x-www-form-urlencoded' \
     --data 'smoke=post'
 assert_header_contains Content-Type text/xml
 assert_body_contains '<version>'
 pass "URL-encoded POST dispatch"
 
-request OPTIONS /api/version.xml
+request OPTIONS /api/version.xml 200
 assert_header_contains Allow 'GET,HEAD,POST,OPTIONS'
 pass "OPTIONS method contract"
+
+request GET /this-resource-must-not-exist-yacy-jetty-smoke 404
+assert_header_contains Content-Type text/html
+assert_body_contains 'YaCy '
+pass "YaCy 404 error page"
+
+request GET /env/grafics/YaCyLogo2012.svg 200 \
+    --header 'Accept-Encoding: gzip' \
+    --raw
+assert_header_contains Content-Encoding gzip
+gzip -dc "$response_body" > "$work_dir/gzip-decoded" || fail "gzip response cannot be decompressed"
+cmp "$work_dir/static-full" "$work_dir/gzip-decoded" >/dev/null 2>&1 || \
+    fail "decompressed response differs from the uncompressed resource"
+pass "gzip response compression"
+
+printf 'q=jetty-gzip-smoke' > "$work_dir/gzip-request-form"
+gzip -c "$work_dir/gzip-request-form" > "$work_dir/gzip-request-body"
+request POST /suggest.json 200 \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --header 'Content-Encoding: gzip' \
+    --data-binary "@$work_dir/gzip-request-body"
+assert_body_contains '["jetty-gzip-smoke",['
+pass "gzip request decompression"
 
 echo "PASS: $checks embedded-server checks succeeded."
