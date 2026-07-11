@@ -88,7 +88,7 @@ public class YaCyLoginService extends HashLoginService implements LoginService {
                 // in YaCy the credential hash is composed of username:pwd so the username is needed to create valid credential
                 // not just the password (as usually in Jetty). As the accountname for the std. adminuser is not stored a useridentity
                 // is created for current user (and the pwd checked against the stored  username:pwd setting)
-                credential = YaCyLegacyCredential.getCredentialForAdmin(username, adminAccountBase64MD5);
+                credential = YaCyDigestCredential.getCredentialForAdmin(username, adminAccountBase64MD5);
                 // TODO: YaCy user:pwd hashes should longterm likely be switched to separable username + pwd-hash entries
                 //       and/or the standard admin account username should be fix = "admin"
                 roles = new String[]{SwitchboardConstants.ADMIN_ACCOUNT_ROLE};

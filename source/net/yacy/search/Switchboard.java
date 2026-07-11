@@ -3929,7 +3929,10 @@ public final class Switchboard extends serverSwitch {
             // handle DIGEST auth by servlet container
             if (requestHeader.getUserPrincipal() != null) { // user is authenticated (by Servlet container)
                 if (requestHeader.isUserInRole(SwitchboardConstants.ADMIN_ACCOUNT_ROLE)) {
-                    // we could double check admin right (but we trust embedded container)
+                    // DIGEST can't be re-verified from the header (response depends on the
+                    // server nonce); only the embedded container that issued the challenge can.
+                    // Trusting its result is safe because getUserPrincipal()/isUserInRole() come
+                    // solely from container auth (see RequestHeader). BASIC above verifies itself.
                     this.adminAuthenticationLastAccess = System.currentTimeMillis();
                     return 4; // has admin right
                 }

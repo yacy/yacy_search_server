@@ -139,8 +139,10 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     }
 
     public boolean accessFromLocalhost() {
-        // authorization for localhost, only if flag is set to grant localhost access as admin
-        final String clientIP = this.getRemoteAddr();
+        // authorization for localhost, only if flag is set to grant localhost access as admin.
+        // This is an access-control decision, therefore the true socket peer must be used:
+        // the client-controlled (and trivially spoofable) X-Real-IP header must NOT be honored here.
+        final String clientIP = this.getRemoteSocketAddr();
         if ( !Domains.isLocalhost(clientIP) ) {
             return false;
         }
@@ -352,6 +354,9 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
 		return null;
     }
 
+    // Invariant relied on for authorization: the role/principal come solely from the servlet
+    // container's authentication. Do not change these to derive from headers/attributes (which
+    // are client-controllable), else authorization based on them becomes spoofable.
     @Override
     public boolean isUserInRole(String role) {
         if (_request != null) {
@@ -696,6 +701,35 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
 		return super.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
     }
 
+    /**
+     * The IP address of the host that opened the TCP connection (the real socket peer).
+     * <p>
+     * In contrast to {@link #getRemoteAddr()} and {@link #client(ServletRequest)} this
+     * <b>never</b> honors the client-controlled X-Real-IP request header. It must therefore
+     * be used for all authentication and access-control decisions: X-Real-IP is trivially
+     * spoofable by a direct client and must only be trusted for peer routing behind a
+     * trusted reverse proxy, not for authentication.
+     *
+     * @return the socket peer IP address
+     */
+    public String getRemoteSocketAddr() {
+        if (this._request != null) {
+            return this._request.getRemoteAddr();
+        }
+        return super.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+    }
+
+    /**
+     * Resolve the client IP for peer routing and logging. This honors the X-Real-IP
+     * request header (set e.g. by an nginx reverse proxy via
+     * "proxy_set_header X-Real-IP $remote_addr;").
+     * <p>
+     * <b>Do not use this for authentication or access control</b> - the header is
+     * client-controlled and spoofable. Use {@link #getRemoteSocketAddr()} for that.
+     *
+     * @param request the servlet request
+     * @return the routing client IP address
+     */
     public static String client(final ServletRequest request) {
         String clientHost = request.getRemoteAddr();
         if (request instanceof HttpServletRequest) {

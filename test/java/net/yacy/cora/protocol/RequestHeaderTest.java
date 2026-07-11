@@ -19,6 +19,12 @@
  */
 package net.yacy.cora.protocol;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -28,6 +34,58 @@ import static org.junit.Assert.*;
  * @author reger24
  */
 public class RequestHeaderTest {
+
+    /**
+     * Build a minimal HttpServletRequest stub answering getRemoteAddr() with the
+     * given socket peer address and returning the given X-Real-IP header value.
+     */
+    private static HttpServletRequest stubRequest(final String socketPeer, final String xRealIP) {
+        final InvocationHandler h = new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) {
+                switch (method.getName()) {
+                    case "getRemoteAddr":
+                        return socketPeer;
+                    case "getRemoteHost":
+                        return socketPeer;
+                    case "getHeader":
+                        return RequestHeader.X_Real_IP.equals(args[0]) ? xRealIP : null;
+                    default:
+                        return null;
+                }
+            }
+        };
+        return (HttpServletRequest) Proxy.newProxyInstance(
+                RequestHeaderTest.class.getClassLoader(),
+                new Class<?>[]{HttpServletRequest.class}, h);
+    }
+
+    /**
+     * Authentication must rely on the true socket peer, never on the spoofable
+     * X-Real-IP header. A remote client sending "X-Real-IP: 127.0.0.1" must not
+     * be treated as localhost.
+     */
+    @Test
+    public void testXRealIpDoesNotAffectAuthentication() {
+        final String remoteClient = "203.0.113.7"; // a non-local address (TEST-NET-3)
+
+        // spoofing attempt: remote socket peer, but X-Real-IP claims localhost
+        final RequestHeader spoofed = new RequestHeader(stubRequest(remoteClient, "127.0.0.1"));
+        // routing accessor honors the header (kept for peer routing behind a trusted proxy) ...
+        assertEquals("127.0.0.1", spoofed.getRemoteAddr());
+        // ... but the authentication accessor must return the true socket peer
+        assertEquals(remoteClient, spoofed.getRemoteSocketAddr());
+        assertFalse("spoofed X-Real-IP must not grant localhost access", spoofed.accessFromLocalhost());
+
+        // genuine localhost access still works
+        final RequestHeader local = new RequestHeader(stubRequest("127.0.0.1", null));
+        assertEquals("127.0.0.1", local.getRemoteSocketAddr());
+        assertTrue(local.accessFromLocalhost());
+
+        // remote client without spoofing stays remote
+        final RequestHeader remote = new RequestHeader(stubRequest(remoteClient, null));
+        assertFalse(remote.accessFromLocalhost());
+    }
 
     /**
      * Test of getServerPort method, of class RequestHeader.

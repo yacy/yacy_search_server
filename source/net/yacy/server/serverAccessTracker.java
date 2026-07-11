@@ -28,7 +28,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.protocol.Domains;
 
 public class serverAccessTracker {
 
@@ -38,7 +37,6 @@ public class serverAccessTracker {
     private static int   maxHostCount     = 100;
     private static final ConcurrentHashMap<String, Queue<Track>> accessTracker = new ConcurrentHashMap<String, Queue<Track>>(); // mappings from requesting host to an ArrayList of serverTrack-entries
     private static long  lastCleanup;
-    private static long  lastLocalhostAccess = 0;
 
     public static class Track {
         private final long time;
@@ -140,7 +138,6 @@ public class serverAccessTracker {
             track.add(new Track(System.currentTimeMillis(), accessPath));
             clearTooOldAccess(track);
         }
-        if (Domains.isLocalhost(host)) lastLocalhostAccess = System.currentTimeMillis();
     }
 
     public static Collection<Track> accessTrack(final String host) {
@@ -161,9 +158,5 @@ public class serverAccessTracker {
         final Map<String, Queue<Track>> accessTrackerClone = new ConcurrentHashMap<String, Queue<Track>>();
         accessTrackerClone.putAll(accessTracker);
         return accessTrackerClone.keySet().iterator();
-    }
-    
-    public static long timeSinceAccessFromLocalhost() {
-        return System.currentTimeMillis() - lastLocalhostAccess;
     }
 }
