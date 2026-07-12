@@ -65,6 +65,8 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import com.google.common.net.InetAddresses;
+
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -490,8 +492,11 @@ public class Jetty12HttpServer implements YaCyHttpServer {
         protected RoleInfo prepareConstraintInfo(final String pathInContext,
                 final org.eclipse.jetty.ee8.nested.Request request) {
             final Switchboard switchboard = Switchboard.getSwitchboard();
-            final String remoteIp = request.getRemoteAddr();
-            serverAccessTracker.track(remoteIp, pathInContext);
+            final String socketRemoteIp = request.getRemoteAddr();
+            final String trackingRemoteIp = resolveTrackingClientIp(request,
+                    switchboard.getConfig(SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED,
+                            SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
+            serverAccessTracker.track(trackingRemoteIp, pathInContext);
             final AdminSecurity.AccessPolicy policy = new AdminSecurity.AccessPolicy(
                     switchboard.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false),
                     switchboard.isRobinsonMode() && !switchboard.isPublicRobinson(),
@@ -499,7 +504,7 @@ public class Jetty12HttpServer implements YaCyHttpServer {
                     switchboard.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false),
                     switchboard.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
                     switchboard.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
-            final AdminSecurity.AccessPolicy.Decision decision = policy.decide(pathInContext, remoteIp,
+            final AdminSecurity.AccessPolicy.Decision decision = policy.decide(pathInContext, socketRemoteIp,
                     request.getHeader(RequestHeader.REFERER),
                     request.getHeader(RequestHeader.AUTHORIZATION));
             if (decision == AdminSecurity.AccessPolicy.Decision.PUBLIC) {
@@ -512,6 +517,21 @@ public class Jetty12HttpServer implements YaCyHttpServer {
             roleInfo.setChecked(true);
             roleInfo.addRole(SwitchboardConstants.ADMIN_ACCOUNT_ROLE);
             return roleInfo;
+        }
+
+        /** Resolve the client address for display and tracking, never for access control. */
+        static String resolveTrackingClientIp(final HttpServletRequest request,
+                final String trustedProxyPatterns) {
+            final String socketRemoteIp = request.getRemoteAddr();
+            if (!ProxyAccessPolicy.isClientAllowed(trustedProxyPatterns, socketRemoteIp)) {
+                return socketRemoteIp;
+            }
+            final String forwardedRemoteIp = request.getHeader(RequestHeader.X_Real_IP);
+            if (forwardedRemoteIp == null) {
+                return socketRemoteIp;
+            }
+            final String candidate = forwardedRemoteIp.trim();
+            return InetAddresses.isInetAddress(candidate) ? candidate : socketRemoteIp;
         }
     }
 

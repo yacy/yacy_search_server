@@ -31,6 +31,12 @@ upnp.remoteHost =
 #(of course you need to customize the ips)
 bindPort = 
 
+# Comma-separated regular expressions matching trusted reverse-proxy socket IPs.
+# X-Real-IP is used for access tracking only when the direct connection comes
+# from one of these addresses. Authentication and access control always use the
+# direct socket IP. Keep this list restricted to proxies controlled by you.
+server.reverseProxy.trusted=127[.]0[.]0[.]1,0:0:0:0:0:0:0:1,::1
+
 # TLS/SSL support:
 #
 # For a German manual see http://yacy-websuche.de/wiki/index.php/De:Interface%C3%9CberHTTPS
