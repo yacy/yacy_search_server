@@ -15,3 +15,7 @@ jobs:
         distribution: 'temurin'
     - name: Build with ant
       run: ant clean all dist
+    - name: Verify Solr and Jetty dependency isolation
+      run: ./test/jetty-solr-dependency-guard.sh
+    - name: Test embedded Solr bridge
+      run: ./test/solr9-jetty-bridge-spike.sh

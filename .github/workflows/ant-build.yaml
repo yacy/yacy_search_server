@@ -38,6 +38,12 @@ jobs:
     - name: Build with Ant
       run: ant clean all dist
 
+    - name: Verify Solr and Jetty dependency isolation
+      run: ./test/jetty-solr-dependency-guard.sh
+
+    - name: Test embedded Solr bridge
+      run: ./test/solr9-jetty-bridge-spike.sh
+
     - name: Verify tarball creation
       run: |
         ls -la ${{ env.RELEASE_DIR }}/
