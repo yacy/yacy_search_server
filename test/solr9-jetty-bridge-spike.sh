@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Exercise the generated Solr 9.0 bridge. Run `ant compile` first. An optional
+# Exercise the generated Solr 9.10 bridge. Run `ant compile` first. An optional
 # JETTY12_CLASSPATH verifies coexistence with already resolved Jetty 12 jars.
 
 set -eu
@@ -36,4 +36,4 @@ javac --release 17 -cp "$classpath" -d "$work" \
 java -cp "$work:$classpath" org.junit.runner.JUnitCore \
     net.yacy.cora.federate.solr.connector.EmbeddedSolrConnectorTest
 
-echo "PASS: integrated Solr 9.0 bridge starts, updates, queries and closes."
+echo "PASS: integrated Solr 9.10 bridge starts, updates, queries and closes."

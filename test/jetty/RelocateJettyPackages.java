@@ -2,9 +2,8 @@
  * Build-time bytecode relocator for the Jetty 12 migration.
  *
  * This is deliberately a small build tool, not YaCy runtime code. It keeps
- * Solr's public packages unchanged while moving its private Jetty 9 linkage
- * below net.yacy.solr9.jetty and its SLF4J 1.7 linkage below
- * net.yacy.solr9.slf4j.
+ * Solr's public packages unchanged while moving its private Jetty 10 linkage
+ * below net.yacy.solr9.jetty.
  */
 package net.yacy.test.jetty;
 
@@ -29,9 +28,7 @@ public final class RelocateJettyPackages {
 
     private static final Relocation[] RELOCATIONS = {
             new Relocation("org/eclipse/jetty", "net/yacy/solr9/jetty",
-                    "org.eclipse.jetty", "net.yacy.solr9.jetty"),
-            new Relocation("org/slf4j", "net/yacy/solr9/slf4j",
-                    "org.slf4j", "net.yacy.solr9.slf4j")
+                    "org.eclipse.jetty", "net.yacy.solr9.jetty")
     };
 
     private RelocateJettyPackages() {

@@ -107,7 +107,7 @@
     <mkdir dir="${ivy.compile.stage}" />
     <ivy:retrieve conf="compile" type="jar,bundle" pathid="compile.path" pattern="${ivy.compile.stage}/[artifact]-[revision].[ext]" />
     <delete failonerror="false">
-      <fileset dir="${lib}" includes="javax.servlet-api-*.jar,jetty-*.jar" />
+      <fileset dir="${lib}" includes="javax.servlet-api-*.jar,jetty-*.jar,lucene-*.jar" />
     </delete>
     <copy todir="${ivy.lib.dir}" overwrite="true">
       <fileset dir="${ivy.compile.stage}" includes="**/*" />
@@ -198,10 +198,10 @@
         <fileset dir="${lib}" includes="solr9-bridge-*.jar" />
     </path>
 
-  <target name="build-solr9-bridge" depends="init,resolve" description="build the private Solr 9.0 Jetty and SLF4J 1.7 island">
+  <target name="build-solr9-bridge" depends="init,resolve" description="build the private Solr 9.10 Jetty 10 island">
     <delete dir="${solr9.bridge.tool}" failonerror="false"/>
     <delete failonerror="false">
-      <fileset dir="${lib}" includes="solr9-bridge-*.jar,solr-core-9.0.0.jar,solr-solrj-9.0.0.jar,solr-scripting-9.0.0.jar,http2-*.jar,slf4j-*-1.7.36.jar" />
+      <fileset dir="${lib}" includes="solr9-bridge-*.jar,solr-*.jar,http2-*.jar,jetty-*-10.0.26.jar,slf4j-*-1.7.36.jar" />
     </delete>
     <mkdir dir="${solr9.bridge.tool}"/>
     <javac srcdir="test/jetty" destdir="${solr9.bridge.tool}"
