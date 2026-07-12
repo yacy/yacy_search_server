@@ -37,7 +37,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.TransactionManager;
-import net.yacy.http.InetPathAccessHandler;
+import net.yacy.http.Jetty12HttpServer;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -243,7 +243,7 @@ public class SettingsAck_p {
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
-                        InetPathAccessHandler.checkPattern(patternStr);
+                        Jetty12HttpServer.AccessRules.checkPattern(patternStr);
                     }
                 } catch (final IllegalArgumentException e) {
                     prop.put("info", "27");

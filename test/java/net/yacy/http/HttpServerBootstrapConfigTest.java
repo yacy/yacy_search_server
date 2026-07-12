@@ -20,6 +20,6 @@ public class HttpServerBootstrapConfigTest {
         Assert.assertEquals(9_000L, HttpServerBootstrapConfig.CONNECTOR_IDLE_TIMEOUT_MILLIS);
         Assert.assertEquals(128, HttpServerBootstrapConfig.ACCEPT_QUEUE_SIZE);
         Assert.assertEquals(4_096, HttpServerBootstrapConfig.REQUEST_INFLATE_BUFFER_SIZE);
-        Assert.assertEquals(-1, HttpServerBootstrapConfig.MAX_FORM_CONTENT_SIZE);
+        Assert.assertEquals(200_000, HttpServerBootstrapConfig.MAX_FORM_CONTENT_SIZE);
     }
 }

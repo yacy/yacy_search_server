@@ -1,5 +1,5 @@
 /**
- *  AdminAuthenticationContext
+ *  ServletRequestHeaderAdapter
  *  Copyright 2026 by Michael Peter Christen
  *  First released 12.07.2026 at https://yacy.net
  *
@@ -20,26 +20,28 @@
 
 package net.yacy.http;
 
-import net.yacy.cora.protocol.Domains;
+import java.util.Enumeration;
 
-/** Request-bound facts needed while the container verifies admin credentials. */
-public final class AdminAuthenticationContext {
+import javax.servlet.http.HttpServletRequest;
 
-    private static final ThreadLocal<String> SOCKET_PEER_IP = new ThreadLocal<>();
+import net.yacy.cora.protocol.RequestHeader;
 
-    private AdminAuthenticationContext() {
+/** Converts servlet request headers into YaCy's mutable header representation. */
+public final class ServletRequestHeaderAdapter {
+
+    private ServletRequestHeaderAdapter() {
     }
 
-    public static void setSocketPeerIp(final String ip) {
-        SOCKET_PEER_IP.set(ip);
-    }
-
-    public static void clear() {
-        SOCKET_PEER_IP.remove();
-    }
-
-    public static boolean isLocalhostRequest() {
-        final String ip = SOCKET_PEER_IP.get();
-        return ip != null && Domains.isLocalhost(ip);
+    public static RequestHeader from(final HttpServletRequest request) {
+        final RequestHeader result = new RequestHeader();
+        final Enumeration<String> names = request.getHeaderNames();
+        while (names.hasMoreElements()) {
+            final String name = names.nextElement();
+            final Enumeration<String> values = request.getHeaders(name);
+            while (values.hasMoreElements()) {
+                result.add(name, values.nextElement());
+            }
+        }
+        return result;
     }
 }

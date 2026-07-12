@@ -203,8 +203,7 @@ assert_body_contains 'YaCy '
 pass "YaCy 404 error page"
 
 request GET /env/grafics/YaCyLogo2012.svg 200 \
-    --header 'Accept-Encoding: gzip' \
-    --raw
+    --header 'Accept-Encoding: gzip'
 assert_header_contains Content-Encoding gzip
 gzip -dc "$response_body" > "$work_dir/gzip-decoded" || fail "gzip response cannot be decompressed"
 cmp "$work_dir/static-full" "$work_dir/gzip-decoded" >/dev/null 2>&1 || \

@@ -46,7 +46,7 @@ import net.yacy.cora.protocol.RequestHeader;
  *
  * This is a plain servlet filter (former Jetty handler MonitorHandler); the
  * tracking entry of a connection is removed on connection close by a
- * servlet-container specific listener, see Jetty9HttpServerImpl.
+ * servlet-container specific listener, see Jetty12HttpServer.
  */
 public class MonitorFilter implements Filter {
 

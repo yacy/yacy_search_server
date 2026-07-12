@@ -39,7 +39,8 @@ bin/apicall.sh 'ConfigAccounts_p.html' >/dev/null
 echo "ok 2 - bin/apicall.sh localhost authentication"
 
 if [ -n "${YACY_SMOKE_ADMIN_USER:-}" ] && [ -n "${YACY_SMOKE_ADMIN_PASSWORD:-}" ]; then
-    authenticated_status=$(status --user "$YACY_SMOKE_ADMIN_USER:$YACY_SMOKE_ADMIN_PASSWORD" \
+    authenticated_status=$(status --anyauth \
+        --user "$YACY_SMOKE_ADMIN_USER:$YACY_SMOKE_ADMIN_PASSWORD" \
         "$base_url$protected_path")
     [ "$authenticated_status" = 200 ] || { echo "FAIL: administrator login returned $authenticated_status" >&2; exit 1; }
     echo "ok 3 - administrator credentials"

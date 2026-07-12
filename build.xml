@@ -39,6 +39,7 @@
   <property name="libt" location="libt"/>
   <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
   <property name="ivy.compile.stage" location="build/ivy-retrieve/compile"/>
+  <property name="jetty12.test.classes" location="build/jetty12-server-tests"/>
   <property name="solr9.bridge.build" location="build/solr9-bridge"/>
   <property name="solr9.bridge.input" location="${solr9.bridge.build}/input"/>
   <property name="solr9.bridge.tool" location="${solr9.bridge.build}/tool"/>
@@ -104,16 +105,16 @@
     -->
     <delete dir="${ivy.compile.stage}" failonerror="false" />
     <mkdir dir="${ivy.compile.stage}" />
-    <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.compile.stage}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="compile" type="jar,bundle" pathid="compile.path" pattern="${ivy.compile.stage}/[artifact]-[revision].[ext]" />
     <delete failonerror="false">
       <fileset dir="${lib}" includes="javax.servlet-api-*.jar,jetty-*.jar" />
     </delete>
     <copy todir="${ivy.lib.dir}" overwrite="true">
       <fileset dir="${ivy.compile.stage}" includes="**/*" />
     </copy>
-    <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
-    <ivy:retrieve conf="solr9-bridge" pathid="solr9.bridge.input.path" pattern="${solr9.bridge.input}/[artifact]-[revision].[ext]" />
-    <ivy:retrieve conf="solr9-bridge-tool" pathid="solr9.bridge.tool.path" pattern="${solr9.bridge.tool.libs}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="test" type="jar,bundle" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="solr9-bridge" type="jar,bundle" pathid="solr9.bridge.input.path" pattern="${solr9.bridge.input}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="solr9-bridge-tool" type="jar,bundle" pathid="solr9.bridge.tool.path" pattern="${solr9.bridge.tool.libs}/[artifact]-[revision].[ext]" />
     <property name="target-resolve-already-run" value="true" />
   </target>
 
@@ -257,7 +258,37 @@
 
   <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets" />
 
-  <target name="all" depends="compile">
+  <target name="jetty12-server-test" depends="compile" description="run focused Jetty 12 server tests">
+    <delete dir="${jetty12.test.classes}" failonerror="false" />
+    <mkdir dir="${jetty12.test.classes}" />
+    <javac srcdir="${test}" destdir="${jetty12.test.classes}"
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
+           release="${javacRelease}" encoding="UTF-8">
+      <include name="net/yacy/http/Jetty12*Test.java" />
+      <include name="net/yacy/http/servlets/ServletResourceTest.java" />
+      <include name="net/yacy/http/servlets/Jetty12QoSFilterTest.java" />
+      <classpath>
+        <pathelement location="${build}" />
+        <path refid="compile.path" />
+        <fileset dir="${libt}" includes="**/*.jar" />
+      </classpath>
+      <compilerarg value="-Xlint:deprecation" />
+    </javac>
+    <java classname="org.junit.runner.JUnitCore" fork="true" failonerror="true">
+      <arg value="net.yacy.http.Jetty12HttpServerTest" />
+      <arg value="net.yacy.http.Jetty12ProxyChainTest" />
+      <arg value="net.yacy.http.servlets.ServletResourceTest" />
+      <arg value="net.yacy.http.servlets.Jetty12QoSFilterTest" />
+      <classpath>
+        <pathelement location="${jetty12.test.classes}" />
+        <pathelement location="${build}" />
+        <path refid="compile.path" />
+        <fileset dir="${libt}" includes="**/*.jar" />
+      </classpath>
+    </java>
+  </target>
+
+  <target name="all" depends="jetty12-server-test">
   </target>
 
   <target name="copyMain4Dist" depends="compile">      
@@ -468,6 +499,7 @@
     </delete>
     <delete dir="test/DATA" failonerror="false"/>
     <delete dir="${ivy.compile.stage}" failonerror="false"/>
+    <delete dir="${jetty12.test.classes}" failonerror="false"/>
     <delete dir="${solr9.bridge.build}" failonerror="false"/>
   </target>
 

@@ -20,6 +20,9 @@
 
 package net.yacy.http;
 
+import java.net.MalformedURLException;
+
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
@@ -31,9 +34,14 @@ import net.yacy.cora.protocol.Domains;
  *
  * All methods are pure functions on their parameters, free of servlet
  * container (Jetty) and Switchboard dependencies: the container specific
- * classes YaCySecurityHandler, YaCyLoginService and YaCyDigestCredential are
- * thin adapters delegating here (extracted from them to ease servlet
- * container migration).
+ * nested classes Jetty12HttpServer.AdminSecurityHandler, .AdminLoginService and
+ * .AdminCredential are thin adapters delegating here (extracted from them to
+ * ease servlet container migration).
+ *
+ * The complete container-neutral administrator security surface lives in this
+ * file: the pure check functions, the request-level {@link AccessPolicy} built
+ * on them, and the {@link AuthenticationContext} that carries the socket peer
+ * IP through the container's credential verification.
  */
 public final class AdminSecurity {
 
@@ -135,5 +143,82 @@ public final class AdminSecurity {
      */
     public static String calcHash(final String pw) {
         return Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(pw));
+    }
+
+    /** Container-neutral policy for administrator access to a request path. */
+    public static final class AccessPolicy {
+
+        public enum Decision {
+            PUBLIC,
+            LOCAL_BYPASS,
+            ADMIN_REQUIRED
+        }
+
+        private final boolean protectAllPages;
+        private final boolean privateRobinsonMode;
+        private final boolean publicSearchPage;
+        private final boolean allowLocalhostWithoutLogin;
+        private final String adminUser;
+        private final String adminHash;
+
+        public AccessPolicy(final boolean protectAllPages, final boolean privateRobinsonMode,
+                final boolean publicSearchPage, final boolean allowLocalhostWithoutLogin,
+                final String adminUser, final String adminHash) {
+            this.protectAllPages = protectAllPages;
+            this.privateRobinsonMode = privateRobinsonMode;
+            this.publicSearchPage = publicSearchPage;
+            this.allowLocalhostWithoutLogin = allowLocalhostWithoutLogin;
+            this.adminUser = adminUser;
+            this.adminHash = adminHash;
+        }
+
+        public Decision decide(final String path, final String socketPeerIp, final String referer,
+                final String authorizationHeader) {
+            if (!AdminSecurity.isProtectedPath(path, this.protectAllPages,
+                    this.privateRobinsonMode, this.publicSearchPage)) {
+                return Decision.PUBLIC;
+            }
+
+            if (AdminSecurity.isLocalhostAccess(socketPeerIp, refererHost(referer))) {
+                if (this.allowLocalhostWithoutLogin || AdminSecurity.checkLocalhostLazyAuth(
+                        authorizationHeader, this.adminUser, this.adminHash)) {
+                    return Decision.LOCAL_BYPASS;
+                }
+            }
+            return Decision.ADMIN_REQUIRED;
+        }
+
+        private static String refererHost(final String referer) {
+            if (referer == null || referer.isEmpty()) {
+                return null;
+            }
+            try {
+                return new MultiProtocolURL(referer).getHost();
+            } catch (final MalformedURLException e) {
+                return null;
+            }
+        }
+    }
+
+    /** Request-bound facts needed while the container verifies admin credentials. */
+    public static final class AuthenticationContext {
+
+        private static final ThreadLocal<String> SOCKET_PEER_IP = new ThreadLocal<>();
+
+        private AuthenticationContext() {
+        }
+
+        public static void setSocketPeerIp(final String ip) {
+            SOCKET_PEER_IP.set(ip);
+        }
+
+        public static void clear() {
+            SOCKET_PEER_IP.remove();
+        }
+
+        public static boolean isLocalhostRequest() {
+            final String ip = SOCKET_PEER_IP.get();
+            return ip != null && Domains.isLocalhost(ip);
+        }
     }
 }

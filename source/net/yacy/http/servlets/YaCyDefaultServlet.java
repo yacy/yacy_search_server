@@ -141,7 +141,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
-    /* ------------------------------------------------------------ */
+    
+    
     @Override
     public void init() throws UnavailableException {
         final Switchboard sb = Switchboard.getSwitchboard();
@@ -159,14 +160,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
         this._acceptRanges = this.getInitBoolean("acceptRanges", this._acceptRanges);
         this._dirAllowed = this.getInitBoolean("dirAllowed", this._dirAllowed);
 
-        Jetty9ServletResource.disableDefaultCaches(); // caching is handled internally (prevent double caching)
-
         final String rb = this.getInitParameter("resourceBase");
         try {
             if (rb != null) {
-                this._resourceBase = Jetty9ServletResource.from(rb);
+                this._resourceBase = ServletResource.from(rb);
             } else {
-                this._resourceBase = Jetty9ServletResource.from(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
+                this._resourceBase = ServletResource.from(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
             }
         } catch (final IOException e) {
             ConcurrentLog.severe("FILEHANDLER", "event=http.resource subsystem=http result=missing-resource-base reason=" + e.getMessage());
@@ -179,7 +178,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         this.templateMethodCache = new ConcurrentHashMap<>();
     }
 
-    /* ------------------------------------------------------------ */
     protected boolean getInitBoolean(final String name, final boolean dft) {
         final String value = this.getInitParameter(name);
         if (value == null || value.length() == 0) {
@@ -192,7 +190,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 || value.startsWith("1"));
     }
 
-    /* ------------------------------------------------------------ */
     /**
      * get Resource to serve. Map a path to a resource. The default
      * implementation calls HttpContext.getResource but derived servlets may
@@ -208,7 +205,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 r = this._resourceBase.addPath(pathInContext);
             } else {
                 final URL u = this._servletContext.getResource(pathInContext);
-                r = Jetty9ServletResource.from(u);
+                r = ServletResource.from(u);
             }
 
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -220,13 +217,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         return r;
     }
-
-    /* ------------------------------------------------------------ */
+    
     protected boolean hasDefinedRange(final Enumeration<String> reqRanges) {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
 
-    /* ------------------------------------------------------------ */
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
@@ -281,7 +276,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
             	if (resource != null) resource.close();
-                resource = Jetty9ServletResource.from(new File(this._htDocsPath, pathInContext));
+                resource = ServletResource.from(new File(this._htDocsPath, pathInContext));
             }
 
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -363,7 +358,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
     }
 
-    /* ------------------------------------------------------------ */
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
@@ -469,7 +463,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
     }
 
-    /* ------------------------------------------------------------ */
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doTrace(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
@@ -478,14 +471,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
-    /* ------------------------------------------------------------ */
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
         resp.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
     }
 
-    /* ------------------------------------------------------------ */
     /**
      * Finds a matching welcome file for the supplied path.
      * The filename to look is set as servlet context init parameter
@@ -506,7 +497,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         return null;
     }
-    /* ------------------------------------------------------------ */
+    
     /* Check modification date headers.
      * send a 304 response instead of content if not modified since
      */
@@ -549,7 +540,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return true;
     }
 
-    /* ------------------------------------------------------------------- */
     protected void sendDirectory(final HttpServletRequest request,
             final HttpServletResponse response,
             final ServletResource resource,
@@ -577,7 +567,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         response.getOutputStream().write(data);
     }
 
-    /* ------------------------------------------------------------ */
     /**
      * send static content
      *
@@ -730,7 +719,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
     }
 
-    /* ------------------------------------------------------------ */
     protected void writeHeaders(final HttpServletResponse response, final ServletResource resource, final long count) {
         if (response.getContentType() == null) {
             final String extensionmime;

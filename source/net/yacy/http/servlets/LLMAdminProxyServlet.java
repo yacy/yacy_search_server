@@ -219,7 +219,7 @@ public class LLMAdminProxyServlet extends HttpServlet {
     }
 
     /**
-     * Check for administrator access, mirroring the rules of YaCySecurityHandler:
+     * Check for administrator access, mirroring the active server security handler:
      * localhost access with the localhost-admin setting is granted without credentials,
      * everything else requires an authenticated user with the admin right. Sends the
      * authentication challenge (401) when credentials are missing.

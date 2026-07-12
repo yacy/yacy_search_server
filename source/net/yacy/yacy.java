@@ -68,7 +68,7 @@ import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
-import net.yacy.http.Jetty9HttpServerImpl;
+import net.yacy.http.Jetty12HttpServer;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
@@ -300,7 +300,7 @@ public final class yacy {
             try {
                 // start http server
                 YaCyHttpServer httpServer;
-                httpServer = new Jetty9HttpServerImpl(port, host);
+                httpServer = new Jetty12HttpServer(port, host);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
                 // TODO: this has no effect on Jetty (but needed to reflect configured value and limit is still used)

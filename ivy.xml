@@ -51,8 +51,8 @@
       <dependency org="org.apache.commons" name="commons-lang3" rev="3.20.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.14"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.14"/>
-      <dependency org="org.apache.james" name="apache-mime4j-core" rev="0.8.14"/>
-      <dependency org="org.apache.james" name="apache-mime4j-dom" rev="0.8.14"/>
+      <dependency org="org.apache.james" name="apache-mime4j-core" rev="0.8.14" conf="compile->master"/>
+      <dependency org="org.apache.james" name="apache-mime4j-dom" rev="0.8.14" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-analysis-common" rev="9.0.0"/>
       <dependency org="org.apache.lucene" name="lucene-backward-codecs" rev="9.0.0" />
       <dependency org="org.apache.lucene" name="lucene-classification" rev="9.0.0" />
@@ -93,18 +93,34 @@
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.84" />
       <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="7.2.1" />
-      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.58.v20250814" conf="compile->default;solr9-bridge->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-io" rev="9.4.58.v20250814" conf="compile->default;solr9-bridge->master"/>
+      <!-- Jetty 12 Core and EE8 form the public embedded-server runtime. -->
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="12.1.11" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-io" rev="12.1.11" conf="compile->default"/>
       <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.58.v20250814"/>
-      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.58.v20250814"/>
-      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.58.v20250814"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.58.v20250814"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.58.v20250814">
-        <exclude module="jetty-util-ajax" />
+      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="12.1.11" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-security" rev="12.1.11" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-server" rev="12.1.11" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="12.1.11" conf="compile->default" />
+      <dependency org="org.eclipse.jetty.compression" name="jetty-compression-server" rev="12.1.11" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-nested" rev="12.1.11" conf="compile->default">
+        <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.58.v20250814" conf="compile->default;solr9-bridge->master" />
-      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.58.v20250814"  />
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-security" rev="12.1.11" conf="compile->default">
+        <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
+      </dependency>
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-servlet" rev="12.1.11" conf="compile->default">
+        <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
+      </dependency>
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-servlets" rev="12.1.11" conf="compile->default">
+        <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
+      </dependency>
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-webapp" rev="12.1.11" conf="compile->default">
+        <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
+      </dependency>
+      <!-- Private Solr bridge inputs remain on Jetty 9. -->
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-io" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.58.v20250814" conf="solr9-bridge->master" />
       <!--
         Temporary Solr 9.0 runtime bridge: CoreContainer eagerly constructs an
         Http2SolrClient for its shard/update handlers even in standalone mode.

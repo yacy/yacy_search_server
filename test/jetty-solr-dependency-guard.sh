@@ -1,8 +1,7 @@
 #!/usr/bin/env sh
 
-# Guard the classpath boundary needed to migrate YaCy's embedded server from
-# Jetty 9 to Jetty 12 while Solr 9's Jetty client is relocated into a private
-# package and kept out of YaCy source code.
+# Guard the production Jetty 12 classpath while Solr 9's Jetty 9 client remains
+# relocated into a private package and out of YaCy source code.
 
 set -eu
 
@@ -25,6 +24,14 @@ if grep -R -n -E \
     fail "YaCy source must not use Solr's Jetty-backed clients or runner"
 fi
 
+if grep -R -n -E \
+    --include='YaCyDefaultServlet.java' \
+    --include='*ServletResource.java' \
+    'org\.eclipse\.jetty|Jetty9ServletResource' \
+    source/net/yacy/http/servlets >/dev/null 2>&1; then
+    fail "YaCyDefaultServlet resources must remain servlet-container neutral"
+fi
+
 if grep -E \
     'name="(jetty-deploy|jetty-jmx)"' \
     ivy.xml >/dev/null 2>&1; then
@@ -34,8 +41,29 @@ fi
 grep -E 'name="jetty-client".*conf="solr9-bridge->master"' ivy.xml >/dev/null 2>&1 || \
     fail "jetty-client must only be a direct input of the Solr 9 bridge"
 
-grep -E 'org="org.eclipse.jetty" name="jetty-io"' ivy.xml >/dev/null 2>&1 || \
-    fail "jetty-io must be an explicit dependency because YaCy imports its API"
+server_jetty_version=12.1.11
+
+for artifact in jetty-http jetty-io jetty-proxy jetty-security jetty-server jetty-util; do
+    grep -E "org=\"org.eclipse.jetty\" name=\"$artifact\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
+        fail "$artifact $server_jetty_version must be on the production compile classpath"
+done
+
+for artifact in jetty-ee8-nested jetty-ee8-security jetty-ee8-servlet jetty-ee8-servlets jetty-ee8-webapp; do
+    grep -E "org=\"org.eclipse.jetty.ee8\" name=\"$artifact\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
+        fail "$artifact $server_jetty_version must be an explicit production EE8 dependency"
+done
+grep -E "org=\"org.eclipse.jetty.compression\" name=\"jetty-compression-server\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
+    fail "Jetty 12 compression server support must be on the production classpath"
+
+if grep -E 'conf="jetty12-migration|rev="9\.4\.58\.v20250814" conf="compile' ivy.xml >/dev/null 2>&1; then
+    fail "ivy.xml still contains an isolated migration configuration or public Jetty 9 dependency"
+fi
+
+if grep -R -n -E --include='*.java' \
+    '(Jetty9HttpServerImpl|AbstractRemoteHandler|YaCyLoginService|YaCySecurityHandler|YaCyDigestCredential|YacyDomainHandler|InetPathAccessHandler)' \
+    source >/dev/null 2>&1; then
+    fail "obsolete Jetty 9 adapter references remain in production source"
+fi
 
 for artifact in http2-client http2-common http2-http-client-transport; do
     grep -E "org=\"org.eclipse.jetty.http2\" name=\"$artifact\".*conf=\"solr9-bridge->master\"" ivy.xml >/dev/null 2>&1 || \
@@ -52,14 +80,6 @@ grep -E 'org="org.eclipse.jetty.toolchain" name="jetty-servlet-api" rev="4.0.9"'
 grep -E 'exclude org="javax.servlet" module="javax.servlet-api"' ivy.xml >/dev/null 2>&1 || \
     fail "transitive javax.servlet-api artifacts must be excluded"
 
-expected_jetty_version=$(sed -n \
-    's/.*org="org.eclipse.jetty" name="jetty-server" rev="\([^"]*\)".*/\1/p' \
-    ivy.xml)
-[ -n "$expected_jetty_version" ] || \
-    fail "could not determine the public Jetty version from jetty-server in ivy.xml"
-[ "$(printf '%s\n' "$expected_jetty_version" | wc -l | tr -d ' ')" -eq 1 ] || \
-    fail "jetty-server must declare exactly one public Jetty version"
-
 if [ -d lib ]; then
     public_jetty_count=0
     for artifact in lib/jetty-*.jar; do
@@ -72,21 +92,12 @@ if [ -d lib ]; then
         esac
         public_jetty_count=$((public_jetty_count + 1))
         case $(basename "$artifact") in
-            *-"$expected_jetty_version".jar) ;;
-            *) fail "public Jetty artifact is not on version $expected_jetty_version: $artifact" ;;
+            *-"$server_jetty_version".jar) ;;
+            *) fail "production Jetty artifact is not on version $server_jetty_version: $artifact" ;;
         esac
     done
     [ "$public_jetty_count" -gt 0 ] || \
-        fail "no public Jetty $expected_jetty_version artifacts found"
-
-    case "$expected_jetty_version" in
-        12.*)
-            for artifact in lib/jetty-continuation-*.jar; do
-                [ -e "$artifact" ] || continue
-                fail "Jetty 9-only artifact remains on the Jetty 12 classpath: $artifact"
-            done
-            ;;
-    esac
+        fail "no production Jetty $server_jetty_version artifacts found"
 
     servlet_api_count=0
     for artifact in lib/*servlet-api-*.jar; do
@@ -103,6 +114,12 @@ if [ -d lib ]; then
     for pattern in \
         'jetty-deploy-*.jar' \
         'jetty-jmx-*.jar' \
+        'jetty-slf4j-impl-*.jar' \
+        'jetty-jakarta-servlet-api-*.jar' \
+        'jakarta.servlet-api-*.jar' \
+        'jetty-ee9-*.jar' \
+        'jetty-ee10-*.jar' \
+        'jetty-ee11-*.jar' \
         'solr-core-*.jar' \
         'solr-solrj-*.jar' \
         'solr-scripting-*.jar' \
@@ -144,4 +161,4 @@ if [ -d lib ]; then
     done
 fi
 
-echo "PASS: Solr 9 uses only the relocated Jetty client and SLF4J 1.7 island."
+echo "PASS: production Jetty 12 and the relocated Solr 9 Jetty 9 dependencies are separated."

@@ -23,8 +23,8 @@ package net.yacy.http;
 /**
  * Servlet-container neutral interface to YaCy's embedded http server.
  * This is the only view the rest of the code base has on the server;
- * all container specific code (currently Jetty 9, see {@link Jetty9HttpServerImpl})
- * stays behind this interface to ease migration to newer container versions.
+ * all container-specific code in {@link Jetty12HttpServer} and
+ * {@link Jetty12ProxyChain} stays behind this interface.
  */
 public interface YaCyHttpServer {
 
