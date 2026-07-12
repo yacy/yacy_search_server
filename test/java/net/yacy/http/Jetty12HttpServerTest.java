@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.ee8.security.authentication.DigestAuthenticator;
 import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee8.servlet.ServletHolder;
@@ -34,6 +33,7 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Credential;
@@ -79,7 +79,7 @@ public class Jetty12HttpServerTest {
                     0, "127.0.0.1", 1, null, -1);
             assertFalse(server.withSSL());
             assertEquals(-1, server.getSslPort());
-            assertTrue(server.getVersion().startsWith("Jetty 12.1.11"));
+            assertTrue(server.getVersion().startsWith("Jetty 12.0.37"));
 
             try {
                 server.startupServer();
@@ -116,10 +116,22 @@ public class Jetty12HttpServerTest {
 
         @Test
         public void preservesJetty9SvgCompressionContract() {
-            final CompressionConfig compression = Jetty12HttpServer.createCompressionConfig(true);
-            assertTrue(compression.isCompressMimeTypeSupported("image/svg+xml"));
-            assertFalse(compression.isCompressMimeTypeSupported("image/png"));
-            assertTrue(compression.isCompressMethodSupported("GET"));
+            final GzipHandler compression = Jetty12HttpServer.createGzipHandler(null, true);
+            assertTrue(compression.isMimeTypeDeflatable("image/svg+xml"));
+            assertFalse(compression.isMimeTypeDeflatable("image/png"));
+            assertEquals(HttpServerBootstrapConfig.REQUEST_INFLATE_BUFFER_SIZE,
+                    compression.getInflateBufferSize());
+            assertTrue(java.util.Arrays.asList(compression.getIncludedMethods()).contains("GET"));
+            assertTrue(java.util.Arrays.asList(compression.getIncludedInflationPaths()).contains("/*"));
+            assertTrue(java.util.Arrays.asList(compression.getExcludedInflationPaths()).contains("*.svgz"));
+        }
+
+        @Test
+        public void canDisableGzipResponsesWithoutDisablingRequestInflation() {
+            final GzipHandler compression = Jetty12HttpServer.createGzipHandler(null, false);
+            assertTrue(java.util.Arrays.asList(compression.getExcludedMethods()).contains("GET"));
+            assertEquals(HttpServerBootstrapConfig.REQUEST_INFLATE_BUFFER_SIZE,
+                    compression.getInflateBufferSize());
         }
 
         @Test

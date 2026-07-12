@@ -41,7 +41,7 @@ fi
 grep -E 'name="jetty-client".*conf="solr9-bridge->master"' ivy.xml >/dev/null 2>&1 || \
     fail "jetty-client must only be a direct input of the Solr 9 bridge"
 
-server_jetty_version=12.1.11
+server_jetty_version=12.0.37
 
 for artifact in jetty-http jetty-io jetty-proxy jetty-security jetty-server jetty-util; do
     grep -E "org=\"org.eclipse.jetty\" name=\"$artifact\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
@@ -52,8 +52,9 @@ for artifact in jetty-ee8-nested jetty-ee8-security jetty-ee8-servlet jetty-ee8-
     grep -E "org=\"org.eclipse.jetty.ee8\" name=\"$artifact\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
         fail "$artifact $server_jetty_version must be an explicit production EE8 dependency"
 done
-grep -E "org=\"org.eclipse.jetty.compression\" name=\"jetty-compression-server\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
-    fail "Jetty 12 compression server support must be on the production classpath"
+if grep -E 'org="org.eclipse.jetty.compression"|name="jetty-compression-' ivy.xml >/dev/null 2>&1; then
+    fail "Jetty 12.1 compression modules must not be declared on the Jetty 12.0 classpath"
+fi
 
 if grep -E 'conf="jetty12-migration|rev="9\.4\.58\.v20250814" conf="compile' ivy.xml >/dev/null 2>&1; then
     fail "ivy.xml still contains an isolated migration configuration or public Jetty 9 dependency"

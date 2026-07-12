@@ -37,10 +37,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.compression.gzip.GzipCompression;
-import org.eclipse.jetty.compression.gzip.GzipDecoderConfig;
-import org.eclipse.jetty.compression.server.CompressionConfig;
-import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee8.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.ee8.security.RoleInfo;
 import org.eclipse.jetty.ee8.security.authentication.DigestAuthenticator;
@@ -49,7 +45,6 @@ import org.eclipse.jetty.ee8.servlet.ServletHolder;
 import org.eclipse.jetty.ee8.webapp.WebAppContext;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.UserPrincipal;
@@ -64,6 +59,7 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Credential;
@@ -203,38 +199,24 @@ public class Jetty12HttpServer implements YaCyHttpServer {
         security.setLoginService(loginService);
         webApp.setSecurityHandler(security);
 
-        final CompressionHandler compressionHandler = new CompressionHandler(webApp.get());
-        final GzipCompression gzip = new GzipCompression();
-        final GzipDecoderConfig decoder = new GzipDecoderConfig();
-        decoder.setBufferSize(HttpServerBootstrapConfig.REQUEST_INFLATE_BUFFER_SIZE);
-        gzip.setDefaultDecoderConfig(decoder);
-        compressionHandler.putCompression(gzip);
-        compressionHandler.putConfiguration("/*",
-                createCompressionConfig(bootstrap.gzipResponsesEnabled()));
-        return compressionHandler;
+        return createGzipHandler(webApp.get(), bootstrap.gzipResponsesEnabled());
     }
 
-    static CompressionConfig createCompressionConfig(final boolean gzipResponsesEnabled) {
-        final CompressionConfig.Builder compression = CompressionConfig.builder()
-                .compressIncludeMethod("GET")
-                .decompressIncludeMethod("POST");
-        for (final String type : MimeTypes.DEFAULTS.getMimeMap().values()) {
-            if ("image/svg+xml".equals(type)) {
-                compression.compressExcludePath("*.svgz").decompressExcludePath("*.svgz");
-            } else if (type.startsWith("image/") || type.startsWith("audio/")
-                    || type.startsWith("video/")) {
-                compression.compressExcludeMimeType(type).decompressExcludeMimeType(type);
-            }
-        }
-        for (final String type : new String[] {"application/compress", "application/zip",
-                "application/gzip", "application/bzip2", "application/brotli",
-                "application/x-xz", "application/x-rar-compressed"}) {
-            compression.compressExcludeMimeType(type).decompressExcludeMimeType(type);
-        }
+    static GzipHandler createGzipHandler(final Handler handler, final boolean gzipResponsesEnabled) {
+        final GzipHandler gzip = new GzipHandler(handler);
+        gzip.setIncludedMethods(HttpMethod.GET.asString());
+        gzip.setInflateBufferSize(HttpServerBootstrapConfig.REQUEST_INFLATE_BUFFER_SIZE);
+        gzip.addIncludedInflationPaths("/*");
+        gzip.addExcludedInflationPaths("*.svgz");
         if (!gzipResponsesEnabled) {
-            compression.compressExcludeMethod("GET").compressExcludeMethod("POST");
+            gzip.addExcludedMethods(HttpMethod.GET.asString());
         }
-        return compression.build();
+        /*
+         * Jetty 12.1 replaced GzipHandler with CompressionHandler plus
+         * GzipCompression/GzipDecoderConfig. Restore that adapter when YaCy moves
+         * back to 12.1 or later; it also supports method-specific decompression.
+         */
+        return gzip;
     }
 
     @Override

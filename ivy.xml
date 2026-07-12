@@ -94,27 +94,26 @@
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.84" />
       <dependency org="com.fasterxml.woodstox" name="woodstox-core" rev="7.2.1" />
       <!-- Jetty 12 Core and EE8 form the public embedded-server runtime. -->
-      <dependency org="org.eclipse.jetty" name="jetty-http" rev="12.1.11" conf="compile->default"/>
-      <dependency org="org.eclipse.jetty" name="jetty-io" rev="12.1.11" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="12.0.37" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-io" rev="12.0.37" conf="compile->default"/>
       <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.58.v20250814" conf="solr9-bridge->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="12.1.11" conf="compile->default"/>
-      <dependency org="org.eclipse.jetty" name="jetty-security" rev="12.1.11" conf="compile->default"/>
-      <dependency org="org.eclipse.jetty" name="jetty-server" rev="12.1.11" conf="compile->default"/>
-      <dependency org="org.eclipse.jetty" name="jetty-util" rev="12.1.11" conf="compile->default" />
-      <dependency org="org.eclipse.jetty.compression" name="jetty-compression-server" rev="12.1.11" conf="compile->default"/>
-      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-nested" rev="12.1.11" conf="compile->default">
+      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="12.0.37" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-security" rev="12.0.37" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-server" rev="12.0.37" conf="compile->default"/>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="12.0.37" conf="compile->default" />
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-nested" rev="12.0.37" conf="compile->default">
         <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
       </dependency>
-      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-security" rev="12.1.11" conf="compile->default">
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-security" rev="12.0.37" conf="compile->default">
         <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
       </dependency>
-      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-servlet" rev="12.1.11" conf="compile->default">
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-servlet" rev="12.0.37" conf="compile->default">
         <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
       </dependency>
-      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-servlets" rev="12.1.11" conf="compile->default">
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-servlets" rev="12.0.37" conf="compile->default">
         <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
       </dependency>
-      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-webapp" rev="12.1.11" conf="compile->default">
+      <dependency org="org.eclipse.jetty.ee8" name="jetty-ee8-webapp" rev="12.0.37" conf="compile->default">
         <exclude org="org.eclipse.jetty.toolchain" module="jetty-servlet-api"/>
       </dependency>
       <!-- Private Solr bridge inputs remain on Jetty 9. -->
