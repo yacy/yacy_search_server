@@ -63,12 +63,12 @@ GET or POST /AccessTracker_p.html?host=...&page=...
 Expect observations: counts, logs, queues, timing, network rows, thread states, or resource values. Monitoring does not fix the issue by itself; it points to the next page or setting to change.
 
 When YaCy is reached through a reverse proxy, Access Tracker uses `X-Real-IP`
-only when the proxy's direct socket IP matches one of the comma-separated regular
-expressions in `server.reverseProxy.trusted`. Loopback proxies are trusted by
-default. Authentication and access-control decisions continue to use the direct
-socket IP, not the forwarded address. The reverse proxy must overwrite
-`X-Real-IP` with the client address; it must not pass a client-supplied value
-unchanged.
+only when the proxy's direct socket IP matches one of the comma-separated
+regular expressions in `server.reverseProxy.trusted` and the header contains
+one valid IPv4 or IPv6 address. Loopback proxies are trusted by default.
+Authentication and access-control decisions continue to use the direct socket
+IP, not the forwarded address. The reverse proxy must overwrite `X-Real-IP`
+with the client address; it must not pass a client-supplied value unchanged.
 
 ## Related Pages
 

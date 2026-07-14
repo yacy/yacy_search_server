@@ -34,6 +34,13 @@ Call the endpoint as a protocol surface. Use exact parameter names and encoded v
 
 This is a peer-service endpoint for YaCy peer communication, not a normal editing page.
 
+Behind a reverse proxy, YaCy accepts `X-Real-IP` as the effective client and
+routing address only when the proxy socket IP matches
+`server.reverseProxy.trusted` and the header contains one valid IPv4 or IPv6
+address. Otherwise YaCy uses the socket IP. Authentication and access control
+always use the socket IP. The proxy must overwrite, not pass through, any
+client-supplied `X-Real-IP` value.
+
 ## Automation And API
 
 Page backend: `source/net/yacy/htroot/yacy/query.java`.

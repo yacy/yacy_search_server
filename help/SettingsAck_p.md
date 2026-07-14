@@ -58,11 +58,12 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `fileHost` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `msgForwardingEnabled` | Enables the named feature. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
 | `port` | HTTP port where YaCy listens. Values below 1024 are ignored by this form; changing the port triggers reconnect/redirect behavior. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
+| `publicPort` | Optional public non-TLS HTTP port, from 1 through 65535, advertised in YaCy's seed/P2P metadata. It takes precedence over UPnP and the local listening port. An empty value disables the manual override. | Processed with the `serveraccount` settings action. Invalid, non-numeric, zero, or out-of-range values leave the previous setting unchanged. Set it when NAT or a reverse proxy exposes YaCy on a different external port. |
 | `proxyaccess` | Saves the proxy client IP-number filter. | Changes proxy access scope; verify the filter before submitting. |
 | `proxyfilter` | Filter expression. It decides which records are included, excluded, displayed, exported, or processed on this page. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
 | `remoteProxyHost` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `remoteProxyUser` | User or account value. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `serveraccount` | User or account value. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
+| `serveraccount` | Action marker whose presence applies the Server Access form, including `fileHost`, `staticIP`, `publicPort`, and `serverfilter`. Its submitted value is not interpreted. | Requires administrator access and a valid transaction token. Include the complete Server Access form state because the action processes its related fields together. |
 | `serverfilter` | Filter expression. It decides which records are included, excluded, displayed, exported, or processed on this page. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
 | `serveruser` | User or account value. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `urlproxydomains` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
@@ -74,6 +75,12 @@ Example request shape:
 ```http
 GET or POST /SettingsAck_p.html?port=...&adminaccount=...&adminpw1=...&adminpw2=...&adminuser=...
 ```
+
+For a server-access form submission, `serveraccount` selects the action and
+`publicPort` carries the optional override. A valid value is stored and applied
+to the current peer seed. Clearing the value removes the override; subsequent
+seed refreshes then use the UPnP mapping when available, otherwise the local
+HTTP listening port. The setting does not override the public TLS port.
 
 ## What To Expect
 

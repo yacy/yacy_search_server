@@ -66,7 +66,7 @@ public final class SwitchboardConstants {
     public static final String SERVER_SHUTDOWNPORT          = "port.shutdown"; // local port to listen for a shutdown signal (0 <= disabled)
     public static final String SERVER_STATICIP              = "staticIP"; // static IP of http server
     public static final String SERVER_PUBLICPORT            = "publicPort";
-    /** Socket peers whose X-Real-IP header may be used for request tracking. */
+    /** Socket peers whose validated X-Real-IP header may be used for routing and tracking. */
     public static final String SERVER_REVERSE_PROXY_TRUSTED = "server.reverseProxy.trusted";
     public static final String SERVER_REVERSE_PROXY_TRUSTED_DEFAULT =
             "127[.]0[.]0[.]1,0:0:0:0:0:0:0:1,::1";

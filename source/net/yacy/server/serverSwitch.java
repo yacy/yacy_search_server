@@ -229,11 +229,17 @@ public class serverSwitch {
      */
     public int getPublicPort(final String key, final int dflt) {
 
+        if (SwitchboardConstants.SERVER_PORT.equals(key)) {
+            final int configuredPublicPort =
+                    this.getConfigInt(SwitchboardConstants.SERVER_PUBLICPORT, -1);
+            if (Seed.isProperPort(configuredPublicPort)) {
+                return configuredPublicPort;
+            }
+        }
+
         if (this.isConnectedViaUpnp && this.upnpPortMap.containsKey(key)) {
             return this.upnpPortMap.get(key).intValue();
         }
-
-        // TODO: add way of setting and retrieving port for manual NAT
 
         return this.getConfigInt(key, dflt);
     }

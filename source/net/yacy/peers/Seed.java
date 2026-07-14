@@ -376,7 +376,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * If no feedback from other peers exist, then all locally determined IPs are returned.
      * If a feedback from other peers exist, then return at most two IPs:
      * the latest IPv4 and the latest IPv6 which was returned during a hello process from a remote peer
-     * @return a set of IPs which are supposed to be my own public IPs
+     * This is the canonical view of a peer's addresses. Callers performing a
+     * network operation should iterate the returned set to allow address-family
+     * fallback. When only a last-resort single address is needed, use the first
+     * iterator entry after checking that the set is not empty.
+     * @return an ordered set of IPs which are supposed to be my own public IPs
      */
     public final Set<String> getIPs() {
         Set<String> h = new LinkedHashSet<>();

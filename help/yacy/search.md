@@ -34,6 +34,13 @@ Call the endpoint as a protocol surface. Use exact parameter names and encoded v
 
 This is a peer-service endpoint for YaCy peer communication, not a normal editing page.
 
+Behind a reverse proxy, YaCy accepts `X-Real-IP` as the effective client and
+routing address only when the proxy socket IP matches
+`server.reverseProxy.trusted` and the header contains one valid IPv4 or IPv6
+address. Otherwise YaCy uses the socket IP. Authentication and access control
+always use the socket IP. The proxy must overwrite, not pass through, any
+client-supplied `X-Real-IP` value.
+
 ## Automation And API
 
 Page backend: `source/net/yacy/htroot/yacy/search.java`.
@@ -53,6 +60,7 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `contentdom` | Content domain filter. Common values are `all`, `text`, `image`, `audio`, `video`, and `app`; use it to ask for web pages, media, or application documents deliberately. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `count` | SRU-style result count. It is an alternative to `maximumRecords` on search endpoints. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
 | `filter` | Filter text or expression used to narrow the displayed records. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
+| `iam` | Twelve-character enhanced-Base64 seed hash of the requesting YaCy peer. When it identifies a known peer, YaCy uses it for search-statistics attribution so peers sharing an address behind NAT remain distinguishable. | This is attribution metadata, not an independent authentication credential. Missing, malformed, or unknown hashes fall back to the effective request client IP. |
 | `language` | Interface language. Values are `browser` for the browser-preferred language, `default` for English, or a language code such as `de`, `fr`, `es`, `zh`, `ja`, or `ko`. | Changes stored data, configuration, or a running job. Use the authenticated action flow where required and verify the result. |
 | `query` | Search text. Use ordinary search terms, quoted phrases where supported by YaCy query parsing, and optional YaCy modifiers such as collection filters when you intentionally need them. | Controls the scope or format of the result. Prefer the narrowest value that answers the request. |
 | `sitehost` | Host or domain scope. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
@@ -63,7 +71,7 @@ The table explains values that an agent or script must set deliberately. Paramet
 Example request shape:
 
 ```http
-GET or POST /yacy/search.html?language=...&query=...&contentdom=...&abstracts=...&author=...
+GET or POST /yacy/search.html?iam=...&language=...&query=...&contentdom=...&abstracts=...&author=...
 ```
 
 ## What To Expect

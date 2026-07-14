@@ -482,6 +482,12 @@ public class Jetty12HttpServer implements YaCyHttpServer {
                 throws IOException, ServletException {
             AdminSecurity.AuthenticationContext.setSocketPeerIp(baseRequest.getRemoteAddr());
             try {
+                final Switchboard switchboard = Switchboard.getSwitchboard();
+                request.setAttribute(RequestHeader.EFFECTIVE_CLIENT_IP_ATTRIBUTE,
+                        resolveTrustedClientIp(request,
+                                switchboard.getConfig(
+                                        SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED,
+                                        SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT)));
                 super.handle(pathInContext, baseRequest, request, response);
             } finally {
                 AdminSecurity.AuthenticationContext.clear();
@@ -493,9 +499,7 @@ public class Jetty12HttpServer implements YaCyHttpServer {
                 final org.eclipse.jetty.ee8.nested.Request request) {
             final Switchboard switchboard = Switchboard.getSwitchboard();
             final String socketRemoteIp = request.getRemoteAddr();
-            final String trackingRemoteIp = resolveTrackingClientIp(request,
-                    switchboard.getConfig(SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED,
-                            SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
+            final String trackingRemoteIp = RequestHeader.client(request);
             serverAccessTracker.track(trackingRemoteIp, pathInContext);
             final AdminSecurity.AccessPolicy policy = new AdminSecurity.AccessPolicy(
                     switchboard.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false),
@@ -519,8 +523,8 @@ public class Jetty12HttpServer implements YaCyHttpServer {
             return roleInfo;
         }
 
-        /** Resolve the client address for display and tracking, never for access control. */
-        static String resolveTrackingClientIp(final HttpServletRequest request,
+        /** Resolve the trusted client address for routing and tracking, never for access control. */
+        static String resolveTrustedClientIp(final HttpServletRequest request,
                 final String trustedProxyPatterns) {
             final String socketRemoteIp = request.getRemoteAddr();
             if (!ProxyAccessPolicy.isClientAllowed(trustedProxyPatterns, socketRemoteIp)) {

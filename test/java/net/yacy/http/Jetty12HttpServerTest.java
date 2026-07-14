@@ -13,6 +13,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -121,27 +123,60 @@ public class Jetty12HttpServerTest {
             final HttpServletRequest trustedProxyRequest = requestWithRemoteAddress(
                     "127.0.0.1", "198.51.100.23");
             assertEquals("198.51.100.23",
-                    Jetty12HttpServer.AdminSecurityHandler.resolveTrackingClientIp(
+                    Jetty12HttpServer.AdminSecurityHandler.resolveTrustedClientIp(
                             trustedProxyRequest,
                             SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
 
             final HttpServletRequest spoofedDirectRequest = requestWithRemoteAddress(
                     "203.0.113.10", "127.0.0.1");
             assertEquals("203.0.113.10",
-                    Jetty12HttpServer.AdminSecurityHandler.resolveTrackingClientIp(
+                    Jetty12HttpServer.AdminSecurityHandler.resolveTrustedClientIp(
                             spoofedDirectRequest,
                             SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
 
             final HttpServletRequest invalidForwardedAddress = requestWithRemoteAddress(
                     "127.0.0.1", "unknown, 198.51.100.23");
             assertEquals("127.0.0.1",
-                    Jetty12HttpServer.AdminSecurityHandler.resolveTrackingClientIp(
+                    Jetty12HttpServer.AdminSecurityHandler.resolveTrustedClientIp(
                             invalidForwardedAddress,
                             SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
+
+            final HttpServletRequest trustedProxyIpv6Request = requestWithRemoteAddress(
+                    "::1", "2001:db8::23");
+            assertEquals("2001:db8::23",
+                    Jetty12HttpServer.AdminSecurityHandler.resolveTrustedClientIp(
+                            trustedProxyIpv6Request,
+                            SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
+        }
+
+        @Test
+        public void exposesOnlyServerValidatedProxyAddressToRequestHeader() {
+            final HttpServletRequest trustedProxyRequest = requestWithRemoteAddress(
+                    "127.0.0.1", "198.51.100.23");
+            trustedProxyRequest.setAttribute(RequestHeader.EFFECTIVE_CLIENT_IP_ATTRIBUTE,
+                    Jetty12HttpServer.AdminSecurityHandler.resolveTrustedClientIp(
+                            trustedProxyRequest,
+                            SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
+
+            final RequestHeader trustedProxyHeader = new RequestHeader(trustedProxyRequest);
+            assertEquals("198.51.100.23", trustedProxyHeader.getRemoteAddr());
+            assertEquals("127.0.0.1", trustedProxyHeader.getRemoteSocketAddr());
+
+            final HttpServletRequest spoofedDirectRequest = requestWithRemoteAddress(
+                    "203.0.113.10", "127.0.0.1");
+            spoofedDirectRequest.setAttribute(RequestHeader.EFFECTIVE_CLIENT_IP_ATTRIBUTE,
+                    Jetty12HttpServer.AdminSecurityHandler.resolveTrustedClientIp(
+                            spoofedDirectRequest,
+                            SwitchboardConstants.SERVER_REVERSE_PROXY_TRUSTED_DEFAULT));
+
+            final RequestHeader spoofedDirectHeader = new RequestHeader(spoofedDirectRequest);
+            assertEquals("203.0.113.10", spoofedDirectHeader.getRemoteAddr());
+            assertEquals("203.0.113.10", spoofedDirectHeader.getRemoteSocketAddr());
         }
 
         private static HttpServletRequest requestWithRemoteAddress(final String socketRemoteIp,
                 final String forwardedRemoteIp) {
+            final Map<String, Object> attributes = new HashMap<String, Object>();
             return (HttpServletRequest) Proxy.newProxyInstance(
                     Jetty12HttpServerTest.class.getClassLoader(),
                     new Class<?>[]{HttpServletRequest.class},
@@ -149,9 +184,19 @@ public class Jetty12HttpServerTest {
                         if ("getRemoteAddr".equals(method.getName())) {
                             return socketRemoteIp;
                         }
+                        if ("getRemoteHost".equals(method.getName())) {
+                            return socketRemoteIp;
+                        }
                         if ("getHeader".equals(method.getName())
                                 && RequestHeader.X_Real_IP.equals(args[0])) {
                             return forwardedRemoteIp;
+                        }
+                        if ("setAttribute".equals(method.getName())) {
+                            attributes.put((String) args[0], args[1]);
+                            return null;
+                        }
+                        if ("getAttribute".equals(method.getName())) {
+                            return attributes.get(args[0]);
                         }
                         return null;
                     });
