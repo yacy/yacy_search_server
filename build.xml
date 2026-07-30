@@ -267,9 +267,11 @@
       <include name="net/yacy/http/Jetty12*Test.java" />
       <include name="net/yacy/http/servlets/ServletResourceTest.java" />
       <include name="net/yacy/http/servlets/Jetty12QoSFilterTest.java" />
+      <include name="net/yacy/http/servlets/SolrSelectServletTest.java" />
       <classpath>
         <pathelement location="${build}" />
         <path refid="compile.path" />
+        <fileset dir="${lib}" includes="solr9-bridge-*.jar" />
         <fileset dir="${libt}" includes="**/*.jar" />
       </classpath>
       <compilerarg value="-Xlint:deprecation" />
@@ -279,10 +281,12 @@
       <arg value="net.yacy.http.Jetty12ProxyChainTest" />
       <arg value="net.yacy.http.servlets.ServletResourceTest" />
       <arg value="net.yacy.http.servlets.Jetty12QoSFilterTest" />
+      <arg value="net.yacy.http.servlets.SolrSelectServletTest" />
       <classpath>
         <pathelement location="${jetty12.test.classes}" />
         <pathelement location="${build}" />
         <path refid="compile.path" />
+        <fileset dir="${lib}" includes="solr9-bridge-*.jar" />
         <fileset dir="${libt}" includes="**/*.jar" />
       </classpath>
     </java>

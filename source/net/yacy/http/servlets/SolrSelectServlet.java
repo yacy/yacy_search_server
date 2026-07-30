@@ -392,11 +392,37 @@ public class SolrSelectServlet extends HttpServlet {
         }
     }
 
-    private void sendError(HttpServletResponse hresponse, Throwable ex) throws IOException {
+    static void sendError(final HttpServletResponse hresponse, final Throwable ex)
+            throws IOException, ServletException {
+        /*
+         * A response writer can fail after Jetty has committed the headers (most
+         * commonly when the client disconnects while a result is being streamed).
+         * Calling sendError() at that point throws IllegalStateException:
+         * COMMITTED and hides the useful original failure from the container.
+         */
+        if (hresponse.isCommitted()) {
+            rethrow(ex);
+        }
         int code = (ex instanceof SolrException) ? ((SolrException) ex).code() : 500;
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
         hresponse.sendError((code < 100) ? 500 : code, ex.getMessage() + "\n\n" + sw.toString());
+    }
+
+    private static void rethrow(final Throwable failure) throws IOException, ServletException {
+        if (failure instanceof IOException) {
+            throw (IOException) failure;
+        }
+        if (failure instanceof ServletException) {
+            throw (ServletException) failure;
+        }
+        if (failure instanceof RuntimeException) {
+            throw (RuntimeException) failure;
+        }
+        if (failure instanceof Error) {
+            throw (Error) failure;
+        }
+        throw new ServletException(failure);
     }
 
 }

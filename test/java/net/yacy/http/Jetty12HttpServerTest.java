@@ -8,10 +8,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
+import java.net.SocketException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.ee8.security.authentication.DigestAuthenticator;
 import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee8.servlet.ServletHolder;
+import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
@@ -343,6 +347,26 @@ public class Jetty12HttpServerTest {
 
     /** Exception barrier around the complete request pipeline. */
     public static class CrashProtectionHandlerTest {
+
+        @Test
+        public void recognizesClientDisconnectFailuresThroughCauseChain() {
+            assertTrue(Jetty12HttpServer.CrashProtectionHandler.isClientDisconnect(
+                    new IOException("Broken pipe")));
+            assertTrue(Jetty12HttpServer.CrashProtectionHandler.isClientDisconnect(
+                    new SocketException("Connection reset")));
+            assertTrue(Jetty12HttpServer.CrashProtectionHandler.isClientDisconnect(
+                    new IllegalStateException("wrapped", new EofException("closed"))));
+            assertTrue(Jetty12HttpServer.CrashProtectionHandler.isClientDisconnect(
+                    new ClosedChannelException()));
+        }
+
+        @Test
+        public void doesNotHideUnrelatedIoOrApplicationFailures() {
+            assertFalse(Jetty12HttpServer.CrashProtectionHandler.isClientDisconnect(
+                    new IOException("disk failure")));
+            assertFalse(Jetty12HttpServer.CrashProtectionHandler.isClientDisconnect(
+                    new IllegalStateException("COMMITTED")));
+        }
 
         @Test
         public void convertsSynchronousHandlerFailureTo500Response() throws Exception {

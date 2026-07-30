@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -46,6 +48,7 @@ import org.eclipse.jetty.ee8.webapp.WebAppContext;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.io.Connection;
+import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.UserPrincipal;
 import org.eclipse.jetty.security.UserStore;
@@ -405,14 +408,48 @@ public class Jetty12HttpServer implements YaCyHttpServer {
             if (!completed.compareAndSet(false, true)) {
                 return;
             }
-            ConcurrentLog.severe("HTTP", "event=http.request subsystem=http result=exception method="
-                    + request.getMethod() + " target=" + request.getHttpURI().getPath()
-                    + " status=500 reason=" + failure.getMessage());
-            if (response.isCommitted()) {
+            final String requestDescription = " method=" + request.getMethod()
+                    + " target=" + request.getHttpURI().getPath();
+            if (isClientDisconnect(failure)) {
+                ConcurrentLog.fine("HTTP", "event=http.request subsystem=http result=client_disconnect"
+                        + requestDescription + " reason=" + failure.getMessage());
                 callback.failed(failure);
                 return;
             }
+            if (response.isCommitted()) {
+                ConcurrentLog.severe("HTTP", "event=http.request subsystem=http result=exception"
+                        + requestDescription + " status=committed reason=" + failure.getMessage());
+                callback.failed(failure);
+                return;
+            }
+            ConcurrentLog.severe("HTTP", "event=http.request subsystem=http result=exception"
+                    + requestDescription + " status=500 reason=" + failure.getMessage());
             Response.writeError(request, response, callback, 500, "Internal Server Error");
+        }
+
+        static boolean isClientDisconnect(final Throwable failure) {
+            Throwable cause = failure;
+            while (cause != null) {
+                if (cause instanceof EofException || cause instanceof ClosedChannelException) {
+                    return true;
+                }
+                if (cause instanceof IOException && cause.getMessage() != null) {
+                    final String message = cause.getMessage().toLowerCase(Locale.ROOT);
+                    if (message.contains("broken pipe") || message.contains("connection reset")
+                            || message.contains("connection aborted")
+                            || message.contains("connection closed")
+                            || message.contains("socket closed")
+                            || message.contains("closed channel")) {
+                        return true;
+                    }
+                }
+                final Throwable next = cause.getCause();
+                if (next == cause) {
+                    break;
+                }
+                cause = next;
+            }
+            return false;
         }
     }
 
