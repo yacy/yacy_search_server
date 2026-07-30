@@ -45,6 +45,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -54,6 +55,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.gui.Audio;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -66,6 +68,7 @@ import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
@@ -108,6 +111,7 @@ public final class search {
         //System.out.println("yacy: search received request = " + post.toString());
 
         final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
+        final String  iam    = post.get("iam", "");    // seed hash of the requesting peer
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
@@ -167,8 +171,7 @@ public final class search {
         }
 
         // check the search tracker
-        TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
-        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+        final TreeSet<Long> trackerHandles = sb.remoteSearchTracker.computeIfAbsent(client, key -> new TreeSet<Long>());
         boolean block = false;
         synchronized (trackerHandles) {
             if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
@@ -430,7 +433,7 @@ public final class search {
         }
 
         // prepare search statistics
-        theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), -1, true, false, false);
+        theQuery.remotepeer = resolveRemotePeer(sb.peers, iam, client);
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
@@ -442,7 +445,6 @@ public final class search {
             // we don't need too much entries in the list; remove superfluous
             while (trackerHandles.size() > 36) if (!trackerHandles.remove(trackerHandles.first())) break;
         }
-        sb.remoteSearchTracker.put(client, trackerHandles);
         if (MemoryControl.shortStatus()) sb.remoteSearchTracker.clear();
 
         // log
@@ -458,6 +460,23 @@ public final class search {
         sb.peers.mySeed().incSI(links);
         sb.peers.mySeed().incSU(links);
         return prop;
+    }
+
+    /**
+     * Resolve the peer used for search statistics. Prefer the requester's known
+     * peer hash because multiple peers can share one public IP behind NAT. The
+     * IP lookup is retained for older requests and unknown peer hashes.
+     */
+    static Seed resolveRemotePeer(final SeedDB peers, final String iam, final String client) {
+        Seed remotePeer = null;
+        if (iam != null && iam.length() == Word.commonHashLength
+                && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(iam))) {
+            remotePeer = peers.get(iam);
+        }
+        if (remotePeer == null && client != null) {
+            remotePeer = peers.lookupByIP(Domains.dnsResolve(client), -1, true, false, false);
+        }
+        return remotePeer;
     }
 
 }

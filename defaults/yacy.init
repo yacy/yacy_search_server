@@ -32,9 +32,12 @@ upnp.remoteHost =
 bindPort = 
 
 # Comma-separated regular expressions matching trusted reverse-proxy socket IPs.
-# X-Real-IP is used for access tracking only when the direct connection comes
-# from one of these addresses. Authentication and access control always use the
-# direct socket IP. Keep this list restricted to proxies controlled by you.
+# A single valid IPv4 or IPv6 address from X-Real-IP is used as the effective
+# client address for routing, logging, and other request attribution only when
+# the direct connection comes from one of these addresses. Authentication and
+# access control always use the direct socket IP.
+# Keep this list restricted to proxies controlled by you, and configure them to
+# overwrite rather than pass through a client-supplied X-Real-IP value.
 server.reverseProxy.trusted=127[.]0[.]0[.]1,0:0:0:0:0:0:0:1,::1
 
 # TLS/SSL support:
@@ -549,7 +552,8 @@ debug.snippets.statistics.enabled=false
 #staticIP if you have a static IP, you can use this setting
 staticIP=
 
-#publicPort if you use a different port to access YaCy than the one it listens on, you can use this setting
+# Optional public HTTP/P2P port (1-65535) advertised instead of the UPnP or
+# local listening port. Leave empty to disable the manual override.
 publicPort=
 
 # each time YaCy starts up, it can trigger the local browser to show the

@@ -203,15 +203,20 @@ public class SettingsAck_p {
 
             // publicPort
             final String publicPort =  (post.get("publicPort")).trim();
-            try {
-                final Integer pport = Integer.parseInt(publicPort);
-                if(pport < 65535 && pport >= 0) {
-                    serverCore.usePublicPort = true;
-                    sb.peers.mySeed().setPort(pport);
-                    env.setConfig(SwitchboardConstants.SERVER_PUBLICPORT, publicPort);
+            if (publicPort.isEmpty()) {
+                serverCore.usePublicPort = false;
+                env.setConfig(SwitchboardConstants.SERVER_PUBLICPORT, "");
+            } else {
+                try {
+                    final Integer pport = Integer.parseInt(publicPort);
+                    if (Seed.isProperPort(pport)) {
+                        serverCore.usePublicPort = true;
+                        sb.peers.mySeed().setPort(pport);
+                        env.setConfig(SwitchboardConstants.SERVER_PUBLICPORT, publicPort);
+                    }
+                } catch (final NumberFormatException e) {
+                    // Keep the previously configured public port on invalid input.
                 }
-            } catch (final NumberFormatException e) {
-                // noop
             }
 
             // server access data

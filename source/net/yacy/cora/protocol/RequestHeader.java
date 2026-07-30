@@ -77,6 +77,9 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public static final String X_CACHE = "X-Cache";
     public static final String X_CACHE_LOOKUP = "X-Cache-Lookup";
     public static final String X_Real_IP = "X-Real-IP";
+    /** Trusted effective client IP, populated by the HTTP server after proxy validation. */
+    public static final String EFFECTIVE_CLIENT_IP_ATTRIBUTE =
+            RequestHeader.class.getName() + ".effectiveClientIp";
 
     public static final String COOKIE = "Cookie";
 
@@ -705,10 +708,8 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
      * The IP address of the host that opened the TCP connection (the real socket peer).
      * <p>
      * In contrast to {@link #getRemoteAddr()} and {@link #client(ServletRequest)} this
-     * <b>never</b> honors the client-controlled X-Real-IP request header. It must therefore
-     * be used for all authentication and access-control decisions: X-Real-IP is trivially
-     * spoofable by a direct client and must only be trusted for peer routing behind a
-     * trusted reverse proxy, not for authentication.
+     * always returns the socket peer. It must therefore be used for authentication and
+     * access-control decisions.
      *
      * @return the socket peer IP address
      */
@@ -720,23 +721,20 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     }
 
     /**
-     * Resolve the client IP for peer routing and logging. This honors the X-Real-IP
-     * request header (set e.g. by an nginx reverse proxy via
-     * "proxy_set_header X-Real-IP $remote_addr;").
-     * <p>
-     * <b>Do not use this for authentication or access control</b> - the header is
-     * client-controlled and spoofable. Use {@link #getRemoteSocketAddr()} for that.
+     * Resolve the client IP for peer routing and logging. A reverse-proxy address is
+     * honored only when the HTTP server has validated the socket peer and populated
+     * {@link #EFFECTIVE_CLIENT_IP_ATTRIBUTE}. Client-supplied forwarding headers are
+     * never read here directly.
      *
      * @param request the servlet request
      * @return the routing client IP address
      */
     public static String client(final ServletRequest request) {
-        String clientHost = request.getRemoteAddr();
-        if (request instanceof HttpServletRequest) {
-        	String XRealIP = ((HttpServletRequest) request).getHeader(X_Real_IP);
-        	if (XRealIP != null && XRealIP.length() > 0) clientHost = XRealIP; // get IP through nginx config "proxy_set_header X-Real-IP $remote_addr;"
+        final Object effectiveClientIp = request.getAttribute(EFFECTIVE_CLIENT_IP_ATTRIBUTE);
+        if (effectiveClientIp instanceof String && !((String) effectiveClientIp).isEmpty()) {
+            return (String) effectiveClientIp;
         }
-		return clientHost;
+        return request.getRemoteAddr();
     }
     
     @Override
@@ -748,12 +746,9 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     }
     
     public static String host(final ServletRequest request) {
-        String clientHost = request.getRemoteHost();
-        if (request instanceof HttpServletRequest) {
-        	String XRealIP = ((HttpServletRequest) request).getHeader(X_Real_IP);
-        	if (XRealIP != null && XRealIP.length() > 0) clientHost = XRealIP; // get IP through nginx config "proxy_set_header X-Real-IP $remote_addr;"
-        }
-		return clientHost;
+        final Object effectiveClientIp = request.getAttribute(EFFECTIVE_CLIENT_IP_ATTRIBUTE);
+        return effectiveClientIp instanceof String && !((String) effectiveClientIp).isEmpty()
+                ? (String) effectiveClientIp : request.getRemoteHost();
     }
 
     @Override

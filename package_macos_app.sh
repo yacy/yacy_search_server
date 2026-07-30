@@ -298,32 +298,90 @@ if [[ ! -d "${USER_DATA_HOME}/DATA" ]]; then
   fi
 fi
 
+TEMURIN_URL="https://adoptium.net/temurin/releases/?version=17&os=mac&package=jdk"
 JAVA_BIN=""
-if [[ -n "${JAVA_HOME:-}" && -x "${JAVA_HOME}/bin/java" ]]; then
-  JAVA_BIN="${JAVA_HOME}/bin/java"
-elif command -v java >/dev/null 2>&1; then
-  JAVA_BIN="$(command -v java)"
-elif command -v /usr/libexec/java_home >/dev/null 2>&1; then
-  JAVA_HOME="$(/usr/libexec/java_home 2>/dev/null || true)"
-  if [[ -n "${JAVA_HOME}" && -x "${JAVA_HOME}/bin/java" ]]; then
-    JAVA_BIN="${JAVA_HOME}/bin/java"
+JAVA_SPEC_VERSION=""
+INCOMPATIBLE_JAVA=""
+
+try_java() {
+  local candidate="$1"
+  local settings=""
+  local specification_version=""
+  local major_version=""
+
+  [[ -x "${candidate}" ]] || return 1
+  if ! settings="$("${candidate}" -XshowSettings:properties -version 2>&1)"; then
+    return 1
+  fi
+
+  while IFS= read -r line; do
+    if [[ "${line}" =~ java\.specification\.version[[:space:]]*=[[:space:]]*([^[:space:]]+) ]]; then
+      specification_version="${BASH_REMATCH[1]}"
+      break
+    fi
+  done <<< "${settings}"
+
+  major_version="${specification_version#1.}"
+  major_version="${major_version%%.*}"
+  [[ "${major_version}" =~ ^[0-9]+$ ]] || return 1
+
+  if (( major_version < 17 )); then
+    if [[ -z "${INCOMPATIBLE_JAVA}" ]]; then
+      INCOMPATIBLE_JAVA="${candidate} (Java ${specification_version})"
+    fi
+    return 1
+  fi
+
+  JAVA_BIN="${candidate}"
+  JAVA_SPEC_VERSION="${specification_version}"
+  return 0
+}
+
+show_java_requirement() {
+  local detail="$1"
+  local message="YaCy requires Java 17 or newer, but no compatible Java runtime was found."
+
+  echo "${message}" >&2
+  if [[ -n "${detail}" ]]; then
+    echo "${detail}" >&2
+  fi
+  echo "Please install Eclipse Temurin 17 or newer and start YaCy again:" >&2
+  echo "${TEMURIN_URL}" >&2
+
+  if command -v osascript >/dev/null 2>&1; then
+    local selected_button=""
+    selected_button="$(osascript <<APPLESCRIPT 2>/dev/null || true
+set dialogResult to display dialog "YaCy requires Java 17 or newer, but no compatible Java runtime was found.\n\nPlease install Eclipse Temurin 17 or newer and start YaCy again.\n\n${TEMURIN_URL}" with title "YaCy requires Java" buttons {"Quit", "Open Temurin Download"} default button "Open Temurin Download" cancel button "Quit"
+return button returned of dialogResult
+APPLESCRIPT
+)"
+    if [[ "${selected_button}" == "Open Temurin Download" ]]; then
+      open "${TEMURIN_URL}"
+    fi
+  fi
+}
+
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  try_java "${JAVA_HOME}/bin/java" || true
+fi
+
+if [[ -z "${JAVA_BIN}" && -x /usr/libexec/java_home ]]; then
+  java_home_17="$(/usr/libexec/java_home -v '17+' 2>/dev/null || true)"
+  if [[ -n "${java_home_17}" ]]; then
+    try_java "${java_home_17}/bin/java" || true
   fi
 fi
 
-if [[ -z "${JAVA_BIN}" ]]; then
-  echo "Unable to find a Java runtime. Please install Java (JDK 17+) and try again." >&2
-  exit 1
+if [[ -z "${JAVA_BIN}" ]] && command -v java >/dev/null 2>&1; then
+  try_java "$(command -v java)" || true
 fi
 
-JAVA_SPEC_VERSION="$("${JAVA_BIN}" -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java.specification.version = //p' | head -n 1)"
-JAVA_MAJOR_VERSION="${JAVA_SPEC_VERSION#1.}"
-JAVA_MAJOR_VERSION="${JAVA_MAJOR_VERSION%%.*}"
-if [[ ! "${JAVA_MAJOR_VERSION}" =~ ^[0-9]+$ ]]; then
-  echo "Unable to determine the Java version reported by ${JAVA_BIN}." >&2
-  exit 1
-fi
-if (( JAVA_MAJOR_VERSION < 17 )); then
-  echo "Java 17 or newer is required to run YaCy (found Java ${JAVA_SPEC_VERSION})." >&2
+if [[ -z "${JAVA_BIN}" ]]; then
+  if [[ -n "${INCOMPATIBLE_JAVA}" ]]; then
+    show_java_requirement "Found an incompatible runtime: ${INCOMPATIBLE_JAVA}"
+  else
+    show_java_requirement "No working Java runtime was detected."
+  fi
   exit 1
 fi
 

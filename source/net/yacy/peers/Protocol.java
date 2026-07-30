@@ -1734,7 +1734,7 @@ public final class Protocol {
         String result = in.get("result");
         if ( result == null ) {
             String errorCause = "no result from transferRWI";
-            String usedIP = in.get(Seed.IP);
+            final String usedIP = transferTargetIP(in, targetSeed);
             sb.peers.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer
             return errorCause;
         }
@@ -1817,7 +1817,7 @@ public final class Protocol {
         result = in.get("result");
         if ( result == null ) {
             String errorCause = "no result from transferURL";
-            String usedIP = in.get(Seed.IP);
+            final String usedIP = transferTargetIP(in, targetSeed);
             sb.peers.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer ip
             return errorCause;
         }
@@ -1864,6 +1864,19 @@ public final class Protocol {
                 targetSeed.hash));
 
         return null;
+    }
+
+    /**
+     * Return the address recorded by a transfer attempt. Malformed responses may
+     * omit that local metadata; in that case use the first address from the
+     * canonical, ordered {@link Seed#getIPs()} view as a last-resort fallback.
+     */
+    static String transferTargetIP(final Map<String, String> response, final Seed targetSeed) {
+        final String usedIP = response == null ? null : response.get(Seed.IP);
+        if (usedIP != null && !usedIP.isEmpty()) return usedIP;
+
+        final Set<String> targetIPs = targetSeed.getIPs();
+        return targetIPs.isEmpty() ? null : targetIPs.iterator().next();
     }
 
     /**
