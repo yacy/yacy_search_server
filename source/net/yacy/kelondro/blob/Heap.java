@@ -28,8 +28,11 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -148,13 +151,21 @@ public final class Heap extends HeapModifier implements BLOB {
         if ((blob == null) || (blob.length == 0)) return;
         final long pos = this.file.length();
         try {
-            this.index.put(key, pos);
             this.file.seek(pos);
             this.file.writeInt(this.keylength + blob.length);
             this.file.write(key);
             this.file.write(blob, 0, blob.length);
+            this.index.put(key, pos);
         } catch (final SpaceExceededException e) {
-            throw new IOException(e.getMessage()); // should never occur;
+            this.file.setLength(pos);
+            throw new IOException("Cannot extend heap index", e);
+        } catch (final IOException e) {
+            try {
+                this.file.setLength(pos);
+            } catch (final IOException rollbackFailure) {
+                e.addSuppressed(rollbackFailure);
+            }
+            throw e;
         }
     }
 
@@ -164,7 +175,11 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      * @throws SpaceExceededException 
      */
-    public void flushBuffer() throws IOException {
+    public synchronized void flushBuffer() throws IOException {
+        flushBufferInternal();
+    }
+
+    private final void flushBufferInternal() throws IOException {
         if (this.buffer == null) return;
 
         // check size of buffer
@@ -176,40 +191,20 @@ public final class Heap extends HeapModifier implements BLOB {
         int posBuffer = 0;
         Map.Entry<byte[], byte[]> entry;
         byte[] key, blob;
-        // simulate write: this whole code block is only here to test the assert at the end of the block; remove after testing
-        /*
-        i = this.buffer.entrySet().iterator();
-        while (i.hasNext()) {
-            entry = i.next();
-            key = normalizeKey(entry.getKey());
-            blob = entry.getValue();
-            posBuffer += 4 + this.keylength + blob.length;
-        }
-        assert l + (4 + this.keylength) * this.buffer.size() == posBuffer : "l = " + l + ", this.keylength = " + this.keylength + ", this.buffer.size() = " + this.buffer.size() + ", posBuffer = " + posBuffer;
-         */
 
         synchronized (this) {
             super.deleteFingerprint();
         }
 
-        // append all contents of the buffer into one byte[]
-        i = this.buffer.entrySet().iterator();
-        final long pos = this.file.length();
-        long posFile = pos;
-        posBuffer = 0;
+        // fully write the large storage blob
         byte[] ba = new byte[l + (4 + this.keylength) * this.buffer.size()];
         byte[] b;
-        SortedMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(this.ordering);
-        flush: while (i.hasNext()) {
+        final long pos = this.file.length();
+        i = this.buffer.entrySet().iterator();
+        while (i.hasNext()) {
             entry = i.next();
             key = normalizeKey(entry.getKey());
             blob = entry.getValue();
-            try {
-                this.index.put(key, posFile);
-            } catch (final SpaceExceededException e) {
-                nextBuffer.put(entry.getKey(), blob);
-                continue flush;
-            }
             b = AbstractWriter.int2array(this.keylength + blob.length);
             assert b.length == 4;
             assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
@@ -217,13 +212,73 @@ public final class Heap extends HeapModifier implements BLOB {
             assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
             System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
             assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
-            //System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
-            //System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
             System.arraycopy(blob, 0, ba, posBuffer + 4 + this.keylength, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
-            posFile += 4 + this.keylength + blob.length;
             posBuffer += 4 + this.keylength + blob.length;
         }
         assert ba.length == posBuffer; // must fit exactly
+
+        // reserve space in the index
+        i = this.buffer.entrySet().iterator();
+        List<Map.Entry<byte[], Long>> oldValues = new ArrayList<>();
+        while (i.hasNext()) {
+            entry = i.next();
+            key = normalizeKey(entry.getKey());
+            try {
+                Long oldValue = this.index.put(key, 0);
+                oldValues.add(new AbstractMap.SimpleEntry<>(key, oldValue));
+            } catch (final SpaceExceededException e) {
+                // if we fail to do index.put, we must roll back everything
+                for (Map.Entry<byte[], Long> se : oldValues) {
+                    if (se.getValue() == -1) {
+                        this.index.remove(se.getKey());
+                    } else {
+                        try {
+                            this.index.put(se.getKey(), se.getValue());
+                        } catch (final SpaceExceededException ee) {
+                            // ignore (yeah that should not happen)
+                        }
+                    }
+                }
+                // we try to shrink the buffer by writing step by step
+                ba = null;
+                oldValues = null;
+                i = this.buffer.entrySet().iterator();
+                while (i.hasNext()) {
+                    entry = i.next();
+                    key = normalizeKey(entry.getKey());
+                    blob = entry.getValue();
+                    try {
+                        this.add(key, blob);
+                        i.remove(); // this should flush the entry from the buffer; we don't need it there any more; this should free up memory
+                        this.buffersize -= blob.length;
+                    } catch (IOException rescueFailure) {
+                        rescueFailure.addSuppressed(e);
+                        throw rescueFailure;
+                    }
+                }
+                // we should be ready!
+                assert this.buffer.isEmpty();
+                assert this.buffersize == 0;
+                return;
+            }
+        }
+        oldValues = null;
+
+        // append all contents of the buffer into one byte[]
+        i = this.buffer.entrySet().iterator();
+        long posFile = pos;
+        SortedMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(this.ordering);
+        while (i.hasNext()) {
+            entry = i.next();
+            key = normalizeKey(entry.getKey());
+            blob = entry.getValue();
+            try {
+                this.index.put(key, posFile);
+            } catch (final SpaceExceededException e) {
+                throw new IOException("Cannot write, not enough memory for index", e);
+            }
+            posFile += 4 + this.keylength + blob.length;
+        }
         this.file.seek(pos);
         this.file.write(ba);
         this.buffer.clear();
@@ -295,7 +350,7 @@ public final class Heap extends HeapModifier implements BLOB {
         ConcurrentLog.info("KELONDRO", "Heap: closing heap " + this.name());
         if (this.file != null && this.buffer != null) {
             try {
-                flushBuffer();
+                flushBufferInternal();
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
@@ -345,7 +400,7 @@ public final class Heap extends HeapModifier implements BLOB {
             if (this.buffersize + b.length > this.buffermax || MemoryControl.shortStatus()) {
                 // this is too big. Flush everything
                 super.shrinkWithGapsAtEnd();
-                flushBuffer();
+                flushBufferInternal();
                 if (b.length > this.buffermax) {
                     this.add(key, b);
                 } else {
@@ -490,7 +545,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        this.flushBuffer();
+        this.flushBufferInternal();
         return super.keys(up, rotating);
     }
 
@@ -503,7 +558,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        this.flushBuffer();
+        this.flushBufferInternal();
         return super.keys(up, firstKey);
     }
 

@@ -268,7 +268,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
      * Adds the key-value pair to the index.
      * @param key the index key
      * @param l the value
-     * @return the previous entry of the index
+     * @return the previous entry of the index or -1 if the entry is new
      * @throws IOException
      * @throws SpaceExceededException
      */
