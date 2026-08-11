@@ -98,20 +98,17 @@
       let persistedModelCapabilities = {};
 
       const RECOMMENDED_MODELS = [
-        ["qwen2.5:1.5b-instruct-q4_K_M",                      " 0.88",  "1GB", "Good small model for 2GB RAM", "Alibaba", "apache-2.0"],
-        ["llama3.2:3b-instruct-q4_K_M",                       " 0.66",  "2GB", "A good 3B model", "Meta", "llama3.2"],
         ["qwen3:4b-instruct-2507-q4_K_M",                     " 7.70",  "3GB", "a good 4B model", "Alibaba", "apache-2.0"],
-        ["hf.co/janhq/Jan-v3-4B-base-instruct-gguf:Q4_K_M",   " 8.19",  "3GB", "a brilliant 4B model, post-trained with large teacher from qwen3:4b", "jan.ai", "apache-2.0"],
-        ["hf.co/unsloth/medgemma-4b-it-GGUF:Q4_K_M",          " 0.60",  "4GB", "Medical Knowledge and Vision", "Google", "health-ai-developer-foundations"],
-        ["frob/qwen3.5-instruct:4b",                          " 8.52",  "4GB", "best model for its size, non-thinking version", "Alibaba", "apache-2.0"],
-        ["olmo-3:7b-instruct-q4_K_M",                         " 2.22",  "5GB", "open and accessible training data, open-source training code", "allenai.org", "apache-2.0"],
-        ["qwen3.5:9b-q4_K_M",                                 "18.37",  "7GB", "multimodal, outstanding for its size, long-context 256K Tokens, strong instruction following model", "Alibaba", "apache-2.0"],
-        ["gemma4:12b-it-qat",                                 "47.09",  "8GB", "Very mighty, very small model from Google", "Google", "apache-2.0"],
-        ["ministral-3:14b-instruct-2512-q4_K_M",              " 8.55", "10GB", "European flagship model, strong multilangual, vision, agentic", "mistral.ai", "apache-2.0"],
+        ["frob/qwen3.5-instruct:4b",                          " 8.52",  "4GB", "good model for its size, non-thinking version", "Alibaba", "apache-2.0"],
+        ["hf.co/InternScience/Agents-A1-4B-Q8_0-GGUF:Q8_0",   "24.34",  "6GB", "fine-tuned version of qwen3.5-instruct:4b; extreme benchmark gains using teacher model", "Intern Science, Shanghai Artificial Intelligence Laboratory", "apache-2.0"],
+        //["qwen3.5:9b-q4_K_M",                                 "18.37",  "7GB", "multimodal, outstanding for its size, long-context 256K Tokens, strong instruction following model", "Alibaba", "apache-2.0"],
+        //["gemma4:12b-it-qat",                                 "47.09",  "8GB", "Very mighty, very small model from Google", "Google", "apache-2.0"],
+        ["ministral-3:14b-instruct-2512-q4_K_M",              " 8.55", "10GB", "European model, strong multilangual, has vision, is agentic", "mistral.ai", "apache-2.0"],
         ["hf.co/mradermacher/Ling-mini-2.0-GGUF:Q4_K_M",      "20.00", "10GB", "very fast 16B MoE model with 1.4B activated parameters per expert", "InclusionAI", "mit"],
         ["olmo-3.1:32b-instruct-q4_K_M",                      "10.25", "19GB", "open and accessible training data, open-source training code", "allenai.org", "apache-2.0"],
-		["qwen3.6:27b-mtp-q4_K_M",                            "70.84", "17GB", "Exceptional good 27B model with vision, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"],
-        ["qwen3.6:35b-a3b-mtp-q4_K_M",                        "63.03", "22GB", "Almost as good as the 27B model, but much faster", "Alibaba", "apache-2.0"]
+        ["qwen3.6:27b-mtp-q4_K_M",                            "49.22", "17GB", "Exceptional good 27B model with vision, ranking above GPT-4-turbo, GPT-4.1-nano, GPT-o1, GPT-4o-mini", "Alibaba", "apache-2.0"],
+        ["muse-glimmer:30b-q4_K_M-dflash",                    "55.55", "21GB", "Agent-first model from Meta, tuned for tool use, long tasks, and failure recovery", "Meta", "apache-2.0"],
+        ["qwen3.6:35b-a3b-mtp-q4_K_M",                        "45.91", "22GB", "Almost as good as the 27B model, but much faster", "Alibaba", "apache-2.0"]
       ];
 	  
       const MODEL_TABLE_HEADERS = ["Model", "Ranking", "Size", "Description", "Provider", "License", "Actions"];
