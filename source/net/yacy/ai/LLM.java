@@ -258,14 +258,6 @@ public class LLM {
         }
     }
 
-    public void applyNoThinkingParametersIfNeeded(final String model, final JSONObject data) {
-        final String normalizedModel = model == null ? "" : model.toLowerCase();
-        if (normalizedModel.contains("qwen3.5") || isCapabilitySupported(this.type, this.hoststub, model, "thinking")) {
-            applyNoThinkingParameters(data);
-        }
-    }
-
-
     // API Helper Methods
 
     private static String sendPostRequest(final String urls, final JSONObject data, final String apiKey) throws IOException, URISyntaxException {
@@ -423,7 +415,7 @@ public class LLM {
             data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", false);
-            applyNoThinkingParametersIfNeeded(model, data);
+            applyNoThinkingParameters(data);
 
             if (schema != null) {
                 System.out.println(schema.toString());
@@ -503,7 +495,7 @@ public class LLM {
             data.put("messages", context);
             data.put("stop", new JSONArray(STOPTOKENS));
             data.put("stream", true);
-            applyNoThinkingParametersIfNeeded(model, data);
+            applyNoThinkingParameters(data);
 
             final URL url = new URI(this.hoststub + "/v1/chat/completions").toURL();
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
