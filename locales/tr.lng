@@ -953,8 +953,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==Sunucu Bağlantı Takibi
-Incoming Connections==Gelen Bağlantılar
+Connection and Request Tracking==Bağlantı ve İstek Takibi
+Incoming HTTP Requests==Gelen HTTP İstekleri
+Active HTTP requests:==Etkin HTTP istekleri:
+Remote-request limit:==Uzak istek sınırı:
+Local requests are exempt.==Yerel istekler muaftır.
 Protocol==Protokol
 Duration==Süre
 Source IP[:Port]==Kaynak IP[:Bağlantı Noktası]
@@ -2558,7 +2561,7 @@ Search Event Cache==Etkinlik Önbelleğinde Ara
 "Reverse Word Index"=="Ters Kelime Dizini"
 "Submit New Values"=="Yeni Değerler Gönder"
 "Enter New Cache Size"=="Yeni Önbellek Boyutunu Girin"
-"Enter new Threadpool Configuration"=="Yeni İş Parçacığı Havuzu Yapılandırmasını girin"
+"Apply Concurrency Limits"=="Eşzamanlılık Sınırlarını Uygula"
 "Total maximum number of simultaneously open connections in the pool"=="Havuzdaki aynı anda açık bağlantıların toplam maksimum sayısı"
 "Number of connections currently being used to execute requests."=="Şu anda istekleri yürütmek için kullanılan bağlantı sayısı."
 "Number of reusable idle connections"=="Yeniden kullanılabilir boş bağlantı sayısı"
@@ -2612,10 +2615,11 @@ Maximum number of words in cache:==Önbellekteki maksimum kelime sayısı:
 This is is the number of word indexes that shall be held in the==Bu, dosyada tutulacak kelime indekslerinin sayısıdır.
 ram cache during indexing. When YaCy is shut down, this cache must be==İndeksleme sırasında RAM önbelleği. YaCy kapatıldığında bu önbellek
 flushed to disc; this may last some minutes.==diske boşaltıldı; bu birkaç dakika sürebilir.
-Thread Pool Settings:==Konu Havuzu Ayarları:
-Thread Pool==Konu Havuzu
-maximum Active==maksimum Aktif
-current Active==mevcut Aktif
+Concurrency Limits:==Eşzamanlılık Sınırları:
+Workload==İş Yükü
+Incoming HTTP Requests==Gelen HTTP İstekleri
+Maximum Active==Maksimum Etkin
+Currently Active==Şu Anda Etkin
 Outgoing connections pools settings :==Giden bağlantı havuzları ayarları:
 Connection Pool==Bağlantı Havuzu
 Total maximum==Toplam maksimum
@@ -3381,7 +3385,9 @@ RAM used:==Kullanılan RAM:
 RAM max:==Maksimum RAM:
 DISK used:==Kullanılan DISK:
 DISK free:==DISK boş:
-Incoming Connections==Gelen Bağlantılar
+Incoming HTTP Requests==Gelen HTTP İstekleri
+Active:==Etkin:
+Limit:==Sınır:
 Queues==Kuyruklar
 Local Crawl==Yerel Tarama
 (paused)==(duraklatıldı)

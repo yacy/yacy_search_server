@@ -52,6 +52,12 @@ import net.yacy.server.serverSwitch;
 
 public class PerformanceQueues_p {
 
+    static final String INCOMING_HTTP_REQUESTS_POOL_NAME = "Incoming HTTP Requests";
+    static final String INCOMING_HTTP_REQUESTS_MAX_ACTIVE_PARAM =
+            INCOMING_HTTP_REQUESTS_POOL_NAME + "_maxActive";
+    static final String LEGACY_HTTPD_SESSION_POOL_MAX_ACTIVE_PARAM =
+            "httpd Session Pool_maxActive";
+
     @SuppressWarnings("deprecation")
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
@@ -302,18 +308,9 @@ public class PerformanceQueues_p {
             sb.setConfig(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, maxBusy);
 
             /*
-             * configuring the http pool
+             * configuring the incoming HTTP request limit
              */
-            try {
-                maxBusy = post.getInt("httpd Session Pool_maxActive", 8);
-            } catch (final NumberFormatException e) {
-                maxBusy = 8;
-            }
-
-            ConnectionInfo.setServerMaxcount(maxBusy);
-
-            // storing the new values into configfile
-            sb.setConfig("httpdMaxBusySessions",maxBusy);
+            applyServerMaxcount(sb, postedServerMaxcount(post));
 
         }
 
@@ -357,16 +354,19 @@ public class PerformanceQueues_p {
         prop.putNum("crawlPauseLocalsearchCurrent", (System.currentTimeMillis() - sb.localSearchLastAccess) / 1000);
         prop.putNum("crawlPauseRemotesearchCurrent", (System.currentTimeMillis() - sb.remoteSearchLastAccess) / 1000);
 
-        // table thread pool settings
+        // concurrency limits
         prop.put("pool_0_name","Crawler Pool");
+        prop.put("pool_0_incomingRequests", 0);
         prop.put("pool_0_maxActive", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 0));
         prop.put("pool_0_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
         prop.put("pool_1_name","Robots.txt Pool");
+        prop.put("pool_1_incomingRequests", 0);
         prop.put("pool_1_maxActive", sb.getConfigInt(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT));
         prop.put("pool_1_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
-        prop.put("pool_2_name", "httpd Session Pool");
+        prop.put("pool_2_name", INCOMING_HTTP_REQUESTS_POOL_NAME);
+        prop.put("pool_2_incomingRequests", 1);
         prop.put("pool_2_maxActive", ConnectionInfo.getServerMaxcount());
         prop.put("pool_2_numActive", ConnectionInfo.getServerCount());
 
@@ -418,6 +418,28 @@ public class PerformanceQueues_p {
 
         // return rewrite values for templates
         return prop;
+    }
+
+    /** Apply and persist an incoming request limit only when it is valid. */
+    static boolean applyServerMaxcount(final serverSwitch env, final int maxBusy) {
+        if (maxBusy <= 0) {
+            return false;
+        }
+        ConnectionInfo.setServerMaxcount(maxBusy);
+        env.setConfig(SwitchboardConstants.SERVER_MAX_BUSY_SESSIONS, maxBusy);
+        return true;
+    }
+
+    /** Read the corrected form parameter, with the former session-pool name as an alias. */
+    static int postedServerMaxcount(final serverObjects post) {
+        final String parameter = post.containsKey(INCOMING_HTTP_REQUESTS_MAX_ACTIVE_PARAM)
+                ? INCOMING_HTTP_REQUESTS_MAX_ACTIVE_PARAM
+                : LEGACY_HTTPD_SESSION_POOL_MAX_ACTIVE_PARAM;
+        try {
+            return post.getInt(parameter, ConnectionInfo.getServerMaxcount());
+        } catch (final NumberFormatException e) {
+            return ConnectionInfo.getServerMaxcount();
+        }
     }
 
     /**

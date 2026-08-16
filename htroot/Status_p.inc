@@ -74,8 +74,8 @@
     <dt>Traffic [<a href="Status.html?ResetTraffic=">Reset</a>]</dt>
     <dd>Proxy: #[trafficProxy]#<br/>Crawler: #[trafficCrawler]#</dd>
 
-    <dt><a href="Connections_p.html">Incoming Connections</a></dt>
-    <dd>Active: #[connectionsActive]# | Max: <a href="PerformanceQueues_p.html#ThreadPoolSettings">#[connectionsMax]#</a></dd>
+    <dt><a href="Connections_p.html">Incoming HTTP Requests</a></dt>
+    <dd><span>Active:</span> #[connectionsActive]# | <span>Limit:</span> <a href="PerformanceQueues_p.html#ThreadPoolSettings">#[connectionsMax]#</a></dd>
 
     <dt><a href="Crawler_p.html">Queues</a></dt>
     <dd>

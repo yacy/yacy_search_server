@@ -860,7 +860,10 @@ This servlet can only be used on operating systems that are currently supported 
 You installed YaCy with a package manager. To update YaCy, use the package manager:==Sie haben YaCy mit einem Paketmanager installiert. Verwenden Sie zum Aktualisieren den Paketmanager:
 #File: Connections_p.html
 #---------------------------
-Incoming Connections==Eingehende Verbindungen
+Incoming HTTP Requests==Eingehende HTTP-Anfragen
+Active HTTP requests:==Aktive HTTP-Anfragen:
+Remote-request limit:==Limit für Remote-Anfragen:
+Local requests are exempt.==Lokale Anfragen sind ausgenommen.
 Duration==Dauer
 Source IP[:Port]==Quell-IP[:Port]
 Dest. IP[:Port]==Ziel-IP[:Port]
@@ -871,7 +874,7 @@ Outgoing Connections==Ausgehende Verbindungen
 Command==Befehl
 ID==ID
 Protocol==Protokoll
-Server Connection Tracking==Server-Verbindungsverfolgung
+Connection and Request Tracking==Verbindungs- und Anfrageüberwachung
 Up-Bytes==Up-Bytes
 #File: CookieMonitorIncoming_p.html
 #---------------------------
@@ -2324,14 +2327,15 @@ Maximum number of words in cache:==Maximale Wortzahl im Cache:
 This is is the number of word indexes that shall be held in the==Dies ist die Anzahl der Wort-indexe die während des Indexierens im
 ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache gehalten werden sollen. Sobald YaCy herunterfährt muss dieser Cache
 flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
-Thread Pool Settings:==Threadpool-Einstellungen:
-maximum Active==max. aktiv
-current Active==derzeit aktiv
+Concurrency Limits:==Parallelitätsgrenzen:
+Maximum Active==Maximal aktiv
+Currently Active==Derzeit aktiv
 #-----------------------------
 
 Description==Beschreibung
 RAM Cache==RAM-Cache
-Thread Pool==Thread-Pool
+Workload==Arbeitslast
+Incoming HTTP Requests==Eingehende HTTP-Anfragen
 milliseconds==Millisekunden
 Exec Time<br />per Busy-Cycle<br />(millis)==Ausführungszeit<br />pro Busy-Zyklus<br />(Millisekunden)
 Memory Use<br />per Busy-Cycle<br />(kbytes)==Speichernutzung<br />pro Busy-Zyklus<br />(KBytes)
@@ -2341,7 +2345,7 @@ Total<br />Cycles==Gesamte<br />Zyklen
 Total<br />Exec Time==Gesamte<br />Ausführungszeit
 Total<br />Sleep Time==Gesamte<br />Schlafzeit
 "Enter New Cache Size"=="Neue Cache-Größe eingeben"
-"Enter new Threadpool Configuration"=="Neue Threadpool-Konfiguration eingeben"
+"Apply Concurrency Limits"=="Parallelitätsgrenzen anwenden"
 "Number of connection requests being blocked awaiting a free connection"=="Anzahl der Verbindungsanfragen, die auf eine freie Verbindung warten"
 "Number of connections currently being used to execute requests."=="Anzahl der Verbindungen, die aktuell zur Ausführung von Anfragen verwendet werden."
 "Number of reusable idle connections"=="Anzahl wiederverwendbarer inaktiver Verbindungen"
@@ -2930,7 +2934,9 @@ RAM max:==RAM maximal:
 DISK used:==DISK benutzt:
 DISK free:==DISK frei:
 
-Incoming Connections==Eingehende Verbindungen
+Incoming HTTP Requests==Eingehende HTTP-Anfragen
+Active:==Aktiv:
+Limit:==Limit:
 #Max:Max:
 Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls

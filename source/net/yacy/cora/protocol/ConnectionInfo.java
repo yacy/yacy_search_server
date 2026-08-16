@@ -44,16 +44,17 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
             .synchronizedSet(new HashSet<ConnectionInfo>());
     private final static Set<ConnectionInfo> serverConnections = Collections
             .synchronizedSet(new HashSet<ConnectionInfo>());
-    // this is only for statistics, so it can be bigger to see lost connectionInfos
-    private final static int staleAfterMillis = 30 * 60000; // 30 minutes
+    /* Stale cleanup is a safety net; normal request and client lifecycles remove their own entries. */
+    private static final long CLIENT_STALE_AFTER_MILLIS = 30L * 60L * 1000L;
+    private static final long SERVER_STALE_AFTER_MILLIS = 30L * 60L * 1000L;
     
     private static int maxcount = 20;
-    private static int serverMaxCount = 50;
+    private static volatile int serverMaxCount = 50;
 
     private final String protocol;
     private final String targetHost;
     private final String command;
-    private final int id;
+    private final long id;
     private final long initTime;
     private final long upbytes;
 
@@ -66,7 +67,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * @param id
      * @param initTime
      */
-    public ConnectionInfo(final String protocol, final String targetHost, final String command, final int id,
+    public ConnectionInfo(final String protocol, final String targetHost, final String command, final long id,
             final long initTime, final long upbytes) {
         this.protocol = protocol;
         this.targetHost = targetHost;
@@ -114,7 +115,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     /**
      * @return
      */
-    public int getID() {
+    public long getID() {
         return id;
     }
 
@@ -150,7 +151,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
     
     /**
-     * gets the number of active server connections
+     * gets the number of active incoming server requests
      * 
      * @return count of active connections
      */
@@ -168,7 +169,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
     
     /**
-     * @return wether the server max connection-count is reached
+     * @return whether the incoming server request limit is reached
      */
     public static boolean isServerCountReached() {
     	return getServerCount() >= getServerMaxcount();
@@ -210,7 +211,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
     
     /**
-     * gets the max connection count of the Server connection manager
+     * gets the maximum active incoming server request count
      * 
      * @return max connections
      */
@@ -219,14 +220,17 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
     
     /**
-     * gets the max connection count of the Sever connection manager
-     * to be used in statistics
+     * sets the maximum active incoming server request count
      * 
      * @param max connections
      * @TODO Is it correct to only set if max > 0? What if maxcount is > 0 and max = 0 ?
      */
     public static void setServerMaxcount(final int max) {
-    	if (max > 0) serverMaxCount = max;
+        if (max > 0) {
+            synchronized (serverConnections) {
+                serverMaxCount = max;
+            }
+        }
     }
 
     /**
@@ -239,12 +243,30 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
 
     /**
-     * add a Server connection to the list of all current connections
+     * add an incoming server request to the active request list
      * 
      * @param conInfo
      */
     public static void addServerConnection(final ConnectionInfo conInfo) {
-    	getServerConnections().add(conInfo);
+        getServerConnections().add(conInfo);
+    }
+
+    /**
+     * Add an incoming server request when capacity is available. The capacity check
+     * and insertion are performed while holding the same lock, so concurrent
+     * callers cannot exceed the configured limit.
+     *
+     * @param conInfo the connection to track
+     * @param limitExempt when true, add the connection regardless of the limit
+     * @return true when the connection was added, false when it was rejected
+     */
+    public static boolean tryAddServerConnection(final ConnectionInfo conInfo, final boolean limitExempt) {
+        synchronized (serverConnections) {
+            if (!limitExempt && serverConnections.size() >= serverMaxCount) {
+                return false;
+            }
+            return serverConnections.add(conInfo);
+        }
     }
 
     /**
@@ -257,7 +279,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
 
     /**
-     * remove a Server connection from the list of all current connections
+     * remove an incoming server request from the active request list
      * 
      * @param conInfo
      */
@@ -270,42 +292,50 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * 
      * @param id
      */
-    public static void removeConnection(final int id) {
+    public static void removeConnection(final long id) {
         removeConnection(new ConnectionInfo(null, null, null, id, 0, 0));
     }
 
     /**
-     * connections with same id {@link equals()} another
-     * 
-     * @param id
-     */
-    public static void removeServerConnection(final int id) {
-        removeServerConnection(new ConnectionInfo(null, null, null, id, 0, 0));
-    }
-    
-    /**
-     * removes stale connections
+     * Remove stale client and server entries. Prefer the pool-specific cleanup
+     * methods when the caller treats the two pools independently.
      */
     public static void cleanUp() {
-    	cleanup(getAllConnections());
-    	cleanup(getServerConnections());
+        cleanUpClientConnections();
+        cleanUpServerConnections();
     }
-    
-    private static void cleanup(final Set<ConnectionInfo> connectionSet) {
-    	final Iterator<ConnectionInfo> iter = connectionSet.iterator();
-    	synchronized (iter) { 
+
+    /**
+     * Remove client connection entries that outlived the stale threshold.
+     *
+     * @return the number of removed entries
+     */
+    public static int cleanUpClientConnections() {
+        return cleanup(allConnections, CLIENT_STALE_AFTER_MILLIS);
+    }
+
+    /**
+     * Remove incoming request entries that outlived the stale threshold.
+     *
+     * @return the number of removed entries
+     */
+    public static int cleanUpServerConnections() {
+        return cleanup(serverConnections, SERVER_STALE_AFTER_MILLIS);
+    }
+
+    private static int cleanup(final Set<ConnectionInfo> connectionSet, final long staleAfterMillis) {
+        int removed = 0;
+        synchronized (connectionSet) {
+            final Iterator<ConnectionInfo> iter = connectionSet.iterator();
             while (iter.hasNext()) {
-                ConnectionInfo con = null;
-                try {
-                    con = iter.next();
-                } catch (Throwable e) {break;} // this must break because otherwise there is danger that the loop does never terminates
-                try {
-                    if (con.getLifetime() > staleAfterMillis) {
-                        connectionSet.remove(con);
-                    }
-                } catch (Throwable e) {continue;}
+                final ConnectionInfo con = iter.next();
+                if (con.getLifetime() > staleAfterMillis) {
+                    iter.remove();
+                    removed++;
+                }
             }
         }
+        return removed;
     }
     
     /* (non-Javadoc)
@@ -335,10 +365,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + id;
-        return result;
+        return Long.hashCode(this.id);
     }
 
     /*

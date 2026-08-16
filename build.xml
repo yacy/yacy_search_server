@@ -268,6 +268,7 @@
       <include name="net/yacy/http/servlets/ServletResourceTest.java" />
       <include name="net/yacy/http/servlets/Jetty12QoSFilterTest.java" />
       <include name="net/yacy/http/servlets/SolrSelectServletTest.java" />
+      <include name="net/yacy/htroot/PerformanceQueues_pTest.java" />
       <classpath>
         <pathelement location="${build}" />
         <path refid="compile.path" />
@@ -282,6 +283,7 @@
       <arg value="net.yacy.http.servlets.ServletResourceTest" />
       <arg value="net.yacy.http.servlets.Jetty12QoSFilterTest" />
       <arg value="net.yacy.http.servlets.SolrSelectServletTest" />
+      <arg value="net.yacy.htroot.PerformanceQueues_pTest" />
       <classpath>
         <pathelement location="${jetty12.test.classes}" />
         <pathelement location="${build}" />

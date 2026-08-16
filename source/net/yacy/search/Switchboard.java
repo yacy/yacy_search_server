@@ -2547,8 +2547,9 @@ public final class Switchboard extends serverSwitch {
                 ConcurrentLog.logException(e);
             }
 
-            // close unused connections
-            ConnectionInfo.cleanUp();
+            // Safety-net cleanup for entries missed by their normal lifecycle handling.
+            ConnectionInfo.cleanUpClientConnections();
+            ConnectionInfo.cleanUpServerConnections();
 
             // clean up delegated stack
             this.checkInterruption();

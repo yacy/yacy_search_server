@@ -25,7 +25,11 @@
 package net.yacy.http.servlets;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -42,13 +46,16 @@ import net.yacy.cora.protocol.RequestHeader;
 /**
  * Records incoming server requests into {@link ConnectionInfo} (displayed on
  * Connections_p.html) and rejects remote requests with http status 503 when
- * the configured maximum number of server connections is reached.
+ * the configured maximum number of active incoming requests is reached.
  *
- * This is a plain servlet filter (former Jetty handler MonitorHandler); the
- * tracking entry of a connection is removed on connection close by a
- * servlet-container specific listener, see Jetty12HttpServer.
+ * This is a plain servlet filter (former Jetty handler MonitorHandler). A
+ * synchronous request is removed when its filter chain exits; an asynchronous
+ * request is removed by a listener when its asynchronous lifecycle finishes.
  */
 public class MonitorFilter implements Filter {
+
+    /** Supplies a distinct tracking identity for every incoming request. */
+    private static final AtomicLong NEXT_REQUEST_ID = new AtomicLong();
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -56,18 +63,6 @@ public class MonitorFilter implements Filter {
 
     @Override
     public void destroy() {
-    }
-
-    /**
-     * @return the ConnectionInfo id of the tcp connection identified by client address and port
-     */
-    public static int connectionId(String remoteAddr, final int remotePort) {
-        // the servlet API reports IPv6 addresses in bracketed form ("[::1]"), the
-        // connection endpoint in plain form: normalize to the plain form
-        if (remoteAddr.startsWith("[") && remoteAddr.endsWith("]")) {
-            remoteAddr = remoteAddr.substring(1, remoteAddr.length() - 1);
-        }
-        return (remoteAddr + ":" + remotePort).hashCode();
     }
 
     @Override
@@ -80,20 +75,56 @@ public class MonitorFilter implements Filter {
                 hrequest.getScheme(),
                 RequestHeader.client(hrequest) + ":" + hrequest.getRemotePort(),
                 hrequest.getMethod() + " " + hrequest.getRequestURI() + (query == null ? "" : "?" + query),
-                connectionId(hrequest.getRemoteAddr(), hrequest.getRemotePort()),
+                NEXT_REQUEST_ID.getAndIncrement(),
                 System.currentTimeMillis(),
                 -1);
 
-        // a keep-alive connection reuses the id: remove a previous entry to show the latest request
-        ConnectionInfo.removeServerConnection(info);
-        ConnectionInfo.addServerConnection(info);
-
-        if (ConnectionInfo.isServerCountReached()
-                && !Domains.isLocal(hrequest.getRemoteAddr(), null)) {
+        final boolean limitExempt = Domains.isLocal(hrequest.getRemoteAddr(), null);
+        if (!ConnectionInfo.tryAddServerConnection(info, limitExempt)) {
             ((HttpServletResponse) response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                    "max. server connections reached (increase /PerformanceQueues_p.html -> httpd Session Pool).");
+                    "maximum active HTTP requests reached (increase Incoming HTTP Requests on "
+                            + "/PerformanceQueues_p.html).");
             return;
         }
-        chain.doFilter(request, response);
+
+        final AtomicBoolean removed = new AtomicBoolean();
+        final Runnable removeTracking = () -> {
+            if (removed.compareAndSet(false, true)) {
+                ConnectionInfo.removeServerConnection(info);
+            }
+        };
+        boolean asyncCleanupRegistered = false;
+        try {
+            chain.doFilter(request, response);
+
+            if (hrequest.isAsyncStarted()) {
+                hrequest.getAsyncContext().addListener(new AsyncListener() {
+                    @Override
+                    public void onComplete(final AsyncEvent event) {
+                        removeTracking.run();
+                    }
+
+                    @Override
+                    public void onTimeout(final AsyncEvent event) {
+                        removeTracking.run();
+                    }
+
+                    @Override
+                    public void onError(final AsyncEvent event) {
+                        removeTracking.run();
+                    }
+
+                    @Override
+                    public void onStartAsync(final AsyncEvent event) {
+                        event.getAsyncContext().addListener(this);
+                    }
+                });
+                asyncCleanupRegistered = true;
+            }
+        } finally {
+            if (!asyncCleanupRegistered) {
+                removeTracking.run();
+            }
+        }
     }
 }

@@ -951,8 +951,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==Śledzenie połączeń serwera
-Incoming Connections==Połączenia przychodzące
+Connection and Request Tracking==Śledzenie połączeń i żądań
+Incoming HTTP Requests==Przychodzące żądania HTTP
+Active HTTP requests:==Aktywne żądania HTTP:
+Remote-request limit:==Limit żądań zdalnych:
+Local requests are exempt.==Żądania lokalne są wyłączone z limitu.
 Protocol==Protokół
 Duration==Czas trwania
 Source IP[:Port]==Źródłowy IP[:Port]
@@ -2556,7 +2559,7 @@ Search Event Cache==Pamięć podręczna zdarzeń wyszukiwania
 "Reverse Word Index"=="Odwrotny indeks słów"
 "Submit New Values"=="Zapisz nowe wartości"
 "Enter New Cache Size"=="Wprowadź nowy rozmiar pamięci podręcznej"
-"Enter new Threadpool Configuration"=="Wprowadź nową konfigurację puli wątków"
+"Apply Concurrency Limits"=="Zastosuj limity współbieżności"
 "Total maximum number of simultaneously open connections in the pool"=="Łączna maksymalna liczba jednocześnie otwartych połączeń w puli"
 "Number of connections currently being used to execute requests."=="Liczba połączeń aktualnie używanych do wykonywania żądań."
 "Number of reusable idle connections"=="Liczba wielokrotnego użytku bezczynnych połączeń"
@@ -2610,10 +2613,11 @@ Maximum number of words in cache:==Maksymalna liczba słów w pamięci podręczn
 This is is the number of word indexes that shall be held in the==To jest liczba indeksów słów, które mają być przechowywane w
 ram cache during indexing. When YaCy is shut down, this cache must be==pamięci podręcznej RAM podczas indeksowania. Gdy YaCy jest wyłączane, ta pamięć podręczna musi zostać
 flushed to disc; this may last some minutes.==zapisana na dysk; może to potrwać kilka minut.
-Thread Pool Settings:==Ustawienia puli wątków:
-Thread Pool==Pula wątków
-maximum Active==maks. aktywnych
-current Active==obecnie aktywnych
+Concurrency Limits:==Limity współbieżności:
+Workload==Obciążenie
+Incoming HTTP Requests==Przychodzące żądania HTTP
+Maximum Active==Maksymalna liczba aktywnych
+Currently Active==Obecnie aktywne
 Outgoing connections pools settings :==Ustawienia pul połączeń wychodzących:
 Connection Pool==Pula połączeń
 Total maximum==Łączne maksimum
@@ -3379,7 +3383,9 @@ RAM used:==Użyty RAM:
 RAM max:==Maks. RAM:
 DISK used:==Użyty dysk:
 DISK free:==Wolny dysk:
-Incoming Connections==Połączenia przychodzące
+Incoming HTTP Requests==Przychodzące żądania HTTP
+Active:==Aktywne:
+Limit:==Limit:
 Queues==Kolejki
 Local Crawl==Crawl lokalny
 (paused)==(wstrzymane)

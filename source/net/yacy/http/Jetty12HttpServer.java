@@ -23,7 +23,6 @@ package net.yacy.http;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,7 +46,6 @@ import org.eclipse.jetty.ee8.servlet.ServletHolder;
 import org.eclipse.jetty.ee8.webapp.WebAppContext;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.UserPrincipal;
@@ -70,7 +68,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import com.google.common.net.InetAddresses;
 
-import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.servlets.MonitorFilter;
@@ -123,24 +120,12 @@ public class Jetty12HttpServer implements YaCyHttpServer {
     private static Server createServer(final int port, final String host, final int acceptorCount,
             final SSLContext sslContext, final int sslPort) {
         final Server server = new Server();
-        final Connection.Listener connectionCloseMonitor = new Connection.Listener() {
-            @Override
-            public void onClosed(final Connection connection) {
-                if (connection.getEndPoint().getRemoteSocketAddress() instanceof InetSocketAddress) {
-                    final InetSocketAddress remote =
-                            (InetSocketAddress) connection.getEndPoint().getRemoteSocketAddress();
-                    ConnectionInfo.removeServerConnection(MonitorFilter.connectionId(
-                            remote.getAddress().getHostAddress(), remote.getPort()));
-                }
-            }
-        };
 
         final HttpConfiguration httpConfiguration = new HttpConfiguration();
         httpConfiguration.setRequestHeaderSize(HttpServerBootstrapConfig.REQUEST_HEADER_SIZE);
         final ServerConnector httpConnector = new ServerConnector(server, acceptorCount, -1,
                 new HttpConnectionFactory(httpConfiguration));
-        configureConnector(httpConnector, host, port, "httpd-" + host + ":" + port,
-                connectionCloseMonitor);
+        configureConnector(httpConnector, host, port, "httpd-" + host + ":" + port);
         httpConnector.setAcceptQueueSize(HttpServerBootstrapConfig.ACCEPT_QUEUE_SIZE);
         server.addConnector(httpConnector);
 
@@ -152,8 +137,7 @@ public class Jetty12HttpServer implements YaCyHttpServer {
             final ServerConnector httpsConnector = new ServerConnector(server, acceptorCount, -1,
                     new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
                     new HttpConnectionFactory(httpsConfiguration));
-            configureConnector(httpsConnector, host, sslPort, "ssld:" + sslPort,
-                    connectionCloseMonitor);
+            configureConnector(httpsConnector, host, sslPort, "ssld:" + sslPort);
             httpsConnector.setAcceptQueueSize(HttpServerBootstrapConfig.ACCEPT_QUEUE_SIZE);
             server.addConnector(httpsConnector);
         }
@@ -169,12 +153,11 @@ public class Jetty12HttpServer implements YaCyHttpServer {
     }
 
     private static void configureConnector(final ServerConnector connector, final String host,
-            final int port, final String name, final Connection.Listener listener) {
+            final int port, final String name) {
         connector.setHost(host);
         connector.setPort(port);
         connector.setName(name);
         connector.setIdleTimeout(HttpServerBootstrapConfig.CONNECTOR_IDLE_TIMEOUT_MILLIS);
-        connector.addBean(listener);
     }
 
     private static Handler createWebAppHandler(final Server server,

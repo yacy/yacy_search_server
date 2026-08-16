@@ -936,8 +936,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==सर्वर कनेक्शन ट्रैकिंग
-Incoming Connections==इनकमिंग कनेक्शन
+Connection and Request Tracking==कनेक्शन और अनुरोध ट्रैकिंग
+Incoming HTTP Requests==आने वाले HTTP अनुरोध
+Active HTTP requests:==सक्रिय HTTP अनुरोध:
+Remote-request limit:==दूरस्थ अनुरोध सीमा:
+Local requests are exempt.==स्थानीय अनुरोधों पर यह सीमा लागू नहीं होती।
 Protocol==शिष्टाचार
 Duration==अवधि
 Source IP[:Port]==स्रोत IP[:Port]
@@ -2541,7 +2544,7 @@ Search Event Cache==इवेंट कैश खोजें
 "Reverse Word Index"=="रिवर्स वर्ड इंडेक्स"
 "Submit New Values"=="नए मान सबमिट करें"
 "Enter New Cache Size"=="नया कैश आकार दर्ज करें"
-"Enter new Threadpool Configuration"=="नया थ्रेडपूल कॉन्फ़िगरेशन दर्ज करें"
+"Apply Concurrency Limits"=="समवर्ती सीमाएँ लागू करें"
 "Total maximum number of simultaneously open connections in the pool"=="पूल में एक साथ खुले कनेक्शनों की कुल अधिकतम संख्या"
 "Number of connections currently being used to execute requests."=="अनुरोधों को निष्पादित करने के लिए वर्तमान में उपयोग किए जा रहे कनेक्शनों की संख्या।"
 "Number of reusable idle connections"=="पुन: प्रयोज्य निष्क्रिय कनेक्शनों की संख्या"
@@ -2595,10 +2598,11 @@ Maximum number of words in cache:==कैश में शब्दों की
 This is is the number of word indexes that shall be held in the==यह शब्द अनुक्रमणिकाओं की संख्या है जो इसमें रखी जाएंगी
 ram cache during indexing. When YaCy is shut down, this cache must be==अनुक्रमण के दौरान रैम कैश। जब YaCy बंद हो जाता है, तो यह कैश अवश्य होना चाहिए
 flushed to disc; this may last some minutes.==डिस्क पर फ्लश किया गया; यह कुछ मिनटों तक चल सकता है.
-Thread Pool Settings:==थ्रेड पूल सेटिंग्स:
-Thread Pool==धागा पूल
-maximum Active==अधिकतम सक्रिय
-current Active==वर्तमान सक्रिय
+Concurrency Limits:==समवर्ती सीमा:
+Workload==कार्यभार
+Incoming HTTP Requests==आने वाले HTTP अनुरोध
+Maximum Active==अधिकतम सक्रिय
+Currently Active==वर्तमान में सक्रिय
 Outgoing connections pools settings :==आउटगोइंग कनेक्शन पूल सेटिंग्स:
 Connection Pool==कनेक्शन पूल
 Total maximum==कुल अधिकतम
@@ -3364,7 +3368,9 @@ RAM used:==रैम का उपयोग किया गया:
 RAM max:==रैम अधिकतम:
 DISK used:==डिस्क का उपयोग किया गया:
 DISK free:==डिस्क मुक्त:
-Incoming Connections==इनकमिंग कनेक्शन
+Incoming HTTP Requests==आने वाले HTTP अनुरोध
+Active:==सक्रिय:
+Limit:==सीमा:
 Queues==कतारों
 Local Crawl==स्थानीय क्रॉल
 (paused)==(रुका हुआ)

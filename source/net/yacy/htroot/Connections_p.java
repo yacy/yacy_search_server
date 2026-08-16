@@ -44,7 +44,7 @@ public final class Connections_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 
-        // server sessions
+        // active incoming HTTP requests
         List<ConnectionInfo> allConnectionsSorted = new LinkedList<ConnectionInfo>(ConnectionInfo.getServerConnections());
         Collections.sort(allConnectionsSorted);
         Collections.reverse(allConnectionsSorted); // toggle ascending/descending
@@ -64,7 +64,7 @@ public final class Connections_p {
         prop.putNum("numMax", ConnectionInfo.getServerMaxcount());
         prop.putNum("numActiveRunning", c);
 
-        // client sessions
+        // active outgoing client connections
         // sorting: sort by initTime, decending
         allConnectionsSorted = new LinkedList<ConnectionInfo>(ConnectionInfo.getAllConnections());
         Collections.sort(allConnectionsSorted);

@@ -1,24 +1,25 @@
 ---
 page: htroot/Connections_p.html
 help: help/Connections_p.md
-title: Server Connection Tracking
+title: Connection and Request Tracking
 package: monitoring-performance
 access: admin
 kind: admin-page
 backend_java: source/net/yacy/htroot/Connections_p.java
 ---
 
-# Server Connection Tracking
+# Connection and Request Tracking
 
 ## Purpose
 
-Server Connection Tracking shows open and recent connections.
+Connection and Request Tracking shows active incoming HTTP requests separately from active outgoing client connections.
 
-Use it when requests appear stuck, slow, or unexpectedly numerous.
+Use it when requests appear stuck, slow, or unexpectedly numerous, or when outgoing HTTP activity needs inspection.
 
 ## What You Can Do Here
 
-- Server Connection Tracking shows open and recent connections.
+- Incoming HTTP Requests contains one row per request currently executing, including concurrent requests sharing one keep-alive connection.
+- Outgoing Connections contains YaCy client connections tracked by the outgoing HTTP client.
 - Filter or limit the view to the symptom being investigated.
 - Use the observation to decide the next crawler, index, network, or configuration action.
 
@@ -38,11 +39,11 @@ Administrator access is required. YaCy protects `_p` pages as administration pag
 
 Page backend: `source/net/yacy/htroot/Connections_p.java`.
 
-No request parameters are needed for normal use of this page.
+No request parameters are needed for normal use of this page. The page refreshes every three seconds.
 
 ## What To Expect
 
-Expect observations: counts, logs, queues, timing, network rows, thread states, or resource values. Monitoring does not fix the issue by itself; it points to the next page or setting to change.
+The incoming count falls when synchronous processing returns or asynchronous processing completes, times out, or fails. Its displayed limit applies to remote requests; local requests are displayed but exempt from rejection. This count is not the number of TCP connections or servlet sessions.
 
 ## Related Pages
 

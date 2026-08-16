@@ -946,8 +946,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==Παρακολούθηση σύνδεσης διακομιστή
-Incoming Connections==Εισερχόμενες συνδέσεις
+Connection and Request Tracking==Παρακολούθηση συνδέσεων και αιτημάτων
+Incoming HTTP Requests==Εισερχόμενα αιτήματα HTTP
+Active HTTP requests:==Ενεργά αιτήματα HTTP:
+Remote-request limit:==Όριο απομακρυσμένων αιτημάτων:
+Local requests are exempt.==Τα τοπικά αιτήματα εξαιρούνται.
 Protocol==Πρωτόκολλο
 Duration==Διάρκεια
 Source IP[:Port]==IP Πηγής[:Port]
@@ -2551,7 +2554,7 @@ Search Event Cache==Αναζήτηση στην κρυφή μνήμη συμβά
 "Reverse Word Index"=="Ευρετήριο αντίστροφης λέξης"
 "Submit New Values"=="Υποβολή νέων τιμών"
 "Enter New Cache Size"=="Εισαγάγετε νέο μέγεθος προσωρινής μνήμης"
-"Enter new Threadpool Configuration"=="Εισαγάγετε τη νέα διαμόρφωση Threadpool"
+"Apply Concurrency Limits"=="Εφαρμογή ορίων ταυτόχρονης εκτέλεσης"
 "Total maximum number of simultaneously open connections in the pool"=="Συνολικός μέγιστος αριθμός ταυτόχρονων ανοιχτών συνδέσεων στην πισίνα"
 "Number of connections currently being used to execute requests."=="Αριθμός συνδέσεων που χρησιμοποιούνται αυτήν τη στιγμή για την εκτέλεση αιτημάτων."
 "Number of reusable idle connections"=="Αριθμός επαναχρησιμοποιήσιμων συνδέσεων αδράνειας"
@@ -2605,10 +2608,11 @@ Maximum number of words in cache:==Μέγιστος αριθμός λέξεων 
 This is is the number of word indexes that shall be held in the==Αυτός είναι ο αριθμός των ευρετηρίων λέξεων που θα διατηρούνται στο
 ram cache during indexing. When YaCy is shut down, this cache must be==ram cache κατά τη δημιουργία ευρετηρίου. Όταν η YaCy τερματίζεται, αυτή η προσωρινή μνήμη πρέπει να είναι
 flushed to disc; this may last some minutes.==ξεπλυθεί σε δίσκο? αυτό μπορεί να διαρκέσει μερικά λεπτά.
-Thread Pool Settings:==Ρυθμίσεις ομάδας νημάτων:
-Thread Pool==Πισίνα με νήματα
-maximum Active==μέγιστο Ενεργό
-current Active==τρέχουσα Ενεργή
+Concurrency Limits:==Όρια ταυτόχρονης εκτέλεσης:
+Workload==Φόρτος εργασίας
+Incoming HTTP Requests==Εισερχόμενα αιτήματα HTTP
+Maximum Active==Μέγιστο ενεργών
+Currently Active==Τρέχοντα ενεργά
 Outgoing connections pools settings :==Ρυθμίσεις πισίνας εξερχόμενων συνδέσεων :
 Connection Pool==Πισίνα σύνδεσης
 Total maximum==Συνολικό μέγιστο
@@ -3374,7 +3378,9 @@ RAM used:==RAM που χρησιμοποιείται:
 RAM max:==Μέγιστο RAM:
 DISK used:==DISK που χρησιμοποιείται:
 DISK free:==Χωρίς Δίσκο:
-Incoming Connections==Εισερχόμενες συνδέσεις
+Incoming HTTP Requests==Εισερχόμενα αιτήματα HTTP
+Active:==Ενεργά:
+Limit:==Όριο:
 Queues==Ουρές
 Local Crawl==Τοπική ανίχνευση
 (paused)==(σε παύση)

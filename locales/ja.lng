@@ -941,8 +941,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==サーバー接続の追跡
-Incoming Connections==着信接続
+Connection and Request Tracking==接続とリクエストの追跡
+Incoming HTTP Requests==受信 HTTP リクエスト
+Active HTTP requests:==アクティブな HTTP リクエスト:
+Remote-request limit:==リモートリクエストの上限:
+Local requests are exempt.==ローカルリクエストは対象外です。
 Protocol==プロトコル
 Duration==間隔
 Source IP[:Port]==ソース IP[:ポート]
@@ -2546,7 +2549,7 @@ Search Event Cache==イベントキャッシュの検索
 "Reverse Word Index"=="逆引き単語索引"
 "Submit New Values"=="新しい値を送信する"
 "Enter New Cache Size"=="新しいキャッシュ サイズを入力してください"
-"Enter new Threadpool Configuration"=="新しいスレッドプール構成を入力してください"
+"Apply Concurrency Limits"=="同時実行数の制限を適用"
 "Total maximum number of simultaneously open connections in the pool"=="プール内で同時にオープンされる接続の合計最大数"
 "Number of connections currently being used to execute requests."=="リクエストを実行するために現在使用されている接続の数。"
 "Number of reusable idle connections"=="再利用可能なアイドル接続の数"
@@ -2600,10 +2603,11 @@ Maximum number of words in cache:==キャッシュ内の最大ワード数:
 This is is the number of word indexes that shall be held in the==これは、ファイル内に保持される単語インデックスの数です。
 ram cache during indexing. When YaCy is shut down, this cache must be==インデックス作成中の RAM キャッシュ。 YaCy がシャットダウンされている場合、このキャッシュは
 flushed to disc; this may last some minutes.==ディスクにフラッシュされました。これは数分間続く場合があります。
-Thread Pool Settings:==スレッドプール設定:
-Thread Pool==スレッドプール
-maximum Active==最大アクティブ
-current Active==現在アクティブ
+Concurrency Limits:==同時実行数の制限:
+Workload==ワークロード
+Incoming HTTP Requests==受信 HTTP リクエスト
+Maximum Active==最大アクティブ数
+Currently Active==現在のアクティブ数
 Outgoing connections pools settings :==発信接続プールの設定:
 Connection Pool==接続プール
 Total maximum==合計最大値
@@ -3369,7 +3373,9 @@ RAM used:==使われているRAM:
 RAM max:==RAMの最大:
 DISK used:==使われているディスク:
 DISK free:==フリーなディスク:
-Incoming Connections==着信接続
+Incoming HTTP Requests==受信 HTTP リクエスト
+Active:==アクティブ:
+Limit:==上限:
 Queues==キュー
 Local Crawl==ローカル キュー
 (paused)==(一時停止)

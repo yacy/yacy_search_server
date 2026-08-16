@@ -225,9 +225,9 @@ bootstrapLoadTimeout = 20000
 # milliseconds
 clientTimeout = 10000
 
-# maximal number of httpd sessions
-# a client may open several connections at once, and the httpdMaxBusySessions value sets
-# a limit on the number of concurrent connections
+# maximum number of concurrently active incoming HTTP requests
+# remote requests above this limit receive HTTP 503; local requests are exempt
+# the historical httpdMaxBusySessions key name is retained for configuration compatibility
 httpdMaxBusySessions = 200
 
 # maximum number of simultaneously open outgoing HTTP connections in the general pool (net.yacy.cora.protocol.http.HTTPClient)

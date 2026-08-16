@@ -946,8 +946,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==服务器连接跟踪
-Incoming Connections==进入连接
+Connection and Request Tracking==连接和请求跟踪
+Incoming HTTP Requests==传入 HTTP 请求
+Active HTTP requests:==活动 HTTP 请求:
+Remote-request limit:==远程请求限制:
+Local requests are exempt.==本地请求不受此限制。
 Protocol==协议
 Duration==持续时间
 Source IP[:Port]==来源IP[:端口]
@@ -2551,7 +2554,7 @@ Search Event Cache==搜索事件缓存
 "Reverse Word Index"=="反向词索引"
 "Submit New Values"=="提交新值"
 "Enter New Cache Size"=="输入新的缓存大小"
-"Enter new Threadpool Configuration"=="输入新的线程池配置"
+"Apply Concurrency Limits"=="应用并发限制"
 "Total maximum number of simultaneously open connections in the pool"=="池中同时打开的连接的最大总数"
 "Number of connections currently being used to execute requests."=="当前用于执行请求的连接数。"
 "Number of reusable idle connections"=="可重用的空闲连接数"
@@ -2605,10 +2608,11 @@ Maximum number of words in cache:==缓存中关键字最大数目:
 This is is the number of word indexes that shall be held in the==这是索引时缓存中存在的最大关键字索引数目.
 ram cache during indexing. When YaCy is shut down, this cache must be==当YaCy停止时,
 flushed to disc; this may last some minutes.==它们会被冲刷到硬盘中, 可能会花费数分钟.
-Thread Pool Settings:==线程池设置:
-Thread Pool==线程池
-maximum Active==最大活动
-current Active==当前活动
+Concurrency Limits:==并发限制:
+Workload==工作负载
+Incoming HTTP Requests==传入 HTTP 请求
+Maximum Active==最大活动数
+Currently Active==当前活动数
 Outgoing connections pools settings :==传出连接池设置：
 Connection Pool==连接池
 Total maximum==总最大值
@@ -3374,7 +3378,9 @@ RAM used:==占用内存:
 RAM max:==最大内存:
 DISK used:==占用硬盘:
 DISK free:==可用硬盘:
-Incoming Connections==流入连接
+Incoming HTTP Requests==传入 HTTP 请求
+Active:==活动:
+Limit:==限制:
 Queues==队列
 Local Crawl==本地爬取
 (paused)==（停顿）

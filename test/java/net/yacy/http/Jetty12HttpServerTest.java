@@ -11,25 +11,35 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncListener;
+import javax.servlet.ServletException;
 import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.ee8.security.authentication.DigestAuthenticator;
+import org.eclipse.jetty.ee8.servlet.FilterHolder;
 import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee8.servlet.ServletHolder;
 import org.eclipse.jetty.io.EofException;
@@ -44,12 +54,16 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Credential;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.servlets.MonitorFilter;
 import net.yacy.search.SwitchboardConstants;
 
 /**
@@ -276,6 +290,375 @@ public class Jetty12HttpServerTest {
                 output.flush();
                 return readAll(client.getInputStream());
             }
+        }
+    }
+
+    /** Regression coverage for the incoming-request accounting leak reported in #800 and #808. */
+    public static class ConnectionTrackingTest {
+
+        private int previousServerMaxCount;
+
+        @Before
+        public void resetConnectionTracking() {
+            this.previousServerMaxCount = ConnectionInfo.getServerMaxcount();
+            ConnectionInfo.getServerConnections().clear();
+            ConnectionInfo.setServerMaxcount(100);
+        }
+
+        @After
+        public void restoreConnectionTracking() {
+            ConnectionInfo.getServerConnections().clear();
+            ConnectionInfo.setServerMaxcount(this.previousServerMaxCount);
+        }
+
+        @Test
+        public void releasesTrackingAfterRepeatedSynchronousRequests() throws Exception {
+            final Jetty12HttpServer httpServer = trackedHttpServer();
+            try {
+                httpServer.startupServer();
+                for (int request = 0; request < 3; request++) {
+                    final String response = closeRequest(httpServer.getHttpPort(), "/request-" + request);
+                    assertTrue(response, response.startsWith("HTTP/1.1 204"));
+                    assertTrackingReturnsToZero();
+                }
+            } finally {
+                httpServer.stop();
+            }
+        }
+
+        @Test
+        public void releasesTrackingWhileKeepAliveConnectionRemainsOpen() throws Exception {
+            final Jetty12HttpServer httpServer = trackedHttpServer();
+            try {
+                httpServer.startupServer();
+                try (Socket client = new Socket("127.0.0.1", httpServer.getHttpPort())) {
+                    final OutputStream output = client.getOutputStream();
+                    output.write(("GET /first HTTP/1.1\r\nHost: 127.0.0.1\r\n"
+                            + "Connection: keep-alive\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+                    output.flush();
+                    assertTrue(readHeaders(client.getInputStream()).startsWith("HTTP/1.1 204"));
+                    assertTrackingReturnsToZero();
+
+                    output.write(("GET /second HTTP/1.1\r\nHost: 127.0.0.1\r\n"
+                            + "Connection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+                    output.flush();
+                    assertTrue(readAll(client.getInputStream()).startsWith("HTTP/1.1 204"));
+                }
+                assertTrackingReturnsToZero();
+            } finally {
+                httpServer.stop();
+            }
+        }
+
+        @Test
+        public void releasesTrackingWhenFilterChainThrows() throws Exception {
+            final MonitorFilter filter = new MonitorFilter();
+            try {
+                filter.doFilter(request("198.51.100.10", 41000), response(new AtomicInteger()),
+                        (request, response) -> {
+                            throw new ServletException("expected test failure");
+                        });
+                org.junit.Assert.fail("Expected the filter chain failure");
+            } catch (final ServletException expected) {
+                assertEquals("expected test failure", expected.getMessage());
+            }
+            assertEquals("Failed requests must not remain active", 0, ConnectionInfo.getServerCount());
+        }
+
+        @Test
+        public void admitsRequestThatReachesConfiguredLimit() throws Exception {
+            ConnectionInfo.setServerMaxcount(1);
+            final AtomicInteger status = new AtomicInteger();
+            final AtomicBoolean invoked = new AtomicBoolean();
+
+            new MonitorFilter().doFilter(request("198.51.100.11", 41001), response(status),
+                    (request, response) -> {
+                        invoked.set(true);
+                        assertEquals("The admitted request must occupy the available slot",
+                                1, ConnectionInfo.getServerCount());
+                    });
+
+            assertEquals("A request filling the final slot must not be rejected", 0, status.get());
+            assertTrue("A request filling the final slot must invoke the filter chain", invoked.get());
+            assertEquals("Completed requests must not remain active", 0, ConnectionInfo.getServerCount());
+        }
+
+        @Test
+        public void enforcesServerConnectionLimitAtomically() throws Exception {
+            ConnectionInfo.setServerMaxcount(1);
+            final CountDownLatch ready = new CountDownLatch(2);
+            final CountDownLatch start = new CountDownLatch(1);
+            final CountDownLatch enteredFilterChain = new CountDownLatch(1);
+            final CountDownLatch rejectedRequestFinished = new CountDownLatch(1);
+            final CountDownLatch releaseFilterChain = new CountDownLatch(1);
+            final AtomicInteger admitted = new AtomicInteger();
+            final AtomicInteger rejected = new AtomicInteger();
+            final AtomicReference<Throwable> failure = new AtomicReference<>();
+            final AtomicInteger nextPort = new AtomicInteger(41010);
+            final Runnable requestTask = () -> {
+                ready.countDown();
+                try {
+                    start.await();
+                    final AtomicInteger status = new AtomicInteger();
+                    new MonitorFilter().doFilter(
+                            request("198.51.100.12", nextPort.getAndIncrement()), response(status),
+                            (request, response) -> {
+                                admitted.incrementAndGet();
+                                enteredFilterChain.countDown();
+                                try {
+                                    releaseFilterChain.await();
+                                } catch (final InterruptedException interrupted) {
+                                    Thread.currentThread().interrupt();
+                                    throw new ServletException(interrupted);
+                                }
+                            });
+                    if (status.get() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+                        rejected.incrementAndGet();
+                        rejectedRequestFinished.countDown();
+                    }
+                } catch (final Throwable error) {
+                    failure.compareAndSet(null, error);
+                }
+            };
+            final Thread first = new Thread(requestTask, "connection-limit-first");
+            final Thread second = new Thread(requestTask, "connection-limit-second");
+
+            first.start();
+            second.start();
+            try {
+                assertTrue("Concurrent requests were not ready", ready.await(5, TimeUnit.SECONDS));
+                start.countDown();
+                assertTrue("No request was admitted", enteredFilterChain.await(5, TimeUnit.SECONDS));
+                assertTrue("Excess request was not rejected",
+                        rejectedRequestFinished.await(5, TimeUnit.SECONDS));
+                assertEquals("Exactly one request may be admitted", 1, admitted.get());
+                assertEquals("Exactly one excess request must be rejected", 1, rejected.get());
+                assertEquals("The active request count must not exceed the limit",
+                        1, ConnectionInfo.getServerCount());
+            } finally {
+                start.countDown();
+                releaseFilterChain.countDown();
+                first.join(5_000L);
+                second.join(5_000L);
+            }
+
+            assertFalse("First request thread did not stop", first.isAlive());
+            assertFalse("Second request thread did not stop", second.isAlive());
+            if (failure.get() != null) {
+                throw new AssertionError("Concurrent limit enforcement failed", failure.get());
+            }
+            assertEquals("Completed requests must not remain active",
+                    0, ConnectionInfo.getServerCount());
+        }
+
+        @Test
+        public void releasesTrackingWhenAsynchronousRequestCompletes() throws Exception {
+            final AtomicReference<AsyncListener> registeredListener = new AtomicReference<>();
+            final AsyncContext asyncContext = (AsyncContext) Proxy.newProxyInstance(
+                    Jetty12HttpServerTest.class.getClassLoader(),
+                    new Class<?>[]{AsyncContext.class},
+                    (proxy, method, args) -> {
+                        if ("addListener".equals(method.getName())) {
+                            registeredListener.set((AsyncListener) args[0]);
+                        }
+                        return defaultValue(method.getReturnType());
+                    });
+
+            new MonitorFilter().doFilter(request("198.51.100.12", 41002, asyncContext),
+                    response(new AtomicInteger()), (request, response) -> {
+                    });
+
+            assertEquals("Async requests must remain active until completion",
+                    1, ConnectionInfo.getServerCount());
+            assertNotNull(registeredListener.get());
+            registeredListener.get().onComplete(null);
+            assertEquals("Completed async requests must not remain active",
+                    0, ConnectionInfo.getServerCount());
+        }
+
+        @Test
+        public void tracksConcurrentRequestsFromSameRemoteConnectionIndependently() throws Exception {
+            final CountDownLatch enteredFilterChains = new CountDownLatch(2);
+            final CountDownLatch releaseFilterChains = new CountDownLatch(1);
+            final AtomicReference<Throwable> failure = new AtomicReference<>();
+            final Runnable requestTask = () -> {
+                try {
+                    new MonitorFilter().doFilter(request("127.0.0.1", 41003),
+                            response(new AtomicInteger()), (servletRequest, servletResponse) -> {
+                                enteredFilterChains.countDown();
+                                try {
+                                    releaseFilterChains.await();
+                                } catch (final InterruptedException interrupted) {
+                                    Thread.currentThread().interrupt();
+                                    throw new ServletException(interrupted);
+                                }
+                            });
+                } catch (final Throwable error) {
+                    failure.compareAndSet(null, error);
+                }
+            };
+            final Thread first = new Thread(requestTask, "connection-tracking-first");
+            final Thread second = new Thread(requestTask, "connection-tracking-second");
+
+            first.start();
+            second.start();
+            try {
+                assertTrue("Both requests did not enter their filter chains",
+                        enteredFilterChains.await(5, TimeUnit.SECONDS));
+                assertEquals("Each active request needs its own tracking entry",
+                        2, ConnectionInfo.getServerCount());
+            } finally {
+                releaseFilterChains.countDown();
+                first.join(5_000L);
+                second.join(5_000L);
+            }
+
+            assertFalse("First request thread did not stop", first.isAlive());
+            assertFalse("Second request thread did not stop", second.isAlive());
+            if (failure.get() != null) {
+                throw new AssertionError("Concurrent tracked request failed", failure.get());
+            }
+            assertEquals("Completed concurrent requests must not remain active",
+                    0, ConnectionInfo.getServerCount());
+        }
+
+        private static Jetty12HttpServer trackedHttpServer() throws Exception {
+            final Jetty12HttpServer httpServer = new Jetty12HttpServer(0, "127.0.0.1", 1, null, -1);
+            final Field serverField = Jetty12HttpServer.class.getDeclaredField("server");
+            serverField.setAccessible(true);
+            final Server server = (Server) serverField.get(httpServer);
+
+            final ServletContextHandler webApp = new ServletContextHandler();
+            webApp.setContextPath("/");
+            webApp.addFilter(new FilterHolder(MonitorFilter.class), "/*",
+                    EnumSet.of(DispatcherType.REQUEST));
+            webApp.addServlet(new ServletHolder(new HttpServlet() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                protected void doGet(final HttpServletRequest request,
+                        final HttpServletResponse response) {
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                }
+            }), "/*");
+            server.setHandler(webApp);
+            return httpServer;
+        }
+
+        private static String closeRequest(final int port, final String path) throws Exception {
+            try (Socket client = new Socket("127.0.0.1", port)) {
+                final OutputStream output = client.getOutputStream();
+                output.write(("GET " + path + " HTTP/1.1\r\nHost: 127.0.0.1:" + port
+                        + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+                output.flush();
+                return readAll(client.getInputStream());
+            }
+        }
+
+        private static void assertTrackingReturnsToZero() throws InterruptedException {
+            final long deadline = System.nanoTime() + 2_000_000_000L;
+            while (ConnectionInfo.getServerCount() != 0 && System.nanoTime() < deadline) {
+                Thread.sleep(10L);
+            }
+            assertEquals("Completed requests must not remain in the active server count",
+                    0, ConnectionInfo.getServerCount());
+        }
+
+        private static HttpServletRequest request(final String remoteAddress, final int remotePort) {
+            return request(remoteAddress, remotePort, null);
+        }
+
+        private static HttpServletRequest request(final String remoteAddress, final int remotePort,
+                final AsyncContext asyncContext) {
+            return (HttpServletRequest) Proxy.newProxyInstance(
+                    Jetty12HttpServerTest.class.getClassLoader(),
+                    new Class<?>[]{HttpServletRequest.class},
+                    (proxy, method, args) -> switch (method.getName()) {
+                        case "getScheme" -> "http";
+                        case "getRemoteAddr", "getRemoteHost" -> remoteAddress;
+                        case "getRemotePort" -> remotePort;
+                        case "getMethod" -> "GET";
+                        case "getRequestURI" -> "/regression";
+                        case "isAsyncStarted" -> asyncContext != null;
+                        case "getAsyncContext" -> asyncContext;
+                        default -> defaultValue(method.getReturnType());
+                    });
+        }
+
+        private static HttpServletResponse response(final AtomicInteger status) {
+            return (HttpServletResponse) Proxy.newProxyInstance(
+                    Jetty12HttpServerTest.class.getClassLoader(),
+                    new Class<?>[]{HttpServletResponse.class},
+                    (proxy, method, args) -> {
+                        if ("sendError".equals(method.getName()) || "setStatus".equals(method.getName())) {
+                            status.set((Integer) args[0]);
+                        }
+                        return defaultValue(method.getReturnType());
+                    });
+        }
+
+        private static Object defaultValue(final Class<?> type) {
+            if (!type.isPrimitive()) return null;
+            if (type == boolean.class) return false;
+            if (type == byte.class) return (byte) 0;
+            if (type == short.class) return (short) 0;
+            if (type == int.class) return 0;
+            if (type == long.class) return 0L;
+            if (type == float.class) return 0.0f;
+            if (type == double.class) return 0.0d;
+            if (type == char.class) return '\0';
+            return null;
+        }
+    }
+
+    /** Regression coverage for stale connection accounting cleanup. */
+    public static class ConnectionInfoCleanupTest {
+
+        private static final long STALE_INIT_TIME =
+                System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(31);
+
+        @Before
+        public void resetConnectionInfo() {
+            ConnectionInfo.getAllConnections().clear();
+            ConnectionInfo.getServerConnections().clear();
+        }
+
+        @After
+        public void clearConnectionInfo() {
+            ConnectionInfo.getAllConnections().clear();
+            ConnectionInfo.getServerConnections().clear();
+        }
+
+        @Test
+        public void clientCleanupRemovesEveryStaleEntryFromClientPoolOnly() {
+            ConnectionInfo.addConnection(connection(1001L, STALE_INIT_TIME));
+            ConnectionInfo.addConnection(connection(1002L, STALE_INIT_TIME));
+            ConnectionInfo.addConnection(connection(1003L, System.currentTimeMillis()));
+            ConnectionInfo.addServerConnection(connection(2001L, STALE_INIT_TIME));
+
+            assertEquals("All stale client entries must be removed",
+                    2, ConnectionInfo.cleanUpClientConnections());
+            assertEquals("The active client entry must remain", 1, ConnectionInfo.getCount());
+            assertEquals("Client cleanup must not alter server entries",
+                    1, ConnectionInfo.getServerCount());
+        }
+
+        @Test
+        public void serverCleanupRemovesEveryStaleEntryFromServerPoolOnly() {
+            ConnectionInfo.addServerConnection(connection(2001L, STALE_INIT_TIME));
+            ConnectionInfo.addServerConnection(connection(2002L, STALE_INIT_TIME));
+            ConnectionInfo.addServerConnection(connection(2003L, System.currentTimeMillis()));
+            ConnectionInfo.addConnection(connection(1001L, STALE_INIT_TIME));
+
+            assertEquals("All stale server entries must be removed",
+                    2, ConnectionInfo.cleanUpServerConnections());
+            assertEquals("The active server entry must remain", 1, ConnectionInfo.getServerCount());
+            assertEquals("Server cleanup must not alter client entries",
+                    1, ConnectionInfo.getCount());
+        }
+
+        private static ConnectionInfo connection(final long id, final long initTime) {
+            return new ConnectionInfo("http", "example.test", "GET /", id, initTime, 0L);
         }
     }
 
@@ -546,6 +929,24 @@ public class Jetty12HttpServerTest {
     static String readAll(final InputStream input) throws Exception {
         final ByteArrayOutputStream result = new ByteArrayOutputStream();
         input.transferTo(result);
+        return result.toString(StandardCharsets.ISO_8859_1);
+    }
+
+    static String readHeaders(final InputStream input) throws Exception {
+        final ByteArrayOutputStream result = new ByteArrayOutputStream();
+        int state = 0;
+        int value;
+        while ((value = input.read()) >= 0) {
+            result.write(value);
+            state = switch (state) {
+                case 0 -> value == '\r' ? 1 : 0;
+                case 1 -> value == '\n' ? 2 : 0;
+                case 2 -> value == '\r' ? 3 : 0;
+                case 3 -> value == '\n' ? 4 : 0;
+                default -> state;
+            };
+            if (state == 4) break;
+        }
         return result.toString(StandardCharsets.ISO_8859_1);
     }
 }

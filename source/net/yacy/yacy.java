@@ -300,11 +300,12 @@ public final class yacy {
             try {
                 // start http server
                 YaCyHttpServer httpServer;
+                ConnectionInfo.setServerMaxcount(sb.getConfigInt(
+                        SwitchboardConstants.SERVER_MAX_BUSY_SESSIONS,
+                        SwitchboardConstants.SERVER_MAX_BUSY_SESSIONS_DEFAULT));
                 httpServer = new Jetty12HttpServer(port, host);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
-                // TODO: this has no effect on Jetty (but needed to reflect configured value and limit is still used)
-                ConnectionInfo.setServerMaxcount(sb.getConfigInt("connectionsMax", ConnectionInfo.getMaxcount()));
 
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());
 

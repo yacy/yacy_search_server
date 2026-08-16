@@ -688,8 +688,11 @@ manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==оновле�
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==автоматичне оновлення: додайте наступний рядок до /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==Стан підключень сервера
-Incoming Connections==Вхідні з’єднання
+Connection and Request Tracking==Відстеження з’єднань і запитів
+Incoming HTTP Requests==Вхідні HTTP-запити
+Active HTTP requests:==Активні HTTP-запити:
+Remote-request limit:==Ліміт віддалених запитів:
+Local requests are exempt.==Локальні запити не обмежуються.
 Duration==Тривалість
 Source IP[:Port]==IP джерела[:Порт]
 Dest. IP[:Port]==IP призначення[:Порт]
@@ -1919,9 +1922,9 @@ Maximum number of words in cache:==Максимальна кількість с�
 This is is the number of word indexes that shall be held in the==Це кількість слів в індексах, що під час індексації
 ram cache during indexing. When YaCy is shut down, this cache must be==RAM кешу повинні бути збережені. Під час вимкнення YaCy, цей кеш повинен
 flushed to disc; this may last some minutes.==бути збережений на диск, що може зайняти декілька хвилин.
-Thread Pool Settings:==Установки пулу потоків:
-maximum Active==макс. активний
-current Active==поточний активний
+Concurrency Limits:==Обмеження паралельності:
+Maximum Active==Максимум активних
+Currently Active==Активні зараз
 milliseconds==мілісекунд
 
 #Сурогати->Заміщення
@@ -1933,7 +1936,7 @@ milliseconds==мілісекунд
 "Reverse Word Index"=="Зворотний покажчик слів"
 "Submit New Values"=="Надіслати нові значення"
 "Enter New Cache Size"=="Введіть новий розмір кешу"
-"Enter new Threadpool Configuration"=="Введіть нову конфігурацію Threadpool"
+"Apply Concurrency Limits"=="Застосувати обмеження паралельності"
 "Total maximum number of simultaneously open connections in the pool"=="Загальна максимальна кількість одночасно відкритих підключень у пулі"
 "Number of connections currently being used to execute requests."=="Кількість підключень, які зараз використовуються для виконання запитів."
 "Number of reusable idle connections"=="Кількість багаторазових неактивних підключень"
@@ -1954,7 +1957,8 @@ Search requests performed on remote peers distributed Reverse Word Index==Зап
 Solr==Solr
 Search requests performed on remote peers Solr indexes==Пошукові запити виконуються на віддалених однорангових індексах Solr
 Words in RAM cache:<br />(Size in KBytes)==Слова в кеші RAM:<br />(Розмір у кбайтах)
-Thread Pool==Пул потоків
+Workload==Робоче навантаження
+Incoming HTTP Requests==Вхідні HTTP-запити
 Outgoing connections pools settings :==Параметри пулів вихідних з'єднань:
 Connection Pool==Пул підключень
 Total maximum==Загальний максимум
@@ -2430,7 +2434,9 @@ No==Ні
 Auto-popup on start-up==Самопоказ при запуску
 Memory Usage==Споживання пам’яті
 
-Incoming Connections==Вхідні з’єднання
+Incoming HTTP Requests==Вхідні HTTP-запити
+Active:==Активні:
+Limit:==Ліміт:
 Max:Макс.:
 Local Crawl==Місцеве сканування
 Remote triggered Crawl==Вхідні віддалені сканування

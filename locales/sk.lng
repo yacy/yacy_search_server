@@ -945,8 +945,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==Sledovanie pripojenia k serveru
-Incoming Connections==Prichadzajuce spojenia
+Connection and Request Tracking==Sledovanie pripojení a požiadaviek
+Incoming HTTP Requests==Prichádzajúce HTTP požiadavky
+Active HTTP requests:==Aktívne HTTP požiadavky:
+Remote-request limit:==Limit vzdialených požiadaviek:
+Local requests are exempt.==Lokálne požiadavky sú vyňaté.
 Protocol==Protokol
 Duration==Trvanie
 Source IP[:Port]==Zdrojova-IP[:Port]
@@ -2550,7 +2553,7 @@ Search Event Cache==Vyhľadajte vyrovnávaciu pamäť udalostí
 "Reverse Word Index"=="Obrátený index slov"
 "Submit New Values"=="Odoslať nové hodnoty"
 "Enter New Cache Size"=="Zadajte novú veľkosť vyrovnávacej pamäte"
-"Enter new Threadpool Configuration"=="Zadajte novú konfiguráciu Threadpool"
+"Apply Concurrency Limits"=="Použiť limity súbežnosti"
 "Total maximum number of simultaneously open connections in the pool"=="Celkový maximálny počet súčasne otvorených pripojení v bazéne"
 "Number of connections currently being used to execute requests."=="Počet pripojení, ktoré sa momentálne používajú na vykonávanie požiadaviek."
 "Number of reusable idle connections"=="Počet opätovne použiteľných nečinných pripojení"
@@ -2604,10 +2607,11 @@ Maximum number of words in cache:==Maximálny počet slov vo vyrovnávacej pamä
 This is is the number of word indexes that shall be held in the==Toto je pocet indexov slov ktore by mali byt
 ram cache during indexing. When YaCy is shut down, this cache must be==v RAM cache pocas indexacie. Ak je YaCy vypnute, tato cache musi byt
 flushed to disc; this may last some minutes.==ulozena na disk. To moze trvat niekolko minut.
-Thread Pool Settings:==Nastavenia fondu vlákien:
-Thread Pool==Zásobník závitov
-maximum Active==max. aktivnych
-current Active==prave aktivnych
+Concurrency Limits:==Limity súbežnosti:
+Workload==Pracovné zaťaženie
+Incoming HTTP Requests==Prichádzajúce HTTP požiadavky
+Maximum Active==Maximálne aktívne
+Currently Active==Aktuálne aktívne
 Outgoing connections pools settings :==Nastavenia fondov odchádzajúcich pripojení:
 Connection Pool==Bazén pripojenia
 Total maximum==Celkové maximum
@@ -3373,7 +3377,9 @@ RAM used:==Použitá RAM:
 RAM max:==RAM max:
 DISK used:==Použitý DISK:
 DISK free:==DISK zadarmo:
-Incoming Connections==Prichadzajuce spojenia
+Incoming HTTP Requests==Prichádzajúce HTTP požiadavky
+Active:==Aktívne:
+Limit:==Limit:
 Queues==Fronty
 Local Crawl==Lokalne crawlovat
 (paused)==(pozastavené)

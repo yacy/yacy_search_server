@@ -162,23 +162,23 @@
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ThreadPoolSettings" class="col-sm-12 col-md-6">
       <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
-	  <fieldset><legend>Thread Pool Settings:</legend>
+	  <fieldset><legend>Concurrency Limits:</legend>
 	    <table border="0">
 	      <tr class="TableHeader" valign="bottom">
-	        <td>Thread Pool</td>
-	        <td>maximum Active</td>
-	        <td>current Active</td>
+	        <td>Workload</td>
+	        <td>Maximum Active</td>
+	        <td>Currently Active</td>
 	      </tr>
 	      #{pool}#
 	      <tr class="TableCellDark">
-	        <td align="left">#[name]#</td>
+	        <td align="left">#(incomingRequests)##[name]#::Incoming HTTP Requests#(/incomingRequests)#</td>
 	        <td align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#" /></td>
 	        <td align="right">#[numActive]#</td>
 	      </tr>
 	      #{/pool}#
 	      <tr class="TableCellLight">
 	        <td align="left" colspan="7">
-	        <input type="submit" name="poolConfig" class="btn btn-sm btn-primary" value="Enter new Threadpool Configuration" />
+	        <input type="submit" name="poolConfig" class="btn btn-sm btn-primary" value="Apply Concurrency Limits" />
 	        Changes take effect immediately</td>
 	      </tr>
 	    </table>

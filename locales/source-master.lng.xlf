@@ -2654,11 +2654,20 @@
 
 <file original="Connections_p.html"  source-language="en"  datatype="html">
   <body>
-    <trans-unit id="da1cdd7c" xml:space="preserve" approved="no" translate="yes">
-       <source>Server Connection Tracking</source>
+    <trans-unit id="a23473" xml:space="preserve" approved="no" translate="yes">
+       <source>Connection and Request Tracking</source>
     </trans-unit>
-    <trans-unit id="14f5d45b" xml:space="preserve" approved="no" translate="yes">
-       <source>Incoming Connections</source>
+    <trans-unit id="dfe35a22" xml:space="preserve" approved="no" translate="yes">
+       <source>Incoming HTTP Requests</source>
+    </trans-unit>
+    <trans-unit id="89681f98" xml:space="preserve" approved="no" translate="yes">
+       <source>Active HTTP requests:</source>
+    </trans-unit>
+    <trans-unit id="18ee22d7" xml:space="preserve" approved="no" translate="yes">
+       <source>Remote-request limit:</source>
+    </trans-unit>
+    <trans-unit id="de4245bc" xml:space="preserve" approved="no" translate="yes">
+       <source>Local requests are exempt.</source>
     </trans-unit>
     <trans-unit id="c8e4f2b8" xml:space="preserve" approved="no" translate="yes">
        <source>Protocol</source>
@@ -7136,8 +7145,8 @@
     <trans-unit id="25753af9" xml:space="preserve" approved="no" translate="yes">
        <source>"Enter New Cache Size"</source>
     </trans-unit>
-    <trans-unit id="9f9296dc" xml:space="preserve" approved="no" translate="yes">
-       <source>"Enter new Threadpool Configuration"</source>
+    <trans-unit id="f80e9589" xml:space="preserve" approved="no" translate="yes">
+       <source>"Apply Concurrency Limits"</source>
     </trans-unit>
     <trans-unit id="74791d75" xml:space="preserve" approved="no" translate="yes">
        <source>"Total maximum number of simultaneously open connections in the pool"</source>
@@ -7298,17 +7307,20 @@
     <trans-unit id="35cca64c" xml:space="preserve" approved="no" translate="yes">
        <source>flushed to disc; this may last some minutes.</source>
     </trans-unit>
-    <trans-unit id="ca387229" xml:space="preserve" approved="no" translate="yes">
-       <source>Thread Pool Settings:</source>
+    <trans-unit id="c99adf55" xml:space="preserve" approved="no" translate="yes">
+       <source>Concurrency Limits:</source>
     </trans-unit>
-    <trans-unit id="d2facc72" xml:space="preserve" approved="no" translate="yes">
-       <source>Thread Pool</source>
+    <trans-unit id="5f8ff97" xml:space="preserve" approved="no" translate="yes">
+       <source>Workload</source>
     </trans-unit>
-    <trans-unit id="4aeef926" xml:space="preserve" approved="no" translate="yes">
-       <source>maximum Active</source>
+    <trans-unit id="f35c546" xml:space="preserve" approved="no" translate="yes">
+       <source>Maximum Active</source>
     </trans-unit>
-    <trans-unit id="4f5fabad" xml:space="preserve" approved="no" translate="yes">
-       <source>current Active</source>
+    <trans-unit id="51dc7be0" xml:space="preserve" approved="no" translate="yes">
+       <source>Currently Active</source>
+    </trans-unit>
+    <trans-unit id="dfe35a22" xml:space="preserve" approved="no" translate="yes">
+       <source>Incoming HTTP Requests</source>
     </trans-unit>
     <trans-unit id="82717ee5" xml:space="preserve" approved="no" translate="yes">
        <source>Outgoing connections pools settings :</source>
@@ -9427,8 +9439,14 @@
     <trans-unit id="94e8670b" xml:space="preserve" approved="no" translate="yes">
        <source>DISK free:</source>
     </trans-unit>
-    <trans-unit id="14f5d45b" xml:space="preserve" approved="no" translate="yes">
-       <source>Incoming Connections</source>
+    <trans-unit id="dfe35a22" xml:space="preserve" approved="no" translate="yes">
+       <source>Incoming HTTP Requests</source>
+    </trans-unit>
+    <trans-unit id="1df8f9d4" xml:space="preserve" approved="no" translate="yes">
+       <source>Active:</source>
+    </trans-unit>
+    <trans-unit id="87ab17ff" xml:space="preserve" approved="no" translate="yes">
+       <source>Limit:</source>
     </trans-unit>
     <trans-unit id="90d8f5a2" xml:space="preserve" approved="no" translate="yes">
        <source>Queues</source>

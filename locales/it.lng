@@ -824,7 +824,10 @@ You installed YaCy with a package manager. To update YaCy, use the package manag
 
 #File: Connections_p.html
 #---------------------------
-Incoming Connections==Connessioni in entrata
+Incoming HTTP Requests==Richieste HTTP in ingresso
+Active HTTP requests:==Richieste HTTP attive:
+Remote-request limit:==Limite richieste remote:
+Local requests are exempt.==Le richieste locali sono esenti.
 Duration==Durata
 Source IP[:Port]==IP sorgente[:Port]
 Dest. IP[:Port]==IP dest.[:Port]
@@ -832,7 +835,7 @@ Outgoing Connections==Connessioni in uscita
 Command==Comando
 ID==ID
 Protocol==Protocollo
-Server Connection Tracking==Tracciamento connessione server
+Connection and Request Tracking==Monitoraggio di connessioni e richieste
 Up-Bytes==Up-Byte
 #-----------------------------
 
@@ -2253,12 +2256,13 @@ Maximum number of words in cache:==Numero massimo di parole nella cache:
 This is is the number of word indexes that shall be held in the==Questo è il numero di indici di parola che si terrà nel
 ram cache during indexing. When YaCy is shut down, this cache must be==ram cache during indexing. When YaCy is shut down, this cache must be
 flushed to disc; this may last some minutes.==asciugato sul disco; questo può durare alcuni minuti.
-Thread Pool Settings:==Impostazioni della piscina filettata:
-maximum Active==massimo attivo
-current Active==corrente attiva
+Concurrency Limits:==Limiti di concorrenza:
+Maximum Active==Massimo attivo
+Currently Active==Attualmente attivi
 Description==Descrizione
 RAM Cache==RAM Cache
-Thread Pool==Piscina filettata
+Workload==Carico di lavoro
+Incoming HTTP Requests==Richieste HTTP in ingresso
 milliseconds==millisecondi
 Exec Time<br />per Busy-Cycle<br />(millis)==Exec Time<br />per ciclo occupato<br />(millis)
 Memory Use<br />per Busy-Cycle<br />(kbytes)==Memoria Usa<br />per ciclo occupato<br />(kbyte)
@@ -2268,7 +2272,7 @@ Total<br />Cycles==Totale cicli<br />
 Total<br />Exec Time==Tempo totale di esecuzione<br />
 Total<br />Sleep Time==Totale<br />Orario di sonno
 "Enter New Cache Size"=="Inserisci nuova dimensione della cache"
-"Enter new Threadpool Configuration"=="Inserisci nuova configurazione di Threadpool"
+"Apply Concurrency Limits"=="Applica limiti di concorrenza"
 "Number of connection requests being blocked awaiting a free connection"=="Numero di richieste di connessione bloccate in attesa di connessione gratuita"
 "Number of connections currently being used to execute requests."=="Numero di connessioni attualmente utilizzate per eseguire le richieste."
 "Number of reusable idle connections"=="Numero di connessioni inattivo riutilizzabili"
@@ -2848,7 +2852,9 @@ RAM used:==RAM usata:
 RAM max:==RAM massima:
 DISK used:==DISCO usato:
 DISK free:==DISCO libero:
-Incoming Connections==Connessioni in entrata
+Incoming HTTP Requests==Richieste HTTP in ingresso
+Active:==Attive:
+Limit:==Limite:
 Local Crawl==Crawl localeCity name (optional, probably does not need a translation)
 Remote triggered Crawl==Crawl attivato da remoto
 Pre-Queueing==Pre-Quéeing

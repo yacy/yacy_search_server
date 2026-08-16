@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Server Connection Tracking</title>
+    <title>YaCy '#[clientname]#': Connection and Request Tracking</title>
     #%env/templates/metas.template%#
     <meta http-equiv="REFRESH" content="3" />
   </head>
@@ -9,9 +9,9 @@
     #%env/templates/header.template%#
     #%env/templates/submenuAccessTracker.template%#
     <script type="text/javascript" src="js/sorttable.js"></script>
-    <h2>Server Connection Tracking</h2>
-    <h3>Incoming Connections</h3>
-    <p>Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections.</p>
+    <h2>Connection and Request Tracking</h2>
+    <h3>Incoming HTTP Requests</h3>
+    <p><span>Active HTTP requests:</span> #[numActiveRunning]#. <span>Remote-request limit:</span> #[numMax]#. <span>Local requests are exempt.</span></p>
     <table class="sortable" border="0">
       <tr class="TableHeader" valign="bottom">
         <td>Protocol</td>

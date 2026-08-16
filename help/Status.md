@@ -12,7 +12,7 @@ backend_java: source/net/yacy/htroot/Status.java
 
 ## Purpose
 
-Console Status is the operational dashboard for the peer.
+Console Status is the operational dashboard for the peer. Its Incoming HTTP Requests metric reports requests currently executing and the configured remote-request limit; it does not report TCP connections or servlet sessions.
 
 Use it first to see identity, uptime, network position, indexing state, and important warnings.
 
@@ -64,7 +64,7 @@ GET /Status.html?aquirerelease=...&ResetTraffic=...&continueCrawlJob=...&jobType
 
 ## What To Expect
 
-Expect observations: counts, logs, queues, timing, network rows, thread states, or resource values. Monitoring does not fix the issue by itself; it points to the next page or setting to change.
+Expect observations including active incoming HTTP requests and their configured limit. Follow that metric to Connection and Request Tracking for individual requests or Concurrency Limits to change the limit. Local requests count as active but are exempt from rejection.
 
 ## Related Pages
 

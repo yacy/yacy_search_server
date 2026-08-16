@@ -885,8 +885,11 @@ manual update:<br/>apt-get update &amp;&amp; apt-get install yacy==обновл�
 automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy==автоматическое обновление: добавьте следующую строку в /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes установить yacy
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==Отслеживание соединений с сервером
-Incoming Connections==Входящие соединения
+Connection and Request Tracking==Отслеживание соединений и запросов
+Incoming HTTP Requests==Входящие HTTP-запросы
+Active HTTP requests:==Активные HTTP-запросы:
+Remote-request limit:==Лимит удалённых запросов:
+Local requests are exempt.==Локальные запросы не ограничиваются.
 Duration==Длительность
 Up-Bytes==Размер
 Source IP[:Port]==IP-адрес источника[:порт]
@@ -2258,10 +2261,11 @@ Maximum number of words in cache:==Максимальное число слов 
 This is is the number of word indexes that shall be held in the==Это число слов индекса, находящихся
 ram cache during indexing. When YaCy is shut down, this cache must be==в оперативной памяти во время индексирования. Когда YaCy выключается, содержимое кэша
 flushed to disc; this may last some minutes.==сохраняется на диск; это может занять несколько минут.
-Thread Pool Settings:==Настройка пула:
-Thread Pool==Пул
-maximum Active==Максимум возможно
-current Active==В данный момент
+Concurrency Limits:==Ограничения параллелизма:
+Workload==Рабочая нагрузка
+Incoming HTTP Requests==Входящие HTTP-запросы
+Maximum Active==Максимум активных
+Currently Active==Активно сейчас
 #-----------------------------
 
 "Submit New Delay Values"=="Отправьте новые значения задержки"
@@ -2270,7 +2274,7 @@ current Active==В данный момент
 "Reverse Word Index"=="Обратный указатель слов"
 "Submit New Values"=="Отправить новые значения"
 "Enter New Cache Size"=="Введите новый размер кэша"
-"Enter new Threadpool Configuration"=="Введите новую конфигурацию пула потоков"
+"Apply Concurrency Limits"=="Применить ограничения параллелизма"
 "Total maximum number of simultaneously open connections in the pool"=="Общее максимальное количество одновременно открытых соединений в пуле"
 "Number of connections currently being used to execute requests."=="Количество соединений, используемых в данный момент для выполнения запросов."
 "Number of reusable idle connections"=="Количество многоразовых простаивающих соединений"
@@ -2863,7 +2867,9 @@ RAM max:==RAM максимум:
 DISK used:==На диске используется:
 DISK free:==На диске свободно:
 
-Incoming Connections==Входящие соединения
+Incoming HTTP Requests==Входящие HTTP-запросы
+Active:==Активно:
+Limit:==Лимит:
 Local Crawl==Локальный индексатор
 Remote triggered Crawl==Удалённый индексатор
 Pre-Queueing==Предварительная очередь

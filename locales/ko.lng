@@ -936,8 +936,11 @@ automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-
 
 #File: Connections_p.html
 #---------------------------
-Server Connection Tracking==서버 연결 추적
-Incoming Connections==들어오는 연결
+Connection and Request Tracking==연결 및 요청 추적
+Incoming HTTP Requests==수신 HTTP 요청
+Active HTTP requests:==활성 HTTP 요청:
+Remote-request limit:==원격 요청 제한:
+Local requests are exempt.==로컬 요청은 제한에서 제외됩니다.
 Protocol==규약
 Duration==지속
 Source IP[:Port]==소스 IP[:포트]
@@ -2541,7 +2544,7 @@ Search Event Cache==이벤트 캐시 검색
 "Reverse Word Index"=="역방향 단어 색인"
 "Submit New Values"=="새 값 제출"
 "Enter New Cache Size"=="새 캐시 크기 입력"
-"Enter new Threadpool Configuration"=="새 스레드풀 구성 입력"
+"Apply Concurrency Limits"=="동시 실행 제한 적용"
 "Total maximum number of simultaneously open connections in the pool"=="풀에서 동시에 열려 있는 총 최대 연결 수"
 "Number of connections currently being used to execute requests."=="현재 요청을 실행하는 데 사용되는 연결 수입니다."
 "Number of reusable idle connections"=="재사용 가능한 유휴 연결 수"
@@ -2595,10 +2598,11 @@ Maximum number of words in cache:==캐시의 최대 단어 수:
 This is is the number of word indexes that shall be held in the==이는 데이터베이스에 보관될 단어 인덱스의 수입니다.
 ram cache during indexing. When YaCy is shut down, this cache must be==인덱싱 중 RAM 캐시. YaCy이 종료되면 이 캐시는 다음과 같아야 합니다.
 flushed to disc; this may last some minutes.==디스크에 플러시됩니다. 몇 분 정도 지속될 수 있습니다.
-Thread Pool Settings:==스레드 풀 설정:
-Thread Pool==스레드 풀
-maximum Active==최대 활성
-current Active==현재 활성
+Concurrency Limits:==동시 실행 제한:
+Workload==워크로드
+Incoming HTTP Requests==수신 HTTP 요청
+Maximum Active==최대 활성
+Currently Active==현재 활성
 Outgoing connections pools settings :==나가는 연결 풀 설정:
 Connection Pool==연결 풀
 Total maximum==총 최대치
@@ -3364,7 +3368,9 @@ RAM used:==사용된 RAM:
 RAM max:==최대 RAM:
 DISK used:==사용된 디스크:
 DISK free:==여유 디스크:
-Incoming Connections==들어오는 연결
+Incoming HTTP Requests==수신 HTTP 요청
+Active:==활성:
+Limit:==제한:
 Queues==대기열
 Local Crawl==로컬 크롤링
 (paused)==(일시중지됨)

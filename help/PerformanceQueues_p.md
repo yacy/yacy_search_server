@@ -12,7 +12,7 @@ backend_java: source/net/yacy/htroot/PerformanceQueues_p.java
 
 ## Purpose
 
-Queue Performance shows processing queues and worker behavior.
+Queue Performance shows processing queues, worker behavior, and concurrency limits.
 
 Use it to find bottlenecks between crawling, parsing, indexing, and response generation.
 
@@ -28,7 +28,7 @@ Monitoring pages read live peer state from queues, logs, network tables, memory 
 
 | Control | Meaning | Values or examples |
 | --- | --- | --- |
-| `#[name]#_maxActive` | Enables the named feature. | Integer value. |
+| `#[name]#_maxActive` | Maximum concurrent activity for the named workload. | Positive integer. The Incoming HTTP Requests row limits active remote requests, not TCP connections or servlet sessions. |
 
 ## Correct Use
 
@@ -60,7 +60,9 @@ The table explains values that an agent or script must set deliberately. Paramet
 | `Crawler Pool_maxActive` | Enables the named feature. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `Robots.txt Pool_maxActive` | Enables the named feature. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
 | `crawlPauseRemotesearch` | User or account value. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
-| `httpd Session Pool_maxActive` | Enables the named feature. | Set only when this option is part of the intended request; otherwise omit it and let YaCy use the page default. |
+| `poolConfig` | Applies the submitted crawler, robots.txt, and incoming HTTP request limits. | Include this submit parameter and preserve the current values of limits that are not being changed. |
+| `Incoming HTTP Requests_maxActive` | Positive integer maximum for concurrently active incoming HTTP requests. | Takes effect immediately and is persisted as `httpdMaxBusySessions`; the same value is restored when YaCy restarts. Non-positive values are ignored. |
+| `httpd Session Pool_maxActive` | Legacy alias for `Incoming HTTP Requests_maxActive`. | Accepted for existing automation, but new integrations should use the corrected parameter name. |
 
 Example request shape:
 
@@ -73,7 +75,7 @@ Content-Type: application/x-www-form-urlencoded
 
 ## What To Expect
 
-Expect observations: counts, logs, queues, timing, network rows, thread states, or resource values. Monitoring does not fix the issue by itself; it points to the next page or setting to change.
+The page reports each workload's current activity and concurrency limit. “Incoming HTTP Requests” counts requests currently executing in the servlet pipeline; it is not a TCP connection pool and not an HTTP session count. Submitting `poolConfig` changes the limits immediately. The incoming request limit persists across restart; remote requests exceeding it receive HTTP 503, while local requests remain exempt from rejection.
 
 ## Related Pages
 

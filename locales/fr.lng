@@ -609,7 +609,10 @@ only main releases==Seulement les principales versions
 
 #File: Connections_p.html
 #---------------------------
-Incoming Connections==Connexions entrantes
+Incoming HTTP Requests==Requêtes HTTP entrantes
+Active HTTP requests:==Requêtes HTTP actives :
+Remote-request limit:==Limite des requêtes distantes :
+Local requests are exempt.==Les requêtes locales sont exemptées.
 Protocol==Protocole
 Duration==Dur&eacute;e
 Source IP[:Port]==Source-IP[:Port]
@@ -617,7 +620,7 @@ Dest. IP[:Port]==Dest.-IP[:Port]
 Command==Commande
 ID==ID
 Outgoing Connections==Connexions sortantes
-Server Connection Tracking==Suivi de la connexion du serveur
+Connection and Request Tracking==Suivi des connexions et des requêtes
 Up-Bytes==Up-Bytes
 #-----------------------------
 
@@ -1335,11 +1338,11 @@ If this is a big number, it shows that the caching works efficiently.==Ce nombre
 This is is the number of word indexes that shall be held in the==C'est le nombre d'index de mots qui doivent &ecirc;tre gard&eacute;s dans le
 ram cache during indexing. When YaCy is shut down, this cache must be==cache m&eacute;moire pendant l'indexation. Quand YaCy est stopp&eacute;, ce cache doit
 flushed to disc; this may last some minutes.==&ecirc;tre transf&eacute;r&eacute; sur disque; cela peut durer quelques minutes.
-maximum Active==max. actif
-current Active==actif courrant
+Maximum Active==Maximum actif
+Currently Active==Actuellement actif
 milliseconds==millisecondes
 "Enter New Cache Size"=="Saisissez une nouvelle taille de cache"
-"Enter new Threadpool Configuration"=="Saisissez une nouvelle configuration Threadpool"
+"Apply Concurrency Limits"=="Appliquer les limites de concurrence"
 "Number of connection requests being blocked awaiting a free connection"=="Nombre de demandes de connexion bloquées en attendant une connexion libre"
 "Number of connections currently being used to execute requests."=="Nombre de connexions actuellement utilisées pour exécuter des requêtes."
 "Number of reusable idle connections"=="Nombre de connexions de ralenti réutilisables"
@@ -1381,8 +1384,9 @@ The maximum of this caches can be set below.==Le maximum de ces caches peut êtr
 This is the maximum age of a word in an index in minutes.==C'est l'âge maximum d'un mot dans un index en minutes.
 This is the minimum age of a word in an index in minutes.==C'est l'âge minimum d'un mot dans un index en minutes.
 Thread==Thread
-Thread Pool==Pool de fils
-Thread Pool Settings:==Paramètres de la piscine de filetage:
+Workload==Charge de travail
+Incoming HTTP Requests==Requêtes HTTP entrantes
+Concurrency Limits:==Limites de concurrence :
 Total maximum==Maximum total
 Total<br />Block Time==Durée totale du bloc<br />
 Total<br />Cycles==Total des cycles<br />
@@ -1599,7 +1603,9 @@ RAM used:==RAM utilis&eacute;e:
 RAM max:==RAM max:
 DISK used:==DISK utilis&eacute;:
 DISK free:==DISK libre:
-Incoming Connections==Connections entrantes
+Incoming HTTP Requests==Requêtes HTTP entrantes
+Active:==Actives :
+Limit:==Limite :
 Local Crawl==Balayage local
 (paused)==(en pause)
 Remote triggered Crawl==Balayages distants en cours
