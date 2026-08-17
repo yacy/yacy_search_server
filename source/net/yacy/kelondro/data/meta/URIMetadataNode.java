@@ -437,6 +437,14 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return getInt(CollectionSchema.wordcount_i);
     }
 
+    /** Returns the fuzzy content signature (64-bit hash of representative words), or 0 if not computed. */
+    public long fuzzySignature() {
+        Object x = this.getFieldValue(CollectionSchema.fuzzy_signature_l.getSolrFieldName());
+        if (x instanceof Long) return (Long) x;
+        if (x instanceof Integer) return ((Integer) x).longValue();
+        return 0L;
+    }
+
     /**
      * in case that images are embedded in the document, get one image which can be used as thumbnail
      * @return the first embedded image url
