@@ -49,6 +49,7 @@ public class IndexReIndexMonitor_p {
 
 	/** This servlet name, used for identifying recorded API calls */
 	private static final String SERVLET_NAME = IndexReIndexMonitor_p.class.getSimpleName() + ".html";
+	private static final String RECRAWL_STARTUP_APICALL_PK_CONFIG = "recrawlindex.startup.apicall.pk";
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
@@ -173,6 +174,10 @@ public class IndexReIndexMonitor_p {
 							WorkTables.calculateAPIScheduler(recrawlCall, false);
 							try {
 								sb.tables.update(WorkTables.TABLE_API_NAME, recrawlCall);
+								final byte[] recrawlCallPk = recrawlCall.getPK();
+								if (recrawlCallPk != null) {
+									sb.setConfig(RECRAWL_STARTUP_APICALL_PK_CONFIG, UTF8.String(recrawlCallPk));
+								}
 							} catch (final IOException e) {
 								ConcurrentLog.logException(e);
 							}
@@ -214,24 +219,12 @@ public class IndexReIndexMonitor_p {
                     deleteOnRecrawl = RecrawlBusyThread.DEFAULT_DELETE_ON_RECRAWL;
                 }
             } else {
-                if (post.containsKey("stoprecrawl")) {
-            		/* We do not remove the thread from the Switchboard worker threads using serverSwitch.terminateThread(String,boolean),
-            		 * because we want to be able to provide a report after its termination */
-                    recrawlbt.terminate(false);
-                    prop.put("recrawljobrunning", 0);
-					if (sb.tables != null) {
-						final Row recrawlCall = WorkTables.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
-						if (recrawlCall != null) {
-							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
-							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
-							recrawlCall.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
-							try {
-								sb.tables.update(WorkTables.TABLE_API_NAME, recrawlCall);
-							} catch (final IOException e) {
-								ConcurrentLog.logException(e);
-							}
-						}
-					}
+				if (post.containsKey("stoprecrawl")) {
+					/* We do not remove the thread from the Switchboard worker threads using serverSwitch.terminateThread(String,boolean),
+					 * because we want to be able to provide a report after its termination */
+					recrawlbt.terminate(false);
+					prop.put("recrawljobrunning", 0);
+					deleteTrackedRecrawlStartupApiCall(sb);
                 }
             }
 
@@ -384,5 +377,22 @@ public class IndexReIndexMonitor_p {
 			formattedTime = "";
 		}
 		return formattedTime;
+	}
+
+	private static void deleteTrackedRecrawlStartupApiCall(final Switchboard sb) {
+		if (sb == null || sb.tables == null) {
+			return;
+		}
+		final String trackedPk = sb.getConfig(RECRAWL_STARTUP_APICALL_PK_CONFIG, "");
+		if (trackedPk.isEmpty()) {
+			return;
+		}
+		try {
+			sb.tables.delete(WorkTables.TABLE_API_NAME, UTF8.getBytes(trackedPk));
+		} catch (final IOException e) {
+			ConcurrentLog.logException(e);
+		} finally {
+			sb.setConfig(RECRAWL_STARTUP_APICALL_PK_CONFIG, "");
+		}
 	}
 }
