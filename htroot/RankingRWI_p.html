@@ -75,6 +75,16 @@
         </dl>
       </fieldset>
       <fieldset>
+        <legend>Demoted Hosts</legend>
+        <p>Hosts listed here will have their ranking score divided by 100 (or a custom divisor), pushing them toward the end of results without removing them. Demotion is skipped when the hostname appears in the search query. Enter one hostname per line, with an optional divisor (e.g. <code>example.com 500</code>).</p>
+        <textarea name="demotedHosts" rows="6" cols="60" style="font-family:monospace">#[demotedHosts]#</textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Demoted Words</legend>
+        <p>Results whose URL, title, or description contains any of these words or phrases will have their ranking score divided by 100 (or a custom divisor). Enter one word or quoted phrase per line, with an optional divisor (e.g. <code>"adult services" 500</code>). Note: only applies to results retrieved via the Solr index.</p>
+        <textarea name="demotedWords" rows="6" cols="60" style="font-family:monospace">#[demotedWords]#</textarea>
+      </fieldset>
+      <fieldset>
         <input type="submit" name="EnterRanking" class="btn btn-primary" value="Set as Default Ranking" />
         <input type="submit" name="ResetRanking" class="btn btn-primary" value="Re-Set to Built-In Ranking" />
       </fieldset>
