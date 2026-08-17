@@ -2059,6 +2059,16 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             if (urlcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_appurl;
             if (descrcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_app_dc_title;
         }
+
+        // apply exponential freshness decay boost
+        // a document modified today gets +256, one modified 365 days ago gets +128, 730 days ago +64, etc.
+        final java.util.Date moddate = rentry.moddate();
+        if (moddate != null) {
+            final long ageDays = Math.max(0L, (System.currentTimeMillis() - moddate.getTime()) / 86_400_000L);
+            final double decayFactor = Math.exp(-ageDays / 365.0);
+            r += (long)(256.0 * decayFactor);
+        }
+
         return r;
     }
 
