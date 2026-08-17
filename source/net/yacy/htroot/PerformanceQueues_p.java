@@ -357,11 +357,13 @@ public class PerformanceQueues_p {
         // concurrency limits
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_incomingRequests", 0);
+        prop.put("pool_0_incomingRequests_name", "Crawler Pool");
         prop.put("pool_0_maxActive", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 0));
         prop.put("pool_0_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
         prop.put("pool_1_name","Robots.txt Pool");
         prop.put("pool_1_incomingRequests", 0);
+        prop.put("pool_1_incomingRequests_name", "Robots.txt Pool");
         prop.put("pool_1_maxActive", sb.getConfigInt(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT));
         prop.put("pool_1_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
