@@ -1004,6 +1004,9 @@ public final class Switchboard extends serverSwitch {
 
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) this.getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
+        final int dhtMinReferenceCount = (int) this.getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_MIN, 10);
+        final int dhtMaxReferenceCountLimit = (int) this.getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_MAX, 1000);
+        this.dhtMaxReferenceCount = Math.max(dhtMinReferenceCount, Math.min(dhtMaxReferenceCountLimit, this.dhtMaxReferenceCount));
 
         // init robinson cluster
         // before we do that, we wait some time until the seed list is loaded.
