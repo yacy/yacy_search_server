@@ -78,6 +78,25 @@ public class ResourceObserver {
         this.normalizedDiskUsed = getNormalizedDiskUsed(true);
     	this.normalizedMemoryFree = getNormalizedMemoryFree();
 
+        // proactively trim RWI RAM buffer when it exceeds the configured heap fraction
+        final IndexCell<WordReference> termIndexForTrim = this.sb.index.termIndex();
+        if (termIndexForTrim != null) {
+            final float rwiMaxHeapFraction = this.sb.getConfigFloat(
+                SwitchboardConstants.RWI_MAX_HEAP_FRACTION, SwitchboardConstants.RWI_MAX_HEAP_FRACTION_DEFAULT);
+            final long rwiMaxBytes = (long) (Runtime.getRuntime().maxMemory() * rwiMaxHeapFraction);
+            final long rwiCurrentBytes = termIndexForTrim.getBufferSizeBytes();
+            if (rwiCurrentBytes > rwiMaxBytes) {
+                log.warn("RWI RAM buffer (" + (rwiCurrentBytes / 1024 / 1024) + " MB) exceeds heap fraction limit ("
+                    + (rwiMaxBytes / 1024 / 1024) + " MB), trimming oversized reference entries");
+                try {
+                    final int trimmed = termIndexForTrim.deleteOld(100, 5000);
+                    if (trimmed > 0) log.info("RWI trim: shrinked " + trimmed + " reference containers");
+                } catch (final IOException e) {
+                    log.warn("RWI trim failed: " + e.getMessage());
+                }
+            }
+        }
+
     	// take actions if disk space is below AMPLE
         if (this.normalizedDiskFree != Space.AMPLE ||
             this.normalizedDiskUsed != Space.AMPLE ||
