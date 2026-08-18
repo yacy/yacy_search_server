@@ -326,8 +326,8 @@ public class MCPSearchServlet extends HttpServlet {
             payload.put("results", results);
 
             final JSONObject contentItem = new JSONObject(true);
-            contentItem.put("type", "json");
-            contentItem.put("json", payload);
+            contentItem.put("type", "text");
+            contentItem.put("text", payload.toString());
 
             final JSONArray content = new JSONArray();
             content.put(contentItem);
