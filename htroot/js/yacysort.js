@@ -312,6 +312,15 @@ var updateSidebar = function() {
 				trailerParams.auth = searchForm.auth.value;
 			}
 		}
+		/* Include the current search query so the server can correctly
+		 * determine the active ranking profile (contextRanking / dateRanking).
+		 * Without this, yacysearchtrailer.java sees an empty query on every
+		 * periodic refresh and always resets the ranking-switch buttons to
+		 * the default "Context Ranking" state, even when "/date" is active. */
+		var searchBox = document.getElementById("search");
+		if (searchBox != null) {
+			trailerParams.query = searchBox.value;
+		}
 		$.get(
 			"yacysearchtrailer.html",
 			trailerParams,
