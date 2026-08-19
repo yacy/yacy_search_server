@@ -663,9 +663,17 @@ public class yacysearch {
             if (languageFromParam) {
                 final ResponseHeader outgoingHeader = prop.getOutgoingHeader();
                 if (modifier.language != null) {
-                    outgoingHeader.setCookie("yacy-language", "lang_" + modifier.language, 365 * 24 * 60 * 60, "/", null, false);
+                    outgoingHeader.add(
+                        HeaderFramework.SET_COOKIE,
+                        "yacy-language=lang_" + modifier.language +
+                        "; Max-Age=" + (365 * 24 * 60 * 60) +
+                        "; Path=/"
+                    );
                 } else {
-                    outgoingHeader.setCookie("yacy-language", "", 0, "/", null, false);
+                    outgoingHeader.add(
+                        HeaderFramework.SET_COOKIE,
+                        "yacy-language=; Max-Age=0; Path=/"
+                    );
                 }
                 prop.setOutgoingHeader(outgoingHeader);
             }
