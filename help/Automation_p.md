@@ -26,6 +26,8 @@ Use it to inspect, schedule, execute, or delete recorded actions. It is powerful
 
 Automation is built around YaCy's recorded API-call table. Each row represents an action that was captured from a servlet request. The page lets an administrator select rows, execute them, delete them, and edit scheduling fields such as next execution date, event trigger, repetition interval, and run frequency.
 
+Action controls are available above and below the table. On long recorded-action lists, use the controls above the table to execute or delete selected rows, delete actions older than a chosen age, or apply edited next-execution dates without scrolling to the bottom.
+
 ## Correct Use
 
 Treat recorded actions as powerful examples, not as harmless history. Read the endpoint and parameters before executing a row. Pay special attention to actions that delete data, start crawls, change settings, or contact other peers. For scheduled execution, check both the next execution date and the repeat/event fields so the action does not run more often than intended.
