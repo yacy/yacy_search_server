@@ -15,8 +15,12 @@
       </dependency>
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
       <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.20.0"  />
+      <!-- Keep Jackson core, dataformat, and Jersey's Jakarta XML Bind module on one release line. -->
+      <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.22"/>
+      <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.22.1"/>
       <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.22.1"/>
       <dependency org="com.fasterxml.jackson.dataformat" name="jackson-dataformat-cbor" rev="2.22.1"/>
+      <dependency org="com.fasterxml.jackson.module" name="jackson-module-jakarta-xmlbind-annotations" rev="2.22.1"/>
       <dependency org="com.github.ben-manes.caffeine" name="caffeine" rev="3.2.4"/>
       <dependency org="com.carrotsearch" name="hppc" rev="0.10.0"/>
       <dependency org="com.google.guava" name="guava" rev="33.6.0-jre" conf="compile->master"/>
@@ -29,8 +33,13 @@
       <dependency org="commons-codec" name="commons-codec" rev="1.22.0" />
       <dependency org="commons-io" name="commons-io" rev="2.22.0" />
       <dependency org="commons-logging" name="commons-logging" rev="1.4.0" />
-      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="4.2.39"/>
-      <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.2.39" conf="compile->master"/>
+      <!--
+        Solr 9.10.1 is tested with Metrics 4.2.26. Later 4.2.x releases add a
+        static EWMA calibration loop which can stall startup on some JVMs
+        (YaCy issue #815).
+      -->
+      <dependency org="io.dropwizard.metrics" name="metrics-core" rev="4.2.26"/>
+      <dependency org="io.dropwizard.metrics" name="metrics-jmx" rev="4.2.26" conf="compile->master"/>
       <dependency org="io.opentracing" name="opentracing-noop" rev="0.33.0"/>
       <dependency org="io.opentracing" name="opentracing-util" rev="0.33.0"/>
       <!--
@@ -50,7 +59,6 @@
       <dependency org="org.apache.calcite" name="calcite-core" rev="1.42.0" conf="compile->master"/>
       <dependency org="org.apache.calcite" name="calcite-linq4j" rev="1.42.0" conf="compile->master"/>
       <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" />
-      <dependency org="org.apache.commons" name="commons-lang3" rev="3.20.0" />
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.14"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.14"/>
       <dependency org="org.apache.james" name="apache-mime4j-core" rev="0.8.14" conf="compile->master"/>

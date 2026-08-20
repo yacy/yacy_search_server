@@ -45,6 +45,9 @@ server_jetty_version=12.0.37
 bridge_jetty_version=10.0.26
 solr_version=9.10.1
 lucene_version=9.12.3
+metrics_version=4.2.26
+jackson_annotations_version=2.22
+jackson_version=2.22.1
 
 for artifact in core api scripting solrj solrj-streaming solrj-zookeeper; do
     grep -E "org=\"org.apache.solr\" name=\"solr-$artifact\" rev=\"$solr_version\" conf=\"solr9-bridge->master\"" ivy.xml >/dev/null 2>&1 || \
@@ -55,6 +58,27 @@ for artifact in analysis-common backward-codecs classification codecs expression
     grep -E "org=\"org.apache.lucene\" name=\"lucene-$artifact\" rev=\"$lucene_version\"" ivy.xml >/dev/null 2>&1 || \
         fail "lucene-$artifact must be on version $lucene_version"
 done
+
+for artifact in core jmx; do
+    grep -E "org=\"io.dropwizard.metrics\" name=\"metrics-$artifact\" rev=\"$metrics_version\"" ivy.xml >/dev/null 2>&1 || \
+        fail "metrics-$artifact must match Solr 9.10.1's tested version $metrics_version"
+done
+
+grep -E "org=\"com.fasterxml.jackson.core\" name=\"jackson-annotations\" rev=\"$jackson_annotations_version\"" ivy.xml >/dev/null 2>&1 || \
+    fail "jackson-annotations must be on version $jackson_annotations_version"
+for coordinate in \
+    'com.fasterxml.jackson.core jackson-core' \
+    'com.fasterxml.jackson.core jackson-databind' \
+    'com.fasterxml.jackson.dataformat jackson-dataformat-cbor' \
+    'com.fasterxml.jackson.module jackson-module-jakarta-xmlbind-annotations'; do
+    set -- $coordinate
+    grep -E "org=\"$1\" name=\"$2\" rev=\"$jackson_version\"" ivy.xml >/dev/null 2>&1 || \
+        fail "$2 must be on version $jackson_version"
+done
+
+commons_lang_declarations=$(grep -c 'org="org.apache.commons" name="commons-lang3"' ivy.xml || true)
+[ "$commons_lang_declarations" -eq 1 ] || \
+    fail "commons-lang3 must have exactly one direct declaration"
 
 for artifact in jetty-http jetty-io jetty-proxy jetty-security jetty-server jetty-util; do
     grep -E "org=\"org.eclipse.jetty\" name=\"$artifact\" rev=\"$server_jetty_version\" conf=\"compile->default\"" ivy.xml >/dev/null 2>&1 || \
@@ -123,6 +147,40 @@ if [ -d lib ]; then
     done
     [ "$public_lucene_count" -gt 0 ] || \
         fail "no Lucene $lucene_version artifacts found"
+
+    for artifact in metrics-core metrics-jmx; do
+        count=0
+        for jar_path in lib/$artifact-*.jar; do
+            [ -e "$jar_path" ] || continue
+            count=$((count + 1))
+            [ "$(basename "$jar_path")" = "$artifact-$metrics_version.jar" ] || \
+                fail "unexpected $artifact revision on the runtime classpath: $jar_path"
+        done
+        [ "$count" -eq 1 ] || \
+            fail "expected exactly one $artifact $metrics_version jar, found $count"
+    done
+
+    for artifact in jackson-core jackson-databind jackson-dataformat-cbor jackson-module-jakarta-xmlbind-annotations; do
+        count=0
+        for jar_path in lib/$artifact-*.jar; do
+            [ -e "$jar_path" ] || continue
+            count=$((count + 1))
+            [ "$(basename "$jar_path")" = "$artifact-$jackson_version.jar" ] || \
+                fail "unexpected $artifact revision on the runtime classpath: $jar_path"
+        done
+        [ "$count" -eq 1 ] || \
+            fail "expected exactly one $artifact $jackson_version jar, found $count"
+    done
+
+    jackson_annotations_count=0
+    for jar_path in lib/jackson-annotations-*.jar; do
+        [ -e "$jar_path" ] || continue
+        jackson_annotations_count=$((jackson_annotations_count + 1))
+        [ "$(basename "$jar_path")" = "jackson-annotations-$jackson_annotations_version.jar" ] || \
+            fail "unexpected jackson-annotations revision on the runtime classpath: $jar_path"
+    done
+    [ "$jackson_annotations_count" -eq 1 ] || \
+        fail "expected exactly one jackson-annotations $jackson_annotations_version jar, found $jackson_annotations_count"
 
     servlet_api_count=0
     for artifact in lib/*servlet-api-*.jar; do

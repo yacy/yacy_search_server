@@ -99,15 +99,15 @@
       Ivy retrieve does not remove stale revisions or replaced coordinates.
       Resolve the complete public classpath into staging before touching lib/;
       a failed resolve therefore leaves the last usable runtime intact. Only
-      after staging succeeds are stale public Jetty/Servlet jars removed and
-      the resolved classpath published. Private Solr jars use the distinct
+      after staging succeeds are stale version-sensitive jars removed and the
+      resolved classpath published. Private Solr jars use the distinct
       solr9-bridge-* prefix and are rebuilt by build-solr9-bridge.
     -->
     <delete dir="${ivy.compile.stage}" failonerror="false" />
     <mkdir dir="${ivy.compile.stage}" />
     <ivy:retrieve conf="compile" type="jar,bundle" pathid="compile.path" pattern="${ivy.compile.stage}/[artifact]-[revision].[ext]" />
     <delete failonerror="false">
-      <fileset dir="${lib}" includes="javax.servlet-api-*.jar,jetty-*.jar,lucene-*.jar" />
+      <fileset dir="${lib}" includes="javax.servlet-api-*.jar,jetty-*.jar,lucene-*.jar,jackson-*.jar,metrics-core-*.jar,metrics-jmx-*.jar" />
     </delete>
     <copy todir="${ivy.lib.dir}" overwrite="true">
       <fileset dir="${ivy.compile.stage}" includes="**/*" />
