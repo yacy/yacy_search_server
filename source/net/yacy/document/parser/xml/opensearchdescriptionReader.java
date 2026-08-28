@@ -110,18 +110,21 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.agent = ClientIdentification.yacyInternetCrawlerAgent;
     }
 
-    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
-    private static SAXParser getParser() throws SAXException {
-        SAXParser parser = tlSax.get();
-        if (parser == null) {
-            try {
-                parser = SAXParserFactory.newInstance().newSAXParser();
-            } catch (final ParserConfigurationException e) {
-                throw new SAXException(e.getMessage(), e);
-            }
-            tlSax.set(parser);
+    private static final SAXParser PARSER;
+    static {
+        try {
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            PARSER = spf.newSAXParser();
+        } catch (SAXException | ParserConfigurationException e) {
+            throw new ExceptionInInitializerError(e);
         }
-        return parser;
+    }
+    
+    private static SAXParser getParser() {
+        return PARSER;
     }
     
     public opensearchdescriptionReader(final String path) {
