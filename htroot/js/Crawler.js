@@ -411,7 +411,10 @@ function showRSS(RSS) {
   if (doc != null) {
     if (crawllist_body.length > 100000) crawllist_body = "";
     for (var i=0; i<RSS.items.length; i++) {
-      crawllist_body = "<tr class='TableCellLight'><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].description + "</a></td><td><a href='" + RSS.items[i].link + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].link + "</a></td></tr>" + crawllist_body;
+      var guid = escapeHtml(RSS.items[i].guid.value);
+      var link = escapeHtml(RSS.items[i].link);
+      var description = escapeHtml(RSS.items[i].description);
+      crawllist_body = "<tr class='TableCellLight'><td><a href='ViewFile.html?action=info&urlHash=" + guid + "' class='small' target='_blank' title='" + link + "'>" + description + "</a></td><td><a href='" + link + "' class='small' target='_blank' title='" + link + "'>" + link + "</a></td></tr>" + crawllist_body;
     }
     doc.innerHTML = crawllist_head + crawllist_body + crawllist_tail;
   }
