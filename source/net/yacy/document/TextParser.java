@@ -69,6 +69,7 @@ import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.html.TagValency;
+import net.yacy.document.parser.images.fitsParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.images.metadataImageParser;
 import net.yacy.document.parser.images.svgParser;
@@ -114,6 +115,7 @@ public final class TextParser {
         initParser(new htmlParser()); // called within rdfa parser
         initParser(new genericImageParser());
         initParser(new metadataImageParser());
+        initParser(new fitsParser());
         initParser(new linkScraperParser());
         initParser(new mmParser());
         initParser(new odtParser());
