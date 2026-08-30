@@ -185,6 +185,7 @@ import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.SortDirection;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.SSTableHandleMap;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.ThreadDump;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -366,6 +367,25 @@ public final class Switchboard extends serverSwitch {
         this.log.config("Index Primary Path: " + indexPath.toString());
         final File archivePath = this.getDataPath(SwitchboardConstants.INDEX_ARCHIVE_PATH, SwitchboardConstants.INDEX_ARCHIVE_DEFAULT);
         this.log.config("Index Archive Path: " + archivePath.toString());
+        this.htCachePath =
+                this.getDataPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+
+        /*
+         * SSTable working and builder files are private scratch state, never a
+         * published fingerprint. A hard process stop can prevent normal cleanup.
+         * Recover all configured repository trees before any ArrayStack opens them;
+         * exclusive file locks protect tables still owned by another YaCy process.
+         */
+        final SSTableHandleMap.RecoveryReport sstableRecovery =
+                SSTableHandleMap.recoverWorkingCopies(
+                        dataPath, indexPath, archivePath, this.htCachePath);
+        if (sstableRecovery.candidates() > 0 || sstableRecovery.failures() > 0) {
+            this.log.info("SSTable crash recovery: deleted "
+                    + sstableRecovery.deleted() + " of "
+                    + sstableRecovery.candidates() + " temporary artifacts; "
+                    + sstableRecovery.inUse() + " still in use, "
+                    + sstableRecovery.failures() + " failures");
+        }
         this.listsPath = this.getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         this.log.config("Lists Path:     " + this.listsPath.toString());
         this.htRootPath = this.getDataPath(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT); // path to the servlets
@@ -770,8 +790,6 @@ public final class Switchboard extends serverSwitch {
         this.log.config("Starting HT Cache Manager");
 
         // create the cache directory
-        this.htCachePath =
-                this.getDataPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
         this.log.info("HTCACHE Path = " + this.htCachePath.getAbsolutePath());
         final long maxCacheSize =
                 1024L * 1024L * Long.parseLong(this.getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte

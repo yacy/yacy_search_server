@@ -32,6 +32,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,7 +55,6 @@ import java.util.zip.GZIPOutputStream;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleMap;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -200,34 +202,48 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         final File tmp = new File(file.getParentFile(), file.getName() + ".prt");
         final Iterator<Row.Entry> i = this.index.rows(true, null);
     	int c = 0;
-    	final FileOutputStream fileStream = new FileOutputStream(tmp);
-    	OutputStream os = null;
         try {
-        	try {
-        		os = new BufferedOutputStream(fileStream, 4 * 1024 * 1024);
-        	} catch (final OutOfMemoryError e) {
-        		os = fileStream;
-        	}
-        	if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
-        	while (i.hasNext()) {
-        		os.write(i.next().bytes());
-        		c++;
-        	}
-        	os.flush();
-        } finally {
-        	try {
-        		if(os != null) {
-        			os.close();
-        		}
-        	} finally {
-        		if(fileStream != os) {
-        			fileStream.close();
-        		}
-        	}
+            final FileOutputStream fileStream = new FileOutputStream(tmp);
+            OutputStream os = null;
+            try {
+                try {
+                    os = new BufferedOutputStream(fileStream, 4 * 1024 * 1024);
+                } catch (final OutOfMemoryError e) {
+                    os = fileStream;
+                }
+                if (file.getName().endsWith(".gz")) {
+                    os = new GZIPOutputStream(os, 65536) {{
+                        this.def.setLevel(Deflater.BEST_COMPRESSION);
+                    }};
+                }
+                while (i.hasNext()) {
+                    os.write(i.next().bytes());
+                    c++;
+                }
+                os.flush();
+            } finally {
+                try {
+                    if (os != null) os.close();
+                } finally {
+                    if (fileStream != os) fileStream.close();
+                }
+            }
+            try {
+                Files.move(tmp.toPath(), file.toPath(),
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (final AtomicMoveNotSupportedException e) {
+                Files.move(tmp.toPath(), file.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (final IOException e) {
+            try {
+                Files.deleteIfExists(tmp.toPath());
+            } catch (final IOException cleanupFailure) {
+                e.addSuppressed(cleanupFailure);
+            }
+            throw e;
         }
-        tmp.renameTo(file);
-        assert file.exists() : file.toString();
-        assert !tmp.exists() : tmp.toString();
         return c;
     }
 
@@ -490,21 +506,17 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         }
 
         @Override
-        public final RowHandleMap call() throws IOException {
-            try {
-                finishloop: while (true) {
-                    entry c;
-                    try {
-                        while ((c = this.cache.take()) != poisonEntry) {
-                            this.map.putUnique(c.key, c.l);
-                        }
-                        break finishloop;
-                    } catch (final InterruptedException e) {
-                        continue finishloop;
+        public final RowHandleMap call() throws SpaceExceededException {
+            finishloop: while (true) {
+                entry c;
+                try {
+                    while ((c = this.cache.take()) != poisonEntry) {
+                        this.map.putUnique(c.key, c.l);
                     }
+                    break finishloop;
+                } catch (final InterruptedException e) {
+                    continue finishloop;
                 }
-            } catch (final SpaceExceededException e) {
-                ConcurrentLog.logException(e);
             }
             return this.map;
         }

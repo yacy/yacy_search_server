@@ -35,7 +35,7 @@ import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
-import net.yacy.kelondro.blob.BLOB;
+import net.yacy.kelondro.blob.ImmutableBLOB;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -364,7 +364,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         return this.array.reduce(termHash, new BLOBReducer(termHash, reducer));
     }
 
-    public class BLOBReducer implements BLOB.Reducer {
+    public class BLOBReducer implements ImmutableBLOB.Reducer {
 
         ContainerReducer<ReferenceType> rewriter;
         byte[] wordHash;

@@ -29,6 +29,8 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -43,10 +45,12 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.storage.ImmutableHandleMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.RowHandleMap;
+import net.yacy.kelondro.index.SSTableHandleMap;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.io.Writer;
 import net.yacy.kelondro.util.FileUtils;
@@ -54,11 +58,12 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.RotateIterator;
 
 
-public class HeapReader {
-
+public abstract class HeapReader<I extends ImmutableHandleMap> {
     //public final static long keepFreeMem = 20 * 1024 * 1024;
 
 	private final static ConcurrentLog log = new ConcurrentLog("KELONDRO");
+
+    private final HeapIndexFactory<I> indexFactory;
 
     // input values
     protected int                keylength;  // the length of the primary key
@@ -67,64 +72,320 @@ public class HeapReader {
 
     // computed values
     protected Writer             file;       // a random access to the file
-    protected HandleMap          index;      // key/seek relation for used records
+    protected I                  index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     private   File               fingerprintFileIdx, fingerprintFileGap; // files with dumped indexes. Will be deleted if file is written
     private   Date               closeDate;  // records a time when the file was closed; used for debugging
 
-    public HeapReader(
+
+    interface HeapIndexFactory<I extends ImmutableHandleMap> {
+        I load(
+                int keylength,
+                ByteOrder ordering,
+                File dump)
+                throws IOException, SpaceExceededException;
+
+        HeapIndexBuilder<I> newBuilder(
+                File heapFile,
+                int keylength,
+                ByteOrder ordering,
+                int expectedspace) throws IOException;
+
+        void prepareForHeapMutation(I index) throws IOException;
+    }
+
+    interface HeapIndexBuilder<I extends ImmutableHandleMap> extends AutoCloseable {
+        void consume(byte[] key, long offset) throws IOException;
+
+        I finish() throws IOException;
+
+        @Override
+        void close() throws IOException;
+    }
+
+    @FunctionalInterface
+    interface HeapFileFactory {
+        Writer open(File heapFile) throws IOException;
+    }
+
+    static HeapIndexFactory<HandleMap> mutable() {
+        return new HeapIndexFactory<HandleMap>() {
+            @Override
+            public HandleMap load(
+                    final int keylength,
+                    final ByteOrder ordering,
+                    final File dump)
+                    throws IOException, SpaceExceededException {
+                return new RowHandleMap(keylength, ordering, 8, dump);
+            }
+
+            @Override
+            public HeapIndexBuilder<HandleMap> newBuilder(
+                    final File heapFile,
+                    final int keylength,
+                    final ByteOrder ordering,
+                    final int expectedspace) {
+                return new HeapIndexBuilder<HandleMap>() {
+                    private RowHandleMap.initDataConsumer building =
+                            RowHandleMap.asynchronusInitializer(
+                                    heapFile.getName() + ".initializer",
+                                    keylength, ordering, 8, expectedspace);
+                    private boolean finishRequested = false;
+
+                    @Override
+                    public void consume(final byte[] key, final long offset) {
+                        if (this.building == null) throw new IllegalStateException("index builder is closed");
+                        this.building.consume(key, offset);
+                    }
+
+                    @Override
+                    public HandleMap finish() throws IOException {
+                        if (this.building == null) throw new IllegalStateException("index builder is closed");
+                        requestFinish();
+                        final RowHandleMap result = awaitResult();
+                        this.building = null;
+                        return result;
+                    }
+
+                    @Override
+                    public void close() throws IOException {
+                        if (this.building == null) return;
+                        requestFinish();
+                        try {
+                            awaitResultForClose();
+                        } finally {
+                            this.building.close();
+                            this.building = null;
+                        }
+                    }
+
+                    private void requestFinish() {
+                        if (this.finishRequested) return;
+                        this.building.finish();
+                        this.finishRequested = true;
+                    }
+
+                    private RowHandleMap awaitResult() throws IOException {
+                        try {
+                            return this.building.result();
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new IOException("Interrupted while rebuilding mutable heap index", e);
+                        } catch (final ExecutionException e) {
+                            throw new IOException("Cannot rebuild mutable heap index", e.getCause());
+                        }
+                    }
+
+                    private RowHandleMap awaitResultForClose() throws IOException {
+                        boolean interrupted = false;
+                        try {
+                            while (true) {
+                                try {
+                                    return this.building.result();
+                                } catch (final InterruptedException e) {
+                                    interrupted = true;
+                                } catch (final ExecutionException e) {
+                                    throw new IOException("Cannot rebuild mutable heap index", e.getCause());
+                                }
+                            }
+                        } finally {
+                            if (interrupted) Thread.currentThread().interrupt();
+                        }
+                    }
+                };
+            }
+
+            @Override
+            public void prepareForHeapMutation(final HandleMap index) {
+                /* RowHandleMap has no mapped fingerprint backing to detach. */
+            }
+        };
+    }
+
+    /**
+     * Index strategy for heaps which never add or replace keys.
+     *
+     * <p>The concrete generic type is intentional: this is not merely a factory
+     * returning some {@link ImmutableHandleMap}. Both loading a fingerprint and
+     * rebuilding from the heap are guaranteed to produce an
+     * {@link SSTableHandleMap}. A future accidental RowHandleMap fallback would
+     * therefore fail at compile time instead of silently restoring the RAM index.</p>
+     */
+    static HeapIndexFactory<SSTableHandleMap> immutable() {
+        return new HeapIndexFactory<SSTableHandleMap>() {
+            @Override
+            public SSTableHandleMap load(
+                    final int keylength,
+                    final ByteOrder ordering,
+                    final File dump)
+                    throws IOException, SpaceExceededException {
+                /*
+                 * Fingerprint dumps are published snapshots. SSTable removals write
+                 * negative offsets, so the dump must never be mapped writable itself.
+                 * openWorkingCopy() maps it read-only and promotes it to an owned
+                 * temporary table only when the heap or index is first mutated.
+                 */
+                return SSTableHandleMap.openWorkingCopy(
+                        keylength, ordering, 8, dump);
+            }
+
+            @Override
+            public HeapIndexBuilder<SSTableHandleMap> newBuilder(
+                    final File heapFile,
+                    final int keylength,
+                    final ByteOrder ordering,
+                    final int expectedspace) throws IOException {
+                final SSTableHandleMap.Builder builder = new SSTableHandleMap.Builder(
+                        keylength, ordering, 8, heapFile.getParentFile(), heapFile.getName());
+                return new HeapIndexBuilder<SSTableHandleMap>() {
+                    @Override
+                    public void consume(final byte[] key, final long offset) throws IOException {
+                        builder.consume(key, offset);
+                    }
+
+                    @Override
+                    public SSTableHandleMap finish() throws IOException {
+                        return builder.finish();
+                    }
+
+                    @Override
+                    public void close() throws IOException {
+                        builder.close();
+                    }
+                };
+            }
+
+            @Override
+            public void prepareForHeapMutation(final SSTableHandleMap index)
+                    throws IOException {
+                index.prepareForMutation();
+            }
+        };
+    }
+
+    protected HeapReader(
             final File heapFile,
             final int keylength,
-            final ByteOrder ordering) throws IOException {
+            final ByteOrder ordering,
+            final HeapIndexFactory<I> indexFactory) throws IOException {
+        this(heapFile, keylength, ordering, indexFactory, CachedFileWriter::new);
+    }
+
+    /** Constructor variant for an alternate heap-file ownership implementation. */
+    protected HeapReader(
+            final File heapFile,
+            final int keylength,
+            final ByteOrder ordering,
+            final HeapIndexFactory<I> indexFactory,
+            final HeapFileFactory heapFileFactory) throws IOException {
+        if (indexFactory == null) throw new IllegalArgumentException("indexFactory must not be null");
+        if (heapFileFactory == null) throw new IllegalArgumentException("heapFileFactory must not be null");
+        this.indexFactory = indexFactory;
         this.ordering = ordering;
         this.heapFile = heapFile;
         this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
         this.free = null; // will be initialized later depending on existing idx/gap file
         this.heapFile.getParentFile().mkdirs();
-        this.file = new CachedFileWriter(this.heapFile);
+        this.file = heapFileFactory.open(this.heapFile);
         this.closeDate = null;
 
-        // read or initialize the index
-        this.fingerprintFileIdx = null;
-        this.fingerprintFileGap = null;
-        if (initIndexReadDump()) {
-            // verify that everything worked just fine
-            // pick some elements of the index
-            Iterator<byte[]> i = this.index.keys(true, null);
-            int c = 3;
-            byte[] b, b1 = new byte[this.keylength];
-            long pos;
-            boolean ok = true;
-            while (i.hasNext() && c-- > 0) {
-                b = i.next();
-                pos = this.index.get(b);
-                this.file.seek(pos + 4);
-                this.file.readFully(b1, 0, b1.length);
-                if (!this.ordering.equal(b, b1)) {
-                    ok = false;
-                    break;
+        try {
+            // read or initialize the index
+            this.fingerprintFileIdx = null;
+            this.fingerprintFileGap = null;
+            if (initIndexReadDump()) {
+                if (!verifyLoadedIndex()) {
+                    log.warn("HeapReader: verification of idx file for " + heapFile.toString() + " failed, re-building index");
+                    /*
+                     * Close the working index before invalidating its source fingerprint.
+                     * This matters for mapped files on Windows and also guarantees that a
+                     * rejected dump cannot leave a temporary SSTable behind.
+                     */
+                    discardIndexState();
+                    deleteFingerprint();
+                    initIndexReadFromHeap();
+                } else {
+                    log.info("HeapReader: using a dump of the index of " + heapFile.toString() + ".");
                 }
-            }
-            if (!ok) {
-                log.warn("HeapReader: verification of idx file for " + heapFile.toString() + " failed, re-building index");
-                initIndexReadFromHeap();
             } else {
-                log.info("HeapReader: using a dump of the index of " + heapFile.toString() + ".");
+                // if we did not have a dump, create a new index
+                initIndexReadFromHeap();
             }
-        } else {
-            // if we did not have a dump, create a new index
-            initIndexReadFromHeap();
+
+            // merge gaps that follow directly
+            mergeFreeEntries();
+
+            // after the initial initialization of the heap, we close the file again
+            // to make more room to file pointers which may run out if the number
+            // of file descriptors is too low and the number of files is too high
+            this.file.close();
+            // the file will be opened again automatically when the next access to it comes.
+        } catch (final IOException | RuntimeException | Error failure) {
+            cleanupFailedInitialization(failure);
+            throw failure;
         }
+    }
 
-        // merge gaps that follow directly
-        mergeFreeEntries();
+    /** Release every resource acquired by a constructor which cannot return. */
+    private void cleanupFailedInitialization(final Throwable failure) {
+        if (this.index != null) {
+            try {
+                this.index.close();
+            } catch (final Throwable cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            } finally {
+                this.index = null;
+            }
+        }
+        if (this.free != null) {
+            try {
+                this.free.clear();
+            } catch (final Throwable cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            } finally {
+                this.free = null;
+            }
+        }
+        if (this.file != null) {
+            try {
+                this.file.close();
+            } catch (final Throwable cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            } finally {
+                this.file = null;
+            }
+        }
+        this.closeDate = new Date();
+    }
 
-        // after the initial initialization of the heap, we close the file again
-        // to make more room to file pointers which may run out if the number
-        // of file descriptors is too low and the number of files is too high
-        this.file.close();
-        // the file will be opened again automatically when the next access to it comes.
+    /**
+     * Verify a small sample before the loaded fingerprint becomes normal runtime state.
+     *
+     * <p>The index and gap dump form a cache, while the heap file remains the source of
+     * truth. A key mismatch, an invalid offset, or a short heap read therefore rejects
+     * the complete cached generation and lets the constructor rebuild it from the heap.
+     * The iterator is closed here so this validation phase owns all resources it opens.</p>
+     */
+    private boolean verifyLoadedIndex() {
+        final CloneableIterator<byte[]> keys = this.index.keys(true, null);
+        try {
+            int remaining = 3;
+            final byte[] storedKey = new byte[this.keylength];
+            while (keys.hasNext() && remaining-- > 0) {
+                final byte[] indexedKey = keys.next();
+                final long position = this.index.get(indexedKey);
+                this.file.seek(position + 4);
+                this.file.readFully(storedKey, 0, storedKey.length);
+                if (!this.ordering.equal(indexedKey, storedKey)) return false;
+            }
+            return true;
+        } catch (final IOException | RuntimeException e) {
+            log.warn("HeapReader: cannot verify loaded index for " + this.heapFile, e);
+            return false;
+        } finally {
+            keys.close();
+        }
     }
 
     public long mem() {
@@ -133,6 +394,11 @@ public class HeapReader {
 
     public void optimize() {
         this.index.optimize();
+    }
+
+    /** Detach a mapped fingerprint before changing the heap generation. */
+    protected final void prepareIndexForHeapMutation() throws IOException {
+        this.indexFactory.prepareForHeapMutation(this.index);
     }
 
     protected byte[] normalizeKey(byte[] key) {
@@ -170,39 +436,71 @@ public class HeapReader {
         if (!this.fingerprintFileGap.exists()) this.fingerprintFileGap = new File(this.fingerprintFileGap.getAbsolutePath() + ".gz");
         if (!this.fingerprintFileIdx.exists() || !this.fingerprintFileGap.exists()) {
             deleteAllFingerprints(this.heapFile, this.fingerprintFileIdx.getName(), this.fingerprintFileGap.getName());
+            /* An incomplete pair must not be mistaken for a publishable snapshot. */
+            deleteFingerprint();
             return false;
         }
 
-        // there is an index and a gap file:
-        // read the index file:
+        /*
+         * Load both parts transactionally. In the immutable mode indexFactory.load()
+         * maps the published fingerprint read-only; it creates a working copy only
+         * on a later mutation. The loaded index must be closed immediately when
+         * loading the gap file or validating the pair fails; assigning fields early
+         * would leak that mapping when the heap scan starts its replacement builder.
+         */
+        I loadedIndex = null;
         try {
-            this.index = new RowHandleMap(this.keylength, this.ordering, 8, this.fingerprintFileIdx);
+            loadedIndex = this.indexFactory.load(
+                    this.keylength, this.ordering, this.fingerprintFileIdx);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
+            deleteFingerprint();
             return false;
         } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
+            deleteFingerprint();
             return false;
         }
 
         // check saturation
-        if (this.index instanceof RowHandleMap) {
-        int[] saturation = ((RowHandleMap) this.index).saturation(); // {<the maximum length of consecutive equal-beginning bytes in the key>, <the minimum number of leading zeros in the second column>}
-        log.info("HeapReader: saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", size = " + this.index.size() +
-                    ", maximum saving for index-compression = " + (saturation[0] * this.index.size() / 1024 / 1024) + " MB" +
-                    ", exact saving for value-compression = " + (saturation[1] * this.index.size() / 1024 / 1024) + " MB");
+        if (loadedIndex instanceof RowHandleMap) {
+            final int[] saturation = ((RowHandleMap) loadedIndex).saturation(); // {<the maximum length of consecutive equal-beginning bytes in the key>, <the minimum number of leading zeros in the second column>}
+            log.info("HeapReader: saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", size = " + loadedIndex.size() +
+                        ", maximum saving for index-compression = " + (saturation[0] * loadedIndex.size() / 1024 / 1024) + " MB" +
+                        ", exact saving for value-compression = " + (saturation[1] * loadedIndex.size() / 1024 / 1024) + " MB");
         }
 
-        // read the gap file:
+        final Gap loadedFree;
         try {
-            this.free = new Gap(this.fingerprintFileGap);
+            loadedFree = new Gap(this.fingerprintFileGap);
         } catch (final IOException e) {
-        	ConcurrentLog.logException(e);
+            loadedIndex.close();
+            ConcurrentLog.logException(e);
+            deleteFingerprint();
             return false;
         }
 
-        // everything is fine now
-        return !this.index.isEmpty();
+        if (loadedIndex.isEmpty() && this.heapFile.length() > 0) {
+            loadedIndex.close();
+            loadedFree.clear();
+            deleteFingerprint();
+            return false;
+        }
+
+        this.index = loadedIndex;
+        this.free = loadedFree;
+        return true;
+    }
+
+    private void discardIndexState() {
+        if (this.index != null) {
+            this.index.close();
+            this.index = null;
+        }
+        if (this.free != null) {
+            this.free.clear();
+            this.free = null;
+        }
     }
 
     /**
@@ -252,65 +550,60 @@ public class HeapReader {
         log.info("HeapReader: generating index for " + this.heapFile.toString() + ", " + (this.file.length() / 1024 / 1024) + " MB. Please wait.");
 
         this.free = new Gap();
-        RowHandleMap.initDataConsumer indexready = RowHandleMap.asynchronusInitializer(this.name() + ".initializer", this.keylength, this.ordering, 8, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
-        byte[] key = new byte[this.keylength];
-        int reclen;
-        long seek = 0;
-        if (this.file.length() > 0) {
-        loop: while (true) { // don't test available() here because this does not work for files > 2GB
+        final int expectedspace = Math.max(10,
+                (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024)));
+        try (HeapIndexBuilder<I> indexBuilder = this.indexFactory.newBuilder(
+                this.heapFile, this.keylength, this.ordering, expectedspace)) {
+            byte[] key = new byte[this.keylength];
+            int reclen;
+            long seek = 0;
+            if (this.file.length() > 0) {
+            loop: while (true) { // don't test available() here because this does not work for files > 2GB
 
-            try {
-                // go to seek position
-                this.file.seek(seek);
+                try {
+                    // go to seek position
+                    this.file.seek(seek);
 
-                // read length of the following record without the length of the record size bytes
-                reclen = this.file.readInt();
-                //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
-                if (reclen == 0) {
-                    // very bad file inconsistency
-                    log.severe("HeapReader: reclen == 0 at seek pos " + seek + " in file " + this.heapFile);
-                    this.file.setLength(seek); // delete everything else at the remaining of the file :-(
-                    break loop;
+                    // read length of the following record without the length of the record size bytes
+                    reclen = this.file.readInt();
+                    //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
+                    if (reclen == 0) {
+                        // very bad file inconsistency
+                        log.severe("HeapReader: reclen == 0 at seek pos " + seek + " in file " + this.heapFile);
+                        this.file.setLength(seek); // delete everything else at the remaining of the file :-(
+                        break loop;
+                    }
+
+                    // read key
+                    this.file.readFully(key, 0, key.length);
+
+                } catch (final IOException e) {
+                    // EOF reached
+                    break loop; // terminate loop
                 }
 
-                // read key
-                this.file.readFully(key, 0, key.length);
-
-            } catch (final IOException e) {
-                // EOF reached
-                break loop; // terminate loop
-            }
-
-            // check if this record is empty
-            if (key == null || key[0] == 0) {
-                // it is an empty record, store to free list
-                if (reclen > 0) this.free.put(seek, reclen);
-            } else {
-                if (this.ordering.wellformed(key)) {
-                    indexready.consume(key, seek);
-                    key = new byte[this.keylength];
+                // check if this record is empty
+                if (key == null || key[0] == 0) {
+                    // it is an empty record, store to free list
+                    if (reclen > 0) this.free.put(seek, reclen);
                 } else {
-                    // free the lost space
-                    this.free.put(seek, reclen);
-                    this.file.seek(seek + 4);
-                    Arrays.fill(key, (byte) 0);
-                    this.file.write(key); // mark the place as empty record
-                    log.warn("HeapReader: BLOB " + this.heapFile.getName() + ": skiped not wellformed key " + UTF8.String(key) + " at seek pos " + seek);
+                    if (this.ordering.wellformed(key)) {
+                        indexBuilder.consume(key, seek);
+                        key = new byte[this.keylength];
+                    } else {
+                        // free the lost space
+                        this.free.put(seek, reclen);
+                        this.file.seek(seek + 4);
+                        Arrays.fill(key, (byte) 0);
+                        this.file.write(key); // mark the place as empty record
+                        log.warn("HeapReader: BLOB " + this.heapFile.getName() + ": skiped not wellformed key " + UTF8.String(key) + " at seek pos " + seek);
+                    }
                 }
+                // new seek position
+                seek += 4L + reclen;
             }
-            // new seek position
-            seek += 4L + reclen;
-        }
-        }
-        indexready.finish();
-
-        // finish the index generation
-        try {
-            this.index = indexready.result();
-        } catch (final InterruptedException e) {
-        	ConcurrentLog.logException(e);
-        } catch (final ExecutionException e) {
-        	ConcurrentLog.logException(e);
+            }
+            this.index = indexBuilder.finish();
         }
         log.info("HeapReader: finished index generation for " + this.heapFile.toString() + ", " + this.index.size() + " entries, " + this.free.size() + " gaps.");
     }
@@ -328,6 +621,7 @@ public class HeapReader {
                 //System.out.println("*** DEBUG BLOB: free-seek = " + nextFree.seek + ", size = " + nextFree.size);
                 // check if they follow directly
                 if (lastFree.getKey() + lastFree.getValue() + 4 == nextFree.getKey()) {
+                    if (merged == 0) prepareIndexForHeapMutation();
                     // merge those records
                     this.file.seek(lastFree.getKey());
                     lastFree.setValue(lastFree.getValue() + nextFree.getValue() + 4); // this updates also the free map
@@ -502,6 +796,7 @@ public class HeapReader {
                 log.severe("HeapReader: file " + this.file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + this.keylength);
                 // to get lazy over that problem (who wants to tell the user to stop operation and delete the file???) we work on like the entry does not exist
                 this.index.remove(key);
+                deleteFingerprint();
                 return null;
             }
             long memr = len + this.keylength + 64;
@@ -523,6 +818,7 @@ public class HeapReader {
                 // this is a severe operation, it should never happen.
                 // remove entry from index because keeping that element in the index would not make sense
                 this.index.remove(key);
+                deleteFingerprint();
                 // nothing to return
                 return null;
                 // but if the process ends in this state, it would completely fail
@@ -599,66 +895,118 @@ public class HeapReader {
 
     /**
      * close the BLOB table
+     * @throws UncheckedIOException when the heap cannot be closed or its complete
+     *         fingerprint pair cannot be published
      */
     public void close(boolean writeIDX) {
-        if (this.index == null) return;
-        synchronized (this.index) {
+        final I closingIndex = this.index;
+        if (closingIndex == null) return;
+        Throwable failure = null;
+        synchronized (closingIndex) {
             try {
-            if (this.file != null)
-    			try {
-    				this.file.close();
-    			} catch (final IOException e) {
-    				ConcurrentLog.logException(e);
-    			}
-            this.file = null;
-            if (writeIDX && this.index != null && this.free != null && (this.index.size() > 3 || this.free.size() > 3)) {
-                // now we can create a dump of the index and the gap information
-                // to speed up the next start
-                try {
-                    String fingerprint = fingerprintFileHash(this.heapFile);
-                    if (fingerprint == null) {
-                        log.severe("HeapReader: cannot write a dump for " + this.heapFile.getName()+ ": fingerprint is null");
-                    } else {
-                        File newFingerprintFileGap = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);
-                        if (this.fingerprintFileGap != null &&
-                            this.fingerprintFileGap.getName().equals(newFingerprintFileGap.getName()) &&
-                            this.fingerprintFileGap.exists()) {
-                            log.info("HeapReader: using existing gap dump instead of writing a new one: " + this.fingerprintFileGap.getName());
-                        } else {
-                            long start = System.currentTimeMillis();
-                            this.free.dump(newFingerprintFileGap);
-                            log.info("HeapReader: wrote a dump for the " + this.free.size() +  " gap entries of " + this.heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
-                        }
-                    }
-                    this.free.clear();
-                    this.free = null;
-                    if (fingerprint != null) {
-                        File newFingerprintFileIdx = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
-                        if (this.fingerprintFileIdx != null &&
-                            this.fingerprintFileIdx.getName().equals(newFingerprintFileIdx.getName()) &&
-                            this.fingerprintFileIdx.exists()) {
-                            log.info("HeapReader: using existing idx dump instead of writing a new one: " + this.fingerprintFileIdx.getName());
-                        } else {
-                            long start = System.currentTimeMillis();
-                            this.index.dump(newFingerprintFileIdx);
-                            log.info("HeapReader: wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
-                        }
-                    }
-                    this.index.close();
-                    this.index = null;
-                } catch (final IOException e) {
-                	ConcurrentLog.logException(e);
+                if (this.file != null) this.file.close();
+                this.file = null;
+                if (writeIDX && this.free != null
+                        && (closingIndex.size() > 3 || this.free.size() > 3)) {
+                    publishFingerprintGeneration(
+                            this.heapFile, closingIndex, this.free,
+                            this.fingerprintFileIdx, this.fingerprintFileGap,
+                            "HeapReader");
                 }
+            } catch (final Throwable e) {
+                failure = e;
+            } finally {
+                this.file = null;
+                if (this.free != null) this.free.clear();
+                this.free = null;
+                try {
+                    closingIndex.close();
+                } catch (final Throwable closeFailure) {
+                    if (failure == null) failure = closeFailure;
+                    else failure.addSuppressed(closeFailure);
+                }
+                if (this.index == closingIndex) this.index = null;
+                this.closeDate = new Date();
             }
-            if (this.free != null) this.free.clear();
-            this.free = null;
-            if (this.index != null) this.index.close();
-            this.index = null;
-            this.closeDate = new Date();
-            } catch (Throwable e) {ConcurrentLog.logException(e);}
 
             log.info("HeapReader: close HeapFile " + this.heapFile.getName());
             log.fine("trace: " + ConcurrentLog.stackTrace());
+        }
+
+        if (failure instanceof IOException) {
+            final IOException ioFailure = (IOException) failure;
+            log.severe("HeapReader: cannot close and publish fingerprint for "
+                    + this.heapFile, ioFailure);
+            throw new UncheckedIOException(
+                    "Cannot close and publish fingerprint for " + this.heapFile,
+                    ioFailure);
+        }
+        if (failure instanceof RuntimeException) throw (RuntimeException) failure;
+        if (failure instanceof Error) throw (Error) failure;
+        if (failure != null) {
+            throw new IllegalStateException("Cannot close heap " + this.heapFile, failure);
+        }
+    }
+
+    /**
+     * Publish one coherent cache generation. The index is installed first and the
+     * gap file last; the latter acts as the commit marker because readers require
+     * both files. A reported failure removes every part installed by this attempt.
+     */
+    static void publishFingerprintGeneration(
+            final File heapFile, final ImmutableHandleMap index, final Gap free,
+            final File reusableIndex, final File reusableGap,
+            final String publisher) throws IOException {
+        final String fingerprint = fingerprintFileHash(heapFile);
+        if (fingerprint == null) {
+            throw new IOException(publisher + ": cannot publish fingerprint for "
+                    + heapFile + ": fingerprint is null");
+        }
+
+        final File targetIndex = HeapWriter.fingerprintIndexFile(heapFile, fingerprint);
+        final File targetGap = HeapWriter.fingerprintGapFile(heapFile, fingerprint);
+        final boolean reusePair = sameFingerprintFile(reusableIndex, targetIndex)
+                && sameFingerprintFile(reusableGap, targetGap);
+        if (reusePair) {
+            log.info(publisher + ": using existing fingerprint pair for "
+                    + heapFile.getName());
+            return;
+        }
+
+        final long start = System.currentTimeMillis();
+        boolean indexPublished = false;
+        boolean gapPublished = false;
+        try {
+            index.dump(targetIndex);
+            indexPublished = true;
+            free.dump(targetGap);
+            gapPublished = true;
+            log.info(publisher + ": published a fingerprint with " + index.size()
+                    + " index entries and " + free.size() + " gap entries for "
+                    + heapFile.getName() + " in "
+                    + (System.currentTimeMillis() - start) + " milliseconds.");
+        } catch (final IOException | RuntimeException e) {
+            final IOException failure = new IOException(
+                    publisher + ": cannot publish complete fingerprint pair for "
+                            + heapFile, e);
+            if (gapPublished) deleteFailedPublish(targetGap, failure);
+            if (indexPublished) deleteFailedPublish(targetIndex, failure);
+            throw failure;
+        }
+    }
+
+    private static boolean sameFingerprintFile(
+            final File reusable, final File target) {
+        return reusable != null && reusable.exists()
+                && reusable.getAbsoluteFile().equals(target.getAbsoluteFile());
+    }
+
+    private static void deleteFailedPublish(
+            final File file, final IOException failure) {
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (final IOException cleanupFailure) {
+            failure.addSuppressed(cleanupFailure);
         }
     }
 

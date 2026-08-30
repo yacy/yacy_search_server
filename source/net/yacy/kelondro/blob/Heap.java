@@ -28,6 +28,7 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,13 +42,14 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.io.AbstractWriter;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public final class Heap extends HeapModifier implements BLOB {
+public final class Heap extends AbstractHeapModifier<HandleMap> implements BLOB {
     
     private SortedMap<byte[], byte[]> buffer;     // a write buffer to limit IO to the file
     private int                     buffersize; // bytes that are buffered in buffer
@@ -88,7 +90,7 @@ public final class Heap extends HeapModifier implements BLOB {
             final int keylength,
             final ByteOrder ordering,
             int buffermax) throws IOException {
-        super(heapFile, keylength, ordering);
+        super(heapFile, keylength, ordering, HeapReader.mutable());
         this.buffermax = buffermax;
         this.buffer = new TreeMap<byte[], byte[]>(ordering);
         this.buffersize = 0;
@@ -344,20 +346,48 @@ public final class Heap extends HeapModifier implements BLOB {
 
     /**
      * close the BLOB table
+     * @throws UncheckedIOException when buffered entries cannot be flushed
      */
     @Override
     public synchronized void close(final boolean writeIDX) {
         ConcurrentLog.info("KELONDRO", "Heap: closing heap " + this.name());
+        IOException flushFailure = null;
         if (this.file != null && this.buffer != null) {
             try {
                 flushBufferInternal();
             } catch (final IOException e) {
-                ConcurrentLog.logException(e);
+                flushFailure = e;
             }
         }
         this.buffer = null;
-        super.close(writeIDX);
+
+        Throwable closeFailure = null;
+        try {
+            /*
+             * A failed flush may have changed the in-memory index without writing
+             * every corresponding record. Publishing that index would turn a
+             * recoverable I/O failure into a persistent, invalid fingerprint.
+             * Closing without a dump makes the next opener rebuild from the blob.
+             */
+            super.close(writeIDX && flushFailure == null);
+        } catch (final Throwable failure) {
+            closeFailure = failure;
+        }
         assert this.file == null;
+
+        if (flushFailure != null) {
+            if (closeFailure != null) flushFailure.addSuppressed(closeFailure);
+            throw new UncheckedIOException(
+                    "Cannot flush heap buffer before closing " + this.name(),
+                    flushFailure);
+        }
+        if (closeFailure instanceof RuntimeException) {
+            throw (RuntimeException) closeFailure;
+        }
+        if (closeFailure instanceof Error) throw (Error) closeFailure;
+        if (closeFailure != null) {
+            throw new IllegalStateException("Cannot close heap " + this.name(), closeFailure);
+        }
     }
 
     @Override
@@ -367,6 +397,13 @@ public final class Heap extends HeapModifier implements BLOB {
 
     public int getBuffermax() {
         return this.buffermax;
+    }
+
+    @Override
+    public synchronized int replace(final byte[] key, final Rewriter rewriter) throws IOException, SpaceExceededException {
+        /* The shared in-place implementation operates on persisted records. */
+        flushBufferInternal();
+        return rewrite(key, rewriter);
     }
 
     /**

@@ -152,25 +152,26 @@ public final class HeapWriter {
         if (this.heapFileTMP.exists()) throw new IOException("HeapWriter: renaming to " + this.heapFileTMP.toString() + " failed: file does not exist");
 
         // generate index and gap files
-        if (writeIDX && this.index.size() > 3) {
-            // now we can create a dump of the index and the gap information
-            // to speed up the next start
-            long start = System.currentTimeMillis();
-            String fingerprint = HeapReader.fingerprintFileHash(this.heapFileREADY);
-            if (fingerprint == null) {
-                log.severe("HeapWriter: cannot write a dump for " + this.heapFileREADY.getName()+ ": fingerprint is null");
-            } else {
-                new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
-                this.index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
-                log.info("HeapWriter: wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+        IOException publishFailure = null;
+        try {
+            if (writeIDX && this.index.size() > 3) {
+                HeapReader.publishFingerprintGeneration(
+                        this.heapFileREADY, this.index, new Gap(),
+                        null, null, "HeapWriter");
             }
-            this.index.close();
-            this.index = null;
-        } else {
-            // this is small.. just free resources, do not write index
-            this.index.close();
-            this.index = null;
+        } catch (final IOException e) {
+            publishFailure = e;
+        } finally {
+            try {
+                this.index.close();
+            } catch (final RuntimeException closeFailure) {
+                if (publishFailure == null) throw closeFailure;
+                publishFailure.addSuppressed(closeFailure);
+            } finally {
+                this.index = null;
+            }
         }
+        if (publishFailure != null) throw publishFailure;
     }
 
     public static void delete(File f) {

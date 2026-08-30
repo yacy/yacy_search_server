@@ -30,14 +30,24 @@ import java.util.SortedMap;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.storage.ImmutableHandleMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.index.SSTableHandleMap;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public class HeapModifier extends HeapReader implements BLOB {
+public class HeapModifier extends AbstractHeapModifier<SSTableHandleMap> {
+
+    public HeapModifier(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
+        super(heapFile, keylength, ordering, HeapReader.immutable());
+    }
+
+}
+
+abstract class AbstractHeapModifier<I extends ImmutableHandleMap> extends HeapReader<I> implements ImmutableBLOB {
 
     /*
      * This class adds a remove operation to a BLOBHeapReader. That means that a BLOBModifier can
@@ -54,8 +64,12 @@ public class HeapModifier extends HeapReader implements BLOB {
      * @param ordering
      * @throws IOException
      */
-    public HeapModifier(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
-        super(heapFile, keylength, ordering);
+    protected AbstractHeapModifier(
+            final File heapFile,
+            final int keylength,
+            final ByteOrder ordering,
+            final HeapIndexFactory<I> indexFactory) throws IOException {
+        super(heapFile, keylength, ordering, indexFactory);
     }
 
     /**
@@ -118,6 +132,7 @@ public class HeapModifier extends HeapReader implements BLOB {
                 ConcurrentLog.severe("KELONDRO", "BLOBHeap: " + this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
                 throw new IOException("BLOBHeap: " + this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
             }
+            prepareIndexForHeapMutation();
             super.deleteFingerprint();
 
             // add entry to free array
@@ -236,18 +251,16 @@ public class HeapModifier extends HeapReader implements BLOB {
         }
     }
 
-	@Override
-    public void insert(byte[] key, byte[] b) throws IOException {
-		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
-	}
-
-	@Override
-    public int replace(byte[] key, final Rewriter rewriter) throws IOException {
-	    throw new UnsupportedOperationException();
-    }
-
-	@Override
-    public int reduce(byte[] key, final Reducer reducer) throws IOException, SpaceExceededException {
+    /**
+     * Rewrite an existing BLOB in place without changing its index entry.
+     *
+     * @param key the primary key
+     * @param rewriter produces content no larger than the existing content
+     * @return the number of bytes removed from the BLOB
+     * @throws IOException when the rewritten content cannot be stored in place
+     * @throws SpaceExceededException when the rewriter cannot allocate its result
+     */
+    protected int rewrite(byte[] key, final Rewriter rewriter) throws IOException, SpaceExceededException {
         key = normalizeKey(key);
         assert key.length == this.keylength;
 
@@ -271,6 +284,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (MemoryControl.available() < len) {
                 if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
             }
+            prepareIndexForHeapMutation();
             super.deleteFingerprint();
 
             // read the key
@@ -283,7 +297,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             this.file.readFully(blob, 0, blob.length);
 
             // rewrite the entry
-            blob = reducer.rewrite(blob);
+            blob = rewriter.rewrite(blob);
             int reduction = len - blob.length;
             if (reduction == 0) {
                 // even if the reduction is zero then it is still be possible that the record has been changed
@@ -318,6 +332,11 @@ public class HeapModifier extends HeapReader implements BLOB {
             assert mem() <= m : "m = " + m + ", mem() = " + mem();
             return reduction;
         }
+    }
+
+    @Override
+    public int reduce(final byte[] key, final Reducer reducer) throws IOException, SpaceExceededException {
+        return rewrite(key, reducer);
     }
 
 }

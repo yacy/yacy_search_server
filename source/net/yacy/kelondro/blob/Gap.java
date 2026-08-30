@@ -34,6 +34,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -101,36 +104,47 @@ public class Gap extends TreeMap<Long, Integer> {
      * @return
      * @throws IOException
      */
-    public int dump(File file) throws IOException {
-        File tmp = new File(file.getParentFile(), file.getName() + ".prt");
-        Iterator<Map.Entry<Long, Integer>> i = this.entrySet().iterator();
+    public int dump(final File file) throws IOException {
+        final File tmp = new File(file.getParentFile(), file.getName() + ".prt");
+        final Iterator<Map.Entry<Long, Integer>> i = this.entrySet().iterator();
         DataOutputStream os;
         int c = 0;
-        try (/* Resource automatically closed by this try-with-resources statement */
-        		final FileOutputStream fileStream = new FileOutputStream(tmp);
-        ) {
-        	try {
-        		os = new DataOutputStream(new BufferedOutputStream(fileStream, (Integer.SIZE + Long.SIZE) * 1024)); // = 16*1024*recordsize
-        	} catch (final OutOfMemoryError e) {
-        		os = new DataOutputStream(fileStream);
-        	}
-        	try {
-        		Map.Entry<Long, Integer> e;
-        		while (i.hasNext()) {
-        			e = i.next();
-        			os.writeLong(e.getKey().longValue());
-        			os.writeInt(e.getValue().intValue());
-        			c++;
-        		}
-        		os.flush();
-        	} finally {
-        		os.close();
-        	}
+        try {
+            try (final FileOutputStream fileStream = new FileOutputStream(tmp)) {
+                try {
+                    os = new DataOutputStream(new BufferedOutputStream(
+                            fileStream, (Integer.SIZE + Long.SIZE) * 1024));
+                } catch (final OutOfMemoryError e) {
+                    os = new DataOutputStream(fileStream);
+                }
+                try {
+                    while (i.hasNext()) {
+                        final Map.Entry<Long, Integer> entry = i.next();
+                        os.writeLong(entry.getKey().longValue());
+                        os.writeInt(entry.getValue().intValue());
+                        c++;
+                    }
+                    os.flush();
+                } finally {
+                    os.close();
+                }
+            }
+            try {
+                Files.move(tmp.toPath(), file.toPath(),
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (final AtomicMoveNotSupportedException e) {
+                Files.move(tmp.toPath(), file.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (final IOException e) {
+            try {
+                Files.deleteIfExists(tmp.toPath());
+            } catch (final IOException cleanupFailure) {
+                e.addSuppressed(cleanupFailure);
+            }
+            throw e;
         }
-        tmp.renameTo(file);
-        assert file.exists() : file.toString();
-        assert !tmp.exists() : tmp.toString();
-        
         return c;
     }
 

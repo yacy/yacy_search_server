@@ -25,8 +25,10 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
+import java.nio.ReadOnlyBufferException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -34,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.document.encoding.UTF8;
 
@@ -49,10 +52,12 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
 
     private final List<Segment> segments;
     private long size;
+    private volatile boolean closed;
 
     public ChunkedBytes() {
         this.segments = new ArrayList<>();
         this.size = 0;
+        this.closed = false;
     }
 
     public ChunkedBytes(InputStream in) throws IOException {
@@ -70,10 +75,13 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         this.append(UTF8.getBytes(initialData));
     }
     
-	private ChunkedBytes(List<Segment> segments, long size) {
-		this.segments = new ArrayList<>(segments);
-		this.size = size;
-	}
+    private ChunkedBytes(final List<Segment> segments, final long size,
+            final List<FileBacking> fileBackings) {
+        this.segments = new ArrayList<>(segments);
+        this.size = size;
+        this.fileBackings.addAll(fileBackings);
+        this.closed = false;
+    }
 
     /** Represents one contiguous region in the logical address space. */
     private static final class Segment implements Closeable, Cloneable {
@@ -86,6 +94,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         @Override public Object clone() {
 			return new Segment((Chunk) this.chunk.clone(), this.start, this.length);
 		}
+        void force() { this.chunk.force(); }
         @Override public void close() throws IOException { this.chunk.close(); }
     }
 
@@ -97,7 +106,45 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         void set(long relPos, byte b);
         int length();
         Object clone();
-        @Override default void close() { /* no-op by default */ }
+        default void force() { /* heap and read-only chunks need no synchronization */ }
+        @Override default void close() throws IOException { /* no-op by default */ }
+    }
+
+    /**
+     * One channel ownership shared by all segments of an appended file and by
+     * read-only clones. A reference belongs to a ChunkedBytes instance, not to
+     * every segment, so a multi-chunk file is closed exactly once per owner.
+     */
+    private static final class FileBacking implements Closeable {
+        final FileChannel channel;
+        private final AtomicInteger references;
+
+        FileBacking(final FileChannel channel) {
+            this.channel = channel;
+            this.references = new AtomicInteger(1);
+        }
+
+        FileBacking retain() {
+            int current;
+            do {
+                current = this.references.get();
+                if (current <= 0) throw new IllegalStateException("File backing is closed");
+                if (current == Integer.MAX_VALUE) {
+                    throw new IllegalStateException("Too many references to file backing");
+                }
+            } while (!this.references.compareAndSet(current, current + 1));
+            return this;
+        }
+
+        @Override
+        public void close() throws IOException {
+            final int remaining = this.references.decrementAndGet();
+            if (remaining == 0) {
+                this.channel.close();
+            } else if (remaining < 0) {
+                throw new IOException("File backing closed more than once");
+            }
+        }
     }
 
     /** On-heap chunk. */
@@ -131,14 +178,14 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
 
     /** File-backed chunk using MappedByteBuffer (lazy mapped). */
     private static final class FileChunk implements Chunk, Cloneable {
-        final FileChannel ch;
+        final FileBacking backing;
         final long fileOffset;       // offset in the file where this chunk starts
         final int len;
         final boolean writable;
         private volatile MappedByteBuffer mm; // lazily created
 
-        FileChunk(FileChannel ch, long fileOffset, int len, boolean writable) {
-            this.ch = ch; this.fileOffset = fileOffset; this.len = len; this.writable = writable;
+        FileChunk(FileBacking backing, long fileOffset, int len, boolean writable) {
+            this.backing = backing; this.fileOffset = fileOffset; this.len = len; this.writable = writable;
         }
         private MappedByteBuffer map() {
             MappedByteBuffer local = this.mm;
@@ -148,9 +195,9 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
                     if (local == null) {
                         final FileChannel.MapMode mapMode = this.writable ? FileChannel.MapMode.READ_WRITE : FileChannel.MapMode.READ_ONLY;
                         try {
-                            this.mm = local = this.ch.map(mapMode, this.fileOffset, this.len);
+                            this.mm = local = this.backing.channel.map(mapMode, this.fileOffset, this.len);
                         } catch (final IOException e) {
-                            throw new RuntimeException(e);
+                            throw new UncheckedIOException(e);
                         }
                     }
                 }
@@ -166,7 +213,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
             return take;
         }
         @Override public int write(long p, byte[] src, int off, int len) {
-            if (!this.writable) throw new RuntimeException("FileChunk is read-only");
+            if (!this.writable) throw new ReadOnlyBufferException();
             if (p >= this.len) return -1;
             final int take = Math.min(len, this.len - (int)p);
             final ByteBuffer dup = this.map().duplicate();
@@ -178,18 +225,30 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
             return this.map().get((int)p);
         }
         @Override public void set(long p, byte b) {
-            if (!this.writable) throw new RuntimeException("FileChunk is read-only");
+            if (!this.writable) throw new ReadOnlyBufferException();
             this.map().put((int)p, b);
         }
         @Override public int length() { return this.len; }
-        @Override public Object clone() { return new FileChunk(this.ch, this.fileOffset, this.len, this.writable); }
-        @Override public void close() {
-            // Best-effort explicit unmap to release file handles promptly.
+        @Override public Object clone() { return new FileChunk(this.backing, this.fileOffset, this.len, this.writable); }
+        @Override public void force() {
             final MappedByteBuffer local = this.mm;
-            if (local != null) {
-                try { Unmapper.unmap(local); } catch (final Throwable ignored) {}
+            if (this.writable && local != null) local.force();
+        }
+        @Override public void close() throws IOException {
+            /* Clear the reference before cleaning so close cannot clean it twice. */
+            final MappedByteBuffer local;
+            synchronized (this) {
+                local = this.mm;
+                this.mm = null;
             }
-            // Channel is closed by owner (we don’t own it here).
+            if (local != null) {
+                try {
+                    Unmapper.unmap(local);
+                } catch (final Exception e) {
+                    throw new IOException("Cannot unmap file chunk at " + this.fileOffset, e);
+                }
+            }
+            // The shared FileBacking is released by the owning ChunkedBytes.
         }
     }
 
@@ -203,7 +262,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
                 final var theUnsafe = unsafeClass.getDeclaredField("theUnsafe");
                 theUnsafe.setAccessible(true);
                 final Object unsafe = theUnsafe.get(null);
-                unsafeClass.getMethod("invokeCleaner", MappedByteBuffer.class).invoke(unsafe, bb);
+                unsafeClass.getMethod("invokeCleaner", ByteBuffer.class).invoke(unsafe, bb);
                 return;
             } catch (final Throwable ignore) {}
             // Java 8: DirectBuffer.cleaner().clean()
@@ -218,22 +277,38 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
     // ------------------- public API -------------------
 
     /** Total logical size in bytes. */
-    public long size() { return this.size; }
+    public long size() {
+        requireOpen();
+        return this.size;
+    }
 
     /** Append bytes from an InputStream into on-heap chunks. */
-    public void writeFrom(InputStream in) throws IOException {
+    public void writeFrom(final InputStream in) throws IOException {
+        requireOpen();
+        if (in == null) throw new NullPointerException("in");
         final byte[] tmp = new byte[64 * 1024];
         int r;
         while ((r = in.read(tmp)) != -1) {
             // InputStream.read(byte[]) may legally return 0
             if (r == 0) continue;
+            /*
+             * InputStream.read() is foreign code and must run without holding the
+             * ChunkedBytes monitor. Otherwise an input implementation which owns
+             * another lock can invert that lock order when its owner concurrently
+             * calls append() or close(). append() provides the required, narrowly
+             * scoped synchronization for the actual state change.
+             */
             this.append(tmp, 0, r);
         }
 
     }
 
     /** Append a byte array (copied into on-heap chunks). */
-    public void append(byte[] src, int off, int len) {
+    public synchronized void append(final byte[] src, int off, int len) {
+        requireOpen();
+        checkBounds(src, off, len, "src");
+        if (len == 0) return;
+        Math.addExact(this.size, len);
         while (len > 0) {
             int space = this.spaceInTailHeapChunk();
             if (space == 0) {
@@ -256,51 +331,65 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         }
     }
 
-    public void append(byte[] src) {
+    public void append(final byte[] src) {
+        if (src == null) throw new NullPointerException("src");
         this.append(src, 0, src.length);
     }
 
-    public void append(String src, int off, int len) {
+    public void append(final String src, final int off, final int len) {
+        if (src == null) throw new NullPointerException("src");
         this.append(src.substring(off, off + len));
     }
 
-    public void append(String src) {
+    public void append(final String src) {
+        if (src == null) throw new NullPointerException("src");
         this.append(UTF8.getBytes(src));
     }
 
     /** Adopt an entire file as zero-copy file-backed segments (read-only). */
-    public void appendFile(Path path) {
+    public void appendFile(final Path path) {
         this.appendFile(path, false);
     }
 
     /** Adopt a file; set writable=true to allow modifications to the mapped bytes. */
-    public void appendFile(Path path, boolean writable) {
+    public synchronized void appendFile(final Path path, final boolean writable) {
+        requireOpen();
+        if (path == null) throw new NullPointerException("path");
         FileChannel ch = null;
         try {
             ch = FileChannel.open(path, writable
                     ? new OpenOption[]{StandardOpenOption.READ, StandardOpenOption.WRITE}
                     : new OpenOption[]{StandardOpenOption.READ});
             final long fileSize = ch.size();
+            if (fileSize == 0) return;
+            final long newSize = Math.addExact(this.size, fileSize);
+            final FileBacking backing = new FileBacking(ch);
+            final List<Segment> fileSegments = new ArrayList<>();
             long pos = 0;
             while (pos < fileSize) {
                 final int len = (int)Math.min(CHUNK_SIZE, fileSize - pos);
-                this.segments.add(new Segment(new FileChunk(ch, pos, len, writable), this.size, len));
-                this.size += len;
+                fileSegments.add(new Segment(
+                        new FileChunk(backing, pos, len, writable), this.size + pos, len));
                 pos += len;
             }
-            // We keep the FileChannel open until this ChunkedBytes is closed.
-            this.fileChannels.add(ch);
+            this.segments.addAll(fileSegments);
+            this.size = newSize;
+            // The shared backing owns the channel until this instance and all clones close.
+            this.fileBackings.add(backing);
             ch = null; // prevent closing in finally
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         } finally {
             if (ch != null) try { ch.close(); } catch (final IOException ignore) {}
         }
     }
 
     /** Read into dst starting at logical position pos. Returns bytes read or -1 at EOF. */
-    public int read(long pos, byte[] dst, int off, int len) {
+    public int read(final long pos, final byte[] dst, final int off, final int len) {
+        requireOpen();
         if (pos < 0) throw new IllegalArgumentException("pos < 0");
+        checkBounds(dst, off, len, "dst");
+        if (len == 0) return 0;
         if (pos >= this.size) return -1;
         long remaining = Math.min(len, this.size - pos);
         int done = 0;
@@ -319,8 +408,11 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
     }
 
     /** Write bytes at logical position pos (requires writable backing for those ranges). */
-    public int write(long pos, byte[] src, int off, int len) {
+    public int write(final long pos, final byte[] src, final int off, final int len) {
+        requireOpen();
         if (pos < 0) throw new IllegalArgumentException("pos < 0");
+        checkBounds(src, off, len, "src");
+        if (len == 0) return 0;
         if (pos >= this.size) return -1;
         long remaining = Math.min(len, this.size - pos);
         int done = 0; int idx = this.findSegment(pos); long p = pos;
@@ -338,31 +430,48 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
 
     /** InputStream view (no copying), supports >2 GB. */
     public InputStream openStream() {
+        requireOpen();
         return new InputStream() {
             long pos = 0;
+            boolean streamClosed = false;
+            private void requireStreamOpen() throws IOException {
+                if (this.streamClosed) throw new IOException("Stream is closed");
+            }
             @Override public int read() throws IOException {
+                requireStreamOpen();
                 final byte[] one = new byte[1];
                 final int n = this.read(one, 0, 1);
                 return n < 0 ? -1 : (one[0] & 0xFF);
             }
             @Override public int read(byte[] b, int off, int len) throws IOException {
+                requireStreamOpen();
                 final int n = ChunkedBytes.this.read(this.pos, b, off, len);
                 if (n > 0) this.pos += n;
                 return n;
             }
-            @Override public long skip(long n) {
+            @Override public long skip(long n) throws IOException {
+                requireStreamOpen();
+                ChunkedBytes.this.requireOpen();
+                if (n <= 0) return 0;
                 final long k = Math.min(n, ChunkedBytes.this.size - this.pos);
                 this.pos += k; return k;
             }
-            @Override public int available() {
+            @Override public int available() throws IOException {
+                requireStreamOpen();
+                ChunkedBytes.this.requireOpen();
                 final long rem = ChunkedBytes.this.size - this.pos;
                 return rem > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) rem;
+            }
+            @Override public void close() {
+                this.streamClosed = true;
             }
         };
     }
 
     /** Write the whole content to an OutputStream. */
-    public void writeTo(OutputStream out) {
+    public void writeTo(final OutputStream out) {
+        requireOpen();
+        if (out == null) throw new NullPointerException("out");
         final byte[] tmp = new byte[256 * 1024];
         long p = 0;
         try {
@@ -373,13 +482,14 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
                 p += n;
             }
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
     /** Materialize as a single byte[] (only if total size fits in an int). */
     public byte[] toByteArray() {
-        if (this.size > Integer.MAX_VALUE) throw new RuntimeException("Size > Integer.MAX_VALUE");
+        requireOpen();
+        if (this.size > Integer.MAX_VALUE) throw new IllegalStateException("Size > Integer.MAX_VALUE");
         final byte[] all = new byte[(int) this.size];
         this.writeTo(new ByteArrayOutputStream() {
             int offset = 0;
@@ -393,6 +503,7 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
 
     @Override
     public synchronized void write(int b) {
+        requireOpen();
         // Append single byte at end (OutputStream semantics)
         final byte[] one = new byte[] { (byte) b };
         this.append(one, 0, 1);
@@ -400,33 +511,63 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
 
     @Override
     public synchronized void write(byte[] b, int off, int len) {
-        if (b == null) throw new NullPointerException("b");
-        if (off < 0 || len < 0 || off + len > b.length) throw new IndexOutOfBoundsException();
+        requireOpen();
+        checkBounds(b, off, len, "b");
         // Append to end; grows with heap chunks as needed
         this.append(b, off, len);
     }
 
     public void writeBytes(byte[] b) {
+        if (b == null) throw new NullPointerException("b");
         this.write(b, 0, b.length);
     }
 
     @Override
     public void flush() {
-        // No-op for heap chunks; file-backed segments via MappedByteBuffer are
-        // written eagerly. If you need a hard sync to disk, expose a separate
-        // method to force() mapped buffers.
+        force();
     }
 
-    @Override public void close() {
-        // Close/unmap all segments and channels.
-        Exception first = null;
+    /** Force changes in every writable mapped chunk to its storage device. */
+    public synchronized void force() {
+        requireOpen();
         for (final Segment s : this.segments) {
-            try { s.close(); } catch (final Exception e) { if (first == null) first = e; }
+            s.force();
         }
-        for (final FileChannel ch : this.fileChannels) {
-            try { ch.close(); } catch (final Exception e) { if (first == null) first = e; }
+    }
+
+    @Override
+    public synchronized void close() {
+        if (this.closed) return;
+
+        Exception failure = null;
+        try {
+            /* Mapped writes must be forced before the buffers are unmapped. */
+            force();
+        } catch (final RuntimeException e) {
+            failure = e;
         }
-        if (first != null) throw new RuntimeException(first.getMessage());
+        this.closed = true;
+
+        for (final Segment s : this.segments) {
+            try {
+                s.close();
+            } catch (final Exception e) {
+                failure = addFailure(failure, e);
+            }
+        }
+        for (final FileBacking backing : this.fileBackings) {
+            try {
+                backing.close();
+            } catch (final Exception e) {
+                failure = addFailure(failure, e);
+            }
+        }
+        if (failure instanceof UncheckedIOException) throw (UncheckedIOException) failure;
+        if (failure instanceof IOException) {
+            throw new UncheckedIOException("Cannot close ChunkedBytes", (IOException) failure);
+        }
+        if (failure instanceof RuntimeException) throw (RuntimeException) failure;
+        if (failure != null) throw new RuntimeException("Cannot close ChunkedBytes", failure);
     }
 
     @Override
@@ -435,8 +576,9 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
     }
 
     public byte get(long pos) {
+        requireOpen();
         if (pos < 0) throw new IllegalArgumentException("pos < 0");
-        if (pos >= this.size) throw new RuntimeException("pos >= size");
+        if (pos >= this.size) throw new IndexOutOfBoundsException("pos >= size");
         final int idx = this.findSegment(pos);
         final Segment s = this.segments.get(idx);
         final long rel = pos - s.start;
@@ -444,11 +586,22 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
     }
 
     @Override
-    public Object clone() {
-		List<Segment> list = new ArrayList<>(this.segments.size());
-		for (Segment s: this.segments) list.add((Segment) s.clone());
-		final ChunkedBytes cb = new ChunkedBytes(list, this.size);
-		return cb;
+    public synchronized Object clone() {
+        requireOpen();
+        final List<FileBacking> retainedBackings = new ArrayList<>(this.fileBackings.size());
+        try {
+            for (final FileBacking backing : this.fileBackings) {
+                retainedBackings.add(backing.retain());
+            }
+            final List<Segment> clonedSegments = new ArrayList<>(this.segments.size());
+            for (final Segment segment : this.segments) {
+                clonedSegments.add((Segment) segment.clone());
+            }
+            return new ChunkedBytes(clonedSegments, this.size, retainedBackings);
+        } catch (final RuntimeException | Error e) {
+            releaseRetainedBackings(retainedBackings, e);
+            throw e;
+        }
     }
     
     @Override
@@ -457,44 +610,47 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         if (o instanceof ChunkedBytes) {
             final ChunkedBytes cb = (ChunkedBytes)o;
             if (this.size != cb.size) return false;
-            for (long i = 0; i < this.size; i++) {
-                if (this.get(i) != cb.get(i)) return false;
-            }
-            return true;
-        }
-        if (o instanceof byte[]) {
-            final byte[] b = (byte[])o;
-            if (this.size != b.length) return false;
-            for (int i = 0; i < b.length; i++) {
-                if (this.get(i) != b[i]) return false;
-            }
-            return true;
-        }
-        if (o instanceof String) {
-            return this.equals(UTF8.getBytes((String) o));
+            return compareChunked(cb) == 0;
         }
         return false;
     }
 
     @Override
+    public int hashCode() {
+        requireOpen();
+        int result = 1;
+        final byte[] buffer = new byte[64 * 1024];
+        long position = 0;
+        while (position < this.size) {
+            final int length = (int) Math.min(buffer.length, this.size - position);
+            final int read = this.read(position, buffer, 0, length);
+            if (read != length) throw new IllegalStateException("Short read while hashing");
+            for (int i = 0; i < read; i++) result = 31 * result + buffer[i];
+            position += read;
+        }
+        return result;
+    }
+
+    /** Content comparison retained for callers which previously used equals(byte[]). */
+    public boolean contentEquals(final byte[] bytes) {
+        requireOpen();
+        if (bytes == null || this.size != bytes.length) return false;
+        return compareBytes(bytes) == 0;
+    }
+
+    /** Content comparison retained for callers which previously used equals(String). */
+    public boolean contentEquals(final String text) {
+        requireOpen();
+        return text != null && contentEquals(UTF8.getBytes(text));
+    }
+
+    @Override
     public int compareTo(Object o) {
         if (o instanceof ChunkedBytes) {
-            final ChunkedBytes cb = (ChunkedBytes)o;
-            final int minLen = (int)Math.min(this.size, cb.size);
-            for (int i = 0; i < minLen; i++) {
-                final int diff = (this.get(i) & 0xFF) - (cb.get(i) & 0xFF);
-                if (diff != 0) return diff;
-            }
-            return Long.compare(this.size, cb.size);
+            return compareChunked((ChunkedBytes) o);
         }
         if (o instanceof byte[]) {
-            final byte[] b = (byte[])o;
-            final int minLen = (int)Math.min(this.size, b.length);
-            for (int i = 0; i < minLen; i++) {
-                final int diff = (this.get(i) & 0xFF) - (b[i] & 0xFF);
-                if (diff != 0) return diff;
-            }
-            return Long.compare(this.size, b.length);
+            return compareBytes((byte[]) o);
         }
         if (o instanceof String) {
             return this.compareTo(UTF8.getBytes((String) o));
@@ -504,7 +660,81 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
 
     // ------------------- internals -------------------
 
-    private final List<FileChannel> fileChannels = new ArrayList<>();
+    private final List<FileBacking> fileBackings = new ArrayList<>();
+
+    private void requireOpen() {
+        if (this.closed) throw new IllegalStateException("ChunkedBytes is closed");
+    }
+
+    private static void checkBounds(final byte[] bytes, final int offset,
+            final int length, final String name) {
+        if (bytes == null) throw new NullPointerException(name);
+        if (offset < 0 || length < 0 || offset > bytes.length - length) {
+            throw new IndexOutOfBoundsException(
+                    "offset=" + offset + ", length=" + length
+                    + ", array length=" + bytes.length);
+        }
+    }
+
+    private static Exception addFailure(final Exception current, final Exception added) {
+        if (current == null) return added;
+        current.addSuppressed(added);
+        return current;
+    }
+
+    private static void releaseRetainedBackings(
+            final List<FileBacking> retainedBackings,
+            final Throwable failure) {
+        for (final FileBacking backing : retainedBackings) {
+            try {
+                backing.close();
+            } catch (final IOException closeFailure) {
+                failure.addSuppressed(closeFailure);
+            }
+        }
+    }
+
+    private int compareChunked(final ChunkedBytes other) {
+        requireOpen();
+        other.requireOpen();
+        final long minimumLength = Math.min(this.size, other.size);
+        final byte[] left = new byte[64 * 1024];
+        final byte[] right = new byte[left.length];
+        long position = 0;
+        while (position < minimumLength) {
+            final int length = (int) Math.min(left.length, minimumLength - position);
+            if (this.read(position, left, 0, length) != length
+                    || other.read(position, right, 0, length) != length) {
+                throw new IllegalStateException("Short read while comparing ChunkedBytes");
+            }
+            for (int i = 0; i < length; i++) {
+                final int difference = (left[i] & 0xff) - (right[i] & 0xff);
+                if (difference != 0) return difference;
+            }
+            position += length;
+        }
+        return Long.compare(this.size, other.size);
+    }
+
+    private int compareBytes(final byte[] bytes) {
+        requireOpen();
+        final long minimumLength = Math.min(this.size, bytes.length);
+        final byte[] left = new byte[64 * 1024];
+        long position = 0;
+        while (position < minimumLength) {
+            final int length = (int) Math.min(left.length, minimumLength - position);
+            if (this.read(position, left, 0, length) != length) {
+                throw new IllegalStateException("Short read while comparing bytes");
+            }
+            final int byteOffset = (int) position;
+            for (int i = 0; i < length; i++) {
+                final int difference = (left[i] & 0xff) - (bytes[byteOffset + i] & 0xff);
+                if (difference != 0) return difference;
+            }
+            position += length;
+        }
+        return Long.compare(this.size, bytes.length);
+    }
 
     private int findSegment(long pos) {
         int lo = 0, hi = this.segments.size() - 1;
