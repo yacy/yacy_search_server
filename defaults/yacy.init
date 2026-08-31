@@ -1276,6 +1276,9 @@ resource.disk.used.max.overshot=4194304
 
 # minimum memory to accept dht-in (MiB)
 memory.acceptDHTabove = 50
+
+# maximum fraction of max heap that the RWI RAM buffer may occupy before entries are trimmed (0.0-1.0)
+rwi.memory.maxHeapFraction = 0.25
 memory.disabledDHT = false
 
 # wether using standard memory strategy - or try generation memory strategy
