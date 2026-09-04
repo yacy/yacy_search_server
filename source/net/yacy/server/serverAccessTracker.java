@@ -128,15 +128,13 @@ public class serverAccessTracker {
 
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
-        Queue<Track> track = accessTracker.get(host);
-        if (track == null) {
-            track = new LinkedBlockingQueue<Track>();
+        final Queue<Track> track = accessTracker.computeIfAbsent(host, key -> new LinkedBlockingQueue<Track>());
+        synchronized (track) {
             track.add(new Track(System.currentTimeMillis(), accessPath));
-            // add to tracker
-            accessTracker.put(host, track);
-        } else {
-            track.add(new Track(System.currentTimeMillis(), accessPath));
-            clearTooOldAccess(track);
+            // Bound bursts immediately; age cleanup runs periodically and when history is read.
+            while (track.size() > maxTrackingCount) {
+                if (track.poll() == null) break;
+            }
         }
     }
 
