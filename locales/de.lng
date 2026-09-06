@@ -2918,6 +2918,7 @@ Your network configuration is in private mode. Your peer seed will not be publis
 #File: Status_p.inc
 #---------------------------
 System Status==Systemstatus
+Git commit:==Git-Commit:
 Unknown==unbekannt
 Protection==Sicherheit
 password-protected==Passwort-geschützt

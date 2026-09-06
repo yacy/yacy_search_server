@@ -4,6 +4,6 @@
     <buildDate>#[buildDate]#</buildDate>
     <buildTime>#[buildTime]#</buildTime>
     <buildDateTime>#[buildDateTime]#</buildDateTime>
-    <buildHash>#[buildDateTime]#</buildHash>
+    <buildHash>#[buildHash]#</buildHash>
     <buildVersion>#[buildVersion]#</buildVersion>
 </version>
