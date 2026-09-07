@@ -428,6 +428,7 @@
         <pathelement location="${build}"/>
         <path refid="compile.path"/>
         <path refid="test.path"/>
+        <fileset dir="${lib}" includes="solr9-bridge-*.jar" />
       </classpath>
       <compilerarg value="-Xlint"/>
     </javac>

@@ -894,6 +894,21 @@ public final class Switchboard extends serverSwitch {
             this.setConfig("parser.enableAudioTags", true);
         }
 
+        final boolean enableFITSParsing = this.getConfigBool("parser.enableFITSParsing", false);
+        /* FITS parser is disabled by default due to very large file sizes (~15MB-100MB+ per RAW frame) */
+        if (!enableFITSParsing) {
+            denyExt.add("fits");
+            denyExt.add("fit");
+            denyExt.add("fts");
+            denyMime.add("image/fits");
+            denyMime.add("image/x-fits");
+            denyMime.add("application/fits");
+
+            this.setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, denyExt);
+            this.setConfig(SwitchboardConstants.PARSER_MIME_DENY, denyMime);
+            this.setConfig("parser.enableFITSParsing", true);
+        }
+
         TextParser.setDenyMime(this.getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         TextParser.setDenyExtension(this.getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
 

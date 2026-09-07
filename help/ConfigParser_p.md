@@ -19,6 +19,7 @@ Use it when crawled files arrive but are not converted into searchable text as e
 ## What You Can Do Here
 
 - Parser settings decide which document formats YaCy can understand.
+- Enable or disable specific document formats and heavy media parsers like FITS astrophotography images (.fits, .fit, .fts).
 - Read the current value before changing it.
 - Verify the effect on the public page, status page, or related administration page.
 
