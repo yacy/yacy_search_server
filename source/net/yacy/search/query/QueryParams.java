@@ -176,6 +176,12 @@ public final class QueryParams {
     private boolean strictContentDom = false;
     
 	/**
+	 * The url hashes a search is restricted to, null or empty when the search
+	 * may return any url
+	 */
+    private HandleSet urlselection = null;
+    
+	/**
 	 * The maximum number of suggestions ("Did you mean") to display at the top of
 	 * the first search results page
 	 */
@@ -447,6 +453,20 @@ public final class QueryParams {
      */
     public void setStrictContentDom(final boolean strictContentDom) {
 		this.strictContentDom = strictContentDom;
+	}
+    
+    /**
+     * @return the url hashes a search is restricted to, null or empty when the search may return any url
+     */
+    public HandleSet getUrlSelection() {
+		return this.urlselection;
+	}
+    
+    /**
+     * @param urlselection the url hashes a search is restricted to. Must be set before the first query is built.
+     */
+    public void setUrlSelection(final HandleSet urlselection) {
+		this.urlselection = urlselection;
 	}
     
 	/**
@@ -764,6 +784,20 @@ public final class QueryParams {
 		}
 	}
     
+    /**
+     * @param urlselection the url hashes a search is restricted to
+     * @return a filter query that matches the documents with these url hashes
+     */
+    private static String urlSelectionFilterQuery(final HandleSet urlselection) {
+        final StringBuilder fq = new StringBuilder(urlselection.size() * (Word.commonHashLength + 1) + 20);
+        fq.append("{!terms f=").append(CollectionSchema.id.getSolrFieldName()).append('}');
+        for (final byte[] urlhash: urlselection) {
+            fq.append(ASCII.String(urlhash)).append(',');
+        }
+        fq.setLength(fq.length() - 1);
+        return fq.toString();
+    }
+    
     private SolrQuery getBasicParams(final boolean getFacets, final List<String> fqs) {
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
@@ -776,6 +810,11 @@ public final class QueryParams {
             // set a most-recent ordering
             params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
             //params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc); // deprecated in Solr 4.2
+        }
+        
+        // restrict the search to the preselected urls
+        if (this.urlselection != null && !this.urlselection.isEmpty()) {
+            fqs.add(urlSelectionFilterQuery(this.urlselection));
         }
         
         // add site facets
