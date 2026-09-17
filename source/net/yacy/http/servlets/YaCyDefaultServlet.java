@@ -606,7 +606,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
 
         // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
-        response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=3600"); // seconds; 1h
 
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
@@ -1213,7 +1213,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
-            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=3600"); // seconds; 1h
         }
     }
 
