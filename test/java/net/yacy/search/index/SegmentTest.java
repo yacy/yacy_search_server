@@ -18,6 +18,7 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.TermSearch;
@@ -207,6 +208,32 @@ public class SegmentTest {
         assertEquals("posofphrase", 100, r.posofphrase());
         assertEquals("posinphrase", 5, r.posinphrase());
 
+    }
+
+    /**
+     * A term read restricted to a url selection returns only the selected urls
+     *
+     * @throws SpaceExceededException
+     * @throws MalformedURLException
+     * @throws IOException
+     */
+    @Test
+    public void testGet_UrlSelection() throws SpaceExceededException, MalformedURLException, IOException {
+        DigestURL selectedUrl = new DigestURL("http://test.org/selected.html");
+        DigestURL otherUrl = new DigestURL("http://test.org/other.html");
+        storeTestDocTextToTermIndex(selectedUrl, "shared word in the selected document");
+        storeTestDocTextToTermIndex(otherUrl, "shared word in the other document");
+        byte[] termHash = Word.word2hash("shared");
+
+        HandleSet urlselection = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 1);
+        urlselection.put(selectedUrl.hash());
+
+        ReferenceContainer<WordReference> unrestricted = index.termIndex.get(termHash, null);
+        assertEquals("references without a url selection", 2, unrestricted.size());
+
+        ReferenceContainer<WordReference> restricted = index.termIndex.get(termHash, urlselection);
+        assertEquals("references within the url selection", 1, restricted.size());
+        assertTrue("selected url in result set", restricted.has(selectedUrl.hash()));
     }
 
 }
