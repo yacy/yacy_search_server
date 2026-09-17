@@ -148,7 +148,7 @@ public final class SSTableHandleMap implements ImmutableHandleMap, Iterable<Map.
                 false, null, null, true, null, null);
     }
 
-    private SSTableHandleMap(final int keyLength, final ByteOrder ordering,
+    public SSTableHandleMap(final int keyLength, final ByteOrder ordering,
             final int valueLength, final File file, final boolean deleteOnClose) throws IOException {
         this(keyLength, ordering, valueLength, file,
                 deleteOnClose, null, null, true, null, null);
