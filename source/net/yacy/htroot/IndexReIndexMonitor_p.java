@@ -21,6 +21,7 @@ package net.yacy.htroot;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
@@ -220,7 +221,27 @@ public class IndexReIndexMonitor_p {
                     recrawlbt.terminate(false);
                     prop.put("recrawljobrunning", 0);
 					if (sb.tables != null) {
-						final Row recrawlCall = WorkTables.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
+						/* Find and clear the startup schedule for the recrawl job.
+						 * We cannot use selectLastExecutedApiCall() here because the stoprecrawl
+						 * POST parameters do not match the stored recrawlnow URL, so we scan the
+						 * API table for any row belonging to this servlet with event_action=startup. */
+						Row recrawlCall = null;
+						try {
+							final Iterator<Row> rowsIt = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+							while (rowsIt.hasNext()) {
+								final Row currentRow = rowsIt.next();
+								if (currentRow == null) continue;
+								final String rowUrl = UTF8.String(currentRow.get(WorkTables.TABLE_API_COL_URL, new byte[0]));
+								final String rowAction = currentRow.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "");
+								if (rowUrl.startsWith("/" + IndexReIndexMonitor_p.SERVLET_NAME)
+										&& "startup".equals(rowAction)) {
+									recrawlCall = currentRow;
+									/* continue to find the most recently executed one */
+								}
+							}
+						} catch (final IOException e) {
+							ConcurrentLog.logException(e);
+						}
 						if (recrawlCall != null) {
 							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
 							recrawlCall.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
