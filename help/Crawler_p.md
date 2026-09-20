@@ -40,6 +40,8 @@ Crawler pages separate three decisions: the source to load, the rules that decid
 
 Begin with the smallest crawl that proves the idea. Use exact start URLs, prefer restrictive boundaries, set limits for unfamiliar sites, and watch the queue after submission. A crawler is not a magic search box: it creates search results only after documents have been loaded, parsed, and indexed.
 
+Crawl profiles retain local start-host metadata to prioritize their connected web-structure graph during pruning. URL starts are recorded at submission; sitemap and file-import starts are recorded when accepted local depth-zero requests reach the crawl stacker. Descendant pages do not become additional roots. Up to 10,000 start hosts are recorded per profile. This metadata is not included in peer crawl-news announcements and requires no additional request parameter. See [Web Structure](WatchWebStructure_p.md) for retention limits.
+
 ## Access And Safety
 
 Administrator access is required. YaCy protects `_p` pages as administration pages.

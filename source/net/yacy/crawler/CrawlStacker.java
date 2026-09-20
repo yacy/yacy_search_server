@@ -396,6 +396,8 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             return error;
         }
 
+        if (local) this.crawler.recordStartURL(profile, entry);
+
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());

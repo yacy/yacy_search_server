@@ -672,7 +672,7 @@ public class Crawler_p {
 
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {
-                                final Map<String, String> m = new HashMap<>(profile); // must be cloned
+                                final Map<String, String> m = profile.copyForCrawlNews();
                                 m.remove("specificDepth");
                                 m.remove("indexText");
                                 m.remove("indexMedia");
