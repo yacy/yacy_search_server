@@ -703,7 +703,8 @@ public final class Switchboard extends serverSwitch {
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
         this.adminAuthenticationLastAccess = 0; // timestamp last admin authentication (as not autenticated here, stamp with 0)
         this.optimizeLastRun = System.currentTimeMillis();
-        this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
+        this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"),
+                () -> this.crawler.getActiveStartHosts());
 
         // configuring list path
         if ( !(this.listsPath.exists()) ) {
@@ -1522,7 +1523,8 @@ public final class Switchboard extends serverSwitch {
                     this.dhtDispatcher = (this.peers.sizeConnected() == 0) ? null : new Dispatcher(this, true, 10000);
 
                     // create new web structure
-                    this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
+                    this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"),
+                            () -> this.crawler.getActiveStartHosts());
 
                     // load domainList
                     try {
@@ -3574,6 +3576,7 @@ public final class Switchboard extends serverSwitch {
 
     public void stackURLs(final Collection<DigestURL> rootURLs, final CrawlProfile profile, final Set<DigestURL> successurls, final Map<DigestURL,String> failurls) {
         if (rootURLs == null || rootURLs.size() == 0) return;
+        profile.setStartURLs(rootURLs);
         if (rootURLs.size() == 1) {
             // for single stack requests, do not use the multithreading overhead;
             final DigestURL url = rootURLs.iterator().next();

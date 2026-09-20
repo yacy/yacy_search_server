@@ -30,10 +30,15 @@ package net.yacy.peers.graphics;
 import java.io.File;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -41,6 +46,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Supplier;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
@@ -83,6 +89,9 @@ public class WebStructureGraph {
 
     /** Eventual backup file */
     private final File structureFile;
+
+    /** Queried only when pruning, including initial loading, so profile changes take effect. */
+    private final Supplier<Set<String>> activeRootHosts;
     
     /** 
      * <p>Older structure entries (notably loaded from the backup file).</p>
@@ -97,6 +106,9 @@ public class WebStructureGraph {
      * "'b64hash(6)','hostname" to 'date-yyyymmdd(8)'{'target-b64hash(6)''target-count-hex(4)'}*</p> 
      *  */
     private final TreeMap<String, byte[]> structure_new;
+
+    /** Number of distinct keys across both maps; guarded by structure_new then structure_old. */
+    private int hostCount;
     
     /** Queue used to receive new entries to store */
     private final BlockingQueue<LearnObject> publicRefDNSResolvingQueue;
@@ -131,6 +143,11 @@ public class WebStructureGraph {
 	 *            backup file
 	 */
     public WebStructureGraph(final File structureFile) {
+        this(structureFile, Collections::emptySet);
+    }
+
+    public WebStructureGraph(final File structureFile, final Supplier<Set<String>> activeRootHosts) {
+        this.activeRootHosts = activeRootHosts;
         this.structure_old = new TreeMap<String, byte[]>();
         this.structure_new = new TreeMap<String, byte[]>();
         this.structureFile = structureFile;
@@ -150,26 +167,8 @@ public class WebStructureGraph {
         }
         this.structure_old.putAll(loadedStructureB);
         
-        // delete out-dated entries in case the structure is too big
-        if ( this.structure_old.size() > maxhosts ) {
-            // fill a set with last-modified - dates of the structure
-            final TreeSet<String> delset = new TreeSet<String>();
-            String key;
-            byte[] value;
-            for ( final Map.Entry<String, byte[]> entry : this.structure_old.entrySet() ) {
-                key = entry.getKey();
-                value = entry.getValue();
-                if ( value != null && value.length >= 8 ) {
-                    delset.add(UTF8.String(value).substring(0, 8) + key);
-                }
-            }
-            int delcount = this.structure_old.size() - (maxhosts * 9 / 10);
-            final Iterator<String> j = delset.iterator();
-            while ( (delcount > 0) && (j.hasNext()) ) {
-                this.structure_old.remove(j.next().substring(8));
-                delcount--;
-            }
-        }
+        this.hostCount = this.structure_old.size();
+        trimHosts();
 
         this.publicRefDNSResolvingWorker = new PublicRefDNSResolvingProcess();
         this.publicRefDNSResolvingWorker.start();
@@ -199,8 +198,13 @@ public class WebStructureGraph {
      * Clear the complete web structure.
      */
     public void clear() {
-        this.structure_old.clear();
-        this.structure_new.clear();
+        synchronized (this.structure_new) {
+            synchronized (this.structure_old) {
+                this.structure_old.clear();
+                this.structure_new.clear();
+                this.hostCount = 0;
+            }
+        }
     }
     
     public void generateCitationReference(final DigestURL url, final Document document) {
@@ -751,9 +755,7 @@ public class WebStructureGraph {
         	if (Switchboard.getSwitchboard() != null && Switchboard.getSwitchboard().shallTerminate()) break;
             if (!exists(domain)) {
                 // this must be recorded as an host with no references
-                synchronized ( this.structure_new ) {
-                    this.structure_new.put(domain + "," + u.getHost(), UTF8.getBytes(none2refstr()));
-                }
+                putNewHost(domain + "," + u.getHost(), UTF8.getBytes(none2refstr()));
             }
             c = 0;
             Integer existingCount = refs.get(domain);
@@ -789,9 +791,93 @@ public class WebStructureGraph {
         }
 
         // store the map back to the structure
-        synchronized ( this.structure_new ) {
-            this.structure_new.put(sourceHosthash + "," + url.getHost(), UTF8.getBytes(map2refstr(refs)));
+        putNewHost(sourceHosthash + "," + url.getHost(), UTF8.getBytes(map2refstr(refs)));
+        synchronized (this.structure_new) {
+            synchronized (this.structure_old) {
+                // Record the source's links before pruning their newly discovered target hosts.
+                trimHosts();
+            }
         }
+    }
+
+    private void putNewHost(final String key, final byte[] value) {
+        synchronized (this.structure_new) {
+            synchronized (this.structure_old) {
+                if (!this.structure_new.containsKey(key) && !this.structure_old.containsKey(key)) {
+                    this.hostCount++;
+                }
+                this.structure_new.put(key, value);
+            }
+        }
+    }
+
+    /** Called before the worker starts, or while holding both map locks. */
+    private void trimHosts() {
+        if (this.hostCount <= maxhosts) return;
+
+        // Recent entries override older dates for hosts present in both maps.
+        final Map<String, byte[]> hosts = new TreeMap<>(this.structure_old);
+        hosts.putAll(this.structure_new);
+        final Set<String> retained = connectedHosts(hosts, this.activeRootHosts.get());
+        final int targetSize = Math.max(maxhosts * 9 / 10, retained.size());
+        final TreeSet<String> oldest = new TreeSet<>();
+        for (final Map.Entry<String, byte[]> entry : hosts.entrySet()) {
+            final byte[] value = entry.getValue();
+            final String date = value == null || value.length < 8 ? "00000000" : UTF8.String(value).substring(0, 8);
+            oldest.add(date + entry.getKey());
+        }
+        // Leave headroom so sorting is amortized over many newly learned hosts.
+        final Iterator<String> i = oldest.iterator();
+        while (this.hostCount > targetSize && i.hasNext()) {
+            final String key = i.next().substring(8);
+            if (retained.contains(key)) continue;
+            this.structure_old.remove(key);
+            this.structure_new.remove(key);
+            this.hostCount--;
+        }
+    }
+
+    /** Keep roots and a breadth-first neighbourhood, so retained paths have their intermediate hosts. */
+    private Set<String> connectedHosts(final Map<String, byte[]> hosts, final Set<String> roots) {
+        final Set<String> retained = new LinkedHashSet<>();
+        if (roots.isEmpty()) return retained;
+        final Map<String, String> namesByHash = new HashMap<>();
+        final Map<String, List<String>> keysByName = new TreeMap<>();
+        for (final String key : hosts.keySet()) {
+            if (key.length() < 8) continue;
+            final String name = key.substring(7);
+            namesByHash.putIfAbsent(key.substring(0, 6), name);
+            keysByName.computeIfAbsent(name, ignored -> new ArrayList<>()).add(key);
+        }
+        final ArrayDeque<String> queue = new ArrayDeque<>();
+        for (final Map.Entry<String, List<String>> group : keysByName.entrySet()) {
+            final String name = group.getKey();
+            if (retained.size() + group.getValue().size() <= maxhosts && (roots.contains(name)
+                    || roots.contains("www." + name)
+                    || (name.startsWith("www.") && roots.contains(name.substring(4))))) {
+                retained.addAll(group.getValue());
+                queue.add(name);
+            }
+        }
+        final int budget = Math.max(maxhosts * 9 / 10, retained.size());
+        while (!queue.isEmpty() && retained.size() < budget) {
+            // The picture aggregates outgoing links over all protocol/port variants of a hostname.
+            for (final String key : keysByName.get(queue.remove())) {
+                for (final byte[] refs : new byte[][] {this.structure_new.get(key), this.structure_old.get(key)}) {
+                    if (refs == null) continue;
+                    for (int p = 8; p + 10 <= refs.length && retained.size() < budget; p += 10) {
+                        final String targetName = namesByHash.get(ASCII.String(refs, p, 6));
+                        final List<String> targetKeys = targetName == null ? null : keysByName.get(targetName);
+                        if (targetKeys != null && !retained.contains(targetKeys.get(0))
+                                && retained.size() + targetKeys.size() <= budget) {
+                            retained.addAll(targetKeys);
+                            queue.add(targetName);
+                        }
+                    }
+                }
+            }
+        }
+        return retained;
     }
 
     private static void joinStructure(final TreeMap<String, byte[]> into, final TreeMap<String, byte[]> from) {
@@ -818,8 +904,10 @@ public class WebStructureGraph {
      */
     public void joinOldNew() {
         synchronized ( this.structure_new ) {
-            joinStructure(this.structure_old, this.structure_new);
-            this.structure_new.clear();
+            synchronized (this.structure_old) {
+                joinStructure(this.structure_old, this.structure_new);
+                this.structure_new.clear();
+            }
         }
     }
 
@@ -910,7 +998,11 @@ public class WebStructureGraph {
          * </ul>
          */
         private StructureIterator(final boolean latest) {
-            this.i = ((latest) ? WebStructureGraph.this.structure_new : WebStructureGraph.this.structure_old).entrySet().iterator();
+            final TreeMap<String, byte[]> structure = latest ? WebStructureGraph.this.structure_new : WebStructureGraph.this.structure_old;
+            synchronized (structure) {
+                // Runtime eviction must not invalidate an iterator already serving a reader.
+                this.i = new TreeMap<>(structure).entrySet().iterator();
+            }
         }
 
         /**
@@ -1035,8 +1127,8 @@ public class WebStructureGraph {
         						+ (this.structure_old.size() * 1000 / t)
         						+ " entries/second");
         			}
-        			this.structure_old.clear();
         		}
+                clear();
         	}
         }
     }

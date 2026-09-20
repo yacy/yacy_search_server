@@ -482,6 +482,52 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return r;
     }
 
+    private static final String START_HOSTS = "startHosts";
+    private Set<String> recordedStartHosts;
+
+    /** Persist the actual start hosts, including profiles whose display name is abbreviated. */
+    public synchronized void setStartURLs(final Collection<? extends MultiProtocolURL> urls) {
+        this.recordedStartHosts = new LinkedHashSet<>();
+        for (final MultiProtocolURL url : urls) {
+            if (this.recordedStartHosts.size() >= net.yacy.peers.graphics.WebStructureGraph.maxhosts) break;
+            if (url.getHost() != null) this.recordedStartHosts.add(url.getHost().toLowerCase(Locale.ROOT));
+        }
+        this.put(START_HOSTS, String.join(",", this.recordedStartHosts));
+    }
+
+    /** Record streamed depth-zero starts once per host, with the same bound as the graph. */
+    public synchronized boolean recordStartURL(final MultiProtocolURL url, final int depth) {
+        if (depth != 0 || url.getHost() == null) return false;
+        if (this.recordedStartHosts == null) {
+            this.recordedStartHosts = new LinkedHashSet<>();
+            final String stored = this.get(START_HOSTS);
+            if (stored != null && !stored.isEmpty()) {
+                for (final String host : stored.split(",")) this.recordedStartHosts.add(host);
+            }
+        }
+        if (this.recordedStartHosts.size() >= net.yacy.peers.graphics.WebStructureGraph.maxhosts
+                || !this.recordedStartHosts.add(url.getHost().toLowerCase(Locale.ROOT))) return false;
+        this.put(START_HOSTS, String.join(",", this.recordedStartHosts));
+        return true;
+    }
+
+    /** Local retention metadata must not be included in peer crawl announcements. */
+    public Map<String, String> copyForCrawlNews() {
+        final Map<String, String> attributes = new HashMap<>(this);
+        attributes.remove(START_HOSTS);
+        return attributes;
+    }
+
+    /** Older profiles used comma-separated start hosts as their name. */
+    public Set<String> startHosts() {
+        final Set<String> hosts = new HashSet<>();
+        final String stored = this.get(START_HOSTS);
+        for (final String host : (stored == null ? name() : stored).split(",")) {
+            if (!host.trim().isEmpty()) hosts.add(host.trim().toLowerCase(Locale.ROOT));
+        }
+        return hosts;
+    }
+
     /**
      * create a name that takes the collection as name if this is not "user".
      * @return the name of the collection if that is not "user" or the name() otherwise;
