@@ -1,0 +1,7 @@
+# Wikitext rendering inside extract_wikipedia_dump_to_markdown.py.
+mwparserfromhell==0.7.2
+# Unicode word boundaries for markdown_to_term_frequency.py; retains Python 3.9 support.
+regex==2025.7.34
+# Parquet conversion; Arrow 21 is the last release supporting Python 3.9.
+pyarrow==21.0.0; python_version < "3.10"
+pyarrow==25.0.1; python_version >= "3.10"

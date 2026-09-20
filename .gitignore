@@ -37,3 +37,10 @@ yacy.log
 /lib
 vagrant_yacy/.vagrant/
 .gradle
+grafic_examples
+/ir/mediawiki/_dumps/
+/ir/mediawiki/__pycache__/
+/ir/mediawiki/test_*.py
+/ir/mediawiki/.venv/
+/ir/mediawiki/_markdown/
+/ir/mediawiki/_statistics/
