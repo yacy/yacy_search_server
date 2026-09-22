@@ -33,6 +33,22 @@
     		startRecordField.value = "0";
     	}
     }
+
+    /**
+    * Trigger one of the action controls below the recorded actions table
+    */
+    function triggerRecordedAction(actionId) {
+        document.getElementById(actionId).click();
+    }
+
+    /**
+    * Apply the selected age from the top controls before deleting old actions
+    */
+    function deleteOldRecordedActions() {
+        document.getElementById("deleteoldtime").value =
+            document.getElementById("deleteoldtime-top").value;
+        triggerRecordedAction("deleteold");
+    }
     </script>
     <script type="text/javascript" src="js/sorttable.js"></script>
   </head>
@@ -77,6 +93,22 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
 
       </span>
       <br/>
+      <div class="form-group col-sm-12">
+        <button type="button" class="btn btn-success" onclick="triggerRecordedAction('execrows')">Execute Selected Actions</button>&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-danger" onclick="triggerRecordedAction('deleterows')">Delete Selected Actions</button>&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-warning" onclick="deleteOldRecordedActions()">Delete all Actions which had been created before </button>
+        <select id="deleteoldtime-top" class="form-control selectWidth input-sm" style="width:auto; display:inline-block;">
+          <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
+          <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
+          <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
+          <option value="30">1 month</option><option value="60" selected="selected">2 months</option><option value="90">3 months</option>
+          <option value="180">6 months</option><option value="270">9 months</option>
+          <option value="365">1 year</option><option value="730">2 years</option>
+        </select>
+        #(hasEditableNextExecDate)#::
+        <button type="button" class="btn btn-default" onclick="triggerRecordedAction('submitNextExecDates')">Apply edited next execution dates</button>
+        #(/hasEditableNextExecDate)#
+      </div>
       <div style="clear:both;">
       <table style="border:0px; padding:2px; border-spacing:1px" role="grid">
         <tr class="TableHeader" valign="bottom">
@@ -235,12 +267,12 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       <input type="hidden" name="current_pk" id="current_pk" value="" />
       <input type="hidden" name="num" value="#[num]#" />
       <div class="form-group col-sm-12">
-        <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
-        <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" id="execrows" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" id="deleterows" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
       </div>
       <div class="form-group col-sm-6">
-        <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
-        <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
+        <input type="submit" id="deleteold" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
+        <select id="deleteoldtime" name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
           <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
           <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
           <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
@@ -251,7 +283,7 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       </div>
       #(hasEditableNextExecDate)#::
       <div class="form-group col-sm-6">
- 		<input type="submit" name="submitNextExecDates" class="btn btn-default" value="Apply edited next execution dates"/>
+        <input type="submit" id="submitNextExecDates" name="submitNextExecDates" class="btn btn-default" value="Apply edited next execution dates"/>
       </div>
       #(/hasEditableNextExecDate)#
       
