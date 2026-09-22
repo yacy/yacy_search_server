@@ -35,6 +35,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -605,6 +607,52 @@ public class Blacklist {
             return temp;
         }
         return true;
+    }
+
+    /**
+     * Return all currently loaded host/path rules matching a URL, in sorted order.
+     * This exhaustive diagnostic is for administrator tools, not crawl/search hot paths.
+     * Unlike isListed(), it neither reads nor updates the positive URL hash cache.
+     * Rules are returned in their loaded, normalized form without source-file provenance.
+     *
+     * @param blacklistType purpose whose active rules should be inspected
+     * @param url URL to test
+     * @return distinct matching rules, or an empty set for a hostless URL
+     */
+    public final Set<String> getMatchingRules(final BlacklistType blacklistType, final DigestURL url) {
+        if (url == null) {
+            throw new IllegalArgumentException("url may not be null");
+        }
+        if (url.getHost() == null) {
+            return Collections.emptySet();
+        }
+        return getMatchingRules(url.getHost().toLowerCase(Locale.ROOT), url.getFile(),
+                getBlacklistMap(blacklistType, true), getBlacklistMap(blacklistType, false));
+    }
+
+    protected static Set<String> getMatchingRules(final String hostlow, final String path,
+            final Map<String, Set<Pattern>> matchable, final Map<String, Set<Pattern>> regex) {
+        final Set<String> matches = new TreeSet<>();
+        collectMatchingRules(hostlow, path, matchable, true, matches);
+        collectMatchingRules(hostlow, path, regex, false, matches);
+        return matches;
+    }
+
+    private static void collectMatchingRules(final String hostlow, final String path,
+            final Map<String, Set<Pattern>> rules, final boolean matchable, final Set<String> matches) {
+        final String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+        final Map<String, Set<Pattern>> empty = Collections.emptyMap();
+        for (final Entry<String, Set<Pattern>> entry : rules.entrySet()) {
+            final Map<String, Set<Pattern>> candidate = Collections.singletonMap(entry.getKey(), entry.getValue());
+            // Delegate host/wildcard/regex semantics to the actual engine, not a full-URL regex.
+            if (isListed(hostlow, path, matchable ? candidate : empty, matchable ? empty : candidate)) {
+                for (final Pattern pattern : entry.getValue().toArray(new Pattern[0])) {
+                    if (pattern.matcher(normalizedPath).matches()) {
+                        matches.add(entry.getKey() + "/" + pattern.pattern());
+                    }
+                }
+            }
+        }
     }
 
     private static final Pattern m1 = Pattern.compile("^[a-z0-9.-]*$");       // simple Domain (yacy.net or www.yacy.net)

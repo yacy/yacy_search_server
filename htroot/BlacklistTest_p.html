@@ -3,6 +3,27 @@
   <head>
     <title>YaCy '#[clientname]#': Blacklist Test</title>
     #%env/templates/metas.template%#
+    <style type="text/css">
+      .blacklistMatches { width: 100%; table-layout: fixed; }
+      .blacklistMatches th:first-child { width: 40%; }
+      .blacklistMatches th:last-child { width: 110px; }
+      .blacklistMatches td { overflow-wrap: anywhere; }
+      .blacklistMatches code { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+      .blacklistMatches form { display: inline-block; margin: 0 4px 4px 0; }
+      .blacklistMatches .btn { width: 38px; height: 34px; }
+      #blacklistTest input[name="testurl"] { max-width: 100%; }
+      #blacklistConfirmation code { white-space: pre-wrap; overflow-wrap: anywhere; }
+      @media (max-width: 600px) {
+        .blacklistMatches, .blacklistMatches tbody, .blacklistMatches tr { display: block; }
+        .blacklistMatches thead { display: none; }
+        .blacklistMatches tr { border-bottom: 1px solid #ddd; padding: 6px 0; }
+        .blacklistMatches td { display: grid; grid-template-columns: 76px minmax(0, 1fr); border: 0 !important; }
+        .blacklistMatches td::before { content: attr(data-label); font-weight: bold; }
+        .blacklistMatches td:last-child { display: flex; align-items: center; }
+        .blacklistMatches td:last-child::before { width: 76px; flex-shrink: 0; }
+      }
+    </style>
+    <script src="js/BlacklistTest.js" type="text/javascript"></script>
   </head>
   <body id="Blacklist">
     #%env/templates/header.template%#
@@ -11,11 +32,33 @@
     <h2>Blacklist Test</h2>
     <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
     <!-- blacklist selection -->
-    <form action="BlacklistTest_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="blacklistTest" action="BlacklistTest_p.html" method="get" accept-charset="UTF-8" data-retest="#[retest]#">
       <fieldset>
         <legend>Test list:</legend>
         <input type="text" name="testurl" size="50" value="#[url]#" />
         <input type="submit" name="testList" class="btn btn-primary" value="Test" />
+      </fieldset>
+    </form>
+    #(actionerror)#::<p class="alert alert-danger">#[message]#</p>#(/actionerror)#
+    #(confirmation)#::
+    <div id="blacklistConfirmation" class="alert alert-warning" role="alert">
+      <h3>Delete this blacklist entry?</h3>
+      <p>Delete <code>#[entry]#</code> from <strong>#[filename]#</strong>?</p>
+      <p>This removes this exact entry (including identical copies) from this file only. Other rules or files may still block the URL.</p>
+      <form action="BlacklistTest_p.html" method="post" accept-charset="UTF-8">
+        <input type="hidden" name="testList" value="Test" />
+        <input type="hidden" name="testurl" value="#[url]#" />
+        <input type="hidden" name="filename" value="#[filename]#" />
+        <input type="hidden" name="entry" value="#[entry]#" />
+        <input type="hidden" name="revision" value="#[revision]#" />
+        <input type="hidden" name="transactionToken" value="#[token]#" />
+        <label><input type="checkbox" name="consent" value="delete" required="required" /> I confirm deletion from this blacklist.</label>
+        <br />
+        <button type="submit" class="btn btn-danger" name="ruleAction" value="confirmDelete" title="Permanently remove this entry from the named file, reload blacklists and test the URL again.">Delete entry</button>
+        <a class="btn btn-default" href="#[retest]#" title="Return to the test without deleting anything.">Cancel</a>
+      </form>
+    </div>
+    #(/confirmation)#
         
         #(testlist)#::
           <br /><br />
@@ -30,13 +73,53 @@
               #(listedinsearch)#::<li>Search</li>#(/listedinsearch)#
               #(listedinsurftips)#::<li>Surftips</li>#(/listedinsurftips)#
             </ul>
+            #(matchdetails)#
+              <p>No matching active rules.</p>
+            ::
+              <h3>Matching rule entries (#[count]#)</h3>
+              <table class="table table-striped blacklistMatches">
+                <thead>
+                  <tr>
+                    <th scope="col" title="Matching active host/path pattern in the form loaded by YaCy, after normalization.">Rule</th>
+                    <th scope="col" title="The active blacklist file containing this entry. Copies in different files are listed separately.">Blacklist</th>
+                    <th scope="col" title="Blacklist purposes for which this rule matches the tested URL.">Used for</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  #{rows}#
+                  <tr><td data-label="Rule"><code>#[rule]#</code></td><td data-label="Blacklist">#[filename]#</td><td data-label="Used for">#[types]#</td><td data-label="Actions">
+                    #(actions)#<span title="No editable host/path source entry is available. Inspect the blacklist in the main editor.">Unavailable</span>::
+                    <form action="Blacklist_p.html" method="post" target="_blank" rel="noopener" class="blacklistEdit" accept-charset="UTF-8">
+                      <input type="hidden" name="action" value="editBlacklistEntry" />
+                      <input type="hidden" name="currentBlacklist" value="#[filename]#" />
+                      <input type="hidden" name="selectedEntry.0" value="#[entry]#" />
+                      <button type="submit" class="btn btn-default" title="Edit this entry in its blacklist using YaCy's editor in a new tab or window." aria-label="Edit entry"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>
+                    </form>
+                    <form action="BlacklistTest_p.html" method="post" accept-charset="UTF-8">
+                      <input type="hidden" name="testList" value="Test" />
+                      <input type="hidden" name="testurl" value="#[url]#" />
+                      <input type="hidden" name="filename" value="#[filename]#" />
+                      <input type="hidden" name="entry" value="#[entry]#" />
+                      <input type="hidden" name="revision" value="#[revision]#" />
+                      <input type="hidden" name="transactionToken" value="#[token]#" />
+                      <button type="submit" class="btn btn-default" name="ruleAction" value="prepareDelete" title="Review and confirm deletion of this entry from this blacklist." aria-label="Delete entry"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                    </form>
+                    #(/actions)#
+                  </td></tr>
+                  #{/rows}#
+                </tbody>
+              </table>
+            #(/matchdetails)#
+            #(sourcewarning)#::<p class="alert alert-warning">Some active blacklist files could not be read. Source attribution may be incomplete.</p>#(/sourcewarning)#
+            #(cachedonly)#::
+              <p class="alert alert-warning">The block for #[types]# is cached; no current rule matched.</p>
+            #(/cachedonly)#
           </div>
           ::
           <br /><br />
           <div>The tested URL was not valid.</div>
         #(/testlist)#
-      </fieldset>
-    </form>
     #%env/templates/footer.template%#
   </body>
 </html>
