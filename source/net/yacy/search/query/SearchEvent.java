@@ -625,7 +625,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                         .query(
                                 SearchEvent.this.query.getQueryGoal().getIncludeHashes(),
                                 SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
-                                null,
+                                SearchEvent.this.query.getUrlSelection(),
                                 Segment.wordReferenceFactory,
                                 SearchEvent.this.query.maxDistance);
                 SearchEvent.this.localSearchInclusion = search.inclusion();
@@ -651,7 +651,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                                 .query(
                                         QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),
                                         SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
-                                        null,
+                                        SearchEvent.this.query.getUrlSelection(),
                                         Segment.wordReferenceFactory,
                                         SearchEvent.this.query.maxDistance);
                         SearchEvent.this.localSearchInclusion = search.inclusion();

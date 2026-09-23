@@ -351,10 +351,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     @Override
     public ReferenceContainer<ReferenceType> get(final byte[] termHash, final HandleSet urlselection) throws IOException {
-        final ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
+        final ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, urlselection);
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
+            if (c1 != null && urlselection != null) c1 = selectEntries(c1, urlselection);
         } catch (final SpaceExceededException e2) {
             ConcurrentLog.logException(e2);
         }
@@ -383,6 +384,24 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             if (s != null) result.removeEntries(s);
         }
         return result;
+    }
+
+    /**
+     * keep only the references whose url hash is in the url selection
+     * @param container a container loaded from the BLOB files
+     * @param urlselection the url hashes that a search is restricted to
+     * @return a new container with the selected references
+     * @throws SpaceExceededException
+     */
+    private ReferenceContainer<ReferenceType> selectEntries(final ReferenceContainer<ReferenceType> container, final HandleSet urlselection) throws SpaceExceededException {
+        final ReferenceContainer<ReferenceType> selection = new ReferenceContainer<ReferenceType>(this.factory, container.getTermHash(), Math.min(container.size(), urlselection.size()));
+        final Iterator<ReferenceType> i = container.entries();
+        ReferenceType entry;
+        while (i.hasNext()) {
+            entry = i.next();
+            if (urlselection.has(entry.urlhash())) selection.add(entry);
+        }
+        return selection;
     }
 
     /**

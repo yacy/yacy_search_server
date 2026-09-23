@@ -22,15 +22,28 @@
 
 package net.yacy.search.query;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.RowHandleSet;
+import net.yacy.search.index.Segment;
+import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.schema.CollectionConfiguration;
 
 /**
  * Unit tests for the {@link QueryParams} class.
@@ -237,6 +250,88 @@ public class QueryParamsTest {
 		Assert.assertEquals(QueryParams.catchall_pattern.toString(), filter);
 	}
 	
+	private Segment indexSegment;
+
+	@After
+	public void tearDown() {
+		if (this.indexSegment != null) {
+			this.indexSegment.close();
+			this.indexSegment = null;
+		}
+		ConcurrentLog.shutdown();
+	}
+
+	/**
+	 * Test that a query restricted to a selection of urls asks Solr only for these urls.
+	 * @throws IOException when the test index segment can not be opened. Should not happen.
+	 */
+	@Test
+	public void testSolrQueryUrlSelection() throws IOException {
+		final HandleSet urlselection = QueryParams.hashes2Set("Yqtkj91wswVc");
+
+		final String[] filterQueries = solrQueryFilterQueriesFor(urlselection);
+
+		Assert.assertTrue("the url selection should be a filter query",
+				containsFilterQuery(filterQueries, "{!terms f=id}Yqtkj91wswVc"));
+	}
+
+	/**
+	 * Test that a query without a url selection asks Solr for any url.
+	 * @throws IOException when the test index segment can not be opened. Should not happen.
+	 */
+	@Test
+	public void testSolrQueryWithoutUrlSelection() throws IOException {
+		final String[] filterQueries = solrQueryFilterQueriesFor(
+				new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0));
+
+		for (final String filterQuery : filterQueries) {
+			Assert.assertFalse("no filter query should name an url : " + filterQuery,
+					filterQuery.contains("{!terms f=id}"));
+		}
+	}
+
+	/**
+	 * @param urlselection the url hashes the query is restricted to
+	 * @return the filter queries of the Solr query built for this selection
+	 * @throws IOException when the test index segment can not be opened
+	 */
+	private String[] solrQueryFilterQueriesFor(final HandleSet urlselection) throws IOException {
+		final QueryParams query = queryOnTestIndex();
+		query.setUrlSelection(urlselection);
+
+		final String[] filterQueries = query.solrQuery(ContentDomain.TEXT, false, false, false).getFilterQueries();
+		return filterQueries == null ? new String[0] : filterQueries;
+	}
+
+	/**
+	 * @param filterQueries the filter queries of a Solr query
+	 * @param expected the filter query to look for
+	 * @return true when one of the filter queries is the expected one
+	 */
+	private static boolean containsFilterQuery(final String[] filterQueries, final String expected) {
+		for (final String filterQuery : filterQueries) {
+			if (expected.equals(filterQuery)) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @return a text query on a test index segment
+	 * @throws IOException when the test index segment can not be opened
+	 */
+	private QueryParams queryOnTestIndex() throws IOException {
+		this.indexSegment = new Segment(new ConcurrentLog("QueryParamsTest"),
+				new File("test/DATA/INDEX/webportal/SEGMENTS"),
+				new File("test/DATA/INDEX/webportal/ARCHIVE"),
+				new CollectionConfiguration(new File("defaults/solr.collection.schema"), true), null);
+
+		final QueryGoal queryGoal = new QueryGoal("test");
+		return new QueryParams(queryGoal, new QueryModifier(0), Integer.MAX_VALUE, "", ContentDomain.TEXT, "en", 0,
+				new HashSet<Tagging.Metatag>(), null, 10, 0, ".*", null, null, QueryParams.Searchdom.LOCAL, null, false,
+				null, MultiProtocolURL.TLD_any_zone_filter, "localhost", false, this.indexSegment,
+				new RankingProfile(ContentDomain.TEXT), "", 0.0d, 0.0d, 0.0d, new HashSet<String>());
+	}
+
 	/**
 	 * Test removal of old modifier(s) when building a search navigation URL.
 	 */
