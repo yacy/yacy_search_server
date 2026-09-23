@@ -26,19 +26,29 @@
 package net.yacy.search.query;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.io.input.BoundedInputStream;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.WordCache;
@@ -51,6 +61,10 @@ public class AccessTracker {
 
     private final static long DUMP_PERIOD = 3600000L;
     private final static int DUMP_SIZE = 50000;
+
+    private static final Pattern DUMP_RECORD = Pattern.compile("([0-9]{14}) ([0-9]{1,5}) (.*)", Pattern.DOTALL);
+    private static final DateTimeFormatter DUMP_TIMESTAMP = DateTimeFormatter
+            .ofPattern("uuuuMMddHHmmss", Locale.ROOT).withResolverStyle(ResolverStyle.STRICT);
 
     private static final int minSize = 100;
     private static final int maxSize = 1000;
@@ -179,7 +193,8 @@ public class AccessTracker {
         sb.append(' ');
         sb.append(querySyntax);
         sb.append(' ');
-        sb.append(querystring);
+        // A query may contain line breaks, but each persisted record must occupy one line.
+        sb.append(querystring.replace("\r\n", " ").replace('\r', ' ').replace('\n', ' '));
         synchronized (log) {
             log.add(sb.toString());
         }
@@ -240,74 +255,87 @@ public class AccessTracker {
      * @return a list of lines within the given dates
      */
     public static List<EventTracker.Event> readLog(File f, Date from, Date to) {
-        List<EventTracker.Event> events = new ArrayList<>();
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(f, "r");
-            Date fd = readDate(raf, 0);
-            if (fd.after(from)) from = fd;
-            long seekFrom = binarySearch(raf, from, 0, raf.length());
-            long seekTo = binarySearch(raf, to, seekFrom, raf.length());
-            //Date eDate = readDate(raf, seekTo);
-            //if (eDate.before(to)) seekTo = raf.length();
+        final List<EventTracker.Event> events = new ArrayList<>();
+        if (!from.before(to)) return events;
+        try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
+            final long length = raf.length();
+            final long seekFrom = binarySearch(raf, from, 0, length);
+            final long seekTo = binarySearch(raf, to, seekFrom, length);
             raf.seek(seekFrom);
-            byte[] buffer = new byte[(int) (seekTo - seekFrom)];
-            raf.readFully(buffer); // we make a copy because that dramatically speeds up reading lines; RandomAccessFile.readLine is very slow
-            raf.close();
-            ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(bais, StandardCharsets.UTF_8));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // parse the line
-                if (line.length() < GenericFormatter.PATTERN_SHORT_SECOND.length() + 3 ||
-                    line.charAt(GenericFormatter.PATTERN_SHORT_SECOND.length()) != ' ') continue;
-                String dateStr = line.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length());
-                int countEnd = -1;
-                for (int i = GenericFormatter.PATTERN_SHORT_SECOND.length() + 2; i < line.length(); i++) {
-                    if (line.charAt(i) == ' ') { countEnd = i; break; }
-                }
-                if (countEnd == -1) continue;
-                String countStr = line.substring(GenericFormatter.PATTERN_SHORT_SECOND.length() + 1, countEnd);
-                if (countStr.length() > 5) continue;
-                int hits = countStr.length() == 1 ? (countStr.charAt(0)) - 48 : Integer.parseInt(countStr);
-                EventTracker.Event event;
-                try {
-                    event = new EventTracker.Event(dateStr, 0, "query", line.substring(dateStr.length() + countStr.length() + 2), hits);
-                    events.add(event);
-                } catch (NumberFormatException e) {
-                    continue;
-                } catch (Throwable e) {
-                    continue;
+            // Buffer the selected byte range without copying the entire range into a byte array.
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    BoundedInputStream.builder().setInputStream(new FileInputStream(raf.getFD()))
+                            .setMaxCount(seekTo - seekFrom).get(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    final EventTracker.Event event = parseLogRecord(line);
+                    if (event != null && event.getTime() >= from.getTime() && event.getTime() < to.getTime()) {
+                        events.add(event);
+                    }
                 }
             }
-            reader.close();
-            bais.close();
-            buffer = null;
         } catch (final FileNotFoundException e) {
             ConcurrentLog.logException(e);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } finally {
-            if (raf != null) try {raf.close();} catch (final IOException e) {}
         }
         return events;
     }
 
+    private static EventTracker.Event parseLogRecord(final String line) {
+        final Matcher record = DUMP_RECORD.matcher(line);
+        if (!record.matches()) return null;
+        try {
+            final long time = LocalDateTime.parse(record.group(1), DUMP_TIMESTAMP)
+                    .toInstant(ZoneOffset.UTC).toEpochMilli();
+            final int hits = Integer.parseInt(record.group(2));
+            return new EventTracker.Event(Long.valueOf(time), 0, "query", record.group(3), hits);
+        } catch (final DateTimeParseException | NumberFormatException e) {
+            return null;
+        }
+    }
+
     /**
-     * recursively search for a the smallest date which is equal or greater than the given date
+     * Find the first valid record at or after the given date in a chronological log.
+     * Malformed physical lines are ignored, including legacy multiline query continuations.
      * @param raf the random access file
      * @param date the given date
      * @param l first seek position to look (included, we expect a date there or after the position l)
      * @param r last seek position to look (excluded, we do not expect that there is a date)
-     * @return the first position where a date appears that is equal or greater than the given one
+     * @return the first matching record position, or the original right boundary when none exists
      */
     private static long binarySearch(RandomAccessFile raf, Date date, long l, long r) throws IOException {
-        if (r <= l) return l;
-        long m = seekLB(raf, (l + r) / 2);
-        if (m <= l) return m;
-        Date mDate = readDate(raf, m);
-        if (mDate.after(date)) return binarySearch(raf, date, l, m);
-        return binarySearch(raf, date, m, r);
+        final long end = r;
+        while (l < r) {
+            final long middle = l + (r - l) / 2;
+            long start = seekLB(raf, middle);
+            raf.seek(start);
+            EventTracker.Event event = null;
+            while (start < r) {
+                final String line = raf.readLine();
+                if (line == null) break;
+                event = parseLogRecord(line);
+                if (event != null) break;
+                start = raf.getFilePointer();
+            }
+            if (event == null) {
+                r = middle;
+            } else if (event.getTime() < date.getTime()) {
+                l = raf.getFilePointer();
+            } else {
+                r = start;
+            }
+        }
+        // The converged boundary may precede malformed lines; return a complete valid record.
+        raf.seek(l);
+        while (l < end) {
+            final String line = raf.readLine();
+            if (line == null) break;
+            final EventTracker.Event event = parseLogRecord(line);
+            if (event != null && event.getTime() >= date.getTime()) return l;
+            l = raf.getFilePointer();
+        }
+        return end;
     }
     
     /**
@@ -318,30 +346,17 @@ public class AccessTracker {
      * @throws IOException
      */
     private static long seekLB(RandomAccessFile raf, long x) throws IOException {
-        if (x <= 0) return x;
-        raf.seek(x);
-        while (x > 0 && raf.read() >= 32) {x--; raf.seek(x);}
-        if (x == 0) return 0;
-        raf.seek(x);
-        return raf.read() >= 32 ? x : x + 1;
-    }
-    
-    /**
-     * read a date at the seek position; the seek position must be exactly at the date start
-     * @param raf the random access file
-     * @param x the seek position of the date string start position
-     * @return the date at position x
-     * @throws IOException
-     */
-    private static Date readDate(RandomAccessFile raf, long x) throws IOException {
-        raf.seek(x);
-        byte[] b = new byte[GenericFormatter.PATTERN_SHORT_SECOND.length()];
-        raf.readFully(b);
-        try {
-            return GenericFormatter.SHORT_SECOND_FORMATTER.parse(UTF8.String(b), 0).getTime();
-        } catch (ParseException e) {
-            throw new IOException(e.getMessage());
+        while (x > 0) {
+            raf.seek(x - 1);
+            final int previous = raf.read();
+            if (previous == '\n') break;
+            if (previous == '\r') {
+                if (raf.read() == '\n') x++;
+                break;
+            }
+            x--;
         }
+        return x;
     }
     
     public static void main(String[] args) {
