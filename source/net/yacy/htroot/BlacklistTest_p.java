@@ -32,18 +32,33 @@
 package net.yacy.htroot;
 
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.ListManager;
+import net.yacy.data.TransactionManager;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.repository.BlacklistDiagnostics;
+import net.yacy.repository.BlacklistDiagnostics.Match;
+import net.yacy.repository.BlacklistFile;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class BlacklistTest_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
         prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
@@ -64,34 +79,68 @@ public class BlacklistTest_p {
             	testurl = null;
             }
             if(testurl != null) {
-                prop.putHTML("url",testurl.toNormalform(false));
-                prop.putHTML("testlist_url",testurl.toNormalform(false));
+                final String normalUrl = testurl.toNormalform(false);
+                prop.putUrlEncodedHTML("url", normalUrl);
+                prop.putUrlEncodedHTML("testlist_url", normalUrl);
+                final String retest = "BlacklistTest_p.html?testList=Test&testurl="
+                        + URLEncoder.encode(normalUrl, StandardCharsets.UTF_8);
+                prop.putUrlEncodedHTML("retest", retest);
                 boolean isblocked = false;
-
-                if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl)) {
-                    prop.put("testlist_listedincrawler", "1");
-                    isblocked = true;
+                final Map<String, Set<BlacklistType>> matchingRules = new TreeMap<>();
+                final Map<BlacklistType, Set<String>> activeFiles = new EnumMap<>(BlacklistType.class);
+                final Set<String> cachedOnly = new TreeSet<>();
+                for (final BlacklistType type : BlacklistType.values()) {
+                    final boolean listed = Switchboard.urlBlacklist.isListed(type, testurl);
+                    final Set<String> rules = Switchboard.urlBlacklist.getMatchingRules(type, testurl);
+                    final String purpose = purpose(type);
+                    activeFiles.put(type, new BlacklistFile(env.getConfig(type + ".BlackLists",
+                            env.getConfig("BlackLists.DefaultList", "url.default.black")), type).getFileNamesUnified());
+                    if (listed) {
+                        prop.put("testlist_listedin" + type.toString(), "1");
+                        isblocked = true;
+                        if (rules.isEmpty()) {
+                            cachedOnly.add(purpose);
+                        }
+                    }
+                    for (final String rule : rules) {
+                        matchingRules.computeIfAbsent(rule, key -> EnumSet.noneOf(BlacklistType.class)).add(type);
+                    }
                 }
-                if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl)) {
-                    prop.put("testlist_listedindht", "1");
-                    isblocked = true;
+                final BlacklistDiagnostics.Report report = BlacklistDiagnostics.findSources(
+                        ListManager.listsPath, activeFiles, matchingRules);
+                final String token = TransactionManager.getTransactionToken(header);
+                prop.put("token", token);
+                putMatchingRules(prop, report, normalUrl, token);
+                if (post.containsKey("ruleAction")) {
+                    try {
+                        if (!(env instanceof Switchboard) || !((Switchboard) env).verifyAuthentication(header)) {
+                            prop.authenticationRequired();
+                            return prop;
+                        }
+                        requirePost(header.getMethod(), post.get(TransactionManager.TRANSACTION_TOKEN_PARAM, ""), token);
+                        TransactionManager.checkPostTransaction(header, post);
+                        final Match selected = BlacklistDiagnostics.requireMatch(report, post.get("filename", ""),
+                                post.get("entry", ""), post.get("revision", ""));
+                        final String action = post.get("ruleAction", "");
+                        if ("prepareDelete".equals(action)) {
+                            putConfirmation(prop, selected, normalUrl, token, retest);
+                        } else if ("confirmDelete".equals(action)) {
+                            requireConfirmation(post.get("consent", ""));
+                            BlacklistDiagnostics.deleteEntry(ListManager.listsPath, selected);
+                            Switchboard.urlBlacklist.clear();
+                            ListManager.reloadBlacklists();
+                            prop.put(serverObjects.ACTION_LOCATION, retest);
+                            return prop;
+                        } else {
+                            throw new IllegalArgumentException("Unknown blacklist action.");
+                        }
+                    } catch (final IllegalArgumentException | IOException e) {
+                        prop.put("actionerror", 1);
+                        prop.putHTML("actionerror_message", e.getMessage());
+                    }
                 }
-                if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl)) {
-                    prop.put("testlist_listedinnews", "1");
-                    isblocked = true;
-                }
-                if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl)) {
-                    prop.put("testlist_listedinproxy", "1");
-                    isblocked = true;
-                }
-                if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl)) {
-                    prop.put("testlist_listedinsearch", "1");
-                    isblocked = true;
-                }
-                if (Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl)) {
-                    prop.put("testlist_listedinsurftips", "1");
-                    isblocked = true;
-                }
+                prop.put("testlist_cachedonly", cachedOnly.isEmpty() ? 0 : 1);
+                prop.putHTML("testlist_cachedonly_types", String.join(", ", cachedOnly));
 
                 if (!isblocked) {
                     prop.put("testlist_isnotblocked", "1");
@@ -105,6 +154,62 @@ public class BlacklistTest_p {
             prop.putHTML("url", "http://");
         }
         return prop;
+    }
+
+    static String purpose(final BlacklistType type) {
+        return type == BlacklistType.CRAWLER ? "Crawling" : type == BlacklistType.DHT ? "DHT"
+                : type.name().charAt(0) + type.toString().substring(1);
+    }
+
+    static void putMatchingRules(final serverObjects prop, final BlacklistDiagnostics.Report report) {
+        putMatchingRules(prop, report, "", "");
+    }
+
+    static void requirePost(final String method, final String provided, final String expected) {
+        if (!"POST".equals(method) || expected.isEmpty() || !MessageDigest.isEqual(
+                expected.getBytes(StandardCharsets.UTF_8), provided.getBytes(StandardCharsets.UTF_8))) {
+            throw new IllegalArgumentException("Invalid action request. Test the URL again before deleting.");
+        }
+    }
+
+    static void requireConfirmation(final String consent) {
+        if (!"delete".equals(consent)) throw new IllegalArgumentException("Confirm the deletion checkbox first.");
+    }
+
+    static void putConfirmation(final serverObjects prop, final Match selected, final String url,
+            final String token, final String retest) {
+        prop.put("confirmation", 1);
+        putSelection(prop, "confirmation_", selected, url, token);
+        prop.putUrlEncodedHTML("confirmation_retest", retest);
+    }
+
+    private static void putSelection(final serverObjects prop, final String prefix, final Match selected,
+            final String url, final String token) {
+        prop.putUrlEncodedHTML(prefix + "filename", selected.filename);
+        prop.putUrlEncodedHTML(prefix + "entry", selected.entry);
+        prop.put(prefix + "revision", selected.revision);
+        prop.putUrlEncodedHTML(prefix + "url", url);
+        prop.put(prefix + "token", token);
+    }
+
+    static void putMatchingRules(final serverObjects prop, final BlacklistDiagnostics.Report report,
+            final String url, final String token) {
+        prop.put("testlist_matchdetails", report.matches.isEmpty() ? 0 : 1);
+        prop.put("testlist_matchdetails_count", report.matches.size());
+        prop.put("testlist_sourcewarning", report.unavailableFiles.isEmpty() ? 0 : 1);
+        int row = 0;
+        for (final Match entry : report.matches) {
+            final String prefix = "testlist_matchdetails_rows_" + row + "_";
+            prop.putUrlEncodedHTML(prefix + "rule", entry.rule);
+            prop.putUrlEncodedHTML(prefix + "filename", entry.filename.isEmpty() ? "Source unavailable" : entry.filename);
+            final Set<String> purposes = new TreeSet<>();
+            for (final BlacklistType type : entry.types) purposes.add(purpose(type));
+            prop.putHTML(prefix + "types", String.join(", ", purposes));
+            prop.put(prefix + "actions", entry.editable() ? 1 : 0);
+            putSelection(prop, prefix + "actions_", entry, url, token);
+            row++;
+        }
+        prop.put("testlist_matchdetails_rows", row);
     }
 
 }
