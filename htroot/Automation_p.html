@@ -78,6 +78,30 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       </span>
       <br/>
       <div style="clear:both;">
+      <!-- Duplicate of the action controls further below the table (#803): on
+           installations with a large number of recorded actions, requiring a
+           scroll to the bottom for every action was a real usability problem.
+           "execrows" / "deleterows" / "deleteold" are plain duplicate submit
+           buttons, same as "submitNextExecDates" already is in the table
+           header below - only one button's name/value is ever sent regardless
+           of which is clicked, so no server-side change is needed for those.
+           "deleteoldtime" cannot be duplicated the same way (a second
+           same-name <select> would submit two values for one field), so the
+           top copy is unnamed and its onchange mirrors the chosen value into
+           the real #deleteoldtime select instead. -->
+      <div class="form-group col-sm-12">
+        <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success btn-sm"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger btn-sm" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning btn-sm" onclick="return confirm('Confirm Deletion')"/>
+        <select id="deleteoldtime_top" class="form-control selectWidth input-sm" style="width:auto;display:inline-block;" onchange="document.getElementById('deleteoldtime').value=this.value;">
+          <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
+          <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
+          <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
+          <option value="30">1 month</option><option value="60" selected="selected">2 months</option><option value="90">3 months</option>
+          <option value="180">6 months</option><option value="270">9 months</option>
+          <option value="365">1 year</option><option value="730">2 years</option>
+        </select>
+      </div>
       <table style="border:0px; padding:2px; border-spacing:1px" role="grid">
         <tr class="TableHeader" valign="bottom">
           <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
@@ -240,7 +264,7 @@ To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index
       </div>
       <div class="form-group col-sm-6">
         <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
-        <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
+        <select name="deleteoldtime" id="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
           <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
           <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
           <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
