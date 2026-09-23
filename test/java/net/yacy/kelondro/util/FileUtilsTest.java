@@ -23,12 +23,18 @@ package net.yacy.kelondro.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -256,6 +262,33 @@ public class FileUtilsTest {
 		/* Trying to read more than source bytes count */
 		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
 			Assert.assertEquals(sourceBytes.length, FileUtils.read(source, sourceBytes.length + 10).length);
+		}
+	}
+
+	/**
+	 * Test saving a map to a file writes keys in a stable alphabetical order.
+	 * @throws IOException when a read/write error occurred
+	 */
+	@Test
+	public void testSaveMapSortedKeys() throws IOException {
+		final Map<String, String> props = new HashMap<>();
+		props.put("zeta", "1");
+		props.put("alpha", "2");
+		props.put("mu", "3");
+		props.put("beta", "4");
+		final File file = File.createTempFile("FileUtilsTest", ".conf");
+		try {
+			FileUtils.saveMap(file, props, "test");
+			final List<String> keys = new ArrayList<>();
+			for (final String line : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) {
+				if (!line.startsWith("#")) {
+					keys.add(line.substring(0, line.indexOf('=')));
+				}
+			}
+			Assert.assertEquals(List.of("alpha", "beta", "mu", "zeta"), keys);
+			Assert.assertEquals(props, FileUtils.loadMap(file));
+		} finally {
+			file.delete();
 		}
 	}
 }

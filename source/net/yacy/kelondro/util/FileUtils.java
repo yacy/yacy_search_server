@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 
@@ -539,7 +540,7 @@ public final class FileUtils {
         final Object lock = SAVE_MAP_LOCKS.computeIfAbsent(lockKey, k -> new Object());
         synchronized (lock) {
             /* Take the snapshot in write order so delayed callers cannot persist stale state. */
-            final Map<String, String> propsCopy = new HashMap<>(props);
+            final Map<String, String> propsCopy = new TreeMap<>(props);
             File tf = null;
             PrintWriter pw = null;
             try {
