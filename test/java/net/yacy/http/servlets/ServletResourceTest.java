@@ -52,14 +52,14 @@ public class ServletResourceTest {
     @Test
     public void createsEscapedDirectoryListing() throws Exception {
         final Path root = this.temporaryFolder.newFolder("root").toPath();
-        Files.writeString(root.resolve("<entry>.txt"), "content", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("entry &test.txt"), "content", StandardCharsets.UTF_8);
         Files.createDirectory(root.resolve("child"));
         final ServletResource directory = ServletResource.from(root.toUri().toURL());
 
         final String listing = directory.getListHTML("/files/", true, null);
         assertTrue(listing.contains("href=\"../\""));
-        assertTrue(listing.contains("%3Centry%3E.txt"));
-        assertTrue(listing.contains("&lt;entry&gt;.txt"));
+        assertTrue(listing, listing.contains("href=\"/files/entry%20&amp;test.txt\""));
+        assertTrue(listing, listing.contains(">entry &amp;test.txt</a>"));
         assertTrue(listing.contains("href=\"/files/child/\""));
     }
 }
