@@ -50,6 +50,10 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
+import net.yacy.crawler.focused.CrawlPolicyContext;
+import net.yacy.crawler.focused.CrawlPolicyDecision;
+import net.yacy.crawler.focused.FocusedCrawlPolicyManager;
+import net.yacy.crawler.focused.FocusedPdfLane;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.document.TextParser;
@@ -80,6 +84,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
     private final SeedDB            peers;
     private final boolean           acceptLocalURLs, acceptGlobalURLs;
     private final FilterEngine      domainList;
+    private final FocusedCrawlPolicyManager focusedPolicyManager;
 
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
@@ -100,6 +105,8 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
+        this.focusedPolicyManager = new FocusedCrawlPolicyManager(
+                Switchboard.getSwitchboard().getAppPath(), Switchboard.getSwitchboard().getDataPath());
         this.requestQueue = new WorkflowProcessor<>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, 10000, null, WorkflowProcessor.availableCPU);
         CrawlStacker.log.info("STACKCRAWL thread initialized.");
     }
@@ -144,6 +151,14 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
         try {
             final String rejectReason = this.stackCrawl(entry);
+
+            if (rejectReason != null) {
+                if (rejectReason.startsWith(CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX)) {
+                    this.focusedPolicyManager.recordDuplicate(entry.url().hash());
+                } else {
+                    this.focusedPolicyManager.recordFailure(entry.url().hash());
+                }
+            }
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null && !rejectReason.startsWith(CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX)) {
@@ -358,7 +373,40 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
         error = this.checkAcceptanceChangeable(entry.url(), profile, entry.depth());
         if (error != null) return error;
-        error = this.checkAcceptanceInitially(entry.url(), profile);
+        final long indexedAt = this.indexSegment.getLoadTime(entry.url().hash());
+        final boolean profileRecrawlDue = indexedAt >= 0L && profile.recrawlIfOlder() > indexedAt;
+        final CrawlPolicyContext policyContext = new CrawlPolicyContext(entry.url(),
+                entry.referrerhash() == null ? null : this.nextQueue.getURL(entry.referrerhash()), 0,
+                entry.name(), profile == null ? "" : profile.name(), entry.depth(), null, indexedAt, profileRecrawlDue);
+        final CrawlPolicyContext scoredContext = new CrawlPolicyContext(entry.url(),
+                policyContext.parentURL(), entry.referrerhash() == null ? 0 : this.focusedPolicyManager.parentScore(entry.referrerhash()),
+                policyContext.anchorText(), policyContext.crawlProfile(), policyContext.depth(), null, indexedAt,
+                profileRecrawlDue, this.focusedPolicyManager.isRecovery(entry.url().hash()));
+        final java.util.List<CrawlPolicyDecision> policyDecisions = this.focusedPolicyManager.preFetch(scoredContext);
+        this.focusedPolicyManager.recordPreFetch(entry.url().hash(), policyDecisions);
+        this.focusedPolicyManager.recordDiscovered(entry, policyDecisions);
+        boolean acceptedByPolicy = policyDecisions.isEmpty();
+        boolean rejectedByPolicy = !policyDecisions.isEmpty();
+        for (final CrawlPolicyDecision decision : policyDecisions) {
+            if (decision.action() != CrawlPolicyDecision.Action.REJECT) acceptedByPolicy = true;
+            if (decision.action() != CrawlPolicyDecision.Action.REJECT) rejectedByPolicy = false;
+        }
+        if (!acceptedByPolicy && rejectedByPolicy) {
+            final boolean admissionDuplicate = policyDecisions.stream().anyMatch(decision -> decision != null
+                    && decision.action() == CrawlPolicyDecision.Action.REJECT
+                    && decision.reasonCodes().contains("focused-admission-duplicate"));
+            return admissionDuplicate
+                    ? CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": focused admission duplicate"
+                    : "focused crawl policy rejection";
+        }
+        final CrawlPolicyDecision focusedDecision = FocusedCrawlPolicyManager.best(policyDecisions);
+
+        // A focused profile may deliberately revisit already-indexed URLs in
+        // order to classify them into its own collections. This is opt-in and
+        // applies only when the policy has assigned a focused/probable lane;
+        // ordinary crawl profiles retain YaCy's normal freshness check.
+        error = this.checkAcceptanceInitially(entry.url(), profile, focusedDecision.recrawlFocused()
+                && focusedDecision.focused());
         if (error != null) return error;
 
         // store information
@@ -388,6 +436,8 @@ public final class CrawlStacker implements WorkflowTask<Request>{
                 if (warning != null && CrawlStacker.log.isFine()) {
                     CrawlStacker.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed to " + NoticedURL.StackType.NOLOAD + " stack : " + warning);
                 }
+                if (warning == null) this.focusedPolicyManager.recordAdmission(scoredContext, policyDecisions);
+                else this.focusedPolicyManager.recordAdmissionRejected(policyDecisions);
                 return null;
             }
 
@@ -406,7 +456,11 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         } else if (local) {
             if (proxy) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, profile, this.robots);
+            final NoticedURL.StackType focusedStack = focusedDecision.focused()
+                    ? (FocusedPdfLane.isPdfURL(entry.url())
+                            ? NoticedURL.StackType.FOCUSED_PDF : noveltyStack(focusedDecision))
+                    : NoticedURL.StackType.LOCAL;
+            warning = this.nextQueue.noticeURL.push(focusedStack, entry, profile, this.robots);
         } else if (proxy) {
             if (remote) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, profile, this.robots);
@@ -414,8 +468,22 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry, profile, this.robots);
         }
         if (warning != null && CrawlStacker.log.isFine()) CrawlStacker.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
+        if (warning == null) this.focusedPolicyManager.recordAdmission(scoredContext, policyDecisions);
+        else this.focusedPolicyManager.recordAdmissionRejected(policyDecisions);
 
         return null;
+    }
+
+    private static NoticedURL.StackType noveltyStack(final CrawlPolicyDecision decision) {
+        if (decision == null) return NoticedURL.StackType.FOCUSED_EXPANSION;
+        switch (decision.noveltyClass()) {
+            case NEW_HOST: return NoticedURL.StackType.FOCUSED_NEW_HOST;
+            case NEW_PATH: return NoticedURL.StackType.FOCUSED_NEW_PATH;
+            case FRESHNESS: return NoticedURL.StackType.FOCUSED_REFRESH;
+            case PROVEN_EXPANSION: return NoticedURL.StackType.FOCUSED_EXPANSION;
+            case SATURATED: return NoticedURL.StackType.FOCUSED_EXPANSION;
+            default: return NoticedURL.StackType.FOCUSED_EXPANSION;
+        }
     }
 
     /**
@@ -426,6 +494,17 @@ public final class CrawlStacker implements WorkflowTask<Request>{
      * @return null if the url is accepted, an error string in case if the url is not accepted with an error description
      */
     public String checkAcceptanceInitially(final DigestURL url, final CrawlProfile profile) {
+        return this.checkAcceptanceInitially(url, profile, false);
+    }
+
+    /**
+     * Initial acceptance checks with an explicit focused-policy refresh
+     * override. The override never bypasses queue deduplication or the
+     * changeable profile/domain/robots checks; it only permits a focused
+     * policy to revisit an existing indexed URL.
+     */
+    public String checkAcceptanceInitially(final DigestURL url, final CrawlProfile profile,
+            final boolean recrawlFocused) {
 
         // check if the url is double registered
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
@@ -462,6 +541,10 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             if (CrawlStacker.log.isFine())
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                         ((System.currentTimeMillis() - oldDate) / 60000 / 60 / 24) + " days ago.");
+        } else if (recrawlFocused) {
+            if (CrawlStacker.log.isFine())
+                CrawlStacker.log.fine("FOCUSED RE-CRAWL of already indexed URL '" + urlstring + "'");
+            return null;
         } else {
             return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, recrawl rejected. Document date = "
                     + ISO8601Formatter.FORMATTER.format(new Date(oldDate)) + " is not older than crawl profile recrawl minimum date = "
@@ -616,4 +699,9 @@ public final class CrawlStacker implements WorkflowTask<Request>{
     public boolean acceptGlobalURLs() {
         return this.acceptGlobalURLs;
     }
+
+    public FocusedCrawlPolicyManager focusedPolicyManager() {
+        return this.focusedPolicyManager;
+    }
+
 }
