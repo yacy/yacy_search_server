@@ -4,6 +4,9 @@ RELEASE
 yacy.log
 classes
 test
+!test/jetty/
+!test/jetty/RelocateJettyPackages.java
+!test/java/
 snap
 examples
 build.nsi

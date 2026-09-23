@@ -450,6 +450,47 @@
     </junit>
   </target>
 
+  <target name="focused-test" depends="compile" description="run Focused Autocrawler Profiles tests">
+      <delete dir="${build}/focused-test-classes" failonerror="false" />
+      <mkdir dir="${build}/focused-test-classes" />
+      <javac srcdir="${test}" destdir="${build}/focused-test-classes"
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
+           release="${javacRelease}" encoding="UTF-8">
+          <include name="net/yacy/crawler/focused/**/*Test.java" />
+          <include name="net/yacy/search/query/FocusedQueryModifierTest.java" />
+          <include name="net/yacy/crawler/data/NoticedURLFocusedLaneTest.java" />
+          <include name="net/yacy/search/ResourceObserverTest.java" />
+          <classpath>
+              <pathelement location="${build}" />
+              <path refid="compile.path" />
+              <path refid="test.path" />
+          </classpath>
+          <compilerarg value="-Xlint" />
+      </javac>
+      <java classname="org.junit.runner.JUnitCore" fork="true" failonerror="true" dir="${yacyroot}">
+          <arg value="net.yacy.crawler.focused.FocusedCrawlMetadataStoreTest" />
+          <arg value="net.yacy.crawler.focused.FocusedCrawlMetricsTest" />
+          <arg value="net.yacy.crawler.focused.FocusedCrawlPolicyManagerTest" />
+          <arg value="net.yacy.crawler.focused.FocusedCrawlPipelineTest" />
+          <arg value="net.yacy.crawler.focused.FocusedCrawlSchedulerTest" />
+          <arg value="net.yacy.crawler.focused.FocusedFrontierStoreTest" />
+          <arg value="net.yacy.crawler.focused.FocusedNoveltyStateTest" />
+          <arg value="net.yacy.crawler.focused.FocusedPdfLaneTest" />
+          <arg value="net.yacy.crawler.focused.FocusedPolicyConfigurationTest" />
+          <arg value="net.yacy.crawler.focused.FocusedResourceGuardTest" />
+          <arg value="net.yacy.crawler.focused.FocusedURLAdmissionStateTest" />
+          <arg value="net.yacy.search.query.FocusedQueryModifierTest" />
+          <arg value="net.yacy.crawler.data.NoticedURLFocusedLaneTest" />
+          <arg value="net.yacy.search.ResourceObserverTest" />
+          <classpath>
+              <pathelement location="${build}/focused-test-classes" />
+              <pathelement location="${build}" />
+              <path refid="compile.path" />
+              <path refid="test.path" />
+          </classpath>
+      </java>
+  </target>
+
   <!-- ======================================================================================================= 
        making a release file for yacy 
        ======================================================================================================= -->
