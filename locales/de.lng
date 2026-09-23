@@ -566,6 +566,7 @@ reject==ablehnen
 Parser Configuration==Parser Einstellungen
 Content Parser Settings==Inhalt Parser Einstellungen
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
+Note: Large media formats such as astronomical FITS images (.fits, .fit) are disabled by default to conserve memory and bandwidth, but can be enabled below if needed.==Hinweis: Große Medienformate wie astrofotografische FITS-Bilder (.fits, .fit) sind standardmäßig deaktiviert, um Speicher und Bandbreite zu sparen, können unten jedoch bei Bedarf aktiviert werden.
 For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
 "Submit"=="Speichern"
 Extension==Erweiterung
