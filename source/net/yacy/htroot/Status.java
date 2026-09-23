@@ -164,6 +164,7 @@ public class Status
         //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         final String versionstring = yacyBuildProperties.getReleaseStub();
         prop.put("versionpp", versionstring);
+        prop.put("gitCommit", yacyBuildProperties.getRepositoryVersionHash());
         prop.put("java.version", System.getProperty("java.version"));
 
         // place some more hints

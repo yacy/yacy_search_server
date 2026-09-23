@@ -16,6 +16,8 @@ Console Status is the operational dashboard for the peer. Its Incoming HTTP Requ
 
 Use it first to see identity, uptime, network position, indexing state, and important warnings.
 
+The System Status box lists the YaCy version stub and the git commit of the running build. The same commit is `buildHash` on `/api/version.xml`.
+
 ## What You Can Do Here
 
 - Console Status is the operational dashboard for the peer.
@@ -28,6 +30,8 @@ Monitoring pages read live peer state from queues, logs, network tables, memory 
 
 | Control | Meaning | Values or examples |
 | --- | --- | --- |
+| Git commit | Abbreviated git hash of this build | `#[gitCommit]#` from `yacyBuild.properties` |
+| `/api/version.xml` `buildHash` | Same git hash as System Status | `#[buildHash]#` |
 
 ## Correct Use
 

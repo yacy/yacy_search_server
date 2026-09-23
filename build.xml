@@ -379,6 +379,7 @@
           <include name="NOTICE"/>
       </fileset>
     </copy>
+    <echo file="${release_main}/README.txt" message="YaCy ${releaseVersion}${line.separator}Git commit: ${repository.revision.hash}${line.separator}Release: ${stdReleaseStub}${line.separator}"/>
 
     <!-- copy source code -->
     <copy todir="${release_main}/source">

@@ -5,6 +5,7 @@
 
     <dt>System</dt>
     <dd>YaCy version: #[versionpp]#
+    <div>Git commit: #[gitCommit]#</div>
     #(peerStatistics)#
       Unknown
       ::
