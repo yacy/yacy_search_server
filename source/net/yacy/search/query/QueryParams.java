@@ -777,6 +777,9 @@ public final class QueryParams {
             params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
             //params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc); // deprecated in Solr 4.2
         }
+        if (this.modifier.relevanceRanking && this.solrSchema.contains(CollectionSchema.focused_relevance_i)) {
+            params.setSort(new SortClause(CollectionSchema.focused_relevance_i.getSolrFieldName(), SolrQuery.ORDER.desc));
+        }
         
         // add site facets
         fqs.addAll(getFacetsFilterQueries());
@@ -880,6 +883,14 @@ public final class QueryParams {
         // add collection facets
         if (this.modifier.collection != null && this.modifier.collection.length() > 0 && this.solrSchema.contains(CollectionSchema.collection_sxt)) {
             fqs.add(QueryModifier.parseCollectionExpression(this.modifier.collection));
+        }
+
+        if (this.modifier.policy != null && this.modifier.policy.length() > 0 && this.solrSchema.contains(CollectionSchema.focused_policy_sxt)) {
+            fqs.add(CollectionSchema.focused_policy_sxt.getSolrFieldName() + ":\"" + this.modifier.policy + '"');
+        }
+
+        if (this.modifier.policyRelevance != null && this.solrSchema.contains(CollectionSchema.focused_relevance_i)) {
+            fqs.add(CollectionSchema.focused_relevance_i.getSolrFieldName() + ":[" + this.modifier.policyRelevance + " TO *]");
         }
         
         if (this.solrSchema.contains(CollectionSchema.dates_in_content_dts)) {
@@ -999,6 +1010,9 @@ public final class QueryParams {
             context.append(this.modifier.protocol).append(asterisk);
             context.append(this.modifier.filetype).append(asterisk);
             context.append(this.modifier.collection).append(asterisk);
+            context.append(this.modifier.policy).append(asterisk);
+            context.append(this.modifier.policyRelevance).append(asterisk);
+            context.append(this.modifier.relevanceRanking).append(asterisk);
             context.append(this.modifier.toString()).append(asterisk);
             context.append(this.siteexcludes).append(asterisk);
             context.append(this.targetlang).append(asterisk);

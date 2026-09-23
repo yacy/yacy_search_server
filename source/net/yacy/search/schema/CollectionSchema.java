@@ -125,6 +125,11 @@ public enum CollectionSchema implements SchemaDeclaration {
 
     // optional values, not part of standard YaCy handling (but useful for external applications)
     collection_sxt(SolrType.string, true, true, true, false, false, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
+    focused_policy_sxt(SolrType.string, true, true, true, false, false, "focused crawl policy identifiers assigned to a document"),
+    focused_profile_version_sxt(SolrType.string, true, true, true, false, false, "focused crawl policy versions assigned to a document"),
+    focused_relevance_i(SolrType.num_integer, true, true, false, false, false, "focused crawl policy relevance score"),
+    focused_priority_s(SolrType.string, true, true, false, false, false, "focused crawl policy priority lane"),
+    focused_reason_sxt(SolrType.string, true, true, true, false, false, "explainable focused crawl policy reason codes"),
     csscount_i(SolrType.num_integer, true, true, false, false, false, "number of entries in css_tag_txt and css_url_txt"),
     css_tag_sxt(SolrType.string, true, true, true, false, false, "full css tag with normalized url"),
     css_url_sxt(SolrType.string, true, true, true, false, false, "normalized urls within a css tag"),
@@ -485,4 +490,3 @@ public enum CollectionSchema implements SchemaDeclaration {
         doc.removeField(this.getSolrFieldName());
     }
 }
-

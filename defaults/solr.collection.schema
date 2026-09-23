@@ -165,6 +165,21 @@ fuzzy_signature_unique_b
 ## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
 collection_sxt
 
+## identifiers of focused autocrawler profiles assigned to this document
+focused_policy_sxt
+
+## versions of focused autocrawler profiles assigned to this document
+focused_profile_version_sxt
+
+## deterministic relevance score assigned by a focused autocrawler policy
+focused_relevance_i
+
+## focused priority lane assigned during crawl classification
+focused_priority_s
+
+## explainable reason codes returned by focused autocrawler policies
+focused_reason_sxt
+
 ## geospatial point in degrees of latitude,longitude as declared in WSG84, location; this creates two additional subfields, coordinate_p_0_coordinate (latitude) and coordinate_p_1_coordinate (longitude)
 coordinate_p
 
@@ -544,4 +559,3 @@ host_extent_i
 
 ## collection of all vocabulary names that have a matcher in the document - use this to boost with vocabularies
 vocabularies_sxt
-    

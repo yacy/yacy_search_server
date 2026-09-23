@@ -138,6 +138,11 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.focused.CrawlPolicyContext;
+import net.yacy.crawler.focused.CrawlPolicyDecision;
+import net.yacy.crawler.focused.FocusedCrawlMetadata;
+import net.yacy.crawler.focused.FocusedCrawlPolicyManager;
+import net.yacy.crawler.focused.FocusedCrawlScheduler;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
@@ -273,6 +278,8 @@ public final class Switchboard extends serverSwitch {
     public CrawlSwitchboard crawler;
     public CrawlQueues crawlQueues;
     public CrawlStacker crawlStacker;
+    public FocusedCrawlPolicyManager focusedCrawlPolicyManager;
+    public FocusedCrawlScheduler focusedCrawlScheduler;
     public MessageBoard messageDB;
     public RobotsTxt robots;
     public Map<String, Object[]> outgoingCookies, incomingCookies;
@@ -1002,7 +1009,9 @@ public final class Switchboard extends serverSwitch {
                         this.peers,
                         this.isIntranetMode(),
                         this.isGlobalMode(),
-                        this.domainList); // Intranet and Global mode may be both true!
+                                    this.domainList); // Intranet and Global mode may be both true!
+        this.focusedCrawlPolicyManager = this.crawlStacker.focusedPolicyManager();
+        this.focusedCrawlScheduler = new FocusedCrawlScheduler(this, this.focusedCrawlPolicyManager);
 
         // possibly switch off localIP check
         Domains.setNoLocalCheck(this.isAllIPMode());
@@ -1152,6 +1161,7 @@ public final class Switchboard extends serverSwitch {
 
         this.initRemoteCrawler(this.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         this.initAutocrawl(this.getConfigBool(SwitchboardConstants.AUTOCRAWL, false));
+        this.initFocusedAutocrawl();
 
         final CrawlQueues crawlQueue = this.crawlQueues;
         this.deployThread(
@@ -1555,6 +1565,8 @@ public final class Switchboard extends serverSwitch {
                                     "local.any".indexOf(this.getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0,
                                     "global.any".indexOf(this.getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0,
                                     this.domainList);
+                    this.focusedCrawlPolicyManager = this.crawlStacker.focusedPolicyManager();
+                    this.focusedCrawlScheduler = new FocusedCrawlScheduler(this, this.focusedCrawlPolicyManager);
 
         }
         Domains.setNoLocalCheck(this.isAllIPMode()); // possibly switch off localIP check
@@ -1690,6 +1702,45 @@ public final class Switchboard extends serverSwitch {
             acr.setBusySleep(this.getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_BUSYSLEEP, 10000));
             acr.setIdleSleep(this.getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_IDLESLEEP, 10000));
         }
+    }
+
+    /** Start or stop all enabled Focused Autocrawler Profiles. */
+    public void initFocusedAutocrawl() {
+        final boolean activate = !this.getConfigBool("focused.autocrawler.paused", false)
+                && this.focusedCrawlPolicyManager != null
+                && !this.focusedCrawlPolicyManager.enabledPolicies().isEmpty();
+        if (!activate) {
+            this.terminateThread(SwitchboardConstants.CRAWLJOB_FOCUSED_AUTOCRAWL, true);
+            return;
+        }
+        BusyThread focused = this.getThread(SwitchboardConstants.CRAWLJOB_FOCUSED_AUTOCRAWL);
+        if (focused == null) {
+            final FocusedCrawlScheduler controller = this.focusedCrawlScheduler;
+            this.deployThread(
+                    SwitchboardConstants.CRAWLJOB_FOCUSED_AUTOCRAWL,
+                    "Focused Autocrawler Profiles",
+                    "Persistent schedulers for configured focused crawl profiles",
+                    "/FocusedProfiles_p.html",
+                    new InstantBusyThread("CrawlQueues.focusedAutocrawlJob", 1000, 1000) {
+                        @Override
+                        public boolean jobImpl() throws Exception {
+                            return controller != null && controller.job();
+                        }
+
+                        @Override
+                        public int getJobCount() {
+                            return controller == null ? 0 : Switchboard.this.crawlQueues.focusedCrawlJobSize();
+                        }
+                    },
+                    10000);
+            focused = this.getThread(SwitchboardConstants.CRAWLJOB_FOCUSED_AUTOCRAWL);
+        }
+        // Recovery checks are intentionally frequent enough to clear a
+        // transient ResourceObserver latch, while the scheduler itself
+        // throttles root refills using each profile's configured interval.
+        final long interval = this.getConfigLong("focused.autocrawler.recoveryInterval", 30000L);
+        focused.setBusySleep(interval);
+        focused.setIdleSleep(interval);
     }
 
     public void initMessages() throws IOException {
@@ -1945,6 +1996,8 @@ public final class Switchboard extends serverSwitch {
         MemoryTracker.stopSystemProfiling();
         this.terminateAllThreads(true);
         net.yacy.gui.framework.Switchboard.shutdown();
+        if (this.focusedCrawlPolicyManager != null) this.focusedCrawlPolicyManager.metrics().flush();
+        if (this.focusedCrawlScheduler != null) this.focusedCrawlScheduler.close();
         this.log.config("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         this.crawlStacker.announceClose();
@@ -2892,10 +2945,14 @@ public final class Switchboard extends serverSwitch {
     public IndexingQueueEntry parseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
         Document[] documents = null;
+        boolean focusedPdfPermit = false;
         try {
+            focusedPdfPermit = this.crawlQueues.focusedPdfLane().acquireForParsing(in.queueEntry);
             documents = this.parseDocument(in.queueEntry);
         } catch (final Exception e ) {
             documents = null;
+        } finally {
+            if (focusedPdfPermit) this.crawlQueues.focusedPdfLane().release(in.queueEntry.url(), documents != null);
         }
         if ( documents == null ) {
             return null;
@@ -3365,9 +3422,44 @@ public final class Switchboard extends serverSwitch {
         final CollectionConfiguration collectionConfig = this.index.fulltext().getDefaultConfiguration();
         final String language = Segment.votedLanguage(url, url.toNormalform(true), document, condenser); // identification of the language
 
-        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this.index, collections, queueEntry.getResponseHeader(),
+        Map<String, Pattern> effectiveCollections = collections;
+        if (this.focusedCrawlPolicyManager != null) {
+            final Map<String, String> metadata = new LinkedHashMap<>();
+            metadata.put("subject", document.dc_subject(' '));
+            metadata.put("mimeType", document.dc_format());
+            final Map<String, String> links = new LinkedHashMap<>();
+            for (final Map.Entry<DigestURL, String> link : document.outboundLinks().entrySet()) {
+                links.put(link.getKey().toNormalform(true), link.getValue());
+            }
+            final long indexedAt = this.index.getLoadTime(url.hash());
+            final int parentScore = queueEntry.referrerHash() == null ? 0
+                    : this.focusedCrawlPolicyManager.parentScore(queueEntry.referrerHash());
+            final CrawlPolicyContext context = new CrawlPolicyContext(url, referrerURL, parentScore,
+                    queueEntry.name(), profile == null ? "" : profile.name(), queueEntry.depth(),
+                    new CrawlPolicyContext.ParsedContent(document.dc_title(), metadata, language,
+                            document.getTextString(), links, document.dc_format()), indexedAt);
+            final java.util.List<CrawlPolicyDecision> decisions = this.focusedCrawlPolicyManager.postFetch(context);
+            this.focusedCrawlPolicyManager.metadataStore().record(url.hash(), decisions);
+            final java.util.Set<String> policyCollections = FocusedCrawlPolicyManager.collections(decisions);
+            if (!policyCollections.isEmpty()) {
+                effectiveCollections = new LinkedHashMap<>(collections == null ? Collections.emptyMap() : collections);
+                for (final String collection : policyCollections) effectiveCollections.put(collection, net.yacy.search.query.QueryParams.catchall_pattern);
+            }
+        }
+        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this.index, effectiveCollections, queueEntry.getResponseHeader(),
                 document, condenser, referrerURL, language, profile.isPushCrawlProfile(),
                 this.index.fulltext().useWebgraph() ? this.index.fulltext().getWebgraphConfiguration() : null, sourceName);
+
+        if (this.focusedCrawlPolicyManager != null) {
+            final FocusedCrawlMetadata metadata = this.focusedCrawlPolicyManager.metadataStore().get(url.hash());
+            if (metadata != null) {
+                CollectionSchema.focused_policy_sxt.add(vector, metadata.policyIds());
+                CollectionSchema.focused_profile_version_sxt.add(vector, metadata.policyVersions());
+                CollectionSchema.focused_relevance_i.add(vector, metadata.relevanceScore());
+                CollectionSchema.focused_priority_s.add(vector, metadata.priority().name());
+                CollectionSchema.focused_reason_sxt.add(vector, metadata.reasonCodes());
+            }
+        }
 
         /*
          * One last posible filtering step before adding to index : using the eventual
@@ -3395,6 +3487,9 @@ public final class Switchboard extends serverSwitch {
                         searchEvent,
                         sourceName,
                         this.getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, false));
+        if (this.focusedCrawlPolicyManager != null) {
+            this.focusedCrawlPolicyManager.recordIndexed(url.hash());
+        }
         final RSSFeed feed =
                 EventChannel.channels(queueEntry.initiator() == null
                 ? EventChannel.PROXY
