@@ -153,6 +153,7 @@ public class QueryGoal {
             while (p < s.length() && s.charAt(p) == space) p++;
             s = s.substring(p);
             if (s.length() == 0) return;
+            p = 0;
 
             // parse phrase
             boolean inc = true;
