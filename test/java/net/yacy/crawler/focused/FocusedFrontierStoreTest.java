@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
@@ -43,6 +46,7 @@ public class FocusedFrontierStoreTest {
         first.markAdmitted(hash);
         assertEquals(1, first.snapshot().admitted());
         assertEquals(1, first.recoverable(System.currentTimeMillis(), 10).size());
+        first.markInFlight(hash);
         first.close();
 
         final FocusedFrontierStore restarted = new FocusedFrontierStore(directory, "astronomy");
@@ -50,8 +54,25 @@ public class FocusedFrontierStoreTest {
         assertEquals("https://research.example/astronomy/start", restarted.get(hash).url());
         assertEquals(1, restarted.recoverStale(System.currentTimeMillis() + 601000L, 600000L));
         assertEquals(1, restarted.recoverable(System.currentTimeMillis(), 10).size());
+        assertEquals(FocusedFrontierStore.State.READY, restarted.get(hash).state());
         assertEquals(PROFILE_HANDLE, restarted.recoverable(System.currentTimeMillis(), 10).get(0).request().profileHandle());
         restarted.close();
+    }
+
+    @Test
+    public void bulkFrontierScansDoNotHoldTheStoreMonitor() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-lock-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        store.discover(request("https://research.example/astronomy/one"), decision());
+        final Request inFlight = request("https://research.example/astronomy/two");
+        store.discover(inFlight, decision());
+        store.markInFlight(inFlight.url().hash());
+
+        assertCompletesWhileMonitorHeld(store, () -> store.snapshot());
+        assertCompletesWhileMonitorHeld(store, () -> store.recoverable(System.currentTimeMillis(), 10));
+        assertCompletesWhileMonitorHeld(store, () -> store.recoverStale(System.currentTimeMillis(), 600000L));
+        assertCompletesWhileMonitorHeld(store, () -> store.compact(0L, 100));
+        store.close();
     }
 
     @Test
@@ -86,5 +107,30 @@ public class FocusedFrontierStoreTest {
         store.markReady(hash, true);
         assertEquals(1, store.snapshot().ready());
         store.close();
+    }
+
+    private static void assertCompletesWhileMonitorHeld(final FocusedFrontierStore store,
+            final Runnable operation) throws Exception {
+        final CountDownLatch started = new CountDownLatch(1);
+        final CountDownLatch finished = new CountDownLatch(1);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final Thread worker = new Thread(() -> {
+            started.countDown();
+            try {
+                operation.run();
+            } catch (final Throwable e) {
+                failure.set(e);
+            } finally {
+                finished.countDown();
+            }
+        }, "focused-frontier-scan-test");
+        synchronized (store) {
+            worker.start();
+            assertTrue("scan worker did not start", started.await(2, TimeUnit.SECONDS));
+            assertTrue("bulk frontier scan waited for the store monitor",
+                    finished.await(2, TimeUnit.SECONDS));
+        }
+        worker.join(2000L);
+        if (failure.get() != null) throw new AssertionError("bulk frontier scan failed", failure.get());
     }
 }

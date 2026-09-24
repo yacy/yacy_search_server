@@ -32,6 +32,9 @@ import net.yacy.kelondro.data.word.Word;
  */
 public final class FocusedFrontierStore implements AutoCloseable {
 
+    /** Avoid a single damaged/restarted profile rewriting an unbounded frontier in one scheduler pass. */
+    private static final int MAX_STALE_RECOVERIES_PER_SCAN = 1024;
+
     public enum State {
         DISCOVERED, READY, ADMITTED, IN_FLIGHT, INDEXED, DUPLICATE, FAILED, BLOCKED
     }
@@ -300,32 +303,39 @@ public final class FocusedFrontierStore implements AutoCloseable {
         update(hash, State.BLOCKED, 0L, false, false);
     }
 
-    /** Convert interrupted native admissions into recoverable candidates. */
-    public synchronized int recoverStale(final long now, final long graceMillis) {
+    /**
+     * Convert stale in-flight requests into recoverable candidates.
+     *
+     * <p>ADMITTED candidates are already eligible in {@link #recoverable(long, int)} and are
+     * checked against YaCy's native queues before resubmission. Only IN_FLIGHT rows need this
+     * transition. The heap scan deliberately does not hold this store's monitor: crawl-stack,
+     * indexing, and loader callbacks update the same store and must not wait behind a full
+     * frontier traversal. Individual stale-row transitions are rechecked and serialized below.</p>
+     */
+    public int recoverStale(final long now, final long graceMillis) {
         if (this.heap == null) return 0;
         int changed = 0;
         final List<byte[]> hashes = new ArrayList<>();
         try {
             final Iterator<Map.Entry<byte[], Map<String, String>>> entries = this.heap.entries(true, false);
-            while (entries.hasNext()) {
+            while (entries.hasNext() && hashes.size() < MAX_STALE_RECOVERIES_PER_SCAN) {
                 final Map.Entry<byte[], Map<String, String>> entry = entries.next();
                 final Candidate candidate = parse(entry.getKey(), entry.getValue());
                 if (candidate == null) continue;
-                if ((candidate.state() == State.ADMITTED || candidate.state() == State.IN_FLIGHT)
+                if (candidate.state() == State.IN_FLIGHT
                         && now - Math.max(candidate.lastSubmitted(), candidate.lastSeen()) >= graceMillis) {
                     hashes.add(candidate.hash());
                 }
             }
             for (final byte[] hash : hashes) {
-                markReady(hash, true);
-                changed++;
+                if (markStaleInFlightReady(hash, now, graceMillis)) changed++;
             }
         } catch (final IOException ignored) { }
         return changed;
     }
 
     /** Return candidates eligible to rebuild the native YaCy queue. */
-    public synchronized List<Candidate> recoverable(final long now, final int limit) {
+    public List<Candidate> recoverable(final long now, final int limit) {
         if (this.heap == null || limit <= 0) return Collections.emptyList();
         final List<Candidate> result = new ArrayList<>();
         try {
@@ -347,7 +357,11 @@ public final class FocusedFrontierStore implements AutoCloseable {
         return result;
     }
 
-    public synchronized Snapshot snapshot() {
+    /**
+     * Return best-effort counts. Concurrent crawl updates can make this snapshot slightly
+     * inconsistent, which is preferable to blocking crawl and indexing callbacks for a full scan.
+     */
+    public Snapshot snapshot() {
         int total = 0, discovered = 0, ready = 0, admitted = 0, inFlight = 0,
                 indexed = 0, duplicate = 0, failed = 0, blocked = 0,
                 seedBootstrap = 0, nativeLink = 0, adminReset = 0, legacy = 0;
@@ -391,14 +405,13 @@ public final class FocusedFrontierStore implements AutoCloseable {
         catch (final IOException | SpaceExceededException ignored) { return null; }
     }
 
-    public synchronized void compact(final long terminalBefore) {
+    public void compact(final long terminalBefore) {
         compact(terminalBefore, Integer.MAX_VALUE);
     }
 
     /** Remove old terminal rows and, when configured, trim oldest terminal rows above the cap. */
-    public synchronized int compact(final long terminalBefore, final int maxEntries) {
+    public int compact(final long terminalBefore, final int maxEntries) {
         if (this.heap == null) return 0;
-        final List<byte[]> deletions = new ArrayList<>();
         final List<Candidate> terminal = new ArrayList<>();
         int removed = 0;
         try {
@@ -407,20 +420,18 @@ public final class FocusedFrontierStore implements AutoCloseable {
                 final Map.Entry<byte[], Map<String, String>> entry = entries.next();
                 final Candidate candidate = parse(entry.getKey(), entry.getValue());
                 if (candidate != null && isTerminal(candidate.state())) {
-                    if (candidate.lastSeen() < terminalBefore) deletions.add(entry.getKey());
+                    if (candidate.lastSeen() < terminalBefore) {
+                        if (deleteTerminal(candidate.hash(), terminalBefore, true)) removed++;
+                    }
                     else terminal.add(candidate);
                 }
-            }
-            for (final byte[] key : deletions) {
-                this.heap.delete(key);
-                removed++;
             }
             if (maxEntries > 0 && this.heap.size() > maxEntries) {
                 terminal.sort((left, right) -> Long.compare(left.lastSeen(), right.lastSeen()));
                 int excess = this.heap.size() - maxEntries;
                 for (int i = 0; i < terminal.size() && excess > 0; i++, excess--) {
-                    this.heap.delete(terminal.get(i).hash());
-                    removed++;
+                    if (deleteTerminal(terminal.get(i).hash(), 0L, false)) removed++;
+                    else excess++;
                 }
             }
         } catch (final IOException ignored) { }
@@ -445,6 +456,31 @@ public final class FocusedFrontierStore implements AutoCloseable {
                 submitted ? now : previous.lastSubmitted(), previous.attempts() + (submitted ? 1 : 0),
                 recovery || previous.recovery(), previous.discoverySource());
         put(updated);
+    }
+
+    /** Recheck and transition one stale in-flight row under the short-lived store lock. */
+    private synchronized boolean markStaleInFlightReady(final byte[] hash, final long now,
+            final long graceMillis) {
+        final Candidate current = get(hash);
+        if (current == null || current.state() != State.IN_FLIGHT
+                || now - Math.max(current.lastSubmitted(), current.lastSeen()) < graceMillis) return false;
+        update(hash, State.READY, 0L, true, false);
+        return true;
+    }
+
+    /** Recheck a terminal row before deleting it; a concurrent transition to active wins. */
+    private synchronized boolean deleteTerminal(final byte[] hash, final long terminalBefore,
+            final boolean requireOlder) {
+        if (this.heap == null || hash == null) return false;
+        final Candidate current = get(hash);
+        if (current == null || !isTerminal(current.state())
+                || (requireOlder && current.lastSeen() >= terminalBefore)) return false;
+        try {
+            this.heap.delete(hash);
+            return true;
+        } catch (final IOException ignored) {
+            return false;
+        }
     }
 
     private void put(final Candidate candidate) {
