@@ -277,8 +277,11 @@ public final class FocusedCrawlScheduler {
                 final int indexedExpansion = configuration.frontier().expandIndexedSources()
                         ? expandFromIndexedSources(configuration, profile, frontier, refillBudget - recovered, state) : 0;
                 if (recovered + indexedExpansion > 0) {
-                    final boolean memoryPressure = !memoryHealthy();
-                    if (memoryPressure) pauseFocusedCrawlForMemoryPressure();
+                    boolean memoryPressure = !memoryHealthy();
+                    if (memoryPressure) {
+                        pauseFocusedCrawlForMemoryPressure();
+                        memoryPressure = !memoryHealthy();
+                    }
                     // Avoid another full queue/frontier scan after pausing on
                     // low headroom; the persisted native queues remain intact.
                     final int after = memoryPressure ? -1 : queueSize(profile);
@@ -738,9 +741,17 @@ public final class FocusedCrawlScheduler {
      * after the larger recovery threshold is met.
      */
     private boolean pauseFocusedCrawlForMemoryPressure() {
-        final long available = MemoryControl.available();
+        long available = MemoryControl.available();
         final long maximum = MemoryControl.maxMemory();
         final long threshold = FocusedResourceGuard.pauseThreshold(maximum);
+        if (FocusedResourceGuard.shouldAttemptMemoryRecovery(available, maximum,
+                MemoryControl.shortStatus())) {
+            // This is a bounded, YaCy-managed reclamation attempt. If the
+            // collector cannot restore headroom, request() records short
+            // memory and the safety pause below still happens immediately.
+            MemoryControl.request(threshold, false);
+            available = MemoryControl.available();
+        }
         if (!FocusedResourceGuard.shouldPause(available, maximum, MemoryControl.shortStatus())) return false;
 
         final String jobType = SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL;

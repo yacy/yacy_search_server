@@ -65,6 +65,17 @@ public final class FocusedResourceGuard {
         return shortMemory || availableMemory < pauseThreshold(maxMemory);
     }
 
+    /**
+     * A low but non-critical heap reading is an opportunity to ask YaCy's
+     * memory controller to reclaim unused heap before stopping the crawler.
+     * A sticky short-memory signal is already a failed allocation and must not
+     * be delayed by another recovery attempt.
+     */
+    public static boolean shouldAttemptMemoryRecovery(final long availableMemory,
+            final long maxMemory, final boolean shortMemory) {
+        return !shortMemory && availableMemory < pauseThreshold(maxMemory);
+    }
+
     public static long recoveryThreshold(final long maxMemory) {
         if (maxMemory <= 0L) return MIN_RECOVERY_HEADROOM;
         return Math.max(MIN_RECOVERY_HEADROOM, maxMemory * 35L / 100L);

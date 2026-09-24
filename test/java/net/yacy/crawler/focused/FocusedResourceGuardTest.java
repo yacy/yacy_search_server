@@ -81,6 +81,15 @@ public class FocusedResourceGuardTest {
     }
 
     @Test
+    public void marginalLowHeadroomRequestsReclamationBeforeTheSafetyPause() {
+        final long max = 3L * 1024L * 1024L * 1024L;
+        final long threshold = FocusedResourceGuard.pauseThreshold(max);
+        assertTrue(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold - 1L, max, false));
+        assertFalse(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold, max, false));
+        assertFalse(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold - 1L, max, true));
+    }
+
+    @Test
     public void onlyObserverAndFocusedGuardPausesAreManaged() {
         assertTrue(FocusedResourceGuard.isManagedPauseCause("resource observer: low memory"));
         assertTrue(FocusedResourceGuard.isManagedPauseCause("focused resource guard: low memory"));
