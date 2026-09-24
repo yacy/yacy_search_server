@@ -76,6 +76,28 @@ public class FocusedFrontierStoreTest {
     }
 
     @Test
+    public void staleRecoveryCanAdvanceInBoundedSlices() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-sliced-recovery-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        for (int i = 0; i < 7; i++) {
+            final Request request = request("https://research.example/astronomy/stale-" + i);
+            store.discover(request, decision());
+            store.markInFlight(request.url().hash());
+        }
+
+        final long recoveryTime = System.currentTimeMillis() + 5000L;
+        int recovered = 0;
+        for (int i = 0; i < 10 && recovered < 7; i++) {
+            final int recoveredThisSlice = store.recoverStale(recoveryTime, 1000L, 2);
+            assertTrue("a slice must not recover more rows than it inspects", recoveredThisSlice <= 2);
+            recovered += recoveredThisSlice;
+        }
+        assertEquals(7, recovered);
+        assertEquals(7, store.snapshot().ready());
+        store.close();
+    }
+
+    @Test
     public void discoverySourceSurvivesPersistenceAndSeedBootstrapIsObservable() throws Exception {
         final java.io.File directory = Files.createTempDirectory("focused-frontier-source-").toFile();
         final Request request = request("https://research.example/astronomy/bootstrap");

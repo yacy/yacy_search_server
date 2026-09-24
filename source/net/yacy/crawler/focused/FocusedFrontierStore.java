@@ -204,6 +204,8 @@ public final class FocusedFrontierStore implements AutoCloseable {
 
     private final MapHeap heap;
     private final String profileId;
+    private final Object staleScanLock = new Object();
+    private Iterator<Map.Entry<byte[], Map<String, String>>> staleScan;
 
     public FocusedFrontierStore(final File stateDirectory, final String profileId) {
         this.profileId = profileId == null ? "" : profileId;
@@ -313,24 +315,45 @@ public final class FocusedFrontierStore implements AutoCloseable {
      * frontier traversal. Individual stale-row transitions are rechecked and serialized below.</p>
      */
     public int recoverStale(final long now, final long graceMillis) {
+        return recoverStale(now, graceMillis, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Inspect at most {@code scanLimit} rows of the persistent frontier for stale in-flight
+     * requests. The iterator is retained between calls, spreading a full recovery sweep over
+     * multiple scheduler cycles instead of issuing hundreds of thousands of disk-backed reads
+     * in one pass.
+     */
+    public int recoverStale(final long now, final long graceMillis, final int scanLimit) {
         if (this.heap == null) return 0;
+        if (scanLimit <= 0) return 0;
         int changed = 0;
         final List<byte[]> hashes = new ArrayList<>();
         try {
-            final Iterator<Map.Entry<byte[], Map<String, String>>> entries = this.heap.entries(true, false);
-            while (entries.hasNext() && hashes.size() < MAX_STALE_RECOVERIES_PER_SCAN) {
-                final Map.Entry<byte[], Map<String, String>> entry = entries.next();
-                final Candidate candidate = parse(entry.getKey(), entry.getValue());
-                if (candidate == null) continue;
-                if (candidate.state() == State.IN_FLIGHT
-                        && now - Math.max(candidate.lastSubmitted(), candidate.lastSeen()) >= graceMillis) {
-                    hashes.add(candidate.hash());
+            synchronized (this.staleScanLock) {
+                if (this.staleScan == null) this.staleScan = this.heap.entries(true, false);
+                int inspected = 0;
+                while (inspected < scanLimit && hashes.size() < MAX_STALE_RECOVERIES_PER_SCAN) {
+                    if (!this.staleScan.hasNext()) {
+                        this.staleScan = null;
+                        break;
+                    }
+                    final Map.Entry<byte[], Map<String, String>> entry = this.staleScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate == null) continue;
+                    if (candidate.state() == State.IN_FLIGHT
+                            && now - Math.max(candidate.lastSubmitted(), candidate.lastSeen()) >= graceMillis) {
+                        hashes.add(candidate.hash());
+                    }
                 }
             }
             for (final byte[] hash : hashes) {
                 if (markStaleInFlightReady(hash, now, graceMillis)) changed++;
             }
-        } catch (final IOException ignored) { }
+        } catch (final IOException ignored) {
+            synchronized (this.staleScanLock) { this.staleScan = null; }
+        }
         return changed;
     }
 

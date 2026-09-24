@@ -53,6 +53,8 @@ import net.yacy.search.schema.CollectionSchema;
  * robots, host balancing, link extraction, parsing and indexing remain native.
  */
 public final class FocusedCrawlScheduler {
+    private static final int FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE = 64;
+    private static final long FRONTIER_COMPACTION_INTERVAL_MILLIS = 24L * 60L * 60L * 1000L;
 
     private static final ConcurrentLog LOG = new ConcurrentLog("FocusedCrawlScheduler");
 
@@ -229,6 +231,15 @@ public final class FocusedCrawlScheduler {
             final PolicyConfiguration configuration = policy.configuration();
             final Properties state = state(configuration.id());
             final CrawlProfile profile = profile(configuration);
+            final FocusedFrontierStore frontier = this.manager.frontierEnabled(configuration.id())
+                    ? this.manager.frontier(configuration.id()) : null;
+            if (frontier != null) {
+                // Inspect a small slice on every control tick. A full MapHeap sweep
+                // over a large on-disk frontier used to issue hundreds of thousands
+                // of disk-backed lookups in one refill and contend with queue updates.
+                frontier.recoverStale(System.currentTimeMillis(),
+                        configuration.frontier().recoveryGraceMillis(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE);
+            }
             final int current = queueSize(profile);
             if (current < 0) {
                 save(state, -1, -1, 0, "queue measurement unavailable");
@@ -253,19 +264,15 @@ public final class FocusedCrawlScheduler {
             }
             final int budget = Math.max(0, Math.min(target - current, hardMaximum - current));
             final int refillBudget = Math.min(budget, configuration.limits().refillBatchSize());
-            final FocusedFrontierStore frontier = this.manager.frontierEnabled(configuration.id())
-                    ? this.manager.frontier(configuration.id()) : null;
             if (frontier != null) {
                 final long now = System.currentTimeMillis();
-                frontier.recoverStale(now, configuration.frontier().recoveryGraceMillis());
-                final long lastCompaction = this.frontierCompactions.getOrDefault(configuration.id(), 0L);
-                if (now - lastCompaction >= 3600000L) {
+                final long lastCompaction = this.frontierCompactions.computeIfAbsent(configuration.id(), id -> now);
+                if (now - lastCompaction >= FRONTIER_COMPACTION_INTERVAL_MILLIS) {
                     frontier.compact(now - configuration.frontier().terminalRetentionDays() * 86400000L,
                             configuration.frontier().maxEntries());
                     this.frontierCompactions.put(configuration.id(), now);
                 }
-                final FocusedFrontierStore.Snapshot beforeRecovery = frontier.snapshot();
-                if (beforeRecovery.total() > 0) state.setProperty("frontierStarted", "true");
+                if (frontier.size() > 0) state.setProperty("frontierStarted", "true");
                 final int recovered = refillFrontier(configuration, profile, frontier, refillBudget);
                 final int indexedExpansion = configuration.frontier().expandIndexedSources()
                         ? expandFromIndexedSources(configuration, profile, frontier, refillBudget - recovered, state) : 0;
@@ -277,16 +284,15 @@ public final class FocusedCrawlScheduler {
                     final int after = memoryPressure ? -1 : queueSize(profile);
                     final String refillReason = memoryPressure ? "resource guard after bounded refill"
                             : indexedExpansion > 0 ? "frontier recovery + indexed source expansion" : "frontier recovery";
-                    save(state, current, after, recovered + indexedExpansion,
-                            refillReason, memoryPressure ? null : frontier.snapshot());
+                    save(state, current, after, recovered + indexedExpansion, refillReason);
                     enqueued = true;
                     continue;
                 }
                 if (budget > 0 && ("initial-only".equals(configuration.frontier().seedMode())
                         || "disabled".equals(configuration.frontier().seedMode()))
-                        && (beforeRecovery.total() > 0
+                        && (frontier.size() > 0
                                 || Boolean.parseBoolean(state.getProperty("frontierStarted", "false")))) {
-                    save(state, current, current, 0, "frontier exhausted", frontier.snapshot());
+                    save(state, current, current, 0, "frontier exhausted");
                     continue;
                 }
             }
