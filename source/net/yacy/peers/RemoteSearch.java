@@ -461,7 +461,7 @@ public class RemoteSearch extends Thread {
 
     public static void interruptAlive(final RemoteSearch[] searchThreads) {
         for (final RemoteSearch searchThread : searchThreads) {
-            if (searchThread.isAlive()) searchThread.interrupt();
+            SolrCommitInterruptGuard.interrupt(searchThread);
         }
     }
 

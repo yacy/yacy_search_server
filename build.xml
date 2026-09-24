@@ -491,6 +491,31 @@
       </java>
   </target>
 
+  <target name="solr-interrupt-test" depends="compile" description="test cancellation safety around local Solr commits">
+      <delete dir="${build}/solr-interrupt-test-classes" failonerror="false" />
+      <mkdir dir="${build}/solr-interrupt-test-classes" />
+      <javac srcdir="${test}" destdir="${build}/solr-interrupt-test-classes"
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
+           release="${javacRelease}" encoding="UTF-8">
+          <include name="net/yacy/peers/SolrCommitInterruptGuardTest.java" />
+          <classpath>
+              <pathelement location="${build}" />
+              <path refid="compile.path" />
+              <path refid="test.path" />
+          </classpath>
+          <compilerarg value="-Xlint" />
+      </javac>
+      <java classname="org.junit.runner.JUnitCore" fork="true" failonerror="true" dir="${yacyroot}">
+          <arg value="net.yacy.peers.SolrCommitInterruptGuardTest" />
+          <classpath>
+              <pathelement location="${build}/solr-interrupt-test-classes" />
+              <pathelement location="${build}" />
+              <path refid="compile.path" />
+              <path refid="test.path" />
+          </classpath>
+      </java>
+  </target>
+
   <!-- ======================================================================================================= 
        making a release file for yacy 
        ======================================================================================================= -->

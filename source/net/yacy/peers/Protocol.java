@@ -807,8 +807,11 @@ public final class Protocol {
                 writerToLocalIndex.stopWriting();
                 throw new InterruptedException("remoteProcess stopped!");
             }
-            /* Ensure freshly stored metadata is visible to queries before adding results. */
-            event.query.getSegment().fulltext().commit(true);
+            /* Ensure freshly stored metadata is visible to queries before adding results.
+             * Coordinate this commit with SearchEvent cancellation: interrupting
+             * a worker inside the Lucene commit can close the shared IndexWriter. */
+            SolrCommitInterruptGuard.commitIfNotInterrupted(
+                    () -> event.query.getSegment().fulltext().commit(true));
             if (storeDocs != null && !storeDocs.isEmpty()) {
                 event.addNodes(storeDocs, null, snip, false, target.getName() + "/" + target.hash, result.totalCount, true);
             } else {

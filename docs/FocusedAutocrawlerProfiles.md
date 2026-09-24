@@ -200,3 +200,24 @@ ant focused-test
 Relevance feedback, learned weights, and cross-peer focused routing are left as
 future interface extensions. The first implementation is deterministic and
 rule-based so a profile can be exported, reviewed, shared, and reproduced.
+
+## Core indexing safety dependency
+
+Focused Autocrawler Profiles reuse YaCy's existing local index and do not own
+or replace Solr's writer. During continuous indexing, a separate core race can
+still stop all subsequent indexing: remote-search cleanup may interrupt a
+worker while it commits fetched peer metadata to the local Solr index. Lucene
+can close its shared `IndexWriter` when that commit is interrupted, after which
+crawl indexing fails with `IndexWriter is closed` even while queued crawl work
+remains.
+
+The accompanying core fix serializes that metadata commit with search-thread
+cancellation. Cancellation is delayed only for the duration of the commit;
+pending cancellation is checked before entering it. This is generic YaCy index
+writer protection, not focused-policy or Canada-specific behavior. It does not
+purge or rebuild the index, alter crawl queues, or change ordinary crawler
+policy. The fix is kept in its own commit so it can be reviewed, cherry-picked,
+or reverted independently from the focused-crawler feature. After a live writer
+has already been closed by this failure, one controlled YaCy restart is needed
+to reopen it; the existing index and queued URLs remain on their persistent
+storage.
