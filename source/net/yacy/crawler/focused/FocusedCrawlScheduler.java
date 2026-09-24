@@ -86,10 +86,11 @@ public final class FocusedCrawlScheduler {
 
         public synchronized Lane choose(final boolean focusedAvailable, final boolean ordinaryAvailable,
                 final int focusedWeight, final int ordinaryWeight) {
-            if (!focusedAvailable) return ordinaryAvailable ? Lane.ORDINARY : null;
+            final int ordinary = Math.max(0, ordinaryWeight);
+            if (!focusedAvailable) return ordinaryAvailable && ordinary > 0 ? Lane.ORDINARY : null;
             if (!ordinaryAvailable) return Lane.FOCUSED;
             final int focused = Math.max(0, focusedWeight);
-            final int ordinary = Math.max(1, ordinaryWeight);
+            if (ordinary == 0) return Lane.FOCUSED;
             final int cycle = Math.max(1, focused + ordinary);
             return (this.dispatches++ % cycle) < focused ? Lane.FOCUSED : Lane.ORDINARY;
         }

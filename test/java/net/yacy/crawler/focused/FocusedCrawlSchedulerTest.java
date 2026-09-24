@@ -29,4 +29,11 @@ public class FocusedCrawlSchedulerTest {
         assertEquals(FocusedCrawlScheduler.Lane.FOCUSED, selector.choose(true, false, 7, 3));
         assertTrue(selector.choose(false, false, 7, 3) == null);
     }
+
+    @Test
+    public void zeroOrdinaryWeightDisablesOrdinaryFallbackAndKeepsFocusedPriority() {
+        final FocusedCrawlScheduler.WeightedLaneSelector selector = new FocusedCrawlScheduler.WeightedLaneSelector();
+        assertEquals(FocusedCrawlScheduler.Lane.FOCUSED, selector.choose(true, true, 6, 0));
+        assertTrue(selector.choose(false, true, 6, 0) == null);
+    }
 }

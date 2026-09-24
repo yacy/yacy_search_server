@@ -35,6 +35,10 @@ focused.autocrawler.ordinaryWeight = 4
 focused.autocrawler.controlInterval = 300000
 ```
 
+Set `focused.autocrawler.ordinaryWeight = 0` to leave ordinary local, global-to-local,
+and no-load work queued but unprocessed while focused profiles continue. The default
+weight preserves YaCy's existing mixed-lane behaviour.
+
 Profile-specific `limits.queueTarget`, `limits.refillBelow`, and
 `limits.hardMaximum` control each profile. No queue size is hard-coded for a
 particular subject. A profile must satisfy `refillBelow <= queueTarget <=
