@@ -94,8 +94,10 @@ than introducing a second downloader. Native links discovered from those roots
 continue through the same focused policy hooks.
 
 Frontier recovery is bounded by `limits.refillBatchSize` for each profile
-(10,000 URLs by default, configurable up to 100,000). The queue target remains
-independent of this per-cycle batch limit. The scheduler checks heap headroom
+(10,000 URLs by default, configurable up to 100,000). The Canada example uses
+a 3,000-URL batch after production measurements showed the larger batch
+triggering repeated memory pauses. The queue target remains independent of
+this per-cycle batch limit. The scheduler checks heap headroom
 while admitting a batch and pauses YaCy's native local crawl when headroom is
 below `max(512 MiB, 25% of maximum heap)`. It resumes only after two healthy
 checks above `max(768 MiB, 35% of maximum heap)`. The pause applies to native

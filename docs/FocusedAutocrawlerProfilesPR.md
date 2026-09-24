@@ -79,8 +79,10 @@ general mechanism for deliberately growing and maintaining such indexes.
 ## Resource backpressure
 
 The focused scheduler bounds each profile's frontier refill with
-`limits.refillBatchSize` (10,000 by default, configurable up to 100,000), and
-checks heap headroom while admitting work. With a focused profile enabled, it
+`limits.refillBatchSize` (10,000 by default, configurable up to 100,000). The
+Canada example uses 3,000 based on observed heap pauses during 4,500+ URL
+refills. The scheduler checks heap headroom while admitting work. With a
+focused profile enabled, it
 pauses YaCy's native local crawl below `max(512 MiB, 25% of maximum heap)` and
 resumes only after two healthy checks above `max(768 MiB, 35% of maximum
 heap)`. This pauses already-queued fetching as well as future refills, while

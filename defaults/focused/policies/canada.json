@@ -88,7 +88,7 @@
     "queueTarget": 250000,
     "refillBelow": 150000,
     "hardMaximum": 300000,
-    "refillBatchSize": 10000,
+    "refillBatchSize": 3000,
     "storageTargetBytes": 0,
     "explorationPercent": 10,
     "maximumDepth": 4,
