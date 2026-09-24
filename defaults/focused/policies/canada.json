@@ -88,6 +88,7 @@
     "queueTarget": 250000,
     "refillBelow": 150000,
     "hardMaximum": 300000,
+    "refillBatchSize": 10000,
     "storageTargetBytes": 0,
     "explorationPercent": 10,
     "maximumDepth": 4,
@@ -96,6 +97,6 @@
     "refreshSeeds": false,
     "recrawlFocused": false,
     "defaultRecrawlMinutes": 43200,
-    "controlIntervalSeconds": 300
+    "controlIntervalSeconds": 30
   }
 }

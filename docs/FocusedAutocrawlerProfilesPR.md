@@ -76,14 +76,24 @@ The large-scale crawling issue is especially relevant because it describes the
 need for very large site-oriented indexes, while this pull request supplies a
 general mechanism for deliberately growing and maintaining such indexes.
 
+## Resource backpressure
+
+The focused scheduler bounds each profile's frontier refill with
+`limits.refillBatchSize` (10,000 by default, configurable up to 100,000), and
+checks heap headroom while admitting work. With a focused profile enabled, it
+pauses YaCy's native local crawl below `max(512 MiB, 25% of maximum heap)` and
+resumes only after two healthy checks above `max(768 MiB, 35% of maximum
+heap)`. This pauses already-queued fetching as well as future refills, while
+leaving the persisted queue intact. Manual pauses are never resumed by the
+guard. The core ResourceObserver remains the final fallback.
+
 ## Scope and operational limits
 
 The implementation preserves robots handling, host balancing, ordinary crawl
 profiles, queue persistence, and existing network behaviour when no focused
-profile is enabled. The separate Solr-commit guard addresses only the
-interruption race described above; it does not claim to fix general memory,
-DNS, or HostBalancer defects. Those remain independent integration points and
-operational concerns.
+profile is enabled. Focused heap backpressure is profile-scoped; it does not
+claim to fix general memory, DNS, or HostBalancer defects. The separate
+Solr-commit guard addresses only the interruption race described above.
 
 Relevance feedback, automatic weight learning, and cross-peer focused-search
 routing remain future extensions. The initial policy engine is deterministic
@@ -91,11 +101,16 @@ and rule-based so profiles can be validated, exported, shared, and reproduced.
 
 ## Validation
 
-- `ant focused-test` passes, including a concurrency regression test asserting
-  bulk frontier scans complete while the store monitor is held by another
-  thread.
+- `ant focused-test` passes in the Docker builder, including focused resource
+  threshold and refill-batch configuration tests.
 - The Docker builder compiles the fork successfully.
-- The deployed smoke check confirmed the existing queue state reopened, search
-  returned HTTP 200, the resource guard remained clear, and no crawler threads
-  were waiting on the focused frontier-store monitor. A 12–24-hour operational
-  soak has not yet completed and is not claimed here.
+- During the 2026-09-24 outage investigation, Caddy returned 502 while the YaCy
+  accept backlog was full. The instance's `memory.acceptDHTabove` setting was
+  50 MiB, so YaCy still considered a 144 MiB heap reserve healthy. Persisted
+  scheduler state recorded a 56,006-URL refill and an 80,970-URL local queue;
+  the focused scheduler then declined more refills but did not pause fetching
+  already in YaCy's queue. The new proactive guard and bounded refill address
+  that observed failure mode.
+- The existing frontier reopened after restart and the public search page
+  returned HTTP 200. A 12–24-hour operational soak has not yet completed and
+  is not claimed here.

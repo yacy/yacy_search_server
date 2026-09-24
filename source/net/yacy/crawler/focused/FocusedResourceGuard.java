@@ -9,8 +9,8 @@ package net.yacy.crawler.focused;
  */
 public final class FocusedResourceGuard {
 
-    private static final long MIN_HEADROOM = 512L * 1024L * 1024L;
-    private static final long MIN_REFILL_HEADROOM = 256L * 1024L * 1024L;
+    private static final long MIN_PAUSE_HEADROOM = 512L * 1024L * 1024L;
+    private static final long MIN_RECOVERY_HEADROOM = 768L * 1024L * 1024L;
     private static final int REQUIRED_HEALTHY_CHECKS = 2;
 
     private int healthyChecks;
@@ -19,7 +19,7 @@ public final class FocusedResourceGuard {
 
     public synchronized boolean observe(final String pauseCause, final long availableMemory,
             final long maxMemory, final boolean shortMemory, final boolean diskHealthy) {
-        if (pauseCause == null || !pauseCause.startsWith("resource observer:")) {
+        if (!isManagedPauseCause(pauseCause)) {
             this.healthyChecks = 0;
             return false;
         }
@@ -45,20 +45,37 @@ public final class FocusedResourceGuard {
     public synchronized long recoveryAttempts() { return this.recoveryAttempts; }
     public synchronized long recoveries() { return this.recoveries; }
 
+    public static boolean isManagedPauseCause(final String cause) {
+        return cause != null && (cause.startsWith("resource observer:")
+                || cause.startsWith("focused resource guard:"));
+    }
+
+    public static boolean isFocusedPauseCause(final String cause) {
+        return cause != null && cause.startsWith("focused resource guard:");
+    }
+
+    /** Headroom below which focused scheduling pauses native local crawling. */
+    public static long pauseThreshold(final long maxMemory) {
+        if (maxMemory <= 0L) return MIN_PAUSE_HEADROOM;
+        return Math.max(MIN_PAUSE_HEADROOM, maxMemory * 25L / 100L);
+    }
+
+    public static boolean shouldPause(final long availableMemory, final long maxMemory,
+            final boolean shortMemory) {
+        return shortMemory || availableMemory < pauseThreshold(maxMemory);
+    }
+
     public static long recoveryThreshold(final long maxMemory) {
-        if (maxMemory <= 0L) return MIN_HEADROOM;
-        return Math.max(MIN_HEADROOM, maxMemory * 30L / 100L);
+        if (maxMemory <= 0L) return MIN_RECOVERY_HEADROOM;
+        return Math.max(MIN_RECOVERY_HEADROOM, maxMemory * 35L / 100L);
     }
 
     /**
-     * Lower threshold for ordinary focused-queue refills. A refill adds
-     * bounded queue metadata and is not the same operation as recovering a
-     * crawler that YaCy's ResourceObserver has already paused. Keeping this
-     * threshold separate avoids draining a healthy queue merely because the
-     * JVM has committed most of its currently reserved heap.
+     * Stop queue admissions at the pause threshold. Recovery intentionally
+     * requires more headroom, providing hysteresis rather than oscillating at
+     * a single memory boundary.
      */
     public static long refillThreshold(final long maxMemory) {
-        if (maxMemory <= 0L) return MIN_REFILL_HEADROOM;
-        return Math.max(MIN_REFILL_HEADROOM, maxMemory * 20L / 100L);
+        return pauseThreshold(maxMemory);
     }
 }

@@ -93,6 +93,16 @@ storage guards before seeding, and submits roots through `CrawlStacker` rather
 than introducing a second downloader. Native links discovered from those roots
 continue through the same focused policy hooks.
 
+Frontier recovery is bounded by `limits.refillBatchSize` for each profile
+(10,000 URLs by default, configurable up to 100,000). The queue target remains
+independent of this per-cycle batch limit. The scheduler checks heap headroom
+while admitting a batch and pauses YaCy's native local crawl when headroom is
+below `max(512 MiB, 25% of maximum heap)`. It resumes only after two healthy
+checks above `max(768 MiB, 35% of maximum heap)`. The pause applies to native
+fetching already in progress as well as future refills; queued requests remain
+persisted. It never resumes a manual pause. The ordinary ResourceObserver pause
+and recovery path remains supported.
+
 ### Persistent frontier and safe queue reset
 
 A profile can opt into a native-queue recovery frontier:

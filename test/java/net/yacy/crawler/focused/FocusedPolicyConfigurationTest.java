@@ -33,7 +33,7 @@ public class FocusedPolicyConfigurationTest {
                 .put("collections", new JSONObject()
                         .put("research", new JSONObject().put("terms", Arrays.asList("astronomy"))))
                 .put("limits", new JSONObject().put("maximumDepth", 3).put("explorationPercent", 10)
-                        .put("seedBatchSize", 3));
+                        .put("seedBatchSize", 3).put("refillBatchSize", 12000));
     }
 
     @Test
@@ -44,8 +44,23 @@ public class FocusedPolicyConfigurationTest {
         assertEquals("astronomy", configuration.id());
         assertEquals(3, configuration.limits().maximumDepth());
         assertEquals(3, configuration.limits().seedBatchSize());
+        assertEquals(12000, configuration.limits().refillBatchSize());
         assertTrue(configuration.limits().recrawlFocused());
         assertTrue(!configuration.enabled());
+    }
+
+    @Test
+    public void refillBatchHasSafeBackwardCompatibleDefaultAndBoundedConfiguration() throws Exception {
+        final JSONObject legacy = configuration(false);
+        legacy.getJSONObject("limits").remove("refillBatchSize");
+        assertEquals(PolicyConfiguration.Limits.DEFAULT_REFILL_BATCH_SIZE,
+                PolicyConfiguration.fromJSON(legacy).limits().refillBatchSize());
+
+        legacy.getJSONObject("limits").put("refillBatchSize", 1000000);
+        assertEquals(100000, PolicyConfiguration.fromJSON(legacy).limits().refillBatchSize());
+
+        legacy.getJSONObject("limits").put("refillBatchSize", 0);
+        assertEquals(1, PolicyConfiguration.fromJSON(legacy).limits().refillBatchSize());
     }
 
     @Test

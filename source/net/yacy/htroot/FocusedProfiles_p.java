@@ -109,7 +109,10 @@ public class FocusedProfiles_p {
         prop.putHTML("resource_pause_cause", resourceStatus == null ? "" : resourceStatus.optString("pauseCause", ""));
         prop.put("resource_paused", resourceStatus != null && resourceStatus.optBoolean("paused", false));
         prop.put("resource_memory_available", resourceStatus == null ? 0L : resourceStatus.optLong("memoryAvailable", 0L));
-        prop.put("resource_memory_threshold", resourceStatus == null ? 0L : resourceStatus.optLong("memoryThreshold", 0L));
+        prop.put("resource_memory_pause_threshold", resourceStatus == null ? 0L : resourceStatus.optLong("memoryPauseThreshold",
+                resourceStatus.optLong("memoryThreshold", 0L)));
+        prop.put("resource_memory_recovery_threshold", resourceStatus == null ? 0L
+                : resourceStatus.optLong("memoryRecoveryThreshold", 0L));
         prop.put("resource_healthy_checks", resourceStatus == null ? 0 : resourceStatus.optInt("healthyChecks", 0));
         prop.put("pdf_active", pdfStatus == null ? 0 : pdfStatus.optInt("active", 0));
         prop.put("pdf_admitted", pdfStatus == null ? 0L : pdfStatus.optLong("admitted", 0L));

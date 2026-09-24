@@ -216,10 +216,16 @@ public final class FocusedCrawlScheduler {
     public synchronized boolean job() {
         if (!isOwner()) return false;
         recoverResourceObserverPause();
-        boolean enqueued = false;
         final Collection<FocusedCrawlPolicy> policies = this.manager.enabledPolicies();
+        if (!policies.isEmpty() && pauseFocusedCrawlForMemoryPressure()) return false;
+        // Respect both operator pauses and resource pauses. In particular, do
+        // not refill a native queue while a focused memory pause is waiting for
+        // its recovery headroom; queued requests also consume heap.
+        if (this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) return false;
+        boolean enqueued = false;
         applyNoveltyWeights(policies);
         for (final FocusedCrawlPolicy policy : policies) {
+            if (this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) break;
             final PolicyConfiguration configuration = policy.configuration();
             final Properties state = state(configuration.id());
             final CrawlProfile profile = profile(configuration);
@@ -246,6 +252,7 @@ public final class FocusedCrawlScheduler {
                 continue;
             }
             final int budget = Math.max(0, Math.min(target - current, hardMaximum - current));
+            final int refillBudget = Math.min(budget, configuration.limits().refillBatchSize());
             final FocusedFrontierStore frontier = this.manager.frontierEnabled(configuration.id())
                     ? this.manager.frontier(configuration.id()) : null;
             if (frontier != null) {
@@ -259,14 +266,19 @@ public final class FocusedCrawlScheduler {
                 }
                 final FocusedFrontierStore.Snapshot beforeRecovery = frontier.snapshot();
                 if (beforeRecovery.total() > 0) state.setProperty("frontierStarted", "true");
-                final int recovered = refillFrontier(configuration, profile, frontier, budget);
+                final int recovered = refillFrontier(configuration, profile, frontier, refillBudget);
                 final int indexedExpansion = configuration.frontier().expandIndexedSources()
-                        ? expandFromIndexedSources(configuration, profile, frontier, budget - recovered, state) : 0;
+                        ? expandFromIndexedSources(configuration, profile, frontier, refillBudget - recovered, state) : 0;
                 if (recovered + indexedExpansion > 0) {
-                    final int after = queueSize(profile);
+                    final boolean memoryPressure = !memoryHealthy();
+                    if (memoryPressure) pauseFocusedCrawlForMemoryPressure();
+                    // Avoid another full queue/frontier scan after pausing on
+                    // low headroom; the persisted native queues remain intact.
+                    final int after = memoryPressure ? -1 : queueSize(profile);
+                    final String refillReason = memoryPressure ? "resource guard after bounded refill"
+                            : indexedExpansion > 0 ? "frontier recovery + indexed source expansion" : "frontier recovery";
                     save(state, current, after, recovered + indexedExpansion,
-                            indexedExpansion > 0 ? "frontier recovery + indexed source expansion" : "frontier recovery",
-                            frontier.snapshot());
+                            refillReason, memoryPressure ? null : frontier.snapshot());
                     enqueued = true;
                     continue;
                 }
@@ -292,7 +304,7 @@ public final class FocusedCrawlScheduler {
             // the same roots, must grow the queue through native link
             // extraction.
             final int configuredSeedBatch = configuration.limits().seedBatchSize();
-            final int rootBatch = Math.min(budget, Math.min(seeds.size(),
+            final int rootBatch = Math.min(refillBudget, Math.min(seeds.size(),
                     configuredSeedBatch > 0 ? configuredSeedBatch : seeds.size()));
             for (int i = 0; i < rootBatch; i++) {
                 final String seed = seeds.get(Math.floorMod(cursor + i, seeds.size()));
@@ -344,6 +356,10 @@ public final class FocusedCrawlScheduler {
         int added = 0;
         final long now = System.currentTimeMillis();
         for (final FocusedFrontierStore.Candidate candidate : frontier.recoverable(now, budget)) {
+            if (!memoryHealthy()) {
+                pauseFocusedCrawlForMemoryPressure();
+                break;
+            }
             if (added >= budget) break;
             final long indexedAt = this.sb.index.getLoadTime(candidate.hash());
             if (indexedAt >= 0L) {
@@ -422,6 +438,10 @@ public final class FocusedCrawlScheduler {
                     ? 0 : sourceCursor + sources.size();
             state.setProperty("indexedSourceCursor", Integer.toString(nextCursor));
             for (final SolrDocument source : sources) {
+                if (!memoryHealthy()) {
+                    pauseFocusedCrawlForMemoryPressure();
+                    break;
+                }
                 if (added >= budget) break;
                 final String sourceId = stringValue(source.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 if (sourceId.isEmpty()) continue;
@@ -446,6 +466,10 @@ public final class FocusedCrawlScheduler {
                 final String sourceProtocol = protocolOf(source.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                 final java.util.Iterator<String> links = outboundLinks(source, sourceProtocol).iterator();
                 while (links.hasNext() && added < budget) {
+                    if (!memoryHealthy()) {
+                        pauseFocusedCrawlForMemoryPressure();
+                        break;
+                    }
                     final DigestURL url;
                     try {
                         url = new DigestURL(links.next());
@@ -700,6 +724,44 @@ public final class FocusedCrawlScheduler {
                 && MemoryControl.available() >= FocusedResourceGuard.refillThreshold(MemoryControl.maxMemory());
     }
 
+    /**
+     * Stop the native local crawler before a focused workload consumes the
+     * last heap headroom. This is deliberately a crawl pause, not just a
+     * refusal to refill: already queued requests and parser work also consume
+     * memory. The distinct cause lets this scheduler resume only its own pause
+     * after the larger recovery threshold is met.
+     */
+    private boolean pauseFocusedCrawlForMemoryPressure() {
+        final long available = MemoryControl.available();
+        final long maximum = MemoryControl.maxMemory();
+        final long threshold = FocusedResourceGuard.pauseThreshold(maximum);
+        if (!FocusedResourceGuard.shouldPause(available, maximum, MemoryControl.shortStatus())) return false;
+
+        final String jobType = SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL;
+        if (!this.sb.crawlJobIsPaused(jobType)) {
+            final String cause = "focused resource guard: JVM headroom " + available
+                    + " bytes is below " + threshold + " bytes";
+            this.sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_AUTODISABLED, true);
+            this.sb.pauseCrawlJob(jobType, cause);
+            LOG.warn("Paused local crawling for focused-profile memory headroom: available="
+                    + available + ", threshold=" + threshold);
+        }
+
+        this.resourceState.setProperty("lastCheck", Long.toString(System.currentTimeMillis()));
+        this.resourceState.setProperty("paused", Boolean.toString(this.sb.crawlJobIsPaused(jobType)));
+        this.resourceState.setProperty("pauseCause", this.sb.getConfig(jobType + "_isPaused_cause", ""));
+        this.resourceState.setProperty("memoryAvailable", Long.toString(available));
+        this.resourceState.setProperty("memoryMaximum", Long.toString(maximum));
+        this.resourceState.setProperty("memoryThreshold", Long.toString(FocusedResourceGuard.refillThreshold(maximum)));
+        this.resourceState.setProperty("memoryPauseThreshold", Long.toString(threshold));
+        this.resourceState.setProperty("memoryRecoveryThreshold", Long.toString(FocusedResourceGuard.recoveryThreshold(maximum)));
+        this.resourceState.setProperty("memoryShort", Boolean.toString(MemoryControl.shortStatus()));
+        this.resourceState.setProperty("memoryProper", Boolean.toString(MemoryControl.properState()));
+        this.resourceState.setProperty("diskHealthy", Boolean.toString(diskHealthy(null)));
+        persistResourceState();
+        return true;
+    }
+
     private boolean diskHealthy(final PolicyConfiguration configuration) {
         final File index = new File(this.sb.getDataPath(), "DATA/INDEX");
         final File data = new File(this.sb.getDataPath(), "DATA");
@@ -710,10 +772,8 @@ public final class FocusedCrawlScheduler {
     }
 
     /**
-     * Recover only pauses explicitly created by YaCy's ResourceObserver.
-     * Manual/network pauses remain untouched. The normal observer method is
-     * invoked after the guard succeeds so all of YaCy's existing autodisable
-     * bookkeeping and wake-up behaviour remains authoritative.
+     * Recover only pauses explicitly created by YaCy's ResourceObserver or
+     * this focused resource guard. Manual/network pauses remain untouched.
      */
     private void recoverResourceObserverPause() {
         final String jobType = SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL;
@@ -724,15 +784,15 @@ public final class FocusedCrawlScheduler {
         // A previous failed allocation sets a sticky short-status bit. Once
         // the full recovery headroom is present, a tiny successful request is
         // safe and lets MemoryControl clear that transient bit normally.
-        if (paused && cause.startsWith("resource observer:") && available >= FocusedResourceGuard.recoveryThreshold(maximum)
+        final boolean managedPause = paused && FocusedResourceGuard.isManagedPauseCause(cause);
+        if (managedPause && available >= FocusedResourceGuard.recoveryThreshold(maximum)
                 && MemoryControl.shortStatus()) {
             MemoryControl.request(1024L, false);
             available = MemoryControl.available();
         }
         final boolean disk = diskHealthy(null);
-        final boolean observerPause = paused && cause.startsWith("resource observer:");
         final boolean recover;
-        if (observerPause) {
+        if (managedPause) {
             recover = this.resourceGuard.observe(cause, available, maximum,
                     MemoryControl.shortStatus(), disk);
         } else {
@@ -745,6 +805,7 @@ public final class FocusedCrawlScheduler {
         this.resourceState.setProperty("memoryAvailable", Long.toString(available));
         this.resourceState.setProperty("memoryMaximum", Long.toString(maximum));
         this.resourceState.setProperty("memoryThreshold", Long.toString(FocusedResourceGuard.refillThreshold(maximum)));
+        this.resourceState.setProperty("memoryPauseThreshold", Long.toString(FocusedResourceGuard.pauseThreshold(maximum)));
         this.resourceState.setProperty("memoryRecoveryThreshold", Long.toString(FocusedResourceGuard.recoveryThreshold(maximum)));
         this.resourceState.setProperty("memoryShort", Boolean.toString(MemoryControl.shortStatus()));
         this.resourceState.setProperty("memoryProper", Boolean.toString(MemoryControl.properState()));
@@ -752,17 +813,29 @@ public final class FocusedCrawlScheduler {
         this.resourceState.setProperty("healthyChecks", Integer.toString(this.resourceGuard.healthyChecks()));
         this.resourceState.setProperty("recoveryAttempts", Long.toString(this.resourceGuard.recoveryAttempts()));
         this.resourceState.setProperty("recoveries", Long.toString(this.resourceGuard.recoveries()));
-        if (recover && paused && cause.startsWith("resource observer:")) {
+        if (recover && managedPause) {
             MemoryControl.resetProperState();
             MemoryControl.request(1024L, false);
-            this.sb.observer.resourceObserverJob();
+            if (FocusedResourceGuard.isFocusedPauseCause(cause)) {
+                if (this.sb.crawlJobIsPaused(jobType)
+                        && this.sb.getConfigBool(SwitchboardConstants.CRAWLJOB_LOCAL_AUTODISABLED, false)
+                        && cause.equals(this.sb.getConfig(jobType + "_isPaused_cause", ""))) {
+                    this.sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_AUTODISABLED, false);
+                    this.sb.continueCrawlJob(jobType);
+                    this.sb.setConfig(jobType + "_isPaused_cause", "");
+                }
+            } else {
+                this.sb.observer.resourceObserverJob();
+            }
             if (!this.sb.crawlJobIsPaused(jobType)) {
                 this.resourceState.setProperty("lastRecovery", Long.toString(System.currentTimeMillis()));
-                LOG.info("Recovered ResourceObserver pause after two healthy focused-crawl checks");
+                LOG.info("Recovered managed crawl resource pause after two healthy focused-crawl checks");
             } else {
                 this.resourceState.setProperty("lastRecoveryFailure", Long.toString(System.currentTimeMillis()));
             }
         }
+        this.resourceState.setProperty("paused", Boolean.toString(this.sb.crawlJobIsPaused(jobType)));
+        this.resourceState.setProperty("pauseCause", this.sb.getConfig(jobType + "_isPaused_cause", ""));
         persistResourceState();
     }
 
@@ -922,6 +995,7 @@ public final class FocusedCrawlScheduler {
                     .put("memoryAvailable", MemoryControl.available())
                     .put("memoryMaximum", MemoryControl.maxMemory())
                     .put("memoryThreshold", FocusedResourceGuard.refillThreshold(MemoryControl.maxMemory()))
+                    .put("memoryPauseThreshold", FocusedResourceGuard.pauseThreshold(MemoryControl.maxMemory()))
                     .put("memoryRecoveryThreshold", FocusedResourceGuard.recoveryThreshold(MemoryControl.maxMemory()))
                     .put("memoryShort", MemoryControl.shortStatus())
                     .put("memoryProper", MemoryControl.properState())

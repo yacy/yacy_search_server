@@ -99,9 +99,12 @@ public final class PolicyConfiguration {
     }
 
     public static final class Limits {
+        public static final int DEFAULT_REFILL_BATCH_SIZE = 10000;
+        private static final int MAX_REFILL_BATCH_SIZE = 100000;
         private final int queueTarget;
         private final int refillBelow;
         private final int hardMaximum;
+        private final int refillBatchSize;
         private final long storageTargetBytes;
         private final int explorationPercent;
         private final int maximumDepth;
@@ -116,6 +119,8 @@ public final class PolicyConfiguration {
             this.queueTarget = Math.max(0, json.optInt("queueTarget", 0));
             this.refillBelow = Math.max(0, json.optInt("refillBelow", 0));
             this.hardMaximum = Math.max(0, json.optInt("hardMaximum", 0));
+            this.refillBatchSize = Math.max(1, Math.min(MAX_REFILL_BATCH_SIZE,
+                    json.optInt("refillBatchSize", DEFAULT_REFILL_BATCH_SIZE)));
             this.storageTargetBytes = Math.max(0L, json.optLong("storageTargetBytes", 0L));
             this.explorationPercent = Math.max(0, Math.min(100, json.optInt("explorationPercent", 10)));
             this.maximumDepth = Math.max(0, json.optInt("maximumDepth", 2));
@@ -140,6 +145,8 @@ public final class PolicyConfiguration {
         public int queueTarget() { return this.queueTarget; }
         public int refillBelow() { return this.refillBelow; }
         public int hardMaximum() { return this.hardMaximum; }
+        /** Maximum frontier URLs admitted in one scheduling cycle. */
+        public int refillBatchSize() { return this.refillBatchSize; }
         public long storageTargetBytes() { return this.storageTargetBytes; }
         public int explorationPercent() { return this.explorationPercent; }
         public int maximumDepth() { return this.maximumDepth; }
@@ -159,7 +166,8 @@ public final class PolicyConfiguration {
             final JSONObject json = new JSONObject(true);
             try {
                 json.put("queueTarget", this.queueTarget).put("refillBelow", this.refillBelow)
-                        .put("hardMaximum", this.hardMaximum).put("storageTargetBytes", this.storageTargetBytes)
+                        .put("hardMaximum", this.hardMaximum).put("refillBatchSize", this.refillBatchSize)
+                        .put("storageTargetBytes", this.storageTargetBytes)
                         .put("explorationPercent", this.explorationPercent).put("maximumDepth", this.maximumDepth)
                         .put("perHostBudget", this.perHostBudget).put("seedBatchSize", this.seedBatchSize)
                         .put("refreshSeeds", this.refreshSeeds)
