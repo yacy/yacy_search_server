@@ -22,7 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import org.json.JSONException;
@@ -54,6 +53,7 @@ import net.yacy.search.schema.CollectionSchema;
  */
 public final class FocusedCrawlScheduler {
     private static final int FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE = 64;
+    private static final int QUEUE_SIZE_MEASUREMENT_ATTEMPTS = 3;
     private static final long FRONTIER_COMPACTION_INTERVAL_MILLIS = 24L * 60L * 60L * 1000L;
 
     private static final ConcurrentLog LOG = new ConcurrentLog("FocusedCrawlScheduler");
@@ -241,11 +241,7 @@ public final class FocusedCrawlScheduler {
                 frontier.recoverStale(System.currentTimeMillis(),
                         configuration.frontier().recoveryGraceMillis(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE);
             }
-            final int current = queueSize(profile);
-            if (current < 0) {
-                save(state, -1, -1, 0, "queue measurement unavailable");
-                continue;
-            }
+            final int current = queueSizeForScheduling(profile);
             final int target = Math.max(0, configuration.limits().queueTarget());
             final int refillBelow = Math.min(target, Math.max(0, configuration.limits().refillBelow()));
             final int hardMaximum = Math.max(target, configuration.limits().hardMaximum());
@@ -285,7 +281,7 @@ public final class FocusedCrawlScheduler {
                     }
                     // Avoid another full queue/frontier scan after pausing on
                     // low headroom; the persisted native queues remain intact.
-                    final int after = memoryPressure ? -1 : queueSize(profile);
+                    final int after = memoryPressure ? -1 : queueSizeForScheduling(profile);
                     final String refillReason = memoryPressure ? "resource guard after bounded refill"
                             : indexedExpansion > 0 ? "frontier recovery + indexed source expansion" : "frontier recovery";
                     save(state, current, after, recovered + indexedExpansion, refillReason);
@@ -353,7 +349,7 @@ public final class FocusedCrawlScheduler {
                 state.setProperty("frontierStarted", "true");
             }
             state.setProperty("lastRefill", Long.toString(System.currentTimeMillis()));
-            final int after = queueSize(profile);
+            final int after = queueSizeForScheduling(profile);
             save(state, current, after, added, "refill");
             enqueued |= added > 0;
         }
@@ -641,10 +637,19 @@ public final class FocusedCrawlScheduler {
         CrawlProfile selected = null;
         int selectedQueue = -1;
         final List<CrawlProfile> duplicates = new ArrayList<>();
+        boolean queueMeasurementUnavailable = false;
         for (final byte[] handle : this.sb.crawler.getActive()) {
             final CrawlProfile candidate = this.sb.crawler.getActive(handle);
             if (candidate == null || !profileName.equals(candidate.name())) continue;
             final int candidateQueue = queueSize(candidate);
+            if (candidateQueue < 0) {
+                // A failed concurrent snapshot is not evidence that this
+                // profile has an empty queue. Keep all matching persisted
+                // profiles rather than risk deleting the one holding work.
+                queueMeasurementUnavailable = true;
+                if (selected == null) selected = candidate;
+                continue;
+            }
             if (selected == null || candidateQueue > selectedQueue) {
                 if (selected != null) duplicates.add(selected);
                 selected = candidate;
@@ -652,6 +657,11 @@ public final class FocusedCrawlScheduler {
             } else {
                 duplicates.add(candidate);
             }
+        }
+        if (queueMeasurementUnavailable) {
+            duplicates.clear();
+            LOG.warn("Could not consistently measure all persisted queues for " + profileName
+                    + "; retaining matching profiles without queue cleanup");
         }
         if (selected != null) {
             applyConfiguration(selected, configuration);
@@ -702,25 +712,29 @@ public final class FocusedCrawlScheduler {
     }
 
     private int queueSize(final CrawlProfile profile) {
-        int count = 0;
-        for (final StackType stack : new StackType[] { StackType.FOCUSED, StackType.FOCUSED_PDF }) {
-            final java.util.Iterator<Request> iterator = this.sb.crawlQueues.noticeURL.iterator(stack);
-            if (iterator == null) continue;
-            try {
-                while (iterator.hasNext()) {
-                    final Request request;
-                    try {
-                        request = iterator.next();
-                    } catch (final NoSuchElementException e) {
-                        return -1;
-                    }
-                    if (request != null && profile.handle().equals(request.profileHandle())) count++;
-                }
-            } catch (final NoSuchElementException e) {
-                return -1;
-            }
-        }
-        return count;
+        final String profileHandle = profile.handle();
+        final StackType[] stacks = { StackType.FOCUSED, StackType.FOCUSED_PDF };
+        return FocusedQueueCounter.countSnapshot(stacks.length,
+                index -> this.sb.crawlQueues.noticeURL.iterator(stacks[index]),
+                request -> request != null && profileHandle.equals(request.profileHandle()),
+                QUEUE_SIZE_MEASUREMENT_ATTEMPTS);
+    }
+
+    /**
+     * The aggregate is an upper bound for any one profile. Use it only when
+     * concurrent queue mutations defeat every per-profile snapshot retry, so
+     * a transient race does not park the sole enabled focused profile. It
+     * cannot make the scheduler exceed its configured queue target.
+     */
+    private int queueSizeForScheduling(final CrawlProfile profile) {
+        final int profileSize = queueSize(profile);
+        if (profileSize >= 0) return profileSize;
+        final int aggregateFocusedSize = this.sb.crawlQueues.noticeURL.stackSize(StackType.FOCUSED)
+                + this.sb.crawlQueues.noticeURL.stackSize(StackType.FOCUSED_PDF);
+        LOG.warn("Could not obtain a stable queue snapshot for focused profile " + profile.name()
+                + " after " + QUEUE_SIZE_MEASUREMENT_ATTEMPTS + " attempts; using conservative aggregate focused queue size "
+                + aggregateFocusedSize);
+        return Math.max(0, aggregateFocusedSize);
     }
 
     private boolean healthy(final PolicyConfiguration configuration) {
