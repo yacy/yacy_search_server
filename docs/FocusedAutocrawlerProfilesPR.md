@@ -17,6 +17,12 @@ resume after a restart or an explicit profile-scoped queue reset without
 replaying completed seed roots. This is a recovery layer around YaCy's native
 queue, not a second downloader.
 
+Frontier recovery, queue-candidate reads, status snapshots, and compaction do
+not hold the shared frontier-store monitor across full heap scans. Stale
+in-flight rows are rechecked before transition and recovered in bounded
+batches, so maintenance work does not serialize crawler admission and
+indexing callbacks behind a large persistent frontier.
+
 The branch also carries one independently reviewable core-safety commit
 (`62302c0`, **Protect Solr commits from search cancellation**). It guards the
 local Solr metadata commit performed by remote search against concurrent
@@ -82,3 +88,14 @@ operational concerns.
 Relevance feedback, automatic weight learning, and cross-peer focused-search
 routing remain future extensions. The initial policy engine is deterministic
 and rule-based so profiles can be validated, exported, shared, and reproduced.
+
+## Validation
+
+- `ant focused-test` passes, including a concurrency regression test asserting
+  bulk frontier scans complete while the store monitor is held by another
+  thread.
+- The Docker builder compiles the fork successfully.
+- The deployed smoke check confirmed the existing queue state reopened, search
+  returned HTTP 200, the resource guard remained clear, and no crawler threads
+  were waiting on the focused frontier-store monitor. A 12–24-hour operational
+  soak has not yet completed and is not claimed here.
