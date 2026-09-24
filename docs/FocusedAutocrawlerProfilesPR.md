@@ -17,6 +17,14 @@ resume after a restart or an explicit profile-scoped queue reset without
 replaying completed seed roots. This is a recovery layer around YaCy's native
 queue, not a second downloader.
 
+The branch also carries one independently reviewable core-safety commit
+(`62302c0`, **Protect Solr commits from search cancellation**). It guards the
+local Solr metadata commit performed by remote search against concurrent
+search-thread cancellation. Lucene can close its shared `IndexWriter` when the
+commit is interrupted; later crawler indexing then fails even though queued
+work remains. This fix is generic, does not add focused-crawl policy, and can be
+cherry-picked or reverted separately from the focused-crawler commits.
+
 The feature is named **Focused Autocrawler Profiles**. It is disabled unless an
 operator enables a profile. The Canadian configuration is the first example
 profile and demonstrates the framework through data. The core implementation
@@ -66,9 +74,10 @@ general mechanism for deliberately growing and maintaining such indexes.
 
 The implementation preserves robots handling, host balancing, ordinary crawl
 profiles, queue persistence, and existing network behaviour when no focused
-profile is enabled. It does not claim to fix underlying DNS, memory, or
-HostBalancer defects; those are integration points and operational concerns
-that can be addressed independently.
+profile is enabled. The separate Solr-commit guard addresses only the
+interruption race described above; it does not claim to fix general memory,
+DNS, or HostBalancer defects. Those remain independent integration points and
+operational concerns.
 
 Relevance feedback, automatic weight learning, and cross-peer focused-search
 routing remain future extensions. The initial policy engine is deterministic
