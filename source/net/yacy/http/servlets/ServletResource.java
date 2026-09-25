@@ -174,7 +174,7 @@ final class ServletResource {
         final boolean directory = Files.isDirectory(child);
         try {
             final String encoded = new URI(null, null, name, null).toASCIIString();
-            html.append("<li><a href=\"").append(escapeHtml(base)).append(encoded);
+            html.append("<li><a href=\"").append(escapeHtml(base)).append(escapeHtml(encoded));
             if (directory) {
                 html.append('/');
             }
