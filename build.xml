@@ -44,6 +44,7 @@
   <property name="solr9.bridge.input" location="${solr9.bridge.build}/input"/>
   <property name="solr9.bridge.tool" location="${solr9.bridge.build}/tool"/>
   <property name="solr9.bridge.tool.libs" location="${solr9.bridge.build}/tool-libs"/>
+  <property name="solr9.test.libs" location="build/solr9-test-libs"/>
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
   <property name="test" location="test/java"/>
@@ -115,6 +116,7 @@
     <ivy:retrieve conf="test" type="jar,bundle" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="solr9-bridge" type="jar,bundle" pathid="solr9.bridge.input.path" pattern="${solr9.bridge.input}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="solr9-bridge-tool" type="jar,bundle" pathid="solr9.bridge.tool.path" pattern="${solr9.bridge.tool.libs}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="solr9-test" type="jar,bundle" pathid="solr9.test.path" pattern="${solr9.test.libs}/[artifact]-[revision].[ext]" />
     <property name="target-resolve-already-run" value="true" />
   </target>
 
@@ -428,6 +430,7 @@
         <pathelement location="${build}"/>
         <path refid="compile.path"/>
         <path refid="test.path"/>
+        <path refid="solr9.test.path"/>
       </classpath>
       <compilerarg value="-Xlint"/>
     </javac>
@@ -439,12 +442,36 @@
       <batchtest>
         <fileset dir="${test}">
       <include name="**/*Test*.java"/>
+      <exclude name="**/*PerfTest.java"/>
+      <exclude name="**/ProfilingGraphTest.java"/>
+      <exclude name="**/EmbeddedSolrConnectorTest.java"/>
+      <exclude name="**/SingleDocumentMatcherTest.java"/>
         </fileset>
       </batchtest>
       <classpath>
         <pathelement location="${test}"/>
         <pathelement location="${build}"/>
     <fileset dir="${libt}" includes="**/*.jar" />
+        <fileset dir="${solr9.test.libs}" includes="**/*.jar">
+          <exclude name="jetty-*.jar"/>
+          <exclude name="http2-*.jar"/>
+        </fileset>
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+    </junit>
+    <junit printsummary="yes" haltonfailure="no" fork="true" dir="${yacyroot}">
+      <formatter type="plain"/>
+      <batchtest>
+        <fileset dir="${test}">
+          <include name="**/EmbeddedSolrConnectorTest.java"/>
+          <include name="**/SingleDocumentMatcherTest.java"/>
+        </fileset>
+      </batchtest>
+      <classpath>
+        <pathelement location="${test}"/>
+        <pathelement location="${build}"/>
+        <fileset dir="${libt}" includes="**/*.jar" />
+        <fileset dir="${solr9.test.libs}" includes="**/*.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
     </junit>
