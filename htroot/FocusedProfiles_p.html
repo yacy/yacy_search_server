@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head><title>YaCy '#[clientname]#': Focused Autocrawler Profiles</title>#%env/templates/metas.template%#</head>
+<body id="FocusedProfiles">
+#%env/templates/header.template%#
+#%env/templates/submenuIndexCreate.template%#
+<h2>Focused Autocrawler Profiles</h2>
+<p>Build a continuously maintained search corpus for a subject using YaCy's ordinary crawler, robots handling, host balancing, parsing and indexer.</p>
+<p class="success">#[message]#</p>
+<p class="error">#[error]#</p>
+<p>Scheduler: #(paused)#paused::running#(/paused)#. Status API: <a href="FocusedProfiles_p.json">JSON</a> | <a href="FocusedProfiles_p.xml">XML</a></p>
+<form method="post" action="FocusedProfiles_p.html">
+  <input type="submit" name="reload" value="Reload profiles" />
+  #(paused)#<input type="submit" name="resume" value="Resume scheduler" />::#(/paused)#
+  #(paused)#::<input type="submit" name="pause" value="Pause scheduler" />#(/paused)#
+</form>
+<h3>Resource and PDF safety</h3>
+<p>Local crawl: #(resource_paused)#paused::running#(/resource_paused)#; pause cause: #[resource_pause_cause]#; healthy recovery checks: #[resource_healthy_checks]#.</p>
+<p>Memory headroom: #[resource_memory_available]# bytes available; pause threshold #[resource_memory_pause_threshold]# bytes, resume threshold #[resource_memory_recovery_threshold]# bytes (two healthy checks). Focused PDF lane: #[pdf_active]# active; #[pdf_admitted]# admitted, #[pdf_completed]# transcribed, #[pdf_blocked]# held for capacity.</p>
+<table class="sortable"><tr><th>Profile</th><th>Version</th><th>Description</th><th>Enabled</th><th>Queue</th><th>Frontier</th><th>Discovery</th><th>Last state</th><th>Action</th></tr>
+#{profiles}#<tr><td><a href="FocusedProfiles_p.html?id=#[id]#">#[id]#</a></td><td>#[version]#</td><td>#[description]#</td><td>#(enabled)#enabled::disabled#(/enabled)#</td><td>#[queue]# / #[target]#</td><td>#[frontierRecoverable]# recoverable</td><td>#[frontierNativeLink]# links, #[frontierSeedBootstrap]# seeds</td><td>#[lastReason]#</td><td><form method="post" action="FocusedProfiles_p.html"><input type="hidden" name="id" value="#[id]#" /><input type="hidden" name="setEnabled" value="1" /><input type="hidden" name="enabled" value="#[nextEnabled]#" /><input type="submit" value="#[action]#" /></form><form method="post" action="FocusedProfiles_p.html"><input type="hidden" name="id" value="#[id]#" /><input type="submit" name="resetFrontier" value="Snapshot and reset frontier" /></form></td></tr>
+#{/profiles}#</table>
+<form method="post" action="FocusedProfiles_p.html">
+  <label for="configuration">Profile JSON (import/export)</label><br />
+  <textarea id="configuration" name="configuration" rows="30" cols="110">#[configuration]#</textarea><br />
+  <input type="submit" name="validate" value="Validate" />
+  <input type="submit" name="saveProfile" value="Validate, save and reload" />
+</form>
+<h3>Quick profile setup</h3>
+<p>Use this form for a basic profile. Existing scoring, collection, exclusion and trust rules are preserved when updating a profile; use the JSON editor for advanced rules.</p>
+<form method="post" action="FocusedProfiles_p.html">
+  <table>
+    <tr><th><label for="setup_id">Profile ID</label></th><td><input id="setup_id" name="setup_id" value="#[setup_id]#" size="32" required="required" /></td></tr>
+    <tr><th><label for="setup_description">Description</label></th><td><input id="setup_description" name="setup_description" value="#[setup_description]#" size="80" /></td></tr>
+    <tr><th><label for="setup_seeds">Seeds</label></th><td><textarea id="setup_seeds" name="setup_seeds" rows="6" cols="80">#[setup_seeds]#</textarea><br />One URL per line.</td></tr>
+    <tr><th><label for="setup_queue_target">Queue target</label></th><td><input id="setup_queue_target" name="setup_queue_target" value="#[setup_queue_target]#" type="number" min="0" /></td></tr>
+    <tr><th><label for="setup_refill_below">Refill below</label></th><td><input id="setup_refill_below" name="setup_refill_below" value="#[setup_refill_below]#" type="number" min="0" /></td></tr>
+    <tr><th><label for="setup_hard_maximum">Queue hard maximum</label></th><td><input id="setup_hard_maximum" name="setup_hard_maximum" value="#[setup_hard_maximum]#" type="number" min="0" /></td></tr>
+    <tr><th><label for="setup_storage_target">Storage target (bytes)</label></th><td><input id="setup_storage_target" name="setup_storage_target" value="#[setup_storage_target]#" type="number" min="0" /></td></tr>
+    <tr><th><label for="setup_exploration">Exploration budget (%)</label></th><td><input id="setup_exploration" name="setup_exploration" value="#[setup_exploration]#" type="number" min="0" max="100" /></td></tr>
+  </table>
+  <input type="submit" name="setupProfile" value="Create or update basic profile" />
+</form>
+</body></html>

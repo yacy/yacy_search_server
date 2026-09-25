@@ -127,6 +127,7 @@ public final class SwitchboardConstants {
      * <p>Name of the autocrawl thread</p>
      */
     public static final String CRAWLJOB_AUTOCRAWL                               = "55_autocrawl";
+    public static final String CRAWLJOB_FOCUSED_AUTOCRAWL                        = "56_focusedautocrawl";
     public static final String CRAWLJOB_AUTOCRAWL_METHOD_START                  = "autocrawlJob";
     public static final String CRAWLJOB_AUTOCRAWL_METHOD_JOBCOUNT               = null;
     public static final String CRAWLJOB_AUTOCRAWL_METHOD_FREEMEM                = null;

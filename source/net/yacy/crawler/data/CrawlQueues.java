@@ -56,6 +56,8 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
+import net.yacy.crawler.focused.FocusedCrawlScheduler;
+import net.yacy.crawler.focused.FocusedPdfLane;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
@@ -79,6 +81,9 @@ public class CrawlQueues {
     private final Switchboard sb;
     private final Loader[] worker;
     private final ArrayBlockingQueue<Request> workerQueue;
+    private final FocusedCrawlScheduler.WeightedLaneSelector focusedLaneScheduler = new FocusedCrawlScheduler.WeightedLaneSelector();
+    private final FocusedPdfLane focusedPdfLane = new FocusedPdfLane();
+    private long focusedPdfDispatches;
     private ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
@@ -268,14 +273,38 @@ public class CrawlQueues {
     }
 
     public int coreCrawlJobSize() {
-        return this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
+        return this.noticeURL.stackSize(NoticedURL.StackType.LOCAL)
+                + this.noticeURL.stackSize(NoticedURL.StackType.FOCUSED)
+                + this.noticeURL.stackSize(NoticedURL.StackType.FOCUSED_PDF)
+                + this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
+    }
+
+    /**
+     * @deprecated use {@link #focusedCrawlJobSize()}; retained as a source and
+     * runtime compatibility alias for older administration clients.
+     */
+    @Deprecated
+    public int canadianCrawlJobSize() {
+        return focusedCrawlJobSize();
+    }
+
+    /** Generic focused queue size; the legacy Canadian method remains as an API alias. */
+    public int focusedCrawlJobSize() {
+        return this.noticeURL.stackSize(NoticedURL.StackType.FOCUSED)
+                + this.noticeURL.stackSize(NoticedURL.StackType.FOCUSED_PDF);
+    }
+
+    public FocusedPdfLane focusedPdfLane() {
+        return this.focusedPdfLane;
     }
 
     public boolean coreCrawlJob() {
         final boolean robinsonPrivateCase = (this.sb.isRobinsonMode() &&
                 !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER));
+        final int ordinaryWeight = this.sb.getConfigInt("focused.autocrawler.ordinaryWeight", 4);
+        final boolean ordinaryEnabled = ordinaryWeight > 0;
 
-        if ((robinsonPrivateCase || this.coreCrawlJobSize() <= 20) && this.limitCrawlJobSize() > 0) {
+        if (ordinaryEnabled && (robinsonPrivateCase || this.coreCrawlJobSize() <= 20) && this.limitCrawlJobSize() > 0) {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, this.limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
@@ -286,9 +315,11 @@ public class CrawlQueues {
                     ", robinsonMode=" + ((this.sb.isRobinsonMode()) ? "on" : "off"));
         }
 
-        final String queueCheckCore = this.loadIsPossible(NoticedURL.StackType.LOCAL);
-        final String queueCheckNoload = this.loadIsPossible(NoticedURL.StackType.NOLOAD);
-        if (queueCheckCore != null && queueCheckNoload != null) {
+        final String queueCheckCore = ordinaryEnabled ? this.loadIsPossible(NoticedURL.StackType.LOCAL) : null;
+        final String queueCheckFocused = this.loadIsPossible(NoticedURL.StackType.FOCUSED);
+        final String queueCheckFocusedPdf = this.loadIsPossible(NoticedURL.StackType.FOCUSED_PDF);
+        final String queueCheckNoload = ordinaryEnabled ? this.loadIsPossible(NoticedURL.StackType.NOLOAD) : null;
+        if (queueCheckCore != null && queueCheckFocused != null && queueCheckFocusedPdf != null && queueCheckNoload != null) {
             if (CrawlQueues.log.isFine()) {
                 CrawlQueues.log.fine("omitting de-queue/local: " + queueCheckCore + ":" + queueCheckNoload);
             }
@@ -304,14 +335,21 @@ public class CrawlQueues {
 
         // do a local crawl
         Request urlEntry;
-        while (!this.noticeURL.isEmpty(NoticedURL.StackType.LOCAL) || !this.noticeURL.isEmpty(NoticedURL.StackType.NOLOAD)) {
+        while (!this.noticeURL.isEmpty(NoticedURL.StackType.LOCAL)
+                || !this.noticeURL.isEmpty(NoticedURL.StackType.FOCUSED)
+                || !this.noticeURL.isEmpty(NoticedURL.StackType.FOCUSED_PDF)
+                || !this.noticeURL.isEmpty(NoticedURL.StackType.NOLOAD)) {
             final String stats = "LOCALCRAWL[" +
                 this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) + ", " +
                 this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " +
+                this.noticeURL.stackSize(NoticedURL.StackType.FOCUSED) + ", " +
+                this.noticeURL.stackSize(NoticedURL.StackType.FOCUSED_PDF) + ", " +
                 this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) +
                 ", " + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
             try {
-                if (!this.noticeURL.isEmpty(NoticedURL.StackType.NOLOAD)) {
+                // With ordinaryWeight=0, preserve ordinary and no-load queues
+                // on disk and let focused profiles use the shared loader.
+                if (ordinaryEnabled && !this.noticeURL.isEmpty(NoticedURL.StackType.NOLOAD)) {
                     // get one entry that will not be loaded, just indexed
                     urlEntry = this.noticeURL.pop(NoticedURL.StackType.NOLOAD, true, this.sb.crawler, this.sb.robots);
                     if (urlEntry == null) {
@@ -332,7 +370,37 @@ public class CrawlQueues {
                     return true;
                 }
 
-                urlEntry = this.noticeURL.pop(NoticedURL.StackType.LOCAL, true, this.sb.crawler, this.sb.robots);
+                final boolean focusedRegularAvailable = !this.noticeURL.isEmpty(NoticedURL.StackType.FOCUSED);
+                final boolean focusedPdfAvailable = !this.noticeURL.isEmpty(NoticedURL.StackType.FOCUSED_PDF);
+                final boolean focusedAvailable = focusedRegularAvailable || focusedPdfAvailable;
+                final boolean ordinaryAvailable = ordinaryEnabled && !this.noticeURL.isEmpty(NoticedURL.StackType.LOCAL);
+                final FocusedCrawlScheduler.Lane selectedLane = this.focusedLaneScheduler.choose(
+                        focusedAvailable,
+                        ordinaryAvailable,
+                        this.sb.getConfigInt("focused.autocrawler.laneWeight", 6),
+                        ordinaryWeight);
+                if (selectedLane == null) return false;
+                final boolean preferFocused = selectedLane == FocusedCrawlScheduler.Lane.FOCUSED;
+                final boolean preferPdf = preferFocused && focusedPdfAvailable
+                        && (!focusedRegularAvailable || (++this.focusedPdfDispatches % 8L) == 0L);
+                if (preferPdf && !this.focusedPdfLane.canStart()) {
+                    // Keep PDFs queued on disk while memory is tight; an ordinary
+                    // or HTML focused URL can still use the loader capacity.
+                    if (!focusedRegularAvailable && !ordinaryAvailable) return false;
+                    urlEntry = ordinaryAvailable
+                            ? this.noticeURL.pop(NoticedURL.StackType.LOCAL, true, this.sb.crawler, this.sb.robots)
+                            : this.noticeURL.pop(NoticedURL.StackType.FOCUSED, true, this.sb.crawler, this.sb.robots);
+                } else {
+                    final StackType preferredStack = preferFocused
+                            ? (preferPdf ? NoticedURL.StackType.FOCUSED_PDF : NoticedURL.StackType.FOCUSED)
+                            : NoticedURL.StackType.LOCAL;
+                    urlEntry = this.noticeURL.pop(preferredStack, true, this.sb.crawler, this.sb.robots);
+                }
+                if (urlEntry == null && focusedAvailable && ordinaryAvailable) {
+                    urlEntry = this.noticeURL.pop(
+                            preferFocused ? NoticedURL.StackType.LOCAL : NoticedURL.StackType.FOCUSED,
+                            true, this.sb.crawler, this.sb.robots);
+                }
                 if (urlEntry == null) {
                     continue;
                 }
@@ -342,11 +410,28 @@ public class CrawlQueues {
                     CrawlQueues.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
+                final CrawlProfile urlProfile = this.sb.crawler.get(ASCII.getBytes(urlEntry.profileHandle()));
+                final boolean focusedPdf = FocusedPdfLane.isFocusedProfile(urlProfile)
+                        && FocusedPdfLane.isPdfURL(urlEntry.url());
+                if (focusedPdf && !this.focusedPdfLane.tryAcquire(urlEntry.url())) {
+                    final String warning = this.noticeURL.push(NoticedURL.StackType.FOCUSED_PDF,
+                            urlEntry, urlProfile, this.sb.robots);
+                    if (warning != null) CrawlQueues.log.warn("cannot return focused PDF to queue: " + warning);
+                    if (ordinaryAvailable) {
+                        final Request ordinary = this.noticeURL.pop(NoticedURL.StackType.LOCAL, true,
+                                this.sb.crawler, this.sb.robots);
+                        if (ordinary != null) {
+                            this.load(ordinary, stats);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
                 this.load(urlEntry, stats);
                 return true;
             } catch (final IOException e) {
                 CrawlQueues.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-                if (e.getMessage() != null && e.getMessage().indexOf("hash is null",0) > 0) {
+                if (ordinaryEnabled && e.getMessage() != null && e.getMessage().indexOf("hash is null",0) > 0) {
                     this.noticeURL.clear(NoticedURL.StackType.LOCAL);
                 }
             }
@@ -388,6 +473,9 @@ public class CrawlQueues {
                     if (!this.activeWorkerEntries().containsKey(urlEntry.url())) {
                         try {
                             this.ensureLoaderRunning();
+                            if (this.sb.focusedCrawlPolicyManager != null) {
+                                this.sb.focusedCrawlPolicyManager.recordInFlight(urlEntry.url().hash());
+                            }
                             this.workerQueue.put(urlEntry);
                         } catch (InterruptedException e) {
                             ConcurrentLog.logException(e);
@@ -745,6 +833,7 @@ public class CrawlQueues {
                     this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
                     this.setName("CrawlQueues.Loader(" + this.request.url().toNormalform(false) + ")");
                     CrawlProfile profile = CrawlQueues.this.sb.crawler.get(UTF8.getBytes(this.request.profileHandle()));
+                    boolean focusedPdfHandedToParser = false;
                     try {
                         // checking robots.txt for http(s) resources
                         this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
@@ -775,6 +864,9 @@ public class CrawlQueues {
                                 } else {
                                     this.request.setStatus("loaded", WorkflowJob.STATUS_RUNNING);
                                     final String storedFailMessage = CrawlQueues.this.sb.toIndexer(response);
+                                    focusedPdfHandedToParser = storedFailMessage == null
+                                            && FocusedPdfLane.isFocusedProfile(profile)
+                                            && FocusedPdfLane.isPdfResponse(response);
                                     this.request.setStatus("enqueued-" + ((storedFailMessage == null) ? "ok" : "fail"), WorkflowJob.STATUS_FINISHED);
                                     error = (storedFailMessage == null) ? null : "not enqueued to indexer: " + storedFailMessage;
                                 }
@@ -803,6 +895,9 @@ public class CrawlQueues {
                         CrawlQueues.this.errorURL.push(this.request.url(), this.request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, e.getMessage() + " - in worker", -1);
                         this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
                     } finally {
+                        if (!focusedPdfHandedToParser) {
+                            CrawlQueues.this.focusedPdfLane.release(this.request.url(), false);
+                        }
                         this.request = null;
                         this.setName("CrawlQueues.Loader(WAITING)");
                     }

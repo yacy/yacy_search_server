@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<focusedAutocrawlerProfiles paused="#(paused)#true::false#(/paused)#">
+#{profiles}#
+  <profile id="#[id]#" version="#[version]#" enabled="#(enabled)#true::false#(/enabled)#" queue="#[queue]#" queueTarget="#[target]#" />
+#{/profiles}#
+</focusedAutocrawlerProfiles>

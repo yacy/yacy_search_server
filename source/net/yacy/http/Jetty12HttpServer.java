@@ -209,7 +209,12 @@ public class Jetty12HttpServer implements YaCyHttpServer {
 
     @Override
     public void startupServer() throws Exception {
-        this.server.setStopAtShutdown(true);
+        /* YaCy owns the orderly JVM shutdown sequence in yacy.startup(): its
+         * shutdown hook signals the main thread, which then stops this server
+         * and closes the Switchboard. A second Jetty shutdown hook can race
+         * that explicit stop on Jetty's lifecycle lock and prevent the JVM
+         * from exiting before Docker's stop timeout. */
+        this.server.setStopAtShutdown(false);
         this.server.start();
     }
 

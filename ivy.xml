@@ -6,6 +6,7 @@
     <conf name="test" visibility="public"/>
     <conf name="solr9-bridge" visibility="private"/>
     <conf name="solr9-bridge-tool" visibility="private"/>
+    <conf name="solr9-test" visibility="private"/>
   
   </configurations>
     <dependencies defaultconf="compile->default">
@@ -109,6 +110,34 @@
       </dependency>
       <dependency org="org.apache.solr" name="solr-solrj-streaming" rev="9.10.1" conf="solr9-bridge->master"/>
       <dependency org="org.apache.solr" name="solr-solrj-zookeeper" rev="9.10.1" conf="solr9-bridge->master"/>
+      <!--
+        Legacy tests still exercise the public Solr 9 APIs directly. Keep these
+        unrelocated classes on an isolated test-only classpath: they must not
+        leak into YaCy's production runtime alongside the relocated bridge.
+      -->
+      <dependency org="org.apache.solr" name="solr-core" rev="9.10.1" conf="solr9-test->master">
+        <exclude org="org.eclipse.jetty" module="*"/>
+        <exclude org="org.eclipse.jetty.http2" module="*"/>
+      </dependency>
+      <dependency org="org.apache.solr" name="solr-api" rev="9.10.1" conf="solr9-test->master"/>
+      <dependency org="org.apache.solr" name="solr-scripting" rev="9.10.1" conf="solr9-test->master">
+        <exclude org="org.eclipse.jetty" module="*"/>
+        <exclude org="org.eclipse.jetty.http2" module="*"/>
+      </dependency>
+      <dependency org="org.apache.solr" name="solr-solrj" rev="9.10.1" conf="solr9-test->master">
+        <exclude org="org.eclipse.jetty" module="*"/>
+        <exclude org="org.eclipse.jetty.http2" module="*"/>
+      </dependency>
+      <dependency org="org.apache.solr" name="solr-solrj-streaming" rev="9.10.1" conf="solr9-test->master"/>
+      <dependency org="org.apache.solr" name="solr-solrj-zookeeper" rev="9.10.1" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-client" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-alpn-java-client" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-io" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="10.0.26" conf="solr9-test->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="10.0.26" conf="solr9-test->master"/>
       <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.9.5" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk18on" rev="1.84" />

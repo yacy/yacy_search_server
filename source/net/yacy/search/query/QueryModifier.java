@@ -44,7 +44,11 @@ import net.yacy.server.serverObjects;
 public class QueryModifier {
 
     private final StringBuilder modifier;
-    public String sitehost, sitehash, filetype, protocol, language, author, keyword, collection, on, from, to;
+    public String sitehost, sitehash, filetype, protocol, language, author, keyword, collection, policy, on, from, to;
+    /** Minimum focused-policy relevance requested by the policy: query modifier. */
+    public Integer policyRelevance;
+    /** Sort local results by focused-policy relevance when /relevance is requested. */
+    public boolean relevanceRanking;
     public int timezoneOffset;
     
     public QueryModifier(final int timezoneOffset) {
@@ -57,6 +61,9 @@ public class QueryModifier {
         this.author = null;
         this.keyword = null;
         this.collection = null;
+        this.policy = null;
+        this.policyRelevance = null;
+        this.relevanceRanking = false;
         this.on = null;
         this.from = null;
         this.to = null;
@@ -149,6 +156,35 @@ public class QueryModifier {
             collectioni = querystring.indexOf("collection:", 0);
         }
         if (this.collection != null) add("collection:" + this.collection);
+
+        // parse focused policy. This is deliberately generic: profile identifiers
+        // and their meaning are supplied by Focused Autocrawler Profiles.
+        int policyi = querystring.indexOf("policy:", 0);
+        while (policyi >= 0) {
+            int ftb = querystring.indexOf(' ', policyi);
+            this.policy = querystring.substring(policyi + 7, ftb == -1 ? querystring.length() : ftb);
+            querystring = querystring.replace("policy:" + this.policy, "").replace("  ", " ").trim();
+            policyi = querystring.indexOf("policy:", 0);
+        }
+        if (this.policy != null && !this.policy.isEmpty()) add("policy:" + this.policy);
+
+        // parse the minimum relevance score. Invalid values are ignored so a
+        // malformed optional modifier cannot break an otherwise valid search.
+        int relevancei = querystring.indexOf("relevance:", 0);
+        if (relevancei >= 0) {
+            int ftb = querystring.indexOf(' ', relevancei);
+            String value = querystring.substring(relevancei + 10, ftb == -1 ? querystring.length() : ftb);
+            try {
+                this.policyRelevance = Integer.valueOf(value);
+                querystring = querystring.replace("relevance:" + value, "").replace("  ", " ").trim();
+                add("relevance:" + this.policyRelevance);
+            } catch (final NumberFormatException e) {
+                this.policyRelevance = null;
+            }
+        }
+        if (querystring.isEmpty() && (this.collection != null || this.policy != null || this.policyRelevance != null)) {
+            querystring = "*";
+        }
         
         // parse on-date, must be after "collection:" as "on:" contained in it
         final int oni = querystring.indexOf("on:", 0);
@@ -331,6 +367,13 @@ public class QueryModifier {
 
         if (this.collection != null && this.collection.length() > 0 && fq.indexOf(CollectionSchema.collection_sxt.getSolrFieldName()) < 0) {
             fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.collection));
+        }
+
+        if (this.policy != null && this.policy.length() > 0 && fq.indexOf(CollectionSchema.focused_policy_sxt.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.focused_policy_sxt.getSolrFieldName()).append(":\"").append(this.policy).append('"');
+        }
+        if (this.policyRelevance != null && fq.indexOf(CollectionSchema.focused_relevance_i.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.focused_relevance_i.getSolrFieldName()).append(":[").append(this.policyRelevance).append(" TO *]");
         }
         
         if (fq.indexOf(CollectionSchema.dates_in_content_dts.getSolrFieldName()) < 0) {
