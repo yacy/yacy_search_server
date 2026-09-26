@@ -133,19 +133,12 @@ public class serverSwitch {
         // Read system properties and set all variables that have a prefix "yacy.".
         // This will make it possible that settings can be overwritten with environment variables.
         // Do this i.e. with "export YACY_PORT=8091 && ./startYACY.sh"
-        for (final Map.Entry<Object, Object> entry: System.getProperties().entrySet()) {
-            final String yacykey = (String) entry.getKey();
-            if (yacykey.startsWith("YACY_")) {
-                key = yacykey.substring(5).toLowerCase().replace('_', '.');
-                if (this.configProps.containsKey(key)) this.configProps.put(key, (String) entry.getValue());
-            }
-        }
-        for (final Map.Entry<String, String> entry: System.getenv().entrySet()) {
-            final String yacykey = entry.getKey();
-            if (yacykey.startsWith("YACY_")) {
-                key = yacykey.substring(5).toLowerCase().replace('_', '.');
-                if (this.configProps.containsKey(key)) this.configProps.put(key, entry.getValue());
-            }
+        Properties props = System.getProperties();
+        Map<String, String> envVars = System.getenv();
+        for (final Map.Entry<String, String> entry: this.configProps.entrySet()) {
+            final String expectedKey = "YACY_" + entry.getKey().replace('.', '_').toUpperCase();
+            if (props.containsKey(expectedKey)) this.configProps.put(entry.getKey(), props.getProperty(expectedKey));
+            if (envVars.containsKey(expectedKey)) this.configProps.put(entry.getKey(), envVars.get(expectedKey));
         }
 
         // save result; this may initially create a config file after
