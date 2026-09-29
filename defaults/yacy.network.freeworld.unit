@@ -66,6 +66,9 @@ network.unit.bootstrap.seedlist7 = https://aahso.net/yacyseed
 network.unit.bootstrap.seedlist8 = https://lodwich.net/static/seeds/seed.txt
 network.unit.bootstrap.seedlist9 = https://tonibot.ddns.net:8892/other/seed.txt
 network.unit.bootstrap.seedlist10 = https://s1002.xpcom-online.de/yacy/seed2.txt
+network.unit.bootstrap.seedlist11 = http://85.215.121.235:8092/seed.txt
+network.unit.bootstrap.seedlist12 = http://[2a01:239:0:167::1]:8094/seed.txt
+network.unit.bootstrap.seedlist13 = https://gumx.de:8097/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
