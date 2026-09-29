@@ -69,9 +69,16 @@ public class Translator {
 
     public final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
 
-    private static final Pattern TECHNICAL_TARGET_PATTERN = Pattern.compile(
-            "^(?:https?://.*|[A-Za-z0-9_./:%?#=&;,+~@!$'()\\[\\]-]+\\.(?:html|inc|json|xml|rss|css|js|pac)(?:[?#].*)?)$",
-            Pattern.CASE_INSENSITIVE);
+private static final Pattern TECHNICAL_TARGET_PATTERN = Pattern.compile(
+        "^(?:"
+        + "#(?:\\[[^\\]]+\\]|\\([^)]*\\)|\\{[^}]+\\}|%[^%]+%)#"
+        + "|https?://.*"
+        + "|[A-Za-z0-9_./:%?#=&;,+~@!$'()\\[\\]{}-]+\\.(?:html|inc|json|xml|rss|css|js|pac)(?:[?#].*)?"
+        + ")$",
+        Pattern.CASE_INSENSITIVE);
+
+        private static final Pattern HTML_IDENTIFIER_ATTRIBUTE_PREFIX_PATTERN = Pattern.compile(
+        "(?i)(?:^|\\s)(?:class|id)\\s*=\\s*[\"'][^\"']*$");
 
     /**
      * Translate source using entries in translationTable
@@ -117,8 +124,10 @@ public class Translator {
                         }
 
                         if (boundary) { // boundary check ok -> translate
-                            if (isInsideTechnicalTarget(builder, index, key.length())) {
-                                index = builder.indexOf(key, index + key.length());
+                            if (isInsideTechnicalTarget(builder, index, key.length())
+                               || isInsideHtmlIdentifierAttribute(builder, index)) {
+                               index = builder.indexOf(key, index + key.length());
+
                             } else {
                                 builder.replace(index, index + key.length(), translation);
                                 index = builder.indexOf(key, index + translation.length());
@@ -159,8 +168,36 @@ public class Translator {
                 || c == '=' || c == '&' || c == ';' || c == ','
                 || c == '+' || c == '~' || c == '@' || c == '!'
                 || c == '$' || c == '\'' || c == '(' || c == ')'
-                || c == '[' || c == ']';
+                || c == '[' || c == ']'
+                || c == '{' || c == '}';
     }
+
+               private static boolean isInsideHtmlIdentifierAttribute(
+        final CharSequence content, final int index) {
+
+    int tagStart = -1;
+
+    for (int i = index - 1; i >= 0; i--) {
+        final char c = content.charAt(i);
+
+        if (c == '>') {
+            return false;
+        }
+
+        if (c == '<') {
+            tagStart = i;
+            break;
+        }
+    }
+
+    if (tagStart < 0) {
+        return false;
+    }
+
+    final String prefix = content.subSequence(tagStart, index).toString();
+
+    return HTML_IDENTIFIER_ATTRIBUTE_PREFIX_PATTERN.matcher(prefix).find();
+}
 
     /**
      * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
