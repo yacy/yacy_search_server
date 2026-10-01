@@ -186,20 +186,29 @@ public class QueryGoal {
                 if (p < s.length() && s.charAt(p) == stop) p++;
             }
 
-            String string;
-            if (stop == space) {
-                string = s.substring(0, p);
-            } else {
-                string = s.substring(0, p - 1);  // Exclude the closing quote
-            }
-            s = p < s.length() ? s.substring(p) : "";
-            p++; // go behind the stop character (eats up space, sq and dq)
-            if (string.length() > 0) {
-                if (inc) {
-                    if (!include_string.contains(string)) include_string.add(string);
-                } else {
-                    if (!exclude_string.contains(string)) exclude_string.add(string);
+            // extract token safely
+            String string = "";
+            
+            if (p > 0) {
+                if (stop == space) {
+                    string = s.substring(0, p);
+                } else if (p > 1) {
+                    string = s.substring(0, p - 1); // exclude closing quote
                 }
+            }
+            
+            // advance cursor
+            s = (p < s.length()) ? s.substring(p) : "";
+            
+            // normalize
+            string = string.trim();
+            if (string.length() == 0) continue;
+            
+            // store token
+            if (inc) {
+                if (!include_string.contains(string)) include_string.add(string);
+            } else {
+                if (!exclude_string.contains(string)) exclude_string.add(string);
             }
         }
 
