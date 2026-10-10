@@ -89,6 +89,11 @@ import net.yacy.utils.crypt;
 
 public final class search {
 
+    /** Limit peer-provided term lists before they expand into local index work or response abstracts. */
+    static final int MAX_REMOTE_SEARCH_WORD_HASHES = 64;
+    /** URL filters are used for narrow follow-up requests and must not become an unbounded row set. */
+    static final int MAX_REMOTE_SEARCH_URL_HASHES = 4096;
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -192,6 +197,11 @@ public final class search {
         if (block) {
             return prop;
         }
+
+        // Bound work driven by peer-supplied lists before parsing hashes or reading
+        // index containers. Result-count and time limits alone do not bound the
+        // number of query terms or abstracts a peer can request.
+        if (!withinRemoteSearchHashLimits(query, exclude, urls, abstracts)) return prop;
 
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(100);
@@ -460,6 +470,19 @@ public final class search {
         sb.peers.mySeed().incSI(links);
         sb.peers.mySeed().incSU(links);
         return prop;
+    }
+
+    static boolean withinRemoteSearchHashLimits(final String query, final String exclude,
+            final String urls, final String abstracts) {
+        return hashCountWithin(query, MAX_REMOTE_SEARCH_WORD_HASHES)
+                && hashCountWithin(exclude, MAX_REMOTE_SEARCH_WORD_HASHES)
+                && hashCountWithin(urls, MAX_REMOTE_SEARCH_URL_HASHES)
+                && (abstracts == null || abstracts.isEmpty() || "auto".equals(abstracts)
+                        || hashCountWithin(abstracts, MAX_REMOTE_SEARCH_WORD_HASHES));
+    }
+
+    private static boolean hashCountWithin(final String hashes, final int maximum) {
+        return hashes == null || hashes.length() / Word.commonHashLength <= maximum;
     }
 
     /**

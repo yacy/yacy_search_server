@@ -487,10 +487,15 @@
           <include name="net/yacy/search/query/FocusedQueryModifierTest.java" />
           <include name="net/yacy/crawler/data/NoticedURLFocusedLaneTest.java" />
           <include name="net/yacy/search/ResourceObserverTest.java" />
+          <include name="net/yacy/htroot/yacy/SearchPeerResolutionTest.java" />
           <classpath>
               <pathelement location="${build}" />
               <path refid="compile.path" />
               <path refid="test.path" />
+              <fileset dir="${solr9.test.libs}" includes="**/*.jar">
+                  <exclude name="jetty-*.jar" />
+                  <exclude name="http2-*.jar" />
+              </fileset>
           </classpath>
           <compilerarg value="-Xlint" />
       </javac>
@@ -509,11 +514,16 @@
           <arg value="net.yacy.search.query.FocusedQueryModifierTest" />
           <arg value="net.yacy.crawler.data.NoticedURLFocusedLaneTest" />
           <arg value="net.yacy.search.ResourceObserverTest" />
+          <arg value="net.yacy.htroot.yacy.SearchPeerResolutionTest" />
           <classpath>
               <pathelement location="${build}/focused-test-classes" />
               <pathelement location="${build}" />
               <path refid="compile.path" />
               <path refid="test.path" />
+              <fileset dir="${solr9.test.libs}" includes="**/*.jar">
+                  <exclude name="jetty-*.jar" />
+                  <exclude name="http2-*.jar" />
+              </fileset>
           </classpath>
       </java>
   </target>

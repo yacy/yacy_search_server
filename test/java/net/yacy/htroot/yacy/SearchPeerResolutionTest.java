@@ -1,6 +1,8 @@
 package net.yacy.htroot.yacy;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,6 +67,27 @@ public class SearchPeerResolutionTest {
                 search.resolveRemotePeer(this.seedDB, "not-a-hash", "198.51.100.20").hash);
         assertEquals(peer.hash,
                 search.resolveRemotePeer(this.seedDB, "", "198.51.100.20").hash);
+    }
+
+    @Test
+    public void remoteSearchHashListsHaveExplicitBounds() {
+        assertTrue(search.withinRemoteSearchHashLimits(null, "", "", "auto"));
+        assertTrue(search.withinRemoteSearchHashLimits(
+                hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES),
+                hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES),
+                hashes(search.MAX_REMOTE_SEARCH_URL_HASHES), "auto"));
+        assertFalse(search.withinRemoteSearchHashLimits(
+                hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES + 1), "", "", ""));
+        assertFalse(search.withinRemoteSearchHashLimits(
+                "", "", "", hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES + 1)));
+        assertFalse(search.withinRemoteSearchHashLimits(
+                "", "", hashes(search.MAX_REMOTE_SEARCH_URL_HASHES + 1), "auto"));
+    }
+
+    private static String hashes(final int count) {
+        final StringBuilder value = new StringBuilder(count * 12);
+        for (int i = 0; i < count; i++) value.append("AAAAAAAAAAAA");
+        return value.toString();
     }
 
     private static Seed seed(final String hash, final String name, final String ip, final int port) {
