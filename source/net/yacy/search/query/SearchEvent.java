@@ -1893,7 +1893,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 success = true;
             }
         } else {
-            final Thread t = new Thread("SearchEvent.drainStacksToResult.oneFilteredFromRWI") {
+            final Runnable snippetFetch = new Runnable() {
                 @Override
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
@@ -1914,7 +1914,11 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     }
                 }
             };
-            if (SearchEvent.this.query.snippetCacheStrategy == null) t.run(); else t.start(); //no need for concurrency if there is no latency
+            if (SearchEvent.this.query.snippetCacheStrategy == null) {
+                snippetFetch.run(); // no need for concurrency if there is no latency
+            } else {
+                SearchSnippetExecutor.SHARED.execute(snippetFetch);
+            }
         }
         return success;
     }
@@ -1970,7 +1974,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     final URIMetadataNode snippetNode = node;
                     final Element<URIMetadataNode> snippetEntryElement = localEntryElement;
 
-                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
+                    SearchSnippetExecutor.SHARED.execute(new Runnable() {
                         @Override
                         public void run() {
                             SearchEvent.this.oneFeederStarted();
@@ -1985,7 +1989,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                                 SearchEvent.this.oneFeederTerminated();
                             }
                         }
-                    }.start();
+                    });
                 }
             }
         }

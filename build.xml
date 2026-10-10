@@ -485,6 +485,7 @@
            release="${javacRelease}" encoding="UTF-8">
           <include name="net/yacy/crawler/focused/**/*Test.java" />
           <include name="net/yacy/search/query/FocusedQueryModifierTest.java" />
+          <include name="net/yacy/search/query/SearchSnippetExecutorTest.java" />
           <include name="net/yacy/crawler/data/NoticedURLFocusedLaneTest.java" />
           <include name="net/yacy/search/ResourceObserverTest.java" />
           <include name="net/yacy/htroot/yacy/SearchPeerResolutionTest.java" />
@@ -512,6 +513,7 @@
           <arg value="net.yacy.crawler.focused.FocusedResourceGuardTest" />
           <arg value="net.yacy.crawler.focused.FocusedURLAdmissionStateTest" />
           <arg value="net.yacy.search.query.FocusedQueryModifierTest" />
+          <arg value="net.yacy.search.query.SearchSnippetExecutorTest" />
           <arg value="net.yacy.crawler.data.NoticedURLFocusedLaneTest" />
           <arg value="net.yacy.search.ResourceObserverTest" />
           <arg value="net.yacy.htroot.yacy.SearchPeerResolutionTest" />
