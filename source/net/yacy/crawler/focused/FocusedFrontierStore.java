@@ -446,6 +446,18 @@ public final class FocusedFrontierStore implements AutoCloseable {
         catch (final IOException | SpaceExceededException ignored) { return null; }
     }
 
+    /**
+     * Check frontier membership without reading and decoding the stored row.
+     * MapHeap keeps its key index in memory, so this is suitable for hot
+     * admission filters that only need to know whether a URL is already
+     * tracked. In particular, indexed-source expansion must not deserialize a
+     * disk-backed candidate for every outbound link while holding the store
+     * monitor.
+     */
+    public boolean contains(final byte[] hash) {
+        return this.heap != null && hash != null && this.heap.containsKey(hash);
+    }
+
     public void compact(final long terminalBefore) {
         compact(terminalBefore, Integer.MAX_VALUE);
     }

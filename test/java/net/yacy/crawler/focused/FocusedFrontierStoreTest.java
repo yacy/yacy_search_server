@@ -1,6 +1,7 @@
 package net.yacy.crawler.focused;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -63,11 +64,15 @@ public class FocusedFrontierStoreTest {
     public void bulkFrontierScansDoNotHoldTheStoreMonitor() throws Exception {
         final java.io.File directory = Files.createTempDirectory("focused-frontier-lock-").toFile();
         final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
-        store.discover(request("https://research.example/astronomy/one"), decision());
+        final Request tracked = request("https://research.example/astronomy/one");
+        assertFalse(store.contains(tracked.url().hash()));
+        store.discover(tracked, decision());
         final Request inFlight = request("https://research.example/astronomy/two");
         store.discover(inFlight, decision());
         store.markInFlight(inFlight.url().hash());
 
+        assertTrue(store.contains(tracked.url().hash()));
+        assertCompletesWhileMonitorHeld(store, () -> store.contains(tracked.url().hash()));
         assertCompletesWhileMonitorHeld(store, () -> store.snapshot());
         assertCompletesWhileMonitorHeld(store, () -> store.recoverable(System.currentTimeMillis(), 10));
         assertCompletesWhileMonitorHeld(store, () -> store.recoverStale(System.currentTimeMillis(), 600000L));

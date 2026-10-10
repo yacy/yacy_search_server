@@ -490,7 +490,7 @@ public final class FocusedCrawlScheduler {
                         continue;
                     }
                     linksSeen++;
-                    if (frontier.get(url.hash()) != null) {
+                    if (frontier.contains(url.hash())) {
                         existing++;
                         continue;
                     }
