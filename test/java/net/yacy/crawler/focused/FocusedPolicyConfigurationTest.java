@@ -16,6 +16,11 @@ import net.yacy.cora.document.id.DigestURL;
 
 public class FocusedPolicyConfigurationTest {
 
+    @Test
+    public void termNormalizationPreservesLettersAndCollapsesSeparators() {
+        assertEquals("star forming regions", RuleBasedCrawlPolicy.normalize("Star—forming_regions!"));
+    }
+
     private static JSONObject configuration(final boolean enabled) throws Exception {
         return new JSONObject()
                 .put("id", "astronomy")

@@ -5,10 +5,13 @@ package net.yacy.crawler.focused;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,14 +21,25 @@ import net.yacy.cora.document.id.DigestURL;
 /** Rule-based implementation suitable for shareable profile configuration. */
 public final class RuleBasedCrawlPolicy implements FocusedCrawlPolicy, AutoCloseable {
 
+    private static final Pattern TERM_NORMALIZER = Pattern.compile("[^\\p{L}0-9]+");
+
     private final PolicyConfiguration configuration;
     private final FocusedNoveltyState noveltyState;
     private final FocusedURLAdmissionState admissionState;
+    private final Map<String, String> normalizedTerms;
 
     public RuleBasedCrawlPolicy(final PolicyConfiguration configuration, final File stateDirectory) {
         this.configuration = configuration;
         this.noveltyState = stateDirectory == null ? null : new FocusedNoveltyState(stateDirectory, configuration.id());
         this.admissionState = stateDirectory == null ? null : new FocusedURLAdmissionState(stateDirectory, configuration.id());
+        final Map<String, String> terms = new HashMap<>();
+        for (final PolicyConfiguration.ScoringRule rule : configuration.scoringRules()) {
+            for (final String term : rule.terms()) terms.put(term, normalize(term));
+        }
+        for (final PolicyConfiguration.CollectionRule rule : configuration.collections().values()) {
+            for (final String term : rule.terms()) terms.put(term, normalize(term));
+        }
+        this.normalizedTerms = Collections.unmodifiableMap(terms);
     }
 
     @Override
@@ -230,12 +244,12 @@ public final class RuleBasedCrawlPolicy implements FocusedCrawlPolicy, AutoClose
                 && context.indexedAt() <= System.currentTimeMillis() - interval;
     }
 
-    private static boolean matches(final PolicyConfiguration.ScoringRule rule, final String host, final String text) {
+    private boolean matches(final PolicyConfiguration.ScoringRule rule, final String host, final String text) {
         for (final String candidate : rule.hosts()) if (hostMatches(host, candidate)) return true;
         for (final String tld : rule.tlds()) if (host.endsWith("." + tld) || host.equals(tld)) return true;
         if (rule.hosts().isEmpty() && rule.tlds().isEmpty()) {
         int matches = 0;
-        for (final String term : rule.terms()) if (text.contains(normalize(term))) matches++;
+        for (final String term : rule.terms()) if (text.contains(normalizedTerm(term))) matches++;
         return matches >= rule.minimumTermMatches();
         }
         return false;
@@ -245,7 +259,7 @@ public final class RuleBasedCrawlPolicy implements FocusedCrawlPolicy, AutoClose
         final Set<String> result = new LinkedHashSet<>();
         for (final PolicyConfiguration.CollectionRule rule : this.configuration.collections().values()) {
             int matches = 0;
-            for (final String term : rule.terms()) if (text.contains(normalize(term))) matches++;
+            for (final String term : rule.terms()) if (text.contains(normalizedTerm(term))) matches++;
             boolean match = matches >= rule.minimumTermMatches();
             if (!match && parsed != null) for (final String sourceType : rule.sourceTypes()) {
                 if (sourceType.equalsIgnoreCase(parsed.sourceType())) { match = true; break; }
@@ -266,8 +280,13 @@ public final class RuleBasedCrawlPolicy implements FocusedCrawlPolicy, AutoClose
         return this.configuration.limits().defaultRecrawlIntervalMillis();
     }
 
-    private static String normalize(final String value) {
-        return value == null ? "" : value.toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}0-9]+", " ").trim();
+    static String normalize(final String value) {
+        return value == null ? "" : TERM_NORMALIZER.matcher(value.toLowerCase(Locale.ROOT)).replaceAll(" ").trim();
+    }
+
+    private String normalizedTerm(final String value) {
+        if (this.normalizedTerms.containsKey(value)) return this.normalizedTerms.get(value);
+        return normalize(value);
     }
 
     /** Stable sampling keeps the configured exploration share across restarts. */
@@ -277,7 +296,11 @@ public final class RuleBasedCrawlPolicy implements FocusedCrawlPolicy, AutoClose
     }
 
     private static boolean hostMatches(final String host, final String candidate) {
-        final String normalized = candidate == null ? "" : candidate.toLowerCase(Locale.ROOT).replaceFirst("^https?://", "").replaceFirst("/.*$", "");
+        String normalized = candidate == null ? "" : candidate.toLowerCase(Locale.ROOT);
+        if (normalized.startsWith("https://")) normalized = normalized.substring(8);
+        else if (normalized.startsWith("http://")) normalized = normalized.substring(7);
+        final int pathSeparator = normalized.indexOf('/');
+        if (pathSeparator >= 0) normalized = normalized.substring(0, pathSeparator);
         return !normalized.isEmpty() && (host.equals(normalized) || host.endsWith("." + normalized));
     }
 }

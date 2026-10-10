@@ -57,6 +57,9 @@ import net.yacy.search.schema.CollectionSchema;
  * robots, host balancing, link extraction, parsing and indexing remain native.
  */
 public final class FocusedCrawlScheduler {
+
+    /** Avoid reopening Linux cgroup files for every URL examined in a refill pass. */
+    private static final long SYSTEM_MEMORY_SNAPSHOT_CACHE_MILLIS = 1000L;
     private static final int FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE = 64;
     private static final int QUEUE_SIZE_MEASUREMENT_ATTEMPTS = 3;
     private static final long FRONTIER_COMPACTION_INTERVAL_MILLIS = 24L * 60L * 60L * 1000L;
@@ -187,6 +190,8 @@ public final class FocusedCrawlScheduler {
     private final Properties resourceState = new Properties();
     private final FocusedResourceGuard resourceGuard = new FocusedResourceGuard();
     private long lastMemoryReclamationAttemptMillis;
+    private SystemMemorySnapshot hotPathSystemMemory;
+    private long hotPathSystemMemoryReadAt;
     private final Map<String, Properties> states = new LinkedHashMap<>();
     private final Map<String, CrawlProfile> profiles = new LinkedHashMap<>();
     private final Map<String, Long> frontierCompactions = new LinkedHashMap<>();
@@ -750,7 +755,13 @@ public final class FocusedCrawlScheduler {
     }
 
     private boolean memoryHealthy() {
-        final SystemMemorySnapshot systemMemory = SystemMemorySnapshot.read();
+        final long now = System.currentTimeMillis();
+        if (this.hotPathSystemMemory == null
+                || now - this.hotPathSystemMemoryReadAt >= SYSTEM_MEMORY_SNAPSHOT_CACHE_MILLIS) {
+            this.hotPathSystemMemory = SystemMemorySnapshot.read();
+            this.hotPathSystemMemoryReadAt = now;
+        }
+        final SystemMemorySnapshot systemMemory = this.hotPathSystemMemory;
         return !MemoryControl.shortStatus()
                 && MemoryControl.available() >= FocusedResourceGuard.refillThreshold(MemoryControl.maxMemory())
                 && systemMemory.healthy();
