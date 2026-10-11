@@ -54,9 +54,10 @@ public final class FocusedPdfLane {
 
     public static boolean isPdfResponse(final Response response) {
         if (response == null) return false;
+        if (isPdfURL(response.url())) return true;
         final String mime = response.getMimeType();
-        return (mime != null && (mime.equals("application/pdf") || mime.equals("application/x-pdf")
-                || mime.endsWith("/pdf"))) || isPdfURL(response.url());
+        return mime != null && (mime.equals("application/pdf") || mime.equals("application/x-pdf")
+                || mime.endsWith("/pdf"));
     }
 
     /** Whether starting another focused PDF is safe enough for the next parser allocation. */
