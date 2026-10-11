@@ -3,7 +3,6 @@
 package net.yacy.crawler.focused;
 
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,7 +12,6 @@ import org.json.JSONObject;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.util.MemoryControl;
@@ -46,10 +44,10 @@ public final class FocusedPdfLane {
     /** Detect PDF URLs before fetching; content-type detection remains in the parser path. */
     public static boolean isPdfURL(final DigestURL url) {
         if (url == null) return false;
-        final String fileName = url.getFileName();
-        if (fileName == null) return false;
-        final String extension = MultiProtocolURL.getFileExtension(fileName);
-        return extension != null && "pdf".equals(extension.toLowerCase(Locale.ROOT));
+        final String path = url.getPath();
+        final int dot = path.lastIndexOf('.');
+        return dot > path.lastIndexOf('/') && path.length() - dot == 4
+                && path.regionMatches(true, dot + 1, "pdf", 0, 3);
     }
 
     public static boolean isPdfResponse(final Response response) {

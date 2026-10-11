@@ -22,6 +22,13 @@ public class FocusedPdfLaneTest {
     }
 
     @Test
+    public void doesNotTreatDirectoriesOrLongerExtensionsAsPdf() throws MalformedURLException {
+        assertFalse(FocusedPdfLane.isPdfURL(new DigestURL("https://example.org/report.pdf/")));
+        assertFalse(FocusedPdfLane.isPdfURL(new DigestURL("https://example.org/report.pdfx")));
+        assertFalse(FocusedPdfLane.isPdfURL(new DigestURL("https://example.org/")));
+    }
+
+    @Test
     public void skipsMimeNormalizationWhenUrlIdentifiesPdf() throws MalformedURLException {
         final CountingResponse response = new CountingResponse(new DigestURL("https://example.org/report.pdf"), "Application/PDF");
         assertTrue(FocusedPdfLane.isPdfResponse(response));
