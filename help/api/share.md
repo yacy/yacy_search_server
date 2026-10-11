@@ -33,6 +33,8 @@ Machine/API pages are compact endpoints. Their architecture is request-parameter
 
 Call the endpoint as a protocol surface. Use exact parameter names and encoded values, authenticate when required, and inspect the response before relying on it. Avoid sending browser-only submit buttons unless the backend explicitly requires the action key.
 
+Multipart request bodies are limited to 1 GiB total and may be limited further when the JVM cannot preserve its heap safety reserve. Keep uploaded files within the current safe limit.
+
 ## Access And Safety
 
 The page is normally public or read-only, unless the peer is configured to require authentication for all pages.
