@@ -119,11 +119,11 @@ public final class FocusedCrawlScheduler {
         private final long lastEnqueued;
         private final String lastReason;
         private final FocusedCrawlMetrics.Snapshot metrics;
-        private final FocusedFrontierStore.Snapshot frontier;
+        private final int frontierEntries;
 
         private ProfileStatus(final String id, final String version, final boolean enabled, final int queueSize,
                 final PolicyConfiguration.Limits limits, final int seeds, final Properties state,
-                final FocusedCrawlMetrics.Snapshot metrics, final FocusedFrontierStore.Snapshot frontier) {
+                final FocusedCrawlMetrics.Snapshot metrics, final int frontierEntries) {
             this.id = id;
             this.version = version;
             this.enabled = enabled;
@@ -136,7 +136,7 @@ public final class FocusedCrawlScheduler {
             this.lastEnqueued = parseLong(state, "lastEnqueued", 0L);
             this.lastReason = state.getProperty("lastReason", "");
             this.metrics = metrics;
-            this.frontier = frontier;
+            this.frontierEntries = frontierEntries;
         }
 
         public JSONObject toJSON() {
@@ -148,19 +148,10 @@ public final class FocusedCrawlScheduler {
                         .put("seeds", this.seeds).put("lastRun", this.lastRun)
                         .put("lastEnqueued", this.lastEnqueued).put("lastReason", this.lastReason)
                         .put("metrics", this.metrics == null ? new JSONObject(true) : this.metrics.toJSON());
-                final JSONObject frontierJSON = new JSONObject(true);
-                if (this.frontier != null) {
-                    frontierJSON.put("total", this.frontier.total()).put("discovered", this.frontier.discovered())
-                            .put("ready", this.frontier.ready()).put("admitted", this.frontier.admitted())
-                            .put("inFlight", this.frontier.inFlight()).put("indexed", this.frontier.indexed())
-                            .put("duplicate", this.frontier.duplicate()).put("failed", this.frontier.failed())
-                            .put("blocked", this.frontier.blocked()).put("recoverable", this.frontier.recoverable())
-                            .put("seedBootstrap", this.frontier.seedBootstrap())
-                            .put("nativeLink", this.frontier.nativeLink())
-                            .put("adminReset", this.frontier.adminReset())
-                            .put("legacy", this.frontier.legacy());
-                }
+                final JSONObject frontierJSON = new JSONObject(true).put("countsAvailable", false);
+                if (this.frontierEntries >= 0) frontierJSON.put("total", this.frontierEntries);
                 json.put("frontier", frontierJSON);
+                json.put("queueSizeObservedAt", this.lastRun);
             } catch (final JSONException e) {
                 throw new IllegalStateException("cannot serialize focused profile status", e);
             }
@@ -178,7 +169,7 @@ public final class FocusedCrawlScheduler {
         public long lastEnqueued() { return this.lastEnqueued; }
         public String lastReason() { return this.lastReason; }
         public FocusedCrawlMetrics.Snapshot metrics() { return this.metrics; }
-        public FocusedFrontierStore.Snapshot frontier() { return this.frontier; }
+        public int frontierEntries() { return this.frontierEntries; }
     }
 
     private final Switchboard sb;
@@ -987,14 +978,16 @@ public final class FocusedCrawlScheduler {
         final List<ProfileStatus> result = new ArrayList<>();
         for (final FocusedCrawlPolicy policy : this.manager.policies()) {
             final PolicyConfiguration configuration = policy.configuration();
-            final CrawlProfile profile = profile(configuration);
             final Properties state = state(configuration.id());
             state.setProperty("id", configuration.id());
+            // Status reads must not initialize a crawl profile, traverse the native queue, or
+            // decode every row in the persistent frontier. Use the most recent scheduler
+            // measurements and the open MapHeap's constant-time entry count instead.
             result.add(new ProfileStatus(configuration.id(), configuration.version(), configuration.enabled(),
-                    queueSize(profile), configuration.limits(), configuration.seeds().size(), state,
+                    intValue(state, "lastQueueAfter", -1), configuration.limits(), configuration.seeds().size(), state,
                     this.manager.metrics().snapshot(configuration.id()),
                     this.manager.frontierEnabled(configuration.id())
-                            ? this.manager.frontier(configuration.id()).snapshot() : null));
+                            ? this.manager.frontierSizeIfOpen(configuration.id()) : -1));
         }
         return result;
     }
@@ -1065,10 +1058,15 @@ public final class FocusedCrawlScheduler {
     }
 
     public synchronized JSONObject statusJSON() {
+        return statusJSON(statuses());
+    }
+
+    /** Serialize one status sample for both the JSON response and its HTML page. */
+    public synchronized JSONObject statusJSON(final Collection<ProfileStatus> profileStatuses) {
         final JSONObject json = new JSONObject(true);
         try {
             final org.json.JSONArray profilesJSON = new org.json.JSONArray();
-            for (final ProfileStatus status : statuses()) profilesJSON.put(status.toJSON());
+            for (final ProfileStatus status : profileStatuses) profilesJSON.put(status.toJSON());
             final JSONObject resource = new JSONObject(true);
             resource.put("paused", this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL))
                     .put("pauseCause", this.sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", ""))

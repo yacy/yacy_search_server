@@ -502,6 +502,7 @@ public final class FocusedFrontierStore implements AutoCloseable {
         final JSONObject status = new JSONObject(true);
         try {
             status.put("records", this.heap == null ? 0 : this.heap.size())
+                    .put("countsAvailable", false)
                     .put("estimatedIndexBytes", this.heap == null ? 0L : this.heap.memoryBytes())
                     .put("heapFileBytes", this.heapFile != null && this.heapFile.isFile() ? this.heapFile.length() : 0L)
                     .put("mapHeapCacheEntries", this.heap == null ? 0 : this.heap.cacheSize());

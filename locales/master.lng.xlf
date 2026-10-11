@@ -4219,6 +4219,119 @@
   </body>
 </file>
 
+<file original="FocusedProfiles_p.html"  source-language="en"  datatype="html">
+  <body>
+    <trans-unit id="8020cbf3" xml:space="preserve" approved="no" translate="yes">
+       <source>"Reload profiles"</source>
+    </trans-unit>
+    <trans-unit id="92c64098" xml:space="preserve" approved="no" translate="yes">
+       <source>"Resume scheduler"</source>
+    </trans-unit>
+    <trans-unit id="1c3a1373" xml:space="preserve" approved="no" translate="yes">
+       <source>"Pause scheduler"</source>
+    </trans-unit>
+    <trans-unit id="7f833cc1" xml:space="preserve" approved="no" translate="yes">
+       <source>"Snapshot and reset frontier"</source>
+    </trans-unit>
+    <trans-unit id="a70d2fca" xml:space="preserve" approved="no" translate="yes">
+       <source>"Validate"</source>
+    </trans-unit>
+    <trans-unit id="7209cd09" xml:space="preserve" approved="no" translate="yes">
+       <source>"Validate, save and reload"</source>
+    </trans-unit>
+    <trans-unit id="94cb9b27" xml:space="preserve" approved="no" translate="yes">
+       <source>"Create or update basic profile"</source>
+    </trans-unit>
+    <trans-unit id="125fd08e" xml:space="preserve" approved="no" translate="yes">
+       <source>Focused Autocrawler Profiles</source>
+    </trans-unit>
+    <trans-unit id="7d8ec436" xml:space="preserve" approved="no" translate="yes">
+       <source>Build a continuously maintained search corpus for a subject using YaCy's ordinary crawler, robots handling, host balancing, parsing and indexer.</source>
+    </trans-unit>
+    <trans-unit id="4dde32ff" xml:space="preserve" approved="no" translate="yes">
+       <source>Scheduler:</source>
+    </trans-unit>
+    <trans-unit id="c4ac992e" xml:space="preserve" approved="no" translate="yes">
+       <source>paused</source>
+    </trans-unit>
+    <trans-unit id="5c6f15bf" xml:space="preserve" approved="no" translate="yes">
+       <source>running</source>
+    </trans-unit>
+    <trans-unit id="1897c1fb" xml:space="preserve" approved="no" translate="yes">
+       <source>Resource and PDF safety</source>
+    </trans-unit>
+    <trans-unit id="9d65df68" xml:space="preserve" approved="no" translate="yes">
+       <source>Local crawl:</source>
+    </trans-unit>
+    <trans-unit id="50c72189" xml:space="preserve" approved="no" translate="yes">
+       <source>Profile</source>
+    </trans-unit>
+    <trans-unit id="782db4b8" xml:space="preserve" approved="no" translate="yes">
+       <source>Version</source>
+    </trans-unit>
+    <trans-unit id="fc9f2bdc" xml:space="preserve" approved="no" translate="yes">
+       <source>Description</source>
+    </trans-unit>
+    <trans-unit id="3482321" xml:space="preserve" approved="no" translate="yes">
+       <source>Enabled</source>
+    </trans-unit>
+    <trans-unit id="c8eddf6e" xml:space="preserve" approved="no" translate="yes">
+       <source>Queue (last sample)</source>
+    </trans-unit>
+    <trans-unit id="b016a39d" xml:space="preserve" approved="no" translate="yes">
+       <source>Frontier entries</source>
+    </trans-unit>
+    <trans-unit id="5a68ee3f" xml:space="preserve" approved="no" translate="yes">
+       <source>Discovery totals</source>
+    </trans-unit>
+    <trans-unit id="935b7ea7" xml:space="preserve" approved="no" translate="yes">
+       <source>Last state</source>
+    </trans-unit>
+    <trans-unit id="74946a56" xml:space="preserve" approved="no" translate="yes">
+       <source>Action</source>
+    </trans-unit>
+    <trans-unit id="a00f8b41" xml:space="preserve" approved="no" translate="yes">
+       <source>enabled</source>
+    </trans-unit>
+    <trans-unit id="10263a7c" xml:space="preserve" approved="no" translate="yes">
+       <source>disabled</source>
+    </trans-unit>
+    <trans-unit id="865217b2" xml:space="preserve" approved="no" translate="yes">
+       <source>Profile JSON (import/export)</source>
+    </trans-unit>
+    <trans-unit id="6ef8f433" xml:space="preserve" approved="no" translate="yes">
+       <source>Quick profile setup</source>
+    </trans-unit>
+    <trans-unit id="e88f5ea0" xml:space="preserve" approved="no" translate="yes">
+       <source>Use this form for a basic profile. Existing scoring, collection, exclusion and trust rules are preserved when updating a profile; use the JSON editor for advanced rules.</source>
+    </trans-unit>
+    <trans-unit id="35180712" xml:space="preserve" approved="no" translate="yes">
+       <source>Profile ID</source>
+    </trans-unit>
+    <trans-unit id="4c11002" xml:space="preserve" approved="no" translate="yes">
+       <source>Seeds</source>
+    </trans-unit>
+    <trans-unit id="8aea580c" xml:space="preserve" approved="no" translate="yes">
+       <source>One URL per line.</source>
+    </trans-unit>
+    <trans-unit id="417efa0" xml:space="preserve" approved="no" translate="yes">
+       <source>Queue target</source>
+    </trans-unit>
+    <trans-unit id="bac5a5e7" xml:space="preserve" approved="no" translate="yes">
+       <source>Refill below</source>
+    </trans-unit>
+    <trans-unit id="79426eba" xml:space="preserve" approved="no" translate="yes">
+       <source>Queue hard maximum</source>
+    </trans-unit>
+    <trans-unit id="cc8881c" xml:space="preserve" approved="no" translate="yes">
+       <source>Storage target (bytes)</source>
+    </trans-unit>
+    <trans-unit id="6b7e1dae" xml:space="preserve" approved="no" translate="yes">
+       <source>Exploration budget (%)</source>
+    </trans-unit>
+  </body>
+</file>
+
 <file original="Help.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="39e864e2" xml:space="preserve" approved="no" translate="yes">
@@ -7318,9 +7431,6 @@
     </trans-unit>
     <trans-unit id="51dc7be0" xml:space="preserve" approved="no" translate="yes">
        <source>Currently Active</source>
-    </trans-unit>
-    <trans-unit id="dfe35a22" xml:space="preserve" approved="no" translate="yes">
-       <source>Incoming HTTP Requests</source>
     </trans-unit>
     <trans-unit id="82717ee5" xml:space="preserve" approved="no" translate="yes">
        <source>Outgoing connections pools settings :</source>
@@ -12243,6 +12353,45 @@
     </trans-unit>
     <trans-unit id="c9fa65a8" xml:space="preserve" approved="no" translate="yes">
        <source>search</source>
+    </trans-unit>
+    <trans-unit id="d1f1f7c2" xml:space="preserve" approved="no" translate="yes">
+       <source>Language:</source>
+    </trans-unit>
+    <trans-unit id="179ec" xml:space="preserve" approved="no" translate="yes">
+       <source>any</source>
+    </trans-unit>
+    <trans-unit id="3a13250" xml:space="preserve" approved="no" translate="yes">
+       <source>English</source>
+    </trans-unit>
+    <trans-unit id="c0286918" xml:space="preserve" approved="no" translate="yes">
+       <source>Deutsch</source>
+    </trans-unit>
+    <trans-unit id="a217509d" xml:space="preserve" approved="no" translate="yes">
+       <source>Français</source>
+    </trans-unit>
+    <trans-unit id="ca53eef" xml:space="preserve" approved="no" translate="yes">
+       <source>Español</source>
+    </trans-unit>
+    <trans-unit id="4331d88f" xml:space="preserve" approved="no" translate="yes">
+       <source>Italiano</source>
+    </trans-unit>
+    <trans-unit id="bb1f142b" xml:space="preserve" approved="no" translate="yes">
+       <source>Português</source>
+    </trans-unit>
+    <trans-unit id="b95d0258" xml:space="preserve" approved="no" translate="yes">
+       <source>Русский</source>
+    </trans-unit>
+    <trans-unit id="28d34d4e" xml:space="preserve" approved="no" translate="yes">
+       <source>Nederlands</source>
+    </trans-unit>
+    <trans-unit id="9dcfa" xml:space="preserve" approved="no" translate="yes">
+       <source>中文</source>
+    </trans-unit>
+    <trans-unit id="18b8997" xml:space="preserve" approved="no" translate="yes">
+       <source>日本語</source>
+    </trans-unit>
+    <trans-unit id="802c7852" xml:space="preserve" approved="no" translate="yes">
+       <source>العربية</source>
     </trans-unit>
     <trans-unit id="c1eb0a77" xml:space="preserve" approved="no" translate="yes">
        <source>No Results.</source>

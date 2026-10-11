@@ -103,8 +103,10 @@ public class FocusedProfiles_p {
         prop.put("setup_hard_maximum", limits == null ? "0" : limits.optString("hardMaximum", "0"));
         prop.put("setup_storage_target", limits == null ? "0" : limits.optString("storageTargetBytes", "0"));
         prop.put("setup_exploration", limits == null ? "10" : limits.optString("explorationPercent", "10"));
+        final Collection<FocusedCrawlScheduler.ProfileStatus> profileStatuses = sb.focusedCrawlScheduler == null
+                ? java.util.Collections.emptyList() : sb.focusedCrawlScheduler.statuses();
         final JSONObject schedulerStatus = sb.focusedCrawlScheduler == null
-                ? new JSONObject(true) : sb.focusedCrawlScheduler.statusJSON();
+                ? new JSONObject(true) : sb.focusedCrawlScheduler.statusJSON(profileStatuses);
         prop.putJSON("status", schedulerStatus.toString());
         final JSONObject resourceStatus = schedulerStatus.optJSONObject("resource");
         final JSONObject pdfStatus = schedulerStatus.optJSONObject("pdfLane");
@@ -151,9 +153,7 @@ public class FocusedProfiles_p {
         prop.put("paused", sb.getConfigBool("focused.autocrawler.paused", false));
         prop.put("profile_count", manager.policies().size());
         final Map<String, FocusedCrawlScheduler.ProfileStatus> statusById = new HashMap<>();
-        if (sb.focusedCrawlScheduler != null) {
-            for (final FocusedCrawlScheduler.ProfileStatus status : sb.focusedCrawlScheduler.statuses()) statusById.put(status.id(), status);
-        }
+        for (final FocusedCrawlScheduler.ProfileStatus status : profileStatuses) statusById.put(status.id(), status);
         int index = 0;
         for (final FocusedCrawlPolicy policy : manager.policies()) {
             final PolicyConfiguration configuration = policy.configuration();
@@ -164,13 +164,15 @@ public class FocusedProfiles_p {
             prop.put("profiles_" + index + "_nextEnabled", Boolean.toString(!configuration.enabled()));
             prop.putHTML("profiles_" + index + "_action", configuration.enabled() ? "Disable" : "Enable");
             final FocusedCrawlScheduler.ProfileStatus status = statusById.get(configuration.id());
-            prop.put("profiles_" + index + "_queue", status == null ? 0 : status.queueSize());
+            prop.put("profiles_" + index + "_queue", status == null || status.queueSize() < 0
+                    ? "—" : Integer.toString(status.queueSize()));
             prop.put("profiles_" + index + "_target", status == null ? 0 : status.queueTarget());
             prop.putHTML("profiles_" + index + "_lastReason", status == null ? "" : status.lastReason());
-            final net.yacy.crawler.focused.FocusedFrontierStore.Snapshot frontier = status == null ? null : status.frontier();
-            prop.put("profiles_" + index + "_frontierRecoverable", frontier == null ? 0 : frontier.recoverable());
-            prop.put("profiles_" + index + "_frontierNativeLink", frontier == null ? 0 : frontier.nativeLink());
-            prop.put("profiles_" + index + "_frontierSeedBootstrap", frontier == null ? 0 : frontier.seedBootstrap());
+            prop.put("profiles_" + index + "_frontierEntries",
+                    status == null || status.frontierEntries() < 0 ? "—" : Integer.toString(status.frontierEntries()));
+            final net.yacy.crawler.focused.FocusedCrawlMetrics.Snapshot metrics = status == null ? null : status.metrics();
+            prop.put("profiles_" + index + "_nativeLinks", metrics == null ? 0 : metrics.nativeLinkDiscovery());
+            prop.put("profiles_" + index + "_seedBootstraps", metrics == null ? 0 : metrics.seedBootstrap());
             index++;
         }
         prop.put("load_error_count", manager.loadErrors().size());

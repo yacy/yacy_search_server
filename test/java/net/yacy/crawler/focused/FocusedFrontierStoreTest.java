@@ -64,6 +64,19 @@ public class FocusedFrontierStoreTest {
     }
 
     @Test
+    public void statusSummaryReportsTheIndexSizeWithoutScanningStateCounts() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-status-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        store.discover(request("https://research.example/astronomy/status"), decision());
+
+        final org.json.JSONObject status = store.statusJSON();
+        assertEquals(1, status.optInt("records", -1));
+        assertFalse(status.optBoolean("countsAvailable", true));
+        assertFalse(status.has("recoverable"));
+        store.close();
+    }
+
+    @Test
     public void bulkFrontierScansDoNotHoldTheStoreMonitor() throws Exception {
         final java.io.File directory = Files.createTempDirectory("focused-frontier-lock-").toFile();
         final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
