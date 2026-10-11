@@ -5,10 +5,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 
@@ -56,6 +65,45 @@ public class FocusedPdfLaneTest {
         assertTrue(lane.tryAcquire(second));
         lane.release(second, false);
         assertTrue(lane.activeCount() == 0);
+    }
+
+    @Test
+    public void memoryWaitDoesNotHoldActiveSetLock() throws Exception {
+        final AtomicBoolean memoryReady = new AtomicBoolean(true);
+        final CountDownLatch memoryWaitStarted = new CountDownLatch(1);
+        final FocusedPdfLane lane = new FocusedPdfLane(() -> {
+            final boolean ready = memoryReady.get();
+            if (!ready) memoryWaitStarted.countDown();
+            return ready;
+        });
+        final DigestURL url = new DigestURL("https://example.org/active.pdf");
+        assertTrue(lane.tryAcquire(url));
+
+        final CrawlProfile profile = new CrawlProfile(Collections.singletonMap(CrawlAttribute.NAME.key, "focused-test"));
+        final Response response = new Response(new Request(url, null), null, null, profile, false, null);
+        memoryReady.set(false);
+
+        final ExecutorService workers = Executors.newFixedThreadPool(2);
+        try {
+            final Future<Boolean> parsing = workers.submit(() -> lane.acquireForParsing(response));
+            assertTrue("PDF parser should wait for the injected memory signal",
+                    memoryWaitStarted.await(2, TimeUnit.SECONDS));
+            final Future<Boolean> release = workers.submit(() -> {
+                lane.release(url, false);
+                return true;
+            });
+            assertTrue("memory wait must not block loader release", release.get(500, TimeUnit.MILLISECONDS));
+            assertFalse(lane.active(url));
+
+            memoryReady.set(true);
+            assertTrue(parsing.get(2, TimeUnit.SECONDS));
+        } finally {
+            memoryReady.set(true);
+            lane.release(url, true);
+            workers.shutdownNow();
+            workers.awaitTermination(2, TimeUnit.SECONDS);
+        }
+        assertEquals(0, lane.activeCount());
     }
 
     private static final class CountingResponse extends Response {

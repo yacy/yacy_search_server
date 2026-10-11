@@ -3,9 +3,11 @@
 package net.yacy.crawler.focused;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BooleanSupplier;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,10 +33,19 @@ public final class FocusedPdfLane {
 
     private final Semaphore permit = new Semaphore(1, true);
     private final Set<String> active = new HashSet<>();
+    private final BooleanSupplier memoryAvailability;
     private final AtomicLong admitted = new AtomicLong();
     private final AtomicLong completed = new AtomicLong();
     private final AtomicLong blocked = new AtomicLong();
     private final AtomicLong failed = new AtomicLong();
+
+    public FocusedPdfLane() {
+        this(FocusedPdfLane::systemMemoryReady);
+    }
+
+    FocusedPdfLane(final BooleanSupplier memoryAvailability) {
+        this.memoryAvailability = Objects.requireNonNull(memoryAvailability);
+    }
 
     /** A focused profile name is deliberately generic: all focused profiles use this namespace. */
     public static boolean isFocusedProfile(final CrawlProfile profile) {
@@ -95,10 +106,16 @@ public final class FocusedPdfLane {
     public boolean acquireForParsing(final Response response) throws InterruptedException {
         if (response == null || !isFocusedProfile(response.profile()) || !isPdfResponse(response)) return false;
         final String key = key(response.url());
+        final boolean alreadyActive;
         synchronized (this.active) {
-            if (this.active.contains(key)) {
-                waitForMemory();
-                return true;
+            alreadyActive = this.active.contains(key);
+        }
+        if (alreadyActive) {
+            // Do not hold the active-set monitor while waiting for heap headroom:
+            // loader completion and release paths need this monitor to free slots.
+            waitForMemory();
+            synchronized (this.active) {
+                if (this.active.contains(key)) return true;
             }
         }
         while (true) {
@@ -117,8 +134,12 @@ public final class FocusedPdfLane {
         }
     }
 
-    private static boolean memoryReady() {
+    private static boolean systemMemoryReady() {
         return !MemoryControl.shortStatus() && MemoryControl.available() >= requiredMemory();
+    }
+
+    private boolean memoryReady() {
+        return this.memoryAvailability.getAsBoolean();
     }
 
     private void waitForMemory() throws InterruptedException {
