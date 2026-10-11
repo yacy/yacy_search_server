@@ -6,8 +6,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.crawler.retrieval.Request;
 
 public class FocusedFrontierStoreTest {
@@ -99,6 +102,58 @@ public class FocusedFrontierStoreTest {
         }
         assertEquals(7, recovered);
         assertEquals(7, store.snapshot().ready());
+        store.close();
+    }
+
+    @Test
+    public void recoverableFrontierScanAdvancesAcrossBoundedSlices() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-sliced-candidates-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        final List<Request> requests = new ArrayList<>();
+        for (int i = 0; i < 10; i++) requests.add(request("https://research.example/astronomy/sliced-" + i));
+        requests.sort((left, right) -> NaturalOrder.naturalOrder.compare(left.url().hash(), right.url().hash()));
+
+        for (int i = 0; i < requests.size(); i++) {
+            final Request request = requests.get(i);
+            store.discover(request, decision());
+            if (i < requests.size() - 1) store.markIndexed(request.url().hash());
+        }
+
+        List<FocusedFrontierStore.Candidate> recovered = Collections.emptyList();
+        int slices = 0;
+        while (recovered.isEmpty() && slices < 6) {
+            recovered = store.recoverable(System.currentTimeMillis(), 10, 2);
+            slices++;
+        }
+        assertTrue("the eligible tail row must be found after bounded slices", slices > 1);
+        assertEquals(requests.get(requests.size() - 1).url().toNormalform(true), recovered.get(0).url());
+        store.close();
+    }
+
+    @Test
+    public void exhaustionCheckDoesNotTreatAnEmptySliceAsAnExhaustedFrontier() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-sliced-exhaustion-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        final List<Request> requests = new ArrayList<>();
+        for (int i = 0; i < 10; i++) requests.add(request("https://research.example/astronomy/exhaustion-" + i));
+        requests.sort((left, right) -> NaturalOrder.naturalOrder.compare(left.url().hash(), right.url().hash()));
+
+        for (int i = 0; i < requests.size(); i++) {
+            final Request request = requests.get(i);
+            store.discover(request, decision());
+            if (i < requests.size() - 1) store.markIndexed(request.url().hash());
+        }
+
+        final long now = System.currentTimeMillis();
+        assertTrue(store.hasRecoverable(now, 2));
+        assertTrue(store.hasRecoverable(now, 2));
+        assertTrue(store.hasRecoverable(now, 2));
+        assertTrue(store.hasRecoverable(now, 2));
+        assertTrue(store.hasRecoverable(now, 2));
+        assertEquals(requests.get(requests.size() - 1).url().toNormalform(true),
+                store.recoverable(now, 1, 2).get(0).url());
+        store.markIndexed(requests.get(requests.size() - 1).url().hash());
+        assertFalse(store.hasRecoverable(now, 2));
         store.close();
     }
 

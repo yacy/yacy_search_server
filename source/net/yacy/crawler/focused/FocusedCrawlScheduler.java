@@ -593,7 +593,7 @@ public final class FocusedCrawlScheduler {
         if (frontier == null || !configuration.frontier().enabled()) return true;
         final String mode = configuration.frontier().seedMode();
         if ("disabled".equals(mode)) return false;
-        if ("exhausted".equals(mode)) return frontier.recoverable(System.currentTimeMillis(), 1).isEmpty();
+        if ("exhausted".equals(mode)) return !frontier.hasRecoverable(System.currentTimeMillis());
         return !Boolean.parseBoolean(state.getProperty("frontierStarted", "false"));
     }
 

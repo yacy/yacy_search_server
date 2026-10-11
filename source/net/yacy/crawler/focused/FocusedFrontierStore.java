@@ -37,6 +37,8 @@ public final class FocusedFrontierStore implements AutoCloseable {
 
     /** Avoid a single damaged/restarted profile rewriting an unbounded frontier in one scheduler pass. */
     private static final int MAX_STALE_RECOVERIES_PER_SCAN = 1024;
+    /** Keep sparse frontier lookups bounded while continuing their iterator over later scheduler passes. */
+    private static final int MAX_RECOVERABLE_ROWS_PER_SCAN = 16384;
 
     public enum State {
         DISCOVERED, READY, ADMITTED, IN_FLIGHT, INDEXED, DUPLICATE, FAILED, BLOCKED
@@ -210,6 +212,9 @@ public final class FocusedFrontierStore implements AutoCloseable {
     private final String profileId;
     private final Object staleScanLock = new Object();
     private Iterator<Map.Entry<byte[], Map<String, String>>> staleScan;
+    private final Object recoverableScanLock = new Object();
+    private Iterator<Map.Entry<byte[], Map<String, String>>> recoverableScan;
+    private Candidate pendingRecoverable;
 
     public FocusedFrontierStore(final File stateDirectory, final String profileId) {
         this.profileId = profileId == null ? "" : profileId;
@@ -361,19 +366,45 @@ public final class FocusedFrontierStore implements AutoCloseable {
         return changed;
     }
 
-    /** Return candidates eligible to rebuild the native YaCy queue. */
+    /**
+     * Return up to {@code limit} candidates from a bounded scan slice. Later
+     * calls continue the retained iterator when sparse frontiers need more rows.
+     */
     public List<Candidate> recoverable(final long now, final int limit) {
-        if (this.heap == null || limit <= 0) return Collections.emptyList();
+        return recoverable(now, limit, MAX_RECOVERABLE_ROWS_PER_SCAN);
+    }
+
+    /**
+     * Inspect at most {@code scanLimit} rows for eligible candidates. The
+     * iterator is retained between calls so sparse frontiers progress over
+     * multiple scheduler passes instead of repeatedly scanning from the start.
+     */
+    List<Candidate> recoverable(final long now, final int limit, final int scanLimit) {
+        if (this.heap == null || limit <= 0 || scanLimit <= 0) return Collections.emptyList();
         final List<Candidate> result = new ArrayList<>();
         try {
-            final Iterator<Map.Entry<byte[], Map<String, String>>> entries = this.heap.entries(true, false);
-            while (entries.hasNext() && result.size() < limit) {
-                final Map.Entry<byte[], Map<String, String>> entry = entries.next();
-                final Candidate candidate = parse(entry.getKey(), entry.getValue());
-                if (candidate == null || !eligible(candidate, now)) continue;
-                result.add(candidate);
+            synchronized (this.recoverableScanLock) {
+                if (this.pendingRecoverable != null) {
+                    if (eligible(this.pendingRecoverable, now)) result.add(this.pendingRecoverable);
+                    this.pendingRecoverable = null;
+                }
+                if (this.recoverableScan == null) this.recoverableScan = this.heap.entries(true, false);
+                int inspected = 0;
+                while (inspected < scanLimit && result.size() < limit) {
+                    if (!this.recoverableScan.hasNext()) {
+                        this.recoverableScan = null;
+                        break;
+                    }
+                    final Map.Entry<byte[], Map<String, String>> entry = this.recoverableScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate == null || !eligible(candidate, now)) continue;
+                    result.add(candidate);
+                }
             }
-        } catch (final IOException ignored) { }
+        } catch (final IOException ignored) {
+            synchronized (this.recoverableScanLock) { this.recoverableScan = null; }
+        }
         result.sort((left, right) -> {
             int comparison = Integer.compare(laneRank(right.lane()), laneRank(left.lane()));
             if (comparison != 0) return comparison;
@@ -382,6 +413,46 @@ public final class FocusedFrontierStore implements AutoCloseable {
             return Long.compare(left.lastSeen(), right.lastSeen());
         });
         return result;
+    }
+
+    /**
+     * Check whether any candidate can be recovered without treating an
+     * incomplete scan slice as proof that the frontier is exhausted.
+     */
+    public boolean hasRecoverable(final long now) {
+        return hasRecoverable(now, MAX_RECOVERABLE_ROWS_PER_SCAN);
+    }
+
+    boolean hasRecoverable(final long now, final int scanLimit) {
+        if (this.heap == null || scanLimit <= 0) return false;
+        try {
+            synchronized (this.recoverableScanLock) {
+                if (this.pendingRecoverable != null && eligible(this.pendingRecoverable, now)) return true;
+                this.pendingRecoverable = null;
+                if (this.recoverableScan == null) this.recoverableScan = this.heap.entries(true, false);
+                int inspected = 0;
+                while (inspected < scanLimit) {
+                    if (!this.recoverableScan.hasNext()) {
+                        this.recoverableScan = null;
+                        return false;
+                    }
+                    final Map.Entry<byte[], Map<String, String>> entry = this.recoverableScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate != null && eligible(candidate, now)) {
+                        this.pendingRecoverable = candidate;
+                        return true;
+                    }
+                }
+                if (this.recoverableScan.hasNext()) return true;
+                this.recoverableScan = null;
+                return false;
+            }
+        } catch (final IOException ignored) {
+            synchronized (this.recoverableScanLock) { this.recoverableScan = null; }
+            // An I/O error cannot prove that the frontier is exhausted.
+            return true;
+        }
     }
 
     /**
@@ -493,6 +564,11 @@ public final class FocusedFrontierStore implements AutoCloseable {
 
     @Override
     public synchronized void close() {
+        synchronized (this.staleScanLock) { this.staleScan = null; }
+        synchronized (this.recoverableScanLock) {
+            this.recoverableScan = null;
+            this.pendingRecoverable = null;
+        }
         if (this.heap != null) this.heap.close();
     }
 
