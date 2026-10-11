@@ -492,6 +492,7 @@
           <include name="net/yacy/htroot/yacy/SearchPeerResolutionTest.java" />
           <include name="net/yacy/peers/RemoteSearchResourceGuardTest.java" />
           <include name="net/yacy/http/servlets/MultipartMemoryBudgetTest.java" />
+          <include name="net/yacy/http/ProxyAccessPolicyTest.java" />
           <classpath>
               <pathelement location="${build}" />
               <path refid="compile.path" />
@@ -523,6 +524,7 @@
           <arg value="net.yacy.htroot.yacy.SearchPeerResolutionTest" />
           <arg value="net.yacy.peers.RemoteSearchResourceGuardTest" />
           <arg value="net.yacy.http.servlets.MultipartMemoryBudgetTest" />
+          <arg value="net.yacy.http.ProxyAccessPolicyTest" />
           <classpath>
               <pathelement location="${build}/focused-test-classes" />
               <pathelement location="${build}" />
