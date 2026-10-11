@@ -472,10 +472,12 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
     public void writeTo(final OutputStream out) {
         requireOpen();
         if (out == null) throw new NullPointerException("out");
-        final byte[] tmp = new byte[256 * 1024];
+        final long contentSize = this.size;
+        if (contentSize == 0L) return;
+        final byte[] tmp = new byte[(int) Math.min(256L * 1024L, contentSize)];
         long p = 0;
         try {
-            while (p < this.size) {
+            while (p < contentSize) {
                 final int n = this.read(p, tmp, 0, tmp.length);
                 if (n < 0) break;
                 out.write(tmp, 0, n);
