@@ -515,6 +515,7 @@
           <arg value="net.yacy.crawler.focused.FocusedFrontierStoreTest" />
           <arg value="net.yacy.crawler.focused.FocusedNoveltyStateTest" />
           <arg value="net.yacy.crawler.focused.FocusedPdfLaneTest" />
+          <arg value="net.yacy.crawler.focused.ResponseProcessCaseTest" />
           <arg value="net.yacy.crawler.focused.FocusedPolicyConfigurationTest" />
           <arg value="net.yacy.crawler.focused.FocusedResourceGuardTest" />
           <arg value="net.yacy.crawler.focused.FocusedURLAdmissionStateTest" />

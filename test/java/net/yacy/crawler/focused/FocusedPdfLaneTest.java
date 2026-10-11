@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.crawler.retrieval.Request;
@@ -46,9 +48,20 @@ public class FocusedPdfLaneTest {
 
     @Test
     public void keepsMimeDetectionForPdfWithoutPdfExtension() throws MalformedURLException {
-        final CountingResponse response = new CountingResponse(new DigestURL("https://example.org/report.bin"), "application/pdf");
+        final CountingResponse response = new CountingResponse(new DigestURL("https://example.org/report.bin"), "application/pdf; charset=binary");
         assertTrue(FocusedPdfLane.isPdfResponse(response));
-        assertEquals(1, response.mimeTypeReads);
+        assertEquals(1, response.responseHeaderReads);
+        assertEquals(0, response.mimeTypeReads);
+    }
+
+    @Test
+    public void matchesPdfMimeTypesWithoutCaseOrParameterNormalization() throws MalformedURLException {
+        assertTrue(FocusedPdfLane.isPdfResponse(new CountingResponse(
+                new DigestURL("https://example.org/report.bin"), " Application/X-PDF ")));
+        assertTrue(FocusedPdfLane.isPdfResponse(new CountingResponse(
+                new DigestURL("https://example.org/report.bin"), "application/vnd.report/PDF; version=1")));
+        assertFalse(FocusedPdfLane.isPdfResponse(new CountingResponse(
+                new DigestURL("https://example.org/report.bin"), "application/pdfx")));
     }
 
     @Test
@@ -109,10 +122,20 @@ public class FocusedPdfLaneTest {
     private static final class CountingResponse extends Response {
         private final String mimeType;
         private int mimeTypeReads;
+        private int responseHeaderReads;
+        private final ResponseHeader responseHeader;
 
         private CountingResponse(final DigestURL url, final String mimeType) {
             super(new Request(url, null), null, null, null, false, null);
             this.mimeType = mimeType;
+            this.responseHeader = new ResponseHeader(200);
+            if (mimeType != null) this.responseHeader.put(HeaderFramework.CONTENT_TYPE, mimeType);
+        }
+
+        @Override
+        public ResponseHeader getResponseHeader() {
+            this.responseHeaderReads++;
+            return this.responseHeader;
         }
 
         @Override

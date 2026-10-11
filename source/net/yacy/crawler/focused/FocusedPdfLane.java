@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.util.MemoryControl;
@@ -64,9 +65,23 @@ public final class FocusedPdfLane {
     public static boolean isPdfResponse(final Response response) {
         if (response == null) return false;
         if (isPdfURL(response.url())) return true;
-        final String mime = response.getMimeType();
-        return mime != null && (mime.equals("application/pdf") || mime.equals("application/x-pdf")
-                || mime.endsWith("/pdf"));
+        final ResponseHeader responseHeader = response.getResponseHeader();
+        return responseHeader != null && isPdfMimeType(responseHeader.getContentType());
+    }
+
+    /** Match the normalized media type without allocating trimmed/lowercase/substrings. */
+    private static boolean isPdfMimeType(final String mime) {
+        if (mime == null) return false;
+        int start = 0;
+        int end = mime.length();
+        while (start < end && mime.charAt(start) <= ' ') start++;
+        while (end > start && mime.charAt(end - 1) <= ' ') end--;
+        final int parameter = mime.indexOf(';', start);
+        if (parameter >= 0 && parameter < end) end = parameter;
+        final int length = end - start;
+        return (length == 15 && mime.regionMatches(true, start, "application/pdf", 0, length))
+                || (length == 17 && mime.regionMatches(true, start, "application/x-pdf", 0, length))
+                || (length >= 4 && mime.regionMatches(true, end - 4, "/pdf", 0, 4));
     }
 
     /** Whether starting another focused PDF is safe enough for the next parser allocation. */

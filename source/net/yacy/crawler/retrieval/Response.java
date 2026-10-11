@@ -34,7 +34,6 @@ import java.util.HashSet;
 import java.util.Locale;
 
 import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -855,19 +854,46 @@ public class Response {
         // 5) local prefetch/crawling (initiator is own seedHash)
         // 6) local fetching for global crawling (other known or unknown initiator)
         // 7) local packs processing (can not be known here : crawl profile is required)
-        EventOrigin processCase = EventOrigin.UNKNOWN;
-        // FIXME the equals seems to be incorrect: String.equals(boolean)
-        if (this.initiator() == null || this.initiator().length == 0 || ASCII.String(this.initiator()).equals("------------")) {
+        final byte[] initiator = this.initiator();
+        if (isProxyInitiator(initiator)) {
             // proxy-load
-            processCase = EventOrigin.PROXY_LOAD;
-        } else if (UTF8.String(this.initiator()).equals(mySeedHash)) {
-            // normal crawling
-            processCase = EventOrigin.LOCAL_CRAWLING;
-        } else {
-            // this was done for remote peer (a global crawl)
-            processCase = EventOrigin.GLOBAL_CRAWLING;
+            return EventOrigin.PROXY_LOAD;
         }
-        return processCase;
+        if (initiatorMatchesSeedHash(initiator, mySeedHash)) {
+            // normal crawling
+            return EventOrigin.LOCAL_CRAWLING;
+        }
+        // this was done for remote peer (a global crawl)
+        return EventOrigin.GLOBAL_CRAWLING;
+    }
+
+    /** Detect the proxy sentinel directly without allocating a decoded String. */
+    private static boolean isProxyInitiator(final byte[] initiator) {
+        if (initiator == null || initiator.length == 0) return true;
+        if (initiator.length != 12) return false;
+        for (final byte value : initiator) if (value != '-') return false;
+        return true;
+    }
+
+    /**
+     * Peer hashes are ASCII base64 values. Compare those bytes directly on the
+     * crawl hot path, retaining UTF-8 decoding for any non-ASCII caller value.
+     */
+    private static boolean initiatorMatchesSeedHash(final byte[] initiator, final String seedHash) {
+        if (seedHash == null) return false;
+        boolean ascii = true;
+        for (int i = 0; i < seedHash.length(); i++) {
+            if (seedHash.charAt(i) > 0x7f) {
+                ascii = false;
+                break;
+            }
+        }
+        if (!ascii) return UTF8.String(initiator).equals(seedHash);
+        if (initiator.length != seedHash.length()) return false;
+        for (int i = 0; i < initiator.length; i++) {
+            if ((initiator[i] & 0xff) != seedHash.charAt(i)) return false;
+        }
+        return true;
     }
 
     public Document[] parse() throws Parser.Failure {
