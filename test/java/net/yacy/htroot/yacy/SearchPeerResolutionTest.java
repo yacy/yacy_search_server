@@ -16,6 +16,7 @@ import org.junit.rules.TemporaryFolder;
 
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
+import net.yacy.server.serverObjects;
 
 public class SearchPeerResolutionTest {
 
@@ -84,6 +85,17 @@ public class SearchPeerResolutionTest {
                 "", "", hashes(search.MAX_REMOTE_SEARCH_URL_HASHES + 1), "auto"));
     }
 
+    @Test
+    public void yacyQueryReadsEnvironmentOnlyForOperationsThatUseIt() {
+        final CountingServerObjects post = new CountingServerObjects();
+        post.put("env", "environment-value");
+
+        assertEquals("", query.environmentForObject(post, "rwicount"));
+        assertEquals(0, post.environmentReads);
+        assertEquals("environment-value", query.environmentForObject(post, "rwiurlcount"));
+        assertEquals(1, post.environmentReads);
+    }
+
     private static String hashes(final int count) {
         final StringBuilder value = new StringBuilder(count * 12);
         for (int i = 0; i < count; i++) value.append("AAAAAAAAAAAA");
@@ -98,5 +110,16 @@ public class SearchPeerResolutionTest {
         seed.setIP(ip);
         seed.setPort(port);
         return seed;
+    }
+
+    private static final class CountingServerObjects extends serverObjects {
+        private static final long serialVersionUID = 1L;
+        private int environmentReads;
+
+        @Override
+        public String get(final String key, final String defaultValue) {
+            if ("env".equals(key)) this.environmentReads++;
+            return super.get(key, defaultValue);
+        }
     }
 }
