@@ -107,7 +107,7 @@ public class FocusedProfiles_p {
                 ? java.util.Collections.emptyList() : sb.focusedCrawlScheduler.statuses();
         final JSONObject schedulerStatus = sb.focusedCrawlScheduler == null
                 ? new JSONObject(true) : sb.focusedCrawlScheduler.statusJSON(profileStatuses);
-        prop.putJSON("status", schedulerStatus.toString());
+        prop.put("status", schedulerStatus.toString());
         final JSONObject resourceStatus = schedulerStatus.optJSONObject("resource");
         final JSONObject pdfStatus = schedulerStatus.optJSONObject("pdfLane");
         final JSONObject runtimeStatus = resourceStatus == null ? null : resourceStatus.optJSONObject("runtime");
