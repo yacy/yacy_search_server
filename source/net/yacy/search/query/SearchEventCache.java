@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.function.BooleanSupplier;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
@@ -45,6 +46,7 @@ public class SearchEventCache {
     private static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
     private static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
     private static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
+    private static final long eventRefreshWhileCrawlingAfterMillis = 60000;
     private static final long memlimitHigh = 600 * 1024 * 1024; // 400 MB
     private static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
     public volatile static String lastEventID = "";
@@ -131,6 +133,12 @@ public class SearchEventCache {
         return event;
     }
 
+    static boolean shouldInvalidateCachedEvent(final boolean eventPresent, final long eventAgeMillis,
+            final BooleanSupplier localCrawlActive) {
+        return eventPresent && eventAgeMillis > eventRefreshWhileCrawlingAfterMillis
+                && localCrawlActive.getAsBoolean();
+    }
+
     public static SearchEvent getEvent(
             final QueryParams query,
             final SeedDB peers,
@@ -151,7 +159,11 @@ public class SearchEventCache {
             cacheDelete++;
             event = null;
         }
-        if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
+        final long eventAgeMillis = event == null ? 0L : System.currentTimeMillis() - event.getEventTime();
+        if (shouldInvalidateCachedEvent(event != null, eventAgeMillis, () -> {
+            final Switchboard sb = Switchboard.getSwitchboard();
+            return sb != null && !sb.crawlQueues.noticeURL.isEmpty();
+        })) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute
