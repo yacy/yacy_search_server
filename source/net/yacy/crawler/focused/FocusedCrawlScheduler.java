@@ -761,8 +761,8 @@ public final class FocusedCrawlScheduler {
             this.hotPathSystemMemoryReadAt = now;
         }
         final SystemMemorySnapshot systemMemory = this.hotPathSystemMemory;
-        return !MemoryControl.shortStatus()
-                && MemoryControl.available() >= FocusedResourceGuard.refillThreshold(MemoryControl.maxMemory())
+        return FocusedResourceGuard.hasRecoveryHeadroom(MemoryControl.available(),
+                MemoryControl.maxMemory(), MemoryControl.shortStatus())
                 && systemMemory.healthy();
     }
 

@@ -141,6 +141,12 @@ public final class FocusedResourceGuard {
         return Math.max(MIN_RECOVERY_HEADROOM, maxMemory * 35L / 100L);
     }
 
+    /** Require recovery headroom before admitting additional focused work. */
+    public static boolean hasRecoveryHeadroom(final long availableMemory,
+            final long maxMemory, final boolean shortMemory) {
+        return !shortMemory && availableMemory >= recoveryThreshold(maxMemory);
+    }
+
     /**
      * Stop queue admissions at the pause threshold. Recovery intentionally
      * requires more headroom, providing hysteresis rather than oscillating at

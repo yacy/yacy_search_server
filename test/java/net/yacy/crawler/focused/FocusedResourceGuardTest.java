@@ -72,6 +72,15 @@ public class FocusedResourceGuardTest {
     }
 
     @Test
+    public void newFocusedWorkRequiresRecoveryHeadroom() {
+        final long max = 4L * 1024L * 1024L * 1024L;
+        final long threshold = FocusedResourceGuard.recoveryThreshold(max);
+        assertFalse(FocusedResourceGuard.hasRecoveryHeadroom(threshold - 1L, max, false));
+        assertTrue(FocusedResourceGuard.hasRecoveryHeadroom(threshold, max, false));
+        assertFalse(FocusedResourceGuard.hasRecoveryHeadroom(max, max, true));
+    }
+
+    @Test
     public void lowHeapHeadroomPausesBeforeTheThresholdAndStickyShortMemoryAlwaysPauses() {
         final long max = 2L * 1024L * 1024L * 1024L;
         final long threshold = FocusedResourceGuard.pauseThreshold(max);

@@ -65,7 +65,7 @@ public class RemoteSearch extends Thread {
      * while the existing work can finish and release its temporary objects.
      */
     static boolean hasPeerSearchHeadroom(final long available, final long maximum, final boolean shortMemory) {
-        return !shortMemory && available >= FocusedResourceGuard.recoveryThreshold(maximum);
+        return FocusedResourceGuard.hasRecoveryHeadroom(available, maximum, shortMemory);
     }
 
     private static boolean hasPeerSearchHeadroom() {
