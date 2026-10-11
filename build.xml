@@ -494,6 +494,7 @@
           <include name="net/yacy/http/servlets/MultipartMemoryBudgetTest.java" />
           <include name="net/yacy/http/ProxyAccessPolicyTest.java" />
           <include name="net/yacy/cora/util/ChunkedBytesWriteTest.java" />
+          <include name="net/yacy/kelondro/data/word/WordReferenceFactoryCompressIndexTest.java" />
           <classpath>
               <pathelement location="${build}" />
               <path refid="compile.path" />
@@ -527,6 +528,7 @@
           <arg value="net.yacy.http.servlets.MultipartMemoryBudgetTest" />
           <arg value="net.yacy.http.ProxyAccessPolicyTest" />
           <arg value="net.yacy.cora.util.ChunkedBytesWriteTest" />
+          <arg value="net.yacy.kelondro.data.word.WordReferenceFactoryCompressIndexTest" />
           <classpath>
               <pathelement location="${build}/focused-test-classes" />
               <pathelement location="${build}" />

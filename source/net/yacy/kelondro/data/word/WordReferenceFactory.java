@@ -79,18 +79,18 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
         synchronized (inputContainer) {
             final Iterator<WordReference> i = inputContainer.entries();
             WordReference iEntry;
-            String dom, mod;
+            String dom;
             StringBuilder paths;
             while (i.hasNext()) {
                 iEntry = i.next();
-                if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.urlhash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = (iEntry instanceof WordReferenceVars) ? ((WordReferenceVars) iEntry).hosthash() : ASCII.String(iEntry.urlhash(), 6, 6);
-                mod = ASCII.String(iEntry.urlhash(), 0, 6);
+                final byte[] urlhash = iEntry.urlhash();
+                if ((excludeContainer != null) && (excludeContainer.getReference(urlhash) != null)) continue; // do not include urls that are in excludeContainer
+                dom = (iEntry instanceof WordReferenceVars) ? ((WordReferenceVars) iEntry).hosthash() : ASCII.String(urlhash, 6, 6);
                 if ((paths = doms.get(dom)) == null) {
-                    doms.put(dom, new StringBuilder(30).append(mod));
-                } else {
-                    doms.put(dom, paths.append(mod));
+                    paths = new StringBuilder(30);
+                    doms.put(dom, paths);
                 }
+                appendAscii(urlhash, 0, 6, paths);
                 if (System.currentTimeMillis() > timeout)
                     break;
             }
@@ -112,6 +112,15 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
         }
         bb.append('}');
         return bb;
+    }
+
+    private static void appendAscii(final byte[] bytes, final int offset, final int length, final StringBuilder target) {
+        final int count = Math.min(length, bytes.length - offset);
+        for (int i = 0; i < count; i++) {
+            final byte value = bytes[offset + i];
+            if (value < 0) throw new IllegalArgumentException("non-ASCII character detected");
+            target.append((char) value);
+        }
     }
 
     /**
