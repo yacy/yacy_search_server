@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
@@ -138,7 +139,31 @@ public class Jetty12HttpServerTest {
 
         @Test
         public void doesNotExposeStackTracesOnClientErrorPages() {
-            assertFalse(new Jetty12HttpServer.ErrorPageHandler().isShowStacks());
+            final Jetty12HttpServer.ErrorPageHandler handler = new Jetty12HttpServer.ErrorPageHandler();
+            assertFalse(handler.isShowStacks());
+            assertFalse(handler.isShowMessageInTitle());
+        }
+
+        @Test
+        public void clientErrorPageDoesNotRenderUnboundedRequestDetails() throws IOException {
+            final Jetty12HttpServer.ErrorPageHandler handler = new Jetty12HttpServer.ErrorPageHandler();
+            final String untrustedDetail = "private-error-detail".repeat(4096);
+            final HttpServletRequest request = (HttpServletRequest) Proxy.newProxyInstance(
+                    Jetty12HttpServerTest.class.getClassLoader(),
+                    new Class<?>[]{HttpServletRequest.class},
+                    (proxy, method, args) -> {
+                        if ("getRequestURI".equals(method.getName())) return untrustedDetail;
+                        if ("getAttribute".equals(method.getName())) return new IllegalArgumentException(untrustedDetail);
+                        return null;
+                    });
+            final StringWriter writer = new StringWriter();
+
+            handler.writeErrorPageBody(request, writer, 500, untrustedDetail, false);
+
+            final String body = writer.toString();
+            assertTrue(body.contains("HTTP ERROR 500"));
+            assertFalse(body.contains("private-error-detail"));
+            assertTrue(body.length() < 2048);
         }
 
         @Test
