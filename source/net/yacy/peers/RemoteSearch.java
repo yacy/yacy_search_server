@@ -40,6 +40,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
+import net.yacy.crawler.focused.FocusedResourceGuard;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
@@ -57,6 +58,19 @@ public class RemoteSearch extends Thread {
 
     private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
     public static final ConcurrentLog log = new ConcurrentLog("DHT");
+
+    /**
+     * Avoid adding peer-search work while heap headroom is below the focused
+     * crawler's recovery watermark. Remote search remains available locally,
+     * while the existing work can finish and release its temporary objects.
+     */
+    static boolean hasPeerSearchHeadroom(final long available, final long maximum, final boolean shortMemory) {
+        return !shortMemory && available >= FocusedResourceGuard.recoveryThreshold(maximum);
+    }
+
+    private static boolean hasPeerSearchHeadroom() {
+        return hasPeerSearchHeadroom(MemoryControl.available(), MemoryControl.maxMemory(), MemoryControl.shortStatus());
+    }
     
     final private SearchEvent event;
     final private String wordhashes, excludehashes;
@@ -180,7 +194,7 @@ public class RemoteSearch extends Thread {
         Switchboard sb = Switchboard.getSwitchboard();
         
         // check the peer memory and lifesign-situation to get a scaling for the number of remote search processes
-        final boolean shortmem = MemoryControl.shortStatus();
+        final boolean shortmem = !hasPeerSearchHeadroom();
         final int indexingQueueSize = event.query.getSegment().fulltext().bufferSize();
         int redundancy = event.peers.redundancy();
         StringBuilder healthMessage = new StringBuilder(50);
@@ -274,7 +288,7 @@ public class RemoteSearch extends Thread {
 			final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom,
 					event.query.isStrictContentDom(), useFacets, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
-				if (MemoryControl.shortStatus()
+				if (!hasPeerSearchHeadroom()
 						|| Memory.getSystemLoadAverage() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
 								SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT)) {
 					continue;
@@ -288,7 +302,7 @@ public class RemoteSearch extends Thread {
         if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
             for (Seed dhtPeer: dhtPeers) {
                 if (dhtPeer == null || dhtPeer.hash == null) continue;
-				if (MemoryControl.shortStatus()
+				if (!hasPeerSearchHeadroom()
 						|| Memory.getSystemLoadAverage() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,
 								SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI_DEFAULT)) {
 					continue;
