@@ -13,7 +13,12 @@ public final class FocusedResourceGuard {
     private static final long MIN_RECOVERY_HEADROOM = 768L * 1024L * 1024L;
     private static final long MIN_PHYSICAL_HEADROOM = 512L * 1024L * 1024L;
     private static final int REQUIRED_HEALTHY_CHECKS = 2;
-    private static final long MEMORY_RECOVERY_RETRY_MILLIS = 60L * 1000L;
+
+    enum MemoryPressureAction {
+        NONE,
+        CLEAR_STALE_SHORT_STATUS,
+        PAUSE
+    }
 
     private int healthyChecks;
     private long recoveryAttempts;
@@ -119,15 +124,16 @@ public final class FocusedResourceGuard {
         return shortMemory || availableMemory < pauseThreshold(maxMemory);
     }
 
-    /** A low heap reading or YaCy short-memory signal should trigger reclamation before a crawl pause. */
-    public static boolean shouldAttemptMemoryRecovery(final long availableMemory,
+    /**
+     * Decide whether to pause crawling or clear a stale short-memory flag.
+     * Low headroom must pause immediately; a forced full GC here can briefly
+     * restore headroom only for the crawler to consume it again.
+     */
+    static MemoryPressureAction memoryPressureAction(final long availableMemory,
             final long maxMemory, final boolean shortMemory) {
-        return shortMemory || availableMemory < pauseThreshold(maxMemory);
-    }
-
-    /** Limit forced heap reclamation to once per cooldown while pressure persists. */
-    public static boolean memoryRecoveryCooldownElapsed(final long lastAttempt, final long now) {
-        return lastAttempt <= 0L || (now >= lastAttempt && now - lastAttempt >= MEMORY_RECOVERY_RETRY_MILLIS);
+        if (availableMemory < pauseThreshold(maxMemory)) return MemoryPressureAction.PAUSE;
+        if (shortMemory) return MemoryPressureAction.CLEAR_STALE_SHORT_STATUS;
+        return MemoryPressureAction.NONE;
     }
 
     public static long recoveryThreshold(final long maxMemory) {

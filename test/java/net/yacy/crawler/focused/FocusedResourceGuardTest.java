@@ -81,21 +81,25 @@ public class FocusedResourceGuardTest {
     }
 
     @Test
-    public void lowHeadroomOrShortMemoryRequestsReclamationBeforeTheSafetyPause() {
+    public void lowHeadroomPausesWithoutForcingHeapReclamation() {
         final long max = 3L * 1024L * 1024L * 1024L;
         final long threshold = FocusedResourceGuard.pauseThreshold(max);
-        assertTrue(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold - 1L, max, false));
-        assertFalse(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold, max, false));
-        assertTrue(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold + 1L, max, true));
-        assertTrue(FocusedResourceGuard.shouldAttemptMemoryRecovery(threshold - 1L, max, true));
+        assertTrue(FocusedResourceGuard.memoryPressureAction(threshold - 1L, max, false)
+                == FocusedResourceGuard.MemoryPressureAction.PAUSE);
+        assertTrue(FocusedResourceGuard.memoryPressureAction(threshold - 1L, max, true)
+                == FocusedResourceGuard.MemoryPressureAction.PAUSE);
+        assertTrue(FocusedResourceGuard.memoryPressureAction(threshold, max, false)
+                == FocusedResourceGuard.MemoryPressureAction.NONE);
     }
 
     @Test
-    public void forcedMemoryReclamationIsRateLimitedToOneAttemptPerMinute() {
-        assertTrue(FocusedResourceGuard.memoryRecoveryCooldownElapsed(0L, 1000L));
-        assertFalse(FocusedResourceGuard.memoryRecoveryCooldownElapsed(1000L, 60999L));
-        assertTrue(FocusedResourceGuard.memoryRecoveryCooldownElapsed(1000L, 61000L));
-        assertFalse(FocusedResourceGuard.memoryRecoveryCooldownElapsed(1000L, 999L));
+    public void staleShortMemoryFlagCanBeClearedOnlyAfterHeadroomRecovers() {
+        final long max = 4L * 1024L * 1024L * 1024L;
+        final long threshold = FocusedResourceGuard.pauseThreshold(max);
+        assertTrue(FocusedResourceGuard.memoryPressureAction(threshold - 1L, max, true)
+                == FocusedResourceGuard.MemoryPressureAction.PAUSE);
+        assertTrue(FocusedResourceGuard.memoryPressureAction(threshold, max, true)
+                == FocusedResourceGuard.MemoryPressureAction.CLEAR_STALE_SHORT_STATUS);
     }
 
     @Test

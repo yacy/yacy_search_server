@@ -189,7 +189,6 @@ public final class FocusedCrawlScheduler {
     private final File resourceStateFile;
     private final Properties resourceState = new Properties();
     private final FocusedResourceGuard resourceGuard = new FocusedResourceGuard();
-    private long lastMemoryReclamationAttemptMillis;
     private SystemMemorySnapshot hotPathSystemMemory;
     private long hotPathSystemMemoryReadAt;
     private final Map<String, Properties> states = new LinkedHashMap<>();
@@ -779,34 +778,20 @@ public final class FocusedCrawlScheduler {
         final long maximum = MemoryControl.maxMemory();
         final long threshold = FocusedResourceGuard.pauseThreshold(maximum);
         boolean memoryShort = MemoryControl.shortStatus();
-        boolean reclaimed = false;
-        if (FocusedResourceGuard.shouldAttemptMemoryRecovery(available, maximum, memoryShort)) {
-            if (available >= threshold) {
-                // A transient short-memory bit can outlive the failed request
-                // that set it. Since the measured heap already meets the
-                // safety threshold, a cheap successful request clears that
-                // stale bit without forcing a collection or pausing crawling.
-                MemoryControl.request(threshold, false);
-            } else if (FocusedResourceGuard.memoryRecoveryCooldownElapsed(
-                    this.lastMemoryReclamationAttemptMillis, System.currentTimeMillis())) {
-                // At the warning threshold, ask YaCy for one explicit
-                // reclamation attempt. The non-forced request used here could
-                // decline to collect based on historical GC yield, set the
-                // global short-memory flag itself, and cause repeated
-                // stop/recover cycles despite reclaimable heap. If this
-                // bounded attempt cannot restore the threshold, the safety
-                // pause below still applies. Do not repeat a costly full GC
-                // more than once per minute while pressure persists.
-                this.lastMemoryReclamationAttemptMillis = System.currentTimeMillis();
-                reclaimed = MemoryControl.request(threshold, true);
-                LOG.info("Attempted focused-crawl heap reclamation: requestSatisfied=" + reclaimed
-                        + ", headroom=" + MemoryControl.available() + ", threshold=" + threshold);
-            }
+        FocusedResourceGuard.MemoryPressureAction memoryAction = FocusedResourceGuard
+                .memoryPressureAction(available, maximum, memoryShort);
+        if (memoryAction == FocusedResourceGuard.MemoryPressureAction.CLEAR_STALE_SHORT_STATUS) {
+            // A failed request may leave a short-memory flag after headroom
+            // has already recovered. Clear it with a tiny non-forced request;
+            // this cannot justify an explicit full GC while crawling.
+            MemoryControl.request(1024L, false);
             available = MemoryControl.available();
             memoryShort = MemoryControl.shortStatus();
+            memoryAction = FocusedResourceGuard.memoryPressureAction(available, maximum, memoryShort);
         }
         final SystemMemorySnapshot systemMemory = SystemMemorySnapshot.read();
-        final boolean jvmPressure = FocusedResourceGuard.shouldPause(available, maximum, memoryShort);
+        final boolean jvmPressure = memoryAction == FocusedResourceGuard.MemoryPressureAction.PAUSE
+                || FocusedResourceGuard.shouldPause(available, maximum, memoryShort);
         if (!jvmPressure && systemMemory.healthy()) return false;
 
         final String jobType = SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL;
