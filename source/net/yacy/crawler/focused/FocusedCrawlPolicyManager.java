@@ -159,12 +159,6 @@ public final class FocusedCrawlPolicyManager implements AutoCloseable {
         return frontier;
     }
 
-    /** Return the count from an already open frontier without opening or scanning its rows. */
-    public synchronized int frontierSizeIfOpen(final String policyId) {
-        final FocusedFrontierStore frontier = this.frontiers.get(policyId);
-        return frontier == null ? -1 : frontier.size();
-    }
-
     /** Record a focused candidate before native YaCy queue admission. */
     public void recordDiscovered(final Request request, final List<CrawlPolicyDecision> decisions) {
         if (request == null || decisions == null) return;

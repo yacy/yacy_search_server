@@ -4646,8 +4646,9 @@ rss terminal==RSS-Terminal
 #-----------------------------
 #File: FocusedProfiles_p.html
 #---------------------------
+Detailed state-store counters are omitted from status reads so large crawl stores cannot block scheduler work.==Detaillierte Zähler der Zustandspeicher werden bei Statusabfragen ausgelassen, damit große Crawlspeicher die Scheduler-Arbeit nicht blockieren.
+Frontier entries (last sample)==Frontier-Einträge (letzte Messung)
 Queue (last sample)==Warteschlange (letzte Messung)
-Frontier entries==Frontier-Einträge
 Discovery totals==Entdeckungszahlen
 seed roots==Seed-URLs
 native links==Native Links

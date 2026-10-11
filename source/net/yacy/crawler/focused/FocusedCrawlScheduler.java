@@ -148,7 +148,8 @@ public final class FocusedCrawlScheduler {
                         .put("seeds", this.seeds).put("lastRun", this.lastRun)
                         .put("lastEnqueued", this.lastEnqueued).put("lastReason", this.lastReason)
                         .put("metrics", this.metrics == null ? new JSONObject(true) : this.metrics.toJSON());
-                final JSONObject frontierJSON = new JSONObject(true).put("countsAvailable", false);
+                final JSONObject frontierJSON = new JSONObject(true).put("countsAvailable", false)
+                        .put("sampledAt", this.lastRun);
                 if (this.frontierEntries >= 0) frontierJSON.put("total", this.frontierEntries);
                 json.put("frontier", frontierJSON);
                 json.put("queueSizeObservedAt", this.lastRun);
@@ -974,22 +975,35 @@ public final class FocusedCrawlScheduler {
         }
     }
 
-    public synchronized Collection<ProfileStatus> statuses() {
+    public Collection<ProfileStatus> statuses() {
         final List<ProfileStatus> result = new ArrayList<>();
         for (final FocusedCrawlPolicy policy : this.manager.policies()) {
             final PolicyConfiguration configuration = policy.configuration();
-            final Properties state = state(configuration.id());
-            state.setProperty("id", configuration.id());
-            // Status reads must not initialize a crawl profile, traverse the native queue, or
-            // decode every row in the persistent frontier. Use the most recent scheduler
-            // measurements and the open MapHeap's constant-time entry count instead.
+            final Properties state = readStatusState(configuration.id());
+            // Do not take this scheduler's monitor here: job() holds it while it
+            // performs queue and disk-backed frontier work. Status reads use the
+            // last persisted sample and never initialize profiles,
+            // traverse native queues, or touch the MapHeap.
             result.add(new ProfileStatus(configuration.id(), configuration.version(), configuration.enabled(),
                     intValue(state, "lastQueueAfter", -1), configuration.limits(), configuration.seeds().size(), state,
                     this.manager.metrics().snapshot(configuration.id()),
-                    this.manager.frontierEnabled(configuration.id())
-                            ? this.manager.frontierSizeIfOpen(configuration.id()) : -1));
+                    intValue(state, "lastFrontierTotal", -1)));
         }
         return result;
+    }
+
+    private Properties readStatusState(final String id) {
+        final Properties snapshot = new Properties();
+        final File file = new File(this.stateDirectory, id + ".properties");
+        if (file.isFile()) {
+            try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+                snapshot.load(reader);
+            } catch (final IOException e) {
+                LOG.warn("Cannot read focused status snapshot for " + id, e);
+            }
+        }
+        snapshot.setProperty("id", id);
+        return snapshot;
     }
 
     /**
@@ -1057,12 +1071,12 @@ public final class FocusedCrawlScheduler {
                 Collections.singletonList("frontier-reset-snapshot"), NoveltyClass.PROVEN_EXPANSION), true);
     }
 
-    public synchronized JSONObject statusJSON() {
+    public JSONObject statusJSON() {
         return statusJSON(statuses());
     }
 
     /** Serialize one status sample for both the JSON response and its HTML page. */
-    public synchronized JSONObject statusJSON(final Collection<ProfileStatus> profileStatuses) {
+    public JSONObject statusJSON(final Collection<ProfileStatus> profileStatuses) {
         final JSONObject json = new JSONObject(true);
         try {
             final org.json.JSONArray profilesJSON = new org.json.JSONArray();
@@ -1085,7 +1099,7 @@ public final class FocusedCrawlScheduler {
                     .put("systemMemoryHealthy", runtime.optBoolean("systemMemoryHealthy", true));
             json.put("feature", "Focused Autocrawler Profiles").put("owner", isOwner()).put("profiles", profilesJSON)
                     .put("resource", resource)
-                    .put("stateStores", this.manager.stateStatusJSON())
+                    .put("stateStores", new JSONObject(true).put("countsAvailable", false))
                     .put("pdfLane", this.sb.crawlQueues.focusedPdfLane().toJSON());
         } catch (final JSONException e) {
             throw new IllegalStateException("cannot serialize focused scheduler status", e);

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,6 +15,14 @@ import java.util.function.IntFunction;
 import org.junit.Test;
 
 public class FocusedCrawlSchedulerTest {
+
+    @Test
+    public void statusReadersDoNotAcquireTheCrawlCycleMonitor() throws Exception {
+        assertFalse(Modifier.isSynchronized(FocusedCrawlScheduler.class.getMethod("statuses").getModifiers()));
+        assertFalse(Modifier.isSynchronized(FocusedCrawlScheduler.class.getMethod("statusJSON").getModifiers()));
+        assertFalse(Modifier.isSynchronized(FocusedCrawlScheduler.class
+                .getMethod("statusJSON", java.util.Collection.class).getModifiers()));
+    }
 
     @Test
     public void weightedSelectorPreservesBothLanes() {

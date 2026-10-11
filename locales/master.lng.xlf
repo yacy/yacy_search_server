@@ -4263,6 +4263,9 @@
     <trans-unit id="9d65df68" xml:space="preserve" approved="no" translate="yes">
        <source>Local crawl:</source>
     </trans-unit>
+    <trans-unit id="30e8ec8f" xml:space="preserve" approved="no" translate="yes">
+       <source>Detailed state-store counters are omitted from status reads so large crawl stores cannot block scheduler work.</source>
+    </trans-unit>
     <trans-unit id="50c72189" xml:space="preserve" approved="no" translate="yes">
        <source>Profile</source>
     </trans-unit>
@@ -4278,8 +4281,8 @@
     <trans-unit id="c8eddf6e" xml:space="preserve" approved="no" translate="yes">
        <source>Queue (last sample)</source>
     </trans-unit>
-    <trans-unit id="b016a39d" xml:space="preserve" approved="no" translate="yes">
-       <source>Frontier entries</source>
+    <trans-unit id="22e63d1a" xml:space="preserve" approved="no" translate="yes">
+       <source>Frontier entries (last sample)</source>
     </trans-unit>
     <trans-unit id="5a68ee3f" xml:space="preserve" approved="no" translate="yes">
        <source>Discovery totals</source>

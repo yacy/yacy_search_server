@@ -111,8 +111,6 @@ public class FocusedProfiles_p {
         final JSONObject resourceStatus = schedulerStatus.optJSONObject("resource");
         final JSONObject pdfStatus = schedulerStatus.optJSONObject("pdfLane");
         final JSONObject runtimeStatus = resourceStatus == null ? null : resourceStatus.optJSONObject("runtime");
-        final JSONObject stateStores = schedulerStatus.optJSONObject("stateStores");
-        final JSONObject metadataStore = stateStores == null ? null : stateStores.optJSONObject("metadata");
         prop.putHTML("resource_pause_cause", resourceStatus == null ? "" : resourceStatus.optString("pauseCause", ""));
         prop.put("resource_paused", resourceStatus != null && resourceStatus.optBoolean("paused", false));
         prop.put("resource_memory_available", resourceStatus == null ? 0L : resourceStatus.optLong("memoryAvailable", 0L));
@@ -142,9 +140,6 @@ public class FocusedProfiles_p {
         }
         prop.put("runtime_direct_buffer_bytes", directBufferBytes);
         prop.put("runtime_mapped_buffer_bytes", mappedBufferBytes);
-        prop.put("state_metadata_records", metadataStore == null ? 0 : metadataStore.optInt("records", 0));
-        prop.put("state_metadata_index_bytes", metadataStore == null ? 0L : metadataStore.optLong("estimatedIndexBytes", 0L));
-        prop.put("state_metadata_file_bytes", metadataStore == null ? 0L : metadataStore.optLong("heapFileBytes", 0L));
         prop.put("resource_healthy_checks", resourceStatus == null ? 0 : resourceStatus.optInt("healthyChecks", 0));
         prop.put("pdf_active", pdfStatus == null ? 0 : pdfStatus.optInt("active", 0));
         prop.put("pdf_admitted", pdfStatus == null ? 0L : pdfStatus.optLong("admitted", 0L));

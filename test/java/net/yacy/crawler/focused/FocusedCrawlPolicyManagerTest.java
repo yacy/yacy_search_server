@@ -85,22 +85,4 @@ public class FocusedCrawlPolicyManagerTest {
         }
     }
 
-    @Test
-    public void statusFrontierSizeDoesNotOpenAnUnloadedStore() throws Exception {
-        final Path application = Files.createTempDirectory("focused-status-app-");
-        final Path data = Files.createTempDirectory("focused-status-data-");
-        final Path profiles = application.resolve("defaults/focused/policies");
-        Files.createDirectories(profiles);
-        Files.writeString(profiles.resolve("astronomy.json"), profile("astronomy", true).toString(),
-                StandardCharsets.UTF_8);
-
-        try (FocusedCrawlPolicyManager manager = new FocusedCrawlPolicyManager(application.toFile(), data.toFile())) {
-            final Path frontierFile = data.resolve("DATA/SETTINGS/focused/state/astronomy.frontier.heap");
-            assertEquals(-1, manager.frontierSizeIfOpen("astronomy"));
-            assertFalse(Files.exists(frontierFile));
-
-            manager.frontier("astronomy");
-            assertEquals(0, manager.frontierSizeIfOpen("astronomy"));
-        }
-    }
 }

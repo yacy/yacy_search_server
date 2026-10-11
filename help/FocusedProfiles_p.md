@@ -18,20 +18,19 @@ frontier in persistent state.
 
 ## Status and resource use
 
-`GET /FocusedProfiles_p.html` shows the last queue size sampled by the
-scheduler, the current entry count for an already open frontier, cumulative
-link/seed discovery totals, and the last scheduler reason. The queue sample time
-is available in JSON as `queueSizeObservedAt` (Unix epoch milliseconds).
+`GET /FocusedProfiles_p.html` shows the last queue size and frontier entry count
+sampled by the scheduler, cumulative link/seed discovery totals, and the last
+scheduler reason. The queue sample time is available in JSON as
+`queueSizeObservedAt` (Unix epoch milliseconds).
 
-`GET /FocusedProfiles_p.json` returns the scheduler resource status, profile
-metrics, and `stateStores` summaries. A profile's `frontier` object contains
-`total` when its store is already open and `countsAvailable: false`. It does not
-calculate per-state frontier counts during a status request: that would read and
-decode the complete disk-backed frontier while blocking scheduler work. The
-`stateStores.profiles[].frontier` summary reports `records`,
-`estimatedIndexBytes`, `heapFileBytes`, and `mapHeapCacheEntries` without a row
-scan when that frontier store is already open. Discovery metrics are cumulative
-counters, not counts of current frontier rows.
+`GET /FocusedProfiles_p.json` returns scheduler resource status, profile
+metrics, and a `stateStores` object with `countsAvailable: false`. Profile
+`queueSize` and `frontier.total` are the last persisted scheduler samples, not
+live queue or frontier scans. `frontier.sampledAt` gives the sample time in
+Unix epoch milliseconds. Status reads do not take the
+scheduler monitor or access the disk-backed MapHeap; detailed state-store
+counters are intentionally omitted so status checks cannot block crawl work.
+Discovery metrics are cumulative counters, not counts of current frontier rows.
 
 The status response also includes `resource` fields for pause state, pause
 cause, JVM headroom thresholds, healthy recovery checks, and system-memory
