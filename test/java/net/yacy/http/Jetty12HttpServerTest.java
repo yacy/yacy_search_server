@@ -137,6 +137,11 @@ public class Jetty12HttpServerTest {
         }
 
         @Test
+        public void doesNotExposeStackTracesOnClientErrorPages() {
+            assertFalse(new Jetty12HttpServer.ErrorPageHandler().isShowStacks());
+        }
+
+        @Test
         public void tracksForwardedClientOnlyForTrustedReverseProxy() {
             final HttpServletRequest trustedProxyRequest = requestWithRemoteAddress(
                     "127.0.0.1", "198.51.100.23");

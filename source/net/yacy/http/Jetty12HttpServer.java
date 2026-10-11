@@ -466,6 +466,13 @@ public class Jetty12HttpServer implements YaCyHttpServer {
     /** YaCy-branded EE8 error page for Jetty 12. */
     static final class ErrorPageHandler extends org.eclipse.jetty.ee8.nested.ErrorHandler {
 
+        ErrorPageHandler() {
+            // Error pages can be returned to unauthenticated remote clients.
+            // Formatting full exception traces on every error adds avoidable
+            // allocation pressure and exposes internal implementation details.
+            setShowStacks(false);
+        }
+
         @Override
         protected void writeErrorPageBody(final HttpServletRequest request, final Writer writer,
                 final int code, final String message, final boolean showStacks) throws IOException {
