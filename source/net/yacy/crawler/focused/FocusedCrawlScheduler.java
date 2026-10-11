@@ -251,10 +251,10 @@ public final class FocusedCrawlScheduler {
                 frontier.recoverStale(System.currentTimeMillis(),
                         configuration.frontier().recoveryGraceMillis(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE);
             }
-            final int current = queueSizeForScheduling(profile);
             final int target = Math.max(0, configuration.limits().queueTarget());
             final int refillBelow = Math.min(target, Math.max(0, configuration.limits().refillBelow()));
             final int hardMaximum = Math.max(target, configuration.limits().hardMaximum());
+            final int current = queueSizeForScheduling(profile, policies.size() == 1);
             if (current >= refillBelow) {
                 save(state, current, current, 0, "queue watermark");
                 continue;
@@ -291,7 +291,8 @@ public final class FocusedCrawlScheduler {
                     }
                     // Avoid another full queue/frontier scan after pausing on
                     // low headroom; the persisted native queues remain intact.
-                    final int after = memoryPressure ? -1 : queueSizeForScheduling(profile);
+                    final int after = memoryPressure ? -1
+                            : queueSizeForScheduling(profile, policies.size() == 1);
                     final String refillReason = memoryPressure ? "resource guard after bounded refill"
                             : indexedExpansion > 0 ? "frontier recovery + indexed source expansion" : "frontier recovery";
                     save(state, current, after, recovered + indexedExpansion, refillReason);
@@ -359,7 +360,7 @@ public final class FocusedCrawlScheduler {
                 state.setProperty("frontierStarted", "true");
             }
             state.setProperty("lastRefill", Long.toString(System.currentTimeMillis()));
-            final int after = queueSizeForScheduling(profile);
+            final int after = queueSizeForScheduling(profile, policies.size() == 1);
             save(state, current, after, added, "refill");
             enqueued |= added > 0;
         }
@@ -736,15 +737,20 @@ public final class FocusedCrawlScheduler {
      * a transient race does not park the sole enabled focused profile. It
      * cannot make the scheduler exceed its configured queue target.
      */
-    private int queueSizeForScheduling(final CrawlProfile profile) {
-        final int profileSize = queueSize(profile);
-        if (profileSize >= 0) return profileSize;
-        final int aggregateFocusedSize = this.sb.crawlQueues.noticeURL.stackSize(StackType.FOCUSED)
+    private int queueSizeForScheduling(final CrawlProfile profile, final boolean soleEnabledProfile) {
+        final FocusedQueueCounter.QueueSize snapshot = FocusedQueueCounter.countForScheduling(soleEnabledProfile,
+                () -> queueSize(profile), this::aggregateFocusedQueueSize);
+        if (snapshot.unavailable()) {
+            LOG.warn("Could not obtain a stable queue snapshot for focused profile " + profile.name()
+                    + " after " + QUEUE_SIZE_MEASUREMENT_ATTEMPTS
+                    + " attempts; using conservative aggregate focused queue size " + snapshot.size());
+        }
+        return snapshot.size();
+    }
+
+    private int aggregateFocusedQueueSize() {
+        return this.sb.crawlQueues.noticeURL.stackSize(StackType.FOCUSED)
                 + this.sb.crawlQueues.noticeURL.stackSize(StackType.FOCUSED_PDF);
-        LOG.warn("Could not obtain a stable queue snapshot for focused profile " + profile.name()
-                + " after " + QUEUE_SIZE_MEASUREMENT_ATTEMPTS + " attempts; using conservative aggregate focused queue size "
-                + aggregateFocusedSize);
-        return Math.max(0, aggregateFocusedSize);
     }
 
     private boolean healthy(final PolicyConfiguration configuration) {

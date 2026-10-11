@@ -1,6 +1,7 @@
 package net.yacy.crawler.focused;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -73,5 +74,34 @@ public class FocusedCrawlSchedulerTest {
 
         assertEquals(-1, FocusedQueueCounter.countSnapshot(1, streams, value -> true, 3));
         assertEquals(3, calls.get());
+    }
+
+    @Test
+    public void soleEnabledProfileUsesAggregateWithoutWalkingHostQueues() {
+        final AtomicInteger exactCalls = new AtomicInteger();
+        final FocusedQueueCounter.QueueSize snapshot = FocusedQueueCounter.countForScheduling(true,
+                () -> { exactCalls.incrementAndGet(); return 17; }, () -> 42);
+
+        assertEquals(42, snapshot.size());
+        assertFalse(snapshot.exact());
+        assertFalse(snapshot.unavailable());
+        assertEquals(0, exactCalls.get());
+    }
+
+    @Test
+    public void multipleEnabledProfilesKeepExactCountAndAggregateFallback() {
+        final AtomicInteger aggregateCalls = new AtomicInteger();
+        final FocusedQueueCounter.QueueSize exact = FocusedQueueCounter.countForScheduling(false,
+                () -> 17, () -> { aggregateCalls.incrementAndGet(); return 42; });
+        assertEquals(17, exact.size());
+        assertTrue(exact.exact());
+        assertEquals(0, aggregateCalls.get());
+
+        final FocusedQueueCounter.QueueSize fallback = FocusedQueueCounter.countForScheduling(false,
+                () -> -1, () -> { aggregateCalls.incrementAndGet(); return 42; });
+        assertEquals(42, fallback.size());
+        assertFalse(fallback.exact());
+        assertTrue(fallback.unavailable());
+        assertEquals(1, aggregateCalls.get());
     }
 }

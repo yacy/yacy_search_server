@@ -6,12 +6,43 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntFunction;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
 /** Counts focused queue iterators while tolerating concurrent crawler pops. */
 final class FocusedQueueCounter {
 
     private FocusedQueueCounter() { }
+
+    static final class QueueSize {
+        private final int size;
+        private final boolean exact;
+        private final boolean unavailable;
+
+        private QueueSize(final int size, final boolean exact, final boolean unavailable) {
+            this.size = size;
+            this.exact = exact;
+            this.unavailable = unavailable;
+        }
+
+        int size() { return this.size; }
+        boolean exact() { return this.exact; }
+        boolean unavailable() { return this.unavailable; }
+    }
+
+    /**
+     * Use the focused-lane aggregate for a sole enabled profile. It is an
+     * upper bound that avoids walking host queues just to distinguish that
+     * profile's requests. Multiple enabled profiles still require an exact
+     * profile-handle count.
+     */
+    static QueueSize countForScheduling(final boolean soleEnabledProfile,
+            final IntSupplier profileSnapshot, final IntSupplier aggregateSnapshot) {
+        if (soleEnabledProfile) return new QueueSize(Math.max(0, aggregateSnapshot.getAsInt()), false, false);
+        final int exact = profileSnapshot.getAsInt();
+        if (exact >= 0) return new QueueSize(exact, true, false);
+        return new QueueSize(Math.max(0, aggregateSnapshot.getAsInt()), false, true);
+    }
 
     /**
      * Count a complete queue snapshot, restarting it when a concurrent pop
