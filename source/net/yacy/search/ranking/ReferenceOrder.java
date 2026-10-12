@@ -27,6 +27,7 @@
 package net.yacy.search.ranking;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,14 +58,22 @@ public class ReferenceOrder {
     private final ConcurrentScoreMap<String> doms; // collected for "authority" heuristic
     private final RankingProfile ranking;
     private final String language;
+    private final Map<String, Long> demotedHostHashes; // hosthash -> divisor
+    private final Map<String, Long> demotedWords;      // word/phrase -> divisor
 
     public ReferenceOrder(final RankingProfile profile, final String language) {
+        this(profile, language, Collections.emptyMap(), Collections.emptyMap());
+    }
+
+    public ReferenceOrder(final RankingProfile profile, final String language, final Map<String, Long> demotedHostHashes, final Map<String, Long> demotedWords) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
         this.doms = new ConcurrentScoreMap<String>();
         this.maxdomcount = 0;
         this.language = language;
+        this.demotedHostHashes = demotedHostHashes;
+        this.demotedWords = demotedWords;
     }
 
     public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container, long maxtime, final boolean local) {
@@ -210,6 +219,25 @@ public class ReferenceOrder {
         }
     }
 
+    /** Returns the score divisor for the given hosthash, or 1 if not demoted. */
+    public long getDemotionDivisor(final String hostHash) {
+        if (this.demotedHostHashes.isEmpty()) return 1L;
+        final Long d = this.demotedHostHashes.get(hostHash);
+        return d != null ? d : 1L;
+    }
+
+    /** Returns the score divisor for the first matching demoted word/phrase, or 1 if none match. */
+    public long getDemotionDivisorByWords(final String url, final String title, final String description) {
+        if (this.demotedWords.isEmpty()) return 1L;
+        final String haystack = (url == null ? "" : url.toLowerCase(java.util.Locale.ROOT))
+                + " " + (title == null ? "" : title.toLowerCase(java.util.Locale.ROOT))
+                + " " + (description == null ? "" : description.toLowerCase(java.util.Locale.ROOT));
+        for (final Map.Entry<String, Long> entry : this.demotedWords.entrySet()) {
+            if (haystack.contains(entry.getKey())) return entry.getValue();
+        }
+        return 1L;
+    }
+
     public int authority(final String hostHash) {
         assert hostHash.length() == 6;
         return (this.doms.get(hostHash) << 8) / (1 + this.maxdomcount);
@@ -261,9 +289,11 @@ public class ReferenceOrder {
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
+        final long hostDivisor = getDemotionDivisor(t.hosthash());
+        if (hostDivisor > 1L) return r / hostDivisor;
         return r; // the higher the number the better the ranking.
     }
-    
+
     public long cardinal(final URIMetadataNode t) {
         // the normalizedEntry must be a normalized indexEntry
         assert t != null;
@@ -292,6 +322,8 @@ public class ReferenceOrder {
            + ((flags.get(Tokenizer.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Tokenizer.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
            + ((this.language.equals(t.language())) ? 255 << this.ranking.coeff_language    : 0);
+        final long hostDivisor = getDemotionDivisor(t.hosthash());
+        if (hostDivisor > 1L) return r / hostDivisor;
         return r; // the higher the number the better the ranking.
     }
 
