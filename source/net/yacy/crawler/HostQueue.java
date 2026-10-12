@@ -487,12 +487,14 @@ public class HostQueue implements Balancer {
                     continue mainloop;
                 }
 
-                // depending on the caching policy we need sleep time to avoid DoS-like situations
-                sleeptime = Latency.getDomainSleepTime(robots, profileEntry, crawlEntry.url());
+                // The robots lookup may perform network I/O; do it after releasing this queue lock.
                 break mainloop;
             }
         }
         if (crawlEntry == null) return null;
+        // Depending on the caching policy, this can fetch robots.txt and must not run
+        // while holding this HostQueue monitor.
+        sleeptime = Latency.getDomainSleepTime(robots, profileEntry, crawlEntry.url());
         final ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
         final long robotsTime = Latency.getRobotsTime(robots, crawlEntry.url(), agent);
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);

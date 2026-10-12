@@ -484,6 +484,7 @@
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            release="${javacRelease}" encoding="UTF-8">
           <include name="net/yacy/crawler/focused/**/*Test.java" />
+          <include name="net/yacy/crawler/robots/RobotsTxtTest.java" />
           <include name="net/yacy/search/query/FocusedQueryModifierTest.java" />
           <include name="net/yacy/search/query/SearchSnippetExecutorTest.java" />
           <include name="net/yacy/search/query/SearchEventCacheTest.java" />
@@ -520,6 +521,7 @@
           <arg value="net.yacy.crawler.focused.FocusedPolicyConfigurationTest" />
           <arg value="net.yacy.crawler.focused.FocusedResourceGuardTest" />
           <arg value="net.yacy.crawler.focused.FocusedURLAdmissionStateTest" />
+          <arg value="net.yacy.crawler.robots.RobotsTxtTest" />
           <arg value="net.yacy.search.query.FocusedQueryModifierTest" />
           <arg value="net.yacy.search.query.SearchSnippetExecutorTest" />
           <arg value="net.yacy.search.query.SearchEventCacheTest" />
