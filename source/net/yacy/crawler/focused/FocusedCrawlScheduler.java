@@ -49,6 +49,7 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.schema.CollectionSchema;
 
 /**
@@ -793,7 +794,8 @@ public final class FocusedCrawlScheduler {
         if (!jvmPressure && systemMemory.healthy()) return false;
 
         final String jobType = SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL;
-        if (!this.sb.crawlJobIsPaused(jobType)) {
+        final boolean crawlAlreadyPaused = this.sb.crawlJobIsPaused(jobType);
+        if (!crawlAlreadyPaused) {
             final String cause;
             if (!systemMemory.healthy()) {
                 cause = systemMemory.pauseReason();
@@ -822,6 +824,15 @@ public final class FocusedCrawlScheduler {
         this.resourceState.setProperty("diskHealthy", Boolean.toString(diskHealthy(null)));
         systemMemory.save(this.resourceState);
         persistResourceState();
+        if (FocusedResourceGuard.shouldClearSearchEventCache(
+                crawlAlreadyPaused, jvmPressure, systemMemory.healthy())) {
+            try {
+                SearchEventCache.cleanupEvents(true);
+                LOG.info("Cleared cached search events after focused resource pressure pause");
+            } catch (final RuntimeException e) {
+                LOG.warn("Could not clear cached search events after focused resource pressure pause", e);
+            }
+        }
         return true;
     }
 

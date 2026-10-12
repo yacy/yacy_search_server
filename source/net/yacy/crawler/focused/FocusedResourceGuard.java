@@ -125,6 +125,16 @@ public final class FocusedResourceGuard {
     }
 
     /**
+     * Cached search events retain local RWI containers, which can be large
+     * after multi-segment merges. Evict them when a new automatic resource
+     * pause is imposed, but do not disturb searches for an existing pause.
+     */
+    static boolean shouldClearSearchEventCache(final boolean crawlAlreadyPaused,
+            final boolean jvmPressure, final boolean systemMemoryHealthy) {
+        return !crawlAlreadyPaused && (jvmPressure || !systemMemoryHealthy);
+    }
+
+    /**
      * Decide whether to pause crawling or clear a stale short-memory flag.
      * Low headroom must pause immediately; a forced full GC here can briefly
      * restore headroom only for the crawler to consume it again.

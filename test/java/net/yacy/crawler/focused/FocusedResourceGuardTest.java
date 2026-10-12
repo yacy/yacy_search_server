@@ -102,6 +102,14 @@ public class FocusedResourceGuardTest {
     }
 
     @Test
+    public void cachedSearchEventsAreClearedOnlyWhenANewResourcePauseStarts() {
+        assertTrue(FocusedResourceGuard.shouldClearSearchEventCache(false, true, true));
+        assertTrue(FocusedResourceGuard.shouldClearSearchEventCache(false, false, false));
+        assertFalse(FocusedResourceGuard.shouldClearSearchEventCache(true, true, true));
+        assertFalse(FocusedResourceGuard.shouldClearSearchEventCache(false, false, true));
+    }
+
+    @Test
     public void staleShortMemoryFlagCanBeClearedOnlyAfterHeadroomRecovers() {
         final long max = 4L * 1024L * 1024L * 1024L;
         final long threshold = FocusedResourceGuard.pauseThreshold(max);
