@@ -521,7 +521,6 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     protected final static RowSet mergeEnum(final RowCollection c0, final RowCollection c1) throws SpaceExceededException {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
         final RowSet r = new RowSet(c0.rowdef);
-        r.ensureSizeExact(c0.size() + c1.size());
         try {
         	c0.sort();
         } catch (final Throwable e) {
@@ -540,6 +539,34 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         final int objectsize = c0.rowdef.objectsize;
         final int c0s = c0.size();
         final int c1s = c1.size();
+
+        // Count the union before allocating its backing array. The inputs may
+        // contain the same primary keys (for example, while merging RWI
+        // containers from multiple index segments), and those duplicates are
+        // discarded below. Reserving the sum of the input sizes can otherwise
+        // leave a large, mostly unused array attached to the result.
+        int mergedSize = 0;
+        while (c0i < c0s && c1i < c1s) {
+            c0p = c0i * objectsize;
+            c1p = c1i * objectsize;
+            o = c0.rowdef.objectOrder.compare(
+                    c0.chunkcache, c0p,
+                    c1.chunkcache, c1p, c0.rowdef.primaryKeyLength);
+            if (o == 0) {
+                c0i++;
+                c1i++;
+            } else if (o < 0) {
+                c0i++;
+            } else {
+                c1i++;
+            }
+            mergedSize++;
+        }
+        mergedSize += c0s - c0i + c1s - c1i;
+        r.ensureSizeExact(mergedSize);
+
+        c0i = 0;
+        c1i = 0;
         while (c0i < c0s && c1i < c1s) {
             c0p = c0i * objectsize;
             c1p = c1i * objectsize;
@@ -563,11 +590,11 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
                 continue;
             }
         }
-        while (c0i < c0.size()) {
+        while (c0i < c0s) {
             r.addSorted(c0.chunkcache, c0i * objectsize, objectsize);
             c0i++;
         }
-        while (c1i < c1.size()) {
+        while (c1i < c1s) {
             r.addSorted(c1.chunkcache, c1i * objectsize, objectsize);
             c1i++;
         }

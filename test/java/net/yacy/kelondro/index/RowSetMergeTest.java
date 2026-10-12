@@ -14,7 +14,7 @@ import net.yacy.cora.util.SpaceExceededException;
 public class RowSetMergeTest {
 
     @Test
-    public void mergeUsesOnlyItsMaximumOutputCapacity() throws SpaceExceededException {
+    public void mergeAllocatesCapacityForDeduplicatedOutput() throws SpaceExceededException {
         final Row row = new Row("byte[] key-4, byte[] payload-4", NaturalOrder.naturalOrder);
         final RowSet left = new RowSet(row);
         left.add(row("0001", "left"));
@@ -29,12 +29,34 @@ public class RowSetMergeTest {
         final RowSet merged = left.merge(right);
 
         assertEquals(4, merged.size());
-        assertEquals(maximumOutputSize * row.objectsize, merged.chunkcache.length);
+        assertEquals((maximumOutputSize - 1) * row.objectsize, merged.chunkcache.length);
         assertTrue(merged.has("0001".getBytes(StandardCharsets.US_ASCII)));
         assertTrue(merged.has("0002".getBytes(StandardCharsets.US_ASCII)));
         assertTrue(merged.has("0003".getBytes(StandardCharsets.US_ASCII)));
         assertTrue(merged.has("0004".getBytes(StandardCharsets.US_ASCII)));
         assertFalse(merged.has("0005".getBytes(StandardCharsets.US_ASCII)));
+    }
+
+    @Test
+    public void mergeKeepsMaximumCapacityWhenInputsDoNotOverlap() throws SpaceExceededException {
+        final Row row = new Row("byte[] key-4, byte[] payload-4", NaturalOrder.naturalOrder);
+        final RowSet left = new RowSet(row);
+        left.add(row("0001", "left"));
+        left.add(row("0002", "left"));
+
+        final RowSet right = new RowSet(row);
+        right.add(row("0003", "rght"));
+        right.add(row("0004", "rght"));
+
+        final int maximumOutputSize = left.size() + right.size();
+        final RowSet merged = left.merge(right);
+
+        assertEquals(maximumOutputSize, merged.size());
+        assertEquals(maximumOutputSize * row.objectsize, merged.chunkcache.length);
+        assertTrue(merged.has("0001".getBytes(StandardCharsets.US_ASCII)));
+        assertTrue(merged.has("0002".getBytes(StandardCharsets.US_ASCII)));
+        assertTrue(merged.has("0003".getBytes(StandardCharsets.US_ASCII)));
+        assertTrue(merged.has("0004".getBytes(StandardCharsets.US_ASCII)));
     }
 
     private static byte[] row(final String key, final String payload) {
