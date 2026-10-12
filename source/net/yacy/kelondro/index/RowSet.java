@@ -520,7 +520,8 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
      */
     protected final static RowSet mergeEnum(final RowCollection c0, final RowCollection c1) throws SpaceExceededException {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
-        final RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
+        final RowSet r = new RowSet(c0.rowdef);
+        r.ensureSizeExact(c0.size() + c1.size());
         try {
         	c0.sort();
         } catch (final Throwable e) {
