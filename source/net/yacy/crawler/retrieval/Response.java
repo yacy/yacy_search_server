@@ -798,14 +798,37 @@ public class Response {
     public String getMimeType() {
         if (this.responseHeader == null) return null;
 
-        String mimeType = this.responseHeader.getContentType();
-        if (mimeType != null) {
-            mimeType = mimeType.trim().toLowerCase(Locale.ROOT);
+        final String contentType = this.responseHeader.getContentType();
+        if (contentType == null) return null;
 
-            final int pos = mimeType.indexOf(';');
-            return ((pos < 0) ? mimeType : mimeType.substring(0, pos));
+        // Content-Type values are normally ASCII. Parse their MIME token before
+        // normalizing it so common lowercase values do not allocate a lowercase
+        // copy of the full value (including parameters) on every response.
+        final int length = contentType.length();
+        int start = 0;
+        int end = length;
+        while (start < end && contentType.charAt(start) <= ' ') start++;
+        while (end > start && contentType.charAt(end - 1) <= ' ') end--;
+        final int separator = contentType.indexOf(';', start);
+        if (separator >= 0 && separator < end) end = separator;
+
+        boolean lowercaseAscii = true;
+        for (int i = start; i < end; i++) {
+            final char c = contentType.charAt(i);
+            if (c > 0x7f) {
+                // Preserve Locale.ROOT's full Unicode behavior for unusual
+                // non-ASCII MIME values.
+                final String normalized = contentType.trim().toLowerCase(Locale.ROOT);
+                final int normalizedSeparator = normalized.indexOf(';');
+                return normalizedSeparator < 0 ? normalized : normalized.substring(0, normalizedSeparator);
+            }
+            if (c >= 'A' && c <= 'Z') lowercaseAscii = false;
         }
-        return null;
+
+        if (lowercaseAscii) {
+            return start == 0 && end == length ? contentType : contentType.substring(start, end);
+        }
+        return contentType.substring(start, end).toLowerCase(Locale.ROOT);
     }
 
     public String getCharacterEncoding() {
