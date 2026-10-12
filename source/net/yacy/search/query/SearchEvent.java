@@ -2069,6 +2069,26 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             if (urlcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_appurl;
             if (descrcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_app_dc_title;
         }
+
+        // thin content penalty: pages with very few words are likely low-quality
+        final int wordCount = rentry.wordCount();
+        if (wordCount < 50) {
+            r += -512;
+        } else if (wordCount < 150) {
+            r += (long)(-512.0 * (150 - wordCount) / 100.0);
+        }
+
+        // link farm penalty: high outbound-to-inbound ratio signals spam
+        final int lother = rentry.lother();
+        if (lother > 50) {
+            final double ratio = (double) lother / (1 + rentry.llocal());
+            if (ratio > 20) {
+                r += -512;
+            } else if (ratio > 5) {
+                r += (long)(-512.0 * (ratio - 5) / 15.0);
+            }
+        }
+
         return r;
     }
 
