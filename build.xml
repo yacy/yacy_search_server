@@ -497,6 +497,7 @@
           <include name="net/yacy/cora/util/ChunkedBytesWriteTest.java" />
           <include name="net/yacy/kelondro/data/word/WordReferenceFactoryCompressIndexTest.java" />
           <include name="net/yacy/kelondro/index/RowSetMergeTest.java" />
+          <include name="net/yacy/document/parser/html/TransformerWriterTest.java" />
           <classpath>
               <pathelement location="${build}" />
               <path refid="compile.path" />
@@ -534,6 +535,7 @@
           <arg value="net.yacy.cora.util.ChunkedBytesWriteTest" />
           <arg value="net.yacy.kelondro.data.word.WordReferenceFactoryCompressIndexTest" />
           <arg value="net.yacy.kelondro.index.RowSetMergeTest" />
+          <arg value="net.yacy.document.parser.html.TransformerWriterTest" />
           <classpath>
               <pathelement location="${build}/focused-test-classes" />
               <pathelement location="${build}" />
