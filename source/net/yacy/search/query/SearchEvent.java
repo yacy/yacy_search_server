@@ -218,6 +218,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     private final HandleSet urlhashes;
     /** best known candidate quality per url hash, used to prefer richer duplicates before final emission */
     private final ConcurrentHashMap<String, Integer> bestResultQualityByUrlHash;
+    /** fuzzy content signatures already emitted; used to suppress near-duplicate pages */
+    private final Set<Long> seenFuzzySignatures;
 
     /** a map from tagging vocabulary names to tagging predicate uris */
     private final Map<String, String> taggingPredicates;
@@ -357,6 +359,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.nodeStack = new WeakPriorityBlockingQueue<>(max_results_node + (query != null ? query.offset + query.itemsPerPage() : 0), false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
+        this.seenFuzzySignatures = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
 
         // prepare configured search navigation
@@ -2634,13 +2637,18 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         if (this.urlhashes.has(entry.hash())) {
             return false;
         }
+        // suppress near-duplicate content: skip pages whose fuzzy content signature was already emitted
+        final long fuzzySig = entry.fuzzySignature();
+        if (fuzzySig != 0L && !this.seenFuzzySignatures.add(fuzzySig)) {
+            return false;
+        }
         try {
             this.urlhashes.putUnique(entry.hash());
-            return true;
         } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             return false;
         }
+        return true;
     }
 
     private void decrementNodeAvailableCount(final URIMetadataNode entry) {
