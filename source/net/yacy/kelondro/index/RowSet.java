@@ -511,6 +511,53 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     }
 
     /**
+     * Accumulate already ordered row sets with a balanced, left-to-right merge.
+     * Adjacent source runs are merged together, so duplicate keys keep the row
+     * from the earliest input just as they do with repeated {@link #merge(RowSet)}
+     * calls, while avoiding repeated copies of every accumulated prefix.
+     */
+    public static final class OrderedMergeAccumulator {
+        private final Row rowdef;
+        private final List<RowSet> levels = new ArrayList<>();
+        private boolean finished;
+
+        public OrderedMergeAccumulator(final Row rowdef) {
+            if (rowdef == null) throw new IllegalArgumentException("row definition must not be null");
+            this.rowdef = rowdef;
+        }
+
+        /** Add the next source row set in its original order. */
+        public void add(final RowSet next) throws SpaceExceededException {
+            if (this.finished) throw new IllegalStateException("merge accumulator is already finished");
+            if (next == null) return;
+            if (next.rowdef != this.rowdef) throw new IllegalArgumentException("row definitions must match");
+
+            RowSet carry = next;
+            int level = 0;
+            while (level < this.levels.size() && this.levels.get(level) != null) {
+                final RowSet earlier = this.levels.set(level, null);
+                carry = earlier.merge(carry);
+                level++;
+            }
+            if (level == this.levels.size()) this.levels.add(carry);
+            else this.levels.set(level, carry);
+        }
+
+        /** Finish the accumulated source runs in their original left-to-right order. */
+        public RowSet finish() throws SpaceExceededException {
+            if (this.finished) throw new IllegalStateException("merge accumulator is already finished");
+            this.finished = true;
+            RowSet result = null;
+            for (int level = this.levels.size() - 1; level >= 0; level--) {
+                final RowSet next = this.levels.get(level);
+                if (next != null) result = result == null ? next : result.merge(next);
+            }
+            this.levels.clear();
+            return result == null ? new RowSet(this.rowdef) : result;
+        }
+    }
+
+    /**
      * merge this row collection with another row collection using an simultanous iteration of the input collections
      * the current collection is not altered in any way, the returned collection is a new collection with copied content.
      * @param c0

@@ -1,5 +1,6 @@
 package net.yacy.kelondro.index;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -57,6 +58,40 @@ public class RowSetMergeTest {
         assertTrue(merged.has("0002".getBytes(StandardCharsets.US_ASCII)));
         assertTrue(merged.has("0003".getBytes(StandardCharsets.US_ASCII)));
         assertTrue(merged.has("0004".getBytes(StandardCharsets.US_ASCII)));
+    }
+
+    @Test
+    public void orderedMergeAccumulatorPreservesSegmentOrderAcrossBalancedRuns() throws SpaceExceededException {
+        final Row row = new Row("byte[] key-4, byte[] payload-4", NaturalOrder.naturalOrder);
+        final RowSet.OrderedMergeAccumulator accumulator = new RowSet.OrderedMergeAccumulator(row);
+        final RowSet[] segments = new RowSet[7];
+        for (int i = 0; i < segments.length; i++) segments[i] = new RowSet(row);
+
+        segments[0].add(row("0001", "s000"));
+        segments[0].add(row("0007", "s000"));
+        segments[1].add(row("0002", "s001"));
+        segments[1].add(row("0007", "s001"));
+        segments[2].add(row("0003", "s002"));
+        segments[2].add(row("0007", "s002"));
+        segments[3].add(row("0004", "s003"));
+        segments[3].add(row("0007", "s003"));
+        segments[4].add(row("0005", "s004"));
+        segments[4].add(row("0007", "s004"));
+        segments[5].add(row("0006", "s005"));
+        segments[5].add(row("0007", "s005"));
+        segments[6].add(row("0008", "s006"));
+        segments[6].add(row("0007", "s006"));
+
+        for (final RowSet segment : segments) accumulator.add(segment);
+        final RowSet merged = accumulator.finish();
+
+        assertEquals(8, merged.size());
+        assertEquals(8 * row.objectsize, merged.chunkcache.length);
+        for (int i = 1; i <= 8; i++) {
+            assertTrue(merged.has(String.format("%04d", i).getBytes(StandardCharsets.US_ASCII)));
+        }
+        assertArrayEquals("s000".getBytes(StandardCharsets.US_ASCII),
+                merged.get("0007".getBytes(StandardCharsets.US_ASCII), true).getColBytes(1, false));
     }
 
     private static byte[] row(final String key, final String payload) {
