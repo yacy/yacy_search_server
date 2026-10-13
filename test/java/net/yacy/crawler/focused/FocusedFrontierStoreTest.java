@@ -144,6 +144,33 @@ public class FocusedFrontierStoreTest {
     }
 
     @Test
+    public void defaultRecoverableScanAdvancesAcrossProductionBoundedSlices() throws Exception {
+        assertTrue("disk-backed frontier scans must stay below the scheduler latency budget",
+                FocusedFrontierStore.MAX_RECOVERABLE_ROWS_PER_SCAN <= 2048);
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-default-slice-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        final List<Request> requests = new ArrayList<>();
+        for (int i = 0; i <= FocusedFrontierStore.MAX_RECOVERABLE_ROWS_PER_SCAN; i++) {
+            requests.add(request("https://research.example/astronomy/default-slice-" + i));
+        }
+        requests.sort((left, right) -> NaturalOrder.naturalOrder.compare(left.url().hash(), right.url().hash()));
+
+        for (int i = 0; i < requests.size(); i++) {
+            final Request request = requests.get(i);
+            store.discover(request, decision());
+            if (i < requests.size() - 1) store.markIndexed(request.url().hash());
+        }
+
+        final long now = System.currentTimeMillis();
+        assertTrue("the production-sized first slice must not scan the full sparse frontier",
+                store.recoverable(now, 1).isEmpty());
+        final List<FocusedFrontierStore.Candidate> recovered = store.recoverable(now, 1);
+        assertEquals(1, recovered.size());
+        assertEquals(requests.get(requests.size() - 1).url().toNormalform(true), recovered.get(0).url());
+        store.close();
+    }
+
+    @Test
     public void exhaustionCheckDoesNotTreatAnEmptySliceAsAnExhaustedFrontier() throws Exception {
         final java.io.File directory = Files.createTempDirectory("focused-frontier-sliced-exhaustion-").toFile();
         final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");

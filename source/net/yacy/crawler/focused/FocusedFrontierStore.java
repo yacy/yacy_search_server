@@ -37,8 +37,12 @@ public final class FocusedFrontierStore implements AutoCloseable {
 
     /** Avoid a single damaged/restarted profile rewriting an unbounded frontier in one scheduler pass. */
     private static final int MAX_STALE_RECOVERIES_PER_SCAN = 1024;
-    /** Keep sparse frontier lookups bounded while continuing their iterator over later scheduler passes. */
-    private static final int MAX_RECOVERABLE_ROWS_PER_SCAN = 16384;
+    /**
+     * Keep each scheduler pass responsive while continuing sparse frontier
+     * lookups over later passes. Each MapHeap row requires disk-backed reads;
+     * a 16k-row slice stalled the production scheduler for over a minute.
+     */
+    static final int MAX_RECOVERABLE_ROWS_PER_SCAN = 2048;
 
     public enum State {
         DISCOVERED, READY, ADMITTED, IN_FLIGHT, INDEXED, DUPLICATE, FAILED, BLOCKED
