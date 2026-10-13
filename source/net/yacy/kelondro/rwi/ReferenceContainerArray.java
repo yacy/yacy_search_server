@@ -303,9 +303,25 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @throws SpaceExceededException
      */
     public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException, SpaceExceededException {
+        return get(termHash, null);
+    }
+
+    /**
+     * Get a container from the BLOBs and optionally merge an in-memory overlay
+     * into the same ordered pass. This avoids materializing a disk-only result
+     * before merging it with the RAM container in {@link IndexCell#get(byte[], net.yacy.cora.storage.HandleSet)}.
+     *
+     * @param termHash the term hash to retrieve
+     * @param additional an optional later-priority in-memory container
+     * @return the merged container, or {@code null} when neither source has data
+     * @throws IOException when reading the BLOB array fails
+     * @throws SpaceExceededException when a row set cannot be allocated
+     */
+    public ReferenceContainer<ReferenceType> get(final byte[] termHash,
+            final ReferenceContainer<ReferenceType> additional) throws IOException, SpaceExceededException {
         final long timeout = System.currentTimeMillis() + METHOD_MAXRUNTIME;
         final Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
-        if (entries == null || !entries.hasNext()) return null;
+        if (entries == null || !entries.hasNext()) return additional;
         final RowSet.OrderedMergeAccumulator merge = new RowSet.OrderedMergeAccumulator(this.factory.getRow());
         int k = 0;
         while (entries.hasNext()) {
@@ -314,9 +330,16 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             if (System.currentTimeMillis() > timeout) {
                 ConcurrentLog.warn("KELONDRO", "ReferenceContainerArray: timout in get() (" + (k == 1 ? 1 : 2)
                         + "): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
-                return new ReferenceContainer<ReferenceType>(this.factory, termHash, merge.finish());
+                return finishMerge(termHash, merge, additional);
             }
         }
+        return finishMerge(termHash, merge, additional);
+    }
+
+    private ReferenceContainer<ReferenceType> finishMerge(final byte[] termHash,
+            final RowSet.OrderedMergeAccumulator merge,
+            final ReferenceContainer<ReferenceType> additional) throws SpaceExceededException {
+        if (additional != null) merge.add(additional);
         return new ReferenceContainer<ReferenceType>(this.factory, termHash, merge.finish());
     }
 

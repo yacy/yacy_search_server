@@ -353,28 +353,35 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public ReferenceContainer<ReferenceType> get(final byte[] termHash, final HandleSet urlselection) throws IOException {
         final ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
         ReferenceContainer<ReferenceType> c1 = null;
+        ReferenceContainer<ReferenceType> result = null;
         try {
-            c1 = this.array.get(termHash);
+            result = c0 == null ? this.array.get(termHash) : this.array.get(termHash, c0);
         } catch (final SpaceExceededException e2) {
             ConcurrentLog.logException(e2);
-        }
-        ReferenceContainer<ReferenceType> result = null;
-        if (c0 != null && c1 != null) {
-            try {
-                result = c1.merge(c0);
-            } catch (final SpaceExceededException e) {
-                // try to free some ram
+            if (c0 != null) {
+                // Retain the previous best-effort behavior if the combined
+                // pass cannot allocate its result.
                 try {
-                    result = c1.merge(c0);
-                } catch (final SpaceExceededException e1) {
-                    // go silently over the problem
-                    result = (c1.size() > c0.size()) ? c1: c0;
+                    c1 = this.array.get(termHash);
+                } catch (final SpaceExceededException e3) {
+                    ConcurrentLog.logException(e3);
+                }
+                if (c1 == null) {
+                    result = c0;
+                } else {
+                    try {
+                        result = c1.merge(c0);
+                    } catch (final SpaceExceededException e) {
+                        // try to free some ram
+                        try {
+                            result = c1.merge(c0);
+                        } catch (final SpaceExceededException e1) {
+                            // go silently over the problem
+                            result = (c1.size() > c0.size()) ? c1: c0;
+                        }
+                    }
                 }
             }
-        } else if (c0 != null) {
-            result = c0;
-        } else if (c1 != null) {
-            result = c1;
         }
         if (result == null) return null;
         // remove the failed urls
