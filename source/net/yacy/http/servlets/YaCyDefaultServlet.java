@@ -362,14 +362,39 @@ public class YaCyDefaultServlet extends HttpServlet  {
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        HttpServletRequest requestForGet = request;
-        if (this.shouldWrapBody(request)) {
-            final String body = this.readRequestBody(request);
-            if (body != null && !body.isEmpty()) {
-                requestForGet = new BodyParameterRequestWrapper(request, body);
+        MultipartMemoryBudget.Reservation uploadReservation = null;
+        if (ServletFileUpload.isMultipartContent(request)) {
+            final long contentLength = request.getContentLengthLong();
+            if (contentLength > MultipartMemoryBudget.MAX_REQUEST_BYTES) {
+                response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
+                        "Multipart request exceeds the 1 GiB request limit");
+                return;
+            }
+            uploadReservation = MultipartMemoryBudget.tryReserve(contentLength,
+                    MemoryControl.available(), MemoryControl.maxMemory());
+            if (uploadReservation == null) {
+                response.setHeader("Retry-After", "5");
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                        "Multipart request deferred because the shared JVM heap budget is in use");
+                return;
+            }
+            request.setAttribute(MultipartMemoryBudget.REQUEST_ATTRIBUTE, uploadReservation);
+        }
+        try {
+            HttpServletRequest requestForGet = request;
+            if (this.shouldWrapBody(request)) {
+                final String body = this.readRequestBody(request);
+                if (body != null && !body.isEmpty()) {
+                    requestForGet = new BodyParameterRequestWrapper(request, body);
+                }
+            }
+            this.doGet(requestForGet, response);
+        } finally {
+            if (uploadReservation != null) {
+                request.removeAttribute(MultipartMemoryBudget.REQUEST_ATTRIBUTE);
+                uploadReservation.close();
             }
         }
-        this.doGet(requestForGet, response);
     }
 
     private boolean shouldWrapBody(final HttpServletRequest request) {
@@ -1326,8 +1351,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
         // Content-Length can be absent for chunked requests. Enforce the same
         // heap-derived bound while parsing those streams, and recheck known
         // lengths after MemoryControl has refreshed its estimate.
-        final long maximumRequestBytes = MultipartMemoryBudget.maximumRequestBytes(
+        long maximumRequestBytes = MultipartMemoryBudget.maximumRequestBytes(
                 MemoryControl.available(), MemoryControl.maxMemory());
+        final Object reservationAttribute = request.getAttribute(MultipartMemoryBudget.REQUEST_ATTRIBUTE);
+        if (reservationAttribute instanceof MultipartMemoryBudget.Reservation) {
+            maximumRequestBytes = Math.min(maximumRequestBytes,
+                    ((MultipartMemoryBudget.Reservation) reservationAttribute).maximumRequestBytes());
+        }
         if (maximumRequestBytes <= 0L || contentLength > maximumRequestBytes) {
             throw new IOException("multipart request exceeds the current safe size limit of "
                     + maximumRequestBytes + " bytes (declared size " + contentLength + " bytes)");
