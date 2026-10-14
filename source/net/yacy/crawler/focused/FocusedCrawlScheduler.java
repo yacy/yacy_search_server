@@ -243,6 +243,20 @@ public final class FocusedCrawlScheduler {
                 // of disk-backed lookups in one refill and contend with queue updates.
                 frontier.recoverStale(System.currentTimeMillis(),
                         configuration.frontier().recoveryGraceMillis(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE);
+                // Compaction also walks the disk-backed MapHeap. Advance it in
+                // bounded slices on control ticks instead of holding the sole
+                // scheduler thread for a complete frontier traversal. Respect
+                // the same resource and disk checks used before refilling.
+                if (healthy(configuration)) {
+                    final long now = System.currentTimeMillis();
+                    final long lastCompaction = this.frontierCompactions.computeIfAbsent(configuration.id(), id -> now);
+                    if (now - lastCompaction >= FRONTIER_COMPACTION_INTERVAL_MILLIS) {
+                        final FocusedFrontierStore.CompactionResult result = frontier.compact(
+                                now - configuration.frontier().terminalRetentionDays() * 86400000L,
+                                configuration.frontier().maxEntries(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE);
+                        if (result.complete()) this.frontierCompactions.put(configuration.id(), now);
+                    }
+                }
             }
             final int target = Math.max(0, configuration.limits().queueTarget());
             final int refillBelow = Math.min(target, Math.max(0, configuration.limits().refillBelow()));
@@ -265,13 +279,6 @@ public final class FocusedCrawlScheduler {
             final int budget = Math.max(0, Math.min(target - current, hardMaximum - current));
             final int refillBudget = Math.min(budget, configuration.limits().refillBatchSize());
             if (frontier != null) {
-                final long now = System.currentTimeMillis();
-                final long lastCompaction = this.frontierCompactions.computeIfAbsent(configuration.id(), id -> now);
-                if (now - lastCompaction >= FRONTIER_COMPACTION_INTERVAL_MILLIS) {
-                    frontier.compact(now - configuration.frontier().terminalRetentionDays() * 86400000L,
-                            configuration.frontier().maxEntries());
-                    this.frontierCompactions.put(configuration.id(), now);
-                }
                 if (frontier.size() > 0) state.setProperty("frontierStarted", "true");
                 final int recovered = refillFrontier(configuration, profile, frontier, refillBudget);
                 final int indexedExpansion = configuration.frontier().expandIndexedSources()

@@ -171,6 +171,66 @@ public class FocusedFrontierStoreTest {
     }
 
     @Test
+    public void compactionAdvancesInBoundedSlicesAndPreservesActiveRows() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-sliced-compaction-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        final List<Request> requests = new ArrayList<>();
+        for (int i = 0; i < 9; i++) requests.add(request("https://research.example/astronomy/compact-" + i));
+
+        for (int i = 0; i < requests.size(); i++) {
+            final Request request = requests.get(i);
+            store.discover(request, decision());
+            if (i < requests.size() - 1) store.markIndexed(request.url().hash());
+        }
+
+        boolean complete = false;
+        int slices = 0;
+        while (!complete && slices < 10) {
+            final FocusedFrontierStore.CompactionResult result = store.compact(0L, 4, 2);
+            assertTrue("a compaction slice must not inspect more rows than its limit", result.scanned() <= 2);
+            if (slices == 0) assertFalse("the first slice must not claim a full-frontier scan", result.complete());
+            complete = result.complete();
+            slices++;
+        }
+
+        assertTrue("the frontier compaction must finish over multiple bounded slices", complete);
+        assertTrue("the test frontier must require multiple slices", slices > 1);
+        assertEquals("terminal rows are trimmed to the configured cap", 4, store.size());
+        assertEquals("active frontier rows must survive capacity compaction", FocusedFrontierStore.State.DISCOVERED,
+                store.get(requests.get(requests.size() - 1).url().hash()).state());
+        store.close();
+    }
+
+    @Test
+    public void compactionExpiresTerminalRowsAcrossBoundedSlices() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-expired-compaction-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        final List<Request> requests = new ArrayList<>();
+        for (int i = 0; i < 5; i++) requests.add(request("https://research.example/astronomy/expired-" + i));
+
+        for (int i = 0; i < requests.size(); i++) {
+            final Request request = requests.get(i);
+            store.discover(request, decision());
+            if (i < requests.size() - 1) store.markIndexed(request.url().hash());
+        }
+
+        boolean complete = false;
+        int slices = 0;
+        while (!complete && slices < 10) {
+            final FocusedFrontierStore.CompactionResult result = store.compact(Long.MAX_VALUE, 0, 2);
+            assertTrue("an expiry slice must not inspect more rows than its limit", result.scanned() <= 2);
+            complete = result.complete();
+            slices++;
+        }
+
+        assertTrue("expired-row compaction must finish over bounded slices", complete);
+        assertEquals("expired terminal rows should be removed", 1, store.size());
+        assertEquals("active frontier rows must survive expiry compaction", FocusedFrontierStore.State.DISCOVERED,
+                store.get(requests.get(requests.size() - 1).url().hash()).state());
+        store.close();
+    }
+
+    @Test
     public void exhaustionCheckDoesNotTreatAnEmptySliceAsAnExhaustedFrontier() throws Exception {
         final java.io.File directory = Files.createTempDirectory("focused-frontier-sliced-exhaustion-").toFile();
         final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");

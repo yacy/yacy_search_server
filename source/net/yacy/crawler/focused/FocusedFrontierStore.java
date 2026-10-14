@@ -43,6 +43,8 @@ public final class FocusedFrontierStore implements AutoCloseable {
      * a 16k-row slice stalled the production scheduler for over a minute.
      */
     static final int MAX_RECOVERABLE_ROWS_PER_SCAN = 2048;
+    /** Keep maintenance work on the scheduler thread to a short disk-backed slice. */
+    static final int MAX_COMPACTION_ROWS_PER_SCAN = 256;
 
     public enum State {
         DISCOVERED, READY, ADMITTED, IN_FLIGHT, INDEXED, DUPLICATE, FAILED, BLOCKED
@@ -189,6 +191,35 @@ public final class FocusedFrontierStore implements AutoCloseable {
         public int legacy() { return this.legacy; }
     }
 
+    /** Progress from one bounded frontier compaction slice. */
+    static final class CompactionResult {
+        private final int scanned;
+        private final int removed;
+        private final boolean complete;
+
+        private CompactionResult(final int scanned, final int removed, final boolean complete) {
+            this.scanned = scanned;
+            this.removed = removed;
+            this.complete = complete;
+        }
+
+        int scanned() { return this.scanned; }
+        int removed() { return this.removed; }
+        boolean complete() { return this.complete; }
+    }
+
+    private static final class TerminalDelete {
+        private final byte[] hash;
+        private final boolean expired;
+        private final long lastSeen;
+
+        private TerminalDelete(final byte[] hash, final boolean expired, final long lastSeen) {
+            this.hash = hash;
+            this.expired = expired;
+            this.lastSeen = lastSeen;
+        }
+    }
+
     private static final String URL = "url";
     private static final String INITIATOR = "initiator";
     private static final String REFERRER = "referrer";
@@ -216,6 +247,8 @@ public final class FocusedFrontierStore implements AutoCloseable {
     private final String profileId;
     private final Object staleScanLock = new Object();
     private Iterator<Map.Entry<byte[], Map<String, String>>> staleScan;
+    private final Object compactionScanLock = new Object();
+    private Iterator<Map.Entry<byte[], Map<String, String>>> compactionScan;
     private final Object recoverableScanLock = new Object();
     private Iterator<Map.Entry<byte[], Map<String, String>>> recoverableScan;
     private Candidate pendingRecoverable;
@@ -534,42 +567,78 @@ public final class FocusedFrontierStore implements AutoCloseable {
         return this.heap != null && hash != null && this.heap.containsKey(hash);
     }
 
+    /** Remove expired terminal rows from one bounded slice. */
     public void compact(final long terminalBefore) {
         compact(terminalBefore, Integer.MAX_VALUE);
     }
 
-    /** Remove old terminal rows and, when configured, trim oldest terminal rows above the cap. */
+    /**
+     * Inspect one bounded slice, removing expired terminal rows and evicting
+     * terminal rows while above the configured size cap. Repeated calls resume
+     * the retained iterator so a scheduler pass never traverses the complete
+     * disk-backed frontier.
+     */
     public int compact(final long terminalBefore, final int maxEntries) {
-        if (this.heap == null) return 0;
-        final List<Candidate> terminal = new ArrayList<>();
+        return compact(terminalBefore, maxEntries, MAX_COMPACTION_ROWS_PER_SCAN).removed();
+    }
+
+    /**
+     * Inspect at most {@code scanLimit} rows. When the configured cap is
+     * exceeded, terminal rows encountered in this slice are removed until the
+     * cap is met; active rows are never removed. This avoids retaining and
+     * sorting every terminal candidate in a large frontier.
+     */
+    CompactionResult compact(final long terminalBefore, final int maxEntries, final int scanLimit) {
+        if (this.heap == null) return new CompactionResult(0, 0, true);
+        if (scanLimit <= 0) return new CompactionResult(0, 0, false);
+        final int boundedScanLimit = Math.min(scanLimit, MAX_COMPACTION_ROWS_PER_SCAN);
+        final List<TerminalDelete> terminal = new ArrayList<>(boundedScanLimit);
+        int inspected = 0;
         int removed = 0;
+        boolean complete = false;
         try {
-            final Iterator<Map.Entry<byte[], Map<String, String>>> entries = this.heap.entries(true, false);
-            while (entries.hasNext()) {
-                final Map.Entry<byte[], Map<String, String>> entry = entries.next();
-                final Candidate candidate = parse(entry.getKey(), entry.getValue());
-                if (candidate != null && isTerminal(candidate.state())) {
-                    if (candidate.lastSeen() < terminalBefore) {
-                        if (deleteTerminal(candidate.hash(), terminalBefore, true)) removed++;
+            synchronized (this.compactionScanLock) {
+                if (this.compactionScan == null) this.compactionScan = this.heap.entries(true, false);
+                while (inspected < boundedScanLimit && this.compactionScan.hasNext()) {
+                    final Map.Entry<byte[], Map<String, String>> entry = this.compactionScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate != null && isTerminal(candidate.state())) {
+                        final boolean expired = candidate.lastSeen() < terminalBefore;
+                        terminal.add(new TerminalDelete(candidate.hash(), expired, candidate.lastSeen()));
                     }
-                    else terminal.add(candidate);
+                }
+                if (!this.compactionScan.hasNext()) {
+                    this.compactionScan = null;
+                    complete = true;
                 }
             }
-            if (maxEntries > 0 && this.heap.size() > maxEntries) {
-                terminal.sort((left, right) -> Long.compare(left.lastSeen(), right.lastSeen()));
-                int excess = this.heap.size() - maxEntries;
-                for (int i = 0; i < terminal.size() && excess > 0; i++, excess--) {
-                    if (deleteTerminal(terminal.get(i).hash(), 0L, false)) removed++;
-                    else excess++;
+            long projectedSize = this.heap.size();
+            for (final TerminalDelete candidate : terminal) {
+                if (!candidate.expired) continue;
+                if (deleteTerminal(candidate.hash, terminalBefore, true)) {
+                    removed++;
+                    projectedSize--;
                 }
             }
-        } catch (final IOException ignored) { }
-        return removed;
+            terminal.sort((left, right) -> Long.compare(left.lastSeen, right.lastSeen));
+            for (final TerminalDelete candidate : terminal) {
+                if (candidate.expired || maxEntries <= 0 || projectedSize <= maxEntries) continue;
+                if (deleteTerminal(candidate.hash, terminalBefore, false)) {
+                    removed++;
+                    projectedSize--;
+                }
+            }
+        } catch (final IOException ignored) {
+            synchronized (this.compactionScanLock) { this.compactionScan = null; }
+        }
+        return new CompactionResult(inspected, removed, complete);
     }
 
     @Override
     public synchronized void close() {
         synchronized (this.staleScanLock) { this.staleScan = null; }
+        synchronized (this.compactionScanLock) { this.compactionScan = null; }
         synchronized (this.recoverableScanLock) {
             this.recoverableScan = null;
             this.pendingRecoverable = null;
