@@ -34,7 +34,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -72,6 +74,8 @@ public class RobotsTxt {
     private final LoaderDispatcher loader;
     /** Thread pool used to launch concurrent tasks */
     private final ThreadPoolExecutor threadPool;
+    /** Host/port keys with an active asynchronous robots fetch. */
+    private final Set<String> loadingHosts = ConcurrentHashMap.newKeySet();
 
     /**
      *
@@ -242,38 +246,48 @@ public class RobotsTxt {
             return;
         }
         if (robotsTable != null && robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+        if (!this.loadingHosts.add(urlHostPort)) return;
         final Thread t = new Thread("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")") {
             @Override
             public void run(){
-                final Object hostLock = RobotsTxt.this.lockForHost(urlHostPort);
-                synchronized (hostLock) {
-                    if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
-                }
-
-                // Do not make threads for colliding hosts wait for this network request.
-                final DigestURL robotsURL = robotsURL(urlHostPort);
-                Response response = null;
-                if (robotsURL != null) {
-                    if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                    try {
-                        response = RobotsTxt.this.loadRobots(robotsURL, agent);
-                    } catch (final IOException e) {
-                        response = null;
+                try {
+                    final Object hostLock = RobotsTxt.this.lockForHost(urlHostPort);
+                    synchronized (hostLock) {
+                        if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
                     }
-                }
 
-                synchronized (hostLock) {
-                    if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
-                    if (response == null) {
-                        RobotsTxt.this.processOldEntry(null, robotsURL, robotsTable);
-                    } else {
-                        RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs());
+                    // Do not make threads for colliding hosts wait for this network request.
+                    final DigestURL robotsURL = robotsURL(urlHostPort);
+                    Response response = null;
+                    if (robotsURL != null) {
+                        if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                        try {
+                            response = RobotsTxt.this.loadRobots(robotsURL, agent);
+                        } catch (final IOException e) {
+                            response = null;
+                        }
                     }
+
+                    synchronized (hostLock) {
+                        if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+                        if (response == null) {
+                            RobotsTxt.this.processOldEntry(null, robotsURL, robotsTable);
+                        } else {
+                            RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs());
+                        }
+                    }
+                } finally {
+                    RobotsTxt.this.loadingHosts.remove(urlHostPort);
                 }
             }
         };
         if (concurrent) {
-            this.threadPool.execute(t);
+            try {
+                this.threadPool.execute(t);
+            } catch (final RuntimeException e) {
+                this.loadingHosts.remove(urlHostPort);
+                throw e;
+            }
         } else {
             t.run();
         }

@@ -402,7 +402,10 @@ public class CrawlQueues {
                             true, this.sb.crawler, this.sb.robots);
                 }
                 if (urlEntry == null) {
-                    continue;
+                    // No ready host may remain while its asynchronous robots.txt
+                    // fetch completes. Yield this queue cycle without changing
+                    // the persisted crawl queues.
+                    return false;
                 }
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());

@@ -254,6 +254,16 @@ public class HostQueue implements Balancer {
         return depthStack;
     }
 
+    /** Return the next queued request without removing it from the persistent host queue. */
+    public synchronized Request peek() throws IOException {
+        final Index depthStack = this.getLowestStack();
+        if (depthStack == null) return null;
+        final Iterator<Row.Entry> rows = depthStack.rows();
+        if (!rows.hasNext()) return null;
+        final Row.Entry row = rows.next();
+        return row == null ? null : new Request(row);
+    }
+
     private File getFile(final int depth) {
         String name = Integer.toString(depth);
         while (name.length() < 4) name = "0" + name;

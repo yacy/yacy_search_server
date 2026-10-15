@@ -318,12 +318,17 @@ public class HostBalancer implements Balancer {
      */
     @Override
     public Request pop(final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
+        int selectedHosts = 0;
         tryagain: while (true) try {
             HostQueue rhq = null;
             String rhh = null;
 
             synchronized (this) {
                 if (this.roundRobinHostHashes.size() == 0) {
+                    // A prior selection pass may have deferred hosts whose
+                    // robots.txt fetch is still running. Yield to the caller
+                    // instead of reloading the same hosts in a tight loop.
+                    if (selectedHosts > 0) return null;
                     // refresh the round-robin cache
                     this.roundRobinHostHashes.addAll(this.queues.keySet());
                     // quickly get rid of small stacks to reduce number of files:
@@ -487,6 +492,25 @@ public class HostBalancer implements Balancer {
                 continue tryagain;
             }
             this.roundRobinHostHashes.remove(rhh); // prevent that the queue is used again
+            selectedHosts++;
+            final Request candidate = rhq.peek();
+            if (candidate != null && candidate.url() != null && !candidate.url().isLocal()) {
+                final CrawlProfile profile = cs == null || candidate.profileHandle() == null ? null
+                        : cs.get(ASCII.getBytes(candidate.profileHandle()));
+                final ClientIdentification.Agent agent = profile == null
+                        ? ClientIdentification.yacyInternetCrawlerAgent : profile.getAgent();
+                if (agent.isRobot()) {
+                    final String hostPort = RobotsTxt.getHostPort(candidate.url());
+                    if (robots.getEntry(hostPort, agent, false) == null) {
+                        // HostBalancer.push normally starts this prefetch. The
+                        // call is repeated for queues restored from disk; RobotsTxt
+                        // coalesces concurrent requests by host. Keep the request
+                        // in its persistent queue until its rules are available.
+                        robots.ensureExist(candidate.url(), agent, true);
+                        continue tryagain;
+                    }
+                }
+            }
             final long timestamp = System.currentTimeMillis();
             final Request request = rhq.pop(delay, cs, robots); // this pop is outside of synchronization to prevent blocking of pushes
             final long actualwaiting = System.currentTimeMillis() - timestamp;
