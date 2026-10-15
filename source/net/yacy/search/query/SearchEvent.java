@@ -98,6 +98,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.navigator.Navigator;
 import net.yacy.search.navigator.NavigatorPlugins;
@@ -224,6 +225,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
     /** thats the bag where the RWI search process writes to. Contains both references from both local and remote RWIs. */
     private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
+    /** Stored fields required when an RWI hit is materialized as a search result. */
+    private final String[] rwiMetadataFields;
 
     /** thats the bag where the solr results are written to */
     private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
@@ -391,6 +394,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 nav.setUpdatesListener(this);
             }
         }
+        final Set<String> additionalMetadataFields = new LinkedHashSet<>();
+        if (this.navigatorPlugins != null) {
+            for (final Navigator navigator : this.navigatorPlugins.values()) {
+                if (navigator != null) additionalMetadataFields.add(navigator.getIndexFieldName());
+            }
+        }
+        if (this.query.metatags != null) {
+            for (final Tagging.Metatag tag : this.query.metatags) {
+                additionalMetadataFields.add(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName()
+                        + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+            }
+        }
+        this.rwiMetadataFields = Fulltext.searchMetadataFields(this.query.isSnippetFetchFullText(),
+                additionalMetadataFields);
 
         this.snippets = new ConcurrentHashMap<>();
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
@@ -1345,7 +1362,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 rwi = this.rwiStack.poll();
                 if (rwi == null) return null;
                 if (!skipDoubleDom) {
-                    final URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
+                    final URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi,
+                            this.rwiMetadataFields);
                     if (node == null) {
                         decrementCounts(rwi.getElement());
                         continue pollloop;
@@ -1364,7 +1382,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                             // first appearance of dom. we create an entry to signal that one of that domain was already returned
                             m = new WeakPriorityBlockingQueue<>(max_results_rwi, false);
                             this.doubleDomCache.put(hosthash, m);
-                            final URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
+                            final URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi,
+                                    this.rwiMetadataFields);
                             if (node == null) {
                                 decrementCounts(rwi.getElement());
                                 continue pollloop;
@@ -1430,7 +1449,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             }
             URIMetadataNode node = null;
             try {
-                node = this.query.getSegment().fulltext().getMetadata(bestEntry);
+                node = this.query.getSegment().fulltext().getMetadata(bestEntry, this.rwiMetadataFields);
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }

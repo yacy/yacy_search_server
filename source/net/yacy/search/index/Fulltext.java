@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -344,12 +345,47 @@ public final class Fulltext {
      * @return URIMetadataNode (solrdocument) with all fields stored in embedded solr index
      */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
+        return getMetadata(element, null);
+    }
+
+    /**
+     * Load search-result metadata with an explicit stored-field projection.
+     * The ordinary overload remains available for callers that need the full
+     * indexed document.
+     */
+    public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element,
+            final String[] fields) {
         if (element == null) return null;
         final WordReferenceVars wre = element.getElement();
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
         final long score = element.getWeight();
-        final URIMetadataNode node = this.getMetadata(wre.urlhash(), wre, score);
+        final URIMetadataNode node = this.getMetadata(wre.urlhash(), wre, score, fields);
         return node;
+    }
+
+    /**
+     * Build the stored fields needed to materialize an RWI search result.
+     * The full text field is the largest indexed field and is discarded by
+     * {@link URIMetadataNode#makeResultEntry} after snippet work, so include it
+     * only when the query explicitly requests a full-text snippet.
+     */
+    public static String[] searchMetadataFields(final boolean includeFullText,
+            final Collection<String> additionalFields) {
+        final Set<String> fields = new LinkedHashSet<>();
+        for (final CollectionSchema schemaField : CollectionSchema.values()) {
+            if (includeFullText || schemaField != CollectionSchema.text_t) {
+                fields.add(schemaField.getSolrFieldName());
+            }
+        }
+        if (additionalFields != null) {
+            for (final String field : additionalFields) {
+                if (field != null && !field.isEmpty()
+                        && (includeFullText || !CollectionSchema.text_t.getSolrFieldName().equals(field))) {
+                    fields.add(field);
+                }
+            }
+        }
+        return fields.toArray(new String[fields.size()]);
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
@@ -358,11 +394,16 @@ public final class Fulltext {
     }
 
     private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
+        return getMetadata(urlHash, wre, score, null);
+    }
+
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score,
+            final String[] fields) {
         final String u = ASCII.String(urlHash);
 
         // get the metadata from Solr
         try {
-            final SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
+            final SolrDocument doc = this.getDefaultConnector().getDocumentById(u, fields);
             if (doc != null) {
                 return new URIMetadataNode(doc, wre, score);
             }
