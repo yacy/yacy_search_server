@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -371,15 +372,25 @@ public final class FocusedFrontierStore implements AutoCloseable {
      * in one pass.
      */
     public int recoverStale(final long now, final long graceMillis, final int scanLimit) {
-        if (this.heap == null) return 0;
-        if (scanLimit <= 0) return 0;
+        return recoverStale(now, graceMillis, scanLimit, () -> true);
+    }
+
+    /**
+     * Inspect stale rows while the caller's resource guard remains healthy.
+     * The retained iterator stays at the current position when the guard
+     * declines more work, so recovery can resume on a later scheduler cycle.
+     */
+    int recoverStale(final long now, final long graceMillis, final int scanLimit,
+            final BooleanSupplier scanAllowed) {
+        if (this.heap == null || scanLimit <= 0 || scanAllowed == null || !scanAllowed.getAsBoolean()) return 0;
         int changed = 0;
         final List<byte[]> hashes = new ArrayList<>();
         try {
             synchronized (this.staleScanLock) {
                 if (this.staleScan == null) this.staleScan = this.heap.entries(true, false);
                 int inspected = 0;
-                while (inspected < scanLimit && hashes.size() < MAX_STALE_RECOVERIES_PER_SCAN) {
+                while (inspected < scanLimit && hashes.size() < MAX_STALE_RECOVERIES_PER_SCAN
+                        && scanAllowed.getAsBoolean()) {
                     if (!this.staleScan.hasNext()) {
                         this.staleScan = null;
                         break;

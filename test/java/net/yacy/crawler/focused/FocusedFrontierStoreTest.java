@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
@@ -114,6 +115,30 @@ public class FocusedFrontierStoreTest {
             recovered += recoveredThisSlice;
         }
         assertEquals(7, recovered);
+        assertEquals(7, store.snapshot().ready());
+        store.close();
+    }
+
+    @Test
+    public void staleRecoveryStopsAtResourceBoundaryAndResumesTheSameScan() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-resource-bounded-recovery-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        for (int i = 0; i < 7; i++) {
+            final Request request = request("https://research.example/astronomy/resource-stale-" + i);
+            store.discover(request, decision());
+            store.markInFlight(request.url().hash());
+        }
+
+        final long recoveryTime = System.currentTimeMillis() + 5000L;
+        assertEquals("an unhealthy resource guard must not start a frontier scan", 0,
+                store.recoverStale(recoveryTime, 1000L, 7, () -> false));
+        final AtomicInteger healthyChecks = new AtomicInteger();
+        final int firstSlice = store.recoverStale(recoveryTime, 1000L, 7,
+                () -> healthyChecks.getAndIncrement() < 3);
+        assertEquals("a resource guard must stop a frontier scan between rows", 2, firstSlice);
+
+        final int resumedSlice = store.recoverStale(recoveryTime, 1000L, 7, () -> true);
+        assertEquals("the retained scan must resume after the guard recovers", 5, resumedSlice);
         assertEquals(7, store.snapshot().ready());
         store.close();
     }

@@ -242,7 +242,8 @@ public final class FocusedCrawlScheduler {
                 // over a large on-disk frontier used to issue hundreds of thousands
                 // of disk-backed lookups in one refill and contend with queue updates.
                 frontier.recoverStale(System.currentTimeMillis(),
-                        configuration.frontier().recoveryGraceMillis(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE);
+                        configuration.frontier().recoveryGraceMillis(), FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE,
+                        () -> healthy(configuration));
                 // Compaction also walks the disk-backed MapHeap. Advance it in
                 // bounded slices on control ticks instead of holding the sole
                 // scheduler thread for a complete frontier traversal. Respect
