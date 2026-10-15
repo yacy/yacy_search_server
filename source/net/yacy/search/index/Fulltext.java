@@ -32,7 +32,9 @@ import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -364,16 +366,36 @@ public final class Fulltext {
     }
 
     /**
+     * Stored fields that can duplicate or greatly expand page content without
+     * contributing to an ordinary RWI search result. Keep them in the index,
+     * but do not materialize them for every RWI candidate.
+     */
+    private static final Set<CollectionSchema> LARGE_SEARCH_METADATA_FIELDS = Collections.unmodifiableSet(
+            EnumSet.of(CollectionSchema.fuzzy_signature_text_t,
+                    CollectionSchema.inboundlinks_anchortext_txt,
+                    CollectionSchema.outboundlinks_anchortext_txt,
+                    CollectionSchema.images_text_t,
+                    CollectionSchema.li_txt,
+                    CollectionSchema.dt_txt,
+                    CollectionSchema.dd_txt,
+                    CollectionSchema.article_txt,
+                    CollectionSchema.bold_txt,
+                    CollectionSchema.italic_txt,
+                    CollectionSchema.underline_txt));
+
+    /**
      * Build the stored fields needed to materialize an RWI search result.
-     * The full text field is the largest indexed field and is discarded by
-     * {@link URIMetadataNode#makeResultEntry} after snippet work, so include it
-     * only when the query explicitly requests a full-text snippet.
+     * Include the full text only when a query explicitly requests a full-text
+     * snippet. Omit supplementary extracted text from the default schema
+     * projection; explicitly configured navigator and vocabulary fields are
+     * added separately.
      */
     public static String[] searchMetadataFields(final boolean includeFullText,
             final Collection<String> additionalFields) {
         final Set<String> fields = new LinkedHashSet<>();
         for (final CollectionSchema schemaField : CollectionSchema.values()) {
-            if (includeFullText || schemaField != CollectionSchema.text_t) {
+            if ((includeFullText || schemaField != CollectionSchema.text_t)
+                    && !LARGE_SEARCH_METADATA_FIELDS.contains(schemaField)) {
                 fields.add(schemaField.getSolrFieldName());
             }
         }
