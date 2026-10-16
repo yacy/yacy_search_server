@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,6 +23,7 @@ import java.util.function.IntFunction;
 import org.apache.solr.common.SolrDocument;
 import org.junit.Test;
 
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.schema.CollectionSchema;
 
 public class FocusedCrawlSchedulerTest {
@@ -61,6 +64,26 @@ public class FocusedCrawlSchedulerTest {
         final FocusedCrawlScheduler.WeightedLaneSelector selector = new FocusedCrawlScheduler.WeightedLaneSelector();
         assertEquals(FocusedCrawlScheduler.Lane.FOCUSED, selector.choose(true, true, 6, 0));
         assertTrue(selector.choose(false, true, 6, 0) == null);
+    }
+
+    @Test
+    public void nativePerHostLimitCanBeCheckedWithoutCreatingACounter() {
+        final Map<String, String> values = new HashMap<>();
+        values.put(CrawlProfile.CrawlAttribute.DOM_MAX_PAGES.key, "2");
+        final CrawlProfile profile = new CrawlProfile(values);
+
+        assertFalse(profile.isDomainMaxPagesReached("example.ca"));
+        profile.domInc("example.ca");
+        assertFalse(profile.isDomainMaxPagesReached("example.ca"));
+        profile.domInc("example.ca");
+        assertTrue(profile.isDomainMaxPagesReached("example.ca"));
+        assertFalse(profile.isDomainMaxPagesReached("other.ca"));
+
+        final Map<String, String> unlimitedValues = new HashMap<>();
+        unlimitedValues.put(CrawlProfile.CrawlAttribute.DOM_MAX_PAGES.key, "0");
+        final CrawlProfile unlimited = new CrawlProfile(unlimitedValues);
+        unlimited.domInc("example.ca");
+        assertFalse(unlimited.isDomainMaxPagesReached("example.ca"));
     }
 
     @Test

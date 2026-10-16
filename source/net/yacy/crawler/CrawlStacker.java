@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -516,21 +515,10 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
-        if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
-            final AtomicInteger dp = profile.getCount(url.getHost());
-            if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urls + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
-                return "crawl stack domain counter exceeded (test by profile)";
-            }
-
-            /*
-            if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= maxAllowedPagesPerDomain) {
-                if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
-                return "result stack domain counter exceeded (test by domainCount)";
-            }
-             */
+        if (profile.isDomainMaxPagesReached(url.getHost())) {
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urls + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+            return "crawl stack domain counter exceeded (test by profile)";
         }
-
         //final Long oldDate = oldEntry == null ? null : oldEntry.date;
         if (oldDate < 0) {
             return null; // no evidence that we know that url

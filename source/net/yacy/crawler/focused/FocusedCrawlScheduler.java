@@ -399,6 +399,13 @@ public final class FocusedCrawlScheduler {
             }
             try {
                 final Request request = candidate.request();
+                if (profile.isDomainMaxPagesReached(request.url().getHost())) {
+                    // The normal stacker would reject this candidate against
+                    // the same profile counter. Keep its retry state in the
+                    // focused frontier without resubmitting doomed work.
+                    frontier.markFailed(candidate.hash(), 3600000L);
+                    continue;
+                }
                 this.manager.markRecovery(candidate.hash());
                 frontier.markReady(candidate.hash(), true);
                 this.stacker.enqueueEntry(request);
@@ -525,7 +532,16 @@ public final class FocusedCrawlScheduler {
                     final Request request = new Request(this.sb.peers.mySeed().hash.getBytes(), url, referrerHash,
                             "Indexed focused source expansion", new Date(), profile.handle(), targetDepth,
                             profile.timezoneOffset());
-                    this.manager.recordDiscovered(request, Collections.singletonList(decision));
+                    final List<CrawlPolicyDecision> decisions = Collections.singletonList(decision);
+                    this.manager.recordDiscovered(request, decisions);
+                    if (profile.isDomainMaxPagesReached(url.getHost())) {
+                        // Match CrawlStacker's native per-host cap before
+                        // queuing the request, then let this bounded source
+                        // page continue to other eligible hosts.
+                        this.manager.recordPreFetch(url.hash(), decisions);
+                        this.manager.recordFailure(url.hash());
+                        continue;
+                    }
                     this.stacker.enqueueEntry(request);
                     added++;
                 }
