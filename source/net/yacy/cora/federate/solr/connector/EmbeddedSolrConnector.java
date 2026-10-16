@@ -276,13 +276,18 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         if (response != null) {
             try {
                 final SolrIndexSearcher searcher = req.getSearcher();
+                /* Respect the request projection. Passing null here makes Solr
+                 * load every stored field, including large multi-valued page
+                 * metadata, even for ID-only lookups. */
+                final Set<String> requestedFields = resultContext == null ? null
+                        : resultContext.getReturnFields().getLuceneFieldNames();
                 final int responseCount = response.size();
                 final DocIterator iterator = response.iterator();
                 for (int i = 0; i < responseCount; i++) {
                     final int docid = iterator.nextDoc();
                     Thread.currentThread().setName("EmbeddedSolrConnector.SolrQueryResponse2SolrDocumentList: " + docid);
-                    final Document responsedoc = searcher.doc(docid, (Set<String>) null);
-                    final SolrDocument sordoc = this.doc2SolrDoc(responsedoc);
+                    final Document responsedoc = searcher.doc(docid, requestedFields);
+                    final SolrDocument sordoc = this.doc2SolrDoc(responsedoc, requestedFields);
                     sdl.add(sordoc);
                 }
             } catch (final IOException e) {
@@ -309,9 +314,14 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     public SolrDocument doc2SolrDoc(final Document doc) {
+        return this.doc2SolrDoc(doc, null);
+    }
+
+    private SolrDocument doc2SolrDoc(final Document doc, final Set<String> requestedFields) {
         final SolrDocument solrDoc = new SolrDocument();
         for (final IndexableField field : doc) {
             final String fieldName = field.name();
+            if (requestedFields != null && !requestedFields.contains(fieldName)) continue;
             final SchemaField sf = this.getSchemaField(fieldName); // hack-patch of this.core.getLatestSchema().getFieldOrNull(fieldName); makes it a lot faster!!
             Object val = null;
             try {
