@@ -22,12 +22,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +64,8 @@ public final class FocusedCrawlScheduler {
     /** Avoid reopening Linux cgroup files for every URL examined in a refill pass. */
     private static final long SYSTEM_MEMORY_SNAPSHOT_CACHE_MILLIS = 1000L;
     private static final int FRONTIER_MAINTENANCE_SCAN_ROWS_PER_CYCLE = 64;
+    /** Keep Solr's stored outbound-link fields bounded when resuming from indexed sources. */
+    static final int MAX_INDEXED_SOURCE_BATCH = 32;
     private static final int QUEUE_SIZE_MEASUREMENT_ATTEMPTS = 3;
     private static final long FRONTIER_COMPACTION_INTERVAL_MILLIS = 24L * 60L * 60L * 1000L;
 
@@ -446,7 +450,7 @@ public final class FocusedCrawlScheduler {
             int sourceCursor = intValue(state, "indexedSourceCursor", 0);
             if (sourceTotal == 0 || sourceCursor >= sourceTotal) sourceCursor = 0;
             sourceQuery.setStart(sourceCursor);
-            sourceQuery.setRows(configuration.frontier().indexedSourceBatch());
+            sourceQuery.setRows(boundedIndexedSourceBatch(configuration.frontier().indexedSourceBatch()));
             sourceQuery.setFields(fields);
             sourceQuery.setIncludeScore(false);
             final QueryResponse sourceResponse = this.sb.index.fulltext().getDefaultEmbeddedConnector()
@@ -483,14 +487,22 @@ public final class FocusedCrawlScheduler {
                 }
                 final String sourceProtocol = protocolOf(source.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                 final java.util.Iterator<String> links = outboundLinks(source, sourceProtocol).iterator();
-                while (links.hasNext() && added < budget) {
+                final Set<String> sourceLinks = new HashSet<>();
+                while (added < budget) {
                     if (!memoryHealthy()) {
                         pauseFocusedCrawlForMemoryPressure();
                         break;
                     }
+                    // Check memory before advancing the lazy iterator: stream iterators may prefetch on hasNext().
+                    if (!links.hasNext()) break;
+                    final String link = links.next();
+                    if (!sourceLinks.add(link)) {
+                        existing++;
+                        continue;
+                    }
                     final DigestURL url;
                     try {
-                        url = new DigestURL(links.next());
+                        url = new DigestURL(link);
                     } catch (final Exception ignored) {
                         invalid++;
                         continue;
@@ -541,44 +553,91 @@ public final class FocusedCrawlScheduler {
      * Read stored outbound links from both the normal Solr response shape and
      * the embedded connector's occasionally nested multi-value shape.
      */
-    private static List<String> outboundLinks(final SolrDocument document, final String fallbackProtocol) {
-        final List<String> stubs = flattenFieldValue(
-                document.getFieldValue(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()));
-        final List<String> encodedProtocols = flattenFieldValue(
-                document.getFieldValue(CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName()));
-        final List<String> protocols = new ArrayList<>(stubs.size());
-        for (int i = 0; i < stubs.size(); i++) protocols.add(fallbackProtocol);
-        for (final String encoded : encodedProtocols) {
-            final int separator = encoded.indexOf('-');
-            if (separator > 0 && separator + 1 < encoded.length()) {
-                try {
-                    final int index = Integer.parseInt(encoded.substring(0, separator));
-                    if (index >= 0 && index < protocols.size()) protocols.set(index, encoded.substring(separator + 1));
-                } catch (final NumberFormatException ignored) {
-                    // Ignore a malformed protocol entry and retain http.
-                }
-            } else if (!encoded.isEmpty() && !protocols.isEmpty()) {
-                protocols.set(0, encoded);
-            }
-        }
-        final Set<String> links = new LinkedHashSet<>();
-        for (int i = 0; i < stubs.size(); i++) {
-            final String stub = stubs.get(i);
-            if (stub.isEmpty()) continue;
-            String url = protocols.get(i) + "://" + stub;
-            final int fragment = url.indexOf('#');
-            if (fragment > 0) url = url.substring(0, fragment);
-            links.add(url);
-        }
-        return new ArrayList<>(links);
+    static int boundedIndexedSourceBatch(final int configuredBatch) {
+        return Math.max(1, Math.min(configuredBatch, MAX_INDEXED_SOURCE_BATCH));
     }
 
-    private static List<String> flattenFieldValue(final Object value) {
-        final List<String> flattened = new ArrayList<>();
+    static Iterable<String> outboundLinks(final SolrDocument document, final String fallbackProtocol) {
+        final Object stubs = document.getFieldValue(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName());
+        final Object encodedProtocols = document.getFieldValue(
+                CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName());
+        return () -> new Iterator<String>() {
+            private final Iterator<String> stubIterator = flattenFieldValue(stubs).iterator();
+            private final IndexedProtocolIterator protocolIterator = new IndexedProtocolIterator(
+                    flattenFieldValue(encodedProtocols).iterator(), fallbackProtocol);
+            private int index;
+
+            @Override
+            public boolean hasNext() {
+                return this.stubIterator.hasNext();
+            }
+
+            @Override
+            public String next() {
+                while (this.stubIterator.hasNext()) {
+                    final String stub = this.stubIterator.next();
+                    final String protocol = this.protocolIterator.at(this.index++);
+                    if (stub.isEmpty()) continue;
+                    String url = protocol + "://" + stub;
+                    final int fragment = url.indexOf('#');
+                    if (fragment > 0) url = url.substring(0, fragment);
+                    return url;
+                }
+                throw new NoSuchElementException();
+            }
+        };
+    }
+
+    private static Stream<String> flattenFieldValue(final Object value) {
         if (value instanceof Collection<?>) {
-            for (final Object nested : (Collection<?>) value) flattened.addAll(flattenFieldValue(nested));
-        } else if (value != null) flattened.add(value.toString());
-        return flattened;
+            return ((Collection<?>) value).stream().flatMap(FocusedCrawlScheduler::flattenFieldValue);
+        }
+        return value == null ? Stream.empty() : Stream.of(value.toString());
+    }
+
+    /** Protocol fields are encoded by ascending link index, so consume them as links are visited. */
+    private static final class IndexedProtocolIterator {
+        private final Iterator<String> encodedProtocols;
+        private final String fallbackProtocol;
+        private String pending;
+        private int activeIndex = -1;
+        private String activeProtocol;
+        private String firstProtocol;
+
+        private IndexedProtocolIterator(final Iterator<String> encodedProtocols, final String fallbackProtocol) {
+            this.encodedProtocols = encodedProtocols;
+            this.fallbackProtocol = fallbackProtocol;
+        }
+
+        private String at(final int index) {
+            while (true) {
+                if (this.pending == null && this.encodedProtocols.hasNext()) this.pending = this.encodedProtocols.next();
+                if (this.pending == null) break;
+                final int separator = this.pending.indexOf('-');
+                if (separator <= 0 || separator + 1 >= this.pending.length()) {
+                    final String unindexed = this.pending;
+                    this.pending = null;
+                    if (index == 0 && !unindexed.isEmpty()) this.firstProtocol = unindexed;
+                    continue;
+                }
+                final int encodedIndex;
+                try {
+                    encodedIndex = Integer.parseInt(this.pending.substring(0, separator));
+                } catch (final NumberFormatException ignored) {
+                    this.pending = null;
+                    continue;
+                }
+                if (encodedIndex > index) break;
+                final String protocol = this.pending.substring(separator + 1);
+                this.pending = null;
+                if (encodedIndex == index) {
+                    this.activeIndex = encodedIndex;
+                    this.activeProtocol = protocol;
+                }
+            }
+            if (index == 0 && this.firstProtocol != null) return this.firstProtocol;
+            return this.activeIndex == index ? this.activeProtocol : this.fallbackProtocol;
+        }
     }
 
     private static String protocolOf(final Object sourceUrl) {
