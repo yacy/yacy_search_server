@@ -428,7 +428,18 @@ public final class FocusedFrontierStore implements AutoCloseable {
      * multiple scheduler passes instead of repeatedly scanning from the start.
      */
     List<Candidate> recoverable(final long now, final int limit, final int scanLimit) {
-        if (this.heap == null || limit <= 0 || scanLimit <= 0) return Collections.emptyList();
+        return recoverable(now, limit, scanLimit, () -> true);
+    }
+
+    /**
+     * Inspect a bounded slice for eligible candidates while the caller's
+     * resource guard remains healthy. Keep the iterator in place when the
+     * guard declines more work so the scan can resume on a later cycle.
+     */
+    List<Candidate> recoverable(final long now, final int limit, final int scanLimit,
+            final BooleanSupplier scanAllowed) {
+        if (this.heap == null || limit <= 0 || scanLimit <= 0 || scanAllowed == null
+                || !scanAllowed.getAsBoolean()) return Collections.emptyList();
         final List<Candidate> result = new ArrayList<>();
         try {
             synchronized (this.recoverableScanLock) {
@@ -438,7 +449,7 @@ public final class FocusedFrontierStore implements AutoCloseable {
                 }
                 if (this.recoverableScan == null) this.recoverableScan = this.heap.entries(true, false);
                 int inspected = 0;
-                while (inspected < scanLimit && result.size() < limit) {
+                while (inspected < scanLimit && result.size() < limit && scanAllowed.getAsBoolean()) {
                     if (!this.recoverableScan.hasNext()) {
                         this.recoverableScan = null;
                         break;

@@ -377,7 +377,8 @@ public final class FocusedCrawlScheduler {
         if (budget <= 0) return 0;
         int added = 0;
         final long now = System.currentTimeMillis();
-        for (final FocusedFrontierStore.Candidate candidate : frontier.recoverable(now, budget)) {
+        for (final FocusedFrontierStore.Candidate candidate : frontier.recoverable(
+                now, budget, FocusedFrontierStore.MAX_RECOVERABLE_ROWS_PER_SCAN, this::memoryHealthy)) {
             if (!memoryHealthy()) {
                 pauseFocusedCrawlForMemoryPressure();
                 break;
@@ -428,6 +429,10 @@ public final class FocusedCrawlScheduler {
     private int expandFromIndexedSources(final PolicyConfiguration configuration, final CrawlProfile profile,
             final FocusedFrontierStore frontier, final int budget, final Properties state) {
         if (budget <= 0) return 0;
+        if (!memoryHealthy()) {
+            pauseFocusedCrawlForMemoryPressure();
+            return 0;
+        }
         final FocusedCrawlPolicy policy = this.manager.policy(configuration.id());
         if (policy == null) return 0;
         final String escapedId = configuration.id().replace("\\", "\\\\").replace("\"", "\\\"");

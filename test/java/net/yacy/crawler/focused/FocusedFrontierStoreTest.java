@@ -169,6 +169,38 @@ public class FocusedFrontierStoreTest {
     }
 
     @Test
+    public void recoverableFrontierScanStopsAtResourceBoundaryAndResumesSameScan() throws Exception {
+        final java.io.File directory = Files.createTempDirectory("focused-frontier-resource-bounded-candidates-").toFile();
+        final FocusedFrontierStore store = new FocusedFrontierStore(directory, "astronomy");
+        final List<Request> requests = new ArrayList<>();
+        for (int i = 0; i < 7; i++) requests.add(request("https://research.example/astronomy/resource-sliced-" + i));
+        requests.sort((left, right) -> NaturalOrder.naturalOrder.compare(left.url().hash(), right.url().hash()));
+
+        for (int i = 0; i < requests.size(); i++) {
+            final Request request = requests.get(i);
+            store.discover(request, decision());
+            if (i < requests.size() - 1) store.markIndexed(request.url().hash());
+        }
+
+        final long now = System.currentTimeMillis();
+        assertTrue("an unhealthy resource guard must not start a recoverable scan",
+                store.recoverable(now, 10, 7, () -> false).isEmpty());
+        final AtomicInteger healthyChecks = new AtomicInteger();
+        assertTrue("a recoverable scan must stop between rows when the guard declines work",
+                store.recoverable(now, 10, 7, () -> healthyChecks.getAndIncrement() < 3).isEmpty());
+
+        List<FocusedFrontierStore.Candidate> recovered = Collections.emptyList();
+        int slices = 0;
+        while (recovered.isEmpty() && slices < 6) {
+            recovered = store.recoverable(now, 10, 2, () -> true);
+            slices++;
+        }
+        assertTrue("the retained recoverable scan must resume after the guard recovers", slices > 1);
+        assertEquals(requests.get(requests.size() - 1).url().toNormalform(true), recovered.get(0).url());
+        store.close();
+    }
+
+    @Test
     public void defaultRecoverableScanAdvancesAcrossProductionBoundedSlices() throws Exception {
         assertTrue("disk-backed frontier scans must stay below the scheduler latency budget",
                 FocusedFrontierStore.MAX_RECOVERABLE_ROWS_PER_SCAN <= 2048);
