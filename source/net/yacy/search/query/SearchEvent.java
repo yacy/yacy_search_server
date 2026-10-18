@@ -148,7 +148,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     public Thread[] secondarySearchThreads;
     public final SortedSet<byte[]> preselectedPeerHashes;
     private final SortedMap<byte[], Integer> IACount;
-    private final SortedMap<byte[], String> IAResults;
+    private final SearchEventAbstractCache IAResults;
     private final SortedMap<byte[], HeuristicResult> heuristics;
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
@@ -414,7 +414,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
-        this.IAResults = new TreeMap<>(Base64Order.enhancedCoder);
+        this.IAResults = new SearchEventAbstractCache(generateAbstracts, this::searchContainerMap);
         this.IACount = new TreeMap<>(Base64Order.enhancedCoder);
         this.heuristics = new TreeMap<>(Base64Order.enhancedCoder);
         this.IAmaxcounthash = null;
@@ -553,7 +553,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                             this.IAneardhthash = wordhash;
                         }
                         this.IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
-                        this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                     }
                 }
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ABSTRACTS, "", this.searchContainerMap() == null ? 0 : this.searchContainerMap().size(), System.currentTimeMillis() - timer), false);

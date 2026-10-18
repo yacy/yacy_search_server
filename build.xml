@@ -488,6 +488,7 @@
           <include name="net/yacy/search/query/FocusedQueryModifierTest.java" />
           <include name="net/yacy/search/query/SearchSnippetExecutorTest.java" />
           <include name="net/yacy/search/query/SearchEventCacheTest.java" />
+          <include name="net/yacy/search/query/SearchEventAbstractCacheTest.java" />
           <include name="net/yacy/search/index/FulltextSearchMetadataFieldsTest.java" />
           <include name="net/yacy/crawler/data/NoticedURLFocusedLaneTest.java" />
           <include name="net/yacy/search/ResourceObserverTest.java" />
@@ -528,6 +529,7 @@
           <arg value="net.yacy.search.query.FocusedQueryModifierTest" />
           <arg value="net.yacy.search.query.SearchSnippetExecutorTest" />
           <arg value="net.yacy.search.query.SearchEventCacheTest" />
+          <arg value="net.yacy.search.query.SearchEventAbstractCacheTest" />
           <arg value="net.yacy.search.index.FulltextSearchMetadataFieldsTest" />
           <arg value="net.yacy.crawler.data.NoticedURLFocusedLaneTest" />
           <arg value="net.yacy.search.ResourceObserverTest" />
