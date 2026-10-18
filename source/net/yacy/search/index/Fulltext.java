@@ -368,7 +368,9 @@ public final class Fulltext {
     /**
      * Stored fields that can duplicate or greatly expand page content without
      * contributing to an ordinary RWI search result. Keep them in the index,
-     * but do not materialize them for every RWI candidate.
+     * but do not materialize them for every RWI candidate. In particular,
+     * high-cardinality link and parser-structure lists can make one result
+     * document much larger than its core display metadata.
      */
     private static final Set<CollectionSchema> LARGE_SEARCH_METADATA_FIELDS = Collections.unmodifiableSet(
             EnumSet.of(CollectionSchema.fuzzy_signature_text_t,
@@ -381,7 +383,23 @@ public final class Fulltext {
                     CollectionSchema.article_txt,
                     CollectionSchema.bold_txt,
                     CollectionSchema.italic_txt,
-                    CollectionSchema.underline_txt));
+                    CollectionSchema.underline_txt,
+                    CollectionSchema.inboundlinks_protocol_sxt,
+                    CollectionSchema.inboundlinks_urlstub_sxt,
+                    CollectionSchema.outboundlinks_protocol_sxt,
+                    CollectionSchema.outboundlinks_urlstub_sxt,
+                    CollectionSchema.css_tag_sxt,
+                    CollectionSchema.css_url_sxt,
+                    CollectionSchema.scripts_sxt,
+                    CollectionSchema.frames_sxt,
+                    CollectionSchema.iframes_sxt,
+                    CollectionSchema.hreflang_cc_sxt,
+                    CollectionSchema.hreflang_url_sxt,
+                    CollectionSchema.navigation_type_sxt,
+                    CollectionSchema.navigation_url_sxt,
+                    CollectionSchema.url_parameter_key_sxt,
+                    CollectionSchema.url_parameter_value_sxt,
+                    CollectionSchema.url_paths_sxt));
 
     /**
      * Build the stored fields needed to materialize an RWI search result.

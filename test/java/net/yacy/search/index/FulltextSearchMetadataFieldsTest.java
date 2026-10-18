@@ -28,11 +28,17 @@ public class FulltextSearchMetadataFieldsTest {
         assertFalse(fieldSet.contains(CollectionSchema.images_text_t.getSolrFieldName()));
         assertFalse(fieldSet.contains(CollectionSchema.article_txt.getSolrFieldName()));
         assertFalse(fieldSet.contains(CollectionSchema.bold_txt.getSolrFieldName()));
+        assertFalse(fieldSet.contains(CollectionSchema.inboundlinks_urlstub_sxt.getSolrFieldName()));
+        assertFalse(fieldSet.contains(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()));
+        assertFalse(fieldSet.contains(CollectionSchema.css_url_sxt.getSolrFieldName()));
+        assertFalse(fieldSet.contains(CollectionSchema.scripts_sxt.getSolrFieldName()));
+        assertFalse(fieldSet.contains(CollectionSchema.url_paths_sxt.getSolrFieldName()));
         assertTrue(fieldSet.contains(CollectionSchema.id.getSolrFieldName()));
         assertTrue(fieldSet.contains(CollectionSchema.sku.getSolrFieldName()));
         assertTrue(fieldSet.contains(CollectionSchema.title.getSolrFieldName()));
         assertTrue(fieldSet.contains(CollectionSchema.h1_txt.getSolrFieldName()));
         assertTrue(fieldSet.contains(CollectionSchema.description_txt.getSolrFieldName()));
+        assertTrue(fieldSet.contains(CollectionSchema.images_urlstub_sxt.getSolrFieldName()));
         assertTrue(fieldSet.contains(CollectionSchema.synonyms_sxt.getSolrFieldName()));
         assertTrue(fieldSet.contains(dynamicField));
     }
@@ -58,8 +64,8 @@ public class FulltextSearchMetadataFieldsTest {
     @Test
     public void configuredNavigatorFieldsRemainAvailable() {
         final String[] fields = Fulltext.searchMetadataFields(false,
-                Collections.singleton(CollectionSchema.inboundlinks_anchortext_txt.getSolrFieldName()));
+                Collections.singleton(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()));
 
-        assertTrue(Arrays.asList(fields).contains(CollectionSchema.inboundlinks_anchortext_txt.getSolrFieldName()));
+        assertTrue(Arrays.asList(fields).contains(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()));
     }
 }

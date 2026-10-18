@@ -97,6 +97,8 @@ GET /yacysearch.html?query=climate+data&maximumRecords=10&resource=local&content
 
 The response is an HTML result page. It contains result entries, navigators/facets when enabled, and hidden references used by authenticated result actions. If a query returns too little, first check whether the crawler has indexed the relevant site and whether `urlmaskfilter`, `collection`, or `contentdom` narrowed the request too far.
 
+Ordinary RWI results load the fields used to render and rank each result. Large extracted page structures such as link lists, CSS/script references, and frame/navigation lists remain in the index but are not loaded into every result by default. A configured navigator can still request its field explicitly.
+
 ## Related Pages
 
 - `Status.html`
