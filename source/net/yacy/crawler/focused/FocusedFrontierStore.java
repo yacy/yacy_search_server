@@ -1,0 +1,847 @@
+// Persistent frontier state for focused autocrawler profiles.
+// SPDX-License-Identifier: GPL-2.0-or-later
+package net.yacy.crawler.focused;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.data.word.Word;
+
+/**
+ * Crash-safe URL frontier for one focused profile.
+ *
+ * <p>The native YaCy queues remain authoritative for fetching. This sidecar
+ * only remembers enough information to rebuild a profile frontier after a
+ * restart or an explicit profile reset.</p>
+ */
+public final class FocusedFrontierStore implements AutoCloseable {
+
+    /** Avoid a single damaged/restarted profile rewriting an unbounded frontier in one scheduler pass. */
+    private static final int MAX_STALE_RECOVERIES_PER_SCAN = 1024;
+    /**
+     * Keep each scheduler pass responsive while continuing sparse frontier
+     * lookups over later passes. Each MapHeap row requires disk-backed reads;
+     * a 16k-row slice stalled the production scheduler for over a minute.
+     */
+    static final int MAX_RECOVERABLE_ROWS_PER_SCAN = 2048;
+    /** Keep maintenance work on the scheduler thread to a short disk-backed slice. */
+    static final int MAX_COMPACTION_ROWS_PER_SCAN = 256;
+
+    public enum State {
+        DISCOVERED, READY, ADMITTED, IN_FLIGHT, INDEXED, DUPLICATE, FAILED, BLOCKED
+    }
+
+    /** How a focused URL entered the durable frontier. */
+    public enum DiscoverySource {
+        SEED_BOOTSTRAP, NATIVE_LINK, ADMIN_RESET, LEGACY
+    }
+
+    /** A persisted candidate and the request information needed to requeue it. */
+    public static final class Candidate {
+        private final byte[] hash;
+        private final String url;
+        private final byte[] initiator;
+        private final byte[] referrerHash;
+        private final String name;
+        private final String profileHandle;
+        private final int depth;
+        private final int timezoneOffset;
+        private final State state;
+        private final NoveltyClass lane;
+        private final int relevance;
+        private final String version;
+        private final Set<String> collections;
+        private final List<String> reasons;
+        private final long firstSeen;
+        private final long lastSeen;
+        private final long nextEligible;
+        private final long lastSubmitted;
+        private final int attempts;
+        private final boolean recovery;
+        private final DiscoverySource discoverySource;
+
+        private Candidate(final byte[] hash, final String url, final byte[] initiator,
+                final byte[] referrerHash, final String name, final String profileHandle,
+                final int depth, final int timezoneOffset, final State state,
+                final NoveltyClass lane, final int relevance, final String version,
+                final Set<String> collections, final List<String> reasons,
+                final long firstSeen, final long lastSeen, final long nextEligible,
+                final long lastSubmitted, final int attempts, final boolean recovery,
+                final DiscoverySource discoverySource) {
+            this.hash = hash == null ? null : hash.clone();
+            this.url = url == null ? "" : url;
+            this.initiator = initiator == null ? null : initiator.clone();
+            this.referrerHash = referrerHash == null ? null : referrerHash.clone();
+            this.name = name == null ? "" : name;
+            this.profileHandle = profileHandle == null ? "" : profileHandle;
+            this.depth = Math.max(0, depth);
+            this.timezoneOffset = timezoneOffset;
+            this.state = state == null ? State.DISCOVERED : state;
+            this.lane = lane == null ? NoveltyClass.SATURATED : lane;
+            this.relevance = relevance;
+            this.version = version == null ? "" : version;
+            this.collections = Collections.unmodifiableSet(new LinkedHashSet<>(collections == null
+                    ? Collections.emptySet() : collections));
+            this.reasons = Collections.unmodifiableList(new ArrayList<>(reasons == null
+                    ? Collections.emptyList() : reasons));
+            this.firstSeen = firstSeen;
+            this.lastSeen = lastSeen;
+            this.nextEligible = nextEligible;
+            this.lastSubmitted = lastSubmitted;
+            this.attempts = Math.max(0, attempts);
+            this.recovery = recovery;
+            this.discoverySource = discoverySource == null ? DiscoverySource.LEGACY : discoverySource;
+        }
+
+        public byte[] hash() { return this.hash == null ? null : this.hash.clone(); }
+        public String url() { return this.url; }
+        public byte[] initiator() { return this.initiator == null ? null : this.initiator.clone(); }
+        public byte[] referrerHash() { return this.referrerHash == null ? null : this.referrerHash.clone(); }
+        public String name() { return this.name; }
+        public String profileHandle() { return this.profileHandle; }
+        public int depth() { return this.depth; }
+        public int timezoneOffset() { return this.timezoneOffset; }
+        public State state() { return this.state; }
+        public NoveltyClass lane() { return this.lane; }
+        public int relevance() { return this.relevance; }
+        public String version() { return this.version; }
+        public Set<String> collections() { return this.collections; }
+        public List<String> reasons() { return this.reasons; }
+        public long firstSeen() { return this.firstSeen; }
+        public long lastSeen() { return this.lastSeen; }
+        public long nextEligible() { return this.nextEligible; }
+        public long lastSubmitted() { return this.lastSubmitted; }
+        public int attempts() { return this.attempts; }
+        public boolean recovery() { return this.recovery; }
+        public DiscoverySource discoverySource() { return this.discoverySource; }
+
+        public Request request() throws IOException {
+            final DigestURL digestURL = new DigestURL(this.url, this.hash);
+            return new Request(this.initiator, digestURL, this.referrerHash, this.name,
+                    new Date(this.lastSeen), this.profileHandle, this.depth, this.timezoneOffset);
+        }
+    }
+
+    /** Compact state counts used by the UI and status API. */
+    public static final class Snapshot {
+        private final int total;
+        private final int discovered;
+        private final int ready;
+        private final int admitted;
+        private final int inFlight;
+        private final int indexed;
+        private final int duplicate;
+        private final int failed;
+        private final int blocked;
+        private final int seedBootstrap;
+        private final int nativeLink;
+        private final int adminReset;
+        private final int legacy;
+
+        private Snapshot(final int total, final int discovered, final int ready, final int admitted,
+                final int inFlight, final int indexed, final int duplicate, final int failed, final int blocked,
+                final int seedBootstrap, final int nativeLink, final int adminReset, final int legacy) {
+            this.total = total;
+            this.discovered = discovered;
+            this.ready = ready;
+            this.admitted = admitted;
+            this.inFlight = inFlight;
+            this.indexed = indexed;
+            this.duplicate = duplicate;
+            this.failed = failed;
+            this.blocked = blocked;
+            this.seedBootstrap = seedBootstrap;
+            this.nativeLink = nativeLink;
+            this.adminReset = adminReset;
+            this.legacy = legacy;
+        }
+
+        public int total() { return this.total; }
+        public int discovered() { return this.discovered; }
+        public int ready() { return this.ready; }
+        public int admitted() { return this.admitted; }
+        public int inFlight() { return this.inFlight; }
+        public int indexed() { return this.indexed; }
+        public int duplicate() { return this.duplicate; }
+        public int failed() { return this.failed; }
+        public int blocked() { return this.blocked; }
+        public int recoverable() { return this.discovered + this.ready + this.admitted + this.inFlight; }
+        public int seedBootstrap() { return this.seedBootstrap; }
+        public int nativeLink() { return this.nativeLink; }
+        public int adminReset() { return this.adminReset; }
+        public int legacy() { return this.legacy; }
+    }
+
+    /** Progress from one bounded frontier compaction slice. */
+    static final class CompactionResult {
+        private final int scanned;
+        private final int removed;
+        private final boolean complete;
+
+        private CompactionResult(final int scanned, final int removed, final boolean complete) {
+            this.scanned = scanned;
+            this.removed = removed;
+            this.complete = complete;
+        }
+
+        int scanned() { return this.scanned; }
+        int removed() { return this.removed; }
+        boolean complete() { return this.complete; }
+    }
+
+    private static final class TerminalDelete {
+        private final byte[] hash;
+        private final boolean expired;
+        private final long lastSeen;
+
+        private TerminalDelete(final byte[] hash, final boolean expired, final long lastSeen) {
+            this.hash = hash;
+            this.expired = expired;
+            this.lastSeen = lastSeen;
+        }
+    }
+
+    private static final String URL = "url";
+    private static final String INITIATOR = "initiator";
+    private static final String REFERRER = "referrer";
+    private static final String NAME = "name";
+    private static final String PROFILE = "profile";
+    private static final String DEPTH = "depth";
+    private static final String TIMEZONE = "timezone";
+    private static final String STATE = "state";
+    private static final String LANE = "lane";
+    private static final String RELEVANCE = "relevance";
+    private static final String VERSION = "version";
+    private static final String COLLECTIONS = "collections";
+    private static final String REASONS = "reasons";
+    private static final String FIRST_SEEN = "firstSeen";
+    private static final String LAST_SEEN = "lastSeen";
+    private static final String NEXT_ELIGIBLE = "nextEligible";
+    private static final String LAST_SUBMITTED = "lastSubmitted";
+    private static final String ATTEMPTS = "attempts";
+    private static final String RECOVERY = "recovery";
+    private static final String DISCOVERY_SOURCE = "discoverySource";
+    private static final String LIST_SEPARATOR = "\u001f";
+
+    private final MapHeap heap;
+    private final File heapFile;
+    private final String profileId;
+    private final Object staleScanLock = new Object();
+    private Iterator<Map.Entry<byte[], Map<String, String>>> staleScan;
+    private final Object compactionScanLock = new Object();
+    private Iterator<Map.Entry<byte[], Map<String, String>>> compactionScan;
+    private final Object recoverableScanLock = new Object();
+    private Iterator<Map.Entry<byte[], Map<String, String>>> recoverableScan;
+    private Candidate pendingRecoverable;
+
+    public FocusedFrontierStore(final File stateDirectory, final String profileId) {
+        this.profileId = profileId == null ? "" : profileId;
+        this.heapFile = stateDirectory == null ? null : new File(stateDirectory, this.profileId + ".frontier.heap");
+        MapHeap opened = null;
+        try {
+            if (stateDirectory != null) stateDirectory.mkdirs();
+            opened = new MapHeap(this.heapFile, Word.commonHashLength, NaturalOrder.naturalOrder,
+                    1024 * 128, 512, ' ');
+        } catch (final IOException ignored) { }
+        this.heap = opened;
+    }
+
+    /** Snapshot a request that is already in a native YaCy queue. */
+    public synchronized void snapshot(final Request request, final FocusedCrawlMetadata metadata,
+            final boolean recovery) {
+        if (request == null || request.url() == null || metadata == null || this.profileId.isEmpty()) return;
+        final String version = metadata.policyVersions().isEmpty() ? "" : metadata.policyVersions().get(0);
+        final CrawlPolicyDecision decision = new CrawlPolicyDecision(this.profileId, version,
+                CrawlPolicyDecision.Action.ACCEPT, metadata.relevanceScore(), metadata.priority(),
+                metadata.collections(), metadata.maximumDepth(), metadata.perHostBudget(),
+                false, metadata.recrawlIntervalMillis(), metadata.reasonCodes(), metadata.noveltyClass());
+        snapshot(request, decision, recovery);
+    }
+
+    /** Snapshot a native request with an already evaluated policy decision. */
+    public synchronized void snapshot(final Request request, final CrawlPolicyDecision decision,
+            final boolean recovery) {
+        if (request == null || request.url() == null || decision == null || this.profileId.isEmpty()) return;
+        discover(request, decision, DiscoverySource.ADMIN_RESET);
+        final Candidate candidate = get(request.url().hash());
+        if (candidate != null) {
+            final Candidate updated = new Candidate(candidate.hash(), candidate.url(), candidate.initiator(),
+                    candidate.referrerHash(), candidate.name(), candidate.profileHandle(), candidate.depth(),
+                    candidate.timezoneOffset(), State.READY, candidate.lane(), candidate.relevance(), candidate.version(),
+                    candidate.collections(), candidate.reasons(), candidate.firstSeen(), System.currentTimeMillis(),
+                    0L, candidate.lastSubmitted(), candidate.attempts(), recovery, candidate.discoverySource());
+            put(updated);
+        }
+    }
+
+    public synchronized boolean discover(final Request request, final CrawlPolicyDecision decision) {
+        return discover(request, decision, DiscoverySource.NATIVE_LINK);
+    }
+
+    public synchronized boolean discover(final Request request, final CrawlPolicyDecision decision,
+            final DiscoverySource discoverySource) {
+        if (request == null || request.url() == null || decision == null || !decision.focused()) return false;
+        final byte[] hash = request.url().hash();
+        final Candidate previous = get(hash);
+        final long now = System.currentTimeMillis();
+        if (previous != null && isTerminal(previous.state())) {
+            // A newly discovered indexed/failed URL remains terminal until the
+            // policy's normal recrawl rules explicitly make it eligible.
+            if (previous.state() == State.INDEXED && !decision.recrawlFocused()) return false;
+            if (previous.state() == State.DUPLICATE && previous.nextEligible() > now) return false;
+        }
+        final DiscoverySource effectiveSource = previous == null || previous.discoverySource() == DiscoverySource.LEGACY
+                ? (discoverySource == null ? DiscoverySource.NATIVE_LINK : discoverySource)
+                : previous.discoverySource();
+        final Candidate candidate = new Candidate(hash, request.url().toNormalform(true), request.initiator(),
+                request.referrerhash(), request.name(), request.profileHandle(), request.depth(),
+                request.timezoneOffset(), previous == null ? State.DISCOVERED : previous.state(),
+                decision.noveltyClass(), decision.relevanceScore(), decision.policyVersion(),
+                decision.collections(), decision.reasonCodes(), previous == null ? now : previous.firstSeen(), now,
+                previous == null ? 0L : previous.nextEligible(), previous == null ? 0L : previous.lastSubmitted(),
+                previous == null ? 0 : previous.attempts(), previous != null && previous.recovery(), effectiveSource);
+        put(candidate);
+        return previous == null;
+    }
+
+    public synchronized void markReady(final byte[] hash, final boolean recovery) {
+        update(hash, State.READY, 0L, recovery, false);
+    }
+
+    public synchronized void markAdmitted(final byte[] hash) {
+        update(hash, State.ADMITTED, 0L, false, true);
+    }
+
+    public synchronized void markInFlight(final byte[] hash) {
+        update(hash, State.IN_FLIGHT, 0L, false, false);
+    }
+
+    public synchronized void markIndexed(final byte[] hash) {
+        update(hash, State.INDEXED, 0L, false, false);
+    }
+
+    public synchronized void markDuplicate(final byte[] hash) {
+        update(hash, State.DUPLICATE, System.currentTimeMillis() + 3600000L, false, false);
+    }
+
+    public synchronized void markFailed(final byte[] hash, final long retryAfterMillis) {
+        update(hash, State.FAILED, System.currentTimeMillis() + Math.max(0L, retryAfterMillis), false, false);
+    }
+
+    public synchronized void markBlocked(final byte[] hash) {
+        update(hash, State.BLOCKED, 0L, false, false);
+    }
+
+    /**
+     * Convert stale in-flight requests into recoverable candidates.
+     *
+     * <p>ADMITTED candidates are already eligible in {@link #recoverable(long, int)} and are
+     * checked against YaCy's native queues before resubmission. Only IN_FLIGHT rows need this
+     * transition. The heap scan deliberately does not hold this store's monitor: crawl-stack,
+     * indexing, and loader callbacks update the same store and must not wait behind a full
+     * frontier traversal. Individual stale-row transitions are rechecked and serialized below.</p>
+     */
+    public int recoverStale(final long now, final long graceMillis) {
+        return recoverStale(now, graceMillis, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Inspect at most {@code scanLimit} rows of the persistent frontier for stale in-flight
+     * requests. The iterator is retained between calls, spreading a full recovery sweep over
+     * multiple scheduler cycles instead of issuing hundreds of thousands of disk-backed reads
+     * in one pass.
+     */
+    public int recoverStale(final long now, final long graceMillis, final int scanLimit) {
+        return recoverStale(now, graceMillis, scanLimit, () -> true);
+    }
+
+    /**
+     * Inspect stale rows while the caller's resource guard remains healthy.
+     * The retained iterator stays at the current position when the guard
+     * declines more work, so recovery can resume on a later scheduler cycle.
+     */
+    int recoverStale(final long now, final long graceMillis, final int scanLimit,
+            final BooleanSupplier scanAllowed) {
+        if (this.heap == null || scanLimit <= 0 || scanAllowed == null || !scanAllowed.getAsBoolean()) return 0;
+        int changed = 0;
+        final List<byte[]> hashes = new ArrayList<>();
+        try {
+            synchronized (this.staleScanLock) {
+                if (this.staleScan == null) this.staleScan = this.heap.entries(true, false);
+                int inspected = 0;
+                while (inspected < scanLimit && hashes.size() < MAX_STALE_RECOVERIES_PER_SCAN
+                        && scanAllowed.getAsBoolean()) {
+                    if (!this.staleScan.hasNext()) {
+                        this.staleScan = null;
+                        break;
+                    }
+                    final Map.Entry<byte[], Map<String, String>> entry = this.staleScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate == null) continue;
+                    if (candidate.state() == State.IN_FLIGHT
+                            && now - Math.max(candidate.lastSubmitted(), candidate.lastSeen()) >= graceMillis) {
+                        hashes.add(candidate.hash());
+                    }
+                }
+            }
+            for (final byte[] hash : hashes) {
+                if (markStaleInFlightReady(hash, now, graceMillis)) changed++;
+            }
+        } catch (final IOException ignored) {
+            synchronized (this.staleScanLock) { this.staleScan = null; }
+        }
+        return changed;
+    }
+
+    /**
+     * Return up to {@code limit} candidates from a bounded scan slice. Later
+     * calls continue the retained iterator when sparse frontiers need more rows.
+     */
+    public List<Candidate> recoverable(final long now, final int limit) {
+        return recoverable(now, limit, MAX_RECOVERABLE_ROWS_PER_SCAN);
+    }
+
+    /**
+     * Inspect at most {@code scanLimit} rows for eligible candidates. The
+     * iterator is retained between calls so sparse frontiers progress over
+     * multiple scheduler passes instead of repeatedly scanning from the start.
+     */
+    List<Candidate> recoverable(final long now, final int limit, final int scanLimit) {
+        return recoverable(now, limit, scanLimit, () -> true);
+    }
+
+    /**
+     * Inspect a bounded slice for eligible candidates while the caller's
+     * resource guard remains healthy. Keep the iterator in place when the
+     * guard declines more work so the scan can resume on a later cycle.
+     */
+    List<Candidate> recoverable(final long now, final int limit, final int scanLimit,
+            final BooleanSupplier scanAllowed) {
+        if (this.heap == null || limit <= 0 || scanLimit <= 0 || scanAllowed == null
+                || !scanAllowed.getAsBoolean()) return Collections.emptyList();
+        final List<Candidate> result = new ArrayList<>();
+        try {
+            synchronized (this.recoverableScanLock) {
+                if (this.pendingRecoverable != null) {
+                    if (eligible(this.pendingRecoverable, now)) result.add(this.pendingRecoverable);
+                    this.pendingRecoverable = null;
+                }
+                if (this.recoverableScan == null) this.recoverableScan = this.heap.entries(true, false);
+                int inspected = 0;
+                while (inspected < scanLimit && result.size() < limit && scanAllowed.getAsBoolean()) {
+                    if (!this.recoverableScan.hasNext()) {
+                        this.recoverableScan = null;
+                        break;
+                    }
+                    final Map.Entry<byte[], Map<String, String>> entry = this.recoverableScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate == null || !eligible(candidate, now)) continue;
+                    result.add(candidate);
+                }
+            }
+        } catch (final IOException ignored) {
+            synchronized (this.recoverableScanLock) { this.recoverableScan = null; }
+        }
+        result.sort((left, right) -> {
+            int comparison = Integer.compare(laneRank(right.lane()), laneRank(left.lane()));
+            if (comparison != 0) return comparison;
+            comparison = Integer.compare(right.relevance(), left.relevance());
+            if (comparison != 0) return comparison;
+            return Long.compare(left.lastSeen(), right.lastSeen());
+        });
+        return result;
+    }
+
+    /**
+     * Check whether any candidate can be recovered without treating an
+     * incomplete scan slice as proof that the frontier is exhausted.
+     */
+    public boolean hasRecoverable(final long now) {
+        return hasRecoverable(now, MAX_RECOVERABLE_ROWS_PER_SCAN);
+    }
+
+    boolean hasRecoverable(final long now, final int scanLimit) {
+        if (this.heap == null || scanLimit <= 0) return false;
+        try {
+            synchronized (this.recoverableScanLock) {
+                if (this.pendingRecoverable != null && eligible(this.pendingRecoverable, now)) return true;
+                this.pendingRecoverable = null;
+                if (this.recoverableScan == null) this.recoverableScan = this.heap.entries(true, false);
+                int inspected = 0;
+                while (inspected < scanLimit) {
+                    if (!this.recoverableScan.hasNext()) {
+                        this.recoverableScan = null;
+                        return false;
+                    }
+                    final Map.Entry<byte[], Map<String, String>> entry = this.recoverableScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate != null && eligible(candidate, now)) {
+                        this.pendingRecoverable = candidate;
+                        return true;
+                    }
+                }
+                if (this.recoverableScan.hasNext()) return true;
+                this.recoverableScan = null;
+                return false;
+            }
+        } catch (final IOException ignored) {
+            synchronized (this.recoverableScanLock) { this.recoverableScan = null; }
+            // An I/O error cannot prove that the frontier is exhausted.
+            return true;
+        }
+    }
+
+    /**
+     * Return best-effort counts. Concurrent crawl updates can make this snapshot slightly
+     * inconsistent, which is preferable to blocking crawl and indexing callbacks for a full scan.
+     */
+    public Snapshot snapshot() {
+        int total = 0, discovered = 0, ready = 0, admitted = 0, inFlight = 0,
+                indexed = 0, duplicate = 0, failed = 0, blocked = 0,
+                seedBootstrap = 0, nativeLink = 0, adminReset = 0, legacy = 0;
+        if (this.heap == null) return new Snapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        try {
+            final Iterator<Map.Entry<byte[], Map<String, String>>> entries = this.heap.entries(true, false);
+            while (entries.hasNext()) {
+                final Map.Entry<byte[], Map<String, String>> entry = entries.next();
+                final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                if (candidate == null) continue;
+                total++;
+                switch (candidate.state()) {
+                    case DISCOVERED: discovered++; break;
+                    case READY: ready++; break;
+                    case ADMITTED: admitted++; break;
+                    case IN_FLIGHT: inFlight++; break;
+                    case INDEXED: indexed++; break;
+                    case DUPLICATE: duplicate++; break;
+                    case FAILED: failed++; break;
+                    case BLOCKED: blocked++; break;
+                    default: break;
+                }
+                switch (candidate.discoverySource()) {
+                    case SEED_BOOTSTRAP: seedBootstrap++; break;
+                    case NATIVE_LINK: nativeLink++; break;
+                    case ADMIN_RESET: adminReset++; break;
+                    case LEGACY: legacy++; break;
+                    default: break;
+                }
+            }
+        } catch (final IOException ignored) { }
+        return new Snapshot(total, discovered, ready, admitted, inFlight, indexed, duplicate, failed, blocked,
+                seedBootstrap, nativeLink, adminReset, legacy);
+    }
+
+    public synchronized int size() { return this.heap == null ? 0 : this.heap.size(); }
+
+    /** Estimated RAM index and on-disk size for diagnostics. */
+    public synchronized JSONObject statusJSON() {
+        final JSONObject status = new JSONObject(true);
+        try {
+            status.put("records", this.heap == null ? 0 : this.heap.size())
+                    .put("countsAvailable", false)
+                    .put("estimatedIndexBytes", this.heap == null ? 0L : this.heap.memoryBytes())
+                    .put("heapFileBytes", this.heapFile != null && this.heapFile.isFile() ? this.heapFile.length() : 0L)
+                    .put("mapHeapCacheEntries", this.heap == null ? 0 : this.heap.cacheSize());
+        } catch (final JSONException e) {
+            throw new IllegalStateException("cannot serialize focused frontier status", e);
+        }
+        return status;
+    }
+
+    public synchronized Candidate get(final byte[] hash) {
+        if (this.heap == null || hash == null) return null;
+        try { return parse(hash, this.heap.get(hash)); }
+        catch (final IOException | SpaceExceededException ignored) { return null; }
+    }
+
+    /**
+     * Check frontier membership without reading and decoding the stored row.
+     * MapHeap keeps its key index in memory, so this is suitable for hot
+     * admission filters that only need to know whether a URL is already
+     * tracked. In particular, indexed-source expansion must not deserialize a
+     * disk-backed candidate for every outbound link while holding the store
+     * monitor.
+     */
+    public boolean contains(final byte[] hash) {
+        return this.heap != null && hash != null && this.heap.containsKey(hash);
+    }
+
+    /** Remove expired terminal rows from one bounded slice. */
+    public void compact(final long terminalBefore) {
+        compact(terminalBefore, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Inspect one bounded slice, removing expired terminal rows and evicting
+     * terminal rows while above the configured size cap. Repeated calls resume
+     * the retained iterator so a scheduler pass never traverses the complete
+     * disk-backed frontier.
+     */
+    public int compact(final long terminalBefore, final int maxEntries) {
+        return compact(terminalBefore, maxEntries, MAX_COMPACTION_ROWS_PER_SCAN).removed();
+    }
+
+    /**
+     * Inspect at most {@code scanLimit} rows. When the configured cap is
+     * exceeded, terminal rows encountered in this slice are removed until the
+     * cap is met; active rows are never removed. This avoids retaining and
+     * sorting every terminal candidate in a large frontier.
+     */
+    CompactionResult compact(final long terminalBefore, final int maxEntries, final int scanLimit) {
+        if (this.heap == null) return new CompactionResult(0, 0, true);
+        if (scanLimit <= 0) return new CompactionResult(0, 0, false);
+        final int boundedScanLimit = Math.min(scanLimit, MAX_COMPACTION_ROWS_PER_SCAN);
+        final List<TerminalDelete> terminal = new ArrayList<>(boundedScanLimit);
+        int inspected = 0;
+        int removed = 0;
+        boolean complete = false;
+        try {
+            synchronized (this.compactionScanLock) {
+                if (this.compactionScan == null) this.compactionScan = this.heap.entries(true, false);
+                while (inspected < boundedScanLimit && this.compactionScan.hasNext()) {
+                    final Map.Entry<byte[], Map<String, String>> entry = this.compactionScan.next();
+                    inspected++;
+                    final Candidate candidate = parse(entry.getKey(), entry.getValue());
+                    if (candidate != null && isTerminal(candidate.state())) {
+                        final boolean expired = candidate.lastSeen() < terminalBefore;
+                        terminal.add(new TerminalDelete(candidate.hash(), expired, candidate.lastSeen()));
+                    }
+                }
+                if (!this.compactionScan.hasNext()) {
+                    this.compactionScan = null;
+                    complete = true;
+                }
+            }
+            long projectedSize = this.heap.size();
+            for (final TerminalDelete candidate : terminal) {
+                if (!candidate.expired) continue;
+                if (deleteTerminal(candidate.hash, terminalBefore, true)) {
+                    removed++;
+                    projectedSize--;
+                }
+            }
+            terminal.sort((left, right) -> Long.compare(left.lastSeen, right.lastSeen));
+            for (final TerminalDelete candidate : terminal) {
+                if (candidate.expired || maxEntries <= 0 || projectedSize <= maxEntries) continue;
+                if (deleteTerminal(candidate.hash, terminalBefore, false)) {
+                    removed++;
+                    projectedSize--;
+                }
+            }
+        } catch (final IOException ignored) {
+            synchronized (this.compactionScanLock) { this.compactionScan = null; }
+        }
+        return new CompactionResult(inspected, removed, complete);
+    }
+
+    @Override
+    public synchronized void close() {
+        synchronized (this.staleScanLock) { this.staleScan = null; }
+        synchronized (this.compactionScanLock) { this.compactionScan = null; }
+        synchronized (this.recoverableScanLock) {
+            this.recoverableScan = null;
+            this.pendingRecoverable = null;
+        }
+        if (this.heap != null) this.heap.close();
+    }
+
+    private void update(final byte[] hash, final State state, final long nextEligible,
+            final boolean recovery, final boolean submitted) {
+        if (this.heap == null || hash == null) return;
+        final Candidate previous = get(hash);
+        if (previous == null) return;
+        final long now = System.currentTimeMillis();
+        final Candidate updated = new Candidate(previous.hash(), previous.url(), previous.initiator(),
+                previous.referrerHash(), previous.name(), previous.profileHandle(), previous.depth(),
+                previous.timezoneOffset(), state, previous.lane(), previous.relevance(), previous.version(),
+                previous.collections(), previous.reasons(), previous.firstSeen(), now, nextEligible,
+                submitted ? now : previous.lastSubmitted(), previous.attempts() + (submitted ? 1 : 0),
+                recovery || previous.recovery(), previous.discoverySource());
+        put(updated);
+    }
+
+    /** Recheck and transition one stale in-flight row under the short-lived store lock. */
+    private synchronized boolean markStaleInFlightReady(final byte[] hash, final long now,
+            final long graceMillis) {
+        final Candidate current = get(hash);
+        if (current == null || current.state() != State.IN_FLIGHT
+                || now - Math.max(current.lastSubmitted(), current.lastSeen()) < graceMillis) return false;
+        update(hash, State.READY, 0L, true, false);
+        return true;
+    }
+
+    /** Recheck a terminal row before deleting it; a concurrent transition to active wins. */
+    private synchronized boolean deleteTerminal(final byte[] hash, final long terminalBefore,
+            final boolean requireOlder) {
+        if (this.heap == null || hash == null) return false;
+        final Candidate current = get(hash);
+        if (current == null || !isTerminal(current.state())
+                || (requireOlder && current.lastSeen() >= terminalBefore)) return false;
+        try {
+            this.heap.delete(hash);
+            return true;
+        } catch (final IOException ignored) {
+            return false;
+        }
+    }
+
+    private void put(final Candidate candidate) {
+        if (this.heap == null || candidate == null || candidate.hash() == null) return;
+        try { this.heap.put(candidate.hash(), serialize(candidate)); }
+        catch (final RuntimeException ignored) { }
+    }
+
+    private static boolean eligible(final Candidate candidate, final long now) {
+        // An admission can disappear from a native stack without reaching a
+        // terminal callback (for example after queue compaction or a worker
+        // interruption). Keep ADMITTED candidates recoverable so the
+        // scheduler can verify native queue/worker presence and re-submit
+        // only genuinely lost work.
+        if (candidate.state() == State.READY || candidate.state() == State.DISCOVERED
+                || candidate.state() == State.ADMITTED) {
+            return candidate.nextEligible() <= now;
+        }
+        if (candidate.state() == State.FAILED || candidate.state() == State.DUPLICATE) {
+            return candidate.nextEligible() > 0L && candidate.nextEligible() <= now;
+        }
+        return false;
+    }
+
+    private static boolean isTerminal(final State state) {
+        return state == State.INDEXED || state == State.DUPLICATE || state == State.BLOCKED;
+    }
+
+    private static int laneRank(final NoveltyClass lane) {
+        if (lane == NoveltyClass.NEW_HOST) return 4;
+        if (lane == NoveltyClass.NEW_PATH) return 3;
+        if (lane == NoveltyClass.PROVEN_EXPANSION) return 2;
+        if (lane == NoveltyClass.FRESHNESS) return 1;
+        return 0;
+    }
+
+    private static Map<String, String> serialize(final Candidate candidate) {
+        final Map<String, String> map = new HashMap<>();
+        map.put(URL, encode(candidate.url()));
+        map.put(INITIATOR, encode(candidate.initiator()));
+        map.put(REFERRER, encode(candidate.referrerHash()));
+        map.put(NAME, encode(candidate.name()));
+        map.put(PROFILE, candidate.profileHandle());
+        map.put(DEPTH, Integer.toString(candidate.depth()));
+        map.put(TIMEZONE, Integer.toString(candidate.timezoneOffset()));
+        map.put(STATE, candidate.state().name());
+        map.put(LANE, candidate.lane().name());
+        map.put(RELEVANCE, Integer.toString(candidate.relevance()));
+        map.put(VERSION, candidate.version());
+        map.put(COLLECTIONS, encodeList(candidate.collections()));
+        map.put(REASONS, encodeList(candidate.reasons()));
+        map.put(FIRST_SEEN, Long.toString(candidate.firstSeen()));
+        map.put(LAST_SEEN, Long.toString(candidate.lastSeen()));
+        map.put(NEXT_ELIGIBLE, Long.toString(candidate.nextEligible()));
+        map.put(LAST_SUBMITTED, Long.toString(candidate.lastSubmitted()));
+        map.put(ATTEMPTS, Integer.toString(candidate.attempts()));
+        map.put(RECOVERY, Boolean.toString(candidate.recovery()));
+        map.put(DISCOVERY_SOURCE, candidate.discoverySource().name());
+        return map;
+    }
+
+    private static Candidate parse(final byte[] hash, final Map<String, String> map) {
+        if (hash == null || map == null) return null;
+        try {
+            return new Candidate(hash, decode(map.get(URL)), decodeBytes(map.get(INITIATOR)),
+                    decodeBytes(map.get(REFERRER)), decode(map.get(NAME)), map.getOrDefault(PROFILE, ""),
+                    integer(map.get(DEPTH)), integer(map.get(TIMEZONE)), state(map.get(STATE)),
+                    lane(map.get(LANE)), integer(map.get(RELEVANCE)), map.getOrDefault(VERSION, ""),
+                    decodeSet(map.get(COLLECTIONS)), decodeList(map.get(REASONS)), longValue(map.get(FIRST_SEEN)),
+                    longValue(map.get(LAST_SEEN)), longValue(map.get(NEXT_ELIGIBLE)),
+                    longValue(map.get(LAST_SUBMITTED)), integer(map.get(ATTEMPTS)),
+                    Boolean.parseBoolean(map.getOrDefault(RECOVERY, "false")),
+                    discoverySource(map.get(DISCOVERY_SOURCE)));
+        } catch (final RuntimeException ignored) { return null; }
+    }
+
+    private static String encode(final String value) {
+        return value == null ? "" : Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String encode(final byte[] value) {
+        return value == null ? "" : Base64.getUrlEncoder().withoutPadding().encodeToString(value);
+    }
+
+    private static String decode(final String value) {
+        if (value == null || value.isEmpty()) return "";
+        return new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
+    }
+
+    private static byte[] decodeBytes(final String value) {
+        if (value == null || value.isEmpty()) return null;
+        return Base64.getUrlDecoder().decode(value);
+    }
+
+    private static String encodeList(final Iterable<String> values) {
+        final StringBuilder result = new StringBuilder();
+        if (values != null) for (final String value : values) {
+            if (result.length() > 0) result.append(LIST_SEPARATOR);
+            result.append(encode(value));
+        }
+        return result.toString();
+    }
+
+    private static List<String> decodeList(final String value) {
+        final List<String> result = new ArrayList<>();
+        if (value == null || value.isEmpty()) return result;
+        for (final String part : value.split(LIST_SEPARATOR, -1)) result.add(decode(part));
+        return result;
+    }
+
+    private static Set<String> decodeSet(final String value) {
+        return new LinkedHashSet<>(decodeList(value));
+    }
+
+    private static int integer(final String value) {
+        try { return Integer.parseInt(value == null ? "0" : value); }
+        catch (final NumberFormatException ignored) { return 0; }
+    }
+
+    private static long longValue(final String value) {
+        try { return Long.parseLong(value == null ? "0" : value); }
+        catch (final NumberFormatException ignored) { return 0L; }
+    }
+
+    private static State state(final String value) {
+        try { return State.valueOf(value == null ? "DISCOVERED" : value); }
+        catch (final IllegalArgumentException ignored) { return State.DISCOVERED; }
+    }
+
+    private static NoveltyClass lane(final String value) {
+        try { return NoveltyClass.valueOf(value == null ? "SATURATED" : value); }
+        catch (final IllegalArgumentException ignored) { return NoveltyClass.SATURATED; }
+    }
+
+    private static DiscoverySource discoverySource(final String value) {
+        try { return DiscoverySource.valueOf(value == null ? "LEGACY" : value); }
+        catch (final IllegalArgumentException ignored) { return DiscoverySource.LEGACY; }
+    }
+}

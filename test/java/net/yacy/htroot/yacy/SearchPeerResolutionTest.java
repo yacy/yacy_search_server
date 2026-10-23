@@ -1,6 +1,8 @@
 package net.yacy.htroot.yacy;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +16,7 @@ import org.junit.rules.TemporaryFolder;
 
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
+import net.yacy.server.serverObjects;
 
 public class SearchPeerResolutionTest {
 
@@ -67,6 +70,38 @@ public class SearchPeerResolutionTest {
                 search.resolveRemotePeer(this.seedDB, "", "198.51.100.20").hash);
     }
 
+    @Test
+    public void remoteSearchHashListsHaveExplicitBounds() {
+        assertTrue(search.withinRemoteSearchHashLimits(null, "", "", "auto"));
+        assertTrue(search.withinRemoteSearchHashLimits(
+                hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES),
+                hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES),
+                hashes(search.MAX_REMOTE_SEARCH_URL_HASHES), "auto"));
+        assertFalse(search.withinRemoteSearchHashLimits(
+                hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES + 1), "", "", ""));
+        assertFalse(search.withinRemoteSearchHashLimits(
+                "", "", "", hashes(search.MAX_REMOTE_SEARCH_WORD_HASHES + 1)));
+        assertFalse(search.withinRemoteSearchHashLimits(
+                "", "", hashes(search.MAX_REMOTE_SEARCH_URL_HASHES + 1), "auto"));
+    }
+
+    @Test
+    public void yacyQueryReadsEnvironmentOnlyForOperationsThatUseIt() {
+        final CountingServerObjects post = new CountingServerObjects();
+        post.put("env", "environment-value");
+
+        assertEquals("", query.environmentForObject(post, "rwicount"));
+        assertEquals(0, post.environmentReads);
+        assertEquals("environment-value", query.environmentForObject(post, "rwiurlcount"));
+        assertEquals(1, post.environmentReads);
+    }
+
+    private static String hashes(final int count) {
+        final StringBuilder value = new StringBuilder(count * 12);
+        for (int i = 0; i < count; i++) value.append("AAAAAAAAAAAA");
+        return value.toString();
+    }
+
     private static Seed seed(final String hash, final String name, final String ip, final int port) {
         final ConcurrentMap<String, String> dna = new ConcurrentHashMap<String, String>();
         final Seed seed = new Seed(hash, dna);
@@ -75,5 +110,16 @@ public class SearchPeerResolutionTest {
         seed.setIP(ip);
         seed.setPort(port);
         return seed;
+    }
+
+    private static final class CountingServerObjects extends serverObjects {
+        private static final long serialVersionUID = 1L;
+        private int environmentReads;
+
+        @Override
+        public String get(final String key, final String defaultValue) {
+            if ("env".equals(key)) this.environmentReads++;
+            return super.get(key, defaultValue);
+        }
     }
 }

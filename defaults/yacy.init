@@ -902,6 +902,13 @@ crawler.latencyFactor = 0.5
 # defined here
 crawler.onDemandLimit = 1000
 
+# Focused Autocrawler Profiles. Profiles are disabled by default and loaded
+# from defaults/focused/policies and DATA/SETTINGS/focused/policies.
+focused.autocrawler.paused = false
+focused.autocrawler.laneWeight = 6
+focused.autocrawler.ordinaryWeight = 4
+focused.autocrawler.controlInterval = 300000
+
 # maximum size of indexing queue
 indexer.slots = 100
 

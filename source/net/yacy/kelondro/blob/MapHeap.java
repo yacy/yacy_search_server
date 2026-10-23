@@ -451,6 +451,25 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         return (this.blob == null) ? 0 : this.blob.size();
     }
 
+    /**
+     * Return the estimated resident size of the key-to-offset index.
+     *
+     * <p>The value cache is bounded, but mutable {@link Heap} instances keep
+     * their key index in RAM. Exposing that estimate lets callers distinguish
+     * a bounded value cache from an index whose memory grows with record
+     * count.</p>
+     *
+     * @return estimated bytes used by the in-memory index, or zero when closed
+     */
+    public long memoryBytes() {
+        return this.blob == null ? 0L : this.blob.mem();
+    }
+
+    /** @return the number of cached values (including ARC ghost entries) */
+    public int cacheSize() {
+        return this.cache == null ? 0 : this.cache.size();
+    }
+
     @Override
     public boolean isEmpty() {
         return (this.blob == null) ? true : this.blob.isEmpty();

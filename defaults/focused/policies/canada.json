@@ -1,0 +1,102 @@
+{
+  "id": "canada",
+  "version": "2",
+  "description": "Example Canadian civic, legal, historical and public-interest focused profile",
+  "enabled": false,
+  "seeds": [
+    "https://www.canada.ca/",
+    "https://www.ontario.ca/",
+    "https://www.owensound.ca/",
+    "https://www.grey.ca/",
+    "https://brucecounty.on.ca/",
+    "https://www.helpos.ca/",
+    "https://www.ontariocourts.ca/",
+    "https://laws-lois.justice.gc.ca/",
+    "https://www.scc-csc.ca/",
+    "https://www.canlii.org/",
+    "https://www.library-archives.canada.ca/",
+    "https://www.canadiana.ca/",
+    "https://www.cbc.ca/",
+    "https://globalnews.ca/",
+    "https://www.thecanadianencyclopedia.ca/"
+  ],
+  "trustedHosts": [
+    "canada.ca", "gc.ca", "statcan.gc.ca", "justice.gc.ca",
+    "laws-lois.justice.gc.ca", "scc-csc.ca", "ontario.ca", "gov.on.ca",
+    "ontariocourts.ca", "grey.ca", "brucecounty.on.ca", "owensound.ca",
+    "helpos.ca", "library-archives.canada.ca", "bac-lac.gc.ca", "canadiana.ca",
+    "canlii.org", "ourcommons.ca", "senate.ca", "cbc.ca", "globalnews.ca",
+    "thecanadianencyclopedia.ca"
+  ],
+  "tlds": ["ca"],
+  "excludedHosts": [
+    "scorecardresearch.com",
+    "googletagmanager.com",
+    "google-analytics.com",
+    "googlesyndication.com",
+    "doubleclick.net",
+    "adobedtm.com",
+    "permutive.app",
+    "cdn.parsely.com",
+    "validate.perfdrive.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "netdna.bootstrapcdn.com"
+  ],
+  "scoring": {
+    "thresholds": {"probable": 15, "focused": 35},
+    "parentInheritanceDivisor": 4,
+    "controlledExploration": true,
+    "rules": [
+      {"id": "federal-source", "score": 25, "hosts": ["canada.ca", "gc.ca"], "collection": "canada-reference"},
+      {"id": "provincial-source", "score": 22, "hosts": ["ontario.ca", "gov.on.ca"], "collection": "canada-civic"},
+      {"id": "municipal-source", "score": 24, "hosts": ["owensound.ca", "grey.ca", "brucecounty.on.ca"], "collection": "canada-civic"},
+      {"id": "legal-source", "score": 23, "hosts": ["canlii.org", "ontariocourts.ca", "scc-csc.ca"], "collection": "canada-reference"},
+      {"id": "history-source", "score": 20, "hosts": ["library-archives.canada.ca", "bac-lac.gc.ca", "canadiana.ca"], "collection": "canada-reference"},
+      {"id": "canadian-place-signal", "score": 10, "minimumTermMatches": 2, "terms": ["canada", "canadian", "canadien", "ontario", "quebec", "québec", "british columbia", "colombie britannique", "alberta", "manitoba", "saskatchewan", "nova scotia", "nouvelle ecosse", "new brunswick", "nouveau brunswick", "newfoundland", "labrador", "terre neuve", "prince edward island", "ile du prince edouard", "yukon", "nunavut", "northwest territories", "territoires du nord ouest", "owen sound", "grey county", "bruce county"]},
+      {"id": "government-signal", "score": 8, "minimumTermMatches": 2, "terms": ["federal", "provincial", "territorial", "municipal", "government", "gouvernement", "ministry", "ministère", "township", "municipalité", "first nations", "premières nations", "metis", "métis", "inuit", "indigenous", "autochtone"]},
+      {"id": "civic-signal", "score": 12, "minimumTermMatches": 2, "terms": ["municipal", "council", "conseil", "zoning", "planning", "budget", "transit", "housing", "public works", "by-law", "règlement", "court", "statute"]},
+      {"id": "english-french-signal", "score": 5, "minimumTermMatches": 2, "terms": ["ontario", "québec", "québécois", "français", "francophone", "municipalité", "gouvernement", "loi", "tribunal", "logement"]},
+      {"id": "broad-canadian-source", "score": 12, "hosts": ["cbc.ca", "globalnews.ca", "thecanadianencyclopedia.ca"], "collection": "canada-pulse"}
+    ]
+  },
+  "collections": {
+    "canada-pulse": {"terms": ["news", "breaking", "update", "current", "today"], "minimumTermMatches": 2, "sourceTypes": ["news"], "recrawlMinutes": 1440},
+    "canada-reference": {"terms": ["law", "court", "archive", "history", "statute", "research"], "minimumTermMatches": 2, "sourceTypes": ["legal", "academic", "archive"], "recrawlMinutes": 129600},
+    "canada-discovery": {"terms": ["canada", "canadian", "ontario", "municipal"], "minimumTermMatches": 2, "sourceTypes": ["web"], "recrawlMinutes": 43200}
+  },
+  "novelty": {
+    "enabled": false,
+    "newHostWeight": 45,
+    "newPathWeight": 35,
+    "expansionWeight": 15,
+    "freshnessWeight": 5,
+    "pathPrefixDepth": 2,
+    "externalRequiresDirectEvidence": true,
+    "explorationCollection": "canada-discovery"
+  },
+  "frontier": {
+    "enabled": true,
+    "seedMode": "initial-only",
+    "recoveryGraceSeconds": 600,
+    "maxEntries": 1000000,
+    "terminalRetentionDays": 30,
+    "expandIndexedSources": true,
+    "indexedSourceBatch": 200
+  },
+  "limits": {
+    "queueTarget": 250000,
+    "refillBelow": 150000,
+    "hardMaximum": 300000,
+    "refillBatchSize": 3000,
+    "storageTargetBytes": 0,
+    "explorationPercent": 10,
+    "maximumDepth": 4,
+    "perHostBudget": 5000,
+    "seedBatchSize": 3,
+    "refreshSeeds": false,
+    "recrawlFocused": false,
+    "defaultRecrawlMinutes": 43200,
+    "controlIntervalSeconds": 30
+  }
+}

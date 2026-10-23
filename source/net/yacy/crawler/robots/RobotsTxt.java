@@ -34,7 +34,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,13 +67,15 @@ public class RobotsTxt {
     protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
     protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
 
-    /** Fixed lock stripes bound memory use; colliding hosts serialize robots.txt fetches. */
+    /** Fixed lock stripes bound memory use; only short robots-table updates are serialized. */
     private final Object[] syncObjects = new Object[256];
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     private final WorkTables tables;
     private final LoaderDispatcher loader;
     /** Thread pool used to launch concurrent tasks */
     private final ThreadPoolExecutor threadPool;
+    /** Host/port keys with an active asynchronous robots fetch. */
+    private final Set<String> loadingHosts = ConcurrentHashMap.newKeySet();
 
     /**
      *
@@ -154,10 +158,10 @@ public class RobotsTxt {
              System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000 */
            )) {
 
-            synchronized (lockForHost(urlHostPort)) {
-                // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
-                // check the robots table again for all threads that come here because they waited for another one
-                // to complete a download
+            final Object hostLock = lockForHost(urlHostPort);
+            synchronized (hostLock) {
+                // if we have not found any data or the data is older than 7 days, check again
+                // for entries created by another thread since the initial table lookup.
                 try {
                     record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
                 } catch (final SpaceExceededException e) {
@@ -167,30 +171,37 @@ public class RobotsTxt {
                     log.warn("cannot get robotstxt from table", e);
                     record = null;
                 }
-                if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
-                if (robotsTxt4Host != null /*&&
-                    robotsTxt4Host.getLoadedDate() != null &&
-                    System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 1*24*60*60*1000 */) {
-                    return robotsTxt4Host;
+                if (record != null) return new RobotsTxtEntry(urlHostPort, record);
+            }
+
+            // A network wait must never hold a striped lock: a slow robots host
+            // can otherwise block the local crawl dispatcher for colliding hosts.
+            final DigestURL robotsURL = robotsURL(urlHostPort);
+            Response response = null;
+            if (robotsURL != null) {
+                if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                try {
+                    response = loadRobots(robotsURL, agent);
+                } catch (final Throwable e) {
+                    log.info("Trying to download the robots.txt file from URL '" + robotsURL.toNormalform(false) + "' failed - " + e.getMessage());
+                    response = null;
                 }
+            }
 
-                // generating the proper url to download the robots txt
-                final DigestURL robotsURL = robotsURL(urlHostPort);
-
-                Response response = null;
-                if (robotsURL != null) {
-                    if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                    final Request request = new Request(robotsURL, null);
-                    try {
-                        response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
-                    } catch (final Throwable e) {
-                        log.info("Trying to download the robots.txt file from URL '" + robotsURL.toNormalform(false) + "' failed - " + e.getMessage());
-                        response = null;
-                    }
+            synchronized (hostLock) {
+                // Another fetch may have completed while this request was in flight.
+                try {
+                    record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
+                } catch (final SpaceExceededException e) {
+                    log.warn("memory exhausted", e);
+                    record = null;
+                } catch (final IOException e) {
+                    log.warn("cannot get robotstxt from table", e);
+                    record = null;
                 }
-
+                if (record != null) return new RobotsTxtEntry(urlHostPort, record);
                 if (response == null) {
-                    this.processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
+                    this.processOldEntry(null, robotsURL, robotsTable);
                 } else {
                     robotsTxt4Host = this.processNewEntry(robotsURL, response, agent.robotIDs());
                 }
@@ -198,6 +209,11 @@ public class RobotsTxt {
         }
 
         return robotsTxt4Host;
+    }
+
+    /** Fetch robots metadata without holding a host stripe lock. */
+    protected Response loadRobots(final DigestURL robotsURL, final ClientIdentification.Agent agent) throws IOException {
+        return this.loader.load(new Request(robotsURL, null), CacheStrategy.NOCACHE, null, agent);
     }
 
     public void delete(final MultiProtocolURL theURL) {
@@ -230,36 +246,48 @@ public class RobotsTxt {
             return;
         }
         if (robotsTable != null && robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+        if (!this.loadingHosts.add(urlHostPort)) return;
         final Thread t = new Thread("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")") {
             @Override
             public void run(){
-                synchronized (RobotsTxt.this.lockForHost(urlHostPort)) {
-                    if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+                try {
+                    final Object hostLock = RobotsTxt.this.lockForHost(urlHostPort);
+                    synchronized (hostLock) {
+                        if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+                    }
 
-                    // generating the proper url to download the robots txt
+                    // Do not make threads for colliding hosts wait for this network request.
                     final DigestURL robotsURL = robotsURL(urlHostPort);
-
                     Response response = null;
                     if (robotsURL != null) {
                         if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                        final Request request = new Request(robotsURL, null);
                         try {
-                            response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
+                            response = RobotsTxt.this.loadRobots(robotsURL, agent);
                         } catch (final IOException e) {
                             response = null;
                         }
                     }
 
-                    if (response == null) {
-                        RobotsTxt.this.processOldEntry(null, robotsURL, robotsTable);
-                    } else {
-                        RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs());
+                    synchronized (hostLock) {
+                        if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+                        if (response == null) {
+                            RobotsTxt.this.processOldEntry(null, robotsURL, robotsTable);
+                        } else {
+                            RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs());
+                        }
                     }
+                } finally {
+                    RobotsTxt.this.loadingHosts.remove(urlHostPort);
                 }
             }
         };
         if (concurrent) {
-            this.threadPool.execute(t);
+            try {
+                this.threadPool.execute(t);
+            } catch (final RuntimeException e) {
+                this.loadingHosts.remove(urlHostPort);
+                throw e;
+            }
         } else {
             t.run();
         }

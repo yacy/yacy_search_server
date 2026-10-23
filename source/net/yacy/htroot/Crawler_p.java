@@ -202,7 +202,7 @@ public class Crawler_p {
             }
         }
         final String queuemessage = sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
-        if (queuemessage.length() == 0) {
+        if (queuemessage.length() == 0 || !sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
             prop.put("info-queue", 0);
         } else {
             prop.put("info-queue", 1);

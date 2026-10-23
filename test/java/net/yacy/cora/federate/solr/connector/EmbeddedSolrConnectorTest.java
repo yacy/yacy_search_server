@@ -73,6 +73,33 @@ public class EmbeddedSolrConnectorTest {
     }
 
     /**
+     * A narrow stored-field projection must not materialize the whole indexed
+     * document in the embedded connector.
+     */
+    @Test
+    public void testDocumentQueryRespectsRequestedStoredFields() throws IOException {
+        final SolrInputDocument input = new SolrInputDocument();
+        final String id = "projection-" + System.currentTimeMillis();
+        input.addField(CollectionSchema.id.name(), id);
+        input.addField(CollectionSchema.title.name(), "projection regression fixture");
+        input.addField(CollectionSchema.host_s.name(), "projection.example");
+        input.addField(CollectionSchema.text_t.name(), "projection regression fixture text");
+        solr.add(input);
+        solr.commit(true);
+
+        final String idField = CollectionSchema.id.getSolrFieldName();
+        final SolrDocumentList results = solr.getDocumentListByQuery(
+                idField + ":" + id, null, 0, 1, idField);
+
+        assertEquals(1, results.size());
+        final SolrDocument result = results.get(0);
+        assertEquals(id, result.getFieldValue(idField));
+        assertFalse(result.containsKey(CollectionSchema.title.getSolrFieldName()));
+        assertFalse(result.containsKey(CollectionSchema.host_s.getSolrFieldName()));
+        assertFalse(result.containsKey(CollectionSchema.text_t.getSolrFieldName()));
+    }
+
+    /**
      * Test of update (partial update)
      */
     @Test

@@ -41,13 +41,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -449,6 +449,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         }
     }
 
+    private static final int INITIALIZER_QUEUE_CAPACITY = 4096;
     protected static final entry poisonEntry = new entry(new byte[0], 0);
 
     public final static class initDataConsumer implements Callable<RowHandleMap> {
@@ -458,8 +459,12 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         private Future<RowHandleMap> result;
 
         public initDataConsumer(final RowHandleMap map) {
+            this(map, INITIALIZER_QUEUE_CAPACITY);
+        }
+
+        initDataConsumer(final RowHandleMap map, final int queueCapacity) {
             this.map = map;
-            this.cache = new LinkedBlockingQueue<entry>();
+            this.cache = new ArrayBlockingQueue<entry>(queueCapacity);
         }
 
         protected final void setResult(final Future<RowHandleMap> result) {

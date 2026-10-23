@@ -8,8 +8,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.Before;
@@ -79,6 +81,68 @@ public class RobotsTxtTest {
         assertWaitsAndRechecksDatabase(true);
     }
 
+    @Test
+    public void getEntryDoesNotHoldStripeWhileFetchingRobots() throws Exception {
+        assertCollidingFetchesDoNotSerialize(false);
+    }
+
+    @Test
+    public void ensureExistDoesNotHoldStripeWhileFetchingRobots() throws Exception {
+        assertCollidingFetchesDoNotSerialize(true);
+    }
+
+    private void assertCollidingFetchesDoNotSerialize(final boolean firstUsesEnsureExist) throws Exception {
+        this.robots.close();
+        final BlockingRobotsTxt blockingRobots = new BlockingRobotsTxt(this.tables);
+        this.robots = blockingRobots;
+
+        final DigestURL firstURL = new DigestURL("http://192.0.2.11/page");
+        final DigestURL secondURL = findCollidingURL(firstURL);
+        assertSame(lock(RobotsTxt.getHostPort(firstURL)), lock(RobotsTxt.getHostPort(secondURL)));
+
+        final FutureTask<Void> first = new FutureTask<>(() -> {
+            if (firstUsesEnsureExist) {
+                this.robots.ensureExist(firstURL, ClientIdentification.yacyInternetCrawlerAgent, false);
+            } else {
+                this.robots.getEntry(firstURL, ClientIdentification.yacyInternetCrawlerAgent);
+            }
+            return null;
+        });
+        final FutureTask<Void> second = new FutureTask<>(() -> {
+            this.robots.getEntry(secondURL, ClientIdentification.yacyInternetCrawlerAgent);
+            return null;
+        });
+        final Thread firstWorker = new Thread(first, "robots-first-fetch-test");
+        final Thread secondWorker = new Thread(second, "robots-colliding-fetch-test");
+        try {
+            firstWorker.start();
+            assertTrue("The first request should enter its simulated network wait",
+                    blockingRobots.awaitLoadsStarted(1, 5, TimeUnit.SECONDS));
+            secondWorker.start();
+            assertTrue("A colliding host must fetch without waiting for the first network request",
+                    blockingRobots.awaitLoadsStarted(2, 5, TimeUnit.SECONDS));
+        } finally {
+            blockingRobots.releaseLoads();
+            firstWorker.join(5000);
+            secondWorker.join(5000);
+        }
+        assertFalse("The first simulated fetch must finish", firstWorker.isAlive());
+        assertFalse("The colliding simulated fetch must finish", secondWorker.isAlive());
+        first.get(5, TimeUnit.SECONDS);
+        second.get(5, TimeUnit.SECONDS);
+        assertEquals(2, this.robots.size());
+    }
+
+    private DigestURL findCollidingURL(final DigestURL firstURL) throws Exception {
+        final Object firstLock = lock(RobotsTxt.getHostPort(firstURL));
+        for (int i = 0; i < 10000; i++) {
+            final DigestURL candidate = new DigestURL("http://robots-collision-" + i + ".example.test/page");
+            if (firstLock == lock(RobotsTxt.getHostPort(candidate))) return candidate;
+        }
+        fail("Could not find a test host in the same bounded lock stripe");
+        return null;
+    }
+
     private void assertWaitsAndRechecksDatabase(final boolean ensureExist) throws Exception {
         // A public numeric address avoids DNS lookups in ensureExist's locality check.
         final DigestURL url = new DigestURL("http://8.8.8.8/page");
@@ -100,7 +164,7 @@ public class RobotsTxtTest {
                         && System.nanoTime() < deadline) {
                     Thread.sleep(10);
                 }
-                assertEquals("The fetch must wait on the shared host lock",
+                assertEquals("The cache recheck must wait on the shared host lock",
                         Thread.State.BLOCKED, worker.getState());
                 final RobotsTxtEntry entry = new RobotsTxtEntry(
                         new DigestURL("http://8.8.8.8/robots.txt"), new ArrayList<>(),
@@ -113,6 +177,40 @@ public class RobotsTxtTest {
         } finally {
             worker.interrupt();
             worker.join(5000);
+        }
+    }
+
+    private static final class BlockingRobotsTxt extends RobotsTxt {
+
+        private final CountDownLatch loadsStarted = new CountDownLatch(2);
+        private final CountDownLatch firstLoadStarted = new CountDownLatch(1);
+        private final CountDownLatch releaseLoads = new CountDownLatch(1);
+        private final AtomicInteger loads = new AtomicInteger();
+
+        private BlockingRobotsTxt(final WorkTables tables) {
+            super(tables, null, 2);
+        }
+
+        @Override
+        protected net.yacy.crawler.retrieval.Response loadRobots(
+                final DigestURL robotsURL, final ClientIdentification.Agent agent) {
+            if (this.loads.incrementAndGet() == 1) this.firstLoadStarted.countDown();
+            this.loadsStarted.countDown();
+            try {
+                this.releaseLoads.await(5, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return null;
+        }
+
+        private boolean awaitLoadsStarted(final int count, final long timeout, final TimeUnit unit)
+                throws InterruptedException {
+            return count == 1 ? this.firstLoadStarted.await(timeout, unit) : this.loadsStarted.await(timeout, unit);
+        }
+
+        private void releaseLoads() {
+            this.releaseLoads.countDown();
         }
     }
 }

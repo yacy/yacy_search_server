@@ -48,6 +48,8 @@ Content application pages store and render peer-local objects such as bookmarks,
 
 Edit content deliberately and check the rendered page after saving. For shared or peer-visible features, assume written content may be read by someone else unless the page clearly says otherwise.
 
+Uploaded multipart bodies are limited to 1 GiB total and may be limited further when the JVM cannot preserve its heap safety reserve.
+
 ## Access And Safety
 
 The page is normally public or read-only, unless the peer is configured to require authentication for all pages.

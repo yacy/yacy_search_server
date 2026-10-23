@@ -131,7 +131,7 @@ public class HostBalancerTest {
 				false,
 				0, false, CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE),
 				-1, true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
-				true, true, true, false, -1, false, true, CrawlProfile.MATCH_NEVER_STRING, CacheStrategy.IFEXIST,
+				true, true, true, false, CacheStrategy.IFEXIST,
 				"robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
 				ClientIdentification.yacyIntranetCrawlerAgentName, TagValency.EVAL, null, null, 0);
 		

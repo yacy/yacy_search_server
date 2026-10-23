@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -511,6 +512,118 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     }
 
     /**
+     * Accumulate ordered row sets and merge them in one k-way pass. Duplicate
+     * keys keep all rows from the earliest input, matching repeated
+     * {@link #merge(RowSet)} calls without allocating intermediate merged sets.
+     */
+    public static final class OrderedMergeAccumulator {
+        private final Row rowdef;
+        private final List<RowSet> sources = new ArrayList<>();
+        private boolean finished;
+
+        public OrderedMergeAccumulator(final Row rowdef) {
+            if (rowdef == null) throw new IllegalArgumentException("row definition must not be null");
+            this.rowdef = rowdef;
+        }
+
+        /** Add the next source row set in its original order. */
+        public void add(final RowSet next) throws SpaceExceededException {
+            if (this.finished) throw new IllegalStateException("merge accumulator is already finished");
+            if (next == null) return;
+            if (next.rowdef != this.rowdef) throw new IllegalArgumentException("row definitions must match");
+            this.sources.add(next);
+        }
+
+        /** Finish all source runs in their original left-to-right order. */
+        public RowSet finish() throws SpaceExceededException {
+            if (this.finished) throw new IllegalStateException("merge accumulator is already finished");
+            this.finished = true;
+            try {
+                if (this.sources.isEmpty()) return new RowSet(this.rowdef);
+                if (this.sources.size() == 1) return this.sources.get(0);
+                final long mergedSize = mergeSources(this.rowdef, this.sources, null);
+                if (mergedSize > Integer.MAX_VALUE) {
+                    throw new SpaceExceededException(Integer.MAX_VALUE, "merged row set exceeds array capacity");
+                }
+                final RowSet result = new RowSet(this.rowdef);
+                result.ensureSizeExact((int) mergedSize);
+                mergeSources(this.rowdef, this.sources, result);
+                return result;
+            } finally {
+                this.sources.clear();
+            }
+        }
+
+        private static final class MergeCursor {
+            private final RowSet rows;
+            private final int sourceOrder;
+            private int index;
+
+            private MergeCursor(final RowSet rows, final int sourceOrder) {
+                this.rows = rows;
+                this.sourceOrder = sourceOrder;
+            }
+        }
+
+        private static long mergeSources(final Row rowdef, final List<RowSet> sources,
+                final RowSet output) throws SpaceExceededException {
+            final int objectSize = rowdef.objectsize;
+            final PriorityQueue<MergeCursor> cursors = new PriorityQueue<>((left, right) -> {
+                final int order = rowdef.objectOrder.compare(left.rows.chunkcache, left.index * objectSize,
+                        right.rows.chunkcache, right.index * objectSize, rowdef.primaryKeyLength);
+                if (order != 0) return order;
+                final int source = Integer.compare(left.sourceOrder, right.sourceOrder);
+                return source != 0 ? source : Integer.compare(left.index, right.index);
+            });
+            for (int i = 0; i < sources.size(); i++) {
+                final RowSet rows = sources.get(i);
+                rows.sort();
+                if (rows.size() > 0) cursors.add(new MergeCursor(rows, i));
+            }
+
+            long mergedSize = 0L;
+            while (!cursors.isEmpty()) {
+                final MergeCursor first = cursors.poll();
+                final byte[] firstRows = first.rows.chunkcache;
+                final int firstOffset = first.index * objectSize;
+
+                // Keep every duplicate within the earliest source, as the
+                // left-biased pairwise merge did, then discard that key from
+                // every later source.
+                while (first.index < first.rows.size()
+                        && sameKey(rowdef, firstRows, firstOffset, firstRows, first.index * objectSize)) {
+                    if (output != null) output.addSorted(firstRows, first.index * objectSize, objectSize);
+                    mergedSize++;
+                    first.index++;
+                }
+                if (first.index < first.rows.size()) cursors.add(first);
+
+                while (!cursors.isEmpty()) {
+                    final MergeCursor duplicate = cursors.peek();
+                    if (!sameKey(rowdef, firstRows, firstOffset, duplicate.rows.chunkcache,
+                            duplicate.index * objectSize)) break;
+                    cursors.poll();
+                    final byte[] duplicateRows = duplicate.rows.chunkcache;
+                    final int duplicateOffset = duplicate.index * objectSize;
+                    do {
+                        duplicate.index++;
+                    } while (duplicate.index < duplicate.rows.size()
+                            && sameKey(rowdef, duplicateRows, duplicateOffset, duplicateRows,
+                                    duplicate.index * objectSize));
+                    if (duplicate.index < duplicate.rows.size()) cursors.add(duplicate);
+                }
+            }
+            return mergedSize;
+        }
+
+        private static boolean sameKey(final Row rowdef, final byte[] left, final int leftOffset,
+                final byte[] right, final int rightOffset) {
+            return rowdef.objectOrder.compare(left, leftOffset, right, rightOffset,
+                    rowdef.primaryKeyLength) == 0;
+        }
+    }
+
+    /**
      * merge this row collection with another row collection using an simultanous iteration of the input collections
      * the current collection is not altered in any way, the returned collection is a new collection with copied content.
      * @param c0
@@ -520,7 +633,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
      */
     protected final static RowSet mergeEnum(final RowCollection c0, final RowCollection c1) throws SpaceExceededException {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
-        final RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
+        final RowSet r = new RowSet(c0.rowdef);
         try {
         	c0.sort();
         } catch (final Throwable e) {
@@ -539,6 +652,34 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         final int objectsize = c0.rowdef.objectsize;
         final int c0s = c0.size();
         final int c1s = c1.size();
+
+        // Count the union before allocating its backing array. The inputs may
+        // contain the same primary keys (for example, while merging RWI
+        // containers from multiple index segments), and those duplicates are
+        // discarded below. Reserving the sum of the input sizes can otherwise
+        // leave a large, mostly unused array attached to the result.
+        int mergedSize = 0;
+        while (c0i < c0s && c1i < c1s) {
+            c0p = c0i * objectsize;
+            c1p = c1i * objectsize;
+            o = c0.rowdef.objectOrder.compare(
+                    c0.chunkcache, c0p,
+                    c1.chunkcache, c1p, c0.rowdef.primaryKeyLength);
+            if (o == 0) {
+                c0i++;
+                c1i++;
+            } else if (o < 0) {
+                c0i++;
+            } else {
+                c1i++;
+            }
+            mergedSize++;
+        }
+        mergedSize += c0s - c0i + c1s - c1i;
+        r.ensureSizeExact(mergedSize);
+
+        c0i = 0;
+        c1i = 0;
         while (c0i < c0s && c1i < c1s) {
             c0p = c0i * objectsize;
             c1p = c1i * objectsize;
@@ -562,11 +703,11 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
                 continue;
             }
         }
-        while (c0i < c0.size()) {
+        while (c0i < c0s) {
             r.addSorted(c0.chunkcache, c0i * objectsize, objectsize);
             c0i++;
         }
-        while (c1i < c1.size()) {
+        while (c1i < c1s) {
             r.addSorted(c1.chunkcache, c1i * objectsize, objectsize);
             c1i++;
         }

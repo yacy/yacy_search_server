@@ -82,7 +82,6 @@ public final class query {
         final String youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
 //      final String key    = post.get("key", "");    // transmission key for response
         final String obj    = post.get("object", ""); // keyword for query subject
-        final String env    = post.get("env", "");    // argument to query
 
         prop.put("mytime", GenericFormatter.SHORT_SECOND_FORMATTER.format());
 
@@ -95,6 +94,7 @@ public final class query {
 
         // requests about environment
         if (obj.equals("rwiurlcount")) try {
+            final String env = environmentForObject(post, obj);
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
             prop.put("response", sb.index.termIndex() == null ? 0 : sb.index.termIndex().get(env.getBytes(), null).size());
@@ -149,4 +149,8 @@ public final class query {
         return prop;
     }
 
+    /** Read only fields consumed by this query operation; serverObjects.get copies the value bytes. */
+    static String environmentForObject(final serverObjects post, final String object) {
+        return "rwiurlcount".equals(object) ? post.get("env", "") : "";
+    }
 }

@@ -215,14 +215,22 @@ public class ResourceObserver {
                 this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
                 this.sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
                 this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
-            } else if (this.sb.getConfigBool(SwitchboardConstants.CRAWLJOB_LOCAL_AUTODISABLED, false)) {
+            } else if (shouldResumePausedCrawl(
+                    this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL),
+                    this.sb.getConfigBool(SwitchboardConstants.CRAWLJOB_LOCAL_AUTODISABLED, false),
+                    this.sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", ""))) {
                 log.info("continue paused local crawls");
                 this.sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_AUTODISABLED,false);
                 this.sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            } else if (this.sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE_AUTODISABLED, false)) {
+                this.sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
+            } else if (shouldResumePausedCrawl(
+                    this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL),
+                    this.sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE_AUTODISABLED, false),
+                    this.sb.getConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused_cause", ""))) {
                 log.info("continue paused remote triggered crawls");
                 this.sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_AUTODISABLED,false);
                 this.sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                this.sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused_cause", "");
             }
             log.info("resources ok");
         }
@@ -355,6 +363,16 @@ public class ResourceObserver {
      */
     public long getMinFreeMemory() {
     	return this.sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0);
+    }
+
+    /**
+     * Resume only a crawl that is still paused for the resource-observer cause
+     * recorded when the observer disabled it. A stale auto-disable flag must
+     * not override a later operator-initiated pause.
+     */
+    static boolean shouldResumePausedCrawl(final boolean paused, final boolean autoDisabled,
+            final String pauseCause) {
+        return paused && autoDisabled && pauseCause != null && pauseCause.startsWith("resource observer:");
     }
 
 }

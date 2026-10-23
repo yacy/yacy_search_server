@@ -19,7 +19,6 @@
 
 package net.yacy.cora.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
@@ -472,10 +471,12 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
     public void writeTo(final OutputStream out) {
         requireOpen();
         if (out == null) throw new NullPointerException("out");
-        final byte[] tmp = new byte[256 * 1024];
+        final long contentSize = this.size;
+        if (contentSize == 0L) return;
+        final byte[] tmp = new byte[(int) Math.min(256L * 1024L, contentSize)];
         long p = 0;
         try {
-            while (p < this.size) {
+            while (p < contentSize) {
                 final int n = this.read(p, tmp, 0, tmp.length);
                 if (n < 0) break;
                 out.write(tmp, 0, n);
@@ -491,13 +492,12 @@ public final class ChunkedBytes extends OutputStream implements Comparable<Objec
         requireOpen();
         if (this.size > Integer.MAX_VALUE) throw new IllegalStateException("Size > Integer.MAX_VALUE");
         final byte[] all = new byte[(int) this.size];
-        this.writeTo(new ByteArrayOutputStream() {
-            int offset = 0;
-            @Override public void write(byte[] b, int off, int len) {
-                System.arraycopy(b, off, all, this.offset, len);
-                this.offset += len;
-            }
-        });
+        int offset = 0;
+        while (offset < all.length) {
+            final int count = this.read(offset, all, offset, all.length - offset);
+            if (count < 0) break;
+            offset += count;
+        }
         return all;
     }
 

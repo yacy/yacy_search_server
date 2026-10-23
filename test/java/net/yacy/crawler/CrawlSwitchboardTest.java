@@ -88,29 +88,29 @@ public class CrawlSwitchboardTest {
     @Test
     public void submittedAndStreamedRootsSurviveDatabaseRestart() throws Exception {
         final CrawlProfile urls = profile("urlprofile00", "abbreviated URL crawl");
-        urls.setStartURLs(Arrays.asList(new DigestURL("https://url-root.test/"),
-                new DigestURL("http://url-root.test/other")));
+        urls.setStartURLs(Arrays.asList(new DigestURL("https://url-root.com/"),
+                new DigestURL("http://url-root.com/other")));
         activate(urls);
 
         // Sitemap and file importers feed local depth-zero requests into this persistence boundary.
-        final CrawlProfile sitemap = profile("sitemapprof0", "sitemap loader for https://source.test/sitemap.xml");
+        final CrawlProfile sitemap = profile("sitemapprof0", "sitemap loader for https://source.com/sitemap.xml");
         final CrawlProfile file = profile("fileprofile0", "starts.html");
         for (final CrawlProfile imported : Arrays.asList(sitemap, file)) {
             activate(imported);
-            final String host = imported == sitemap ? "sitemap-root.test" : "file-root.test";
+            final String host = imported == sitemap ? "sitemap-root.com" : "file-root.com";
             this.crawler.recordStartURL(imported, request(imported, host, 0));
             this.crawler.recordStartURL(imported, request(imported, host, 0));
-            this.crawler.recordStartURL(imported, request(imported, "descendant.test", 1));
+            this.crawler.recordStartURL(imported, request(imported, "descendant.com", 1));
         }
         final Set<String> expected = new HashSet<>(Arrays.asList(
-                "url-root.test", "sitemap-root.test", "file-root.test"));
+                "url-root.com", "sitemap-root.com", "file-root.com"));
         assertEquals(expected, this.crawler.getActiveStartHosts());
         restartProfiles();
         assertEquals(expected, this.crawler.getActiveStartHosts());
 
         final CrawlProfile reloaded = this.crawler.getActive(UTF8.getBytes(sitemap.handle()));
-        this.crawler.recordStartURL(reloaded, request(reloaded, "later-root.test", 0));
-        expected.add("later-root.test");
+        this.crawler.recordStartURL(reloaded, request(reloaded, "later-root.com", 0));
+        expected.add("later-root.com");
         restartProfiles();
         assertEquals(expected, this.crawler.getActiveStartHosts());
     }
@@ -119,11 +119,11 @@ public class CrawlSwitchboardTest {
     public void stoppedAndReplacedProfilesIgnoreLateStartRequests() throws Exception {
         final CrawlProfile stopped = profile("stopprofile0", "stopped import");
         activate(stopped);
-        this.crawler.recordStartURL(stopped, request(stopped, "stopped.test", 0));
+        this.crawler.recordStartURL(stopped, request(stopped, "stopped.com", 0));
         this.crawler.putPassive(UTF8.getBytes(stopped.handle()), stopped);
-        this.crawler.recordStartURL(stopped, request(stopped, "late.test", 0));
+        this.crawler.recordStartURL(stopped, request(stopped, "late.com", 0));
         assertNull(this.crawler.getActive(UTF8.getBytes(stopped.handle())));
-        assertEquals(Collections.singleton("stopped.test"),
+        assertEquals(Collections.singleton("stopped.com"),
                 this.crawler.getPassive(UTF8.getBytes(stopped.handle())).startHosts());
         assertTrue(this.crawler.getActiveStartHosts().isEmpty());
         restartProfiles();
@@ -131,10 +131,10 @@ public class CrawlSwitchboardTest {
 
         final CrawlProfile replacement = profile(stopped.handle(), "replacement import");
         activate(replacement);
-        this.crawler.recordStartURL(stopped, request(stopped, "obsolete.test", 0));
-        this.crawler.recordStartURL(replacement, request(replacement, "replacement.test", 0));
+        this.crawler.recordStartURL(stopped, request(stopped, "obsolete.com", 0));
+        this.crawler.recordStartURL(replacement, request(replacement, "replacement.com", 0));
         restartProfiles();
-        assertEquals(Collections.singleton("replacement.test"), this.crawler.getActiveStartHosts());
+        assertEquals(Collections.singleton("replacement.com"), this.crawler.getActiveStartHosts());
     }
 
     @Test
@@ -142,20 +142,20 @@ public class CrawlSwitchboardTest {
         for (final byte[] handle : this.crawler.getActive()) {
             final CrawlProfile profile = this.crawler.getActive(handle);
             assertTrue(CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name()));
-            this.crawler.recordStartURL(profile, request(profile, "default.test", 0));
-            assertFalse(profile.startHosts().contains("default.test"));
+            this.crawler.recordStartURL(profile, request(profile, "default.com", 0));
+            assertFalse(profile.startHosts().contains("default.com"));
             // Even existing metadata on a default profile must not protect its hosts.
-            profile.setStartURLs(Collections.singletonList(new DigestURL("https://default.test/")));
+            profile.setStartURLs(Collections.singletonList(new DigestURL("https://default.com/")));
             activate(profile);
         }
-        final CrawlProfile passive = profile("passiveprof0", "passive.test");
+        final CrawlProfile passive = profile("passiveprof0", "passive.com");
         this.crawler.putPassive(UTF8.getBytes(passive.handle()), passive);
-        final CrawlProfile legacy = profile("legacyprof00", "Legacy.test, www.second.test");
+        final CrawlProfile legacy = profile("legacyprof00", "Legacy.com, www.second.com");
         activate(legacy);
-        assertEquals(new HashSet<>(Arrays.asList("legacy.test", "www.second.test")),
+        assertEquals(new HashSet<>(Arrays.asList("legacy.com", "www.second.com")),
                 this.crawler.getActiveStartHosts());
         restartProfiles();
-        assertEquals(new HashSet<>(Arrays.asList("legacy.test", "www.second.test")),
+        assertEquals(new HashSet<>(Arrays.asList("legacy.com", "www.second.com")),
                 this.crawler.getActiveStartHosts());
     }
 
@@ -170,11 +170,11 @@ public class CrawlSwitchboardTest {
         try {
             for (int worker = 0; worker < tasks.length; worker++) {
                 final int number = worker;
-                for (int i = 0; i < 25; i++) expected.add("root-" + worker + "-" + i + ".test");
+                for (int i = 0; i < 25; i++) expected.add("root-" + worker + "-" + i + ".com");
                 tasks[worker] = executor.submit(() -> {
                     start.await();
                     for (int i = 0; i < 25; i++) {
-                        this.crawler.recordStartURL(profile, request(profile, "root-" + number + "-" + i + ".test", 0));
+                        this.crawler.recordStartURL(profile, request(profile, "root-" + number + "-" + i + ".com", 0));
                     }
                     return null;
                 });
@@ -191,9 +191,9 @@ public class CrawlSwitchboardTest {
 
     @Test
     public void persistedActiveRootsProtectGraphUntilCrawlStops() throws Exception {
-        final DigestURL root = new DigestURL("https://root.test/");
-        final DigestURL bridge = new DigestURL("http://bridge.test/");
-        final DigestURL leaf = new DigestURL("https://leaf.test/");
+        final DigestURL root = new DigestURL("https://root.com/");
+        final DigestURL bridge = new DigestURL("http://bridge.com/");
+        final DigestURL leaf = new DigestURL("https://leaf.com/");
         final CrawlProfile profile = profile("graphprofile", "abbreviated graph crawl");
         profile.setStartURLs(Collections.singletonList(root));
         activate(profile);
@@ -204,7 +204,7 @@ public class CrawlSwitchboardTest {
         storeHost(entries, bridge, "19900101" + leaf.hosthash() + "0001");
         storeHost(entries, leaf, "19900101");
         for (int i = 0; i < WebStructureGraph.maxhosts - 2; i++) {
-            storeHost(entries, new DigestURL("http://unrelated-" + i + ".test/"), "20990101");
+            storeHost(entries, new DigestURL("http://unrelated-" + i + ".com/"), "20990101");
         }
         final File backup = this.temporaryFolder.newFile("webStructure.map");
         FileUtils.saveMapB(backup, entries, "active root and newer unrelated hosts");
@@ -222,9 +222,9 @@ public class CrawlSwitchboardTest {
             // This is the same profile transition used by crawl termination/cleanup.
             this.crawler.cleanProfiles(Collections.singleton(profile.handle()));
             assertTrue(this.crawler.getActiveStartHosts().isEmpty());
-            final DigestURL unrelated = new DigestURL("http://unrelated-0.test/");
+            final DigestURL unrelated = new DigestURL("http://unrelated-0.com/");
             for (int i = 0; i <= 1000; i++) {
-                graph.generateCitationReference(new DigestURL("https://new-" + i + ".test/"), unrelated);
+                graph.generateCitationReference(new DigestURL("https://new-" + i + ".com/"), unrelated);
             }
         } finally {
             // Drain the real learning worker before inspecting the persisted graph.

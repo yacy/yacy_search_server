@@ -45,6 +45,7 @@ import org.eclipse.jetty.ee8.servlet.FilterHolder;
 import org.eclipse.jetty.ee8.servlet.ServletHolder;
 import org.eclipse.jetty.ee8.webapp.WebAppContext;
 import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.security.HashLoginService;
@@ -209,7 +210,12 @@ public class Jetty12HttpServer implements YaCyHttpServer {
 
     @Override
     public void startupServer() throws Exception {
-        this.server.setStopAtShutdown(true);
+        /* YaCy owns the orderly JVM shutdown sequence in yacy.startup(): its
+         * shutdown hook signals the main thread, which then stops this server
+         * and closes the Switchboard. A second Jetty shutdown hook can race
+         * that explicit stop on Jetty's lifecycle lock and prevent the JVM
+         * from exiting before Docker's stop timeout. */
+        this.server.setStopAtShutdown(false);
         this.server.start();
     }
 
@@ -461,14 +467,29 @@ public class Jetty12HttpServer implements YaCyHttpServer {
     /** YaCy-branded EE8 error page for Jetty 12. */
     static final class ErrorPageHandler extends org.eclipse.jetty.ee8.nested.ErrorHandler {
 
+        ErrorPageHandler() {
+            // Error pages can be returned to unauthenticated remote clients.
+            // Formatting exception details can allocate heavily for large
+            // request-derived messages and exposes internal implementation details.
+            setShowStacks(false);
+            setShowMessageInTitle(false);
+        }
+
         @Override
         protected void writeErrorPageBody(final HttpServletRequest request, final Writer writer,
                 final int code, final String message, final boolean showStacks) throws IOException {
-            final String uri = request.getRequestURI();
-            this.writeErrorPageMessage(request, writer, code, message, uri);
-            if (showStacks) {
-                this.writeErrorPageStacks(request, writer);
+            // Jetty's default page reflects the request URI, error message and
+            // exception causes. These values may be untrusted and very large;
+            // return bounded status-only details instead of copying them into
+            // both the title and body of an unauthenticated response.
+            writer.write("<h2>HTTP ERROR ");
+            writer.write(Integer.toString(code));
+            final String status = HttpStatus.getMessage(code);
+            if (status != null && !status.isEmpty()) {
+                writer.write(" ");
+                writer.write(status);
             }
+            writer.write("</h2>\n<p>The request could not be processed.</p>");
             writer.write("<br/><hr /><small>YaCy " + yacyBuildProperties.getVersion()
                     + "  - <i> powered by Jetty </i> - </small>");
             for (int i = 0; i < 20; i++) {

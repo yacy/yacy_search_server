@@ -33,6 +33,8 @@ Security and blacklist pages turn names, patterns, credentials, or request prope
 
 Test with a concrete example. A blacklist, regular expression, rate limit, cookie rule, or access rule is only understandable when checked against a real URL or request. Prefer narrow patterns and document the reason for broad rules.
 
+Uploaded multipart bodies are limited to 1 GiB total and may be limited further when the JVM cannot preserve its heap safety reserve.
+
 ## Access And Safety
 
 Administrator access is required. YaCy protects `_p` pages as administration pages.

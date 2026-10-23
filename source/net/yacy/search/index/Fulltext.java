@@ -32,9 +32,12 @@ import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -344,12 +347,85 @@ public final class Fulltext {
      * @return URIMetadataNode (solrdocument) with all fields stored in embedded solr index
      */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
+        return getMetadata(element, null);
+    }
+
+    /**
+     * Load search-result metadata with an explicit stored-field projection.
+     * The ordinary overload remains available for callers that need the full
+     * indexed document.
+     */
+    public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element,
+            final String[] fields) {
         if (element == null) return null;
         final WordReferenceVars wre = element.getElement();
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
         final long score = element.getWeight();
-        final URIMetadataNode node = this.getMetadata(wre.urlhash(), wre, score);
+        final URIMetadataNode node = this.getMetadata(wre.urlhash(), wre, score, fields);
         return node;
+    }
+
+    /**
+     * Stored fields that can duplicate or greatly expand page content without
+     * contributing to an ordinary RWI search result. Keep them in the index,
+     * but do not materialize them for every RWI candidate. In particular,
+     * high-cardinality link and parser-structure lists can make one result
+     * document much larger than its core display metadata.
+     */
+    private static final Set<CollectionSchema> LARGE_SEARCH_METADATA_FIELDS = Collections.unmodifiableSet(
+            EnumSet.of(CollectionSchema.fuzzy_signature_text_t,
+                    CollectionSchema.inboundlinks_anchortext_txt,
+                    CollectionSchema.outboundlinks_anchortext_txt,
+                    CollectionSchema.images_text_t,
+                    CollectionSchema.li_txt,
+                    CollectionSchema.dt_txt,
+                    CollectionSchema.dd_txt,
+                    CollectionSchema.article_txt,
+                    CollectionSchema.bold_txt,
+                    CollectionSchema.italic_txt,
+                    CollectionSchema.underline_txt,
+                    CollectionSchema.inboundlinks_protocol_sxt,
+                    CollectionSchema.inboundlinks_urlstub_sxt,
+                    CollectionSchema.outboundlinks_protocol_sxt,
+                    CollectionSchema.outboundlinks_urlstub_sxt,
+                    CollectionSchema.css_tag_sxt,
+                    CollectionSchema.css_url_sxt,
+                    CollectionSchema.scripts_sxt,
+                    CollectionSchema.frames_sxt,
+                    CollectionSchema.iframes_sxt,
+                    CollectionSchema.hreflang_cc_sxt,
+                    CollectionSchema.hreflang_url_sxt,
+                    CollectionSchema.navigation_type_sxt,
+                    CollectionSchema.navigation_url_sxt,
+                    CollectionSchema.url_parameter_key_sxt,
+                    CollectionSchema.url_parameter_value_sxt,
+                    CollectionSchema.url_paths_sxt));
+
+    /**
+     * Build the stored fields needed to materialize an RWI search result.
+     * Include the full text only when a query explicitly requests a full-text
+     * snippet. Omit supplementary extracted text from the default schema
+     * projection; explicitly configured navigator and vocabulary fields are
+     * added separately.
+     */
+    public static String[] searchMetadataFields(final boolean includeFullText,
+            final Collection<String> additionalFields) {
+        final Set<String> fields = new LinkedHashSet<>();
+        for (final CollectionSchema schemaField : CollectionSchema.values()) {
+            if ((includeFullText || schemaField != CollectionSchema.text_t)
+                    && !LARGE_SEARCH_METADATA_FIELDS.contains(schemaField)) {
+                fields.add(schemaField.getSolrFieldName());
+            }
+        }
+        if (additionalFields != null) {
+            for (final String field : additionalFields) {
+                if (field != null && !field.isEmpty()
+                        && (includeFullText || !CollectionSchema.text_t.getSolrFieldName().equals(field))) {
+                    fields.add(field);
+                }
+            }
+        }
+        return fields.toArray(new String[fields.size()]);
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
@@ -358,11 +434,16 @@ public final class Fulltext {
     }
 
     private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
+        return getMetadata(urlHash, wre, score, null);
+    }
+
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score,
+            final String[] fields) {
         final String u = ASCII.String(urlHash);
 
         // get the metadata from Solr
         try {
-            final SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
+            final SolrDocument doc = this.getDefaultConnector().getDocumentById(u, fields);
             if (doc != null) {
                 return new URIMetadataNode(doc, wre, score);
             }

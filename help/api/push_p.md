@@ -35,6 +35,8 @@ Machine/API pages are compact endpoints. Their architecture is request-parameter
 
 Call the endpoint as a protocol surface. Use exact parameter names and encoded values, authenticate when required, and inspect the response before relying on it. Avoid sending browser-only submit buttons unless the backend explicitly requires the action key.
 
+Multipart request bodies are limited to 1 GiB total and may be limited further when the JVM cannot preserve its heap safety reserve. Concurrent uploads share that in-flight heap budget. If the budget is occupied, YaCy returns HTTP 503 with `Retry-After: 5`; retry after the indicated delay. Split large document batches across smaller requests; YaCy also applies the size limit when a client omits `Content-Length`.
+
 ## Access And Safety
 
 Administrator access is required. YaCy protects `_p` pages as administration pages.

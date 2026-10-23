@@ -395,6 +395,19 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     /**
+     * Check the per-domain crawl cap without creating an empty counter.
+     * Callers may use this before handing a request to the stacker; the stacker
+     * remains responsible for the authoritative check when concurrent requests
+     * race for the last slot.
+     */
+    public boolean isDomainMaxPagesReached(final String domain) {
+        final int maximum = domMaxPages();
+        if (domain == null || maximum <= 0 || maximum == Integer.MAX_VALUE) return false;
+        final AtomicInteger count = this.doms.get(domain);
+        return count != null && count.get() >= maximum;
+    }
+
+    /**
      * Adds a parameter to CrawlProfile.
      * @param key name of the parameter
      * @param value values if the parameter

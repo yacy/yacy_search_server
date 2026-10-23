@@ -514,6 +514,13 @@ public class yacysearch {
                 modifier.add("/date");
             }
 
+            if ( querystring.indexOf("/relevance", 0) >= 0 ) {
+                querystring = querystring.replace("/relevance", "");
+                ranking.allZero(); // switch off ordinary ranking attributes
+                modifier.relevanceRanking = true;
+                modifier.add("/relevance");
+            }
+
             if ( querystring.indexOf("/location", 0) >= 0 ) {
                 querystring = querystring.replace("/location", "");
                 if ( constraint == null ) {

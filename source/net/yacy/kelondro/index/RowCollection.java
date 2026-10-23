@@ -246,6 +246,22 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         final long allocram = neededSpaceForEnsuredSize(elements);
         if (allocram == 0) return;
         assert this.chunkcache.length < elements * this.rowdef.objectsize : "wrong alloc computation (1): elements * rowdef.objectsize = " + (elements * this.rowdef.objectsize) + ", chunkcache.length = " + this.chunkcache.length;
+        allocateChunkCache(allocram);
+    }
+
+    /**
+     * Ensure capacity for a known final size without reserving the normal
+     * growth margin. This is useful for one-shot collections whose maximum
+     * element count is already known.
+     */
+    protected final void ensureSizeExact(final int elements) throws SpaceExceededException {
+        if (elements == 0) return;
+        final long allocram = (long) elements * this.rowdef.objectsize;
+        if (this.chunkcache.length >= allocram) return;
+        allocateChunkCache(allocram);
+    }
+
+    private void allocateChunkCache(final long allocram) throws SpaceExceededException {
         assert allocram > this.chunkcache.length : "wrong alloc computation (2): allocram = " + allocram + ", chunkcache.length = " + this.chunkcache.length;
         if (allocram > Integer.MAX_VALUE || !MemoryControl.request(allocram + 32, true))
         	throw new SpaceExceededException(allocram + 32, "RowCollection grow");

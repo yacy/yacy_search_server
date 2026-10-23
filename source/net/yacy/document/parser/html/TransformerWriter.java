@@ -146,10 +146,22 @@ public final class TransformerWriter extends Writer {
     }
     public static char[] generatePairedTag(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
             final char[] gt0 = generateSingletonTag(tagname, tagopts, quotechar);
-            final CharBuffer cb = new CharBuffer(ContentScraper.MAX_DOCSIZE, gt0, gt0.length + text.length + tagname.length() + 3);
-            cb.append(text).append('<').append('/').append(tagname).append('>');
-            final char[] result = cb.getChars();
-            cb.close();
+            final long resultLength = (long) gt0.length + text.length + tagname.length() + 3L;
+            // CharBuffer used to allocate this full capacity, then getChars() allocated and
+            // copied it again. Preserve its maximum-length behavior: when the complete tag
+            // would exceed the limit, only the already generated opening tag is returned.
+            if (resultLength > ContentScraper.MAX_DOCSIZE) return gt0;
+            final char[] result = new char[(int) resultLength];
+            int offset = 0;
+            System.arraycopy(gt0, 0, result, offset, gt0.length);
+            offset += gt0.length;
+            System.arraycopy(text, 0, result, offset, text.length);
+            offset += text.length;
+            result[offset++] = '<';
+            result[offset++] = '/';
+            tagname.getChars(0, tagname.length(), result, offset);
+            offset += tagname.length();
+            result[offset] = '>';
             return result;
     }
 

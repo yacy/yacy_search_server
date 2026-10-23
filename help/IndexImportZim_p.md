@@ -37,6 +37,8 @@ Import and export pages translate external data formats into YaCy documents or m
 
 Prepare source and target details before starting: file path or URL, format, collection, credentials if needed, and expected size. Imports and exports can continue in the background, so confirm progress on the related monitor or queue page.
 
+Uploaded multipart bodies are limited to 1 GiB total and may be limited further when the JVM cannot preserve its heap safety reserve. Use an accessible server-side file path for larger archives.
+
 ## Access And Safety
 
 Administrator access is required. YaCy protects `_p` pages as administration pages.
