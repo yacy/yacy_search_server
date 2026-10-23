@@ -64,6 +64,39 @@ public class ChunkedBytesWriteTest {
                 allocated < (long) iterations * 8 * 1024);
     }
 
+    @Test
+    public void largeToByteArrayDoesNotAllocateAnAdditionalStreamingBuffer() throws Exception {
+        final java.lang.management.ThreadMXBean platformBean = ManagementFactory.getThreadMXBean();
+        assumeTrue("thread allocation measurements are unavailable",
+                platformBean instanceof com.sun.management.ThreadMXBean);
+        final com.sun.management.ThreadMXBean allocationBean =
+                (com.sun.management.ThreadMXBean) platformBean;
+        assumeTrue("thread allocation measurements are unavailable",
+                allocationBean.isThreadAllocatedMemorySupported());
+        try {
+            if (!allocationBean.isThreadAllocatedMemoryEnabled()) {
+                allocationBean.setThreadAllocatedMemoryEnabled(true);
+            }
+        } catch (final SecurityException | UnsupportedOperationException e) {
+            assumeNoException("cannot enable thread allocation measurements", e);
+        }
+
+        final byte[] expected = new byte[1024 * 1024 + 37];
+        new Random(73L).nextBytes(expected);
+        final ChunkedBytes bytes = new ChunkedBytes(expected);
+        final int iterations = 24;
+        final byte[][] results = new byte[iterations][];
+        final long threadId = Thread.currentThread().getId();
+        for (int i = 0; i < 8; i++) bytes.toByteArray(); // warm the call path before measuring
+        final long before = allocationBean.getThreadAllocatedBytes(threadId);
+        for (int i = 0; i < iterations; i++) results[i] = bytes.toByteArray();
+        final long allocated = allocationBean.getThreadAllocatedBytes(threadId) - before;
+
+        assertArrayEquals(expected, results[iterations - 1]);
+        assertTrue("large conversion allocated " + allocated + " bytes",
+                allocated < (long) iterations * (expected.length + 64 * 1024));
+    }
+
     private static void assertWritten(final byte[] expected) {
         try (ChunkedBytes bytes = new ChunkedBytes(expected)) {
             final ByteArrayOutputStream output = new ByteArrayOutputStream();
