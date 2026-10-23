@@ -227,10 +227,10 @@ public final class FocusedCrawlScheduler {
         if (!isOwner()) return false;
         recoverResourceObserverPause();
         final Collection<FocusedCrawlPolicy> policies = this.manager.enabledPolicies();
-        if (!policies.isEmpty() && pauseFocusedCrawlForMemoryPressure()) return false;
+        if (!policies.isEmpty() && pauseFocusedCrawlForResourcePressure()) return false;
         // Respect both operator pauses and resource pauses. In particular, do
-        // not refill a native queue while a focused memory pause is waiting for
-        // its recovery headroom; queued requests also consume heap.
+        // not refill the native queue while a focused resource pause is waiting
+        // for disk or memory recovery; queued requests also consume resources.
         if (this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) return false;
         boolean enqueued = false;
         applyNoveltyWeights(policies);
@@ -289,16 +289,12 @@ public final class FocusedCrawlScheduler {
                 final int indexedExpansion = configuration.frontier().expandIndexedSources()
                         ? expandFromIndexedSources(configuration, profile, frontier, refillBudget - recovered, state) : 0;
                 if (recovered + indexedExpansion > 0) {
-                    boolean memoryPressure = !memoryHealthy();
-                    if (memoryPressure) {
-                        pauseFocusedCrawlForMemoryPressure();
-                        memoryPressure = !memoryHealthy();
-                    }
+                    final boolean resourcePressure = pauseFocusedCrawlForResourcePressure();
                     // Avoid another full queue/frontier scan after pausing on
-                    // low headroom; the persisted native queues remain intact.
-                    final int after = memoryPressure ? -1
+                    // any resource limit; the persisted native queues remain intact.
+                    final int after = resourcePressure ? -1
                             : queueSizeForScheduling(profile, policies.size() == 1);
-                    final String refillReason = memoryPressure ? "resource guard after bounded refill"
+                    final String refillReason = resourcePressure ? "resource guard after bounded refill"
                             : indexedExpansion > 0 ? "frontier recovery + indexed source expansion" : "frontier recovery";
                     save(state, current, after, recovered + indexedExpansion, refillReason);
                     enqueued = true;
@@ -380,7 +376,7 @@ public final class FocusedCrawlScheduler {
         for (final FocusedFrontierStore.Candidate candidate : frontier.recoverable(
                 now, budget, FocusedFrontierStore.MAX_RECOVERABLE_ROWS_PER_SCAN, this::memoryHealthy)) {
             if (!memoryHealthy()) {
-                pauseFocusedCrawlForMemoryPressure();
+                pauseFocusedCrawlForResourcePressure();
                 break;
             }
             if (added >= budget) break;
@@ -430,7 +426,7 @@ public final class FocusedCrawlScheduler {
             final FocusedFrontierStore frontier, final int budget, final Properties state) {
         if (budget <= 0) return 0;
         if (!memoryHealthy()) {
-            pauseFocusedCrawlForMemoryPressure();
+            pauseFocusedCrawlForResourcePressure();
             return 0;
         }
         final FocusedCrawlPolicy policy = this.manager.policy(configuration.id());
@@ -473,7 +469,7 @@ public final class FocusedCrawlScheduler {
             state.setProperty("indexedSourceCursor", Integer.toString(nextCursor));
             for (final SolrDocument source : sources) {
                 if (!memoryHealthy()) {
-                    pauseFocusedCrawlForMemoryPressure();
+                    pauseFocusedCrawlForResourcePressure();
                     break;
                 }
                 if (added >= budget) break;
@@ -502,7 +498,7 @@ public final class FocusedCrawlScheduler {
                 final Set<String> sourceLinks = new HashSet<>();
                 while (added < budget) {
                     if (!memoryHealthy()) {
-                        pauseFocusedCrawlForMemoryPressure();
+                        pauseFocusedCrawlForResourcePressure();
                         break;
                     }
                     // Check memory before advancing the lazy iterator: stream iterators may prefetch on hasNext().
@@ -854,13 +850,12 @@ public final class FocusedCrawlScheduler {
     }
 
     /**
-     * Stop the native local crawler before a focused workload consumes the
-     * last heap headroom. This is deliberately a crawl pause, not just a
-     * refusal to refill: already queued requests and parser work also consume
-     * memory. The distinct cause lets this scheduler resume only its own pause
-     * after the larger recovery threshold is met.
+     * Stop the native local crawler when a focused workload reaches a resource
+     * limit. This pauses already queued work as well as future refills. The
+     * distinct cause lets this scheduler resume only its own pause after the
+     * disk, physical memory, swap, and JVM recovery checks pass.
      */
-    private boolean pauseFocusedCrawlForMemoryPressure() {
+    private boolean pauseFocusedCrawlForResourcePressure() {
         long available = MemoryControl.available();
         final long maximum = MemoryControl.maxMemory();
         final long threshold = FocusedResourceGuard.pauseThreshold(maximum);
@@ -877,15 +872,18 @@ public final class FocusedCrawlScheduler {
             memoryAction = FocusedResourceGuard.memoryPressureAction(available, maximum, memoryShort);
         }
         final SystemMemorySnapshot systemMemory = SystemMemorySnapshot.read();
+        final boolean disk = diskHealthy(null);
         final boolean jvmPressure = memoryAction == FocusedResourceGuard.MemoryPressureAction.PAUSE
                 || FocusedResourceGuard.shouldPause(available, maximum, memoryShort);
-        if (!jvmPressure && systemMemory.healthy()) return false;
+        if (!FocusedResourceGuard.shouldPauseForResources(jvmPressure, systemMemory.healthy(), disk)) return false;
 
         final String jobType = SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL;
         final boolean crawlAlreadyPaused = this.sb.crawlJobIsPaused(jobType);
         if (!crawlAlreadyPaused) {
             final String cause;
-            if (!systemMemory.healthy()) {
+            if (!disk) {
+                cause = "focused resource guard: index or DATA volume is below 25% free space";
+            } else if (!systemMemory.healthy()) {
                 cause = systemMemory.pauseReason();
             } else if (MemoryControl.shortStatus()) {
                 cause = "focused resource guard: JVM reported a failed memory request; current headroom "
@@ -909,7 +907,7 @@ public final class FocusedCrawlScheduler {
         this.resourceState.setProperty("memoryRecoveryThreshold", Long.toString(FocusedResourceGuard.recoveryThreshold(maximum)));
         this.resourceState.setProperty("memoryShort", Boolean.toString(MemoryControl.shortStatus()));
         this.resourceState.setProperty("memoryProper", Boolean.toString(MemoryControl.properState()));
-        this.resourceState.setProperty("diskHealthy", Boolean.toString(diskHealthy(null)));
+        this.resourceState.setProperty("diskHealthy", Boolean.toString(disk));
         systemMemory.save(this.resourceState);
         persistResourceState();
         if (FocusedResourceGuard.shouldClearSearchEventCache(

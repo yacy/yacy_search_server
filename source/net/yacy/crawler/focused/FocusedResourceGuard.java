@@ -124,6 +124,12 @@ public final class FocusedResourceGuard {
         return shortMemory || availableMemory < pauseThreshold(maxMemory);
     }
 
+    /** Pause native local crawling while any focused-crawl safety limit is unhealthy. */
+    public static boolean shouldPauseForResources(final boolean jvmPressure,
+            final boolean systemMemoryHealthy, final boolean diskHealthy) {
+        return jvmPressure || !systemMemoryHealthy || !diskHealthy;
+    }
+
     /**
      * Cached search events retain local RWI containers, which can be large
      * after multi-segment merges. Evict them when a new automatic resource

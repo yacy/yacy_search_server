@@ -102,6 +102,14 @@ public class FocusedResourceGuardTest {
     }
 
     @Test
+    public void anyUnhealthyResourcePausesFocusedLocalCrawling() {
+        assertFalse(FocusedResourceGuard.shouldPauseForResources(false, true, true));
+        assertTrue(FocusedResourceGuard.shouldPauseForResources(true, true, true));
+        assertTrue(FocusedResourceGuard.shouldPauseForResources(false, false, true));
+        assertTrue(FocusedResourceGuard.shouldPauseForResources(false, true, false));
+    }
+
+    @Test
     public void cachedSearchEventsAreClearedOnlyWhenANewResourcePauseStarts() {
         assertTrue(FocusedResourceGuard.shouldClearSearchEventCache(false, true, true));
         assertTrue(FocusedResourceGuard.shouldClearSearchEventCache(false, false, false));
@@ -167,6 +175,19 @@ public class FocusedResourceGuardTest {
                 12L * 1024L * 1024L * 1024L, 15L * 1024L * 1024L * 1024L, true);
         assertTrue(refreshed.contains("awaiting second healthy recovery check"));
         assertFalse(refreshed.contains("52775208"));
+    }
+
+    @Test
+    public void diskFailurePreventsRecoveryAndResetsTheHealthyCheckStreak() {
+        final FocusedResourceGuard guard = new FocusedResourceGuard();
+        final String cause = "focused resource guard: index volume is below 25% free space";
+        final long max = 4L * 1024L * 1024L * 1024L;
+        final long threshold = FocusedResourceGuard.recoveryThreshold(max);
+        assertFalse(guard.observe(cause, threshold, max, false, true));
+        assertFalse(guard.observe(cause, threshold, max, false, false));
+        assertTrue(guard.healthyChecks() == 0);
+        assertFalse(guard.observe(cause, threshold, max, false, true));
+        assertTrue(guard.observe(cause, threshold, max, false, true));
     }
 
     @Test
